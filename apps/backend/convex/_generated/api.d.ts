@@ -60,6 +60,7 @@ import type * as slowCast_anglers from "../slowCast/anglers.js";
 import type * as slowCast_flies from "../slowCast/flies.js";
 import type * as slowCast_leaderboard from "../slowCast/leaderboard.js";
 import type * as slowCast_lifecycle from "../slowCast/lifecycle.js";
+import type * as slowCast_migrations from "../slowCast/migrations.js";
 import type * as slowCast_operations from "../slowCast/operations.js";
 import type * as slowCast_payload from "../slowCast/payload.js";
 import type * as slowCast_profile from "../slowCast/profile.js";
@@ -133,6 +134,7 @@ declare const fullApi: ApiFromModules<{
   "slowCast/flies": typeof slowCast_flies;
   "slowCast/leaderboard": typeof slowCast_leaderboard;
   "slowCast/lifecycle": typeof slowCast_lifecycle;
+  "slowCast/migrations": typeof slowCast_migrations;
   "slowCast/operations": typeof slowCast_operations;
   "slowCast/payload": typeof slowCast_payload;
   "slowCast/profile": typeof slowCast_profile;
