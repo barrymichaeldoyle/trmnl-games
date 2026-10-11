@@ -6,8 +6,7 @@ import { SampleScreen } from '../lib/sampleScreen'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
 import { SITE_JSON_LD, seo } from '../lib/seo'
 import { WaitlistForm } from '../lib/waitlist'
-import { useQuery } from '@tanstack/react-query'
-import { gamesQuery } from '../lib/gameAccess'
+import { gamesQuery, useGames } from '../lib/gameAccess'
 
 export const Route = createFileRoute('/')({
   head: () => seo({ path: '/', jsonLd: SITE_JSON_LD }),
@@ -18,7 +17,7 @@ export const Route = createFileRoute('/')({
 
 /** Slow Cast (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
 function SlowCastSection() {
-  const { data } = useQuery(gamesQuery)
+  const data = useGames()
   const game = data?.games.find((g) => g.slug === 'slow-cast')
   if (!game || (game.status === 'hidden' && !data?.admin)) return null
   const live = game.status === 'live'

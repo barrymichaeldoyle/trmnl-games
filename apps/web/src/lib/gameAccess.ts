@@ -1,11 +1,27 @@
 import { convexQuery } from '@convex-dev/react-query'
 import type { QueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { notFound } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import type { GameSlug } from '@trmnl-games/platform'
+import { useConvexAuth } from 'convex/react'
+import { useRef } from 'react'
 
 /** The games this viewer can see, with each one's lifecycle status (slow-cast.md "Architecture"). */
 export const gamesQuery = convexQuery(api.platform.list, {})
+
+/**
+ * The games listing for rendering. After a page load the Convex socket runs queries signed out until Clerk hands it a
+ * token, so an admin's listing would drop hidden games and then bring them back. Until the socket's auth settles this
+ * holds the first answer, which is the server render's signed-in one.
+ */
+export function useGames() {
+  const { isLoading } = useConvexAuth()
+  const { data } = useQuery(gamesQuery)
+  const first = useRef(data)
+  first.current ??= data
+  return isLoading ? first.current : data
+}
 
 /**
  * Route loader gate for a game that may not be live. A hidden or preview game answers with the

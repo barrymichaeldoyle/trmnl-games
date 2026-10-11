@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { gamesQuery } from '../lib/gameAccess'
+import { gamesQuery, useGames } from '../lib/gameAccess'
 import { PRIVACY_UPDATED, ProsePage, SUPPORT_EMAIL } from '../lib/prose'
 import { seo } from '../lib/seo'
 
@@ -9,7 +8,7 @@ import { seo } from '../lib/seo'
  * unannounced; admins, the only players while it is hidden, see it too.
  */
 function SlowCastPrivacy() {
-  const { data } = useQuery(gamesQuery)
+  const data = useGames()
   if (!data?.games.some((game) => game.slug === 'slow-cast')) return null
   return (
     <>

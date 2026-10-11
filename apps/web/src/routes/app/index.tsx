@@ -6,7 +6,7 @@ import { seo } from '../../lib/seo'
 import { preload } from '../../lib/preload'
 import { BUTTON_PRIMARY, LINK_BUTTON } from '../../lib/ui'
 import { games } from '@trmnl-games/platform'
-import { gamesQuery } from '../../lib/gameAccess'
+import { gamesQuery, useGames } from '../../lib/gameAccess'
 
 /** Short library labels; the hero page carries the full status sentence. */
 const STATUS_LABEL: Record<string, string> = { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' }
@@ -41,7 +41,7 @@ function Library() {
 
 /** Slow Cast in the library (D115): its angler's state once started, a "Coming soon" tile in preview, and a hidden-status mark for admins. */
 function UpcomingGames() {
-  const { data } = useQuery(gamesQuery)
+  const data = useGames()
   const game = data?.games.find((g) => g.slug === 'slow-cast')
   const { data: dock } = useQuery({ ...convexQuery(api.slowCast.anglers.dock, {}), enabled: game?.canOpen === true })
   if (!game) return null

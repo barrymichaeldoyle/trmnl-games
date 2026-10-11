@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { games } from '@trmnl-games/platform'
-import { gamesQuery, requireOpenGame } from '../../lib/gameAccess'
+import { requireOpenGame, useGames } from '../../lib/gameAccess'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { preload } from '../../lib/preload'
 import { seo } from '../../lib/seo'
@@ -36,7 +36,7 @@ const NAV = [
 function Shell() {
   const { data, isPending } = useQuery(convexQuery(api.slowCast.anglers.dock, {}))
   const dock = data as Dock | undefined
-  const { data: listing } = useQuery(gamesQuery)
+  const listing = useGames()
   const status = listing?.games.find((game) => game.slug === 'slow-cast')?.status
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
   // A cooler or bait alert's tap lands here with ?alert=<kind>; counted once the page is ready.
