@@ -96,6 +96,20 @@ describe('player intents', () => {
     expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ status: 'travelling', targetBiomeId: 'server_room', arriveAtTick: 1 })
   })
 
+  it('manages the bag while travelling but not while recovering or paused', async () => {
+    const heroId = await seedHero(t, { level: 4, hp: 136 }, 'Dee')
+    const [sold, worn, kept] = await addGear(t, heroId, 3)
+    const owner = as(t, 'Dee')
+    await owner.mutation(api.heroes.changeBiome, { operationId: opId(), biomeId: 'server_room' })
+    expect(await owner.mutation(api.inventory.sell, { operationId: opId(), itemId: sold! })).toMatchObject({ changed: true })
+    expect(await owner.mutation(api.inventory.equip, { operationId: opId(), itemId: worn! })).toMatchObject({ changed: true })
+    expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ status: 'travelling', weaponId: worn })
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { status: 'dead', hp: 0, reviveAtTick: 4, targetBiomeId: undefined, arriveAtTick: undefined }))
+    expect(await errorCode(owner.mutation(api.inventory.sell, { operationId: opId(), itemId: kept! }))).toBe('INVALID_STATE')
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { status: 'paused', pausedFromStatus: 'exploring', hp: 136, reviveAtTick: undefined }))
+    expect(await errorCode(owner.mutation(api.inventory.sell, { operationId: opId(), itemId: kept! }))).toBe('INVALID_STATE')
+  })
+
   it('sells many items atomically: one invalid item sells nothing', async () => {
     const heroId = await seedHero(t, {}, 'Ana')
     const ids = await addGear(t, heroId, 3)

@@ -26,7 +26,8 @@ const intentResult = v.object({
   tick: v.optional(v.number()),
 })
 
-const MANAGEABLE = new Set(['exploring', 'resting', 'sleeping'])
+// Everything but recovering (dead) and paused. Travelling is included: it fights and finds nothing, so a sale or swap on the way cannot race the simulator.
+const MANAGEABLE = new Set(['exploring', 'resting', 'travelling', 'sleeping'])
 
 async function heroItems(ctx: QueryCtx, heroId: Id<'heroes'>): Promise<Doc<'items'>[]> {
   return await ctx.db
@@ -191,7 +192,7 @@ export const equip = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.equip', { itemId: args.itemId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Gear can be changed while exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be changed while your hero is recovering or paused.")
       const item = await ctx.db.get(args.itemId)
       if (item === null || item.heroId !== hero._id || item.kind === 'potion') throw appError('ITEM_NOT_AVAILABLE', 'That item is not available.')
       if (item._id === hero.heldItemId) throw appError('ITEM_HELD', 'Claim the held find first.')
@@ -212,7 +213,7 @@ export const unequip = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.unequip', { slot: args.slot }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Gear can be changed while exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be changed while your hero is recovering or paused.")
       const field = args.slot === 'weapon' ? 'weaponId' : 'armorId'
       if (hero[field] === undefined) return { changed: false }
       // D61: unequipped gear needs a bag slot of its own.
@@ -224,7 +225,7 @@ export const unequip = mutation({
 
 /** Sell bag or desk drawer gear. Equipped and held items are refused; the sale value comes from the stored item, never the client. */
 async function sellItems(ctx: MutationCtx, hero: Doc<'heroes'>, itemIds: Id<'items'>[]) {
-  if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Gear can be sold while exploring, resting or taking a break.')
+  if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be sold while your hero is recovering or paused.")
   if (new Set(itemIds).size !== itemIds.length) throw appError('INVALID_INPUT', 'Each item can only be sold once.')
   const items: Doc<'items'>[] = []
   for (const id of itemIds) {
@@ -300,7 +301,7 @@ export const claimFromDrawer = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.claimFromDrawer', { itemId: args.itemId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Gear can be moved while exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be moved while your hero is recovering or paused.")
       if (!inDrawer(hero, args.itemId)) throw appError('ITEM_NOT_AVAILABLE', 'That item is not in the desk drawer.')
       const items = await heroItems(ctx, hero._id)
       if (bagFull(hero, items)) throw appError('BAG_FULL', 'Free a bag slot to move this into the bag.')
@@ -318,7 +319,7 @@ export const equipFromDrawer = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.equipFromDrawer', { itemId: args.itemId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Gear can be changed while exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be changed while your hero is recovering or paused.")
       if (!inDrawer(hero, args.itemId)) throw appError('ITEM_NOT_AVAILABLE', 'That item is not in the desk drawer.')
       const item = await ctx.db.get(args.itemId)
       if (item === null || item.heroId !== hero._id || item.kind === 'potion') throw appError('ITEM_NOT_AVAILABLE', 'That item is not available.')
@@ -372,7 +373,7 @@ export const buyBag = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.buyBag', { tierId: args.tierId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Bags can be bought while exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Bags can't be bought while your hero is recovering or paused.")
       const content = await contentOf(ctx)
       const tier = nextEarlyTier(content, asBagHero(hero))
       if (tier === undefined || tier.price === undefined || tier.id !== args.tierId) throw appError('BAG_UNAVAILABLE', 'That bag is not available right now.')
@@ -392,7 +393,7 @@ export const buyPouch = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.buyPouch', { tierId: args.tierId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Pouches can be bought while exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Pouches can't be bought while your hero is recovering or paused.")
       const content = await contentOf(ctx)
       const state = { level: hero.level, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
       const tier = nextEarlyPouchTier(content, state)
@@ -415,7 +416,7 @@ export const buyOffer = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.buyOffer', { offerId: args.offerId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', 'Shopping is for exploring, resting or taking a break.')
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Shopping isn't open while your hero is recovering or paused.")
       const tick = await currentTick(ctx)
       const visit = hero.merchant
       if (!visit || tick >= visit.expiresAtTick) throw appError('MERCHANT_GONE', 'The merchant has moved on.')

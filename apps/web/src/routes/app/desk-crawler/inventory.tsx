@@ -83,8 +83,8 @@ function Inventory() {
   if (!bag || !hero) return <LoadingState label="Loading your bag…" />
 
   const gear = bag.gear as Gear[]
-  const manageable = hero.simulationState !== 'quarantined' && ['exploring', 'resting', 'sleeping'].includes(hero.status)
-  const reason = manageable ? null : hero.simulationState === 'quarantined' ? 'Gear changes are paused during a service check.' : hero.status === 'paused' ? 'Adventures are paused. Resume from Hero to change or sell gear.' : 'Gear changes open again once your hero is back from travelling or recovering.'
+  const manageable = hero.simulationState !== 'quarantined' && ['exploring', 'resting', 'travelling', 'sleeping'].includes(hero.status)
+  const reason = manageable ? null : hero.simulationState === 'quarantined' ? 'Gear changes are paused during a service check.' : hero.status === 'paused' ? 'Adventures are paused. Resume from Hero to change or sell gear.' : 'Gear changes open again once your hero is back on their feet.'
   const held = gear.find((item) => item.held) ?? null
   const sellable = gear.filter((item) => !item.equipped && !item.held)
   const inBag = sellable.filter((item) => !item.inDrawer)
