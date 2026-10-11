@@ -12,8 +12,8 @@ import { waterId } from './validators'
 export const DEVICE_TOP = 5
 
 /**
- * The shared engine's hourly publication, kept for achievement rarity (D65). Slow Cast writes no rank inputs, so its
- * XP boards stay empty; the boards players see are the catch records (records.ts).
+ * The shared engine's hourly publication, kept for achievement rarity (D65). Slow Cast has no ranking tables, so a
+ * build publishes at once; the boards players see are the catch records (records.ts).
  */
 export const buildBatch = internalMutation({
   args: { publicationId: v.id('swLeaderboardPublications'), expectedSequence: v.number() },

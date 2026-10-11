@@ -52,6 +52,11 @@ export async function buildStep(ctx: MutationCtx, runtime: EngineRuntime<unknown
   const run = await ctx.db.get(publication.runId)
   if (run === null || run.state !== 'ranking') return null
   const now = Date.now()
+  // A game without XP boards (D116) has nothing to build: its publication carries achievement rarity only.
+  if (runtime.tables.rankInputs === undefined) {
+    await publish(ctx, runtime, publication, run, 0, now)
+    return null
+  }
   const board = publication.currentBoard
   const page = await pageQuery(ctx, runtime, publication, board).paginate({ numItems: PAGE_SIZE, cursor: publication.cursor ?? null })
 
@@ -182,11 +187,16 @@ async function publish(ctx: MutationCtx, runtime: EngineRuntime<unknown>, public
   }
 }
 
-/** Delete an obsolete publication's rows in bounded batches, then its rank inputs and the record itself. */
+/** Delete an obsolete publication's rows in bounded batches, then its rank inputs and the record itself; a game without XP boards has only its rarity row. */
 export async function cleanupStep(ctx: MutationCtx, runtime: EngineRuntime<unknown>, publicationId: Id<'leaderboardPublications'>): Promise<null> {
   const tables = typedTables(runtime)
   const publication = await ctx.db.get(publicationId)
   if (publication === null || publication.state !== 'obsolete') return null
+  if (runtime.tables.rankInputs === undefined) {
+    for (const row of await ctx.db.query(tables.achievementStats).withIndex('by_publicationId', (q) => q.eq('publicationId', publicationId)).take(5)) await ctx.db.delete(row._id)
+    await ctx.db.delete(publicationId)
+    return null
+  }
   const ranks = await ctx.db
     .query(tables.ranks)
     .withIndex('by_publicationId', (q) => q.eq('publicationId', publicationId))

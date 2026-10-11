@@ -1,13 +1,13 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
-import { DESK_CRAWLER_TABLES, SLOW_CAST_TABLES, engineTables } from './lib/engine/tables'
+import { DESK_CRAWLER_TABLES, SLOW_CAST_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, swLogDetail, swLogKind, waterId } from './slowCast/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
-const deskCrawlerEngine = engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds'])
+const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
 
-/** Slow Cast's engine tables, prefixed `sw` so retention and deletion stay per game (slow-cast.md "Data"). */
+/** Slow Cast's engine tables, prefixed `sw` so retention and deletion stay per game (slow-cast.md "Data"); no XP boards (D116). */
 const slowCastEngine = engineTables(SLOW_CAST_TABLES, ['landed', 'released', 'gotAway'])
 
 /**
@@ -163,7 +163,7 @@ export default defineSchema({
   simulationFailures: deskCrawlerEngine.failures,
   heroScoreWindows: deskCrawlerEngine.scoreWindows,
   rankInputs: deskCrawlerEngine.rankInputs,
-  leaderboardPublications: deskCrawlerEngine.publications,
+  leaderboardPublications: defineTable(deskCrawlerEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
   leaderboardGenerations: deskCrawlerEngine.generations,
   heroRanks: deskCrawlerEngine.ranks,
   achievementStats: deskCrawlerEngine.achievementStats,
@@ -171,11 +171,7 @@ export default defineSchema({
   swWorldState: slowCastEngine.world,
   swSimulationRuns: defineTable(slowCastEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
   swSimulationFailures: slowCastEngine.failures,
-  swScoreWindows: slowCastEngine.scoreWindows,
-  swRankInputs: slowCastEngine.rankInputs,
-  swLeaderboardPublications: slowCastEngine.publications,
-  swLeaderboardGenerations: slowCastEngine.generations,
-  swRanks: slowCastEngine.ranks,
+  swLeaderboardPublications: defineTable(slowCastEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
   swAchievementStats: slowCastEngine.achievementStats,
 
   /** One per user once they start Slow Cast (D115), like `deskCrawlerProfiles`. */

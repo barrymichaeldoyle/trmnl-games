@@ -3,7 +3,7 @@ import { v } from 'convex/values'
 
 /**
  * Engine tables (slow-cast.md "Architecture", S0). Every game's world, runs,
- * score windows and leaderboard sets come from this one factory, so their
+ * publications and, for XP boards, score windows and leaderboard sets come from these factories, so their
  * shapes and indexes are identical by construction and the engine code in this
  * folder can serve them all. Desk Crawler's instantiation produces exactly the
  * tables it had before S0.
@@ -16,15 +16,25 @@ export interface EngineTableNames {
   readonly world: string
   readonly runs: string
   readonly failures: string
-  readonly scoreWindows: string
-  readonly rankInputs: string
   readonly publications: string
-  readonly generations: string
-  readonly ranks: string
   readonly achievementStats: string
+  /** XP boards (Desk Crawler): a game without them publishes only achievement rarity each hour (D116). */
+  readonly scoreWindows?: string
+  readonly rankInputs?: string
+  readonly generations?: string
+  readonly ranks?: string
 }
 
+/** A game with XP boards names all four ranking tables. */
+export type RankedTableNames = EngineTableNames & Required<Pick<EngineTableNames, 'scoreWindows' | 'rankInputs' | 'generations' | 'ranks'>>
+
 export const boardLiteral = v.union(v.literal('overall'), v.literal('recent_24h'), v.literal('recent_7d'))
+
+/** A publication's in-progress generation, for a game with XP boards; absent otherwise. */
+type GenerationField<N extends EngineTableNames> = N extends { readonly generations: infer G extends string } ? { currentGenerationId: ReturnType<typeof v.optional<ReturnType<typeof v.id<G>>>> } : Record<never, never>
+function generationField<N extends EngineTableNames>(names: N): GenerationField<N> {
+  return (names.generations === undefined ? {} : { currentGenerationId: v.optional(v.id(names.generations)) }) as GenerationField<N>
+}
 
 /**
  * `runCounters` are the game's own per-run tallies beside the engine's (processed, eligible, skipped, quarantined).
@@ -98,6 +108,40 @@ export function engineTables<const N extends EngineTableNames, const C extends s
       .index('by_heroId', ['heroId'])
       .index('by_createdAt', ['createdAt']),
 
+    /** Publication fields only, for the same reason as `runFields`: each schema adds `by_runId` and `by_state` itself. */
+    publicationFields: {
+      runId: v.id<N['runs']>(names.runs),
+      state: v.union(v.literal('building'), v.literal('published'), v.literal('obsolete')),
+      previousPublicationId: v.optional(v.id<N['publications']>(names.publications)),
+      scoreAt: v.number(),
+      asOfTick: v.number(),
+      globalTotalPlayers: v.number(),
+      currentBoard: boardLiteral,
+      ...generationField(names),
+      cursor: v.optional(v.string()),
+      paginationVersion: v.literal(1),
+      batchSequence: v.number(),
+      nextScheduledFunctionId: v.optional(v.id('_scheduled_functions')),
+      lastProgressAt: v.number(),
+      builtAt: v.optional(v.number()),
+      publishedAt: v.optional(v.number()),
+    },
+
+    /** Per-publication unlock tally for rarity; written once at promotion from the run's batch tally (D65). */
+    achievementStats: defineTable({
+      publicationId: v.id<N['publications']>(names.publications),
+      runId: v.id<N['runs']>(names.runs),
+      counts: v.record(v.string(), v.number()),
+      totalPlayers: v.number(),
+      scoreAt: v.number(),
+    }).index('by_publicationId', ['publicationId']),
+  }
+}
+
+
+/** The XP-board tables (score windows, frozen rank inputs, generations and ranks), for a game that ranks by XP. */
+export function rankingTables<const N extends RankedTableNames>(names: N) {
+  return {
     scoreWindows: defineTable({
       heroId: v.id<N['subject']>(names.subject),
       buckets: v.array(v.object({ hourStart: v.number(), xp: v.number() })),
@@ -132,26 +176,6 @@ export function engineTables<const N extends EngineTableNames, const C extends s
       .index('by_run_order', ['runId', 'negativeLevel', 'negativeXp', 'lastLevelUpTick', 'heroCreatedAt', 'heroKey'])
       .index('by_run_recent24', ['runId', 'ranked24h', 'cohortKey', 'negativeScore24h', 'activatedAt', 'heroKey'])
       .index('by_run_recent7', ['runId', 'ranked7d', 'cohortKey', 'negativeScore7d', 'activatedAt', 'heroKey']),
-
-    publications: defineTable({
-      runId: v.id<N['runs']>(names.runs),
-      state: v.union(v.literal('building'), v.literal('published'), v.literal('obsolete')),
-      previousPublicationId: v.optional(v.id<N['publications']>(names.publications)),
-      scoreAt: v.number(),
-      asOfTick: v.number(),
-      globalTotalPlayers: v.number(),
-      currentBoard: boardLiteral,
-      currentGenerationId: v.optional(v.id<N['generations']>(names.generations)),
-      cursor: v.optional(v.string()),
-      paginationVersion: v.literal(1),
-      batchSequence: v.number(),
-      nextScheduledFunctionId: v.optional(v.id('_scheduled_functions')),
-      lastProgressAt: v.number(),
-      builtAt: v.optional(v.number()),
-      publishedAt: v.optional(v.number()),
-    })
-      .index('by_runId', ['runId'])
-      .index('by_state', ['state']),
 
     generations: defineTable({
       publicationId: v.id<N['publications']>(names.publications),
@@ -192,14 +216,6 @@ export function engineTables<const N extends EngineTableNames, const C extends s
       .index('by_publicationId_and_board_and_heroId', ['publicationId', 'board', 'heroId'])
       .index('by_publicationId', ['publicationId']),
 
-    /** Per-publication unlock tally for rarity; written once at promotion from the run's batch tally (D65). */
-    achievementStats: defineTable({
-      publicationId: v.id<N['publications']>(names.publications),
-      runId: v.id<N['runs']>(names.runs),
-      counts: v.record(v.string(), v.number()),
-      totalPlayers: v.number(),
-      scoreAt: v.number(),
-    }).index('by_publicationId', ['publicationId']),
   }
 }
 
@@ -217,16 +233,12 @@ export const DESK_CRAWLER_TABLES = {
   achievementStats: 'achievementStats',
 } as const
 
-/** Slow Cast's engine tables, prefixed so retention and deletion stay per game. */
+/** Slow Cast's engine tables, prefixed so retention and deletion stay per game. Its boards are catch records, so it has no ranking tables (D116). */
 export const SLOW_CAST_TABLES = {
   subject: 'anglers',
   world: 'swWorldState',
   runs: 'swSimulationRuns',
   failures: 'swSimulationFailures',
-  scoreWindows: 'swScoreWindows',
-  rankInputs: 'swRankInputs',
   publications: 'swLeaderboardPublications',
-  generations: 'swLeaderboardGenerations',
-  ranks: 'swRanks',
   achievementStats: 'swAchievementStats',
 } as const

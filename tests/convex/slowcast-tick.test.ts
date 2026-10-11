@@ -43,7 +43,7 @@ describe('Slow Cast tick on the shared engine (D115, S2)', () => {
     expect(state.runs.every((r) => r.state === 'completed' && r.eligible === 1)).toBe(true)
   })
 
-  it('publishes hourly with no XP rank inputs, and boards each water by the heaviest fish', async () => {
+  it('publishes hourly rarity without XP boards, and boards each water by the heaviest fish', async () => {
     // Paused, so the ticks publish without landing fish of their own; the records below are the only ones.
     const anglerId = await seedAngler(t, { status: 'paused' }, 'Reel')
     const rival = await seedAngler(t, { status: 'paused' }, 'Mo')
@@ -51,11 +51,11 @@ describe('Slow Cast tick on the shared engine (D115, S2)', () => {
     for (let i = 0; i < 3; i += 1) await nextSlowCastTick(t)
     const sets = await t.run(async (ctx) => ({
       published: await ctx.db.query('swLeaderboardPublications').withIndex('by_state', (q) => q.eq('state', 'published')).collect(),
-      inputs: await ctx.db.query('swRankInputs').collect(),
+      stats: await ctx.db.query('swAchievementStats').collect(),
     }))
-    // The hourly set still carries achievement rarity; Slow Cast has no XP, so nothing is ranked by it.
+    // The hourly set carries achievement rarity only; Slow Cast has no ranking tables.
     expect(sets.published.length).toBeGreaterThanOrEqual(1)
-    expect(sets.inputs).toEqual([])
+    expect(sets.stats.length).toBe(sets.published.length)
     // A heavier fish replaces the angler's row; a lighter one does not.
     const { recordCatch, weekKey } = await import('../../apps/backend/convex/slowCast/records')
     const at = Date.UTC(2026, 9, 7, 12)

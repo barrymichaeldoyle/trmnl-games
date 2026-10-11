@@ -256,7 +256,7 @@ New tables, all prefixed `sw` to keep indexes, retention and deletion boundaries
 - `slowCastProfiles` `{ userId, anglerId }`, one per user, like `deskCrawlerProfiles`.
 - `anglers`: owner, level, xp, lifetimeXp, gold, waterId, status, wakeAtTick?, rod, baitOnHook, bait `{ class → castsLeft }`, cooler tier, access set, logbook `{ speciesId → { count, best, firstTick } }`, counters, publicProfile, activation fields, lastTick, eligibleFromTick, createdAt. Indexes `by_owner`, `by_createdAt`.
 - `catches`: anglerId, speciesId, weight, caughtTick, value; index `by_anglerId`. At most 24 per angler.
-- `swWorldState`, `swSimulationRuns`, `swSimulationFailures`, `swTickLogs`, `swScoreWindows`, `swRankInputs`, `swLeaderboardPublications`, `swLeaderboardGenerations`, `swRanks`, `swAchievements`, `swAchievementStats`: the Desk Crawler shapes with `heroId` read as `anglerId`.
+- `swWorldState`, `swSimulationRuns`, `swSimulationFailures`, `swTickLogs`, `swLeaderboardPublications`, `swAchievements`, `swAchievementStats`: the Desk Crawler shapes with `heroId` read as `anglerId`. No ranking tables: the boards are `swCatchRecords` (D116).
 - Shared: `users` (plus a `slowCastAlerts` preference block), `trmnlGrants`, `trmnlInstances`, `trmnlInstallAttempts` and `trmnlReconnectAttempts` (`gameSlug` widens to a union), `operationReceipts` and `rateLimitBuckets` (keys carry the game), `pushSubscriptions` (shared devices), `alertOutbox` (kind widens, rows carry the game), `gameDeletionJobs`.
 - Retention: `swTickLogs` and `swSimulationRuns` under the same bounded cleanup; `catches` live until sold.
 

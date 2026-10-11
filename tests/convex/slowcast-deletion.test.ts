@@ -54,13 +54,13 @@ describe('Slow Cast deletion (D115, S2)', () => {
       anglers: await ctx.db.query('anglers').collect(),
       catches: await ctx.db.query('catches').collect(),
       logs: await ctx.db.query('swTickLogs').collect(),
-      windows: await ctx.db.query('swScoreWindows').collect(),
+      records: await ctx.db.query('swCatchRecords').collect(),
       profile: await ctx.db.query('slowCastProfiles').first(),
       heroes: await ctx.db.query('heroes').collect(),
       grants: await ctx.db.query('trmnlGrants').collect(),
       revoked: (await ctx.db.query('revokedTrmnlCredentials').collect()).map((r) => r.tokenHash),
     }))
-    expect(state).toMatchObject({ anglers: [], catches: [], logs: [], windows: [], profile: { state: 'active' }, revoked: [sha256Hex('sc-token-ana')] })
+    expect(state).toMatchObject({ anglers: [], catches: [], logs: [], records: [], profile: { state: 'active' }, revoked: [sha256Hex('sc-token-ana')] })
     expect(state.heroes).toHaveLength(1)
     expect(state.grants.map((g) => g.gameSlug)).toEqual(['desk-crawler'])
     expect((await screen(t, 'dc-token-ana', DC_UUID, '/trmnl/v1/screen')).status).toBe(200)
@@ -90,11 +90,11 @@ describe('Slow Cast deletion (D115, S2)', () => {
       anglers: await ctx.db.query('anglers').collect(),
       catches: await ctx.db.query('catches').collect(),
       logs: await ctx.db.query('swTickLogs').collect(),
-      windows: await ctx.db.query('swScoreWindows').collect(),
+      records: await ctx.db.query('swCatchRecords').collect(),
       profiles: await ctx.db.query('slowCastProfiles').collect(),
       grants: await ctx.db.query('trmnlGrants').collect(),
     }))
-    expect(left).toEqual({ users: [], anglers: [], catches: [], logs: [], windows: [], profiles: [], grants: [] })
+    expect(left).toEqual({ users: [], anglers: [], catches: [], logs: [], records: [], profiles: [], grants: [] })
   })
 })
 
