@@ -169,7 +169,7 @@ export const usePotion = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.usePotion', {}, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (hero.status !== 'exploring' && hero.status !== 'resting') throw appError('INVALID_STATE', 'Potions can be used while exploring or resting.')
+      if (hero.status !== 'exploring' && hero.status !== 'resting' && hero.status !== 'travelling') throw appError('INVALID_STATE', 'Potions can be used while exploring, resting or travelling.')
       const max = maxHp(hero.level)
       if (hero.hp >= max) throw appError('FULL_HP', 'Your hero is already at full health.')
       const potion = (await heroItems(ctx, hero._id)).find((item) => item.kind === 'potion')

@@ -180,6 +180,8 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const choose = useIntent(api.heroes.choose, { onFeedback: notify })
   const healthy = hero.simulationState !== 'quarantined'
   const canAct = healthy && (hero.status === 'exploring' || hero.status === 'resting')
+  // D118: a travelling hero can drink too, so it arrives ready.
+  const canDrink = canAct || (healthy && hero.status === 'travelling')
   // Anything that could set the hero back or slow it down asks first (the to-do swap, pause, travel, stance, a costly decision).
   const [ask, setAsk] = useState<Ask | null>(null)
   const close = () => setAsk(null)
@@ -194,7 +196,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   return (
     <div className="flex min-w-0 flex-col gap-8">
       <section ref={commands} aria-label="Commands" className="flex flex-col gap-2">
-        {canAct || hero.status === 'paused' || hero.status === 'sleeping' ? (
+        {canDrink || hero.status === 'paused' || hero.status === 'sleeping' ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.
           <div className="grid gap-2 sm:flex sm:flex-wrap">
             {hero.status === 'sleeping' ? (
@@ -207,7 +209,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
                 Resume adventures
               </Button>
             ) : null}
-            {canAct ? (
+            {canDrink ? (
               <Button icon="potion" variant={hero.hp < hero.maxHp && bag?.potions ? 'primary' : 'secondary'} pending={potion.pending} busyLabel="Drinking…" disabled={hero.hp >= hero.maxHp || !bag?.potions} onClick={() => potion.run({}, `Potion drunk, +${healing} HP.`)}>
                 {potionLabel}
               </Button>

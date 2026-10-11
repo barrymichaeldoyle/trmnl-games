@@ -110,6 +110,15 @@ describe('player intents', () => {
     expect(await errorCode(owner.mutation(api.inventory.sell, { operationId: opId(), itemId: kept! }))).toBe('INVALID_STATE')
   })
 
+  it('drinks a potion on the way without ending the trip', async () => {
+    const heroId = await seedHero(t, { level: 4, hp: 60 }, 'Dee')
+    const owner = as(t, 'Dee')
+    await owner.mutation(api.heroes.changeBiome, { operationId: opId(), biomeId: 'server_room' })
+    const drunk = await owner.mutation(api.inventory.usePotion, { operationId: opId() })
+    expect(drunk.hp).toBeGreaterThan(60)
+    expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ status: 'travelling', targetBiomeId: 'server_room', hp: drunk.hp })
+  })
+
   it('sells many items atomically: one invalid item sells nothing', async () => {
     const heroId = await seedHero(t, {}, 'Ana')
     const ids = await addGear(t, heroId, 3)

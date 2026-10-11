@@ -95,7 +95,7 @@ Desk drawer (D111, content v8, live since 2026-10-09, [spec](desk-drawer.md), [e
 
 To-do list (D112, content v9, live since 2026-10-09, [spec](quests.md), [evidence](evidence/quests.md)): after the tick's own story, every hero's three tasks move by what the tick did (named monster wins, any wins, exploring ticks in a named biome, gear finds, encounter gold, dodged traps, elite wins). A task that reaches its target pays its gold (5, 16 or 30 by biome tier, never XP) and counts in `tasksCompleted`, logged as a `todo` line after the story. At the first evaluation at or after the hero's local 07:00, at least 20 hours after the last stand-up, finished slots and any task unfinished for two waking refills get new tasks from the `quest` stream, logged as a stand-up line. Two of three tasks are finishable where the hero stands. The `quest` stream is drawn only under v9, so v8 replays unchanged.
 
-Manual potions are allowed only when exploring/resting and below full HP. A potion can help a resting hero resume when its HP reaches 75%. Manual use cannot revive or heal while travelling/paused/sleeping. Repeated calls consume finite items and never advance encounters.
+Manual potions are allowed when exploring, resting or travelling (D118) and below full HP. A potion can help a resting hero resume when its HP reaches 75%; a travelling hero stays travelling and arrives with the healed HP. Manual use cannot revive or heal while paused/sleeping. Repeated calls consume finite items and never advance encounters.
 
 ## Encounters
 
