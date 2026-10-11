@@ -1,3 +1,4 @@
+import { useAuth } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { useQuery } from '@tanstack/react-query'
@@ -12,15 +13,16 @@ export const gamesQuery = convexQuery(api.platform.list, {})
 
 /**
  * The games listing for rendering. After a page load the Convex socket runs queries signed out until Clerk hands it a
- * token, so an admin's listing would drop hidden games and then bring them back. Until the socket's auth settles this
- * holds the first answer, which is the server render's signed-in one.
+ * token, so an admin's listing would drop hidden games and then bring them back. This holds the first answer (the
+ * server render's, signed in) until the socket's sign-in is confirmed, or Clerk has loaded and says signed out.
  */
 export function useGames() {
-  const { isLoading } = useConvexAuth()
+  const { isAuthenticated } = useConvexAuth()
+  const { isLoaded, isSignedIn } = useAuth()
   const { data } = useQuery(gamesQuery)
   const first = useRef(data)
   first.current ??= data
-  return isLoading ? first.current : data
+  return isAuthenticated || (isLoaded && !isSignedIn) ? data : first.current
 }
 
 /**
