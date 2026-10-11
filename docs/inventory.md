@@ -4,15 +4,14 @@ Approved policy: D18/D19/D29, with capacity and cadence amended by D61 (bag ladd
 
 ## Cadence and capacity
 
-D61: bag capacity grows per hero. A new hero starts with a 6-slot Paper Bag; capacity counts only unequipped, non-held gear, so equipped gear and potions take no space. The ladder is Paper Bag 6 → Tote Bag 10 → Laptop Backpack 13 → Messenger Bag 16 → Rolling Suitcase 20. Three sources each advance one tier:
+D61, amended by D122 (content v10, 2026-10-11): bag capacity grows per hero. A new hero starts with a 6-slot Paper Bag; capacity counts only unequipped, non-held gear, so equipped gear and potions take no space. The ladder is Paper Bag 6 → Tote Bag 10 → Laptop Backpack 13 → Messenger Bag 16 → Rolling Suitcase 20. Under v10 there are two kinds of rung:
 
-1. Milestones guarantee a minimum tier: the Tote Bag on the hero's sixth adventure (about 1.5–2 hours, a deliberate early win), then levels 4, 8 and 12. A milestone lands before that tick's gear is placed.
-2. A rare find: each loot encounter draws once (8‰); an eligible hero finds the next bag instead of other loot.
-3. Gold: `inventory.buyBag` buys the next tier at a fixed price (40 / 150 / 600 / 2,000), gold's first use.
+1. One milestone: the Tote Bag on the hero's sixth adventure (about 1.5–2 hours, a deliberate early win and the only step a player who never opens the companion gets). It lands before that tick's gear is placed and can also be bought for 40 gold before then.
+2. Shop tiers: the Laptop Backpack (100 gold), Messenger Bag (300) and Rolling Suitcase (1,500) have no milestone and no loot draw. `inventory.buyBag` sells them in order whenever the hero has the gold, at any level. The wandering merchant (D78) offers the next rung at 25% off the Bag page price for four adventures.
 
-Finds and purchases may lead the guaranteed tier by at most one tier, so luck and saved gold speed a hero up without breaking the curve. Capacity never shrinks. The MVP ceiling is 20 slots, deliberately below the old 30 so crafting, raids and later content can offer bigger bags. Warn quietly at 80% of current capacity.
+Content v1 to v9 keep D61's three sources (milestones at levels 4, 8 and 12, an 8‰ find per loot encounter, purchases at most one tier ahead of the guaranteed tier) and replay unchanged; the one-ahead rule applies only to milestone tiers, so a catalog may mix a milestone floor with shop tiers above it. Capacity never shrinks. The MVP ceiling is 20 slots, deliberately below the old 30 so crafting, raids and later content can offer bigger bags. Warn quietly at 80% of current capacity.
 
-Cadence: frequent visits in the first days, settling to about every three to four days at 20 slots (~4.7 gear/day). Seven-day management now sleeps for much of each week; this is an accepted consequence of D61 (see [balance evidence](evidence/bag-ladder.md)). Manual equip/sell/biome choices remain intentional.
+Cadence under v10 (harness, visits buy every rung they can afford): daily managers finish the ladder on day 7.2, three-day managers on day 9.5 and weekly managers on day 14.6, sleeping 27% of the month against 26% under v9; an unattended hero stays on the Tote Bag plus the desk drawer and sleeps 89% (see [gold-only ladders](evidence/gold-only-ladders.md), earlier [bag ladder evidence](evidence/bag-ladder.md)). At 20 slots (~4.7 gear/day) the comfortable visit is every three to four days. Manual equip/sell/biome choices remain intentional.
 
 Under the ladder, unequipping needs a free bag slot; swapping is always possible, and equipping into an empty slot frees one. Rows stay bounded: 20 bag + 2 equipped + 1 held + 1 potion = 24, within the 32-row read.
 

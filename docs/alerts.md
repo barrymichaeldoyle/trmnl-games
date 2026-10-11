@@ -9,7 +9,7 @@ Source: the original brief listed "web push choice/merchant/death", to come late
 | Event | Stopped or losing something? | Player can act? | Verdict |
 | --- | --- | --- | --- |
 | Hero asleep with a full bag and full desk drawer | Yes: no XP, no adventures until the player acts | Yes: sell, claim, resume | **Alert** |
-| Merchant offering the next bag or pouch the hero can afford | Yes: the offer vanishes after four adventures (an hour), and a bag or pouch bought early is a real step on the ladder | Yes: buy | **Alert** |
+| Merchant offering the next bag or pouch the hero can afford | Yes: the offer vanishes after four adventures (an hour), and under content v10 (D122) it is 25% off the Bag page price, a real saving on a real step up the ladder | Yes: buy | **Alert** |
 | Merchant offering only potions | No: potions are a small convenience and the next visit sells them too | Yes | No alert: it would buzz a phone several times a day for nothing |
 | Decision pending | No: the default resolves it after a day and play continues, and D79 promises a choice never needs intervention | Yes, but the default is fine | No alert: the game's own rule says nothing is waiting |
 | Weekly keepsake waiting | No: it waits all week on the device | Yes | No alert: the keepsake exists to make people look at the TRMNL (D46), not a phone |
@@ -29,7 +29,7 @@ Email is out (Barry, 2026-10-09). A push lands on the phone the player already u
   - "Hero asleep: the bag and drawer are full and adventures have stopped. Once per nap."
   - "Merchant deal: a bag or pouch you can afford is on sale for about an hour. At most once a day."
   - Quiet hours, on by default from 21:00 to 08:00 in the browser's timezone, editable in whole hours.
-- **The alert itself:** short, in the game's voice, and it carries no data that would be a privacy problem on a lock screen: "Baz's bag is full, so they've stopped for a nap. Make room to send them back out." or "A merchant is selling Baz a Messenger Bag, and they have the gold. The offer lasts about an hour." Tapping opens the right companion page (Bag or Merchant).
+- **The alert itself:** short, in the game's voice, and it carries no data that would be a privacy problem on a lock screen: "Baz's bag is full, so they've stopped for a nap. Make room to send them back out." or "A merchant is offering Baz a Messenger Bag at a discount, and they have the gold. The offer lasts about an hour." Tapping opens the right companion page (Bag or Merchant).
 - **Nothing on the device changes.**
 
 ## Rules

@@ -777,10 +777,12 @@ class TickRun {
     const rule = content.merchant!
     const quantity = this.rng.reward.int(1, rule.maxPotionsOffered)
     const offers: MerchantOffer[] = [{ id: 'potions', name: quantity === 1 ? 'Healing potion' : `${quantity} healing potions`, quantity, price: rule.potionPrice * biomeTier * quantity }]
+    // D122: the merchant undercuts the companion's ladder price, so a visit is a deal rather than a convenience.
+    const discounted = (price: number) => Math.max(1, Math.floor((price * (100 - (rule.ladderDiscountPct ?? 0))) / 100))
     const pouch = nextEarlyPouchTier(content, h)
-    if (pouch?.price !== undefined) offers.push({ id: 'pouch', name: pouch.name, quantity: 1, price: pouch.price, tierId: pouch.id })
+    if (pouch?.price !== undefined) offers.push({ id: 'pouch', name: pouch.name, quantity: 1, price: discounted(pouch.price), tierId: pouch.id })
     const bag = nextEarlyTier(content, h)
-    if (bag?.price !== undefined) offers.push({ id: 'bag', name: bag.name, quantity: 1, price: bag.price, tierId: bag.id })
+    if (bag?.price !== undefined) offers.push({ id: 'bag', name: bag.name, quantity: 1, price: discounted(bag.price), tierId: bag.id })
     return { offers, expiresAtTick: this.input.tick + rule.staysForTicks, biomeId: h.biomeId }
   }
 

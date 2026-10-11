@@ -270,6 +270,8 @@
   ],
   "heldItemId": null,
   "ladder": {
+   "findable": false,
+   "merchantDiscountPct": 25,
    "name": "Laptop Backpack",
    "next": {
     "buyable": true,
@@ -277,15 +279,17 @@
     "id": "messenger_bag",
     "lockedUntilLevel": null,
     "milestoneAdventures": null,
-    "milestoneLevel": 8,
+    "milestoneLevel": null,
     "name": "Messenger Bag",
-    "price": 600
+    "price": 300
    }
   },
   "merchant": null,
   "potions": 3,
   "pouch": {
    "cap": 20,
+   "findable": false,
+   "merchantDiscountPct": 25,
    "name": "Potion pouch",
    "next": null
   },

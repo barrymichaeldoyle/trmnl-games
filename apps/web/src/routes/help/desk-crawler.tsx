@@ -8,6 +8,21 @@ const DRAWER = catalogs[ACTIVE_CONTENT].deskDrawer?.capacity ?? 0
 /** D112: the to-do list section appears once the active catalog has one. */
 const TODO = catalogs[ACTIVE_CONTENT].todo
 const STANDUP = TODO === undefined ? '' : `${String(TODO.refillHour).padStart(2, '0')}:00`
+/** D122: the bag and pouch ladders are read from the active catalog, so the help page names the real rungs and prices. */
+const BAGS = catalogs[ACTIVE_CONTENT].bagLadder.tiers
+const POUCHES = catalogs[ACTIVE_CONTENT].potionPouch?.tiers ?? []
+const MERCHANT_OFF = catalogs[ACTIVE_CONTENT].merchant?.ladderDiscountPct ?? 0
+const gold = (n: number) => `${n.toLocaleString('en-US')} gold`
+/** "a Lunchbox (30) for 120 gold, a Cooler Bag (40) for 450 gold and a Vending Cart (60) for 1,500 gold". */
+function rungs(list: readonly { name: string; size: number; price: number | undefined }[]): string {
+  const parts = list.map((rung) => `a ${rung.name} (${rung.size})${rung.price === undefined ? '' : ` for ${gold(rung.price)}`}`)
+  return parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
+}
+const SHOP_BAGS = BAGS.filter((tier) => tier.milestone === undefined && tier.price !== undefined).map((tier) => ({ name: tier.name, size: tier.capacity, price: tier.price }))
+const SHOP_POUCHES = POUCHES.filter((tier) => tier.milestone === undefined && tier.price !== undefined).map((tier) => ({ name: tier.name, size: tier.cap, price: tier.price }))
+const TOTE = BAGS.find((tier) => tier.milestone?.ticksExplored !== undefined)
+const TOP_BAG = BAGS.at(-1)?.capacity ?? 0
+const MERCHANT_LINE = MERCHANT_OFF > 0 ? ` A wandering merchant sometimes offers the next one at ${MERCHANT_OFF}% off.` : ''
 
 /** The page's sections, for the jump list at the top: on a phone the page runs to about twenty screens. */
 const CONTENTS: ReadonlyArray<readonly [string, string]> = [
@@ -88,9 +103,9 @@ export const Route = createFileRoute('/help/desk-crawler')({
       ) : null}
       <h2 id="potions">Potions</h2>
       <p>A healing potion restores 40% of your hero's maximum HP, rounded up. Your hero drinks one automatically when HP falls below the stance's potion level while exploring, and the adventure log notes it. With no potions left, your hero rests below the stance's rest level and sets off again once recovered. You can also drink one yourself from the Hero page whenever your hero is exploring or resting and not at full HP. Potions are found while exploring and never take up bag space.</p>
-      <p>Potions are kept in a pouch. A new hero carries a Thermos that holds 20. The pouch grows to a Lunchbox (30) at level 6, a Cooler Bag (40) at level 10 and a Vending Cart (60) at level 14. Your hero might find the next pouch early, or you can buy it on the Bag page for 120, 450 or 1,500 gold, up to one pouch ahead of those levels. When the pouch is full, a potion find becomes gold instead.</p>
+      <p>Potions are kept in a pouch. A new hero carries a {POUCHES[0]?.name ?? 'Thermos'} that holds {POUCHES[0]?.cap ?? 20}. Bigger pouches are bought with gold on the Bag page, one at a time: {rungs(SHOP_POUCHES)}.{MERCHANT_LINE} When the pouch is full, a potion find becomes gold instead.</p>
       <h2 id="the-wandering-merchant">The wandering merchant</h2>
-      <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and sometimes the next pouch or bag early. Each offer sells once. The merchant moves on after four adventures or after your last purchase. Missing a visit costs nothing.</p>
+      <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and the next pouch or bag{MERCHANT_OFF > 0 ? ` at ${MERCHANT_OFF}% off the Bag page price` : ''}. Each offer sells once. The merchant moves on after four adventures or after your last purchase. Missing a visit costs nothing.</p>
       <h2 id="decisions">Decisions</h2>
       <p>Sometimes the office asks your hero something small, like chipping in for a cake or staying late. Your screen says “A decision is waiting in the companion.” and the Hero page shows both options with exactly what each one changes. If you don't answer within about a day, the option marked as the default happens by itself, so adventures never wait for you.</p>
       <h2 id="effects">Effects</h2>
@@ -107,7 +122,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. A full bag alone does not stop adventures: the next piece you find is held safely, then your hero sleeps until you make room. The held find is never automatically sold or discarded.</p>
       {DRAWER > 0 ? <p>Your hero also has a desk drawer with {DRAWER} slots. When the bag is full, new finds go in the drawer and your hero keeps adventuring; it only stops when the drawer is full too. On the Bag page you can sell a drawer item, equip it, or move it into the bag when there’s a free slot. Nothing in the drawer is ever sold or thrown away for you.</p> : null}
       <h2 id="bigger-bags">Bigger bags</h2>
-      <p>Your bag grows as you play. Your hero finds a Tote Bag within the first couple of hours, then a bigger bag at levels 4, 8 and 12, up to 20 slots. Your hero might find the next bag early while exploring, or you can buy it with gold on the Bag page, up to one bag ahead of those levels.</p>
+      <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements and no bag drops: save up and buy.{MERCHANT_LINE}</p>
       <ol className="[&_li]:list-decimal">
         <li>Open Bag in the companion. Equip any upgrades and sell spare gear to free space.</li>
         <li>If a find is being held, choose Claim find{DRAWER > 0 ? ' (with the bag full, it goes in the desk drawer)' : ''}. Leave at least one free slot after claiming it so adventures can resume.</li>
@@ -127,7 +142,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>Your TRMNL is the main way to keep up with your hero, but Settings can also send a phone notification in two cases, each off until you turn it on:</p>
       <ul>
         <li><strong>Hero asleep:</strong> the bag{DRAWER > 0 ? ' and desk drawer are' : ' is'} full and adventures have stopped. It comes half an hour after the nap starts, so nothing arrives if you are already sorting out the bag, and once per nap.</li>
-        <li><strong>Merchant deal:</strong> a merchant is selling the next bag or pouch and your hero has the gold. At most once a day. A merchant with only potions never sends one.</li>
+        <li><strong>Merchant deal:</strong> a merchant is selling the next bag or pouch{MERCHANT_OFF > 0 ? ` at ${MERCHANT_OFF}% off` : ''} and your hero has the gold. At most once a day. A merchant with only potions never sends one.</li>
       </ul>
       <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a nap alert waits until they end, and a merchant deal that turns up then is skipped. Before sending, the game checks that the alert still holds, so you never hear about a nap that is already over or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>
       <p>Choose Allow on this device in Settings, then accept your browser’s prompt. On iPhone and iPad, first add TRMNL Games to your Home Screen (Share, then Add to Home Screen) and open it from there. Each device you allow is listed in Settings with a Remove button; removing the last one turns alerts off.</p>

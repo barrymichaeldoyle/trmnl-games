@@ -168,12 +168,14 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
     return false
   })
   h.gold = gold
-  // D61: buy at most the next bag (purchases never run more than one ahead of milestones).
-  const bag = policy.buyBags === false ? undefined : nextEarlyTier(content, h)
-  if (bag?.price !== undefined && h.gold >= bag.price) {
+  // D61/D122: keep buying the next bag while it is allowed and affordable. Under milestone ladders the one-ahead rule
+  // stops this after one; under a shop ladder a visit with the gold climbs several rungs, as a player would.
+  for (;;) {
+    const bag = policy.buyBags === false ? undefined : nextEarlyTier(content, h)
+    if (bag?.price === undefined || h.gold < bag.price) break
     h.gold -= bag.price
     h.bagCapacity = bag.capacity
-    bought = bag.price
+    bought += bag.price
   }
   const hardest = policy.staySafe ? content.biomes.find(b => b.safe)! : content.biomes.filter((b) => b.unlockLevel <= h.level).at(-1)!
   if (h.status === 'sleeping') {
@@ -253,7 +255,8 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         if (bought > 0) {
           log.bagPurchases += 1
           log.bagGoldSpent += bought
-          if (!log.bagTick.has(hero.bagCapacity)) log.bagTick.set(hero.bagCapacity, tick)
+          // A visit may climb several rungs at once (D122); every rung passed counts as reached now.
+          for (const tier of content.bagLadder.tiers) if (tier.capacity <= hero.bagCapacity && !log.bagTick.has(tier.capacity)) log.bagTick.set(tier.capacity, tick)
         }
         log.equippedUpgrades += Number(before.weaponId !== hero.weaponId) + Number(before.armorId !== hero.armorId)
       }

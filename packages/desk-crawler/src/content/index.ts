@@ -8,6 +8,7 @@ import { contentV6 } from './v6'
 import { contentV7 } from './v7'
 import { contentV8 } from './v8'
 import { contentV9 } from './v9'
+import { contentV10 } from './v10'
 
 /**
  * Every supported catalog version. Runs pin one; a balance change after launch
@@ -23,9 +24,10 @@ export const catalogs = {
   v7: contentV7,
   v8: contentV8,
   v9: contentV9,
+  v10: contentV10,
 } as const satisfies Record<string, ContentCatalog>
 
 export type CatalogId = keyof typeof catalogs
 
 /** New worlds start here; a live world switches with `world.setActiveContentVersion` between runs. */
-export const ACTIVE_CONTENT: CatalogId = 'v9'
+export const ACTIVE_CONTENT: CatalogId = 'v10'

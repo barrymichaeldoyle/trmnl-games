@@ -38,7 +38,7 @@ describe('potion pouch and merchant intents (D77/D78)', () => {
   it('shows the pouch ladder, buys the next pouch once, and never runs two ahead of the milestones', async () => {
     const heroId = await seedHero(t, { gold: 1000 }, 'Ana')
     const user = as(t, 'Ana')
-    expect((await user.query(api.inventory.mine, {})).pouch).toEqual({ name: 'Thermos', cap: 20, next: { id: 'lunchbox', name: 'Lunchbox', cap: 30, price: 120, milestoneLevel: 6, buyable: true, lockedUntilLevel: null } })
+    expect((await user.query(api.inventory.mine, {})).pouch).toEqual({ name: 'Thermos', cap: 20, findable: true, merchantDiscountPct: 0, next: { id: 'lunchbox', name: 'Lunchbox', cap: 30, price: 120, milestoneLevel: 6, buyable: true, lockedUntilLevel: null } })
     expect(await errorCode(user.mutation(api.inventory.buyPouch, { operationId: opId(), tierId: 'cooler_bag' }))).toBe('POUCH_UNAVAILABLE')
     expect(await user.mutation(api.inventory.buyPouch, { operationId: opId(), tierId: 'lunchbox' })).toMatchObject({ changed: true, gold: -120, count: 30 })
     expect(await heroDoc(t, heroId)).toMatchObject({ gold: 880, potionCap: 30 })

@@ -49,6 +49,8 @@ describe('bag ladder intents (D61)', () => {
     expect(bag).toMatchObject({ capacity: 6, used: 0 })
     expect(bag.ladder).toEqual({
       name: 'Paper Bag',
+      findable: true,
+      merchantDiscountPct: 0,
       next: { id: 'tote_bag', name: 'Tote Bag', capacity: 10, price: 40, milestoneLevel: null, milestoneAdventures: 6, buyable: true, lockedUntilLevel: null },
     })
   })

@@ -174,7 +174,7 @@ export interface BagTier {
   readonly id: string
   readonly name: string
   readonly capacity: number
-  /** Guaranteed once either condition is met; the first tier has none. */
+  /** Guaranteed once either condition is met; the first tier has none. A later tier without one is a shop tier (D122). */
   readonly milestone?: Readonly<{ ticksExplored?: number; level?: number }>
   /** Gold to buy this tier in the companion; absent for the starting tier. */
   readonly price?: number
@@ -185,7 +185,7 @@ export interface PouchTier {
   readonly id: string
   readonly name: string
   readonly cap: number
-  /** Guaranteed at this level; the first tier has none. */
+  /** Guaranteed at this level; the first tier has none. A later tier without one is a shop tier (D122). */
   readonly milestone?: Readonly<{ level: number }>
   /** Gold to buy this tier; absent for the starting tier. */
   readonly price?: number
@@ -206,6 +206,8 @@ export interface MerchantRule {
   readonly maxPotionsOffered: number
   /** Offers stay open for this many ticks after the visit. */
   readonly staysForTicks: number
+  /** D122: the merchant's bag and pouch offers are this much cheaper than the companion's ladder price; absent means full price. */
+  readonly ladderDiscountPct?: number
 }
 
 export interface MerchantOffer {

@@ -146,5 +146,5 @@ export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>
   if (row.kind === 'asleep') {
     return { title: `${heroName} is napping`, body: `${heroName}'s bag is full, so they've stopped for a nap. Make room to send them back out.`, url: '/app/desk-crawler/inventory?alert=asleep' }
   }
-  return { title: 'A merchant is visiting', body: `A merchant is selling ${heroName} a ${row.offerName ?? 'bigger bag'}, and they have the gold. The offer lasts about an hour.`, url: '/app/desk-crawler/inventory?alert=merchant' }
+  return { title: 'A merchant is visiting', body: `A merchant is offering ${heroName} a ${row.offerName ?? 'bigger bag'} at a discount, and they have the gold. The offer lasts about an hour.`, url: '/app/desk-crawler/inventory?alert=merchant' }
 }

@@ -219,7 +219,7 @@ function Inventory() {
         </ul>
       </section> : null}
 
-      {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} disabled={!manageable || busy} intent={buyOffer} /> : null}
+      {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} discountPct={bag.ladder.merchantDiscountPct} disabled={!manageable || busy} intent={buyOffer} /> : null}
       <div className="grid gap-8 sm:grid-cols-2">
         <BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} />
         <PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} />
@@ -349,14 +349,28 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, full, claimB
 
 type Ladder = {
   name: string
+  findable: boolean
+  merchantDiscountPct: number
   next: { id: string; name: string; capacity: number; price: number | null; milestoneLevel: number | null; milestoneAdventures: number | null; buyable: boolean; lockedUntilLevel: number | null } | null
 }
-type Pouch = { name: string; cap: number; next: { id: string; name: string; cap: number; price: number | null; milestoneLevel: number | null; buyable: boolean; lockedUntilLevel: number | null } | null }
+type Pouch = { name: string; cap: number; findable: boolean; merchantDiscountPct: number; next: { id: string; name: string; cap: number; price: number | null; milestoneLevel: number | null; buyable: boolean; lockedUntilLevel: number | null } | null }
+
+/**
+ * How the next rung arrives (D61/D122): a milestone tier names its level or adventure count and the early routes;
+ * a shop tier is bought here, or from the merchant at a discount.
+ */
+function howToGet(milestone: string | null, findable: boolean, discount: number): string {
+  if (milestone !== null) {
+    const early = [findable ? 'your hero finds one' : null, 'the merchant has one'].filter((route) => route !== null)
+    return `Yours ${milestone}, or sooner if ${early.join(' or ')}.`
+  }
+  return discount > 0 ? `Buy it here whenever you have the gold, or from a wandering merchant at ${discount}% off.` : 'Buy it here whenever you have the gold.'
+}
 type Offer = { id: 'potions' | 'pouch' | 'bag'; name: string; quantity: number; price: number; tierId?: string }
 type Visit = { offers: Offer[]; expiresAtTick: number; ticksLeft: number; biomeId: string }
 type PurchaseIntent<A> = { pending: boolean; run: (args: A, message?: string) => Promise<boolean> }
 
-/** D77: the potion pouch, its next tier and the three ways to get it, beside the bag ladder. */
+/** D77/D122: the potion pouch, its next tier and how to get it, beside the bag ladder. */
 function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch; potions: number; gold: number; disabled: boolean; intent: PurchaseIntent<{ tierId: string }> }) {
   const next = pouch.next
   const affordable = next?.price != null && gold >= next.price
@@ -365,7 +379,7 @@ function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch;
     <p className="tabular-nums">Holds <strong>{pouch.cap}</strong> potions. You have <strong>{potions}</strong>.</p>
     {next ? <>
       <p className="mt-3"><strong>Next: {next.name}</strong>, {next.cap} potions</p>
-      <p className="mt-1 text-sm text-muted">Yours at level {next.milestoneLevel}, or sooner if your hero finds one or the merchant has one.</p>
+      <p className="mt-1 text-sm text-muted">{howToGet(next.milestoneLevel !== null ? `at level ${next.milestoneLevel}` : null, pouch.findable, pouch.merchantDiscountPct)}</p>
       {next.price !== null ? next.buyable ? <>
         <Button className="mt-3" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button>
         <BuySheet open={asking} title={`Buy the ${next.name}?`} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, `${next.name} bought. It holds ${next.cap} potions.`)}>
@@ -378,7 +392,7 @@ function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch;
 }
 
 /** D78: the visiting merchant's offers, each sold once, open for a few adventures. */
-function Merchant({ visit, gold, potions, cap, disabled, intent }: { visit: Visit; gold: number; potions: number; cap: number; disabled: boolean; intent: PurchaseIntent<{ offerId: Offer['id'] }> }) {
+function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: { visit: Visit; gold: number; potions: number; cap: number; discountPct: number; disabled: boolean; intent: PurchaseIntent<{ offerId: Offer['id'] }> }) {
   const [asking, setAsking] = useState<Offer | null>(null)
   return <Card title="Wandering Merchant" icon="merchant">
     <p className="text-sm">Leaves in {visit.ticksLeft === 1 ? 'one adventure' : `${visit.ticksLeft} adventures`}. Each offer sells once.</p>
@@ -386,8 +400,10 @@ function Merchant({ visit, gold, potions, cap, disabled, intent }: { visit: Visi
       {visit.offers.map((offer) => {
         const affordable = gold >= offer.price
         const overflow = offer.id === 'potions' && potions + offer.quantity > cap
+        // D122: a bag or pouch offer undercuts the Bag page, and the card says so.
+        const deal = offer.id !== 'potions' && discountPct > 0
         return <li key={offer.id} className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-faint pt-3 first:border-t-0 first:pt-0">
-          <span><strong>{offer.name}</strong>{overflow ? <span className="block text-sm text-muted">Your pouch holds {cap}; make room first.</span> : null}</span>
+          <span><strong>{offer.name}</strong>{deal ? <span className="block text-sm text-muted">{discountPct}% off the Bag page price.</span> : null}{overflow ? <span className="block text-sm text-muted">Your pouch holds {cap}; make room first.</span> : null}</span>
           <Button variant={affordable && !overflow ? 'primary' : 'secondary'} disabled={disabled || !affordable || overflow} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(offer)}>Buy for {offer.price} gold</Button>
         </li>
       })}
@@ -411,7 +427,7 @@ function BuySheet({ open, title, price, gold, pending, onConfirm, onClose, child
   )
 }
 
-/** D61: the current bag, the next one and the three ways to get it. */
+/** D61/D122: the current bag, the next one and how to get it. */
 function BagLadder({ ladder, capacity, gold, disabled, intent }: { ladder: Ladder; capacity: number; gold: number; disabled: boolean; intent: PurchaseIntent<{ tierId: string }> }) {
   const next = ladder.next
   const affordable = next?.price != null && gold >= next.price
@@ -420,7 +436,7 @@ function BagLadder({ ladder, capacity, gold, disabled, intent }: { ladder: Ladde
     <p className="tabular-nums">Your <strong>{ladder.name}</strong> holds <strong>{capacity}</strong> pieces of gear. Equipped gear and potions don’t take up space.</p>
     {next ? <>
       <p className="mt-3"><strong>Next: {next.name}</strong>, {next.capacity} slots</p>
-      <p className="mt-1 text-sm text-muted">{next.milestoneAdventures !== null ? `Yours after ${next.milestoneAdventures} adventures` : `Yours at level ${next.milestoneLevel}`}, or sooner if your hero finds one.</p>
+      <p className="mt-1 text-sm text-muted">{howToGet(next.milestoneAdventures !== null ? `after ${next.milestoneAdventures} adventures` : next.milestoneLevel !== null ? `at level ${next.milestoneLevel}` : null, ladder.findable, ladder.merchantDiscountPct)}</p>
       {next.price !== null ? next.buyable ? <>
         <Button className="mt-3" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button>
         <BuySheet open={asking} title={`Buy the ${next.name}?`} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, `${next.name} bought. It holds ${next.capacity}.`)}>

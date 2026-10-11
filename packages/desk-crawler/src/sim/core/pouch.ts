@@ -19,11 +19,20 @@ function tierIndex(content: ContentCatalog, hero: PouchHero): number {
   return tiers.findIndex((tier) => tier.cap === cap)
 }
 
-/** Highest pouch tier the hero's level guarantees. */
+/** Highest pouch tier the hero's level guarantees. A tier without a milestone is a shop tier (D122): never guaranteed. */
 export function guaranteedPouchIndex(content: ContentCatalog, hero: PouchHero): number {
   let index = 0
   ;(content.potionPouch?.tiers ?? []).forEach((tier, i) => {
-    if (tier.milestone === undefined || hero.level >= tier.milestone.level) index = i
+    if (i === 0 || (tier.milestone !== undefined && hero.level >= tier.milestone.level)) index = i
+  })
+  return index
+}
+
+/** The highest pouch tier that has a milestone; the one-ahead rule applies up to it and never to the shop tiers above. */
+function lastPouchMilestoneIndex(content: ContentCatalog): number {
+  let index = 0
+  ;(content.potionPouch?.tiers ?? []).forEach((tier, i) => {
+    if (tier.milestone !== undefined) index = i
   })
   return index
 }
@@ -36,13 +45,19 @@ export function pouchMilestoneUpgrade(content: ContentCatalog, hero: PouchHero):
   return guaranteed.cap > potionCap(content, hero) ? guaranteed : undefined
 }
 
-/** The next tier a find or purchase may grant: one rung up, never more than one rung ahead of the guaranteed tier. */
+/**
+ * The next tier a find or purchase may grant: one rung up. Among milestone tiers never more than one rung ahead of
+ * the guaranteed tier (D77); shop tiers above the last milestone are bought in order whenever the hero has the gold
+ * (D122).
+ */
 export function nextEarlyPouchTier(content: ContentCatalog, hero: PouchHero): PouchTier | undefined {
   const tiers = content.potionPouch?.tiers
   if (tiers === undefined) return undefined
   const current = tierIndex(content, hero)
   const next = tiers[current + 1]
-  if (current < 0 || next === undefined || current + 1 > guaranteedPouchIndex(content, hero) + 1) return undefined
+  if (current < 0 || next === undefined) return undefined
+  const underMilestoneRule = current + 1 <= lastPouchMilestoneIndex(content)
+  if (underMilestoneRule && current + 1 > guaranteedPouchIndex(content, hero) + 1) return undefined
   return next
 }
 

@@ -65,6 +65,9 @@ function bagLadderView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const guaranteed = ladder.tiers[guaranteedTierIndex(ladder, state)]!
   return {
     name: current?.name ?? 'Bag',
+    // D122: whether a loot draw can still find a bag, and the merchant's cut off the ladder price (0 under older catalogs).
+    findable: ladder.findPermille > 0,
+    merchantDiscountPct: content.merchant?.ladderDiscountPct ?? 0,
     next: next
       ? {
           id: next.id,
@@ -73,7 +76,7 @@ function bagLadderView(content: ContentCatalog, hero: Doc<'heroes'>) {
           price: next.price ?? null,
           milestoneLevel: next.milestone?.level ?? null,
           milestoneAdventures: next.milestone?.ticksExplored ?? null,
-          // Purchases may run one bag ahead of the guaranteed one, never more.
+          // Purchases may run one bag ahead of the guaranteed one, never more; a shop tier (D122) is always buyable.
           buyable: early?.id === next.id,
           lockedUntilLevel: early?.id === next.id ? null : (ladder.tiers.find((tier) => tier.capacity > guaranteed.capacity)?.milestone?.level ?? null),
         }
@@ -85,13 +88,15 @@ function pouchView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const state = { level: hero.level, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
   const cap = potionCap(content, state)
   const ladder = content.potionPouch
-  if (!ladder) return { name: 'Potion pouch', cap, next: null }
+  if (!ladder) return { name: 'Potion pouch', cap, findable: false, merchantDiscountPct: 0, next: null }
   const next = nextPouchTier(content, state)
   const early = nextEarlyPouchTier(content, state)
   const guaranteed = ladder.tiers[guaranteedPouchIndex(content, state)]!
   return {
     name: currentPouchTier(content, state)?.name ?? 'Potion pouch',
     cap,
+    findable: ladder.findPermille > 0,
+    merchantDiscountPct: content.merchant?.ladderDiscountPct ?? 0,
     next: next
       ? {
           id: next.id,

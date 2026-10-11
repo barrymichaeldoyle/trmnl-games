@@ -227,7 +227,7 @@ describe('alerts backend (P33)', () => {
     const first = await queued(heroId, 'merchant', 11, { offerId: 'bag', offerName: 'Messenger Bag' })
     await deliver()
     expect(await row(first)).toMatchObject({ state: 'sent' })
-    expect(JSON.parse(sent.at(-1)!.payload).body).toBe('A merchant is selling Baz a Messenger Bag, and they have the gold. The offer lasts about an hour.')
+    expect(JSON.parse(sent.at(-1)!.payload).body).toBe('A merchant is offering Baz a Messenger Bag at a discount, and they have the gold. The offer lasts about an hour.')
     // Two pushes today already: the third is skipped, not queued.
     const third = await queued(heroId, 'asleep', 12)
     await deliver()

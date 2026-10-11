@@ -43,9 +43,10 @@ function tierIndex(ladder: BagLadder, capacity: number): number {
   return ladder.tiers.findIndex((tier) => tier.capacity === capacity)
 }
 
+/** A tier without a milestone (other than the starting bag) is a shop tier (D122): gold buys it, nothing grants it. */
 function milestoneMet(tier: BagTier, hero: ProgressHero): boolean {
   const m = tier.milestone
-  if (m === undefined) return true
+  if (m === undefined) return false
   return (m.ticksExplored !== undefined && hero.counters.ticksExplored >= m.ticksExplored) || (m.level !== undefined && hero.level >= m.level)
 }
 
@@ -53,7 +54,16 @@ function milestoneMet(tier: BagTier, hero: ProgressHero): boolean {
 export function guaranteedTierIndex(ladder: BagLadder, hero: ProgressHero): number {
   let index = 0
   ladder.tiers.forEach((tier, i) => {
-    if (milestoneMet(tier, hero)) index = i
+    if (i === 0 || milestoneMet(tier, hero)) index = i
+  })
+  return index
+}
+
+/** The highest tier that has a milestone; the one-ahead rule below applies up to it and never to the shop tiers above. */
+function lastMilestoneIndex(ladder: BagLadder): number {
+  let index = 0
+  ladder.tiers.forEach((tier, i) => {
+    if (tier.milestone !== undefined) index = i
   })
   return index
 }
@@ -64,12 +74,18 @@ export function milestoneUpgrade(content: ContentCatalog, hero: ProgressHero): B
   return guaranteed.capacity > hero.bagCapacity ? guaranteed : undefined
 }
 
-/** The next tier a find or purchase may grant: one rung up, and never more than one rung ahead of the guaranteed tier. */
+/**
+ * The next tier a find or purchase may grant: one rung up. Among milestone tiers it never runs more than one rung
+ * ahead of the guaranteed tier (D61); shop tiers above the last milestone are bought in order whenever the hero has
+ * the gold (D122).
+ */
 export function nextEarlyTier(content: ContentCatalog, hero: ProgressHero): BagTier | undefined {
   const ladder = content.bagLadder
   const current = tierIndex(ladder, hero.bagCapacity)
   const next = ladder.tiers[current + 1]
-  if (current < 0 || next === undefined || current + 1 > guaranteedTierIndex(ladder, hero) + 1) return undefined
+  if (current < 0 || next === undefined) return undefined
+  const underMilestoneRule = current + 1 <= lastMilestoneIndex(ladder)
+  if (underMilestoneRule && current + 1 > guaranteedTierIndex(ladder, hero) + 1) return undefined
   return next
 }
 

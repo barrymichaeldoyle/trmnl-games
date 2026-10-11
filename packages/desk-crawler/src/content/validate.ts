@@ -38,9 +38,12 @@ export function validateCatalog(content: ContentCatalog): string[] {
     if (pouch.tiers[0]?.milestone !== undefined || pouch.tiers[0]?.price !== undefined) problems.push('the starting pouch has no milestone or price')
     if (pouch.tiers[0]?.cap !== c.potionStackCap) problems.push('the starting pouch must match potionStackCap')
     pouch.tiers.forEach((tier, i) => {
-      if (i > 0 && (tier.milestone === undefined || tier.price === undefined)) problems.push(`pouch ${tier.id} needs a milestone and a price`)
+      if (i > 0 && (tier.price === undefined || tier.price < 1)) problems.push(`pouch ${tier.id} needs a price`)
       if (i > 0 && tier.cap <= pouch.tiers[i - 1]!.cap) problems.push(`pouch ${tier.id} must be larger than the previous tier`)
-      if (i > 1 && (tier.milestone?.level ?? 0) <= (pouch.tiers[i - 1]!.milestone?.level ?? 0)) problems.push(`pouch ${tier.id} milestone must come after the previous tier's`)
+      // D122: milestone tiers come first, then shop tiers; a milestone never follows a shop tier.
+      if (i > 1 && tier.milestone !== undefined && pouch.tiers[i - 1]!.milestone === undefined) problems.push(`pouch ${tier.id} has a milestone after a shop tier`)
+      if (i > 1 && tier.milestone !== undefined && tier.milestone.level <= (pouch.tiers[i - 1]!.milestone?.level ?? 0)) problems.push(`pouch ${tier.id} milestone must come after the previous tier's`)
+      if (i > 0 && tier.milestone === undefined && tier.price! <= (pouch.tiers[i - 1]!.price ?? 0)) problems.push(`pouch ${tier.id} must cost more than the previous tier`)
     })
     if (!Number.isSafeInteger(pouch.findPermille) || pouch.findPermille < 0 || pouch.findPermille > 1000) problems.push('pouch find chance must be a permille')
   }
@@ -165,6 +168,8 @@ export function validateCatalog(content: ContentCatalog): string[] {
   if (content.merchant) {
     if (!(content.merchant.potionPrice >= 1 && content.merchant.maxPotionsOffered >= 1 && content.merchant.maxPotionsOffered <= 10)) problems.push('merchant potion offer out of bounds')
     if (!(content.merchant.staysForTicks >= 1 && content.merchant.staysForTicks <= 8)) problems.push('merchant must stay between 1 and 8 ticks')
+    const discount = content.merchant.ladderDiscountPct
+    if (discount !== undefined && !(Number.isSafeInteger(discount) && discount >= 1 && discount <= 50)) problems.push('merchant ladder discount must be a whole percentage from 1 to 50')
   }
   if (content.stances && (content.stances.balanced.autoPotionBelowPct !== c.autoPotionBelowPct || content.stances.balanced.restBelowPct !== c.restBelowPct || content.stances.balanced.resumeExploringAtPct !== c.resumeExploringAtPct || content.stances.balanced.victoryXpPct !== 100)) problems.push('the balanced stance must mirror the catalog constants')
   percent('jackpot.chancePct', c.jackpot.chancePct)
@@ -221,7 +226,10 @@ export function validateCatalog(content: ContentCatalog): string[] {
     if (!Number.isSafeInteger(tier.capacity) || tier.capacity < 1) problems.push(`bag ${tier.id} capacity must be a positive integer`)
     if (i > 0) {
       if (tier.capacity <= tiers[i - 1]!.capacity) problems.push(`bag ${tier.id} must be larger than the previous tier`)
-      if (tier.milestone === undefined || tier.price === undefined || tier.price < 1) problems.push(`bag ${tier.id} needs a milestone and price`)
+      if (tier.price === undefined || tier.price < 1) problems.push(`bag ${tier.id} needs a price`)
+      // D122: milestone tiers come first, then shop tiers that gold buys in order at rising prices.
+      if (i > 1 && tier.milestone !== undefined && tiers[i - 1]!.milestone === undefined) problems.push(`bag ${tier.id} has a milestone after a shop tier`)
+      if (tier.milestone === undefined && tier.price !== undefined && tier.price <= (tiers[i - 1]!.price ?? 0)) problems.push(`bag ${tier.id} must cost more than the previous tier`)
     }
   })
   // Bounded reads (MAX_INVENTORY_ROWS): bag + two equipped + held + potion.

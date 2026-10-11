@@ -65,3 +65,5 @@ The [D56 adaptive layout](adaptive-log-layout.md) is deployed v27, verified by 2
 [Effects and affixes](effects-affixes.md) records D80/D81: the epic rarity, four affixes on rare and epic gear, three temporary effects with their order of operations, and the v6 balance run.
 
 Achievement catalog version 2 (D82) adds the five v1.1 families; the catalog tests pin 146 ids and 39 families, and the version bump triggers the designed full pass.
+
+[Gold-only ladders](gold-only-ladders.md) records D122 (content v10): bags and pouches above the Tote Bag bought with gold only, prices from three harness sweeps, the merchant's 25% discount, and the seven-cohort v10 run against v9.
