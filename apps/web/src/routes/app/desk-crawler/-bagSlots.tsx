@@ -39,17 +39,17 @@ const RARITY_EDGE: Record<string, string> = { common: 'border-raised', uncommon:
 const SLOT = 'relative flex aspect-square w-full min-w-11 items-center justify-center border-[3px] bg-night text-cream'
 
 export type SlotItem = { id: string; kind: 'weapon' | 'armor'; templateId: string; label: string; rarity: string; requiredLevel: number }
-type Marks = { selectable?: boolean; selected?: boolean; upgrade?: boolean; lockedLevel?: number | null; busy?: boolean }
+type Marks = { selectable?: boolean; selected?: boolean; upgrade?: boolean; downgrade?: boolean; lockedLevel?: number | null; busy?: boolean }
 
 const edgeOf = (item: SlotItem, { selected = false, held = false }: { selected?: boolean; held?: boolean }) => selected ? 'border-gold bg-raised' : held ? 'border-gold border-dashed' : RARITY_EDGE[item.rarity] ?? RARITY_EDGE.common
 
-/** The piece's icon with its gem, and an upgrade arrow, level lock or selection tick in the corners. */
-function SlotFace({ item, selectable = false, selected = false, upgrade = false, lockedLevel = null, busy = false }: { item: SlotItem } & Marks) {
+/** The piece's icon with its gem, and an upgrade or downgrade arrow, level lock or selection tick in the corners. */
+function SlotFace({ item, selectable = false, selected = false, upgrade = false, downgrade = false, lockedLevel = null, busy = false }: { item: SlotItem } & Marks) {
   return <>
     <SpriteIcon sprite={itemArt(item.templateId, item.kind)} className={busy ? 'opacity-40' : ''} />
     <Gem rarity={item.rarity} scale={2} className="absolute bottom-1 left-1" />
     {selectable ? <span aria-hidden="true" className={`absolute top-1 left-1 flex size-4 items-center justify-center border-2 border-edge ${selected ? 'bg-gold' : 'bg-night'}`}>{selected ? <svg viewBox="0 0 6 6" width={10} height={10} shapeRendering="crispEdges" className="fill-night"><path d="M4 1h1v1H4zM3 2h1v1H3zM0 3h1v1H0zM2 3h1v1H2zM1 4h1v1H1z" /></svg> : null}</span> : null}
-    {lockedLevel !== null ? <span aria-hidden="true" className="absolute top-1 right-1 bg-night px-0.5 label-px text-muted">L{lockedLevel}</span> : upgrade ? <svg aria-hidden="true" viewBox="0 0 7 7" width={14} height={14} shapeRendering="crispEdges" className="absolute top-1 right-1 fill-xp"><path d="M3 0h1v1H3zM2 1h3v1H2zM1 2h5v1H1zM0 3h7v1H0zM2 4h3v3H2z" /></svg> : null}
+    {lockedLevel !== null ? <span aria-hidden="true" className="absolute top-1 right-1 bg-night px-0.5 label-px text-muted">L{lockedLevel}</span> : upgrade ? <svg aria-hidden="true" viewBox="0 0 7 7" width={14} height={14} shapeRendering="crispEdges" className="absolute top-1 right-1 fill-xp"><path d="M3 0h1v1H3zM2 1h3v1H2zM1 2h5v1H1zM0 3h7v1H0zM2 4h3v3H2z" /></svg> : downgrade ? <svg aria-hidden="true" viewBox="0 0 7 7" width={14} height={14} shapeRendering="crispEdges" className="absolute top-1 right-1 fill-hp-ink"><path d="M2 0h3v3H2zM0 3h7v1H0zM1 4h5v1H1zM2 5h3v1H2zM3 6h1v1H3z" /></svg> : null}
     {busy ? <span aria-hidden="true" className="dither absolute inset-0 text-faint/60" /> : null}
   </>
 }

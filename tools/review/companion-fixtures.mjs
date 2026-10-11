@@ -6,7 +6,7 @@
  *   node tools/review/companion-fixtures.mjs && pnpm exec vite --config .previews/submission-companion/vite.config.mjs
  *
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /leaderboard, /settings). Query parameters:
- *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   slots=30 (gear count)   merchant=1
+ *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   drawer=N (D111: the desk drawer on, holding N of 6, with the bag full when N > 0)
@@ -67,6 +67,7 @@ if (held) { hero.status = 'sleeping'; hero.wakeAtTick = null }
 if (hero.status === 'travelling') { hero.targetBiomeId = 'server_room'; hero.arriveAtTick = hero.world.currentTick + 1 }
 if (hero.status === 'dead') { hero.hp = 0; hero.reviveAtTick = hero.world.currentTick + 3 }
 if (hero.status === 'resting') hero.hp = Math.round(hero.maxHp * 0.4);
+if (params.get('hp')) hero.hp = Math.round(hero.maxHp * Number(params.get('hp')) / 100);
 if (flag('choice')) hero.choice = { eventId: 'late_night', title: 'The boss asks for one more hour', prompt: 'The lights are dimming but the report is not done. Stay late for a bonus, or head home?', expiresAtTick: hero.world.currentTick + 4, ticksLeft: 4, defaultOptionId: 'home', options: [{ id: 'stay', label: 'Stay late', change: { gold: 50, hp: -6, potions: 0 } }, { id: 'home', label: 'Head home', change: { gold: 0, hp: 0, potions: 0 } }] };
 if (flag('effects')) hero.effects = [{ id: 'coffee', name: 'Coffee rush', blurb: '+3 ATK', kind: 'boon', ticksLeft: 3 }, { id: 'papercut', name: 'Paper cut', blurb: '-2 DEF', kind: 'bane', ticksLeft: 1 }];
 if (flag('merchant')) { hero.merchantTicksLeft = 3; inventory.merchant = { offers: [{ id: 'potions', name: 'Three potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 400, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 3, ticksLeft: 3, biomeId: hero.biomeId } }

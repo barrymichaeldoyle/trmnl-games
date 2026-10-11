@@ -86,22 +86,30 @@ function SignedInApp() {
             <img src="/games/desk-crawler/favicon.svg" alt="" width={24} height={24} className="[image-rendering:pixelated]" />
             <span className="ml-3 text-xs text-gold-ink">Desk Crawler</span>
           </li>
-          {NAV.map((item) => (
-            <li key={item.to} className="flex-1">
-              <Link
-                to={item.to}
-                activeOptions={{ exact: true }}
-                className="menu-cursor flex min-h-13 flex-col items-center justify-center gap-1 text-[0.625rem] text-muted hover:text-ink aria-[current=page]:text-gold-ink aria-[current=page]:shadow-[inset_0_-4px_0_var(--color-gold)] max-sm:before:hidden sm:flex-row sm:gap-2 sm:text-hud-sm"
-              >
-                {/* The tab's glyph carries recognition on phones, where the pixel label is at its smallest. */}
-                <Glyph name={item.glyph} className="sm:hidden lg:block" />
-                <span>
-                  {item.label}
-                  {item.to === '/app/desk-crawler/inventory' && bagUsed !== undefined ? <span className="ml-1 tabular-nums text-gold-ink"><span className="sr-only">, </span>{bagUsed}<span className="sr-only"> slots used</span></span> : null}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {NAV.map((item) => {
+            // The Bag tab carries how many slots are used as a badge, like a notification count.
+            const count = item.to === '/app/desk-crawler/inventory' ? bagUsed : undefined
+            return (
+              <li key={item.to} className="flex-1">
+                <Link
+                  to={item.to}
+                  activeOptions={{ exact: true }}
+                  className="menu-cursor flex min-h-13 flex-col items-center justify-center gap-1 text-[0.625rem] text-muted hover:text-ink aria-[current=page]:text-gold-ink aria-[current=page]:shadow-[inset_0_-4px_0_var(--color-gold)] max-sm:before:hidden sm:flex-row sm:gap-2 sm:text-hud-sm"
+                >
+                  {/* The tab's glyph carries recognition on phones, where the pixel label is at its smallest. On phones the
+                      badge sits on its corner; from 640px, where the glyph hides or sits beside the label, it follows the label. */}
+                  <span className="relative sm:hidden lg:block">
+                    <Glyph name={item.glyph} />
+                    {count !== undefined ? <CountBadge count={count} className="absolute -top-2 left-3.5 flex sm:hidden" /> : null}
+                  </span>
+                  <span className="flex items-center">
+                    {item.label}
+                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">, {count} slots used</span></> : null}
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       </nav>
       <main id="main" className={`mx-auto flex w-full min-w-0 flex-col gap-8 px-3 pt-6 min-[375px]:px-4 pb-[max(2rem,env(safe-area-inset-bottom))] ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
@@ -110,4 +118,9 @@ function SignedInApp() {
       </main>
     </>
   )
+}
+
+/** A small count on a tab, drawn as a notification badge: night digits on a gold square, hidden from screen readers. */
+function CountBadge({ count, className = '' }: { count: number; className?: string }) {
+  return <span aria-hidden="true" className={`h-4 min-w-4 items-center justify-center bg-gold px-1 label-px leading-none tabular-nums text-night shadow-[0_0_0_2px_var(--color-night)] ${className}`}>{count}</span>
 }

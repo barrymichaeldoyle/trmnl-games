@@ -200,7 +200,7 @@ function Inventory() {
         </p>
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
           {held ? <li><Slot item={held} held label={slotLabel(held)} busy={busyId === held.id} onClick={() => setOpenId(held.id)} /></li> : null}
-          {inBag.map((item) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode === 'sell'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
+          {inBag.map((item) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode === 'sell'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} downgrade={deltaOf(item) < 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
           {Array.from({ length: Math.max(0, slots - inBag.length) }, (_, index) => <li key={`empty-${index}`}><EmptySlot /></li>)}
         </ul>
       </section>
@@ -214,7 +214,7 @@ function Inventory() {
           {mode === 'sell' && drawer.length > 0 ? 'Tap gear to add it to the sale.' : drawer.length === 0 ? 'When the bag is full, finds go in here and your hero keeps adventuring.' : drawerRoom ? 'Finds that didn’t fit in the bag. Tap one to equip, move or sell it.' : 'Drawer full too. The next find is held, and adventures stop until you make room.'}
         </p>
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
-          {drawer.map((item: Gear) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode === 'sell'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
+          {drawer.map((item: Gear) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode === 'sell'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} downgrade={deltaOf(item) < 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
           {Array.from({ length: Math.max(0, drawerView.capacity - drawer.length) }, (_, index) => <li key={`drawer-empty-${index}`}><EmptySlot /></li>)}
         </ul>
       </section> : null}
