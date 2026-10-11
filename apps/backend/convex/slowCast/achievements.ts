@@ -27,7 +27,7 @@ export async function awardAngler(ctx: MutationCtx, angler: Doc<'anglers'>, befo
     if (existing) continue
     await ctx.db.insert('swAchievements', { userId: angler.userId, anglerId: angler._id, achievementId: def.id, unlockedAt: now, tick, catalogVersion: ACHIEVEMENTS_VERSION })
     sequence += 1
-    await ctx.db.insert('swTickLogs', { anglerId: angler._id, source: 'lifecycle', tick, sequence, at: now, kind: 'achievement', summary: `Achievement: ${def.name}`, detail: { v: 1, achievementId: def.id, name: def.name }, deltas: { xpEarned: 0, gold: 0 } })
+    await ctx.db.insert('swTickLogs', { anglerId: angler._id, source: 'lifecycle', tick, sequence, at: now, kind: 'achievement', summary: `Achievement: ${def.name}`, detail: { v: 1, achievementId: def.id, name: def.name }, deltas: { gold: 0 } })
     written.push(def)
   }
   const patch: Partial<Doc<'anglers'>> = {}

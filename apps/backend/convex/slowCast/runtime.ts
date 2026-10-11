@@ -19,7 +19,7 @@ export const SLOW_CAST_RUNTIME: EngineRuntime<SlowCastCatalog> = {
   schedule: SLOW_CAST_SCHEDULE,
   simulationVersion: SIMULATION_VERSION,
   seedVersion: SEED_VERSION,
-  runCounters: ['landed', 'released', 'gotAway', 'levelUps'],
+  runCounters: ['landed', 'released', 'gotAway'],
   initialContentVersion: catalogs[ACTIVE_CONTENT].contentVersion,
   content: (version) => catalogs[version as CatalogId],
   refs: {

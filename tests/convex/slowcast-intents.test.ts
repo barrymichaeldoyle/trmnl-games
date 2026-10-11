@@ -110,14 +110,24 @@ describe('Slow Cast intents (D115, S2)', () => {
     expect(dock.catches.map((c: { grams: number; record: boolean }) => [c.grams, c.record])).toEqual(expect.arrayContaining([[410, true], [200, false]]))
   })
 
-  it('clears the retired XP fields from an older angler', async () => {
+  it('clears the retired XP fields from anglers, stories and runs, stage by stage', async () => {
     const anglerId = await seedAngler(t, { level: 6, xp: 312, lifetimeXp: 4000, lastLevelUpTick: 90, scoreHourXp: 12 }, 'Pat')
     const { internal } = await import('../../apps/backend/convex/_generated/api')
-    expect(await t.mutation(internal.slowCast.migrations.clearRetiredFields, {})).toEqual({ cleared: 1, done: true, cursor: null })
-    const angler = await t.run(async (ctx) => await ctx.db.get(anglerId))
-    expect(angler).not.toHaveProperty('level')
-    expect(angler).not.toHaveProperty('scoreHourXp')
-    expect(await t.mutation(internal.slowCast.migrations.clearRetiredFields, {})).toMatchObject({ cleared: 0 })
+    const logId = await t.run(async (ctx) => {
+      const run = await ctx.db.query('swSimulationRuns').first()
+      await ctx.db.patch(run!._id, { levelUps: 0 })
+      return await ctx.db.insert('swTickLogs', { anglerId, source: 'tick', sequence: 9, at: Date.now(), kind: 'catch', summary: 'catch', detail: { v: 1 }, deltas: { xpEarned: 12, gold: 0 } })
+    })
+    const clear = (args: Record<string, unknown>) => t.mutation(internal.slowCast.migrations.clearRetiredFields, args)
+    expect(await clear({})).toEqual({ cleared: 1, done: false, stage: 'tickLogs', cursor: null })
+    expect(await clear({ stage: 'tickLogs' })).toMatchObject({ cleared: 1, stage: 'runs' })
+    expect(await clear({ stage: 'runs' })).toEqual({ cleared: 1, done: true, stage: 'runs', cursor: null })
+    const after = await t.run(async (ctx) => ({ angler: await ctx.db.get(anglerId), log: await ctx.db.get(logId), runs: await ctx.db.query('swSimulationRuns').collect() }))
+    expect(after.angler).not.toHaveProperty('level')
+    expect(after.angler).not.toHaveProperty('scoreHourXp')
+    expect(after.log!.deltas).toEqual({ gold: 0 })
+    expect(after.runs.every((run) => run.levelUps === undefined)).toBe(true)
+    expect(await clear({})).toMatchObject({ cleared: 0 })
   })
 
   it('shows unseen species with only their bait, and epics with nothing, in the logbook', async () => {

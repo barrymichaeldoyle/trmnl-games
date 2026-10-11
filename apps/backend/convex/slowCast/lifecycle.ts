@@ -38,7 +38,7 @@ export async function prepareAngler(ctx: MutationCtx, user: Doc<'users'>, now: n
     simulationState: 'healthy',
   })
   await setCurrentAngler(ctx, user, anglerId)
-  await ctx.db.insert('swTickLogs', { anglerId, source: 'lifecycle', sequence: 1, at: now, kind: 'system', summary: FIRST_LOG, detail: { v: 1, operation: 'angler_created' }, deltas: { xpEarned: 0, gold: 0 } })
+  await ctx.db.insert('swTickLogs', { anglerId, source: 'lifecycle', sequence: 1, at: now, kind: 'system', summary: FIRST_LOG, detail: { v: 1, operation: 'angler_created' }, deltas: { gold: 0 } })
   return anglerId
 }
 

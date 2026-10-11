@@ -51,7 +51,7 @@ const REFUSAL: Record<string, string> = {
 
 async function commandLog(ctx: MutationCtx, angler: Doc<'anglers'>, operation: string, summary: string, gold = 0): Promise<number> {
   const sequence = angler.logSequence + 1
-  await ctx.db.insert('swTickLogs', { anglerId: angler._id, source: 'command', sequence, at: Date.now(), kind: 'system', summary: summary.slice(0, 90), detail: { v: 1, operation }, deltas: { xpEarned: 0, gold } })
+  await ctx.db.insert('swTickLogs', { anglerId: angler._id, source: 'command', sequence, at: Date.now(), kind: 'system', summary: summary.slice(0, 90), detail: { v: 1, operation }, deltas: { gold } })
   return sequence
 }
 
