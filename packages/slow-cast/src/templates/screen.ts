@@ -106,7 +106,7 @@ const attention = (clamp = 2) =>
 /** One story's glyph: its kind's, a star for a milestone, a dot for anything else. */
 const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !== 'system')
   .map((kind) => `{% when "${kind}" %}{% assign m_story = m_${kind} %}`)
-  .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% when "levelup" %}{% assign m_story = m_star %}{% else %}{% assign m_story = m_system %}{% endcase %}`
+  .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% else %}{% assign m_story = m_system %}{% endcase %}`
 
 /** The newest stories, each behind its glyph. */
 const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') =>

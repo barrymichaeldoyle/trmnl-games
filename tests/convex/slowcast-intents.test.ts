@@ -110,20 +110,6 @@ describe('Slow Cast intents (D115, S2)', () => {
     expect(dock.catches.map((c: { grams: number; record: boolean }) => [c.grams, c.record])).toEqual(expect.arrayContaining([[410, true], [200, false]]))
   })
 
-  it('deletes the old level-up stories and leaves the rest', async () => {
-    const anglerId = await seedAngler(t, {}, 'Pat')
-    const { internal } = await import('../../apps/backend/convex/_generated/api')
-    const story = (sequence: number, kind: 'levelup' | 'catch') => ({ anglerId, source: 'tick' as const, sequence, at: Date.now(), kind, summary: kind, detail: { v: 1 as const }, deltas: { gold: 0 } })
-    await t.run(async (ctx) => {
-      await ctx.db.insert('swTickLogs', story(5, 'levelup'))
-      await ctx.db.insert('swTickLogs', story(6, 'catch'))
-    })
-    expect(await t.mutation(internal.slowCast.migrations.dropLevelUpStories, {})).toEqual({ deleted: 1, done: true, cursor: null })
-    const kinds = await t.run(async (ctx) => (await ctx.db.query('swTickLogs').collect()).map((log) => log.kind))
-    expect(kinds).not.toContain('levelup')
-    expect(kinds).toContain('catch')
-  })
-
   it('shows unseen species with only their bait, and epics with nothing, in the logbook', async () => {
     await seedAngler(t, { logbook: { roach: { count: 3, bestGrams: 410, firstTick: 2 } } }, 'Pat')
     const book = await as('Pat').query(api.slowCast.anglers.logbook, {})

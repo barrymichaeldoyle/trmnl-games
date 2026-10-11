@@ -47,7 +47,7 @@ export interface PayloadStory {
 }
 
 /** Within one cast, the fish comes first, then its milestones (a title, a water opening), then what it earned. */
-const STORY_RANK: Readonly<Record<string, number>> = { catch: 0, release: 0, got_away: 0, milestone: 1, levelup: 1, achievement: 2 }
+const STORY_RANK: Readonly<Record<string, number>> = { catch: 0, release: 0, got_away: 0, milestone: 1, achievement: 2 }
 
 /**
  * The stories as the device lists them (newest first). Lines written at the same moment belong to one cast: the catch
