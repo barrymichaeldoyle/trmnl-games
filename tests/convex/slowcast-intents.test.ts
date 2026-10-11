@@ -96,38 +96,18 @@ describe('Slow Cast intents (D115, S2)', () => {
     const anglerId = await seedAngler(t, { logbook: { roach: { count: 2, bestGrams: 410, firstTick: 1 } } }, 'Pat')
     await fillCooler(anglerId, [['roach', 410, 12], ['roach', 200, 8]])
     const now = Date.now()
-    const log = (sequence: number, at: number, kind: 'catch' | 'release' | 'got_away', detail: Record<string, unknown>, xp: number) =>
-      ({ anglerId, source: 'tick' as const, sequence, at, kind, summary: kind, detail: { v: 1 as const, ...detail }, deltas: { xpEarned: xp, gold: 0 } })
+    const log = (sequence: number, at: number, kind: 'catch' | 'release' | 'got_away', detail: Record<string, unknown>) =>
+      ({ anglerId, source: 'tick' as const, sequence, at, kind, summary: kind, detail: { v: 1 as const, ...detail }, deltas: { gold: 0 } })
     await t.run(async (ctx) => {
-      await ctx.db.insert('swTickLogs', log(1, now - 3_600_000, 'catch', { speciesId: 'roach', grams: 410, record: true }, 12))
-      await ctx.db.insert('swTickLogs', log(2, now - 7_200_000, 'release', { speciesId: 'perch', grams: 900, firstOfSpecies: true }, 16))
-      await ctx.db.insert('swTickLogs', log(3, now - 1_800_000, 'got_away', { speciesId: 'common_carp', grams: 6000 }, 0))
+      await ctx.db.insert('swTickLogs', log(1, now - 3_600_000, 'catch', { speciesId: 'roach', grams: 410, record: true }))
+      await ctx.db.insert('swTickLogs', log(2, now - 7_200_000, 'release', { speciesId: 'perch', grams: 900, firstOfSpecies: true }))
+      await ctx.db.insert('swTickLogs', log(3, now - 1_800_000, 'got_away', { speciesId: 'common_carp', grams: 6000 }))
       // Older than twelve hours: left out.
-      await ctx.db.insert('swTickLogs', log(4, now - 13 * 3_600_000, 'catch', { speciesId: 'roach', grams: 300 }, 12))
+      await ctx.db.insert('swTickLogs', log(4, now - 13 * 3_600_000, 'catch', { speciesId: 'roach', grams: 300 }))
     })
     const dock = await as('Pat').query(api.slowCast.anglers.dock, {})
     expect(dock.recap).toEqual({ landed: 2, released: 1, records: 1, firsts: 1, best: { speciesId: 'perch', grams: 900 }, gotAway: 1, awayGrams: [6000] })
     expect(dock.catches.map((c: { grams: number; record: boolean }) => [c.grams, c.record])).toEqual(expect.arrayContaining([[410, true], [200, false]]))
-  })
-
-  it('clears the retired XP fields from anglers, stories and runs, stage by stage', async () => {
-    const anglerId = await seedAngler(t, { level: 6, xp: 312, lifetimeXp: 4000, lastLevelUpTick: 90, scoreHourXp: 12 }, 'Pat')
-    const { internal } = await import('../../apps/backend/convex/_generated/api')
-    const logId = await t.run(async (ctx) => {
-      const run = await ctx.db.query('swSimulationRuns').first()
-      await ctx.db.patch(run!._id, { levelUps: 0 })
-      return await ctx.db.insert('swTickLogs', { anglerId, source: 'tick', sequence: 9, at: Date.now(), kind: 'catch', summary: 'catch', detail: { v: 1 }, deltas: { xpEarned: 12, gold: 0 } })
-    })
-    const clear = (args: Record<string, unknown>) => t.mutation(internal.slowCast.migrations.clearRetiredFields, args)
-    expect(await clear({})).toEqual({ cleared: 1, done: false, stage: 'tickLogs', cursor: null })
-    expect(await clear({ stage: 'tickLogs' })).toMatchObject({ cleared: 1, stage: 'runs' })
-    expect(await clear({ stage: 'runs' })).toEqual({ cleared: 1, done: true, stage: 'runs', cursor: null })
-    const after = await t.run(async (ctx) => ({ angler: await ctx.db.get(anglerId), log: await ctx.db.get(logId), runs: await ctx.db.query('swSimulationRuns').collect() }))
-    expect(after.angler).not.toHaveProperty('level')
-    expect(after.angler).not.toHaveProperty('scoreHourXp')
-    expect(after.log!.deltas).toEqual({ gold: 0 })
-    expect(after.runs.every((run) => run.levelUps === undefined)).toBe(true)
-    expect(await clear({})).toMatchObject({ cleared: 0 })
   })
 
   it('shows unseen species with only their bait, and epics with nothing, in the logbook', async () => {

@@ -28,13 +28,9 @@ export const boardLiteral = v.union(v.literal('overall'), v.literal('recent_24h'
 
 /**
  * `runCounters` are the game's own per-run tallies beside the engine's (processed, eligible, skipped, quarantined).
- * `retiredCounters` are tallies a game stopped keeping: optional, so older runs still validate.
  */
-export function engineTables<const N extends EngineTableNames, const C extends string, const R extends string = never>(names: N, runCounters: readonly C[], retiredCounters: readonly R[] = []) {
-  const counters = {
-    ...(Object.fromEntries(runCounters.map((name) => [name, v.number()])) as Record<C, ReturnType<typeof v.number>>),
-    ...(Object.fromEntries(retiredCounters.map((name) => [name, v.optional(v.number())])) as Record<R, ReturnType<typeof v.optional<ReturnType<typeof v.number>>>>),
-  }
+export function engineTables<const N extends EngineTableNames, const C extends string>(names: N, runCounters: readonly C[]) {
+  const counters = Object.fromEntries(runCounters.map((name) => [name, v.number()])) as Record<C, ReturnType<typeof v.number>>
   return {
     world: defineTable({
       key: v.literal('world'),

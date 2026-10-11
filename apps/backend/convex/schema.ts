@@ -8,7 +8,7 @@ import { accessId, anglerCounters, baitClass, logbookEntry, swLogDetail, swLogKi
 const deskCrawlerEngine = engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds'])
 
 /** Slow Cast's engine tables, prefixed `sw` so retention and deletion stay per game (slow-cast.md "Data"). */
-const slowCastEngine = engineTables(SLOW_CAST_TABLES, ['landed', 'released', 'gotAway'], ['levelUps'])
+const slowCastEngine = engineTables(SLOW_CAST_TABLES, ['landed', 'released', 'gotAway'])
 
 /**
  * Current-release schema only (data-model.md). Tables arrive with the work
@@ -214,16 +214,6 @@ export default defineSchema({
     simulationState: v.union(v.literal('healthy'), v.literal('quarantined')),
     quarantineReasonCode: v.optional(v.string()),
     achievementsVersion: v.optional(v.number()),
-    /**
-     * Retired 2026-10-10: Slow Cast has no XP or levels (titles and the logbook replace them). Nothing writes these;
-     * `slowCast/migrations:clearRetiredFields` unsets them, then they leave the schema.
-     */
-    level: v.optional(v.number()),
-    xp: v.optional(v.number()),
-    lifetimeXp: v.optional(v.number()),
-    lastLevelUpTick: v.optional(v.number()),
-    scoreHour: v.optional(v.number()),
-    scoreHourXp: v.optional(v.number()),
   })
     .index('by_userId_and_isActive', ['userId', 'isActive'])
     .index('by_createdAt', ['createdAt'])
@@ -289,7 +279,7 @@ export default defineSchema({
     kind: swLogKind,
     summary: v.string(),
     detail: swLogDetail,
-    deltas: v.object({ gold: v.number(), /** Older stories only (XP retired 2026-10-10). */ xpEarned: v.optional(v.number()) }),
+    deltas: v.object({ gold: v.number() }),
   })
     .index('by_anglerId_and_at_and_sequence', ['anglerId', 'at', 'sequence'])
     .index('by_at', ['at']),

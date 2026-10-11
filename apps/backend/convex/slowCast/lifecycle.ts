@@ -48,6 +48,6 @@ export async function activateAngler(ctx: MutationCtx, userId: Id<'users'>, now:
   const angler = await currentAngler(ctx, user)
   if (angler === null || angler.activationState === 'active') return
   const world = await getOrCreateEngineWorld(ctx, SLOW_CAST_RUNTIME)
-  await ctx.db.patch(angler._id, { activationState: 'active', activatedAt: now, eligibleFromTick: world.currentTick + 1, lastTick: world.currentTick, lastProgressTick: world.currentTick, lastLevelUpTick: world.currentTick })
+  await ctx.db.patch(angler._id, { activationState: 'active', activatedAt: now, eligibleFromTick: world.currentTick + 1, lastTick: world.currentTick, lastProgressTick: world.currentTick })
   if (user?.analyticsConsent === true) await ctx.scheduler.runAfter(0, internal.analytics.captureActivation, { userId, event: 'slow cast started', game: 'slow-cast' })
 }
