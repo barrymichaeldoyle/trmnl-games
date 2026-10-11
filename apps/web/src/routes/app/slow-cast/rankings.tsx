@@ -6,6 +6,7 @@ import { api } from '@trmnl-games/backend/api'
 import { preload } from '../../../lib/preload'
 import { formatWeight } from '../../../lib/slowCast'
 import { Card } from '../../../lib/ui'
+import { FishIcon } from './-art'
 import { FishName } from './-fish'
 import { LocalTime } from '../../../lib/localTime'
 
@@ -75,7 +76,7 @@ function RankingsPage() {
                     <span className={`truncate ${row.own ? 'font-semibold text-gold-ink' : ''}`}>
                       {row.profile ? <Link to="/profile/$alias" params={{ alias: row.name }} className="underline underline-offset-4">{row.name}</Link> : row.name}
                     </span>
-                    <span className="text-sm"><FishName id={row.speciesId} /></span>
+                    <span className="flex items-center gap-2 text-sm"><FishIcon id={row.speciesId} scale={2} /><FishName id={row.speciesId} /></span>
                   </span>
                   <span className="shrink-0 tabular-nums">{formatWeight(row.grams)}</span>
                 </li>

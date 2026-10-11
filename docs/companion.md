@@ -169,4 +169,4 @@ Confirmations (2026-10-09, at Barry's direction after an accidental swap): any c
 
 ## Slow Cast (D115)
 
-Slow Cast's companion lives at `/app/slow-cast` with five tabs: Dock, Cooler, Shop, Log and More ([spec](slow-cast.md#companion)). While the game is hidden its routes answer not-found for everyone but admins, and the shell shows the status to admins. Phone checks use the fixtures harness (`node tools/review/companion-fixtures.mjs`) with `?sc=` states.
+Slow Cast's companion lives at `/app/slow-cast` with five tabs: Dock, Cooler, Shop, Log and More ([spec](slow-cast.md#companion)). While the game is hidden its routes answer not-found for everyone but admins, and the shell shows the status to admins. Phone checks use the fixtures harness (`node tools/review/companion-fixtures.mjs`) with `?sc=` states. The Dock's scene, the fish and the flies are painted in colour from the device's 1-bit art (D120), as the hero page's scene is (D96).

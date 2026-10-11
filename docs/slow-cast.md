@@ -228,6 +228,8 @@ Angler poses: casting, waiting, reeling, holding a catch, paused (rod on the res
 
 Routes under `/app/slow-cast`: Dock, Cooler, Shop, Logbook, Rankings, Achievements; Settings and Account are shared. The game switcher on the shell lists both games. Empty, pending, paused, travelling, disconnected and error states follow [companion](companion.md). Mobile first at 390 wide. Help at `/help/slow-cast`, public game page at `/games/slow-cast`.
 
+The companion is in colour (D120, 2026-10-11). The Dock paints the device's own scene the way Desk Crawler's hero page does (D96): `composeScene` names each drawing's region on the canvas, `art/sceneColour.ts` tones every cell from that region and its grid character (ink, paper, or two shade tones on the device's checker) and the result is a stage-sized PNG data URI over sky and water bands chosen by time band, weather and water. The scene key comes from the preview's `scene_base`, so the held fish and the hat's fly match the device; before a device image exists the dock's own water, band, weather and status draw the same scene (a catch shows the angler waiting rather than holding nothing). The image sits at a whole-number scale, 2x on phones, 3x from 640px and 4x from 1024px, with the bands filling the rest. Fish in the cooler, logbook, rankings and the recap's heaviest row, and the flies in the box, are painted from `art/tones.ts`: one outline, paper and shade pair per species and per fly; an uncaught fish stays a grey silhouette and an uncollected fly a dimmed grey. `pnpm tsx tools/art/slowcastPainted.ts <out.png>` draws nine scenes, every fish and every fly for review.
+
 ## Staying on the TRMNL: the fly box
 
 The game cannot and does not enforce that the plugin stays on a playlist: activation needs one verified install (D09), removal preserves progress, penalties and urgency are ruled out by [product](product.md), and no render can prove a physical display. The lever is the one Desk Crawler already uses, [desk keepsakes](playlist-retention.md) (D46), with a fishing skin.
@@ -277,7 +279,7 @@ A separate marketplace plugin with its own OAuth client, listing image, knowledg
 
 ## Art
 
-1-bit, hand-authored like Desk Crawler: three water backdrops with the four sky bands and three weather overlays (rain, wind, fog); five angler poses; thirty fish sprites at two sizes (a small one for log lines and the cooler, a larger one for the logbook and the device catch moment); about fourteen gear icons; a cooler meter glyph. The art count is the largest single cost in the MVP and the reason launch content is capped at three waters.
+1-bit, hand-authored like Desk Crawler: three water backdrops with the four sky bands and three weather overlays (rain, wind, fog); five angler poses; thirty fish sprites at two sizes (a small one for log lines and the cooler, a larger one for the logbook and the device catch moment); about fourteen gear icons; a cooler meter glyph. The art count is the largest single cost in the MVP and the reason launch content is capped at three waters. The companion paints the same sprites in colour from `art/tones.ts` and `art/sceneColour.ts` (D120); the device never sees a colour.
 
 ## Work slices
 

@@ -206,6 +206,7 @@ const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('
 // Optimistic updates are not simulated: the stubbed mutation ignores them, so only local drafts show early.
 export const useMutation = () => useCallback(Object.assign(async () => settle(), { withOptimisticUpdate() { return this } }), []);
 export const useAction = () => useCallback(async () => settle(), []);
+export const useConvexAuth = () => ({ isLoading: false, isAuthenticated: true });
 export const usePaginatedQuery = (fn, args, { initialNumItems }) => { const [count, setCount] = useState(initialNumItems); const page = data.log.slice(0, count); return { results: page, status: page.length < data.log.length ? 'CanLoadMore' : 'Exhausted', loadMore: (n) => setCount((c) => c + n) } };
 export const getFunctionName = (fn) => String(fn);
 export class ConvexError extends Error { constructor(data) { super(typeof data === 'string' ? data : data?.message); this.data = data } }

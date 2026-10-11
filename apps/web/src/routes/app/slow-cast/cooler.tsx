@@ -3,13 +3,12 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
-import { fishSprite, FISH_SMALL } from '@trmnl-games/slow-cast/art/fish'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import { formatWeight, type Dock } from '../../../lib/slowCast'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
-import { SpriteIcon } from '../desk-crawler/-bagSlots'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
+import { FishIcon } from './-art'
 import { FishName } from './-fish'
 import { Rows } from './-rows'
 
@@ -55,7 +54,7 @@ function CoolerPage() {
               <li key={fish.id}>
                 <label className="flex min-h-12 cursor-pointer items-center gap-3 border-b border-rule py-2 last:border-b-0">
                   <input type="checkbox" className="pixel-check size-5 shrink-0" checked={chosen.has(fish.id)} onChange={() => toggle(fish.id)} />
-                  <SpriteIcon sprite={fishSprite(fish.speciesId, FISH_SMALL.width, FISH_SMALL.height)} scale={3} />
+                  <FishIcon id={fish.speciesId} />
                   {/* Name over weight: inline, a phone's narrow row split the weight across lines. */}
                   <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId}>{fish.name}</FishName>{' '}<span className="text-sm whitespace-nowrap text-muted">{formatWeight(fish.grams)}{fish.record ? <span className="text-gold-ink"> · personal best</span> : null}</span></span>
                   <span className="shrink-0 tabular-nums text-gold-ink">{fish.value} gold</span>

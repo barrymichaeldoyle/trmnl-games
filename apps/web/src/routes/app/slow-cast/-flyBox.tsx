@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { Button, Card } from '../../../lib/ui'
-import { SpriteIcon } from '../desk-crawler/-bagSlots'
+import { FlyIcon } from './-art'
 import { LocalTime } from '../../../lib/localTime'
 
 type Box = { totalCollected: number; claimedThisWeek: boolean; nextAvailableAt: number | null; connected: boolean; newest: string | null; box: Array<{ id: string; name: string; count: number; rows: string[] }> } | null
@@ -43,7 +43,7 @@ export function FlyBox({ notify }: { notify: Notify }) {
       <ul className="mt-4 grid grid-cols-3 gap-2 min-[400px]:grid-cols-4 sm:grid-cols-6" aria-label={`${box.totalCollected} flies collected`}>
         {box.box.map((fly) => (
           <li key={fly.id} className={`flex flex-col items-center gap-1 border p-2 text-center text-xs ${fly.count > 0 ? 'border-edge' : 'border-rule opacity-40'}`} title={fly.count > 0 ? fly.name : 'Not collected yet'}>
-            <SpriteIcon sprite={{ width: fly.rows[0]!.length, height: fly.rows.length, rows: fly.rows }} scale={4} />
+            <FlyIcon id={fly.id} rows={fly.rows} className={fly.count > 0 ? '' : 'grayscale'} />
             <span className="leading-tight [overflow-wrap:normal]">{fly.count > 0 ? fly.name : '?'}{fly.count > 1 ? ` ×${fly.count}` : ''}</span>
           </li>
         ))}

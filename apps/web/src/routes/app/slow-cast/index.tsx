@@ -2,10 +2,13 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
+import { poseFor, type SceneKey } from '@trmnl-games/slow-cast/art/scene'
+import { sceneKeyFromUrl } from '@trmnl-games/slow-cast/art/sceneColour'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/slowCast'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
+import { FishIcon, Scene } from './-art'
 import { FishName, FishText } from './-fish'
 import { Rows } from './-rows'
 import { LocalTime } from '../../../lib/localTime'
@@ -30,7 +33,8 @@ function DockPage() {
   if (!dock || !angler) return null
   const here = dock.waters?.find((w) => w.id === angler.waterId)
   const destination = angler.travelTo ? dock.waters?.find((w) => w.id === angler.travelTo) : null
-  const scene = typeof preview?.scene_base === 'string' && preview.scene_base ? `${preview.scene_base}/3.png` : null
+  // The scene the device shows, painted here in colour; without a device image yet, the dock's own water, weather and status draw the same scene.
+  const scene: SceneKey | null = (typeof preview?.scene_base === 'string' && preview.scene_base ? sceneKeyFromUrl(`${preview.scene_base}/3.png`) : null) ?? sceneFromDock(dock)
   // While travelling, bait choices are for the water the angler is heading to: the next cast is there.
   const baitWater = destination ?? here
   // Bait this water uses that the angler holds, plus the one in use even when it ran out.
@@ -61,7 +65,7 @@ function DockPage() {
           <h1 id="dock-title" className="font-display text-3xl font-bold">{angler.alias}</h1>
           <span className="label-px text-muted">{angler.title} · {angler.gold} gold</span>
         </div>
-        {scene ? <img src={scene} alt={`${angler.alias} fishing at ${here?.name ?? 'the water'}`} width={456} height={120} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
+        {scene ? <Scene sceneKey={scene} alt={`${angler.alias} fishing at ${here?.name ?? 'the water'}`} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
         <div className="flex flex-col gap-1">
           <p className="text-lg font-semibold">
@@ -89,7 +93,7 @@ function DockPage() {
         <Card title="Last 12 hours">
           <Rows rows={[
             ['Landed', `${recap.landed} fish${recap.released ? ` (${recap.released} released, cooler full)` : ''}`],
-            recap.best ? ['Heaviest', <>{formatWeight(recap.best.grams)} <FishName id={recap.best.speciesId} /></>] : null,
+            recap.best ? ['Heaviest', <span className="inline-flex flex-wrap items-center gap-2"><FishIcon id={recap.best.speciesId} scale={2} /><span>{formatWeight(recap.best.grams)} <FishName id={recap.best.speciesId} /></span></span>] : null,
             recap.records ? ['Personal bests', `${recap.records}`] : null,
             recap.firsts ? ['New species', `${recap.firsts}`] : null,
             recap.gotAway ? ['Got away', `${recap.gotAway}, too heavy for the ${angler.rod.name}`] : null,
@@ -162,6 +166,16 @@ function DockPage() {
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>
   )
+}
+
+/** The scene from the dock alone: the water the angler fishes or heads to, its band and weather, and the pose the latest story calls for. */
+function sceneFromDock(dock: Dock): SceneKey | null {
+  const angler = dock.angler
+  const water = dock.waters?.find((w) => w.id === (angler?.travelTo ?? angler?.waterId))
+  if (!angler || !water) return null
+  const pose = poseFor(angler.status === 'paused' ? 'paused' : angler.travelTo ? 'travelling' : 'fishing', dock.logs?.[0]?.kind ?? null)
+  // The dock does not say which fish was held, so a catch shows the angler waiting rather than holding nothing.
+  return { water: water.id as SceneKey['water'], band: water.band as SceneKey['band'], weather: water.weather as SceneKey['weather'], pose: pose === 'holding' ? 'waiting' : pose, fish: null, fly: null }
 }
 
 /**

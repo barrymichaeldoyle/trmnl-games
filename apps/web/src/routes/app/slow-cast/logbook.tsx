@@ -8,6 +8,7 @@ import { useAnalyticsView } from '../../../lib/analyticsProvider'
 import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight } from '../../../lib/slowCast'
 import { Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { Gem, SpriteIcon } from '../desk-crawler/-bagSlots'
+import { FishIcon } from './-art'
 import { FlyBox } from './-flyBox'
 import { FishName } from './-fish'
 
@@ -54,7 +55,7 @@ function LogbookPage() {
           <ul className="grid gap-3 sm:grid-cols-2">
             {species.map((s) => (
               <li key={s.id} className="flex items-start gap-3 border border-rule p-3">
-                <SpriteIcon sprite={s.seen ? fishSprite(s.id, FISH_LARGE.width, FISH_LARGE.height) : silhouette(s.id)} scale={2} className={s.seen ? '' : 'opacity-60'} />
+                {s.seen ? <FishIcon id={s.id} size="large" scale={2} /> : <SpriteIcon sprite={silhouette(s.id)} scale={2} className="opacity-60" />}
                 <div className="min-w-0">
                   <p className="flex items-center gap-2 font-semibold"><Gem rarity={s.rarity} scale={2} />{s.seen ? <FishName id={s.id}>{s.name}</FishName> : 'Not caught yet'}</p>
                   {s.seen ? (

@@ -17,6 +17,9 @@ export const SMALL_SCALE = 2
 export const LARGE_SCALE = 6
 export const MEDIUM_SCALE = 3
 const HORIZON = 21
+/** The top row of the near ground: the pier's deck and the grass bank. */
+const DECK = 30
+const BANK = 31
 
 const sun = sprite(`
    #
@@ -127,19 +130,27 @@ const rest = sprite(`
   #
 `)
 
+/** Each drawing names its region on the canvas (`Canvas.region`) so the companion's painted scene (sceneColour.ts) can tone it; the 1-bit image ignores the names. */
 function sky(c: Canvas, band: TimeBand, weather: Weather): void {
   const covered = weather === 'overcast' || weather === 'rain' || weather === 'fog'
   if (band === 'night') {
+    c.region = 'star'
     if (!covered) for (const [x, y] of [[12, 3], [40, 8], [70, 2], [98, 6], [118, 11], [140, 4]] as const) c.draw(star, x, y)
+    c.region = 'moon'
     if (weather !== 'overcast' && weather !== 'rain') c.draw(moon, 128, 3)
   } else if (band === 'day') {
+    c.region = 'sun'
     if (!covered) c.draw(sun, 128, 2)
+    c.region = 'cloud'
     c.draw(cloud, 30, 4)
   } else {
     // Dawn rises on the right, dusk sets on the left: the low sun sits on the horizon.
+    c.region = 'sun'
     if (!covered) c.draw(lowSun, band === 'dawn' ? 138 : 2, HORIZON - 5)
+    c.region = 'dusk'
     if (band === 'dusk') c.rect(0, 0, STAGE_WIDTH, 3, '.')
   }
+  c.region = 'cloud'
   if (covered) {
     c.draw(bigCloud, 10, 2)
     c.draw(bigCloud, 62, 0)
@@ -147,28 +158,38 @@ function sky(c: Canvas, band: TimeBand, weather: Weather): void {
   }
   if (weather === 'wind') {
     c.draw(cloud, 92, 9)
+    c.region = 'wind'
     for (const [x, y] of [[20, 9], [48, 14], [84, 5], [110, 15], [136, 10]] as const) c.hline(x, x + 7, y, '#')
   }
 }
 
 function backdrop(c: Canvas, water: WaterId): void {
+  c.region = 'horizon'
   c.hline(0, STAGE_WIDTH - 1, HORIZON, '#')
   if (water === 'millpond') {
+    c.region = 'mill'
     c.draw(mill, 110, HORIZON - 8)
+    c.region = 'reeds'
     c.draw(reeds, 62, HORIZON - 4)
     c.draw(reeds, 88, HORIZON - 4)
   } else if (water === 'river_bend') {
+    c.region = 'willow'
     c.draw(willow, 70, HORIZON - 8)
     c.draw(willow, 118, HORIZON - 8)
     // The far bank's edge sits just above the river.
+    c.region = 'far_bank'
     c.hline(60, STAGE_WIDTH - 1, HORIZON - 1, ':')
   } else {
+    c.region = 'lighthouse'
     c.draw(lighthouse, 136, HORIZON - 8)
+    c.region = 'boat'
     c.draw(boat, 96, HORIZON - 7)
+    c.region = 'gull'
     c.draw(gull, 70, 8)
     c.draw(gull, 82, 12)
   }
   // Water: ripples, wider apart toward the viewer.
+  c.region = 'ripple'
   for (let y = HORIZON + 2, row = 0; y < STAGE_HEIGHT; y += 3 + Math.floor(row / 2), row += 1) {
     const gap = 9 + row * 3
     for (let x = (row * 5) % gap; x < STAGE_WIDTH; x += gap) c.hline(x, x + (water === 'harbour_pier' ? 3 : 2), y, water === 'harbour_pier' && row % 2 ? '#' : ':')
@@ -178,13 +199,15 @@ function backdrop(c: Canvas, water: WaterId): void {
 /** Near ground for the angler: a grass bank on fresh water, wooden planks on the pier. Returns the ground's top row. */
 function nearGround(c: Canvas, water: WaterId): number {
   if (water === 'harbour_pier') {
-    const deck = 30
+    c.region = 'deck'
+    const deck = DECK
     c.rect(0, deck, 58, 2, '#')
     c.rect(0, deck + 2, 58, 1, '=')
     for (const x of [4, 22, 40, 56]) c.rect(x, deck + 3, 2, STAGE_HEIGHT - deck - 3, '#')
     return deck
   }
-  const bank = 31
+  c.region = 'grass'
+  const bank = BANK
   c.rect(0, bank, 46, STAGE_HEIGHT - bank, 'w')
   c.hline(0, 40, bank, '#')
   for (let x = 40; x <= 46; x += 1) c.paint(x, bank + (x - 40), '#')
@@ -197,7 +220,9 @@ function nearGround(c: Canvas, water: WaterId): number {
 }
 
 function weatherOver(c: Canvas, weather: Weather): void {
+  c.region = 'rain'
   if (weather === 'rain') for (let y = 1; y < STAGE_HEIGHT; y += 4) for (let x = (y * 3) % 7; x < STAGE_WIDTH; x += 7) c.paint(x, y, '#')
+  c.region = 'fog'
   if (weather === 'fog') {
     for (let y = HORIZON - 6; y <= HORIZON + 6; y += 1) for (let x = 0; x < STAGE_WIDTH; x += 1) if ((x + y * 3) % 5 === 0 && c.ink[y * STAGE_WIDTH + x]) c.set(x, y, false)
     for (let y = HORIZON - 4; y <= HORIZON + 4; y += 2) for (let x = (y % 4) * 2; x < STAGE_WIDTH; x += 8) c.set(x, y, true)
@@ -246,15 +271,23 @@ export interface SceneKey {
   readonly fly?: string | null
 }
 
-export function composeScene(key: SceneKey): Canvas {
-  const c = new Canvas(STAGE_WIDTH, STAGE_HEIGHT)
+/** Where the angler stands on the stage for a key: the sprite's top-left and its pose. */
+export function anglerPlacement(key: SceneKey): { sprite: Sprite; left: number; top: number } {
+  const sprite = anglerPoses[key.pose]
+  const ground = key.water === 'harbour_pier' ? DECK : BANK
+  return { sprite, left: key.water === 'harbour_pier' ? 26 : 18, top: ground - sprite.height }
+}
+
+/** Compose the scene onto a fresh canvas, or onto one passed in (the companion's painted canvas notes each region). */
+export function composeScene(key: SceneKey, c: Canvas = new Canvas(STAGE_WIDTH, STAGE_HEIGHT)): Canvas {
   sky(c, key.band, key.weather)
   backdrop(c, key.water)
   const ground = nearGround(c, key.water)
   const angler = anglerPoses[key.pose]
-  const ax = key.water === 'harbour_pier' ? 26 : 18
-  const ay = ground - angler.height
+  const { left: ax, top: ay } = anglerPlacement(key)
+  c.region = 'angler'
   drawSolid(c, angler, ax, ay)
+  c.region = 'fly'
   if (key.fly) {
     // A fly is three pixels on the hat band, with a tail: small, but it is the reward drawn where it was earned.
     const hatRow = angler.rows.findIndex((row) => row.includes('########'))
@@ -271,19 +304,27 @@ export function composeScene(key: SceneKey): Canvas {
   const floatY = HORIZON + 7
   switch (key.pose) {
     case 'waiting':
+      c.region = 'rod'
       rod(c, handX, handY, handX + 26, handY - 12, -2)
+      c.region = 'line'
       line(c, handX + 26, handY - 12, floatX + 1, floatY)
+      c.region = 'float'
       c.draw(float, floatX, floatY)
       break
     case 'casting':
+      c.region = 'rod'
       rod(c, handX, handY, handX - 8, handY - 2 - 0, 0)
       rod(c, handX, handY, handX + 4, 0, -3)
+      c.region = 'line'
       line(c, handX + 4, 0, floatX + 10, 4)
       break
     case 'reeling':
+      c.region = 'rod'
       rod(c, handX, handY, handX + 24, handY - 4, -6)
+      c.region = 'line'
       line(c, handX + 24, handY - 4, floatX - 6, floatY + 2, false)
       // The splash where the fish fights.
+      c.region = 'splash'
       for (const [dx, dy] of [[-2, -1], [2, -1], [0, -2], [-3, 1], [3, 1]] as const) c.set(floatX - 6 + dx, floatY + 2 + dy, true)
       break
     case 'holding': {
@@ -291,16 +332,21 @@ export function composeScene(key: SceneKey): Canvas {
         const fish = fishSprite(key.fish, FISH_LARGE.width, FISH_LARGE.height)
         const fx = handX + 1
         const fy = handY - Math.floor(fish.height / 2)
+        c.region = `fish:${key.fish}`
         drawSolid(c, fish, fx, fy)
       }
       break
     }
     case 'paused': {
       const restX = ax + 20
+      c.region = 'rest'
       c.draw(rest, restX, ground - 6)
+      c.region = 'rod'
       rod(c, restX + 2, ground - 4, restX + 30, ground - 16, -2)
       rod(c, restX + 2, ground - 4, restX - 6, ground - 1, 0)
+      c.region = 'line'
       line(c, restX + 30, ground - 16, floatX + 1, floatY)
+      c.region = 'float'
       c.draw(float, floatX, floatY)
       break
     }
@@ -318,4 +364,5 @@ export function poseFor(status: 'fishing' | 'paused' | 'travelling' | 'pending' 
   return 'waiting'
 }
 
+export { HORIZON }
 export type { AnglerPose, Sprite }
