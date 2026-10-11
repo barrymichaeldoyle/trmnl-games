@@ -121,6 +121,8 @@ Persistent fight design must define saved monster state, damage/reward idempoten
 
 Re-measure pacing before this release: D61 moves the level-8 date for weekly managers from day 11 to day 17, so the "best-in-slot at days 35–45" assumption behind P27 needs a fresh harness run.
 
+Gold is the strongest reason to pull this release forward. Under content v10 (D122) the bag and pouch ladders cost about 4,000 gold in all, which a daily manager has spent by its second week; it then holds a median 16,000 gold at day 30 and 57,000 at day 90 with nothing to buy but merchant potions ([gold-only ladders](evidence/gold-only-ladders.md), [balance](evidence/balance.md)). Salvage, upgrades and bigger bags are the designed sinks; until they ship, gold is a week-one currency. Do not add a stopgap sink that touches power (a paid revive, bought stats) or that would make finds matter less (bought gear).
+
 Gate: no repeatable boss rewards, no blocked fights after deployments, progression remains viable for existing high-level heroes, content compatible with retained items/logs. Compare retention by account age/level as a diagnostic rather than assert a predetermined percentage.
 
 ## v2.1 — Guilds (was Month 5)

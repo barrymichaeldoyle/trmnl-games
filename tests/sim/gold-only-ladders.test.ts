@@ -140,7 +140,10 @@ describe('gold-only ladders (D122, content v10)', () => {
         const stamp = (r: SimulationResult) => r.itemChanges.map((change) => (change.type === 'create' ? { ...change, item: { ...change.item, contentVersion: 'x' } } : change))
         expect(stamp(next)).toEqual(stamp(old))
         expect(next.nextHero).toEqual(old.nextHero)
-        expect(next.event?.summary).toBe(old.event?.summary)
+        // v10 adds full-health rest lines, so that one story may read differently; everything it reports is the same.
+        const quietRest = next.event?.kind === 'rest' && next.event.deltas.hp === 0
+        if (quietRest) expect(v10.narrative.shared.restFull).toContain(next.event?.summary)
+        else expect(next.event?.summary).toBe(old.event?.summary)
         expect(next.event?.deltas).toEqual(old.event?.deltas)
         expect({ ...next.event?.detail, contentVersion: 'x' }).toEqual(old.event === undefined ? { contentVersion: 'x' } : { ...old.event.detail, contentVersion: 'x' })
       }

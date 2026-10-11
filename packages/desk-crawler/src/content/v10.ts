@@ -45,4 +45,22 @@ export const contentV10: ContentCatalog = {
     findPermille: 0,
   },
   merchant: { ...contentV9.merchant!, ladderDiscountPct: 25 },
+  // A rest at full health is about one Office story in seven, so it gets more to say. Narrative draws its own
+  // stream, so the extra lines change which words appear and nothing else.
+  narrative: {
+    ...contentV9.narrative,
+    shared: {
+      ...contentV9.narrative.shared,
+      restFull: [
+        ...contentV9.narrative.shared.restFull,
+        'Watered the desk plant. Nothing needed healing.',
+        'Sat through a stand-up that could have been an email.',
+        'Tidied the cable drawer, just because.',
+        'Found the good chair and kept it for ten minutes.',
+        'Read the fridge notes twice. Still at full health.',
+        'Reheated lunch and ate it at the desk.',
+        'Straightened the mouse mat. Everything in order.',
+      ],
+    },
+  },
 }
