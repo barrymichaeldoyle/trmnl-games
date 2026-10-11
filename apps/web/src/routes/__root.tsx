@@ -6,13 +6,14 @@ import { HeadContent, Link, Outlet, Scripts, createRootRouteWithContext, useRout
 import { createServerFn } from '@tanstack/react-start'
 import type { ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { SiteLinks } from '../lib/prose'
 import { OG_VERSION, SITE_NAME, SITE_ORIGIN, seo } from '../lib/seo'
 import appCss from '../styles.css?url'
 import { NetworkProvider } from '../lib/network'
 import { AnalyticsProvider } from '../lib/analyticsProvider'
 import { useDeployWatch } from '../lib/deployWatch'
+import { queriesHeldForAuth } from '../lib/authHold'
 
 /** Server-only: read the Clerk session and mint a Convex token from the "convex" JWT template. */
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -86,10 +87,23 @@ function RootComponent() {
   return (
     <ClerkProvider>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
+        <ReleaseSignedOutQueries client={context.convexClient} />
         <NetworkProvider><Outlet /><AnalyticsProvider /></NetworkProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
   )
+}
+
+/**
+ * The router holds Convex queries for a browser whose Clerk cookie says signed in. If Clerk loads signed out (an
+ * expired session), no token ever comes: an empty token fetch releases the held queries to run signed out.
+ */
+function ReleaseSignedOutQueries({ client }: { client: ConvexReactClient }) {
+  const { isLoaded, isSignedIn } = useAuth()
+  useEffect(() => {
+    if (isLoaded && !isSignedIn && queriesHeldForAuth()) client.setAuth(async () => null, () => {})
+  }, [client, isLoaded, isSignedIn])
+  return null
 }
 
 function RootDocument({ children }: { children: ReactNode }) {

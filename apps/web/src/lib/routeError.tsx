@@ -2,15 +2,18 @@ import { Link, useRouter, type ErrorComponentProps } from '@tanstack/react-route
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui'
 import { reportError } from './errorReporting'
+import { reloadingForNewBuild } from './staleChunks'
 
 export function RouteError({ reset, error }: ErrorComponentProps) {
   const router = useRouter()
   const [retrying, setRetrying] = useState(false)
   const [retryFailed, setRetryFailed] = useState(false)
-  useEffect(() => { reportError(error, 'route') }, [error])
+  useEffect(() => { if (!reloadingForNewBuild()) reportError(error, 'route') }, [error])
   // Inside a shell the error sits in its <main>; at the top level it is the page, so it takes the skip link's target.
   const section = useRef<HTMLElement>(null)
   useEffect(() => { if (section.current && !document.getElementById('main')) section.current.id = 'main' }, [])
+  // A stale chunk is reloading the page onto the new build: show nothing rather than an error for that moment.
+  if (reloadingForNewBuild()) return null
   return <section ref={section} aria-labelledby="page-error-title" className="mx-auto flex w-full max-w-3xl flex-col gap-4 px-4 py-10">
     <h1 id="page-error-title" className="font-display text-3xl font-bold">We couldn’t load this page</h1>
     <p role="alert">{retryFailed ? 'Still not loading. Try again, or get help below.' : 'Check your connection and try again.'}</p>

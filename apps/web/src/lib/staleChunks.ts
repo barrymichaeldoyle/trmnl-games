@@ -1,0 +1,29 @@
+let reloading = false
+
+/** True once a stale-chunk reload is under way: the failed import that triggered it is not a real page error. */
+export const reloadingForNewBuild = () => reloading
+
+/**
+ * A deploy replaces the hashed asset files, so a tab opened before it fails to
+ * load the next route's chunk and the click silently does nothing. Vite reports
+ * that as `vite:preloadError`; one full reload picks up the new build.
+ * Cancelling the event makes Vite resolve the import to undefined, so the router
+ * still raises an error before the reload lands: callers check reloadingForNewBuild().
+ */
+export function recoverFromStaleChunks() {
+  const KEY = 'trmnl-games.chunk-reload'
+  window.addEventListener('vite:preloadError', (event) => {
+    // At most one automatic reload a minute, so a genuinely broken chunk cannot loop.
+    let recently = false
+    try {
+      recently = Date.now() - Number(window.sessionStorage.getItem(KEY) ?? 0) < 60_000
+      if (!recently) window.sessionStorage.setItem(KEY, String(Date.now()))
+    } catch {
+      // Storage unavailable: a single reload is still the best recovery.
+    }
+    if (recently) return
+    event.preventDefault()
+    reloading = true
+    window.location.reload()
+  })
+}
