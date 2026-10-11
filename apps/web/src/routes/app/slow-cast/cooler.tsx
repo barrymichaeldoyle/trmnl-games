@@ -37,13 +37,13 @@ function CoolerPage() {
   })
   const sellRows = async (rows: typeof catches) => {
     if (rows.length === 0) return
-    if (await sell.run({ catchIds: rows.map((r) => r.id) }, `Sold ${rows.length} fish for ${total(rows)} gold.`)) setChosen(new Set())
+    if (await sell.run({ catchIds: rows.map((r) => r.id) }, `Sold ${rows.length} fish for ${total(rows)} coins.`)) setChosen(new Set())
   }
   return (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Cooler</h1>
-        <span className="label-px text-muted">{dock.angler.cooler.name} · {catches.length}/{dock.angler.cooler.capacity} · {dock.angler.gold} gold</span>
+        <span className="label-px text-muted">{dock.angler.cooler.name} · {catches.length}/{dock.angler.cooler.capacity} · {dock.angler.gold} coins</span>
       </div>
       {catches.length === 0 ? (
         <Card><p>The cooler is empty. Fish land here as the angler catches them.</p></Card>
@@ -64,17 +64,17 @@ function CoolerPage() {
           </ul>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button disabled={picked.length === 0} pending={sell.pending} busyLabel="Selling…" onClick={() => void sellRows(picked)}>
-              {picked.length === 0 ? 'Choose fish to sell' : `Sell ${picked.length} for ${total(picked)} gold`}
+              {picked.length === 0 ? 'Choose fish to sell' : `Sell ${picked.length} for ${total(picked)} coins`}
             </Button>
-            <Button variant="secondary" disabled={sell.pending} onClick={() => setAskingAll(true)}>Sell all for {total(catches)} gold</Button>
+            <Button variant="secondary" disabled={sell.pending} onClick={() => setAskingAll(true)}>Sell all for {total(catches)} coins</Button>
           </div>
-          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to double'], ['Cooler full', 'New catches are released. They still give XP, but no gold']]} />
+          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to double'], ['Cooler full', 'New catches are released. They still give XP, but no coins']]} />
         </Card>
       )}
       <ConfirmSheet
         open={askingAll}
         title={`Sell all ${catches.length} fish?`}
-        confirmLabel={`Sell for ${total(catches)} gold`}
+        confirmLabel={`Sell for ${total(catches)} coins`}
         busyLabel="Selling…"
         cancelLabel="Cancel"
         pending={sell.pending}
@@ -85,7 +85,7 @@ function CoolerPage() {
           setAskingAll(false)
         }}
       >
-        <p>Every fish in the {dock.angler.cooler.name.toLowerCase()} goes, and you get {total(catches)} gold. Your logbook keeps every personal best, even once the fish is sold.</p>
+        <p>Every fish in the {dock.angler.cooler.name.toLowerCase()} goes, and you get {total(catches)} coins. Your logbook keeps every personal best, even once the fish is sold.</p>
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>

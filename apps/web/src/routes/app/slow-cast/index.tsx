@@ -63,7 +63,7 @@ function DockPage() {
       <section aria-labelledby="dock-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 id="dock-title" className="font-display text-3xl font-bold">{angler.alias}</h1>
-          <span className="label-px text-muted">{angler.title} · {angler.gold} gold</span>
+          <span className="label-px text-muted">{angler.title} · {angler.gold} coins</span>
         </div>
         {scene ? <Scene sceneKey={scene} alt={`${angler.alias} fishing at ${here?.name ?? 'the water'}`} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
@@ -79,7 +79,7 @@ function DockPage() {
           <Meter label={angler.cooler.name} value={angler.cooler.used} max={angler.cooler.capacity} tone="gold" />
         </div>
         {!coolerFull && catches.length > 0 ? (
-          <p className="text-sm"><Link to="/app/slow-cast/cooler" className="underline underline-offset-4">Sell {catches.length} fish for {coolerValue} gold</Link></p>
+          <p className="text-sm"><Link to="/app/slow-cast/cooler" className="underline underline-offset-4">Sell {catches.length} fish for {coolerValue} coins</Link></p>
         ) : null}
         {goal ? <p className="text-sm"><span className="text-muted">Next goal</span> · <Link to="/app/slow-cast/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
         {coolerFull ? (
@@ -99,7 +99,7 @@ function DockPage() {
             recap.gotAway ? ['Got away', `${recap.gotAway}, too heavy for the ${angler.rod.name}`] : null,
           ]} />
           {nextRod && rodWouldLand > 0 ? (
-            <p className="mt-3 text-sm">The {nextRod.name} would have landed {rodWouldLand === recap.gotAway ? (rodWouldLand === 1 ? 'it' : 'all of them') : `${rodWouldLand} of them`}. <Link to="/app/slow-cast/shop" className="underline underline-offset-4">{nextRod.price} gold in the shop</Link>.</p>
+            <p className="mt-3 text-sm">The {nextRod.name} would have landed {rodWouldLand === recap.gotAway ? (rodWouldLand === 1 ? 'it' : 'all of them') : `${rodWouldLand} of them`}. <Link to="/app/slow-cast/shop" className="underline underline-offset-4">{nextRod.price} coins in the shop</Link>.</p>
           ) : null}
         </Card>
       ) : null}
@@ -185,7 +185,7 @@ function sceneFromDock(dock: Dock): SceneKey | null {
 function nextGoal(dock: Dock): string | null {
   const angler = dock.angler!
   const gold = angler.gold
-  const afford = (price: number) => (gold >= price ? `${price} gold (you have it)` : `${price - gold} gold to go`)
+  const afford = (price: number) => (gold >= price ? `${price} coins (you have it)` : `${price - gold} coins to go`)
   const locked = dock.waters?.find((w) => !w.open)
   if (locked) {
     const pass = dock.shop?.access.find((a) => a.water === locked.id && !a.owned)

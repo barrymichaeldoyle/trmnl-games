@@ -38,7 +38,7 @@ function ShopPage() {
   if (!dock || !angler || !dock.shop) return null
   const gold = angler.gold
   const buying = rod.pending || cooler.pending || access.pending || bait.pending
-  const short = (price: number) => (gold < price ? <span className="text-sm text-muted">{price - gold} gold short</span> : null)
+  const short = (price: number) => (gold < price ? <span className="text-sm text-muted">{price - gold} coins short</span> : null)
   const gateOf = (water: string) => dock.waters?.find((w) => w.id === water)?.opensAfter ?? null
   const nextRod = dock.shop.rod
   const nextCooler = dock.shop.cooler
@@ -59,7 +59,7 @@ function ShopPage() {
           ['Waters', waters.join(', ')],
           ...(catches.only.ids.length + catches.only.unseen > 0 ? [['Only bait for', <FishList {...catches.only} />] as const] : []),
           ...(catches.also.ids.length + catches.also.unseen > 0 ? [['Also catches', <FishList {...catches.also} />] as const] : []),
-          ['Tub', `${b.tubSize} for ${b.price} gold`],
+          ['Tub', `${b.tubSize} for ${b.price} coins`],
         ]} />
         <div className="flex flex-wrap gap-2">
           {[1, 3].filter((n) => n <= b.tubsThatFit).map((n) => (
@@ -76,7 +76,7 @@ function ShopPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Tackle shop</h1>
-        <span className="label-px text-gold-ink">{gold} gold</span>
+        <span className="label-px text-gold-ink">{gold} coins</span>
       </div>
 
       <Card title="Rod">
@@ -89,7 +89,7 @@ function ShopPage() {
           <>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <Button disabled={gold < nextRod.price || buying} onClick={() => setOffer({ title: `Buy the ${nextRod.name}?`, price: nextRod.price, rows: [['Replaces', `the ${angler.rod.name}`], ['Lands up to', `${formatWeight(nextRod.limitGrams)} (now ${formatWeight(angler.rod.limitGrams)})`], ['Bite chance', `+${nextRod.biteBonusPercent}% over the Cane Rod`]], buy: () => rod.run({}, `Bought the ${nextRod.name}.`) })}>
-                Buy for {nextRod.price} gold
+                Buy for {nextRod.price} coins
               </Button>
               {short(nextRod.price)}
             </div>
@@ -102,12 +102,12 @@ function ShopPage() {
           ['Yours', <><strong>{angler.cooler.name}</strong>, holds {angler.cooler.capacity} fish</>],
           nextCooler ? ['Next', <><strong>{nextCooler.name}</strong>, holds {nextCooler.capacity} fish</>] : null,
         ]} />
-        <p className="mt-2 text-sm text-muted">When the cooler is full, new catches are released and earn no gold.</p>
+        <p className="mt-2 text-sm text-muted">When the cooler is full, new catches are released and earn no coins.</p>
         {nextCooler ? (
           <>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <Button disabled={gold < nextCooler.price || buying} onClick={() => setOffer({ title: `Buy the ${nextCooler.name}?`, price: nextCooler.price, rows: [['Replaces', `the ${angler.cooler.name}`], ['Holds', `${nextCooler.capacity} fish (now ${angler.cooler.capacity})`], ['Your catch', 'Moves into the new cooler']], buy: () => cooler.run({}, `Bought the ${nextCooler.name}.`) })}>
-                Buy for {nextCooler.price} gold
+                Buy for {nextCooler.price} coins
               </Button>
               {short(nextCooler.price)}
             </div>
@@ -129,7 +129,7 @@ function ShopPage() {
                 </div>
                 {item.owned ? <span className="label-px text-xp-ink">Owned</span> : (
                   <Button variant="secondary" disabled={gold < item.price || buying} onClick={() => setOffer({ title: `Buy the ${item.name}?`, price: item.price, rows: [['Opens', water[0]!.toUpperCase() + water.slice(1)], ['Fish there', gate && missing > 0 ? `After ${missing} more ${gate.waterName} species` : 'Straight away']], buy: () => access.run({ access: item.id }, `Bought the ${item.name}.`) })}>
-                    Buy for {item.price} gold
+                    Buy for {item.price} coins
                   </Button>
                 )}
               </li>
@@ -151,7 +151,7 @@ function ShopPage() {
       <ConfirmSheet
         open={offer !== null}
         title={offer?.title ?? ''}
-        confirmLabel={offer ? `Buy for ${offer.price} gold` : 'Buy'}
+        confirmLabel={offer ? `Buy for ${offer.price} coins` : 'Buy'}
         busyLabel="Buying…"
         cancelLabel="Cancel"
         pending={buying}
@@ -162,7 +162,7 @@ function ShopPage() {
           setOffer(null)
         }}
       >
-        {offer ? <Rows rows={[...offer.rows, ['Cost', `${offer.price} gold`], ['Gold left', `${gold - offer.price}`]]} /> : null}
+        {offer ? <Rows rows={[...offer.rows, ['Cost', `${offer.price} coins`], ['Coins left', `${gold - offer.price}`]]} /> : null}
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>

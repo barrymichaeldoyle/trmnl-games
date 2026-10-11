@@ -42,7 +42,7 @@ export const Route = createFileRoute('/help/slow-cast')({
       <h2 id="bait">Bait</h2>
       <p>Each water takes its own baits, and the bait decides which fish can bite; the Shop says which fish take each one. Choose the bait to fish with on the Dock page. Each fish you keep, or that gets away, uses one bait. A cast with no bite uses none, and neither does a fish released from a full cooler. With no bait for the water the angler fishes a bare hook, which gets fewer bites and only small fish. Buy bait in tubs in the Shop, up to 72 of each; bait never spoils.</p>
       <h2 id="the-cooler">The cooler</h2>
-      <p>Fish go in the cooler until you sell them. When it is full the angler keeps fishing and releases what it catches. Released fish still go in the logbook, count for achievements and can top the boards, but earn no gold. Your TRMNL says when the cooler is full, and its QR code opens the cooler. A bigger cooler means fewer released fish between visits. Nothing is ever sold for you.</p>
+      <p>Fish go in the cooler until you sell them. When it is full the angler keeps fishing and releases what it catches. Released fish still go in the logbook, count for achievements and can top the boards, but earn no coins. Your TRMNL says when the cooler is full, and its QR code opens the cooler. A bigger cooler means fewer released fish between visits. Nothing is ever sold for you.</p>
       <h2 id="rods-and-fish-that-get-away">Rods and fish that get away</h2>
       <p>Each rod lands fish up to a weight. A heavier fish breaks free, and the story says something heavy got away. A better rod would have landed it. Better rods also get a few more bites.</p>
       <h2 id="waters">Waters</h2>

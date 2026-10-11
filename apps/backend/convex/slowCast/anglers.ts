@@ -39,7 +39,7 @@ async function playableAngler(ctx: QueryCtx, user: Doc<'users'>): Promise<Doc<'a
 }
 
 const REFUSAL: Record<string, string> = {
-  NOT_ENOUGH_GOLD: 'Not enough gold yet.',
+  NOT_ENOUGH_GOLD: 'Not enough coins yet.',
   MAX_TIER: 'You already have the best one.',
   ALREADY_OWNED: 'You already have that.',
   BAIT_FULL: 'That would hold more bait than the tub allows.',
@@ -136,9 +136,9 @@ export const sellCatches = mutation({
         const next = sell(toAnglerState(angler), rows.map((r) => r.value))
         for (const row of rows) await ctx.db.delete(row._id)
         const earned = next.gold - angler.gold
-        const sequence = await commandLog(ctx, angler, 'slowCast.sell', `Sold ${rows.length} fish for ${earned} gold.`, earned)
+        const sequence = await commandLog(ctx, angler, 'slowCast.sell', `Sold ${rows.length} fish for ${earned} coins.`, earned)
         await ctx.db.patch(angler._id, { gold: next.gold, counters: next.counters, logSequence: sequence })
-        // Sales and gold earned are achievement families.
+        // Sales and coins earned are achievement families.
         const { world, content } = await worldContentOf(ctx)
         await awardAfterAnglerIntent(ctx, angler, content, world?.currentTick ?? 0)
         return { changed: true, gold: next.gold, count: rows.length }

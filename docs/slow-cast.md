@@ -27,7 +27,7 @@ No streaks, no daily login, no expiring bait, no spoiling fish, no line breaks t
 | --- | --- |
 | Name | The account's public alias; an angler has no separate name |
 | Level / XP | 1 / 0; lifetime XP kept separately |
-| Gold | 0 |
+| Coins (the `gold` field) | 0 |
 | Water | `millpond` |
 | Status | `fishing` |
 | Rod | Cane Rod (lands up to 1.5 kg) |
@@ -77,8 +77,8 @@ Time multipliers: dawn 1.3, day 1.0, dusk 1.3, night 0.8 freshwater and 1.0 at t
 | Water | Unlock | Base bite | Baits used |
 | --- | --- | --- | --- |
 | Millpond | start | 13% | worms, bread, spinner |
-| River Bend | level 4 and Waders (250 gold) | 14% | worms, maggots, spinner |
-| Harbour Pier | level 8 and Pier Permit (900 gold) | 12% | ragworm, mackerel strip, spinner |
+| River Bend | level 4 and Waders (250 coins) | 14% | worms, maggots, spinner |
+| Harbour Pier | level 8 and Pier Permit (900 coins) | 12% | ragworm, mackerel strip, spinner |
 
 Millpond: calm freshwater commons, carp at dawn and dusk, eels at night. River Bend: trout, grayling and chub; predators on the spinner; salmon at dawn and dusk in the rain. Harbour Pier: sea fish, bigger and worth more; most need the Carbon Rod or better.
 
@@ -160,7 +160,7 @@ Each bait holds at most 72 fish, bought in whole tubs, so nobody stockpiles week
 
 The ceiling of 24 rows keeps the per-angler read bounded (24 catches + the angler row).
 
-**Access:** Waders 250 gold (River Bend), Pier Permit 900 gold (Harbour Pier). Permanent.
+**Access:** Waders 250 coins (River Bend), Pier Permit 900 coins (Harbour Pier). Permanent.
 
 ### Progression
 
@@ -169,6 +169,8 @@ The ceiling of 24 rows keeps the per-angler read bounded (24 catches + the angle
 - Levels unlock nothing except waters and achievements. There are no stats.
 
 ### Selling and the shop
+
+The currency is called **coins** to the player (D121, 2026-10-11): a cooler row's "420 g" above "41 gold" read as the same unit. The field, the counter `goldEarned` and the achievement family id `gold_earned` keep their names; only copy changed, and stories stored before the rename read "coins" in the companion. Desk Crawler keeps gold.
 
 - `cooler.sell(catchId)` and `cooler.sellMany(catchIds)` (up to 24) sell at the fish's value. Selection is explicit; there is no auto-sell.
 - `shop.buyRod`, `shop.buyCooler`, `shop.buyAccess(waterId)` buy the next tier or the named item at the fixed price. `shop.buyBait(class, tubs)` adds whole tubs up to the 72 cap. `angler.setBait(class)` chooses the hook.
@@ -197,7 +199,7 @@ A Slow Cast catalog, versioned and appended as [achievements](achievements.md) r
 | Got away | `gotAway` | 1 / 10 / 50 |
 | Night fishing | `nightCatches` | 1 / 25 / 250 |
 | Released | `released` | 1 / 25 / 250 |
-| Gold earned | `goldEarned` | 100 / 1,000 / 10,000 / 100,000 |
+| Coins earned | `goldEarned` | 100 / 1,000 / 10,000 / 100,000 |
 | Sales | `fishSold` | 1 / 25 / 250 / 1,000 |
 | Levels | `level` | 4 / 8 / 12 / 16 / 20 |
 | Waters | `watersVisited` | 2 / 3 |

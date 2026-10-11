@@ -13,9 +13,9 @@ export function FishName({ id, children }: { id: string; children?: ReactNode })
   return <strong className={`font-semibold ${RARITY_TONE[species?.rarity ?? 'common'] ?? ''}`}>{children ?? species?.name ?? id}</strong>
 }
 
-/** A story line with every species name in it set as a FishName. */
+/** A story line with every species name in it set as a FishName. Stories stored before D121 say gold; they read coins. */
 export function FishText({ text }: { text: string }) {
-  const parts = text.split(NAMES)
+  const parts = text.replace(/\bgold\b/g, 'coins').split(NAMES)
   return <>{parts.map((part, i) => (i % 2 === 1 && byName.has(part) ? <FishName key={i} id={byName.get(part)!.id} /> : <Fragment key={i}>{part}</Fragment>))}</>
 }
 

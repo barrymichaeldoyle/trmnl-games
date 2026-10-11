@@ -109,7 +109,7 @@ function SettingsPage() {
         <Consequences>
           <li>No casts or fish until you resume, and missed casts are not made up later.</li>
           <li>Your fish stay on the boards, but you can't add to this week's while paused.</li>
-          <li>Your cooler, bait and gold stay as they are. Resume any time.</li>
+          <li>Your cooler, bait and coins stay as they are. Resume any time.</li>
         </Consequences>
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />

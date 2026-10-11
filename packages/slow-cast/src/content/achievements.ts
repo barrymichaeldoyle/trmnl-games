@@ -92,11 +92,11 @@ const FAMILIES: AchievementDef[] = [
     [3, 'Carbon Fibre', 'You can feel every nibble.'],
     [4, 'Beachcaster', 'Built for the biggest fish in the sea.'],
   ]),
-  ...family('gold_earned', 'Gold earned', 'Trade', counter('goldEarned'), [
+  ...family('gold_earned', 'Coins earned', 'Trade', counter('goldEarned'), [
     [100, 'Pocket Money', 'Enough for a tub of worms or four.'],
     [1000, 'Market Stall', 'The fishmonger saves you a spot.'],
     [10000, 'Fishmonger', 'A van with your name on it.'],
-    [100000, 'Fish Baron', 'A hundred thousand gold from fish.'],
+    [100000, 'Fish Baron', 'A hundred thousand coins from fish.'],
   ]),
   ...family('sales', 'Sales', 'Trade', counter('fishSold'), [
     [1, 'First Sale', 'Fresh today.'],

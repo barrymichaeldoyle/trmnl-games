@@ -47,9 +47,9 @@ describe('Slow Cast intents (D115, S2)', () => {
     await expect(as('Pat').mutation(api.slowCast.anglers.sellCatches, { operationId: 'sell-00003', catchIds: [] })).rejects.toThrow()
   })
 
-  it('buys up the ladders only with enough gold, and spends exactly the price', async () => {
+  it('buys up the ladders only with enough coins, and spends exactly the price', async () => {
     const anglerId = await seedAngler(t, { gold: 310 }, 'Pat')
-    await expect(as('Pat').mutation(api.slowCast.anglers.buyAccessItem, { operationId: 'buy-000001', access: 'pier_permit' })).rejects.toThrow(/Not enough gold/)
+    await expect(as('Pat').mutation(api.slowCast.anglers.buyAccessItem, { operationId: 'buy-000001', access: 'pier_permit' })).rejects.toThrow(/Not enough coins/)
     expect(await as('Pat').mutation(api.slowCast.anglers.buyNextRod, { operationId: 'buy-000002' })).toMatchObject({ gold: 60 })
     expect(await as('Pat').mutation(api.slowCast.anglers.buyNextCooler, { operationId: 'buy-000003' })).toMatchObject({ gold: 0 })
     expect(await t.run(async (ctx) => await ctx.db.get(anglerId))).toMatchObject({ rodTier: 2, coolerTier: 2, gold: 0 })
