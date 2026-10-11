@@ -5,10 +5,13 @@ import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { Button, Card } from '../../../lib/ui'
 import { SpriteIcon } from '../desk-crawler/-bagSlots'
+import { LocalTime } from '../../../lib/localTime'
 
 type Box = { totalCollected: number; claimedThisWeek: boolean; nextAvailableAt: number | null; connected: boolean; newest: string | null; box: Array<{ id: string; name: string; count: number; rows: string[] }> } | null
 
 type Notify = (feedback: { error: string | null; message: string | null }) => void
+
+const weekday = (date: Date) => date.toLocaleDateString([], { weekday: 'long' })
 
 /** The fly box (D115): enter the code your TRMNL shows for one fly a week. Cosmetic; the newest one rides on the angler's hat. */
 export function FlyBox({ notify }: { notify: Notify }) {
@@ -21,12 +24,11 @@ export function FlyBox({ notify }: { notify: Notify }) {
     event.preventDefault()
     if (await claim.run({ code }, 'Checking the code…')) setCode('')
   }
-  const next = box.nextAvailableAt ? new Date(box.nextAvailableAt).toLocaleDateString([], { weekday: 'long' }) : null
   return (
     <Card title="Fly box">
       <p>Each week your TRMNL shows a <strong>Fly code</strong> in its title bar. Enter it to add a fly to the box. Your angler wears the newest one on their hat.</p>
       {box.claimedThisWeek ? (
-        <p className="mt-3 text-sm font-semibold">This week's fly is in the box. A new code appears on {next}.</p>
+        <p className="mt-3 text-sm font-semibold">This week's fly is in the box. A new code appears on {box.nextAvailableAt ? <LocalTime at={box.nextAvailableAt} format={weekday} /> : null}.</p>
       ) : box.connected ? (
         <form onSubmit={submit} className="mt-3 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1">

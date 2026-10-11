@@ -11,6 +11,9 @@ import { useOnline } from '../../../lib/network'
 import { Submission } from '../../../lib/submission'
 import { ActionFeedback, BUTTON_SECONDARY, Button, LINK_BUTTON } from '../../../lib/ui'
 import { Glyph } from '../../../lib/glyphs'
+import { LocalTime } from '../../../lib/localTime'
+
+const arrivesAt = (date: Date) => date.toLocaleString(undefined, { weekday: 'long', hour: 'numeric', minute: '2-digit' })
 
 export function KeepsakeIcon({ pixels }: { pixels: readonly string[] }) {
   const path = pixels.flatMap((row, y) => [...row.matchAll(/#+/g)].map((run) => `M${run.index} ${y}h${run[0].length}v1h-${run[0].length}z`)).join('')
@@ -140,7 +143,7 @@ export function DeskKeepsakes() {
         <KeepsakeIcon pixels={next.pixels} />
         <div><p className="font-semibold">{collectedThisWeek ? 'Coming next: ' : 'Next keepsake: '}{next.name}</p><p className="mt-1 text-sm text-muted">{next.description}</p></div>
       </div>
-      {collectedThisWeek ? <p className="text-sm font-semibold">Collected this week. {collection.nextAvailableAt ? `The next code arrives ${new Date(collection.nextAvailableAt).toLocaleString(undefined, { weekday: 'long', hour: 'numeric', minute: '2-digit' })}.` : 'The next code arrives next week.'}</p> : <KeepsakeCodeForm form={form} inputId="keepsake-code" />}
+      {collectedThisWeek ? <p className="text-sm font-semibold">Collected this week. {collection.nextAvailableAt ? <>The next code arrives <LocalTime at={collection.nextAvailableAt} format={arrivesAt} />.</> : 'The next code arrives next week.'}</p> : <KeepsakeCodeForm form={form} inputId="keepsake-code" />}
       <p id="keepsake-code-help" className="mt-3 max-w-prose text-sm text-muted">{collection.connected ? 'The code sits beside “Keepsake” on your TRMNL screen. The preview on this site leaves it out.' : 'Reconnect the Desk Crawler plugin in TRMNL to receive keepsake codes.'}</p>
       <ActionFeedback error={error} message={message} />
       <ul aria-label="Your keepsake shelf" className="mt-5 grid grid-cols-1 gap-x-6 gap-y-4 min-[480px]:grid-cols-2 sm:grid-cols-3 sm:gap-y-5">

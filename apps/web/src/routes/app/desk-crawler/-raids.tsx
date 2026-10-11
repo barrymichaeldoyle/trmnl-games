@@ -4,6 +4,7 @@ import { api } from '@trmnl-games/backend/api'
 import { SectionTitle } from '../../../lib/glyphs'
 import { PixelIcon } from './-pixelIcon'
 import { KIND_BADGE } from '../../../lib/palette'
+import { LocalTime } from '../../../lib/localTime'
 
 type Raid = { tick: number; at: number; role: 'raider' | 'target'; rivalName: string; won: boolean; gold: number; hpLost: number | null; pending: boolean }
 
@@ -11,8 +12,7 @@ type Raid = { tick: number; at: number; role: 'raider' | 'target'; rivalName: st
 const describe = (raid: Raid) =>
   raid.role === 'raider' ? (raid.won ? `Raided ${raid.rivalName}'s desk` : `Caught raiding ${raid.rivalName}'s desk`) : raid.won ? `Caught ${raid.rivalName} raiding` : `Raided by ${raid.rivalName}`
 
-const when = (at: number) => {
-  const day = new Date(at)
+const when = (day: Date) => {
   const today = new Date()
   const time = day.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
   return day.toDateString() === today.toDateString() ? time : `${day.toLocaleDateString(undefined, { weekday: 'short' })} ${time}`
@@ -56,7 +56,7 @@ export function Raids({ enabled }: { enabled: boolean }) {
                 <p className="pt-1">{describe(raid)}</p>
                 <p className="flex flex-wrap gap-x-3 text-xs font-semibold tabular-nums">
                   <span className={raid.won ? 'text-xp-ink' : 'text-hp-ink'}>{raid.won ? 'Won' : 'Lost'}</span>
-                  <time className="text-muted" dateTime={new Date(raid.at).toISOString()}>{when(raid.at)}</time>
+                  <LocalTime className="text-muted" at={raid.at} format={when} />
                   <span className="text-gold-ink">{raid.won ? '+' : '−'}{raid.gold.toLocaleString()} gold</span>
                   {raid.hpLost !== null ? <span className="text-hp-ink">−{raid.hpLost} HP</span> : null}
                   {raid.pending ? <span className="text-muted">lands on the next adventure</span> : null}

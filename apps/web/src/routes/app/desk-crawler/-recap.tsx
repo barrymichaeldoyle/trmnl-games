@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react'
 import { useEffect, useRef, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { afterVisibleVisit } from '../../../lib/visibleVisit'
+import { LocalTime } from '../../../lib/localTime'
 
 type Summary = {
   baseline: { at: number } | null
@@ -19,6 +20,8 @@ type Summary = {
   held: boolean
   status: string
 }
+
+const sinceAt = (date: Date) => date.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 /**
  * D25 return recap: frozen for this visit, acknowledged once after it has been
@@ -98,7 +101,6 @@ function Ledger({ summary }: { summary: Summary }) {
     )
   }
 
-  const since = new Date(summary.baseline.at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
   const rows: Array<[string, number]> = [
     ['XP', summary.xpGained ?? 0],
     ['Levels', summary.levelsGained ?? 0],
@@ -120,7 +122,7 @@ function Ledger({ summary }: { summary: Summary }) {
           While you were away
         </h2>
         <p className="text-sm text-muted">
-          {since}
+          <LocalTime at={summary.baseline.at} format={sinceAt} />
           {summary.newEvents && !quiet ? `, ${summary.newEvents} log ${summary.newEvents === 1 ? 'entry' : 'entries'}` : ''}
         </p>
       </div>

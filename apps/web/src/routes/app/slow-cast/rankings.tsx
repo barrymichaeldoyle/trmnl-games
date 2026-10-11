@@ -7,6 +7,7 @@ import { preload } from '../../../lib/preload'
 import { formatWeight } from '../../../lib/slowCast'
 import { Card } from '../../../lib/ui'
 import { FishName } from './-fish'
+import { LocalTime } from '../../../lib/localTime'
 
 /**
  * Slow Cast rankings (2026-10-10): each water's heaviest fish, this week and of all time. No XP or levels: the fish
@@ -32,6 +33,8 @@ type View = { waterId: (typeof WATERS)[number]['id']; period: 'week' | 'all'; we
 
 const TAB = 'hud text-hud-sm min-h-11 flex-1 border-[3px] px-2'
 
+const resetsAt = (date: Date) => date.toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' })
+
 function RankingsPage() {
   const { data: first } = useQuery(convexQuery(api.slowCast.leaderboard.view, {}))
   const [water, setWater] = useState<View['waterId'] | null>(null)
@@ -39,7 +42,6 @@ function RankingsPage() {
   const chosen = water ?? (first as View | undefined)?.waterId ?? 'millpond'
   const { data } = useQuery(convexQuery(api.slowCast.leaderboard.view, { waterId: chosen, period }))
   const view = data as View | undefined
-  const resets = view ? new Date(view.weekEndsAt).toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' }) : null
   return (
     <>
       <h1 className="font-display text-3xl font-bold">Rankings</h1>
@@ -62,7 +64,7 @@ function RankingsPage() {
         <Card>
           <p className="mb-3 text-sm text-muted">
             {view.own ? <>Your best: {formatWeight(view.own.grams)} <FishName id={view.own.speciesId} />{view.own.rank ? `, #${view.own.rank}` : ''}.</> : `You have no fish here ${view.period === 'week' ? 'this week' : 'yet'}.`}
-            {view.period === 'week' && resets ? ` Starts again ${resets}.` : ''}
+            {view.period === 'week' ? <> Starts again <LocalTime at={view.weekEndsAt} format={resetsAt} />.</> : null}
           </p>
           {view.entries.length === 0 ? <p>No fish landed here {view.period === 'week' ? 'this week' : 'yet'}.</p> : (
             <ol className="flex flex-col">

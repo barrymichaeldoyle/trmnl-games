@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
 import { Button, Meter } from '../../../lib/ui'
 import { Sheet, SheetTitle } from './-bagSlots'
+import { LocalTime } from '../../../lib/localTime'
 
 type Earned = { id: string; name: string; blurb: string; tier: number; unlockedAt: number | null }
 type Family = { family: string; name: string; category: string; tier: number; tiers: number; earned: Earned | null; next: { id: string; tier: number } | null; value: number; target: number }
@@ -24,6 +25,8 @@ function rarityOf(id: string, rarity: View['rarity']): { band: RarityBand; text:
   const pct = Math.round(share * 100)
   return { band, text: `${pct < 1 ? '<1' : pct}% of heroes` }
 }
+
+const earnedOn = (date: Date) => date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
 
 export function Rarity({ id, rarity }: { id: string; rarity: View['rarity'] }) {
   const r = rarityOf(id, rarity)
@@ -76,7 +79,7 @@ function EarnedSheet({ family, rarity, onClose }: { family: (Family & { earned: 
           <p>{family.earned.blurb}</p>
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <Rarity id={family.earned.id} rarity={rarity} />
-            {family.earned.unlockedAt ? <time className="text-xs tabular-nums text-muted" dateTime={new Date(family.earned.unlockedAt).toISOString()}>Earned {new Date(family.earned.unlockedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</time> : null}
+            {family.earned.unlockedAt ? <span className="text-xs tabular-nums text-muted">Earned <LocalTime at={family.earned.unlockedAt} format={earnedOn} /></span> : null}
           </div>
           {family.next ? <Meter label={`Tier ${tierLabel(family.next.tier)}`} value={Math.min(family.value, family.target)} max={family.target} tone="gold" /> : <p className="text-sm text-muted">Top tier reached.</p>}
           <Button variant="secondary" className="mt-1" allowOffline onClick={onClose}>Close</Button>

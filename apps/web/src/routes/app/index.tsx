@@ -2,16 +2,24 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
+import type { FunctionReturnType } from 'convex/server'
 import { seo } from '../../lib/seo'
 import { preload } from '../../lib/preload'
 import { BUTTON_PRIMARY, LINK_BUTTON } from '../../lib/ui'
 import { games } from '@trmnl-games/platform'
 import { gamesQuery, useGames } from '../../lib/gameAccess'
 
+const dockQuery = convexQuery(api.slowCast.anglers.dock, {})
+
 /** Short library labels; the hero page carries the full status sentence. */
 const STATUS_LABEL: Record<string, string> = { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' }
 
-export const Route = createFileRoute('/app/')({ head: () => seo({ title: 'My games', index: false }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), gamesQuery), component: Library })
+export const Route = createFileRoute('/app/')({ head: () => seo({ title: 'My games', index: false }), loader: async ({ context }) => {
+  await preload(context, convexQuery(api.users.me, {}), gamesQuery)
+  // An open Slow Cast tile shows the angler, so fetch it too rather than flash the sample screen first.
+  const listing = context.queryClient.getQueryData<FunctionReturnType<typeof api.platform.list>>(gamesQuery.queryKey)
+  if (listing?.games.some((game) => game.slug === 'slow-cast' && game.canOpen)) await preload(context, dockQuery)
+}, component: Library })
 
 function Library() {
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))
@@ -43,8 +51,9 @@ function Library() {
 function UpcomingGames() {
   const data = useGames()
   const game = data?.games.find((g) => g.slug === 'slow-cast')
-  const { data: dock } = useQuery({ ...convexQuery(api.slowCast.anglers.dock, {}), enabled: game?.canOpen === true })
+  const { data: dock, isPending } = useQuery({ ...dockQuery, enabled: game?.canOpen === true })
   if (!game) return null
+  const loading = game.canOpen && isPending
   const angler = (dock as { angler?: { activationState: string; status: string; title: string } | null } | undefined)?.angler
   return (
     <section className="window flex flex-col gap-3 p-5" aria-labelledby="library-sc">
@@ -52,10 +61,10 @@ function UpcomingGames() {
         <img src="/games/slow-cast/icon-192.png" alt="" width={64} height={64} className="h-16 w-16 [image-rendering:pixelated]" />
         <h2 id="library-sc" className="font-display text-2xl font-bold text-gold-ink">{games['slow-cast'].name}</h2>
       </div>
-      {!angler ? <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen" width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
-      <p className="text-muted">{angler ? `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}` : games['slow-cast'].description}</p>
+      {!angler && !loading ? <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen" width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
+      {loading ? null : <p className="text-muted">{angler ? `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}` : games['slow-cast'].description}</p>}
       {game.status !== 'live' ? <p className="label-px self-start">{game.status === 'hidden' ? 'Hidden: only admins can see this' : 'Coming soon'}</p> : null}
-      {game.canOpen ? <Link to="/app/slow-cast" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{angler ? 'Open Slow Cast' : 'About Slow Cast'}</Link> : null}
+      {game.canOpen && !loading ? <Link to="/app/slow-cast" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{angler ? 'Open Slow Cast' : 'About Slow Cast'}</Link> : null}
     </section>
   )
 }

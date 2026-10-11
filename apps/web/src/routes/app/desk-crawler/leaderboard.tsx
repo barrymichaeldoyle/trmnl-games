@@ -8,6 +8,7 @@ import { seo } from '../../../lib/seo'
 import { Button, Card, LoadingState } from '../../../lib/ui'
 import { preload } from '../../../lib/preload'
 import { levelGroup } from '@trmnl-games/desk-crawler/sim/core/stats'
+import { LocalTime } from '../../../lib/localTime'
 
 export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: () => seo({ title: 'Rankings', index: false }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {})), component: Leaderboard })
 
@@ -23,6 +24,8 @@ const TABS: Array<{ board: Board; label: string }> = [
 const breakable = (name: string) => name.split(/(?<=_)/).flatMap((part, index) => (index ? [<wbr key={index} />, part] : [part]))
 
 const groupLabel = (key: string) => (key === 'all' ? 'All heroes' : `Levels ${key.replace('-', '–')}`)
+
+const updatedAt = (date: Date) => date.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 function Leaderboard() {
   const [board, setBoard] = useState<Board>('recent_24h')
@@ -63,7 +66,7 @@ function Leaderboard() {
         <Card title={`${groupLabel(data.cohortKey)}, ${data.totalPlayers} ${data.totalPlayers === 1 ? 'hero' : 'heroes'}`} className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <p className="mb-3 text-sm text-muted">
             {board === 'overall' ? 'Ranked by level and lifetime XP.' : 'Ranked by XP earned in the period.'} Updated hourly, last at{' '}
-            <time dateTime={new Date(data.scoreAt).toISOString()}>{new Date(data.scoreAt).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</time>.
+            <LocalTime at={data.scoreAt} format={updatedAt} />.
           </p>
           {data.own ? (
             <p className="mb-3 font-semibold">

@@ -8,6 +8,7 @@ import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishName, FishText } from './-fish'
 import { Rows } from './-rows'
+import { LocalTime } from '../../../lib/localTime'
 
 /** The dock: the angler's scene, progress, the bait in use, the waters and the latest stories. The fly box lives in the logbook. */
 export const Route = createFileRoute('/app/slow-cast/')({
@@ -15,7 +16,8 @@ export const Route = createFileRoute('/app/slow-cast/')({
   component: DockPage,
 })
 
-const time = (at: number) => new Date(at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+const clock = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+const time = (at: number) => <LocalTime at={at} format={clock} />
 
 function DockPage() {
   const { data } = useQuery(convexQuery(api.slowCast.anglers.dock, {}))
@@ -63,7 +65,7 @@ function DockPage() {
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
         <div className="flex flex-col gap-1">
           <p className="text-lg font-semibold">
-            {angler.status === 'paused' ? <>Fishing is paused. <Link to="/app/slow-cast/settings" className="font-normal underline underline-offset-4">Resume on the More page</Link>.</> : destination ? `Heading to ${destination.name}.${firstCastThere ? ` First cast there at ${firstCastThere}.` : ''}` : `Casting at ${here?.name ?? 'the water'}.`}
+            {angler.status === 'paused' ? <>Fishing is paused. <Link to="/app/slow-cast/settings" className="font-normal underline underline-offset-4">Resume on the More page</Link>.</> : destination ? <>Heading to {destination.name}.{firstCastThere ? <> First cast there at {firstCastThere}.</> : null}</> : `Casting at ${here?.name ?? 'the water'}.`}
           </p>
           {here ? <p className="text-muted">{BAND_LABEL[here.band]}, {WEATHER_LABEL[here.weather]?.toLowerCase()} · Bite chance {here.bitePercent}%</p> : null}
           {dock.nextTickAt && !destination && angler.status !== 'paused' ? <p className="text-sm text-muted">Next cast at {time(dock.nextTickAt)}.</p> : null}
