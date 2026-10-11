@@ -34,6 +34,9 @@ function AppShell() {
 
 function SignedInApp() {
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))
+  // The Bag tab shows how full the bag is, so a new find is visible from any tab.
+  const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
+  const bagUsed = (bag as { used: number } | null | undefined)?.used
   const setupState = !me?.hero ? (me?.hasActiveInstallation ? 'installation_without_hero' : 'not_enrolled') : me.hero.activationState === 'pending_trmnl' ? 'waiting_for_save' : 'active'
   useAnalyticsView(setupState === 'active' ? 'companion ready' : 'setup screen shown', { setup_state: setupState, has_active_installation: me?.hasActiveInstallation ?? false }, !isPending && me?.user?.state !== 'deleting' && me?.gameState !== 'deleting')
   // P33: an alert's tap lands here with ?alert=<kind>; counted once identity is known.
@@ -92,7 +95,10 @@ function SignedInApp() {
               >
                 {/* The tab's glyph carries recognition on phones, where the pixel label is at its smallest. */}
                 <Glyph name={item.glyph} className="sm:hidden lg:block" />
-                {item.label}
+                <span>
+                  {item.label}
+                  {item.to === '/app/desk-crawler/inventory' && bagUsed !== undefined ? <span className="ml-1 tabular-nums text-gold-ink"><span className="sr-only">, </span>{bagUsed}<span className="sr-only"> slots used</span></span> : null}
+                </span>
               </Link>
             </li>
           ))}
