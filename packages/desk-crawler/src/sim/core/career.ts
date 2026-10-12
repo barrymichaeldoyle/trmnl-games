@@ -57,8 +57,15 @@ export const rungSatisfied = (rung: CareerRung, hero: HeroState, content: Conten
 
 /** The first rung at or after `from` the hero has not satisfied; the ladder's length when none is left. */
 export function firstOpenRung(rules: CareerRule, hero: HeroState, content: ContentCatalog, from = 0): number {
-  for (let i = from; i < rules.rungs.length; i += 1) if (!rungSatisfied(rules.rungs[i]!, hero, content)) return i
+  for (let i = from; i < rules.rungs.length; i += 1) if (!rules.rungs[i]!.retired && !rungSatisfied(rules.rungs[i]!, hero, content)) return i
   return rules.rungs.length
+}
+
+/** The first rung at or after `from` that is not retired; the ladder's length when none is left. */
+export function liveRung(rules: CareerRule, from: number): number {
+  let i = from
+  while (rules.rungs[i]?.retired) i += 1
+  return i
 }
 
 /** The feature a guaranteed event needs, if any. */
@@ -83,7 +90,8 @@ export function eventCount(hero: HeroState, event: GuaranteedEvent): number {
 
 /** The hero's current rung under the catalog, or undefined off the ladder. */
 export function currentRung(content: ContentCatalog, hero: HeroState): CareerRung | undefined {
-  return hero.career === undefined ? undefined : content.career?.rungs[hero.career.rung]
+  const rules = content.career
+  return hero.career === undefined || rules === undefined ? undefined : rules.rungs[liveRung(rules, hero.career.rung)]
 }
 
 /**
@@ -140,12 +148,14 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
 
   if (rules !== undefined && rules.rungs.length > 0) {
     let state: CareerState = hero.career ?? { rung: firstOpenRung(rules, before, content), startedTick: tick, reached: [] }
+    // A pointer left on a rung a later catalog retired moves past it silently (retired rungs carry no guarantee).
+    if (liveRung(rules, state.rung) !== state.rung) state = { rung: liveRung(rules, state.rung), startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
     const current = rules.rungs[state.rung]
     if (current !== undefined && rungSatisfied(current, hero, content)) {
       const gold = current.gold
       hero = { ...hero, counters: { ...hero.counters, careerRungs: hero.counters.careerRungs + 1 } }
       metrics.careerRungs = 1
-      const next = state.rung + 1
+      const next = liveRung(rules, state.rung + 1)
       const when = input.tickAt === undefined ? {} : { at: input.tickAt }
       state = { rung: next, startedTick: tick, reached: [...state.reached, { id: current.id, tick, ...when }], unclaimed: [...(state.unclaimed ?? []), ...(gold > 0 ? [{ id: current.id, gold, tick, ...when }] : [])] }
       const following = rules.rungs[next]

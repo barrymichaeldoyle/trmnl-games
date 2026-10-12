@@ -25,7 +25,7 @@ export const Route = createFileRoute('/app/desk-crawler/')({
   component: HeroHome,
 })
 
-type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number }
+type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number; safe: boolean }
 
 /**
  * The game screen leads, after an unclaimed weekly keepsake's callout (a
@@ -122,6 +122,10 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const potionLabel = !bag ? 'Drink potion' : !bag.potions ? 'No potions' : hero.hp >= hero.maxHp ? `Drink potion (${bag.potions})` : `Drink potion +${healing} HP (${bag.potions})`
   const drink = () => (strengths.length > 1 ? setAsk({ kind: 'potion' }) : potion.run(fit === null ? {} : { templateId: fit.templateId }, `${fit === null ? 'Potion' : fit.name} drunk, +${healing} HP.`))
   const chosenStance = hero.stances.find((option) => option.id === hero.stance) ?? null
+  // D132: what the stance risks where the hero is now; the safe biome turns a knockout into a rescue.
+  const here = hero.biomes.find((biome) => biome.id === hero.biomeId)
+  const safeBiome = hero.biomes.find((biome) => biome.safe)
+  const stanceRisk = here === undefined || safeBiome === undefined ? null : here.safe ? `${here.name} can't knock your hero out, so Bold has no knockout risk here.` : `Here a knockout costs gold and sends your hero back to ${safeBiome.name}. Cautious gets knocked out least and Bold most.`
   // P35: a feature the hero's level has not reached shows as a locked card where its card will be.
   const locked = (feature: UnlockView[number]['feature']) => hero.unlocks?.find((entry) => entry.feature === feature && !entry.unlocked) ?? null
   // Pause and Resume swap places when they succeed; focus follows to whichever command takes over.
@@ -210,6 +214,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
               <span className="text-muted tabular-nums">Potion below {chosenStance.potionBelowPct}% · rest below {chosenStance.restBelowPct}% · back out at {chosenStance.resumeAtPct}% · {chosenStance.victoryXpPct}% XP from wins{chosenStance.raidsPerDay !== undefined && chosenStance.raidWinPct !== undefined ? ` · ${raidPace(chosenStance.raidsPerDay)}, wins ${chosenStance.raidWinPct}% of raids against Balanced` : ''}.</span>
             </p>
           ) : null}
+          {stanceRisk ? <p className="text-sm">{stanceRisk}</p> : null}
         </section>
       ) : null}
 

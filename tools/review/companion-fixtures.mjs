@@ -8,7 +8,7 @@
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
  *   workbench=1 (D129, default: a few materials and the workbench card)   workbench=rich (every job affordable)   workbench=done (a +3 weapon)   workbench=0 (no workbench)
  *   potions=1 (D131, default: three strengths, a combine affordable)   potions=short (two minors, no Scrap)   potions=one (healing only)   potions=0 (no strengths)
- *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
+ *   floor=server_room (D132: the hero on another floor)   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
@@ -56,7 +56,7 @@ export const Outlet = () => { const Page = useContext(OutletContext); return Pag
 // Queries from the fixture; mutations settle locally.
 write('data.js', `import fixture from './fixture.json';
 import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
-import { contentV12 } from '../../packages/desk-crawler/src/content/v12';
+import { contentV15 } from '../../packages/desk-crawler/src/content/v15';
 import { useCallback, useState } from 'react';
 const params = new URLSearchParams(location.search);
 const flag = (name) => params.get(name) === '1';
@@ -71,6 +71,7 @@ if (held) { hero.status = 'sleeping'; hero.wakeAtTick = null }
 if (hero.status === 'travelling') { hero.targetBiomeId = 'server_room'; hero.arriveAtTick = hero.world.currentTick + 1 }
 if (hero.status === 'dead') { hero.hp = 0; hero.reviveAtTick = hero.world.currentTick + 3 }
 if (hero.status === 'resting') hero.hp = Math.round(hero.maxHp * 0.4);
+if (params.get('floor')) hero.biomeId = params.get('floor');
 if (params.get('hp')) hero.hp = Math.round(hero.maxHp * Number(params.get('hp')) / 100);
 if (flag('choice')) hero.choice = { eventId: 'late_night', title: 'The boss asks for one more hour', prompt: 'The lights are dimming but the report is not done. Stay late for a bonus, or head home?', expiresAtTick: hero.world.currentTick + 4, ticksLeft: 4, defaultOptionId: 'home', options: [{ id: 'stay', label: 'Stay late', change: { gold: 50, hp: -6, potions: 0 } }, { id: 'home', label: 'Head home', change: { gold: 0, hp: 0, potions: 0 } }] };
 if (flag('effects')) hero.effects = [{ id: 'coffee', name: 'Coffee rush', blurb: '+3 ATK', kind: 'boon', ticksLeft: 3 }, { id: 'papercut', name: 'Paper cut', blurb: '-2 DEF', kind: 'bane', ticksLeft: 1 }];
@@ -167,7 +168,7 @@ decorateGear();
 // level-1 hero with everything still locked; career=done a finished ladder.
 if (params.has('career')) {
   const mode = params.get('career');
-  const rungs = contentV12.career.rungs;
+  const rungs = contentV15.career.rungs.filter((r) => !r.retired);
   const rung = mode === 'new' ? 1 : mode === 'done' ? rungs.length : 9;
   const now = Date.now();
   hero.level = mode === 'new' ? 1 : hero.level;
@@ -176,10 +177,10 @@ if (params.has('career')) {
   hero.career.unclaimed = mode === 'new' ? [] : [{ id: 'first_trip', title: 'Travel to the Server Room', gold: 25, at: now - 864e5 * 2 }, { id: 'laptop_backpack', title: 'Buy the Laptop Backpack', gold: 30, at: now - 864e5 }];
   if (mode === 'new') hero.career.current = { ...hero.career.current, value: 0, target: 1 };
   if (mode !== 'new' && mode !== 'done') hero.career.current.value = 2, hero.career.current.target = 3, hero.career.current.title = 'Finish three to-do tasks', hero.career.current.blurb = rungs[3].blurb, hero.career.current.companion = false;
-  hero.unlocks = [['todo', 'the to-do list', 2], ['stances', 'stances', 3], ['choices', 'office decisions', 5], ['merchant', 'the wandering merchant', 6], ['raids', 'desk raids', 7]].map(([feature, label, level]) => ({ feature, label, level, unlocked: hero.level >= level }));
+  hero.unlocks = [['todo', 'the to-do list', 2], ['stances', 'stances', 7], ['choices', 'office decisions', 5], ['merchant', 'the wandering merchant', 6], ['raids', 'desk raids', 7]].map(([feature, label, level]) => ({ feature, label, level, unlocked: hero.level >= level }));
   if (mode === 'new') { hero.todo = null; hero.stance = 'balanced' }
   data.log.unshift(
-    { id: 'career1', at: now - 5e5, tick: 911, kind: 'career', summary: 'Goal reached: Pick a stance. Next: Reach level 4.', source: 'tick', deltas: { xpEarned: 0, gold: 20, hp: 0 } },
+    { id: 'career1', at: now - 5e5, tick: 911, kind: 'career', summary: 'Goal reached: Sell a piece of gear. Next: Reach level 4.', source: 'tick', deltas: { xpEarned: 0, gold: 20, hp: 0 } },
     { id: 'career2', at: now - 36e5 * 5, tick: 896, kind: 'career', summary: 'Unlocked: stances.', source: 'tick', deltas: { xpEarned: 0, gold: 0, hp: 0 } },
   );
 }

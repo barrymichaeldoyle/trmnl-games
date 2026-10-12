@@ -29,19 +29,22 @@
     "id": "office_cubicles",
     "name": "Office Cubicles",
     "unlockLevel": 1,
-    "unlocked": true
+    "unlocked": true,
+    "safe": true
    },
    {
     "id": "server_room",
     "name": "Server Room",
     "unlockLevel": 4,
-    "unlocked": true
+    "unlocked": true,
+    "safe": false
    },
    {
     "id": "cafeteria_depths",
     "name": "Cafeteria Depths",
     "unlockLevel": 8,
-    "unlocked": false
+    "unlocked": false,
+    "safe": false
    }
   ],
   "choice": null,

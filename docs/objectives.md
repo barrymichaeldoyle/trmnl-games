@@ -29,7 +29,7 @@ Unlocks are **level milestones** in the catalog, under a new `unlocks` rule. The
 | --- | --- | --- | --- |
 | Adventures, bag, equip, sell, manual potions, the Tote Bag on the sixth adventure, keepsakes | start | day 0 | The core loop and the D122 onboarding win. Keepsakes are the playlist incentive and stay on from the first screen |
 | To-do list | level 2 | day 1 | The first thing to look forward to, and the first system that needs no companion |
-| Stances | level 3 | day 2 | The first real choice, once the player has seen a rest and a potion |
+| Stances | level 3, level 7 from v15 (D132) | day 2 | The first real choice, once the player has seen a rest and a potion. Moved to level 7 by D132: in Office Cubicles Bold has no knockout risk, so the choice first matters with raids and the Cafeteria |
 | Server Room | level 4 | day 3 to 4 | Unchanged (D24) |
 | Narrative choices | level 5 | day 5 | Needs a hero that already opens the companion for travel |
 | Wandering merchant | level 6 | day 7 | By now the hero has 100 to 300 gold, so a 25% off bag offer means something; also the Lunchbox level under v4 |
@@ -55,7 +55,7 @@ The ladder is an ordered list of rungs in the catalog, under a new `career` rule
 | 3 | Reach level 2 | `level ≥ 2` | no | 15 | |
 | 4 | Finish three to-do tasks | `tasksCompleted ≥ 3` | no, Swap optional | 20 | |
 | 5 | Sell a piece of gear | `itemsSold ≥ 1` | Bag page | 20 | |
-| 6 | Pick a stance | `stanceChanges ≥ 1` | Hero page | 20 | |
+| 6 | Pick a stance | `stanceChanges ≥ 1` | Hero page | 20 | Retired in v15 (D132) |
 | 7 | Reach level 4 | `level ≥ 4` | no | 25 | |
 | 8 | Travel to the Server Room | `trips ≥ 1` | Hero page | 25 | |
 | 9 | Buy the Satchel | `bagCapacity ≥ 15` | Bag page | 30 | |
@@ -130,6 +130,8 @@ counters.careerRungs, counters.itemsEquipped                                    
 6. **No analytics event**: a goal is reached inside a tick, not by a companion action, so the engagement report counts rungs instead.
 7. Rung 9 names the Laptop Backpack (13 slots), the first shop rung under the D122 ladder; the spec's "Satchel" was a placeholder.
 8. **The gold waits for a Claim button (D130).** Barry asked for a claim step with confetti. The pointer still moves on its own (a gate would stall device-only players at every rung); the rung's gold sits in `career.unclaimed` until `heroes.claimGoal` pays it, and the Goal card shows each waiting reward with Claim and a confetti burst before the next goal. All gold sinks are companion actions, so nothing is lost by a player who never claims.
+
+9. **Stances move to level 7 and "Pick a stance" is retired (D132, content v15).** At level 3 the hero is still in Office Cubicles, where Bold has no knockout risk, so the choice taught nothing. Rungs are never reordered, so the rung keeps its id and place, carries `retired`, and the ladder walks past it without pay or a line; the Career page hides it unless the hero reached it. The raid goal's blurb names the stance instead.
 
 ## Open points for Barry (settled 2026-10-12)
 

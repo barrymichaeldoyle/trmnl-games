@@ -102,7 +102,7 @@ export const mine = query({
       // P35: the current goal and the ladder so far, and which features this hero's level has opened.
       career: careerView(worldContent(world), hero),
       unlocks: unlocksView(worldContent(world), hero.level),
-      biomes: content.biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level })),
+      biomes: content.biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe })),
       world: world
         ? {
             currentTick: world.currentTick,
@@ -341,20 +341,22 @@ function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const rung = currentRung(content, heroState)
   const reachedAt = new Map(state.reached.map((entry) => [entry.id, entry.at ?? null]))
   const titleOf = (id: string) => rules.rungs.find((rung) => rung.id === id)?.title ?? id
+  // D132: a retired rung shows only where the hero reached it; the count and position skip the rest.
+  const shown = rules.rungs.map((entry, index) => ({ entry, index })).filter(({ entry }) => !entry.retired || reachedAt.has(entry.id))
   return {
-    rung: state.rung,
-    total: rules.rungs.length,
+    rung: shown.filter(({ index }) => index < state.rung).length,
+    total: shown.length,
     // D129: rewards waiting for the Claim button, oldest first.
     unclaimed: (state.unclaimed ?? []).map((reward) => ({ id: reward.id, title: titleOf(reward.id), gold: reward.gold, at: reward.at ?? null })),
     current: rung === undefined ? null : { id: rung.id, title: rung.title, blurb: rung.blurb, gold: rung.gold, companion: rung.companion ?? false, ...measureRung(rung.predicate, heroState, content) },
     // Every rung in order: done before the ladder arrived (no tick), reached under it (with its tick), current, or ahead.
-    rungs: rules.rungs.map((entry, index) => ({
+    rungs: shown.map(({ entry, index }) => ({
       id: entry.id,
       title: entry.title,
       blurb: entry.blurb,
       gold: entry.gold,
       companion: entry.companion ?? false,
-      state: index < state.rung ? ('done' as const) : index === state.rung ? ('current' as const) : ('ahead' as const),
+      state: index < state.rung ? ('done' as const) : entry.id === rung?.id ? ('current' as const) : ('ahead' as const),
       reachedAt: reachedAt.get(entry.id) ?? null,
     })),
   }

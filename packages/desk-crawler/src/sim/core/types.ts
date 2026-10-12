@@ -371,6 +371,8 @@ export interface CareerRung {
   /** The rung needs the companion (equip, sell, travel, buy); the device-only player sees it wait. */
   readonly companion?: boolean
   readonly guarantee?: CareerGuarantee
+  /** Retired by a later catalog: kept so stored ids stay valid, but the ladder walks past it without pay or a line. */
+  readonly retired?: true
 }
 
 /** P35: the career ladder. Every hero has one current rung; rungs are checked in order. */

@@ -9,7 +9,7 @@ import { codePoints, composeSummary, fill, rarityLabel, variant, withArticle, ty
 import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } from './raid'
 import { createRng, pickOne, pickWeighted, type Rng } from './rng'
 import { applyTodo } from './todo'
-import { applyCareer, effectiveStance, guaranteeDue, unlocked } from './career'
+import { applyCareer, currentRung, effectiveStance, guaranteeDue, unlocked } from './career'
 import { applyXp, deriveStats, maxHp, pctOf } from './stats'
 import type {
   BagTier,
@@ -345,7 +345,7 @@ class TickRun {
       this.metrics.guarantees = 1
       const { armedAt: _armed, armedCount: _count, ...career } = h.career!
       // Fired: a repeating guarantee is re-armed at the tick's end; any other stands down for the rest of the rung.
-      h.career = content.career!.rungs[career.rung]!.guarantee!.repeat ? career : { ...career, fired: true }
+      h.career = currentRung(content, h)!.guarantee!.repeat ? career : { ...career, fired: true }
     }
     h.counters.ticksExplored += 1
     this.metrics.encounter = kind

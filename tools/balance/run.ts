@@ -678,7 +678,8 @@ function todoReport(logs: HeroLog[], totalDays: number) {
  * ones a device-only player waits on).
  */
 function careerReport(logs: HeroLog[], totalDays: number, content: ContentCatalog, censored: (ticks: (number | undefined)[]) => { p10: number | string; median: number | string; p90: number | string; reached: number }) {
-  const rungs = content.career!.rungs
+  // D132: a retired rung is walked past, so it has nothing to report.
+  const rungs = content.career!.rungs.filter((rung) => !rung.retired)
   const careerGold = logs.reduce((sum, l) => sum + l.careerGold, 0)
   const allGold = logs.reduce((sum, l) => sum + l.goldEarned, 0)
   const standing = new Map<string, number>()

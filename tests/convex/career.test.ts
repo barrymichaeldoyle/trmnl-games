@@ -141,4 +141,31 @@ describe('career ladder backend (P35)', () => {
     for (let slot = 24; slot < 104; slot += 1) await tickAt(t, slot)
     expect((await t.run(async (ctx) => await ctx.db.query('raids').collect())).length).toBeGreaterThan(0)
   })
+
+  it('opens stances at level 7 under v15 and hides the retired stance goal unless it was reached (D132)', { timeout: 30_000 }, async () => {
+    await seedWorld(t, { activeContentVersion: 'v15', currentTick: 10 })
+    const heroId = await seedHero(t, { level: 6 }, 'Di')
+    expect(await errorCode(as(t, 'Di').mutation(api.heroes.setStance, { operationId: opId(), stance: 'bold' }))).toBe('LOCKED')
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { level: 7 }))
+    await as(t, 'Di').mutation(api.heroes.setStance, { operationId: opId(), stance: 'bold' })
+    expect((await heroDoc(t, heroId)).stance).toBe('bold')
+    // Past the retired rung without reaching it: the page neither lists nor counts it.
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { career: { rung: 7, startedTick: 0, reached: [] } }))
+    let view = (await as(t, 'Di').query(api.heroes.mine, {}))!
+    expect(view.career!.rungs.map((rung) => rung.id)).not.toContain('pick_stance')
+    expect(view.career).toMatchObject({ rung: 6, total: 21, current: { id: 'first_trip' } })
+    expect(view.career!.rungs[6]).toMatchObject({ id: 'first_trip', state: 'current' })
+    // A hero who reached it under v12 to v14 keeps it in the list.
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { career: { rung: 7, startedTick: 0, reached: [{ id: 'pick_stance', tick: 5 }] } }))
+    view = (await as(t, 'Di').query(api.heroes.mine, {}))!
+    expect(view.career).toMatchObject({ rung: 7, total: 22 })
+    expect(view.career!.rungs.find((rung) => rung.id === 'pick_stance')).toMatchObject({ state: 'done' })
+    // A pointer still on the retired rung shows the next live one as the goal.
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { career: { rung: 5, startedTick: 0, reached: [] } }))
+    view = (await as(t, 'Di').query(api.heroes.mine, {}))!
+    expect(view.career).toMatchObject({ rung: 5, current: { id: 'level_4' } })
+    expect(view.career!.rungs[5]).toMatchObject({ id: 'level_4', state: 'current' })
+    // The stance card's floor line reads which biome is safe.
+    expect(view.biomes.map((biome) => [biome.id, biome.safe])).toEqual([['office_cubicles', true], ['server_room', false], ['cafeteria_depths', false]])
+  })
 })

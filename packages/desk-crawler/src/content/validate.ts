@@ -172,7 +172,7 @@ export function validateCatalog(content: ContentCatalog): string[] {
   if (content.career) {
     const counters = new Set(Object.keys(zeroCounters()))
     const ids = new Set<string>()
-    if (content.career.rungs.length < 1) problems.push('a career ladder needs at least one rung')
+    if (content.career.rungs.filter((rung) => !rung.retired).length < 1) problems.push('a career ladder needs at least one rung')
     for (const rung of content.career.rungs) {
       if (ids.has(rung.id)) problems.push(`duplicate career rung ${rung.id}`)
       ids.add(rung.id)
@@ -187,6 +187,7 @@ export function validateCatalog(content: ContentCatalog): string[] {
       if (p.kind === 'bag' && !content.bagLadder.tiers.some((tier) => tier.capacity === p.atLeast)) problems.push(`career rung ${rung.id} bag target is not a tier`)
       if (p.kind === 'pouch' && !(content.potionPouch?.tiers ?? []).some((tier) => tier.cap === p.atLeast)) problems.push(`career rung ${rung.id} pouch target is not a tier`)
       const g = rung.guarantee
+      if (rung.retired && g !== undefined) problems.push(`retired career rung ${rung.id} cannot carry a guarantee`)
       if (g !== undefined) {
         if (!Number.isSafeInteger(g.withinTicks) || g.withinTicks < 1 || g.withinTicks > 960) problems.push(`career rung ${rung.id} guarantee must be 1 to 960 adventures`)
         if (g.event === 'choice' && content.choices === undefined) problems.push(`career rung ${rung.id} guarantees a choice without choices`)

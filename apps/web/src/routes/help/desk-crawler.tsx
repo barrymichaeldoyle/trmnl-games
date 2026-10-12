@@ -108,7 +108,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <h2 id="career">Career</h2>
           <p>Your hero always has one goal, shown at the top of the Hero page: “Win your first fight”, “Equip a piece of gear you found”, “Reach the Server Room”, “Buy the Laptop Backpack”. Some are reached by adventuring; the rest are things you do here, on the Bag or Hero page. Reaching a goal shows “Goal reached” on your TRMNL and sets a little gold aside ({CAREER_GOLD.toLocaleString('en-US')} across the whole ladder); press Claim on the Hero page to collect it, whenever you like. Goals never give XP, never expire and never fail; the next one simply waits, and the ladder keeps moving whether or not you have claimed.</p>
           <ul>
-            <li>The Career page under More lists the {CAREER.rungs.length} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
+            <li>The Career page under More lists the {CAREER.rungs.filter((rung) => !rung.retired).length} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
             {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The Server Room opens at level 4 and the Cafeteria Depths at level 8, as before.</li> : null}
             <li>A few early goals come with a guarantee, so a new hero is never left waiting on luck: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is the ordinary roll.</li>
           </ul>
@@ -121,6 +121,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li><strong>Balanced</strong>, the default, drinks below 50%, rests below 35% and sets off again at 75%, with the usual XP.</li>
         <li><strong>Bold</strong> drinks below 35%, rests below 20% and sets off again at 60%. It earns 115% XP from wins but gets knocked out more often.</li>
       </ul>
+      <p>Office Cubicles can't knock a hero out, so Bold has no knockout risk there. In the Server Room and the Cafeteria Depths a knockout costs gold and sends your hero back to Office Cubicles, and Bold is knocked out most often.</p>
       <h2 id="desk-raids">Desk raids</h2>
       <p>While exploring, heroes sometimes raid each other's desks. It happens by itself, to every active hero{UNLOCKS === undefined ? '' : ` from level ${UNLOCKS.raids}`}, with nothing to press and no way to aim it.{UNLOCKS === undefined ? '' : ` Below level ${UNLOCKS.raids} a hero neither raids nor gets raided.`} The raid shows up in both heroes' adventure logs with the other player's public name, and the Hero page keeps a record of your hero's raids.</p>
       <ul>

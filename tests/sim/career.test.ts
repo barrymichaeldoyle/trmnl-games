@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { applyItemChanges } from '@trmnl-games/desk-crawler/sim/core/apply'
-import { canRaid, careerLine, claimReward, effectiveStance, firstOpenRung, guaranteeDue, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { maxHp, xpToLeave } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -303,3 +303,55 @@ describe('guarantees (P35)', () => {
     expect(run({ ...a.nextHero, hp: maxHp(1) }, armed.inventory, 12, 8).event?.summary).toBe(run({ ...a.nextHero, hp: maxHp(1), career: b.nextHero.career!, counters: { ...a.nextHero.counters, ticksExplored: 2 } }, armed.inventory, 12, 8).event?.summary)
   })
 })
+
+describe('stances with desk raids (D132, content v15)', () => {
+  const v14 = catalogs.v14
+  const v15 = catalogs.v15
+  const index = (id: string) => v15.career!.rungs.findIndex((r) => r.id === id)
+  const done = { combatWins: 1, itemsEquipped: 1, tasksCompleted: 3, itemsSold: 1 }
+
+  it('is valid, moves only the stance unlock and retires only the stance goal, keeping every id in place', () => {
+    expect(validateCatalog(v15)).toEqual([])
+    expect(v15.unlocks).toEqual({ ...v14.unlocks, stances: 7 })
+    expect(v15.career!.rungs.map((r) => r.id)).toEqual(v14.career!.rungs.map((r) => r.id))
+    expect(v15.career!.rungs.filter((r) => r.retired).map((r) => r.id)).toEqual(['pick_stance'])
+    expect(v15.career!.rungs.find((r) => r.id === 'first_raid')!.blurb).toMatch(/stance/)
+    expect(validateCatalog({ ...v15, career: { rungs: v15.career!.rungs.map((r) => (r.id === 'pick_stance' ? { ...r, guarantee: { event: 'combat' as const, withinTicks: 4 } } : r)) } })).toContain('retired career rung pick_stance cannot carry a guarantee')
+    expect(validateCatalog({ ...v15, career: { rungs: [{ ...v15.career!.rungs[0]!, retired: true }] } })).toContain('a career ladder needs at least one rung')
+  })
+
+  it('plays balanced until level 7', () => {
+    expect(effectiveStance(v15, { level: 6, stance: 'bold' })).toBeUndefined()
+    expect(effectiveStance(v15, { level: 7, stance: 'bold' })).toBe('bold')
+    expect(effectiveStance(v14, { level: 3, stance: 'bold' })).toBe('bold')
+  })
+
+  it('walks past the retired rung: a hero joining skips it, and the sale goal names level 4 next', () => {
+    const { hero: h } = hero({ level: 3 }, done)
+    expect(firstOpenRung(v14.career!, h, v14)).toBe(index('pick_stance'))
+    expect(firstOpenRung(v15.career!, h, v15)).toBe(index('level_4'))
+    expect(liveRung(v15.career!, index('pick_stance'))).toBe(index('level_4'))
+    const { hero: atSale, inventory } = hero({ level: 3, career: { rung: index('first_sale'), startedTick: 0, reached: [] } }, done)
+    const result = run(atSale, inventory, 10, 1, v15)
+    expect(careerLines(result).map((e) => e.summary)).toContain('Goal reached: Sell a piece of gear. Next: Reach level 4.')
+    expect(result.nextHero.career!.rung).toBe(index('level_4'))
+  })
+
+  it('moves a pointer left on the retired rung on without pay or a line, then pays the next rung that holds', () => {
+    const { hero: h, inventory } = hero({ level: 4, career: { rung: index('pick_stance'), startedTick: 0, reached: [] } }, done)
+    expect(currentRung(v15, h)!.id).toBe('level_4')
+    const result = run(h, inventory, 10, 1, v15)
+    const reached = careerLines(result).flatMap((e) => (e.detail.outcome.variant === 'career' && e.detail.outcome.phase === 'reached' ? [e.detail.outcome.id] : []))
+    expect(reached).toEqual(['level_4'])
+    expect(result.nextHero.career!.rung).toBe(index('first_trip'))
+    expect(result.nextHero.career!.reached.map((r) => r.id)).toEqual(['level_4'])
+  })
+
+  it('keeps a stance goal reached under v14 valid, unclaimed reward included', () => {
+    const state: CareerState = { rung: index('level_4'), startedTick: 0, reached: [{ id: 'pick_stance', tick: 5 }], unclaimed: [{ id: 'pick_stance', gold: 20, tick: 5 }] }
+    expect(careerProblems(state, v15)).toBeUndefined()
+    const { hero: h } = hero({ level: 4, career: state }, done)
+    expect(claimReward(h, v15)).toMatchObject({ reward: { id: 'pick_stance', title: 'Pick a stance', gold: 20 } })
+  })
+})
+
