@@ -109,11 +109,13 @@ function anglerTone(sprite: Sprite, pose: AnglerPose, ch: string, x: number, y: 
 
 /** A canvas that also notes, per cell, the region and grid character last painted there. */
 class PaintedCanvas extends Canvas {
-  readonly regions: string[] = new Array<string>(STAGE_WIDTH * STAGE_HEIGHT).fill('')
-  readonly chars: string[] = new Array<string>(STAGE_WIDTH * STAGE_HEIGHT).fill('')
+  readonly regions: string[]
+  readonly chars: string[]
 
-  constructor() {
-    super(STAGE_WIDTH, STAGE_HEIGHT)
+  constructor(width: number) {
+    super(width, STAGE_HEIGHT)
+    this.regions = new Array<string>(width * STAGE_HEIGHT).fill('')
+    this.chars = new Array<string>(width * STAGE_HEIGHT).fill('')
   }
 
   private note(x: number, y: number, ch: string): void {
@@ -135,16 +137,19 @@ class PaintedCanvas extends Canvas {
   }
 }
 
-/** The stage in full colour as rows of colours (null for clear), painted from the same composition as the device image. */
-export function paintedScene(key: SceneKey): Array<Array<string | null>> {
-  const c = new PaintedCanvas()
+/**
+ * The stage in full colour as rows of colours (null for clear), painted from the same composition as the device
+ * image, at the composed width or any width the device may show (`clampStageWidth`).
+ */
+export function paintedScene(key: SceneKey, width = STAGE_WIDTH): Array<Array<string | null>> {
+  const c = new PaintedCanvas(width)
   composeScene(key, c)
   const angler = anglerPlacement(key)
   const table = key.band === 'night' ? NIGHT : key.band === 'day' ? DAY : LOW_SUN
   return Array.from({ length: STAGE_HEIGHT }, (_, y) =>
-    Array.from({ length: STAGE_WIDTH }, (_, x) => {
-      const ch = c.chars[y * STAGE_WIDTH + x]!
-      const region = c.regions[y * STAGE_WIDTH + x]!
+    Array.from({ length: width }, (_, x) => {
+      const ch = c.chars[y * width + x]!
+      const region = c.regions[y * width + x]!
       if (!ch) return null
       if (region === 'angler') return anglerTone(angler.sprite, key.pose, ch, x - angler.left, y - angler.top)
       const tones: Tones = region.startsWith('fish:') ? fishTones(region.slice(5)) : (table[region] ?? {})
@@ -157,29 +162,29 @@ export function paintedScene(key: SceneKey): Array<Array<string | null>> {
   )
 }
 
-/** The painted scene as a stage-sized PNG data URI. */
-export function paintedSceneUri(key: SceneKey): string {
-  const grid = paintedScene(key)
+/** The painted scene as a PNG data URI, `width` columns by the stage's 40 rows. */
+export function paintedSceneUri(key: SceneKey, width = STAGE_WIDTH): string {
+  const grid = paintedScene(key, width)
   const colours = new Map<string, number>([['', 0]])
-  const index = new Uint8Array(STAGE_WIDTH * STAGE_HEIGHT)
+  const index = new Uint8Array(width * STAGE_HEIGHT)
   grid.forEach((row, y) =>
     row.forEach((colour, x) => {
       const id = colour ?? ''
       if (!colours.has(id)) colours.set(id, colours.size)
-      index[y * STAGE_WIDTH + x] = colours.get(id)!
+      index[y * width + x] = colours.get(id)!
     }),
   )
   const palette = [...colours.keys()].map((hex) => (hex ? ([1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) as [number, number, number]) : ([0, 0, 0] as const)))
-  const png = encodePngIndexed(STAGE_WIDTH, STAGE_HEIGHT, index, palette, 0)
+  const png = encodePngIndexed(width, STAGE_HEIGHT, index, palette, 0)
   let binary = ''
   for (const byte of png) binary += String.fromCharCode(byte)
   return `data:image/png;base64,${btoa(binary)}`
 }
 
-/** The scene key behind a device image URL (`scene_base/<scale>.png`), or null for anything that is not one. */
+/** The scene key behind a device image URL (`scene_base/<width>/<scale>.png`), or null for anything that is not one. */
 export function sceneKeyFromUrl(url: string): SceneKey | null {
   const parsed = parseScenePath(url.replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, ''))
   if (!parsed) return null
-  const { scale: _scale, ...key } = parsed
+  const { scale: _scale, width: _width, ...key } = parsed
   return key
 }

@@ -5,13 +5,25 @@ import { FISH_LARGE, fishSprite } from './fish'
 
 /**
  * Slow Cast scene (slow-cast.md "Device"): sky by local time band, the water's backdrop, the forecast's weather,
- * the angler and the line, on the same 152x40 stage as Desk Crawler so layouts scale it the same way. A held catch
- * draws the large fish at the angler's hands. Deterministic per key, so each image URL is immutable.
+ * the angler and the line, on a 40-row stage whose width each layout chooses (D125). The angler, the pier or bank
+ * and the cast are anchored to the left edge; the far backdrop (the mill, the willow, the lighthouse, the moon and
+ * the sun) to the right edge; the horizon, the ripples and the weather run the whole width. So a slot asks for the
+ * width that fills it at a whole-number scale and the water reaches both edges. 152 is the composed width every
+ * sprite was placed on. A held catch draws the large fish at the angler's hands. Deterministic per key and width, so
+ * each image URL is immutable.
  */
-/** v2 (S6) adds the newest fly on the angler's hat. */
-export const SCENE_VERSION = 2
+/** v2 (S6) adds the newest fly on the angler's hat; v3 (D125) takes the stage width from the URL. */
+export const SCENE_VERSION = 3
 export const STAGE_WIDTH = 152
 export const STAGE_HEIGHT = 40
+/** The narrowest stage: the cast still lands clear of the right-anchored backdrop. The widest bounds the served image. */
+export const MIN_STAGE_WIDTH = 120
+export const MAX_STAGE_WIDTH = 400
+export const clampStageWidth = (width: number) => Math.min(MAX_STAGE_WIDTH, Math.max(MIN_STAGE_WIDTH, Math.floor(width)))
+/** Backdrop drawings at or past this column move with the right edge; nearer ones stay with the angler. */
+const RIGHT_ANCHOR = 76
+/** The column a drawing placed at `x` on the composed stage takes on a canvas of another width. */
+const anchored = (c: Canvas, x: number) => (x >= RIGHT_ANCHOR ? x + c.width - STAGE_WIDTH : x)
 export const FULL_SCALE = 5
 export const SMALL_SCALE = 2
 export const LARGE_SCALE = 6
@@ -135,64 +147,64 @@ function sky(c: Canvas, band: TimeBand, weather: Weather): void {
   const covered = weather === 'overcast' || weather === 'rain' || weather === 'fog'
   if (band === 'night') {
     c.region = 'star'
-    if (!covered) for (const [x, y] of [[12, 3], [40, 8], [70, 2], [98, 6], [118, 11], [140, 4]] as const) c.draw(star, x, y)
+    if (!covered) for (const [x, y] of [[12, 3], [40, 8], [70, 2], [98, 6], [118, 11], [140, 4]] as const) c.draw(star, anchored(c, x), y)
     c.region = 'moon'
-    if (weather !== 'overcast' && weather !== 'rain') c.draw(moon, 128, 3)
+    if (weather !== 'overcast' && weather !== 'rain') c.draw(moon, anchored(c, 128), 3)
   } else if (band === 'day') {
     c.region = 'sun'
-    if (!covered) c.draw(sun, 128, 2)
+    if (!covered) c.draw(sun, anchored(c, 128), 2)
     c.region = 'cloud'
     c.draw(cloud, 30, 4)
   } else {
     // Dawn rises on the right, dusk sets on the left: the low sun sits on the horizon.
     c.region = 'sun'
-    if (!covered) c.draw(lowSun, band === 'dawn' ? 138 : 2, HORIZON - 5)
+    if (!covered) c.draw(lowSun, band === 'dawn' ? anchored(c, 138) : 2, HORIZON - 5)
     c.region = 'dusk'
-    if (band === 'dusk') c.rect(0, 0, STAGE_WIDTH, 3, '.')
+    if (band === 'dusk') c.rect(0, 0, c.width, 3, '.')
   }
   c.region = 'cloud'
   if (covered) {
     c.draw(bigCloud, 10, 2)
     c.draw(bigCloud, 62, 0)
-    c.draw(bigCloud, 112, 3)
+    c.draw(bigCloud, anchored(c, 112), 3)
   }
   if (weather === 'wind') {
-    c.draw(cloud, 92, 9)
+    c.draw(cloud, anchored(c, 92), 9)
     c.region = 'wind'
-    for (const [x, y] of [[20, 9], [48, 14], [84, 5], [110, 15], [136, 10]] as const) c.hline(x, x + 7, y, '#')
+    for (const [x, y] of [[20, 9], [48, 14], [84, 5], [110, 15], [136, 10]] as const) c.hline(anchored(c, x), anchored(c, x) + 7, y, '#')
   }
 }
 
 function backdrop(c: Canvas, water: WaterId): void {
   c.region = 'horizon'
-  c.hline(0, STAGE_WIDTH - 1, HORIZON, '#')
+  c.hline(0, c.width - 1, HORIZON, '#')
   if (water === 'millpond') {
     c.region = 'mill'
-    c.draw(mill, 110, HORIZON - 8)
+    c.draw(mill, anchored(c, 110), HORIZON - 8)
     c.region = 'reeds'
     c.draw(reeds, 62, HORIZON - 4)
-    c.draw(reeds, 88, HORIZON - 4)
+    c.draw(reeds, anchored(c, 88), HORIZON - 4)
   } else if (water === 'river_bend') {
     c.region = 'willow'
     c.draw(willow, 70, HORIZON - 8)
-    c.draw(willow, 118, HORIZON - 8)
+    c.draw(willow, anchored(c, 118), HORIZON - 8)
     // The far bank's edge sits just above the river.
     c.region = 'far_bank'
-    c.hline(60, STAGE_WIDTH - 1, HORIZON - 1, ':')
+    c.hline(60, c.width - 1, HORIZON - 1, ':')
   } else {
     c.region = 'lighthouse'
-    c.draw(lighthouse, 136, HORIZON - 8)
+    c.draw(lighthouse, anchored(c, 136), HORIZON - 8)
     c.region = 'boat'
-    c.draw(boat, 96, HORIZON - 7)
+    c.draw(boat, anchored(c, 96), HORIZON - 7)
     c.region = 'gull'
     c.draw(gull, 70, 8)
-    c.draw(gull, 82, 12)
+    c.draw(gull, anchored(c, 82), 12)
   }
   // Water: ripples, wider apart toward the viewer.
   c.region = 'ripple'
   for (let y = HORIZON + 2, row = 0; y < STAGE_HEIGHT; y += 3 + Math.floor(row / 2), row += 1) {
     const gap = 9 + row * 3
-    for (let x = (row * 5) % gap; x < STAGE_WIDTH; x += gap) c.hline(x, x + (water === 'harbour_pier' ? 3 : 2), y, water === 'harbour_pier' && row % 2 ? '#' : ':')
+    for (let x = (row * 5) % gap; x < c.width; x += gap) c.hline(x, x + (water === 'harbour_pier' ? 3 : 2), y, water === 'harbour_pier' && row % 2 ? '#' : ':')
   }
 }
 
@@ -221,11 +233,11 @@ function nearGround(c: Canvas, water: WaterId): number {
 
 function weatherOver(c: Canvas, weather: Weather): void {
   c.region = 'rain'
-  if (weather === 'rain') for (let y = 1; y < STAGE_HEIGHT; y += 4) for (let x = (y * 3) % 7; x < STAGE_WIDTH; x += 7) c.paint(x, y, '#')
+  if (weather === 'rain') for (let y = 1; y < STAGE_HEIGHT; y += 4) for (let x = (y * 3) % 7; x < c.width; x += 7) c.paint(x, y, '#')
   c.region = 'fog'
   if (weather === 'fog') {
-    for (let y = HORIZON - 6; y <= HORIZON + 6; y += 1) for (let x = 0; x < STAGE_WIDTH; x += 1) if ((x + y * 3) % 5 === 0 && c.ink[y * STAGE_WIDTH + x]) c.set(x, y, false)
-    for (let y = HORIZON - 4; y <= HORIZON + 4; y += 2) for (let x = (y % 4) * 2; x < STAGE_WIDTH; x += 8) c.set(x, y, true)
+    for (let y = HORIZON - 6; y <= HORIZON + 6; y += 1) for (let x = 0; x < c.width; x += 1) if ((x + y * 3) % 5 === 0 && c.ink[y * c.width + x]) c.set(x, y, false)
+    for (let y = HORIZON - 4; y <= HORIZON + 4; y += 2) for (let x = (y % 4) * 2; x < c.width; x += 8) c.set(x, y, true)
   }
 }
 
@@ -278,7 +290,10 @@ export function anglerPlacement(key: SceneKey): { sprite: Sprite; left: number; 
   return { sprite, left: key.water === 'harbour_pier' ? 26 : 18, top: ground - sprite.height }
 }
 
-/** Compose the scene onto a fresh canvas, or onto one passed in (the companion's painted canvas notes each region). */
+/**
+ * Compose the scene onto a fresh canvas of the composed width, or onto one passed in: a wider or narrower stage
+ * (`clampStageWidth`), or the companion's painted canvas, which notes each region.
+ */
 export function composeScene(key: SceneKey, c: Canvas = new Canvas(STAGE_WIDTH, STAGE_HEIGHT)): Canvas {
   sky(c, key.band, key.weather)
   backdrop(c, key.water)

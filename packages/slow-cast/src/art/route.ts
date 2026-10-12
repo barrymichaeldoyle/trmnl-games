@@ -5,14 +5,15 @@ import { anglerPoses, type AnglerPose } from './angler'
 import { Canvas } from '@trmnl-games/engine/art/canvas'
 import { FISH_LARGE, FISH_TRAITS, fishSprite } from './fish'
 import { FLIES } from '../content/flies'
-import { composeScene, SCENE_VERSION, type SceneKey } from './scene'
+import { composeScene, MAX_STAGE_WIDTH, MIN_STAGE_WIDTH, SCENE_VERSION, STAGE_HEIGHT, type SceneKey } from './scene'
 
 /**
  * Slow Cast art paths, served by the Convex art route under `/art/sc/` (slow-cast.md "Device"):
- *   /art/sc/scene/v2/<water>/<band>/<weather>/<pose>/<fish|none>/<fly|nofly>/<scale>.png
+ *   /art/sc/scene/v3/<water>/<band>/<weather>/<pose>/<fish|none>/<fly|nofly>/<width>/<scale>.png
  *   /art/sc/qr/v1/<target>/<scale>.png
  *   /art/sc/fish/v1/<species>/<scale>.png   (template v2's newest-catch panel)
- * Every part is allowlisted, so the route can never draw arbitrary text or mint arbitrary codes.
+ * Every part is allowlisted and the stage width bounded (`MIN_STAGE_WIDTH` to `MAX_STAGE_WIDTH`, D125), so the
+ * route can never draw arbitrary text, mint arbitrary codes or render an unbounded image.
  */
 const WATERS = new Set<WaterId>(['millpond', 'river_bend', 'harbour_pier'])
 const BANDS = new Set<TimeBand>(['dawn', 'day', 'dusk', 'night'])
@@ -37,16 +38,21 @@ export const FISH_VERSION = 1
 export const FISH_SCALES = new Set([2, 3, 4, 5, 6, 8])
 export const fishBase = (speciesId: string) => `/art/sc/fish/v${FISH_VERSION}/${speciesId}`
 
-export function parseScenePath(path: string): (SceneKey & { scale: number }) | null {
-  const match = /^\/art\/sc\/scene\/v(\d+)\/([a-z_]+)\/([a-z]+)\/([a-z]+)\/([a-z]+)\/([a-z_]+)\/([a-z_]+)\/(\d+)\.png$/.exec(path)
+/** The scene image path for a key: `sceneBase(key)` then the stage width and the whole-number scale. */
+export const scenePath = (key: SceneKey, width: number, scale: number) => `${sceneBase(key)}/${width}/${scale}.png`
+
+export function parseScenePath(path: string): (SceneKey & { width: number; scale: number }) | null {
+  const match = /^\/art\/sc\/scene\/v(\d+)\/([a-z_]+)\/([a-z]+)\/([a-z]+)\/([a-z]+)\/([a-z_]+)\/([a-z_]+)\/(\d{3})\/(\d+)\.png$/.exec(path)
   if (!match || Number(match[1]) !== SCENE_VERSION) return null
-  const [, , water, band, weather, pose, fish, fly, scaleText] = match
+  const [, , water, band, weather, pose, fish, fly, widthText, scaleText] = match
   if (fly !== 'nofly' && !FLIES.some((f) => f.id === fly)) return null
+  const width = Number(widthText)
   const scale = Number(scaleText)
+  if (width < MIN_STAGE_WIDTH || width > MAX_STAGE_WIDTH) return null
   if (!WATERS.has(water as WaterId) || !BANDS.has(band as TimeBand) || !WEATHERS.has(weather as Weather) || !(pose! in anglerPoses) || !SCENE_SCALES.has(scale)) return null
   if (fish !== 'none' && !(fish! in FISH_TRAITS)) return null
   if ((pose === 'holding') !== (fish !== 'none') && fish !== 'none') return null
-  return { water: water as WaterId, band: band as TimeBand, weather: weather as Weather, pose: pose as AnglerPose, fish: fish === 'none' ? null : fish!, fly: fly === 'nofly' ? null : fly!, scale }
+  return { water: water as WaterId, band: band as TimeBand, weather: weather as Weather, pose: pose as AnglerPose, fish: fish === 'none' ? null : fish!, fly: fly === 'nofly' ? null : fly!, width, scale }
 }
 
 export function renderSlowCastArt(path: string, origin: string): { png: Uint8Array; immutable: boolean } | null {
@@ -69,6 +75,6 @@ export function renderSlowCastArt(path: string, origin: string): { png: Uint8Arr
   }
   const parsed = parseScenePath(path)
   if (!parsed) return null
-  const { width, height, ink } = composeScene(parsed).scaled(parsed.scale)
+  const { width, height, ink } = composeScene(parsed, new Canvas(parsed.width, STAGE_HEIGHT)).scaled(parsed.scale)
   return { png: encodePng1Bit(width, height, ink), immutable: true }
 }

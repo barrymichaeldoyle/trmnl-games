@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { Liquid } from 'liquidjs'
 import { contentV1 } from '@trmnl-games/slow-cast/content'
 import { buildPayload, deviceStories } from '@trmnl-games/slow-cast/payload'
-import { fishBase, parseScenePath, renderSlowCastArt, sceneBase, SCENE_SCALES } from '@trmnl-games/slow-cast/art/route'
+import { fishBase, parseScenePath, renderSlowCastArt, sceneBase, scenePath, SCENE_SCALES } from '@trmnl-games/slow-cast/art/route'
 import { SC_MARKS, STORY_GLYPHS } from '@trmnl-games/slow-cast/art/marks'
-import { composeScene, poseFor, STAGE_HEIGHT, STAGE_WIDTH } from '@trmnl-games/slow-cast/art/scene'
+import { Canvas } from '@trmnl-games/engine/art/canvas'
+import { clampStageWidth, composeScene, MAX_STAGE_WIDTH, MIN_STAGE_WIDTH, poseFor, STAGE_HEIGHT, STAGE_WIDTH } from '@trmnl-games/slow-cast/art/scene'
 import { FISH_TRAITS, fishSprite } from '@trmnl-games/slow-cast/art/fish'
 import { screenMarkup } from '@trmnl-games/slow-cast/templates/screen'
 import { previewScenarios, PREVIEW_NOW } from '@trmnl-games/slow-cast/templates/previewScenarios'
@@ -38,15 +39,42 @@ describe('Slow Cast scenes and codes', () => {
           }
   })
 
+  it('composes any stage width the layouts ask for: the cast stays with the angler, the far backdrop with the right edge', () => {
+    const key = { water: 'harbour_pier', band: 'night', weather: 'clear', pose: 'waiting', fish: null } as const
+    const composed = composeScene(key)
+    // A column's rows from the top: the whole stage, or only the sky and backdrop above the horizon (row 21), under which the ripples' phase runs from the left.
+    const column = (c: Canvas, x: number, rows = STAGE_HEIGHT) => Array.from({ length: rows }, (_, y) => c.ink[y * c.width + x]).join('')
+    const columns = (c: Canvas, from: number, to: number, rows = STAGE_HEIGHT) => Array.from({ length: to - from }, (_, i) => column(c, from + i, rows)).join('|')
+    for (const width of [MIN_STAGE_WIDTH, 182, 220, MAX_STAGE_WIDTH]) {
+      const wide = composeScene(key, new Canvas(width, STAGE_HEIGHT))
+      expect(wide.width).toBe(width)
+      // The pier, the angler and the cast are unchanged at the left; the lighthouse and the moon sit the same distance from the right edge.
+      expect(columns(wide, 0, 48)).toBe(columns(composed, 0, 48))
+      expect(columns(wide, width - 16, width, 21)).toBe(columns(composed, STAGE_WIDTH - 16, STAGE_WIDTH, 21))
+      // The horizon runs the whole width.
+      for (let x = 0; x < width; x += 1) expect(wide.ink[21 * width + x], `horizon at ${x} of ${width}`).toBe(1)
+    }
+    expect(clampStageWidth(90)).toBe(MIN_STAGE_WIDTH)
+    expect(clampStageWidth(119.9)).toBe(MIN_STAGE_WIDTH)
+    expect(clampStageWidth(153.7)).toBe(153)
+    expect(clampStageWidth(9000)).toBe(MAX_STAGE_WIDTH)
+  })
+
   it('round-trips scene paths and refuses anything off the allowlist', () => {
-    const base = sceneBase({ water: 'river_bend', band: 'dusk', weather: 'rain', pose: 'holding', fish: 'salmon', fly: 'zulu' })
-    expect(base).toBe('/art/sc/scene/v2/river_bend/dusk/rain/holding/salmon/zulu')
-    expect(parseScenePath(`${base}/5.png`)).toMatchObject({ water: 'river_bend', fish: 'salmon', fly: 'zulu', scale: 5 })
-    expect(sceneBase({ water: 'millpond', band: 'day', weather: 'clear', pose: 'waiting', fish: 'roach' })).toBe('/art/sc/scene/v2/millpond/day/clear/waiting/none/nofly')
-    for (const bad of [`${base}/7.png`, '/art/sc/scene/v2/ocean/day/clear/waiting/none/nofly/5.png', '/art/sc/scene/v2/millpond/day/clear/waiting/shark/nofly/5.png', '/art/sc/scene/v2/millpond/day/clear/waiting/none/dragonfly/5.png', '/art/sc/scene/v1/millpond/day/clear/waiting/none/5.png', '/art/sc/qr/v1/anything/3.png'])
+    const key = { water: 'river_bend', band: 'dusk', weather: 'rain', pose: 'holding', fish: 'salmon', fly: 'zulu' } as const
+    const base = sceneBase(key)
+    expect(base).toBe('/art/sc/scene/v3/river_bend/dusk/rain/holding/salmon/zulu')
+    expect(scenePath(key, 182, 5)).toBe(`${base}/182/5.png`)
+    expect(parseScenePath(`${base}/182/5.png`)).toMatchObject({ water: 'river_bend', fish: 'salmon', fly: 'zulu', width: 182, scale: 5 })
+    expect(sceneBase({ water: 'millpond', band: 'day', weather: 'clear', pose: 'waiting', fish: 'roach' })).toBe('/art/sc/scene/v3/millpond/day/clear/waiting/none/nofly')
+    for (const bad of [`${base}/152/7.png`, `${base}/5.png`, `${base}/119/5.png`, `${base}/401/5.png`, `${base}/1520/5.png`, `${base}/0152/5.png`, '/art/sc/scene/v3/ocean/day/clear/waiting/none/nofly/152/5.png', '/art/sc/scene/v3/millpond/day/clear/waiting/shark/nofly/152/5.png', '/art/sc/scene/v3/millpond/day/clear/waiting/none/dragonfly/152/5.png', '/art/sc/scene/v2/millpond/day/clear/waiting/none/nofly/5.png', '/art/sc/scene/v1/millpond/day/clear/waiting/none/5.png', '/art/sc/qr/v1/anything/3.png'])
       expect(renderSlowCastArt(bad, 'https://trmnlgames.com'), bad).toBeNull()
     expect(renderSlowCastArt('/art/sc/qr/v1/home/3.png', 'https://trmnlgames.com')?.immutable).toBe(false)
-    expect(renderSlowCastArt(`${base}/2.png`, 'https://trmnlgames.com')?.immutable).toBe(true)
+    expect(renderSlowCastArt(`${base}/152/2.png`, 'https://trmnlgames.com')?.immutable).toBe(true)
+    // The served PNG is the stage width over the scale: its IHDR holds the width at byte 16 and the height at 20.
+    const png = renderSlowCastArt(`${base}/220/2.png`, 'https://trmnlgames.com')!.png
+    const view = new DataView(png.buffer, png.byteOffset, png.byteLength)
+    expect([view.getUint32(16), view.getUint32(20)]).toEqual([440, STAGE_HEIGHT * 2])
     expect([...SCENE_SCALES]).toEqual([1, 2, 3, 4, 5, 6, 8, 10])
   })
 
@@ -84,7 +112,7 @@ describe('Slow Cast payload', () => {
       bait_label: 'Maggots 34',
       attention: null,
       latest_catch: { species_id: 'barbel', name: 'Barbel', weight_label: '1.9 kg' },
-      scene_base: `${ART}/art/sc/scene/v2/river_bend/dusk/overcast/holding/barbel/red_tag`,
+      scene_base: `${ART}/art/sc/scene/v3/river_bend/dusk/overcast/holding/barbel/red_tag`,
       qr_base: `${ART}/art/sc/qr/v1/home`,
       recap: 'Last 12 hours: 3 fish, best 1.9 kg Barbel, 1 got away',
     })

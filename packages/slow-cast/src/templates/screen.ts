@@ -2,18 +2,21 @@
  * Slow Cast screen markup (slow-cast.md "Device"). TRMNL framework 3.4 Liquid over the flat payload. TRMNL wraps
  * each layout in its own `.view`, so markup starts at the layout and closes with the title bar (the framework sizes a
  * layout only when the title bar is its next sibling). Each layout has a landscape and a portrait arrangement; images
- * are whole-number scales of 1-bit art (`scene_base` and `qr_base` plus `/<scale>.png`), chosen per size and screen so
- * every pixel stays crisp: `lg:` swaps in the TRMNL X's larger scales. User text arrives only as escaped variables.
+ * are whole-number scales of 1-bit art (`qr_base` plus `/<scale>.png`; `scene_base` plus `/<width>/<scale>.png`),
+ * chosen per size and screen so every pixel stays crisp: `lg:` swaps in the TRMNL X's larger scales. User text
+ * arrives only as escaped variables.
  *
  * Template v2 (2026-10-10) brings the screen up to Desk Crawler's HUD: marks instead of words for the counters
  * (cooler, bait, gold, logbook), progress to the next title as ten half-step ticks, the time of day and weather as marks,
  * a glyph before every story, the attention line inverted behind its mark, the water's weekly board of heaviest fish,
  * and the recap as facts behind their marks.
  * The OG's full landscape shows five stories where three left the foot empty; the X's sets its stories beside the board.
+ * Template v4 (D125) asks for the stage width that fills each scene slot at its whole-number scale (scene v3), so
+ * the water reaches the slot's edges instead of floating in it, and lifts the OG's landscape half to 3x.
  */
 import { markUri, STORY_GLYPHS, type ScMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 3
+export const TEMPLATE_VERSION = 4
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -87,9 +90,14 @@ const oriented = (classes: string, landscape: string, portrait: string, narrowPo
 <div class="${classes} landscape:hidden">${portrait}
 </div>${titleBar('portrait', narrowPortrait)}`
 
-/** The scene at an OG scale and a larger X scale. */
-const scene = (og: number, x: number, classes = 'stretch-x') =>
-  `{% if scene_base != "" %}<div class="${classes} no-shrink flex flex--row flex--center-x"><img class="image lg:hidden" src="{{ scene_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ scene_base }}/${x}.png" alt=""></div>{% endif %}`
+/**
+ * The scene for one slot: the OG's stage width and scale, then the X's. Each width is the slot's width over the scale
+ * (over 1.8 times the scale on the X, which draws images that much larger), so the image fills the slot edge to edge:
+ * the OG's full view is 780 wide inside its padding, its side view 365, its portrait half 440 and its portrait side
+ * 205; the X's full view is 1836 and its side 873 (`tools/trmnl` measures these in the framework previews).
+ */
+const scene = (og: readonly [width: number, scale: number], x: readonly [width: number, scale: number], classes = 'stretch-x') =>
+  `{% if scene_base != "" %}<div class="${classes} no-shrink flex flex--row flex--center-x"><img class="image lg:hidden" src="{{ scene_base }}/${og[0]}/${og[1]}.png" alt=""><img class="image hidden lg:block" src="{{ scene_base }}/${x[0]}/${x[1]}.png" alt=""></div>{% endif %}`
 
 const qr = (og: number, x: number) =>
   `{% if qr_base != "" %}<div class="no-shrink" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt=""></div>{% endif %}`
@@ -171,14 +179,14 @@ const header = (qrOg: number, qrX: number) => `
 const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
   ready(`${header(2, 4)}
-    <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene(4, 4, '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene(5, 5)}{% endif %}</div>
+    <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
     <div class="lg:hidden flex flex--col flex--left flex--top gap--small stretch-x no-shrink">${attention(1)}{% if attention %}${stories(4)}{% else %}${stories(5)}{% endif %}</div>
-    <div class="hidden lg:flex flex--col flex--left flex--top gap--medium stretch-x no-shrink">${scene(6, 6)}${attention(1)}
+    <div class="hidden lg:flex flex--col flex--left flex--top gap--medium stretch-x no-shrink">${scene([170, 6], [170, 6])}${attention(1)}
       <div class="flex flex--row flex--top gap--large stretch-x"><div class="grow w--min-0">${stories(5, 2)}</div><div class="no-shrink w--[38%] flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
     ${recap()}`),
   ready(`${header(2, 4)}
-    ${scene(3, 8)}
+    ${scene([153, 3], [152, 5])}
     ${attention(3)}
     ${stories(5, 2, 'label lg:title')}
     ${catchPanel(3, 8)}
@@ -189,7 +197,7 @@ const full = oriented(
 const halfHorizontal = oriented(
   'layout layout--row layout--left layout--stretch-y gap--medium',
   ready(`
-    <div class="no-shrink flex flex--col flex--center-y gap--small">${scene(2, 4)}</div>
+    <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [152, 4])}</div>
     <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
       ${statusRow()}
@@ -200,7 +208,7 @@ const halfHorizontal = oriented(
   ready(`
     <div class="flex flex--col flex--left gap--small grow w--min-0 h--full">
       <div class="flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--row flex--left flex--center-y gap--small grow w--min-0">${nameLine()}</div>${qr(2, 4)}</div>
-      ${scene(2, 6)}
+      ${scene([220, 2], [185, 4])}
       ${statusRow()}
       ${counters()}
       {% if attention %}${attention()}{% else %}${stories(2, 2)}{% endif %}
@@ -211,7 +219,7 @@ const halfVertical = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small',
   ready(`
     <div class="no-shrink flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--row flex--left flex--center-y gap--small grow w--min-0">${nameLine()}</div>${qr(2, 4)}</div>
-    ${scene(2, 5)}
+    ${scene([182, 2], [161, 3])}
     ${xpTicks()}
     ${statusRow()}
     ${counters()}
@@ -220,7 +228,7 @@ const halfVertical = oriented(
     ${recap()}`),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
-    ${scene(1, 4)}
+    ${scene([205, 1], [177, 2])}
     ${xpTicks()}
     ${statusRow()}
     ${counters('short')}

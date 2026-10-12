@@ -54,13 +54,23 @@ describe('companion painted scene', () => {
             // Every inked device cell is painted; the painted scene adds paper and shade tones but never loses ink.
             for (let y = 0; y < STAGE_HEIGHT; y += 1) for (let x = 0; x < STAGE_WIDTH; x += 1) if (device.ink[y * STAGE_WIDTH + x]) expect(grid[y]![x]).not.toBeNull()
           }
+    // At another stage width (D125) the painted scene is the device's composition at that width, column for column.
+    for (const width of [120, 220]) {
+      const key: SceneKey = { water: 'harbour_pier', band: 'dawn', weather: 'fog', pose: 'waiting', fish: null, fly: null }
+      const grid = paintedScene(key, width)
+      const device = composeScene(key, new Canvas(width, STAGE_HEIGHT))
+      expect(grid[0]).toHaveLength(width)
+      for (let y = 0; y < STAGE_HEIGHT; y += 1) for (let x = 0; x < width; x += 1) if (device.ink[y * width + x]) expect(grid[y]![x], `${width}:${x},${y}`).not.toBeNull()
+      expect(paintedSceneUri(key, width)).toMatch(/^data:image\/png;base64,/)
+    }
   })
 
   it('reads the scene key back from a device image URL and encodes a PNG', () => {
     const key: SceneKey = { water: 'river_bend', band: 'dusk', weather: 'rain', pose: 'holding', fish: 'salmon', fly: 'zulu' }
-    expect(sceneKeyFromUrl(`https://art.test${sceneBase(key)}/3.png?x=1`)).toEqual(key)
-    expect(sceneKeyFromUrl(`${sceneBase(key)}/7.png`)).toBeNull()
-    expect(sceneKeyFromUrl('/art/sc/scene/v2/ocean/day/clear/waiting/none/nofly/3.png')).toBeNull()
+    expect(sceneKeyFromUrl(`https://art.test${sceneBase(key)}/182/3.png?x=1`)).toEqual(key)
+    expect(sceneKeyFromUrl(`${sceneBase(key)}/182/7.png`)).toBeNull()
+    expect(sceneKeyFromUrl(`${sceneBase(key)}/3.png`)).toBeNull()
+    expect(sceneKeyFromUrl('/art/sc/scene/v3/ocean/day/clear/waiting/none/nofly/152/3.png')).toBeNull()
     expect(paintedSceneUri(key)).toMatch(/^data:image\/png;base64,/)
   })
 

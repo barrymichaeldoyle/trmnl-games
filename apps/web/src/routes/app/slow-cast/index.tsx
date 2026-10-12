@@ -35,7 +35,7 @@ function DockPage() {
   const here = dock.waters?.find((w) => w.id === angler.waterId)
   const destination = angler.travelTo ? dock.waters?.find((w) => w.id === angler.travelTo) : null
   // The scene the device shows, painted here in colour; without a device image yet, the dock's own water, weather and status draw the same scene.
-  const scene: SceneKey | null = (typeof preview?.scene_base === 'string' && preview.scene_base ? sceneKeyFromUrl(`${preview.scene_base}/3.png`) : null) ?? sceneFromDock(dock)
+  const scene: SceneKey | null = (typeof preview?.scene_base === 'string' && preview.scene_base ? sceneKeyFromUrl(`${preview.scene_base}/152/3.png`) : null) ?? sceneFromDock(dock)
   // While travelling, bait choices are for the water the angler is heading to: the next cast is there.
   const baitWater = destination ?? here
   // Bait this water uses that the angler holds, plus the one in use even when it ran out.

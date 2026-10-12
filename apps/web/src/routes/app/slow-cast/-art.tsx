@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { inked, type Sprite } from '@trmnl-games/engine/art/canvas'
 import { fishSprite, FISH_LARGE, FISH_SMALL } from '@trmnl-games/slow-cast/art/fish'
 import { paintedSceneUri, sceneBands } from '@trmnl-games/slow-cast/art/sceneColour'
-import type { SceneKey } from '@trmnl-games/slow-cast/art/scene'
+import { clampStageWidth, MIN_STAGE_WIDTH, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/slow-cast/art/scene'
 import { fishTones, flyTones, type Tones } from '@trmnl-games/slow-cast/art/tones'
 
 /**
@@ -39,22 +39,41 @@ export function FlyIcon({ id, rows, scale = 4, className = '' }: { id: string; r
   return <PaintedSprite sprite={{ width: rows[0]!.length, height: rows.length, rows }} tones={flyTones(id)} scale={scale} className={className} />
 }
 
+/** The scene's scale for the width of its box: 2x where a 3x stage would be narrower than the composer allows, 4x from 600px. */
+const sceneScale = (boxWidth: number) => (boxWidth < 3 * MIN_STAGE_WIDTH ? 2 : boxWidth < 600 ? 3 : 4)
+
 /**
- * The dock's scene: the device's composition painted in colour over its sky and water bands, at a whole-number
- * scale so the pixels stay crisp (2x on phones, 3x from 640px, 4x from 1024px); the bands fill the rest of the width.
+ * The dock's scene: the device's composition painted in colour over its sky and water bands, edge to edge (D125).
+ * The box's width is measured, and the stage composed at that width over a whole-number scale (2x on narrow phones,
+ * 3x on phones, 4x from 600px) so the pixels stay crisp and the water reaches both edges; the server render and the
+ * first frame use the composed width, cropped to the box, until the measurement lands.
  */
 export function Scene({ sceneKey, alt }: { sceneKey: SceneKey; alt: string }) {
   const id = JSON.stringify(sceneKey)
+  const box = useRef<HTMLDivElement>(null)
+  const [boxWidth, setBoxWidth] = useState<number | null>(null)
+  useEffect(() => {
+    const el = box.current
+    if (!el) return
+    const measure = () => setBoxWidth(el.clientWidth)
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+  const scale = boxWidth ? sceneScale(boxWidth) : 3
+  const width = boxWidth ? clampStageWidth(boxWidth / scale) : STAGE_WIDTH
   // Keyed on the key's text: a fresh dock object with the same scene must not repaint.
-  const painted = useMemo(() => paintedSceneUri(JSON.parse(id) as SceneKey), [id])
+  const painted = useMemo(() => paintedSceneUri(JSON.parse(id) as SceneKey, width), [id, width])
   const bands = sceneBands(sceneKey)
   return (
-    <div className="relative overflow-hidden border-4 border-night bg-night">
+    <div ref={box} className="relative overflow-hidden border-4 border-night bg-night">
       <div aria-hidden="true" className="absolute inset-0 grid grid-rows-[52.5%_1fr]">
         <div style={{ background: bands.sky }} />
         <div className="border-t-2 border-night/20" style={{ background: bands.water }} />
       </div>
-      <img src={painted} alt={alt} width={608} height={160} className="relative mx-auto block h-20 w-[304px] max-w-full object-cover object-center [image-rendering:pixelated] sm:h-[120px] sm:w-[456px] lg:h-40 lg:w-[608px]" />
+      {/* Sized to its pixels, never stretched: the bands take the few columns the whole-number scale leaves over. */}
+      <img src={painted} alt={alt} width={width * scale} height={STAGE_HEIGHT * scale} style={{ width: width * scale, height: STAGE_HEIGHT * scale }} className="relative mx-auto block max-w-full object-cover object-left [image-rendering:pixelated]" />
     </div>
   )
 }
