@@ -1,6 +1,6 @@
 # Stances with desk raids: build evidence (D132)
 
-Date: 2026-10-12 · Simulation version 1 · Content v15 (built; production runs v14 until Barry switches it between runs) · Harness: `pnpm balance` ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database.
+Date: 2026-10-12 · Simulation version 1 · Content v15 (live in production since about 18:20 UTC the same day) · Harness: `pnpm balance` ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database.
 
 ## What changed
 
@@ -41,3 +41,7 @@ pnpm balance --heroes 300 --days 90 --content v15 --json docs/evidence/balance-v
 How to read it: before level 7 every hero plays Balanced, so Bold loses its early XP bonus (level 8 about 0.3 days later) and Cautious stops paying for safety it did not need in the Office (the weekly cohort reaches level 8 four days sooner). Cafeteria knockouts move within sampling noise, because the Cafeteria opens at level 8, after the stance is back in play. Stances arrive with raids on day 6.1 for a daily manager, 7.2 for three-day and 15 for weekly (v14: level 3, about day 1 to 2).
 
 The career ladder pays 20 gold less (990 instead of 1,010 per finished ladder) and has 21 live rungs.
+
+## Switch
+
+Deployed with the push to main (commit 99ea9a0, Workers build passed). `world:setActiveContentVersion` returned `{ from: "v14", to: "v15" }`. Barry switched the world from v14 to v15 at about 18:20 UTC between runs 814 and 815, and run 815 (18:30 UTC), the first on v15, completed clean with nothing quarantined: one eligible hero, one processed, no `simulationFailures` row.
