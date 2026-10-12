@@ -20,6 +20,7 @@ Implementation was authorized on 2026-10-03. This index includes the original pl
 | [Raids](raids.md) | Desk raids: passive, unavoidable, chance-driven hero-versus-hero raids, stance-only odds, ledger application, work slices (D110) |
 | [Quests](quests.md) | Approved (D112, content v9): daily quests as a passive, place-aware office to-do list paying gold only; refill and timezone rules |
 | [Objectives](objectives.md) | Built (D128, content v12, 2026-10-12): one current goal per hero on a nineteen-rung career ladder, feature unlocks by level, and once-per-rung guarantees for the opening's lucky events ([evidence](evidence/career.md)) |
+| [Salvage and the workbench](salvage.md) | Approved (D129, 2026-10-12), not built: the v2.0 design amendment for salvage (P26) and owned-gear upgrades (P27): three material rows outside the bag, tier upgrades, +1 to +3 reinforcement, chosen affixes; settles O13 |
 | [Desk drawer](desk-drawer.md) | Built (D111, content v8) and removed (D123, content v11, 2026-10-12): the six-slot overflow that delayed inventory sleep; kept as the record of what shipped and why it went |
 | [Alerts](alerts.md) | Built (D114): opt-in web push only for a stopped hero and an affordable merchant bag or pouch |
 | [Slow Cast](slow-cast.md) | Built (D115, hidden until its listing): the second game, a passive pixel art fishing simulator; waters, species, gear ladders, shared weather, platform profile and the engine extraction it needs |
