@@ -4,6 +4,7 @@ import { currentHero } from './gameProfile'
 import { effectiveStats } from '@trmnl-games/desk-crawler/sim/core/modifiers'
 import type { RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
 import type { ContentCatalog, IncomingRaid, RaidTarget, SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
+import { effectiveStance, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 
 /**
  * Desk raids adapter (D110). Every read is bounded: a raider whose launch draw hit takes one pool row, then the
@@ -54,6 +55,8 @@ export async function pickRaidTarget(ctx: MutationCtx, raider: Doc<'heroes'>, pl
   }
   if (hero.activationState !== 'active' || hero.simulationState !== 'healthy' || hero.eligibleFromTick > tick) return undefined
   if (hero.status !== 'exploring' && hero.status !== 'resting') return undefined
+  // P35: a hero below the raid unlock neither raids nor gets raided; the draw is spent like any empty desk.
+  if (!unlocked(content, hero.level, 'raids')) return undefined
   if (row.raidedAtTick !== undefined && tick - row.raidedAtTick < content.raids!.targetCooldownTicks) return undefined
   const owner = await ctx.db.get(hero.userId)
   if (owner === null || (await currentHero(ctx, owner))?._id !== hero._id) return undefined
@@ -61,7 +64,7 @@ export async function pickRaidTarget(ctx: MutationCtx, raider: Doc<'heroes'>, pl
   const inventory = equipped.flatMap((item) => (item === null ? [] : [{ ...item, id: item._id }]))
   const thrifty = effectiveStats(content, { level: hero.level, ...(hero.weaponId ? { weaponId: hero.weaponId } : {}), ...(hero.armorId ? { armorId: hero.armorId } : {}) }, inventory, tick).modifiers.goldLossPct
   return {
-    target: { heroId: hero._id, name: visibleName(owner), gold: hero.gold, ...(hero.stance === undefined ? {} : { stance: hero.stance }), ...(thrifty > 0 ? { goldLossPct: thrifty } : {}) },
+    target: { heroId: hero._id, name: visibleName(owner), gold: hero.gold, ...(effectiveStance(content, hero) === undefined ? {} : { stance: effectiveStance(content, hero)! }), ...(thrifty > 0 ? { goldLossPct: thrifty } : {}) },
     poolRowId: row._id,
     targetHeroId: hero._id,
     targetUser: owner,

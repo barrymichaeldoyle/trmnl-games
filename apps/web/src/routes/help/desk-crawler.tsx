@@ -21,6 +21,12 @@ const SHOP_POUCHES = POUCHES.filter((tier) => tier.milestone === undefined && ti
 const TOTE = BAGS.find((tier) => tier.milestone?.ticksExplored !== undefined)
 const TOP_BAG = BAGS.at(-1)?.capacity ?? 0
 const MERCHANT_LINE = MERCHANT_OFF > 0 ? ` A wandering merchant sometimes offers the next one at ${MERCHANT_OFF}% off.` : ''
+/** P35: the career ladder and the levels features arrive at, read from the active catalog. */
+const CAREER = catalogs[ACTIVE_CONTENT].career
+const UNLOCKS = catalogs[ACTIVE_CONTENT].unlocks
+const CAREER_GOLD = CAREER?.rungs.reduce((sum, rung) => sum + rung.gold, 0) ?? 0
+/** " It arrives at level 3." or nothing under a catalog without unlocks. */
+const arrives = (feature: NonNullable<typeof UNLOCKS> extends Record<infer K, number> ? K : never) => (UNLOCKS === undefined ? '' : ` It arrives at level ${UNLOCKS[feature]}.`)
 
 /** The page's sections, for the jump list at the top: on a phone the page runs to about twenty screens. */
 const CONTENTS: ReadonlyArray<readonly [string, string]> = [
@@ -28,6 +34,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['if-the-qr-sends-you-back-to-setup', 'If the QR sends you back to setup'],
   ['how-time-works', 'How time works'],
   ['desk-keepsakes', 'Desk keepsakes'],
+  ...(CAREER !== undefined ? [['career', 'Career'] as const] : []),
   ['stances', 'Stances'],
   ['desk-raids', 'Desk raids'],
   ...(TODO !== undefined ? [['to-do-list', 'To-do list'] as const] : []),
@@ -71,15 +78,26 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <h2 id="desk-keepsakes">Desk keepsakes</h2>
       <p>Keep Desk Crawler in your playlist and look for “Keepsake code” and a six-digit code, like 482 917, in the screen’s title bar (narrow portrait mashups shorten it to “Keepsake”). Enter that code in the companion’s Settings to collect a permanent office souvenir. Full-screen and mashup layouts both show it; the companion preview hides it.</p>
       <p>You can collect one keepsake each week, with a new code from Monday at 00:00 UTC. Last week’s code works too if your screen refreshes slowly. If you miss a week, you get the same design the week after. After collecting the full set, you can collect more of each. Keepsakes do not change XP, gear or rankings, and extra devices or faster refresh earn no extras.</p>
+      {CAREER !== undefined ? (
+        <>
+          <h2 id="career">Career</h2>
+          <p>Your hero always has one goal, shown at the top of the Hero page: “Win your first fight”, “Equip a piece of gear you found”, “Reach the Server Room”, “Buy the Laptop Backpack”. Some are reached by adventuring; the rest are things you do here, on the Bag or Hero page. Reaching a goal pays a little gold ({CAREER_GOLD.toLocaleString('en-US')} across the whole ladder) and shows “Goal reached” on your TRMNL. Goals never give XP, never expire and never fail; the next one simply waits.</p>
+          <ul>
+            <li>The Career page under More lists the {CAREER.rungs.length} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
+            {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The Server Room opens at level 4 and the Cafeteria Depths at level 8, as before.</li> : null}
+            <li>A few early goals come with a guarantee, so a new hero is never left waiting on luck: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is the ordinary roll.</li>
+          </ul>
+        </>
+      ) : null}
       <h2 id="stances">Stances</h2>
-      <p>Choose how careful your hero is on the Hero page. The stance applies from the next adventure, and you can change it whenever you like. Your TRMNL shows it beside the bag count, under a gauge whose needle sits low for Cautious, in the middle for Balanced and high for Bold.</p>
+      <p>Choose how careful your hero is on the Hero page.{arrives('stances')} The stance applies from the next adventure, and you can change it whenever you like. Your TRMNL shows it beside the bag count, under a gauge whose needle sits low for Cautious, in the middle for Balanced and high for Bold.</p>
       <ul>
         <li><strong>Cautious</strong> drinks a potion below 65% HP, rests below 50% and sets off again at 90%. It earns 90% of the usual XP from wins.</li>
         <li><strong>Balanced</strong>, the default, drinks below 50%, rests below 35% and sets off again at 75%, with the usual XP.</li>
         <li><strong>Bold</strong> drinks below 35%, rests below 20% and sets off again at 60%. It earns 115% XP from wins but gets knocked out more often.</li>
       </ul>
       <h2 id="desk-raids">Desk raids</h2>
-      <p>While exploring, heroes sometimes raid each other's desks. It happens by itself, to every active hero, with nothing to press and no way to aim it. The raid shows up in both heroes' adventure logs with the other player's public name, and the Hero page keeps a record of your hero's raids.</p>
+      <p>While exploring, heroes sometimes raid each other's desks. It happens by itself, to every active hero{UNLOCKS === undefined ? '' : ` from level ${UNLOCKS.raids}`}, with nothing to press and no way to aim it.{UNLOCKS === undefined ? '' : ` Below level ${UNLOCKS.raids} a hero neither raids nor gets raided.`} The raid shows up in both heroes' adventure logs with the other player's public name, and the Hero page keeps a record of your hero's raids.</p>
       <ul>
         <li>Who wins is a coin toss, moved only by stance. Level, gear and effects never count. Cautious adds 10 points to its side of the toss, Balanced adds nothing and Bold takes 5 away, whether raiding or defending.</li>
         <li>How often your hero raids depends on stance too: Cautious about every other day of exploring, Balanced about once a day, Bold about twice a day.</li>
@@ -90,7 +108,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       {TODO !== undefined ? (
         <>
           <h2 id="to-do-list">To-do list</h2>
-          <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”. It works through them by itself while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TODO.rewardByTier[1]}, {TODO.rewardByTier[2]} or {TODO.rewardByTier[3]} depending on the area. Tasks never give XP, so they never change the rankings.</p>
+          <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”.{arrives('todo')} It works through them by itself while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TODO.rewardByTier[1]}, {TODO.rewardByTier[2]} or {TODO.rewardByTier[3]} depending on the area. Tasks never give XP, so they never change the rankings.</p>
           <ul>
             <li>Every morning at {STANDUP} your TRMNL's local time, the stand-up gives new tasks for the ones that are done. Your screen lists them.</li>
             <li>Tasks never expire and an unfinished task costs nothing. A task your hero can't get on with is swapped by itself after two stand-ups.</li>

@@ -15,7 +15,7 @@ const FILTERS = [
   { key: 'all', label: 'All', kinds: null, glyph: null },
   { key: 'fights', label: 'Fights', kinds: ['combat'], glyph: 'combat' },
   { key: 'finds', label: 'Finds', kinds: ['loot'], glyph: 'loot' },
-  { key: 'milestones', label: 'Milestones', kinds: ['levelup', 'achievement', 'death', 'revive', 'travel'], glyph: 'levelup' },
+  { key: 'milestones', label: 'Milestones', kinds: ['levelup', 'achievement', 'career', 'death', 'revive', 'travel'], glyph: 'levelup' },
   { key: 'rest', label: 'Rest & traps', kinds: ['rest', 'trap'], glyph: 'rest' },
   { key: 'raids', label: 'Raids', kinds: ['raid'], glyph: 'raid' },
   { key: 'todo', label: 'To-do', kinds: ['todo'], glyph: 'todo' },

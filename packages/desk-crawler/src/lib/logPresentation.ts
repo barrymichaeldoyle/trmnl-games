@@ -40,7 +40,8 @@ export function logPresentation(entry: { readonly summary: string; readonly kind
   const signed = (value: number, unit: string) => `${value > 0 ? '+' : '−'}${Math.abs(value)} ${unit}`
   // D112: to-do labels carry targets ("Earn 50 gold adventuring"), never changes, so they keep every number; a
   // ticked-off line's reward is its gold chip and a stand-up changes nothing, so it stands alone.
-  if (entry.kind === 'todo') return { narrative: entry.summary, changes: deltas.gold ? [signed(deltas.gold, 'gold')] : [] }
+  // P35: a goal line's bonus is its gold chip the same way; an unlock changes nothing and stands alone.
+  if (entry.kind === 'todo' || entry.kind === 'career') return { narrative: entry.summary, changes: deltas.gold ? [signed(deltas.gold, 'gold')] : [] }
   // Transform only plain runs: numbers/units inside marked item names are names.
   let narrative = markedRuns(entry.summary).map((run) => run.bold ? `[[${run.text}]]` : run.text
     .replace(/[+−-]\d+ (?:XP|gold|HP)(?:,\s*[+−-]\d+ (?:XP|gold|HP))*\.?/g, '')

@@ -1,4 +1,5 @@
 import type { ContentCatalog, Modifiers } from '../sim/core/types'
+import { zeroCounters } from '../sim/core/starter'
 
 /** Content limits from the specs: name budgets (domain-contracts.md) and the D26 content floor. */
 export const CONTENT_LIMITS = {
@@ -153,6 +154,42 @@ export function validateCatalog(content: ContentCatalog): string[] {
     for (const monster of content.monsters) {
       const plural = todo.monsterPlurals[monster.id]
       if (plural === undefined || [...plural].length > CONTENT_LIMITS.monsterName + 2) problems.push(`to-do needs a short plural for ${monster.id}`)
+    }
+  }
+  // P35: unlock levels gate features the catalog actually has; a ladder's rungs are well formed and their lines fit.
+  if (content.unlocks) {
+    for (const [feature, level] of Object.entries(content.unlocks)) {
+      if (!Number.isSafeInteger(level) || level < 1 || level > 20) problems.push(`unlock level for ${feature} must be 1 to 20`)
+    }
+    if (content.unlocks.todo > 1 && content.todo === undefined) problems.push('to-do unlock without to-do rules')
+    if (content.unlocks.stances > 1 && content.stances === undefined) problems.push('stance unlock without stances')
+    if (content.unlocks.choices > 1 && content.choices === undefined) problems.push('choice unlock without choices')
+    if (content.unlocks.merchant > 1 && content.merchant === undefined) problems.push('merchant unlock without a merchant')
+    if (content.unlocks.raids > 1 && content.raids === undefined) problems.push('raid unlock without raid rules')
+  }
+  if (content.career) {
+    const counters = new Set(Object.keys(zeroCounters()))
+    const ids = new Set<string>()
+    if (content.career.rungs.length < 1) problems.push('a career ladder needs at least one rung')
+    for (const rung of content.career.rungs) {
+      if (ids.has(rung.id)) problems.push(`duplicate career rung ${rung.id}`)
+      ids.add(rung.id)
+      if (!/^[a-z0-9_]+$/.test(rung.id)) problems.push(`career rung id ${rung.id} must be snake case`)
+      if ([...rung.title].length < 1 || [...rung.title].length > 40) problems.push(`career rung ${rung.id} title must be 1 to 40 characters`)
+      if ([...rung.blurb].length < 1 || [...rung.blurb].length > 120) problems.push(`career rung ${rung.id} blurb must be 1 to 120 characters`)
+      if (!Number.isSafeInteger(rung.gold) || rung.gold < 0) problems.push(`career rung ${rung.id} gold must be a nonnegative integer`)
+      const p = rung.predicate
+      if ((p.kind === 'counter' && !counters.has(p.counter)) || (p.kind === 'anyCounter' && (p.counters.length === 0 || p.counters.some((counter) => !counters.has(counter))))) problems.push(`career rung ${rung.id} names an unknown counter`)
+      if ('atLeast' in p && (!Number.isSafeInteger(p.atLeast) || p.atLeast < 1)) problems.push(`career rung ${rung.id} target must be a positive integer`)
+      if (p.kind === 'biomeWin' && !content.biomes.some((biome) => biome.id === p.biomeId)) problems.push(`career rung ${rung.id} names an unknown biome`)
+      if (p.kind === 'bag' && !content.bagLadder.tiers.some((tier) => tier.capacity === p.atLeast)) problems.push(`career rung ${rung.id} bag target is not a tier`)
+      if (p.kind === 'pouch' && !(content.potionPouch?.tiers ?? []).some((tier) => tier.cap === p.atLeast)) problems.push(`career rung ${rung.id} pouch target is not a tier`)
+      const g = rung.guarantee
+      if (g !== undefined) {
+        if (!Number.isSafeInteger(g.withinTicks) || g.withinTicks < 1 || g.withinTicks > 960) problems.push(`career rung ${rung.id} guarantee must be 1 to 960 adventures`)
+        if (g.event === 'choice' && content.choices === undefined) problems.push(`career rung ${rung.id} guarantees a choice without choices`)
+        if (g.event === 'merchant' && content.merchant === undefined) problems.push(`career rung ${rung.id} guarantees a merchant without one`)
+      }
     }
   }
   if (content.merchant) {

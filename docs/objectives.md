@@ -1,6 +1,6 @@
 # The career ladder: one main objective and feature unlocks (P35)
 
-Proposed 2026-10-12 for Barry's review. Nothing here is approved or built. Barry asked for a single long-term objective that gives players a sense of progression, teaches the game through the companion, and makes the opening more predictable for new heroes; then added that features such as the to-do list could unlock as the hero progresses, with the next objective being to use the new feature. This spec settles the shape and names the open points at the end. It would be a v1.1-style minor release: additive schema, a new content version, old payloads and templates keep their meaning.
+Proposed 2026-10-12 and approved the same day as D128, when Barry asked for whatever is best for the project's long-term goals; the four open points at the end were settled as recommended and the ladder was built in slices C1 to C5 the same day ([evidence](evidence/career.md)). [Changes while building](#changes-while-building) lists where the build differs from this spec. Barry asked for a single long-term objective that gives players a sense of progression, teaches the game through the companion, and makes the opening more predictable for new heroes; then added that features such as the to-do list could unlock as the hero progresses, with the next objective being to use the new feature. This spec settles the shape and names the open points at the end. It would be a v1.1-style minor release: additive schema, a new content version, old payloads and templates keep their meaning.
 
 Companions: the [to-do list](quests.md) (D112, the daily horizon), [achievements](achievements.md) (D65, the record), and the [roadmap](roadmap.md), whose v2.0 systems extend the ladder later.
 
@@ -120,7 +120,19 @@ counters.careerRungs, counters.itemsEquipped                                    
 | C4 Device | Goal and unlock log lines and celebration text fit all four layouts and the X mashups, template bump, preview sweep | The longest goal line with its "Next:" clause renders without clipping in every full layout; compact layouts drop the clause |
 | C5 Switch | Content v12 live under the post-launch preservation rule, evidence page, decisions row | First v12 run completes clean with nothing quarantined; the production hero's goal pointer lands on the right rung |
 
-## Open points for Barry
+## Changes while building
+
+1. **A guarantee fires once per rung**, and stands down once its event has come by itself. Fired on every tick after the bound, the gear guarantee filled an unattended hero's bag by day 0.3.
+2. **The decision rung's guarantee repeats** (at most one forced decision per 48 adventures, never while one is pending), because a decision expires unanswered and a weekly manager otherwise waited two weeks on that rung.
+3. **Rung 12 is "Meet the wandering merchant"** (`merchantVisits ≥ 1`), not a purchase. A merchant stays four adventures, so buying from one is luck for anyone not watching the app; the D114 alert is the buying prompt.
+4. **Every rung is reached in order, one per tick.** A rung already satisfied when the pointer arrives pays at the next evaluation instead of being skipped, so an active player keeps "Sell a piece of gear" in the record. Only the join point skips what an existing hero had done.
+5. **The raid pool needs no `level` field**: the pick already reads the target hero live, so the level check happens there.
+6. **No analytics event**: a goal is reached inside a tick, not by a companion action, so the engagement report counts rungs instead.
+7. Rung 9 names the Laptop Backpack (13 slots), the first shop rung under the D122 ladder; the spec's "Satchel" was a placeholder.
+
+## Open points for Barry (settled 2026-10-12)
+
+All four settled as recommended when Barry handed over the decision: level gates, the raid gate protecting new heroes, no backfill line, and the proposed bounds (the decision guarantee now repeats, above).
 
 1. **Gate by level or by adventures?** Level is what the player sees and what the ladder celebrates, so it is proposed. Adventures explored would make unlock days identical for every cohort. Level is the recommendation.
 2. **The raid gate at level 7** also protects new heroes from being raided. That is a change to D110's "any active hero" and shrinks the pool for a few days per hero; the harness checks that the times-targeted spread stays near p10 14 / p90 27.

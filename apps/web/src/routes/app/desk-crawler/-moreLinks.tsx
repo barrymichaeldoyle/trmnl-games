@@ -4,6 +4,7 @@ import { Glyph, type GlyphName } from '../../../lib/glyphs'
 
 /** The More tab's pages (D124), each a row with its glyph: what the Hero tab used to hold under the world map. */
 const MORE_LINKS = [
+  { to: '/app/desk-crawler/career', label: 'Career', blurb: 'The ladder of goals, and what opens at each level.', glyph: 'career' },
   { to: '/app/desk-crawler/achievements', label: 'Achievements', blurb: 'Every one you have earned, and how rare it is.', glyph: 'achievement' },
   { to: '/app/desk-crawler/keepsakes', label: 'Desk keepsakes', blurb: 'The weekly code from your TRMNL and your shelf.', glyph: 'keepsake' },
   { to: '/app/desk-crawler/trmnl', label: 'On your TRMNL', blurb: 'What the plugin is showing, in every layout.', glyph: 'screen' },

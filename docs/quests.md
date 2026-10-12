@@ -4,6 +4,8 @@ Proposed 2026-10-09 for Barry's review and revised the same day with the open qu
 
 Source: the original brief listed "three local-day quests, shards/keys" and parked them until the timezone, DST and abuse rules were designed ([source brief](source-brief.md)). Two product rules shape this design. [Product](product.md) rules out streak penalties, expiring rewards and daily login requirements, and [TRMNL experience](trmnl-experience.md) rules out urgency and streak pressure. A quest system that punishes a missed day breaks the game's promise, so this one doesn't.
 
+Under content v12 (D128) the list arrives at level 2, the first feature the [career ladder](objectives.md) unlocks; below it the hero takes no `quest` draw and the companion shows a locked card.
+
 ## The idea in one paragraph
 
 Every hero has an office to-do list of three small tasks, such as "Defeat 4 Paper Imps", "Find 2 pieces of gear" or "Explore the Server Room for 8 adventures". The hero works through them on its own as it adventures. When a task is done, the hero ticks it off on the device and gets a small gold reward. Each morning the stand-up hands out new tasks for any finished slots and the device says what they are. Unfinished tasks are never taken away and never cost anything. A player who never opens the companion still finishes tasks, because the list is written for where the hero actually is. A player who does open it can steer, for example by travelling to the biome a task names, or swap a task they dislike once a day.

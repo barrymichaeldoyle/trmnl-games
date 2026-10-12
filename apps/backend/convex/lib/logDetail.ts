@@ -114,6 +114,15 @@ const outcome = v.union(
     phase: v.union(v.literal('done'), v.literal('standup')),
     tasks: v.array(v.object({ templateId: todoKind, label: v.string(), reward: v.number() })),
   }),
+  /** P35: a career rung reached, or a feature unlocked. */
+  v.object({
+    variant: v.literal('career'),
+    phase: v.union(v.literal('reached'), v.literal('unlocked')),
+    id: v.string(),
+    title: v.string(),
+    next: v.optional(v.string()),
+    gold: v.number(),
+  }),
 )
 
 export const simulationDetail = v.object({

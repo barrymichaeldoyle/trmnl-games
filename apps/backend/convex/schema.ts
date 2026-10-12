@@ -71,6 +71,19 @@ export const heroCounters = v.object({
   drawerFinds: v.optional(v.number()),
   /** P31: to-do tasks ticked off. */
   tasksCompleted: v.optional(v.number()),
+  /** P35: gear equipped in the companion, and career rungs reached. */
+  itemsEquipped: v.optional(v.number()),
+  careerRungs: v.optional(v.number()),
+})
+
+/** P35: the hero's place on the career ladder, written by the simulator. */
+export const careerState = v.object({
+  rung: v.number(),
+  startedTick: v.number(),
+  armedAt: v.optional(v.number()),
+  armedCount: v.optional(v.number()),
+  fired: v.optional(v.literal(true)),
+  reached: v.array(v.object({ id: v.string(), tick: v.number(), at: v.optional(v.number()) })),
 })
 
 /** P31: the office to-do list, three tasks written by the simulator and swapped by `heroes.swapTask`. */
@@ -131,6 +144,7 @@ export const logKind = v.union(
   v.literal('choice'),
   v.literal('raid'),
   v.literal('todo'),
+  v.literal('career'),
   v.literal('system'),
 )
 
@@ -386,6 +400,8 @@ export default defineSchema({
     raidPoolId: v.optional(v.id('raidPool')),
     /** P31: the office to-do list, written at the hero's first evaluation under a catalog with to-do rules. */
     todo: v.optional(todoList),
+    /** P35: the career ladder state, written at the hero's first evaluation under a catalog with a ladder. */
+    career: v.optional(careerState),
     eligibleFromTick: v.number(),
     lastTick: v.number(),
     lastProgressTick: v.number(),

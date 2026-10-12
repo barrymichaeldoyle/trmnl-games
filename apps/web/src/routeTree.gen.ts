@@ -34,6 +34,7 @@ import { Route as HelpSlowCastRouteImport } from './routes/help/slow-cast'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
 import { Route as AppDeskCrawlerIndexRouteImport } from './routes/app/desk-crawler/index'
 import { Route as AppDeskCrawlerAchievementsRouteImport } from './routes/app/desk-crawler/achievements'
+import { Route as AppDeskCrawlerCareerRouteImport } from './routes/app/desk-crawler/career'
 import { Route as AppDeskCrawlerInventoryRouteImport } from './routes/app/desk-crawler/inventory'
 import { Route as AppDeskCrawlerKeepsakesRouteImport } from './routes/app/desk-crawler/keepsakes'
 import { Route as AppDeskCrawlerLeaderboardRouteImport } from './routes/app/desk-crawler/leaderboard'
@@ -179,6 +180,11 @@ const AppDeskCrawlerAchievementsRoute =
     path: '/achievements',
     getParentRoute: () => AppDeskCrawlerRoute,
   } as any)
+const AppDeskCrawlerCareerRoute = AppDeskCrawlerCareerRouteImport.update({
+  id: '/career',
+  path: '/career',
+  getParentRoute: () => AppDeskCrawlerRoute,
+} as any)
 const AppDeskCrawlerInventoryRoute = AppDeskCrawlerInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
+  '/app/desk-crawler/career': typeof AppDeskCrawlerCareerRoute
   '/app/desk-crawler/inventory': typeof AppDeskCrawlerInventoryRoute
   '/app/desk-crawler/keepsakes': typeof AppDeskCrawlerKeepsakesRoute
   '/app/desk-crawler/leaderboard': typeof AppDeskCrawlerLeaderboardRoute
@@ -342,6 +349,7 @@ export interface FileRoutesByTo {
   '/profile/$alias': typeof ProfileAliasRoute
   '/app': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
+  '/app/desk-crawler/career': typeof AppDeskCrawlerCareerRoute
   '/app/desk-crawler/inventory': typeof AppDeskCrawlerInventoryRoute
   '/app/desk-crawler/keepsakes': typeof AppDeskCrawlerKeepsakesRoute
   '/app/desk-crawler/leaderboard': typeof AppDeskCrawlerLeaderboardRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
+  '/app/desk-crawler/career': typeof AppDeskCrawlerCareerRoute
   '/app/desk-crawler/inventory': typeof AppDeskCrawlerInventoryRoute
   '/app/desk-crawler/keepsakes': typeof AppDeskCrawlerKeepsakesRoute
   '/app/desk-crawler/leaderboard': typeof AppDeskCrawlerLeaderboardRoute
@@ -435,6 +444,7 @@ export interface FileRouteTypes {
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
+    | '/app/desk-crawler/career'
     | '/app/desk-crawler/inventory'
     | '/app/desk-crawler/keepsakes'
     | '/app/desk-crawler/leaderboard'
@@ -477,6 +487,7 @@ export interface FileRouteTypes {
     | '/profile/$alias'
     | '/app'
     | '/app/desk-crawler/achievements'
+    | '/app/desk-crawler/career'
     | '/app/desk-crawler/inventory'
     | '/app/desk-crawler/keepsakes'
     | '/app/desk-crawler/leaderboard'
@@ -522,6 +533,7 @@ export interface FileRouteTypes {
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
+    | '/app/desk-crawler/career'
     | '/app/desk-crawler/inventory'
     | '/app/desk-crawler/keepsakes'
     | '/app/desk-crawler/leaderboard'
@@ -748,6 +760,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDeskCrawlerAchievementsRouteImport
       parentRoute: typeof AppDeskCrawlerRoute
     }
+    '/app/desk-crawler/career': {
+      id: '/app/desk-crawler/career'
+      path: '/career'
+      fullPath: '/app/desk-crawler/career'
+      preLoaderRoute: typeof AppDeskCrawlerCareerRouteImport
+      parentRoute: typeof AppDeskCrawlerRoute
+    }
     '/app/desk-crawler/inventory': {
       id: '/app/desk-crawler/inventory'
       path: '/inventory'
@@ -879,6 +898,7 @@ declare module '@tanstack/react-router' {
 
 interface AppDeskCrawlerRouteChildren {
   AppDeskCrawlerAchievementsRoute: typeof AppDeskCrawlerAchievementsRoute
+  AppDeskCrawlerCareerRoute: typeof AppDeskCrawlerCareerRoute
   AppDeskCrawlerInventoryRoute: typeof AppDeskCrawlerInventoryRoute
   AppDeskCrawlerKeepsakesRoute: typeof AppDeskCrawlerKeepsakesRoute
   AppDeskCrawlerLeaderboardRoute: typeof AppDeskCrawlerLeaderboardRoute
@@ -890,6 +910,7 @@ interface AppDeskCrawlerRouteChildren {
 
 const AppDeskCrawlerRouteChildren: AppDeskCrawlerRouteChildren = {
   AppDeskCrawlerAchievementsRoute: AppDeskCrawlerAchievementsRoute,
+  AppDeskCrawlerCareerRoute: AppDeskCrawlerCareerRoute,
   AppDeskCrawlerInventoryRoute: AppDeskCrawlerInventoryRoute,
   AppDeskCrawlerKeepsakesRoute: AppDeskCrawlerKeepsakesRoute,
   AppDeskCrawlerLeaderboardRoute: AppDeskCrawlerLeaderboardRoute,

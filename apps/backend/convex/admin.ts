@@ -91,6 +91,8 @@ export const engagement = internalQuery({
       raids: { launched: sum((c) => c.raidsLaunched), won: sum((c) => c.raidsWon), repelled: sum((c) => c.raidsRepelled), lost: sum((c) => c.raidsLost), heroesRaiding: reached((c) => c.raidsLaunched), heroesRaided: heroes.filter((h) => (h.counters.raidsRepelled ?? 0) + (h.counters.raidsLost ?? 0) > 0).length },
       // D112: to-do tasks ticked off, and how many heroes have finished one.
       tasks: { completed: sum((c) => c.tasksCompleted), heroes: reached((c) => c.tasksCompleted) },
+      // P35: career rungs reached under the ladder, equips, and where heroes stand on it.
+      career: { rungs: sum((c) => c.careerRungs), heroes: reached((c) => c.careerRungs), equips: sum((c) => c.itemsEquipped), standing: tally(heroes.map((h) => h.career?.rung ?? 'none')) },
       analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
     }
   },

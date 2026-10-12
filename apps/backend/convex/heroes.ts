@@ -23,6 +23,8 @@ import { hereBiomeId, isLocal, nextStandupAfter, swapTask as swapTodoTask, swapU
 import { deriveStreamSeed } from '@trmnl-games/desk-crawler/sim/seed'
 import { worldContent } from './world'
 import { toHeroState } from './sim/runs/adapter'
+import { currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 
 const intentResult = v.object({
   operationId: v.string(),
@@ -55,7 +57,7 @@ export const mine = query({
       .query('tickLogs')
       .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
       .order('desc')
-      .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo')
+      .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
     const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null)
     return {
       id: hero._id,
@@ -95,6 +97,9 @@ export const mine = query({
       raidsEnabled: content.raids !== undefined,
       // P31: the to-do list once the world runs a catalog with to-do rules and the hero has one.
       todo: todoView(worldContent(world), hero, user.trmnlUtcOffset),
+      // P35: the current goal and the ladder so far, and which features this hero's level has opened.
+      career: careerView(worldContent(world), hero),
+      unlocks: unlocksView(worldContent(world), hero.level),
       biomes: content.biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level })),
       world: world
         ? {
@@ -219,6 +224,9 @@ export const setStance = mutation({
       const content = catalogs[ACTIVE_CONTENT]
       const rule = content.stances?.[args.stance]
       if (!rule || !STANCE_IDS.includes(args.stance)) throw appError('INVALID_INPUT', 'Unknown stance.')
+      // P35: the unlock level belongs to the world's catalog; below it the picker is a locked card, and a stale client gets the level back.
+      const live = worldContent(await readWorld(ctx))
+      if (!unlocked(live, hero.level, 'stances')) throw appError('LOCKED', `Stances unlock at level ${live.unlocks!.stances}.`)
       if ((hero.stance ?? 'balanced') === args.stance) return { changed: false }
       const counters = withCounterDefaults(hero.counters)
       // An achievement the switch itself earned may sit above its line; anything else closes the line.
@@ -296,6 +304,37 @@ function todoView(content: ContentCatalog, hero: Doc<'heroes'>, utcOffset: numbe
     nextStandupAt: nextStandupAfter(list, utcOffset, content),
     refillHour: content.todo.refillHour,
   }
+}
+
+/** P35: the companion's goal line and Career page. Null under a catalog without a ladder or before the hero's first evaluation under it. */
+function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
+  const rules = content.career
+  const state = hero.career
+  if (rules === undefined || state === undefined) return null
+  const heroState: HeroState = toHeroState(hero)
+  const rung = currentRung(content, heroState)
+  const reachedAt = new Map(state.reached.map((entry) => [entry.id, entry.at ?? null]))
+  return {
+    rung: state.rung,
+    total: rules.rungs.length,
+    current: rung === undefined ? null : { id: rung.id, title: rung.title, blurb: rung.blurb, gold: rung.gold, companion: rung.companion ?? false, ...measureRung(rung.predicate, heroState, content) },
+    // Every rung in order: done before the ladder arrived (no tick), reached under it (with its tick), current, or ahead.
+    rungs: rules.rungs.map((entry, index) => ({
+      id: entry.id,
+      title: entry.title,
+      blurb: entry.blurb,
+      gold: entry.gold,
+      companion: entry.companion ?? false,
+      state: index < state.rung ? ('done' as const) : index === state.rung ? ('current' as const) : ('ahead' as const),
+      reachedAt: reachedAt.get(entry.id) ?? null,
+    })),
+  }
+}
+
+/** P35: each gated feature with its level and whether this hero has it; null under a catalog without unlocks. */
+function unlocksView(content: ContentCatalog, level: number) {
+  if (content.unlocks === undefined) return null
+  return FEATURES.map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: content.unlocks![feature], unlocked: unlocked(content, level, feature) }))
 }
 
 /** v1.2: show or hide the hero's public profile page. Off until the owner turns it on. */

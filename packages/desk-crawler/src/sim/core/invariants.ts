@@ -2,6 +2,7 @@ import { bagUsed } from './bag'
 import { potionCap } from './pouch'
 import { maxHp, xpToLeave } from './stats'
 import { todoProblems } from './todo'
+import { careerProblems } from './career'
 import type { ContentCatalog, HeroState, ItemSnapshot } from './types'
 
 /** A recognized pure-core failure. The adapter quarantines the hero; it never retries blindly. */
@@ -52,6 +53,11 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
   if (hero.todo !== undefined && content.todo !== undefined) {
     const problem = todoProblems(hero.todo, content)
     if (problem !== undefined) fail('TODO', problem)
+  }
+  // P35: the same for a career state.
+  if (hero.career !== undefined && content.career !== undefined) {
+    const problem = careerProblems(hero.career, content)
+    if (problem !== undefined) fail('CAREER', problem)
   }
   const biomeIds = new Set(content.biomes.map((biome) => biome.id))
   if (!biomeIds.has(hero.biomeId)) fail('BIOME', `unknown biome ${hero.biomeId}`)

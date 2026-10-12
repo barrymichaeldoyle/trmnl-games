@@ -8,6 +8,7 @@ import { codePoints, composeSummary, fill, rarityLabel, variant, withArticle, ty
 import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } from './raid'
 import { createRng, pickOne, pickWeighted, type Rng } from './rng'
 import { applyTodo } from './todo'
+import { applyCareer, effectiveStance, guaranteeDue, unlocked } from './career'
 import { applyXp, deriveStats, maxHp, pctOf } from './stats'
 import type {
   BagTier,
@@ -64,6 +65,9 @@ const ZERO_METRICS: TickMetrics = {
   raidsApplied: 0,
   tasksCompleted: 0,
   todoRefills: 0,
+  careerRungs: 0,
+  unlocks: 0,
+  guarantees: 0,
 }
 
 interface Streams {
@@ -80,8 +84,9 @@ export function simulateHero(input: SimulationInput): SimulationResult {
   }
   if (!Number.isSafeInteger(input.tick) || input.tick < 0) throw new SimulationInvariantError('TICK', `invalid tick ${input.tick}`)
   assertHeroInvariants(input.hero, input.inventory, input.content)
-  // P31: the to-do list reads the finished tick and adds its own lines after the tick's story.
-  const result = applyTodo(input, new TickRun(input).run())
+  // P31: the to-do list reads the finished tick and adds its own lines after the tick's story; P35: the career
+  // ladder reads the result of both and adds unlock and goal lines last.
+  const result = applyCareer(input, applyTodo(input, new TickRun(input).run()))
   validateOutput(input, result)
   return result
 }
@@ -111,8 +116,14 @@ class TickRun {
    * catalog constants. A hero without a stance, or any hero under a pre-v3 catalog, plays exactly as before.
    */
   private sustain(): { autoPotionBelowPct: number; restBelowPct: number; resumeExploringAtPct: number; victoryXpPct: number } {
-    const rule = this.content.stances?.[this.h.stance ?? 'balanced']
+    // P35: below the stance unlock a chosen stance waits; the hero plays balanced until then.
+    const rule = this.content.stances?.[this.stance() ?? 'balanced']
     return rule ?? { ...this.content.constants, victoryXpPct: 100 }
+  }
+
+  /** The stance the hero plays and raids by (P35: balanced until stances unlock). */
+  private stance() {
+    return effectiveStance(this.content, this.h)
   }
 
   private narrate(templates: readonly string[], vars: NarrativeVars, callbacks?: Readonly<Record<string, string>>): string {
@@ -315,12 +326,21 @@ class TickRun {
     if (raid !== undefined) return raid
 
     const biome = this.biome(h.biomeId)
-    const kind = pickWeighted<EncounterKind>(this.rng.encounter, [
+    // P35: a rung's guarantee replaces the rolled kind once its bound has passed; every draw is still taken in its place.
+    const forced = guaranteeDue(content, h)
+    const rolled = pickWeighted<EncounterKind>(this.rng.encounter, [
       ['combat', biome.weights.combat],
       ['loot', biome.weights.loot],
       ['trap', biome.weights.trap],
       ['rest', biome.weights.rest],
     ])
+    const kind: EncounterKind = forced === undefined ? rolled : forced === 'combat' || forced === 'elite' ? 'combat' : 'loot'
+    if (forced !== undefined) {
+      this.metrics.guarantees = 1
+      const { armedAt: _armed, armedCount: _count, ...career } = h.career!
+      // Fired: a repeating guarantee is re-armed at the tick's end; any other stands down for the rest of the rung.
+      h.career = content.career!.rungs[career.rung]!.guarantee!.repeat ? career : { ...career, fired: true }
+    }
     h.counters.ticksExplored += 1
     this.metrics.encounter = kind
 
@@ -342,7 +362,7 @@ class TickRun {
     switch (kind) {
       case 'combat': {
         const monster = this.monster(pickOne(this.rng.encounter, biome.monsterIds))
-        const elite = this.rng.encounter.chance(c.elite.chancePct)
+        const elite = this.rng.encounter.chance(c.elite.chancePct) || forced === 'elite'
         const stats = effectiveStats(content, h, input.inventory, input.tick)
         const mods = stats.modifiers
         let monsterHp = elite ? Math.floor((monster.hp * c.elite.hpMultiplierPct) / 100) : monster.hp
@@ -448,8 +468,13 @@ class TickRun {
           ...(c.lootWeights.merchant === undefined ? [] : [['merchant', c.lootWeights.merchant] as const]),
           ...(c.lootWeights.event === undefined ? [] : [['event', c.lootWeights.event] as const]),
         ])
-        // D79: one pending choice at a time; a second draw while one is open falls through to gold.
-        if (found === 'event' && (h.choice !== undefined || content.choices === undefined)) found = 'gold'
+        if (forced === 'gear') found = 'gear'
+        else if (forced === 'choice') found = 'event'
+        else if (forced === 'merchant') found = 'merchant'
+        // D79: one pending choice at a time; a second draw while one is open falls through to gold. P35: so does a
+        // draw before the feature unlocks, for choices and the merchant alike.
+        if (found === 'event' && (h.choice !== undefined || content.choices === undefined || !unlocked(content, h.level, 'choices'))) found = 'gold'
+        if (found === 'merchant' && (content.merchant === undefined || !unlocked(content, h.level, 'merchant'))) found = 'gold'
         if (found === 'event') {
           const event = pickOne(this.rng.reward, content.choices!.events)
           const choice: PendingChoice = { eventId: event.id, offeredAtTick: input.tick, expiresAtTick: input.tick + content.choices!.expiresAfterTicks, biomeTier: biome.tier }
@@ -667,12 +692,13 @@ class TickRun {
   private launchRaid(): SimulationResult | undefined {
     const { h, content, input } = this
     const rng = raidStream(input.streams, content)
-    if (rng === undefined) return undefined
-    if (drawRaidPlan(rng, h.stance, content) === undefined) return undefined
+    // P35: no launch draw before raids unlock; the adapter checks the same level before it looks for a target.
+    if (rng === undefined || !unlocked(content, h.level, 'raids')) return undefined
+    if (drawRaidPlan(rng, this.stance(), content) === undefined) return undefined
     const target = input.raidTarget
     if (target === undefined || target.heroId === h.id) return undefined
     const rules = content.raids!
-    const raiderWon = rng.chance(raidWinChance(content, h.stance, target.stance))
+    const raiderWon = rng.chance(raidWinChance(content, this.stance(), target.stance))
     const thrifty = effectiveStats(content, h, input.inventory, input.tick).modifiers.goldLossPct
     const gold = raiderWon ? raidGoldLoss(target.gold, rules.goldLossPct, target.goldLossPct ?? 0) : raidGoldLoss(h.gold, rules.goldLossPct, thrifty)
     if (raiderWon) {
@@ -909,13 +935,18 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
   }
   if (result.event && result.event.summary.trim() === '') fail('SUMMARY_EMPTY', 'event without summary')
   for (const extra of result.extraEvents ?? []) {
-    if (extra.kind !== 'todo' || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0) fail('TODO_EVENT', 'to-do lines move gold only')
+    if ((extra.kind !== 'todo' && extra.kind !== 'career') || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0 || extra.deltas.gold < 0) fail('EXTRA_EVENT', 'to-do and career lines add gold only')
     if (codePoints(extra.summary) > input.content.constants.summaryMaxCodePoints) fail('SUMMARY_LENGTH', extra.summary)
   }
-  if (input.content.todo === undefined && (out.todo !== hero.todo || result.extraEvents !== undefined)) fail('TODO', 'no to-do list without to-do rules')
-  const taskGold = (result.extraEvents ?? []).reduce((sum, extra) => sum + extra.deltas.gold, 0)
+  const todoLines = (result.extraEvents ?? []).filter((extra) => extra.kind === 'todo')
+  const careerLines = (result.extraEvents ?? []).filter((extra) => extra.kind === 'career')
+  if (input.content.todo === undefined && (out.todo !== hero.todo || todoLines.length > 0)) fail('TODO', 'no to-do list without to-do rules')
+  if (input.content.career === undefined && input.content.unlocks === undefined && (out.career !== hero.career || careerLines.length > 0)) fail('CAREER', 'no career lines without a ladder')
+  const reached = careerLines.filter((extra) => extra.detail.outcome.variant === 'career' && extra.detail.outcome.phase === 'reached').length
+  if (reached > 1 || out.counters.careerRungs - hero.counters.careerRungs !== reached) fail('CAREER_COUNT', 'one rung pays per tick and the counter follows it')
+  const taskGold = todoLines.reduce((sum, extra) => sum + extra.deltas.gold, 0)
   // A task ticked off this tick may already be refilled by the stand-up, so count the lines, not the list.
-  const ticked = (result.extraEvents ?? []).reduce((sum, extra) => sum + (extra.detail.outcome.variant === 'todo' && extra.detail.outcome.phase === 'done' ? extra.detail.outcome.tasks.length : 0), 0)
+  const ticked = todoLines.reduce((sum, extra) => sum + (extra.detail.outcome.variant === 'todo' && extra.detail.outcome.phase === 'done' ? extra.detail.outcome.tasks.length : 0), 0)
   if (out.counters.tasksCompleted - hero.counters.tasksCompleted !== ticked) fail('TODO_COUNT', 'tasks completed must match the tasks ticked off this tick')
   if (taskGold < 0) fail('TODO_GOLD', 'task rewards cannot take gold')
   if (out.status === 'sleeping' && hero.status !== 'sleeping' && applied.hero.heldItemId === undefined) {

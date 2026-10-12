@@ -32,6 +32,7 @@ export function toHeroState(hero: Doc<'heroes'>): HeroState {
     ...(hero.choice === undefined ? {} : { choice: hero.choice }),
     ...(hero.effects === undefined ? {} : { effects: hero.effects }),
     ...(hero.todo === undefined ? {} : { todo: hero.todo }),
+    ...(hero.career === undefined ? {} : { career: hero.career }),
   }
 }
 
@@ -89,6 +90,8 @@ export async function applyResult(
     effects: next.effects === undefined ? undefined : next.effects.map((effect) => ({ ...effect })),
     // P31: an earlier catalog carries the list untouched, so this never clears one.
     todo: next.todo === undefined ? undefined : { ...next.todo, tasks: next.todo.tasks.map((task) => ({ ...task })) },
+    // P35: same for the career state.
+    career: next.career === undefined ? undefined : { ...next.career, reached: next.career.reached.map((entry) => ({ ...entry })) },
     lastLevelUpTick: next.lastLevelUpTick,
     counters: next.counters,
   }

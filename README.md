@@ -6,7 +6,7 @@ Also by the same author: **[Formula 1 Race Weekend](https://trmnl.com/recipes/48
 
 A passive multiplayer office RPG for your desk. A hero explores every 15 minutes, finds equipment, survives mishaps, and climbs a global leaderboard. Built exclusively for TRMNL: install the plugin to start your hero, watch the story on e-ink, and use the companion website for occasional decisions.
 
-**Phase: in marketplace review, v1.1 shipped.** Plugin 564 was submitted to TRMNL on 2026-10-07. The companion, Convex backend and TRMNL integration are live, with production on content v11 (stances, potion pouch, merchant, decisions, effects, affixes, epic gear, desk raids, the to-do list and gold-only bag and pouch ladders) and device template v51. See the [roadmap](docs/roadmap.md) for what comes next. See [implementation status](docs/status.md) and [release checks](docs/evidence/release.md) for verified behavior and remaining gates. Run `pnpm install` then `pnpm check` and `pnpm balance`.
+**Phase: in marketplace review, v1.1 shipped.** Plugin 564 was submitted to TRMNL on 2026-10-07. The companion, Convex backend and TRMNL integration are live, with production moving from content v11 to v12 (stances, potion pouch, merchant, decisions, effects, affixes, epic gear, desk raids, the to-do list, gold-only bag and pouch ladders, and from v12 the career ladder with level-gated unlocks) and device template v52. See the [roadmap](docs/roadmap.md) for what comes next. See [implementation status](docs/status.md) and [release checks](docs/evidence/release.md) for verified behavior and remaining gates. Run `pnpm install` then `pnpm check` and `pnpm balance`.
 
 Confirmed on 2026-10-03:
 

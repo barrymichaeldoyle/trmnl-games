@@ -14,6 +14,7 @@ import { keepsakeWeek } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { affixById } from '@trmnl-games/desk-crawler/sim/core/modifiers'
 import { todoCompactLine } from '@trmnl-games/desk-crawler/sim/core/todo'
+import { careerLine } from '@trmnl-games/desk-crawler/sim/core/career'
 
 /**
  * Fixed-cost canonical payload for one authorized instance (trmnl.md "Query
@@ -54,11 +55,19 @@ export const forInstance = internalQuery({
   },
 })
 
-/** D112: the count form of a stand-up, or of several tasks ticked off at once; a single ticked-off task keeps its label. */
-function todoCompact(log: Doc<'tickLogs'>): { compact?: string } {
-  if (log.kind !== 'todo' || !('outcome' in log.detail) || log.detail.outcome.variant !== 'todo') return {}
-  const { phase, tasks } = log.detail.outcome
-  return phase === 'standup' || tasks.length > 1 ? { compact: todoCompactLine(phase, tasks.length) } : {}
+/**
+ * D112: the count form of a stand-up, or of several tasks ticked off at once; a single ticked-off task keeps its label.
+ * P35: a goal line drops its "Next:" clause where the row is narrow.
+ */
+function compactLine(log: Doc<'tickLogs'>): { compact?: string } {
+  if (!('outcome' in log.detail)) return {}
+  const outcome = log.detail.outcome
+  if (log.kind === 'todo' && outcome.variant === 'todo') return outcome.phase === 'standup' || outcome.tasks.length > 1 ? { compact: todoCompactLine(outcome.phase, outcome.tasks.length) } : {}
+  if (log.kind === 'career' && outcome.variant === 'career') {
+    const { compact } = careerLine(outcome)
+    return compact === log.summary ? {} : { compact }
+  }
+  return {}
 }
 
 /** The canonical device payload for a user's current hero. Shared by the device endpoint and the owner preview. */
@@ -107,7 +116,7 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     const summaries = await maskRaidSummaries(ctx, recent)
     // D112: a stand-up, or several tasks ticked off at once, carries its count form for rows too narrow for the labels.
     // A legacy drawer find (D111, removed in D123) reads as the loot line it is.
-    logs = recent.map((log, index) => ({ at: log.at, kind: log.kind, summary: summaries[index]!, deltas: displayLogDeltas(log), ...todoCompact(log) }))
+    logs = recent.map((log, index) => ({ at: log.at, kind: log.kind, summary: summaries[index]!, deltas: displayLogDeltas(log), ...compactLine(log) }))
     // The most recently completed night or day period in the owner's local time (D75), the same one buildPayload labels.
     const period = recapPeriod(now, utcOffset)
     const window = await ctx.db
@@ -118,10 +127,14 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     activity = { entries: window.slice(0, MAX_RECAP_EVENTS), truncated: window.length > MAX_RECAP_EVENTS }
     // The scene follows the newest gameplay event; the celebration follows the newest log, which may be an achievement (D65).
     // D112: to-do lines follow their tick's story, so neither the scene nor the celebration ever follows one.
-    const gameplay = recent.find((log) => log.kind !== 'achievement' && log.kind !== 'todo')
+    // P35: a career line (a goal reached, a feature unlocked) is a celebration, never a scene.
+    const gameplay = recent.find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
     if (gameplay) latestEvent = { kind: gameplay.kind, ...('outcome' in gameplay.detail ? { outcome: gameplay.detail.outcome } : {}) }
     const newest = recent.find((log) => log.kind !== 'todo')
-    if (newest) newestEvent = { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}), ...('achievementId' in newest.detail ? { title: newest.detail.name } : {}) }
+    if (newest) {
+      const title = 'achievementId' in newest.detail ? newest.detail.name : 'outcome' in newest.detail && newest.detail.outcome.variant === 'career' ? careerLine(newest.detail.outcome).compact.replace(/\.$/, '') : undefined
+      newestEvent = { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}), ...(title === undefined ? {} : { title }) }
+    }
   }
 
   const payload = buildPayload({

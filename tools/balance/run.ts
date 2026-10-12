@@ -13,7 +13,10 @@ import { nextEarlyTier } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { cumulativeXpToReach } from '@trmnl-games/desk-crawler/sim/core/stats'
-import type { ContentCatalog, HeroState, ItemSnapshot, StanceId, TodoKind } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog, HeroState, ItemSnapshot, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
+import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
+import { nextEarlyPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
+import { currentRung, FEATURES, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import { createRng } from '@trmnl-games/desk-crawler/sim/core/rng'
 import { ACHIEVEMENTS, ACHIEVEMENT_FAMILIES, rarityBand } from '@trmnl-games/desk-crawler/content/achievements'
 import { allSatisfied } from '@trmnl-games/desk-crawler/sim/core/achievements'
@@ -102,6 +105,12 @@ export interface HeroLog {
   refills: number
   /** D65: achievement ids satisfied at the end of each snapshot day. */
   achievementsByDay: Map<number, readonly string[]>
+  /** P35: first tick each feature was unlocked, each rung was reached, guarantee fires by rung, and the ladder's gold. */
+  unlockTick: Map<UnlockableFeature, number>
+  rungTick: Map<string, number>
+  guaranteeFires: Map<string, number>
+  careerGold: number
+  finalRung?: string
 }
 
 function args() {
@@ -125,7 +134,7 @@ function args() {
 function streams(heroIndex: number, tick: number) {
   const base = createRng((heroIndex * 0x9e3779b1 + tick * 0x85ebca77) >>> 0)
   const next = () => Math.floor(base.next() * 2 ** 32)
-  return { encounter: next(), combat: next(), reward: next(), narrative: next(), quest: next() }
+  return { encounter: next(), combat: next(), reward: next(), narrative: next(), quest: next(), raid: next() }
 }
 
 function bestInSlot(content: ContentCatalog): { attack: number; defense: number } {
@@ -136,11 +145,18 @@ function bestInSlot(content: ContentCatalog): { attack: number; defense: number 
   return { attack: tier.weaponAttack + offset('weapon') + bonus, defense: tier.armorDefense + offset('armor') + bonus }
 }
 
-/** One visit: equip best eligible gear, claim and sell everything else, resume/travel to the hardest unlocked biome (D29). */
+/**
+ * One visit: equip best eligible gear, claim and sell everything else, resume/travel to the hardest unlocked biome (D29).
+ * P35: the visit also does what a player does once on the companion, so the ladder's companion rungs are reachable in
+ * the harness: it counts equips and sales, picks a stance once stances are unlocked, answers a pending decision with its
+ * default, and buys the merchant's bag or pouch offer (else its potions) when it can afford it.
+ */
 export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy): { hero: HeroState; inventory: ItemSnapshot[]; bought: number } {
   let bought = 0
   if (!['exploring', 'resting', 'sleeping'].includes(hero.status)) return { hero, inventory, bought }
   const h: Mutable<HeroState> = { ...hero }
+  const counters = { ...h.counters }
+  h.counters = counters
   const gear = inventory.filter((item) => item.kind !== 'potion')
   const best = (kind: 'weapon' | 'armor') =>
     gear
@@ -151,16 +167,57 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
       }, undefined)
   const weapon = best('weapon')
   const armor = best('armor')
-  if (weapon && policy.equipGear !== false) h.weaponId = weapon.id
-  if (armor && policy.equipGear !== false) h.armorId = armor.id
+  if (weapon && policy.equipGear !== false && h.weaponId !== weapon.id) {
+    h.weaponId = weapon.id
+    counters.itemsEquipped += 1
+  }
+  if (armor && policy.equipGear !== false && h.armorId !== armor.id) {
+    h.armorId = armor.id
+    counters.itemsEquipped += 1
+  }
   delete h.heldItemId
   let gold = h.gold
-  const kept = inventory.filter((item) => {
+  let sold = 0
+  let kept = inventory.filter((item) => {
     if (item.kind === 'potion' || item.id === h.weaponId || item.id === h.armorId) return true
     gold += item.saleValue
+    sold += 1
     return false
   })
   h.gold = gold
+  counters.itemsSold += sold
+  counters.goldEarned += gold - hero.gold
+  // P35: the once-only companion deeds. The stance pick keeps the cohort's sustain (balanced unless --stance).
+  if (content.stances !== undefined && unlocked(content, h.level, 'stances') && counters.stanceChanges === 0) counters.stanceChanges = 1
+  if (h.choice !== undefined && content.choices !== undefined) {
+    const event = eventById(content, h.choice.eventId)
+    const option = event === undefined ? undefined : optionOf(event, event.defaultOptionId)
+    const potionRow = kept.find((item) => item.kind === 'potion')
+    if (option !== undefined) {
+      const change = resolveEffect(content, h, potionRow?.quantity ?? 0, option.effect, h.choice.biomeTier)
+      h.gold += change.gold
+      h.hp += change.hp
+      if (change.potions > 0 && potionRow !== undefined) kept = kept.map((item) => (item.id === potionRow.id ? { ...item, quantity: item.quantity + change.potions } : item))
+    }
+    delete h.choice
+    counters.choicesMade += 1
+  }
+  if (h.merchant !== undefined && h.merchant.expiresAtTick > tick) {
+    const ladder = h.merchant.offers.find((offer) => (offer.id === 'bag' || offer.id === 'pouch') && offer.price <= h.gold)
+    const potions = h.merchant.offers.find((offer) => offer.id === 'potions' && offer.price <= h.gold)
+    const offer = ladder ?? potions
+    if (offer !== undefined) {
+      h.gold -= offer.price
+      counters.purchases += 1
+      if (offer.id === 'bag') h.bagCapacity = content.bagLadder.tiers.find((tier) => tier.id === offer.tierId)?.capacity ?? h.bagCapacity
+      else if (offer.id === 'pouch') h.potionCap = content.potionPouch?.tiers.find((tier) => tier.id === offer.tierId)?.cap ?? potionCap(content, h)
+      else {
+        const potionRow = kept.find((item) => item.kind === 'potion')
+        if (potionRow !== undefined) kept = kept.map((item) => (item.id === potionRow.id ? { ...item, quantity: Math.min(potionCap(content, h), item.quantity + offer.quantity) } : item))
+      }
+      delete h.merchant
+    }
+  }
   // D61/D122: keep buying the next bag while it is allowed and affordable. Under milestone ladders the one-ahead rule
   // stops this after one; under a shop ladder a visit with the gold climbs several rungs, as a player would.
   for (;;) {
@@ -169,6 +226,13 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
     h.gold -= bag.price
     h.bagCapacity = bag.capacity
     bought += bag.price
+  }
+  // P35: the Lunchbox is a rung, so a visiting player buys the next pouch too once the bag ladder stops taking its gold.
+  for (;;) {
+    const pouch = policy.buyBags === false ? undefined : nextEarlyPouchTier(content, h)
+    if (pouch?.price === undefined || h.gold < pouch.price) break
+    h.gold -= pouch.price
+    h.potionCap = pouch.cap
   }
   const hardest = policy.staySafe ? content.biomes.find(b => b.safe)! : content.biomes.filter((b) => b.unlockLevel <= h.level).at(-1)!
   if (h.status === 'sleeping') {
@@ -229,6 +293,10 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       staleSwaps: 0,
       refills: 0,
       achievementsByDay: new Map(),
+      unlockTick: new Map(),
+      rungTick: new Map(),
+      guaranteeFires: new Map(),
+      careerGold: 0,
     }
     let dayTasks = 0
     let daySleep = 0
@@ -258,7 +326,11 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       if (hero.status === 'exploring' || hero.status === 'resting') markDay(log.eligibleDaysByBiome, biomeBefore, day)
       const utcOffsetSeconds = harnessOffset(policy, index, day)
       const before = hero.todo?.tasks
-      const result = simulateHero({ hero, inventory, tick, content, simulationVersion: SIMULATION_VERSION, streams: streams(index, tick), recentSummaries, tickAt: HARNESS_EPOCH + tick * SLOT_MS, utcOffsetSeconds })
+      const rungBefore = currentRung(content, hero)?.id
+      // P35: a stand-in desk to raid (balanced, 200 gold), so launches happen at their natural rate and the ladder's raid rung
+      // can be measured; being raided needs the pool, which only tools/balance/raids.ts models. Added 2026-10-12: earlier
+      // evidence files were produced without raids in this harness.
+      const result = simulateHero({ hero, inventory, tick, content, simulationVersion: SIMULATION_VERSION, streams: streams(index, tick), recentSummaries, tickAt: HARNESS_EPOCH + tick * SLOT_MS, utcOffsetSeconds, ...(content.raids === undefined ? {} : { raidTarget: { heroId: 'coworker', name: 'A coworker', gold: 200 } }) })
       if (hero.status === 'sleeping') daySleep += 1
       for (const extra of result.extraEvents ?? []) {
         const outcome = extra.detail.outcome
@@ -284,6 +356,15 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         // A slot rewritten this tick whose old task was not ticked off was a stale swap.
         if (before !== undefined) after.forEach((task, i) => { if (task.addedTick === tick && before[i]!.doneTick === undefined && !(result.extraEvents ?? []).some((e) => e.detail.outcome.variant === 'todo' && e.detail.outcome.phase === 'done' && e.detail.outcome.tasks.some((t) => t.templateId === before[i]!.templateId))) log.staleSwaps += 1 })
       }
+      // P35: rungs reached and guarantees fired, by rung id; unlocks by the level the hero holds after the tick.
+      for (const extra of result.extraEvents ?? []) {
+        const outcome = extra.detail.outcome
+        if (outcome.variant !== 'career' || outcome.phase !== 'reached') continue
+        log.rungTick.set(outcome.id, tick)
+        log.careerGold += extra.deltas.gold
+      }
+      if (result.metrics.guarantees && rungBefore !== undefined) log.guaranteeFires.set(rungBefore, (log.guaranteeFires.get(rungBefore) ?? 0) + 1)
+      if (content.unlocks !== undefined) for (const feature of FEATURES) if (!log.unlockTick.has(feature) && result.nextHero.level >= content.unlocks[feature]) log.unlockTick.set(feature, tick)
       if (result.event) recentSummaries = [result.event.summary, ...recentSummaries].slice(0, 2)
       if (result.metrics.encounter !== 'none') {
         log.exploringTicksByBiome.set(biomeBefore, (log.exploringTicksByBiome.get(biomeBefore) ?? 0) + 1)
@@ -347,6 +428,8 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
     log.finalGold = hero.gold
     log.goldEarned = hero.counters.goldEarned
     log.finalPotions = inventory.find(item => item.kind === 'potion')?.quantity ?? 0
+    const finalRung = currentRung(content, hero)?.id
+    if (finalRung !== undefined) log.finalRung = finalRung
     logs.push(log)
   }
   return logs
@@ -412,6 +495,7 @@ export function summarize(policy: Policy, logs: HeroLog[], totalDays: number, co
     goldDayEnd: { median: pct(logs.map((l) => l.finalGold), 0.5), p90: pct(logs.map((l) => l.finalGold), 0.9) },
     goldDay30: totalDays >= 30 ? pct(logs.map((l) => l.goldDay30 ?? 0), 0.5) : null,
     todo: content.todo === undefined ? null : todoReport(logs, totalDays),
+    career: content.career === undefined ? null : careerReport(logs, totalDays, content, censored),
     jackpotGoldShare: Math.round((sum((l) => l.jackpotGold) / Math.max(1, sum((l) => l.goldEarned))) * 1000) / 10,
     elitesPerHeroDay: Math.round((sum((l) => l.elites) / logs.length / totalDays) * 100) / 100,
     bag: {
@@ -458,6 +542,34 @@ function todoReport(logs: HeroLog[], totalDays: number) {
     staleSwapsPerTaskWrittenPct: written > 0 ? round1((logs.reduce((sum, l) => sum + l.staleSwaps, 0) / written) * 100) : null,
     refillsPerHeroDay: Math.round((logs.reduce((sum, l) => sum + l.refills, 0) / logs.length / totalDays) * 1000) / 1000,
     maxRefillsPerDay: Math.round(Math.max(...logs.map((l) => l.refills / totalDays)) * 1000) / 1000,
+  }
+}
+
+/**
+ * P35 reports: the day each feature unlocks and each rung is reached (censored percentiles), guarantee fires per hero
+ * by rung, the ladder's gold as a share of all gold earned, and where heroes stand at the end (companion rungs are the
+ * ones a device-only player waits on).
+ */
+function careerReport(logs: HeroLog[], totalDays: number, content: ContentCatalog, censored: (ticks: (number | undefined)[]) => { p10: number | string; median: number | string; p90: number | string; reached: number }) {
+  const rungs = content.career!.rungs
+  const careerGold = logs.reduce((sum, l) => sum + l.careerGold, 0)
+  const allGold = logs.reduce((sum, l) => sum + l.goldEarned, 0)
+  const standing = new Map<string, number>()
+  for (const l of logs) standing.set(l.finalRung ?? 'done', (standing.get(l.finalRung ?? 'done') ?? 0) + 1)
+  return {
+    unlocks: content.unlocks === undefined ? null : Object.fromEntries(FEATURES.map((feature) => [feature, { level: content.unlocks![feature], ...censored(logs.map((l) => l.unlockTick.get(feature))) }])),
+    rungs: rungs.map((rung) => ({
+      id: rung.id,
+      companion: rung.companion ?? false,
+      ...censored(logs.map((l) => l.rungTick.get(rung.id))),
+      guaranteeFiresPerHero: rung.guarantee === undefined ? null : Math.round((logs.reduce((sum, l) => sum + (l.guaranteeFires.get(rung.id) ?? 0), 0) / logs.length) * 1000) / 1000,
+    })),
+    careerGoldSharePct: allGold > 0 ? round1((careerGold / allGold) * 100) : null,
+    careerGoldPerHero: round1(careerGold / logs.length),
+    rungsReachedMedian: pct(logs.map((l) => l.rungTick.size), 0.5),
+    finalRung: Object.fromEntries([...standing.entries()].sort((a, b) => b[1] - a[1])),
+    waitingOnCompanionPct: round1((logs.filter((l) => rungs.find((r) => r.id === l.finalRung)?.companion).length / logs.length) * 100),
+    days: totalDays,
   }
 }
 
@@ -521,6 +633,12 @@ function main() {
       const t = r.todo
       console.log(`  to-do: tasks/hero-day ${t.tasksPerHeroDay} (awake ${t.tasksPerAwakeHeroDay}, ${t.awakeDaySharePct}% of days awake); days with 2+ ${t.daysWithTwoPlusPct}% (awake ${t.awakeDaysWithTwoPlusPct}%); task gold ${t.taskGoldSharePct}% of other gold (${t.taskGoldPerHeroDay}/hero-day)`)
       console.log(`  to-do: stale swaps ${t.staleSwapsPerTaskWrittenPct}% of tasks written; refills/hero-day ${t.refillsPerHeroDay} (max hero ${t.maxRefillsPerDay}); hours to finish ${Object.entries(t.hoursToFinish).map(([k, h]) => `${k} ${h.median}h (p10 ${h.p10}, p90 ${h.p90}, n ${h.finished})`).join('; ')}`)
+    }
+    if (r.career) {
+      const c = r.career
+      console.log(`  unlocks: ${Object.entries(c.unlocks ?? {}).map(([f, u]) => `${f} L${u.level} ${u.median}d`).join('; ')}`)
+      console.log(`  career: ${c.rungs.map((x) => `${x.id} ${x.median}d (${x.reached}/${r.heroes}${x.guaranteeFiresPerHero === null ? '' : `, forced ${x.guaranteeFiresPerHero}/hero`})`).join('; ')}`)
+      console.log(`  career: gold ${c.careerGoldSharePct}% of all gold (${c.careerGoldPerHero}/hero); rungs reached median ${c.rungsReachedMedian}; waiting on a companion rung at the end ${c.waitingOnCompanionPct}%; standing ${JSON.stringify(c.finalRung)}`)
     }
     console.log(`  potions ${JSON.stringify(r.potions)}; useful gear/day ${r.usefulGearPerDay}; equipped upgrades/hero ${r.equippedUpgradesPerHero}`)
     console.log(`  bag ${r.bag.reach.map((b) => `${b.capacity}: ${b.median}d (p10 ${b.p10}, p90 ${b.p90})`).join('; ')}; finds/hero ${r.bag.findsPerHero}; buys/hero ${r.bag.purchasesPerHero}; gold spent median ${r.bag.goldSpentMedian}`)

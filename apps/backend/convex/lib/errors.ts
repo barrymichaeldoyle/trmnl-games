@@ -24,6 +24,8 @@ export type ErrorCode =
   | 'TODO_UNAVAILABLE'
   | 'TASK_DONE'
   | 'SWAP_USED'
+  /** P35: the feature unlocks at a later level. */
+  | 'LOCKED'
   | 'BAG_FULL'
   | 'BAG_UNAVAILABLE'
   | 'POUCH_UNAVAILABLE'

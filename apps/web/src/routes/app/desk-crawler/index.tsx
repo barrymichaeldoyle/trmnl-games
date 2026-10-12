@@ -15,6 +15,7 @@ import { ReturnNudge } from './-recap'
 import { GameScreen, latestLogQuery } from './-gameScreen'
 import { KeepsakeCallout } from './-keepsakes'
 import { TodoCard, type TodoView } from './-todo'
+import { GoalCard, LockedCard, type CareerView, type UnlockView } from './-career'
 import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
 import { AlertNudge } from './-alerts'
 
@@ -30,7 +31,7 @@ type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number 
 /**
  * The game screen leads, after an unclaimed weekly keepsake's callout (a
  * reason to go and look at the TRMNL): the hero's scene in colour under a
- * platformer HUD, then the few commands the game asks for, the to-do list, the stance and the world map.
+ * platformer HUD, the current goal (P35), then the few commands the game asks for, the to-do list, the stance and the world map.
  * What happened lives on the Log tab, standing on Ranks, and the rest behind More (D124): on a phone this page
  * was seven screens tall when it held all of it.
  */
@@ -46,6 +47,7 @@ function HeroHome() {
       <h1 className="sr-only">{hero.name}, your hero</h1>
       <KeepsakeCallout />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
+      {hero.career ? <GoalCard career={hero.career} level={hero.level} /> : null}
       <ReturnNudge />
       <HeroSheet hero={hero} />
     </div>
@@ -73,6 +75,9 @@ type HeroView = {
   raidsEnabled?: boolean
   /** D112: present once the world runs the to-do list and the hero has one. */
   todo?: TodoView | null
+  /** P35: the ladder, and which features this level has opened; null under a catalog without them. */
+  career?: CareerView | null
+  unlocks?: UnlockView | null
   merchantTicksLeft: number | null
   wakeAtTick: number | null
   choice: Choice | null
@@ -114,6 +119,8 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const healing = Math.min(hero.maxHp - hero.hp, pctOf(hero.maxHp, POTION_HEAL_PCT))
   const potionLabel = !bag ? 'Drink potion' : !bag.potions ? 'No potions' : hero.hp >= hero.maxHp ? `Drink potion (${bag.potions})` : `Drink potion +${healing} HP (${bag.potions})`
   const chosenStance = hero.stances.find((option) => option.id === hero.stance) ?? null
+  // P35: a feature the hero's level has not reached shows as a locked card where its card will be.
+  const locked = (feature: UnlockView[number]['feature']) => hero.unlocks?.find((entry) => entry.feature === feature && !entry.unlocked) ?? null
   // Pause and Resume swap places when they succeed; focus follows to whichever command takes over.
   const commands = useFocusWithin<HTMLElement>(hero.status)
 
@@ -172,9 +179,10 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         </section>
       ) : null}
 
-      {hero.todo ? <TodoCard todo={hero.todo} biomes={hero.biomes} healthy={healthy} notify={notify} /> : null}
+      {hero.todo ? <TodoCard todo={hero.todo} biomes={hero.biomes} healthy={healthy} notify={notify} /> : locked('todo') ? <LockedCard title="To-do list" glyph="todo" level={locked('todo')!.level} blurb="Three small jobs a day from the morning stand-up, which your hero ticks off by itself for a little gold." /> : null}
 
-      {hero.stances.length > 0 ? (
+      {hero.stances.length > 0 && locked('stances') ? <LockedCard title="Stance" glyph="shield" level={locked('stances')!.level} blurb="Cautious, Balanced or Bold: how far your hero pushes before it rests. Balanced until then." /> : null}
+      {hero.stances.length > 0 && !locked('stances') ? (
         <section aria-labelledby="stance-title" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4">
             <SectionTitle id="stance-title" glyph="shield" tone="text-sky-ink">Stance</SectionTitle>

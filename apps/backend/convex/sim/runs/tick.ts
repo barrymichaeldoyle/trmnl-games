@@ -9,6 +9,7 @@ import { deriveStreamSeeds } from '@trmnl-games/desk-crawler/sim/seed'
 import { applyResult, storedDetail, toHeroState, toInventory } from './adapter'
 import { joinRaidPool, nextIncomingRaid, pickRaidTarget, raidRival, settleRaids, type PendingRaid, type RaidPick } from '../../lib/raids'
 import { planRaid, type RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
+import { canRaid, effectiveStance } from '@trmnl-games/desk-crawler/sim/core/career'
 import { writeRankInput } from '../../leaderboard'
 import { achievementState, awardAchievements, keepsakeTotal, tallyUnlocks } from '../../lib/achievements'
 import { needsFullPass } from '@trmnl-games/desk-crawler/sim/core/achievements'
@@ -81,14 +82,15 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
   let pick: RaidPick | undefined
   let pending: PendingRaid | undefined
   if (content.raids !== undefined) {
-    plan = planRaid(streams, hero.stance, content)
+    // P35: the same level gate and the same stance the core uses, so the two never disagree about a launch.
+    plan = canRaid(content, hero.level) ? planRaid(streams, effectiveStance(content, hero), content) : undefined
     if (plan !== undefined) pick = await pickRaidTarget(ctx, hero, plan, run.tick, content)
     pending = await nextIncomingRaid(ctx, hero._id)
   }
   let result
   const recentLogs = (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(4))
-    // Achievements and P31 to-do lines are not stories, so they never steer the next variant.
-    .filter((log) => log.kind !== 'achievement' && log.kind !== 'todo')
+    // Achievements, P31 to-do lines and P35 career lines are not stories, so they never steer the next variant.
+    .filter((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
     .slice(0, 2)
   try {
     result = simulateHero({
@@ -155,7 +157,7 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
       deltas: result.event.deltas,
     })
   }
-  // P31: tasks ticked off, then the stand-up, logged after the tick's story.
+  // P31/P35: tasks ticked off, the stand-up, then unlocks and the goal reached, logged after the tick's story.
   for (const extra of result.extraEvents ?? []) {
     sequence += 1
     await ctx.db.insert('tickLogs', { heroId: hero._id, source: 'tick', tick: run.tick, runId: run._id, sequence, at: now, kind: extra.kind, summary: extra.summary, detail: storedDetail(extra.detail), deltas: extra.deltas })

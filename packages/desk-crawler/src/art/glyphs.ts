@@ -18,6 +18,8 @@ export const GLYPHS: Record<string, readonly string[]> = {
   raid: ['........', '........', '.######.', '########', '#..##..#', '########', '.##..##.', '........'],
   /** D112: a to-do task ticked off, and the stand-up's new tasks: a checkbox with its tick. */
   todo: ['########', '#......#', '#.....##', '#....#.#', '##..#..#', '#.##...#', '#......#', '########'],
+  /** P35: a career rung reached or a feature unlocked: the ladder. */
+  career: ['##....##', '########', '##....##', '##....##', '########', '##....##', '##....##', '########'],
   /** D112: an open to-do task in the companion: the empty checkbox. */
   todoOpen: ['########', '#......#', '#......#', '#......#', '#......#', '#......#', '#......#', '########'],
   system: ['..####..', '.#....#.', '#..##..#', '#.#..#.#', '#.#..#.#', '#..##..#', '.#....#.', '..####..'],

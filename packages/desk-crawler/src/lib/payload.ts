@@ -195,6 +195,8 @@ export const keepUnitsTogether = (text: string) =>
 export function celebrationFor(latest: LatestEvent | null, level: number): string | null {
   if (latest === null) return null
   if (latest.kind === 'achievement') return latest.title ? `Achievement: ${latest.title}` : null
+  // P35: "Goal reached: Equip a find" or "Unlocked: the to-do list", exactly as the line reads.
+  if (latest.kind === 'career') return latest.title ?? null
   if (latest.kind === 'levelup') return `Level up! Now level ${level}`
   const outcome = latest.outcome
   if (outcome?.variant === 'combat' && outcome.elite === true && outcome.outcome === 'victory') return 'Elite defeated!'

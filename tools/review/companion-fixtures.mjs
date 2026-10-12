@@ -10,6 +10,7 @@
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
+ *   career=1 (P35: the goal card, the Career page and the unlocks, plus career log lines)   career=new (level 1, everything locked)   career=done (the ladder finished)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
  * Slow Cast (D115): /app/slow-cast, /cooler, /shop, /logbook, /settings, with sc=full (cooler full), sc=empty (empty cooler, no bait here),
@@ -53,6 +54,7 @@ export const Outlet = () => { const Page = useContext(OutletContext); return Pag
 // Queries from the fixture; mutations settle locally.
 write('data.js', `import fixture from './fixture.json';
 import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
+import { contentV12 } from '../../packages/desk-crawler/src/content/v12';
 import { useCallback, useState } from 'react';
 const params = new URLSearchParams(location.search);
 const flag = (name) => params.get(name) === '1';
@@ -121,6 +123,25 @@ if (many > 0) {
   inventory.capacity = Math.max(inventory.capacity, many); inventory.used = many;
 }
 if (held) { inventory.gear.unshift({ id: 'held', kind: 'weapon', templateId: 'spork_halberd', name: 'Spork Halberd', label: 'Rare Spork Halberd', rarity: 'rare', requiredLevel: 4, attack: 11, defense: 0, saleValue: 19, affix: null, equipped: false, held: true }); inventory.heldItemId = 'held'; inventory.used = inventory.capacity; inventory.canResume = false }
+// P35: career=1 gives the hero its place on the ladder (goal card, Career page, unlocks) and the two log lines; career=new a
+// level-1 hero with everything still locked; career=done a finished ladder.
+if (params.has('career')) {
+  const mode = params.get('career');
+  const rungs = contentV12.career.rungs;
+  const rung = mode === 'new' ? 1 : mode === 'done' ? rungs.length : 9;
+  const now = Date.now();
+  hero.level = mode === 'new' ? 1 : hero.level;
+  hero.career = { rung, total: rungs.length, current: rung < rungs.length ? { id: rungs[rung].id, title: rungs[rung].title, blurb: rungs[rung].blurb, gold: rungs[rung].gold, companion: rungs[rung].companion ?? false, value: rungs[rung].predicate.kind === 'counter' && rungs[rung].predicate.counter === 'choicesMade' ? 0 : 1, target: 1 } : null,
+    rungs: rungs.map((r, i) => ({ id: r.id, title: r.title, blurb: r.blurb, gold: r.gold, companion: r.companion ?? false, state: i < rung ? 'done' : i === rung ? 'current' : 'ahead', reachedAt: i < rung && i >= 4 ? now - 864e5 * (rung - i) : null })) };
+  if (mode === 'new') hero.career.current = { ...hero.career.current, value: 0, target: 1 };
+  if (mode !== 'new' && mode !== 'done') hero.career.current.value = 2, hero.career.current.target = 3, hero.career.current.title = 'Finish three to-do tasks', hero.career.current.blurb = rungs[3].blurb, hero.career.current.companion = false;
+  hero.unlocks = [['todo', 'the to-do list', 2], ['stances', 'stances', 3], ['choices', 'office decisions', 5], ['merchant', 'the wandering merchant', 6], ['raids', 'desk raids', 7]].map(([feature, label, level]) => ({ feature, label, level, unlocked: hero.level >= level }));
+  if (mode === 'new') { hero.todo = null; hero.stance = 'balanced' }
+  data.log.unshift(
+    { id: 'career1', at: now - 5e5, tick: 911, kind: 'career', summary: 'Goal reached: Pick a stance. Next: Reach level 4.', source: 'tick', deltas: { xpEarned: 0, gold: 20, hp: 0 } },
+    { id: 'career2', at: now - 36e5 * 5, tick: 896, kind: 'career', summary: 'Unlocked: stances.', source: 'tick', deltas: { xpEarned: 0, gold: 0, hp: 0 } },
+  );
+}
 // D112: todo=1 gives the hero a to-do list with each state the card draws; todo=used spends the swap.
 if (params.has('todo')) {
   hero.todo = { swapAvailable: params.get('todo') !== 'used', nextStandupAt: Date.now() + 36e5 * 14, refillHour: 7, tasks: [
@@ -236,6 +257,7 @@ import { Route as Ranks } from '../../apps/web/src/routes/app/desk-crawler/leade
 import { Route as Settings } from '../../apps/web/src/routes/app/desk-crawler/settings';
 import { Route as Log } from '../../apps/web/src/routes/app/desk-crawler/log';
 import { Route as DcAchievements } from '../../apps/web/src/routes/app/desk-crawler/achievements';
+import { Route as Career } from '../../apps/web/src/routes/app/desk-crawler/career';
 import { Route as Keepsakes } from '../../apps/web/src/routes/app/desk-crawler/keepsakes';
 import { Route as Device } from '../../apps/web/src/routes/app/desk-crawler/trmnl';
 import { Route as Profile } from '../../apps/web/src/routes/desk-crawler/heroes.$alias';
@@ -251,7 +273,7 @@ import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
-const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
+const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
   '/app/slow-cast': ScDock.options.component, '/app/slow-cast/cooler': ScCooler.options.component, '/app/slow-cast/shop': ScShop.options.component, '/app/slow-cast/logbook': ScLogbook.options.component, '/app/slow-cast/settings': ScSettings.options.component, '/app/slow-cast/rankings': ScRankings.options.component, '/app/slow-cast/achievements': ScAchievements.options.component };
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);

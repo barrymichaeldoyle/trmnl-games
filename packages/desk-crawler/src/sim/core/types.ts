@@ -31,6 +31,7 @@ export type LogKind =
   | 'choice'
   | 'raid'
   | 'todo'
+  | 'career'
   | 'system'
 
 // ---------------------------------------------------------------- content
@@ -331,6 +332,51 @@ export interface TodoRule {
   readonly monsterPlurals: Readonly<Record<string, string>>
 }
 
+/** P35: features that arrive at a level. Below it a hero behaves as under a catalog without that feature's rules. */
+export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids'
+export type UnlockRule = Readonly<Record<UnlockableFeature, number>>
+
+/** P35: what a career rung asks for, over the same bounded state achievements read. */
+export type CareerPredicate =
+  | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
+  /** Any one of the counters at or above the target. */
+  | { readonly kind: 'anyCounter'; readonly counters: readonly NumericCounter[]; readonly atLeast: number }
+  | { readonly kind: 'level'; readonly atLeast: number }
+  | { readonly kind: 'bag'; readonly atLeast: number }
+  /** Potion cap (D77). */
+  | { readonly kind: 'pouch'; readonly atLeast: number }
+  /** At least one victory over a monster of this biome. */
+  | { readonly kind: 'biomeWin'; readonly biomeId: string }
+
+/** P35: the lucky event a rung guarantees once the hero has explored `withinTicks` ticks on that rung without it. */
+export type GuaranteedEvent = 'combat' | 'gear' | 'choice' | 'merchant' | 'elite'
+export interface CareerGuarantee {
+  readonly event: GuaranteedEvent
+  readonly withinTicks: number
+  /** Only fires outside the safe biome (an elite in the Office would be a waste of the guarantee). */
+  readonly outsideSafe?: boolean
+  /** Re-arms after firing instead of standing down, for an event that expires unanswered (a decision); still at most once per bound. */
+  readonly repeat?: true
+}
+
+export interface CareerRung {
+  /** Append-only and never reused, like achievement ids. */
+  readonly id: string
+  readonly title: string
+  readonly blurb: string
+  readonly predicate: CareerPredicate
+  /** Gold paid when the rung is reached; never XP. */
+  readonly gold: number
+  /** The rung needs the companion (equip, sell, travel, buy); the device-only player sees it wait. */
+  readonly companion?: boolean
+  readonly guarantee?: CareerGuarantee
+}
+
+/** P35: the career ladder. Every hero has one current rung; rungs are checked in order. */
+export interface CareerRule {
+  readonly rungs: readonly CareerRung[]
+}
+
 export interface RaidNarrative {
   /** The raider won. */
   readonly raidWon: readonly string[]
@@ -456,6 +502,10 @@ export interface ContentCatalog {
   readonly raids?: RaidRule
   /** Absent before v9 (P31): without it a hero has no to-do list and draws nothing from the `quest` stream. */
   readonly todo?: TodoRule
+  /** Absent before v12 (P35): every feature is on from level 1. */
+  readonly unlocks?: UnlockRule
+  /** Absent before v12 (P35): no career ladder, no goal lines, no guarantees. */
+  readonly career?: CareerRule
   readonly narrative: Readonly<{ biomes: Readonly<Record<string, BiomeNarrative>>; shared: SharedNarrative; monsters: Readonly<Record<string, MonsterNarrative>> }>
 }
 
@@ -507,6 +557,10 @@ export interface HeroCounters {
   readonly raidsLost: number
   /** To-do tasks ticked off (P31). */
   readonly tasksCompleted: number
+  /** Gear equipped in the companion (P35), written by the equip intent. */
+  readonly itemsEquipped: number
+  /** Career rungs reached under a catalog with a ladder (P35). */
+  readonly careerRungs: number
 }
 
 /** Counter names that hold one number (everything except `monsterWins`). */
@@ -547,6 +601,23 @@ export interface HeroState {
   readonly effects?: readonly ActiveEffect[]
   /** P31: the office to-do list; absent until the hero's first evaluation under a catalog with to-do rules. */
   readonly todo?: TodoList
+  /** P35: where the hero stands on the career ladder; absent until its first evaluation under a catalog with one. */
+  readonly career?: CareerState
+}
+
+/** P35: the hero's place on the career ladder. */
+export interface CareerState {
+  /** Index of the current rung; the ladder's length once every rung is reached. */
+  readonly rung: number
+  readonly startedTick: number
+  /** `ticksExplored` when the current rung's guarantee was armed; absent while the rung has none, its feature is locked, or it has fired. */
+  readonly armedAt?: number
+  /** The guaranteed event's count when armed; the guarantee stands down once the event has happened by itself. */
+  readonly armedCount?: number
+  /** The current rung's guarantee has fired; a guarantee fires once per rung. */
+  readonly fired?: true
+  /** Rungs reached under the ladder, in order, with the tick and its wall slot when the input carried one; rungs already satisfied when the ladder arrived are not listed. */
+  readonly reached: readonly { readonly id: string; readonly tick: number; readonly at?: number }[]
 }
 
 /** One to-do task. The biome and monster it names, its target and its reward are fixed when it is written. */
@@ -705,6 +776,16 @@ export type OutcomeDetail =
       readonly phase: 'done' | 'standup'
       readonly tasks: readonly { readonly templateId: TodoKind; readonly label: string; readonly reward: number }[]
     }
+  | {
+      readonly variant: 'career'
+      /** `reached`: a rung reached (`id` is the rung, `gold` its bonus); `unlocked`: a feature arrived (`id` is the feature). */
+      readonly phase: 'reached' | 'unlocked'
+      readonly id: string
+      readonly title: string
+      /** The next rung's title after a reached one, when the ladder goes on. */
+      readonly next?: string
+      readonly gold: number
+    }
 
 export interface LogDetail {
   readonly v: 1
@@ -764,6 +845,10 @@ export interface TickMetrics {
   readonly raidsApplied: number
   readonly tasksCompleted: number
   readonly todoRefills: number
+  /** P35: a career rung reached, features unlocked, and a guaranteed event forced this tick. */
+  readonly careerRungs: number
+  readonly unlocks: number
+  readonly guarantees: number
 }
 
 export interface SimulationResult {
@@ -776,6 +861,6 @@ export interface SimulationResult {
   readonly raidLaunch?: RaidLaunch
   /** D110: the incoming raid was applied this tick; the adapter marks the ledger row applied. */
   readonly raidApplied?: boolean
-  /** P31: to-do log lines logged after `event`, in order: tasks ticked off, then the stand-up. Never the tick's only story unless nothing else happened. */
+  /** P31/P35: lines logged after `event`, in order: tasks ticked off, the stand-up, features unlocked, a rung reached. Never the tick's only story unless nothing else happened. */
   readonly extraEvents?: readonly TickEvent[]
 }

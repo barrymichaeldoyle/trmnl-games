@@ -60,6 +60,8 @@ export function activityRecap(entries: readonly ActivityEntry[], period: RecapPe
       if (entry.detail.outcome.phase === 'done') totals.tasks += entry.detail.outcome.tasks.length
       continue
     }
+    // P35: goal and unlock lines are the ladder's commentary on the period, not events in it.
+    if (entry.detail.outcome.variant === 'career') continue
     events++
     const { outcome, levelsGained } = entry.detail
     totals.xp += entry.deltas.xpEarned

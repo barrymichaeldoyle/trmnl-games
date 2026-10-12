@@ -1,6 +1,7 @@
 import { SimulationInvariantError } from './invariants'
 import { codePoints, fill, stripMarks } from './narrative'
 import { createRng, pickOne, type Rng } from './rng'
+import { unlocked } from './career'
 import type { BiomeTemplate, ContentCatalog, HeroState, LogDetail, SimulationInput, SimulationResult, TickEvent, TodoKind, TodoList, TodoTask, TodoTemplate } from './types'
 
 /**
@@ -163,6 +164,8 @@ export function applyTodo(input: SimulationInput, result: SimulationResult): Sim
   if (rules === undefined) return result
   const before = input.hero
   let hero = result.nextHero
+  // P35: no list before the to-do unlock; the first fill comes with the tick that reaches the level.
+  if (!unlocked(content, hero.level, 'todo')) return result
   const events: TickEvent[] = []
   const metrics = { ...result.metrics }
   const at = input.tickAt ?? tick * TICK_MS
