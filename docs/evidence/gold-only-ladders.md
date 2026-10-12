@@ -1,6 +1,6 @@
 # Gold-only bag and pouch ladders (D122, content v10)
 
-Date: 2026-10-11 · Simulation version 1 · Content v10 (built; production stays on v9 until the switch) · Harness: `pnpm balance --heroes 300 --days 30 --content v10 --json docs/evidence/balance-v10-gold-only-30-days.json` ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw report: [balance-v10-gold-only-30-days.json](balance-v10-gold-only-30-days.json). Price sweeps: [sweep 1](gold-only-ladders-sweep-1.json) (v9's prices and multiples of them), [sweep 2](gold-only-ladders-sweep-2.json) (cheaper middle rungs), [sweep 3](gold-only-ladders-sweep-3.json) (the top rung).
+Date: 2026-10-11 · Simulation version 1 · Content v10 (switched on in production 2026-10-12) · Harness: `pnpm balance --heroes 300 --days 30 --content v10 --json docs/evidence/balance-v10-gold-only-30-days.json` ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw report: [balance-v10-gold-only-30-days.json](balance-v10-gold-only-30-days.json). Price sweeps: [sweep 1](gold-only-ladders-sweep-1.json) (v9's prices and multiples of them), [sweep 2](gold-only-ladders-sweep-2.json) (cheaper middle rungs), [sweep 3](gold-only-ladders-sweep-3.json) (the top rung).
 
 ## What changed
 
