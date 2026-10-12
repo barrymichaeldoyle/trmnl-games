@@ -15,6 +15,7 @@ import { readWorld, worldContent } from './world'
 import { awardAfterIntent } from './lib/achievements'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield, workbenchSuffix } from '@trmnl-games/desk-crawler/sim/core/workbench'
+import { bestFitPotion, combineBatches, healPctOf, potionItem, potionStrengths, potionWord, potionsHeld, strengthById, strengthOf } from '@trmnl-games/desk-crawler/sim/core/potions'
 import type { ItemSnapshot, MaterialCount } from '@trmnl-games/desk-crawler/sim/core/types'
 
 const currentTick = async (ctx: QueryCtx) => (await readWorld(ctx))?.currentTick ?? 0
@@ -203,7 +204,10 @@ export const mine = query({
       weaponId: hero.weaponId ?? null,
       armorId: hero.armorId ?? null,
       heldItemId: hero.heldItemId ?? null,
-      potions: items.find((item) => item.kind === 'potion')?.quantity ?? 0,
+      potions: potionsHeld(items),
+      // D131: one entry per strength in catalog order (count 0 included), and the combine recipe with what it would make.
+      potionRows: potionStrengths(content).map((strength) => ({ templateId: strength.templateId, name: strength.name, healPct: strength.healPct, heals: Math.min(maxHp(hero.level), pctOf(maxHp(hero.level), strength.healPct)), count: items.find((item) => item.kind === 'potion' && item.templateId === strength.templateId)?.quantity ?? 0 })),
+      potionCombine: combineView(content, items, held),
       canResume: hero.status === 'sleeping' && hero.heldItemId === undefined && !bagFull(hero, items) && hero.wakeAtTick === undefined,
       gear: items
         .filter((item) => isGear(item.kind))
@@ -233,26 +237,96 @@ export const mine = query({
   },
 })
 
+/** D131: the combine recipe as the companion shows it: names, counts and how many batches the hero can make. */
+function combineView(content: ContentCatalog, items: Doc<'items'>[], held: MaterialCount) {
+  const rule = content.potions?.combine
+  if (rule === undefined) return null
+  const from = strengthById(content, rule.from)
+  const to = strengthById(content, rule.to)
+  if (from === undefined || to === undefined) return null
+  const have = items.find((item) => item.kind === 'potion' && item.templateId === from.templateId)?.quantity ?? 0
+  const short = materialShortfall(held, rule.materials)
+  return {
+    from: { templateId: from.templateId, name: from.name, count: rule.count, have },
+    materials: rule.materials,
+    to: { templateId: to.templateId, name: to.name },
+    shortfall: { potions: Math.max(0, rule.count - have), materials: short },
+    batches: combineBatches(content, items.map(snapshotOf), held),
+  }
+}
+
+/**
+ * Drink one potion. D131: `templateId` names the strength; without it the smallest potion that heals to full is
+ * drunk, else the strongest held. Before D131 there is one strength and the argument is ignored.
+ */
 export const usePotion = mutation({
-  args: { operationId: v.string() },
+  args: { operationId: v.string(), templateId: v.optional(v.string()) },
   returns: intentResult,
   handler: async (ctx, args) =>
-    await runIntent(ctx, args.operationId, 'inventory.usePotion', {}, async (user) => {
+    await runIntent(ctx, args.operationId, 'inventory.usePotion', { ...(args.templateId === undefined ? {} : { templateId: args.templateId }) }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
       if (hero.status !== 'exploring' && hero.status !== 'resting' && hero.status !== 'travelling') throw appError('INVALID_STATE', 'Potions can be used while exploring, resting or travelling.')
       const max = maxHp(hero.level)
       if (hero.hp >= max) throw appError('FULL_HP', 'Your hero is already at full health.')
-      const potion = (await heroItems(ctx, hero._id)).find((item) => item.kind === 'potion')
-      if (!potion) throw appError('NO_POTION', 'No potions left.')
-      const constants = (await contentOf(ctx)).constants
-      const hp = Math.min(max, hero.hp + pctOf(max, constants.potionHealPct))
+      const content = await contentOf(ctx)
+      const rows = (await heroItems(ctx, hero._id)).filter((item) => item.kind === 'potion').map((item) => ({ ...item, id: item._id as string }))
+      const chosen = args.templateId === undefined || content.potions === undefined
+        ? bestFitPotion(content, rows, hero.hp, max)
+        : ((row) => (row === undefined ? undefined : { row, healPct: healPctOf(content, row.templateId) }))(rows.find((row) => row.templateId === args.templateId))
+      if (chosen === undefined) {
+        const named = args.templateId === undefined ? undefined : strengthOf(content, args.templateId)
+        throw appError('NO_POTION', named === undefined ? 'No potions left.' : `No ${potionWord(named.name)}s left.`)
+      }
+      const potion = chosen.row
+      const hp = Math.min(max, hero.hp + pctOf(max, chosen.healPct))
       if (potion.quantity <= 1) await ctx.db.delete(potion._id)
       else await ctx.db.patch(potion._id, { quantity: potion.quantity - 1 })
+      const constants = content.constants
       const status = hero.status === 'resting' && hp * 100 >= max * constants.resumeExploringAtPct ? 'exploring' : hero.status
       await ctx.db.patch(hero._id, { hp, status, counters: { ...withCounterDefaults(hero.counters), potionsUsed: (hero.counters.potionsUsed ?? 0) + 1 } })
-      await commandLog(ctx, hero, 'use_potion', 'Drank a potion.', { xpEarned: 0, gold: 0, hp: hp - hero.hp })
-      await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+      await commandLog(ctx, hero, 'use_potion', content.potions === undefined ? 'Drank a potion.' : `Drank a ${potionWord(potion.name)}.`, { xpEarned: 0, gold: 0, hp: hp - hero.hp })
+      await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
       return { changed: true, hp }
+    }),
+})
+
+/**
+ * D131: combine potions by the catalog recipe (three minors and one Scrap make a major), `batches` times under one
+ * receipt. Explicit only; the pouch can never overflow, since every batch removes more potions than it adds.
+ */
+export const combinePotions = mutation({
+  args: { operationId: v.string(), batches: v.optional(v.number()) },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.combinePotions', { batches: args.batches ?? 1 }, async (user) => {
+      const batches = args.batches ?? 1
+      if (!Number.isSafeInteger(batches) || batches < 1 || batches > 10) throw appError('INVALID_INPUT', 'Combine between 1 and 10 batches.')
+      const hero = await requirePlayableHero(ctx, user)
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Potions can't be combined while your hero is recovering or paused.")
+      const content = await contentOf(ctx)
+      const rule = content.potions?.combine
+      const from = rule === undefined ? undefined : strengthById(content, rule.from)
+      const to = rule === undefined ? undefined : strengthById(content, rule.to)
+      if (rule === undefined || from === undefined || to === undefined) throw appError('POTIONS_UNAVAILABLE', 'Potions cannot be combined yet.')
+      const items = await heroItems(ctx, hero._id)
+      const source = items.find((item) => item.kind === 'potion' && item.templateId === from.templateId)
+      const needed = rule.count * batches
+      if ((source?.quantity ?? 0) < needed) throw appError('NOT_ENOUGH_POTIONS', `Needs ${needed - (source?.quantity ?? 0)} more ${potionWord(from.name)}${needed - (source?.quantity ?? 0) === 1 ? '' : 's'}.`)
+      const cost = Object.fromEntries(Object.entries(rule.materials).map(([id, n]) => [id, n * batches]))
+      const short = materialShortfall(heldMaterials(items.map(snapshotOf)), cost)
+      if (Object.keys(short).length > 0) throw appError('NOT_ENOUGH_MATERIALS', `Needs ${materialsText(content, short)} more.`)
+      if (source!.quantity === needed) await ctx.db.delete(source!._id)
+      else await ctx.db.patch(source!._id, { quantity: source!.quantity - needed })
+      await adjustMaterials(ctx, hero, items, content, Object.fromEntries(Object.entries(cost).map(([id, n]) => [id, -n])))
+      const target = items.find((item) => item.kind === 'potion' && item.templateId === to.templateId)
+      if (target) await ctx.db.patch(target._id, { quantity: target.quantity + batches })
+      else await ctx.db.insert('items', { ...potionItem(content, to, batches), heroId: hero._id, createdAt: Date.now() })
+      const counters = withCounterDefaults(hero.counters)
+      await ctx.db.patch(hero._id, { counters: { ...counters, potionsCombined: counters.potionsCombined + batches } })
+      const made = batches === 1 ? `a ${potionWord(to.name)}` : `${batches} ${potionWord(to.name)}s`
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'combine_potions', `Combined ${needed} ${potionWord(from.name)}s and ${materialsText(content, cost)} into ${made}.`, { xpEarned: 0, gold: 0, hp: 0 }, { materials: cost, potionsBought: batches })
+      await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
+      return { changed: true, count: batches }
     }),
 })
 
@@ -455,11 +529,13 @@ export const buyOffer = mutation({
       let summary: string
       let count = offer.quantity
       if (offer.id === 'potions') {
-        const potion = (await heroItems(ctx, hero._id)).find((item) => item.kind === 'potion')
-        const have = potion?.quantity ?? 0
+        // D131: the merchant sells the catalog (healing) potion; the pouch counts every strength.
+        const rows = (await heroItems(ctx, hero._id)).filter((item) => item.kind === 'potion')
+        const potion = rows.find((item) => item.templateId === content.potion.templateId)
+        const have = potionsHeld(rows)
         const cap = potionCap(content, state)
         if (have + offer.quantity > cap) throw appError('POUCH_FULL', `Your pouch holds ${cap} potions; ${cap - have} more would fit.`)
-        if (potion) await ctx.db.patch(potion._id, { quantity: have + offer.quantity })
+        if (potion) await ctx.db.patch(potion._id, { quantity: potion.quantity + offer.quantity })
         else await ctx.db.insert('items', { ...starterKit(content).potions, quantity: offer.quantity, heroId: hero._id, createdAt: Date.now() })
         summary = `Bought ${offer.quantity === 1 ? 'a healing potion' : `${offer.quantity} healing potions`} from the merchant.`
       } else if (offer.id === 'pouch') {

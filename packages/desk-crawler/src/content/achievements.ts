@@ -8,7 +8,7 @@ import type { NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 5
+export const ACHIEVEMENTS_VERSION = 6
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -321,6 +321,14 @@ counter('workbench', 'Workbench', 'Lifetime', 'gearUpgraded', [1, 5, 15], [
   ['Tinkerer', 'Took a piece of gear to the workbench and made it better.'],
   ['Shop Steward', 'Five workbench jobs. The bench has a dent now.'],
   ['Master of the Works', 'Fifteen jobs, and a sign on the bench that says so.'],
+])
+
+// ---------------------------------------------------------------- v2.0 Potion strengths (catalog version 6, D131; appended, never edited)
+
+counter('mixing', 'Potion mixing', 'Lifetime', 'potionsCombined', [1, 10, 50], [
+  ['Kitchen Chemist', 'Three minor potions and a paperclip make a major. Tastes of pennies.'],
+  ['Tea Round', 'Ten majors mixed. The kettle has opinions.'],
+  ['Head of Pharmacy', 'Fifty majors. Facilities want the sink back.'],
 ])
 
 /** Families in display order. */

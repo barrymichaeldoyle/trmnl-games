@@ -5,6 +5,7 @@ import { mutation, query } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
 import { isGear } from '@trmnl-games/desk-crawler/sim/core/workbench'
+import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
 import { appError } from './lib/errors'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
 import { deriveStats } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -90,7 +91,7 @@ export const mine = query({
       // D76: the chosen stance and every stance's thresholds, so the companion can show what each one does.
       merchantTicksLeft: hero.merchant && world && hero.merchant.expiresAtTick > world.currentTick ? hero.merchant.expiresAtTick - world.currentTick : null,
       // D79: the pending choice with its options and what each one would do to this hero right now.
-      choice: choiceView(content, hero, items.find((item) => item.kind === 'potion')?.quantity ?? 0, world?.currentTick ?? 0),
+      choice: choiceView(content, hero, potionsHeld(items), world?.currentTick ?? 0),
       stance: hero.stance ?? 'balanced',
       publicProfile: hero.publicProfile ?? false,
       // D110: under a catalog with raids, each stance also says how often it raids and how often it wins against a balanced hero.
@@ -190,9 +191,11 @@ export const choose = mutation({
       const event = eventById(content, pending.eventId)
       const option = event === undefined ? undefined : optionOf(event, args.optionId)
       if (!event || !option) throw appError('INVALID_INPUT', 'That is not one of the options.')
-      const potion = (await ctx.db.query('items').withIndex('by_heroId_and_kind', (q) => q.eq('heroId', hero._id).eq('kind', 'potion')).first()) ?? null
+      // D131: the pouch counts every strength; a decision's potions are the catalog (healing) potion.
+      const potionRows = await ctx.db.query('items').withIndex('by_heroId_and_kind', (q) => q.eq('heroId', hero._id).eq('kind', 'potion')).take(8)
+      const potion = potionRows.find((row) => row.templateId === content.potion.templateId) ?? null
       const state = { level: hero.level, hp: hero.hp, gold: hero.gold, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
-      const change = resolveEffect(content, state, potion?.quantity ?? 0, option.effect, pending.biomeTier)
+      const change = resolveEffect(content, state, potionsHeld(potionRows), option.effect, pending.biomeTier)
       const counters = withCounterDefaults(hero.counters)
       const granted = change.effectId === undefined ? undefined : effectById(content, change.effectId)
       await ctx.db.patch(hero._id, { choice: undefined, gold: hero.gold + change.gold, hp: hero.hp + change.hp, counters: { ...counters, choicesMade: counters.choicesMade + 1, goldEarned: counters.goldEarned + Math.max(0, change.gold) }, ...(granted ? { effects: withEffect(hero.effects, granted, tick).map((effect) => ({ ...effect })) } : {}) })

@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {
@@ -168,6 +168,8 @@ const SPECIAL_EVENTS: Record<string, (args: Record<string, unknown>) => [Analyti
   'inventory:salvageMany': (args) => ['gear salvaged', { count: String(Array.isArray(args.itemIds) ? args.itemIds.length : 0) }],
   'inventory:upgrade': () => ['gear upgraded', {}],
   'inventory:chooseAffix': (args) => ['affix chosen', { affix: String(args.affixId ?? '') }],
+  // D131: potions combined, by batches.
+  'inventory:combinePotions': (args) => ['potion combined', { batches: String(args.batches ?? 1) }],
   'slowCast/anglers:sellCatches': (args) => ['fish sold', { count: String(Array.isArray(args.catchIds) ? args.catchIds.length : 0) }],
   'slowCast/anglers:buyNextRod': () => ['tackle bought', { item: 'rod' }],
   'slowCast/anglers:buyNextCooler': () => ['tackle bought', { item: 'cooler' }],

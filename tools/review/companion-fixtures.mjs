@@ -7,6 +7,7 @@
  *
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
  *   workbench=1 (D129, default: a few materials and the workbench card)   workbench=rich (every job affordable)   workbench=done (a +3 weapon)   workbench=0 (no workbench)
+ *   potions=1 (D131, default: three strengths, a combine affordable)   potions=short (two minors, no Scrap)   potions=one (healing only)   potions=0 (no strengths)
  *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
@@ -126,6 +127,17 @@ const STEPS = [{ kind: 'tier', to: 2, label: 'Upgrade to Mk II', gold: 150, mate
 inventory.materials = wb === '0' ? [] : [{ id: 'scrap', name: 'Scrap', glyph: 'scrap', count: wb === 'rich' ? 60 : 7 }, { id: 'parts', name: 'Parts', glyph: 'parts', count: wb === 'rich' ? 20 : 1 }, { id: 'components', name: 'Components', glyph: 'components', count: wb === 'rich' ? 6 : 0 }];
 inventory.workbench = wb === '0' ? null : { affix: { gold: 1500, materials: { components: 2 } }, affixes: [{ id: 'vampiric', name: 'Vampiric', blurb: 'Heals 5% of maximum HP after every win.' }, { id: 'lucky', name: 'Lucky', blurb: 'Adds 20% gold from wins and finds.' }, { id: 'sturdy', name: 'Sturdy', blurb: 'Takes 40% less damage from traps.' }, { id: 'thrifty', name: 'Thrifty', blurb: 'A retreat costs nothing and a knockout costs 5% of gold instead of 10%.' }] };
 if (wb === 'rich') hero.gold = 24000;
+// D131: potion strengths. potions=1 (default) holds all three with a combine affordable; potions=short holds two minors and no Scrap;
+// potions=one holds healing potions only (the picker stays closed); potions=0 is a catalog without strengths.
+const po = params.get('potions') ?? '1';
+const heals = (pct) => Math.min(hero.maxHp, Math.ceil(hero.maxHp * pct / 100));
+const rowsOf = (minor, healing, major) => [{ templateId: 'minor_potion', name: 'Minor Potion', healPct: 25, heals: heals(25), count: minor }, { templateId: 'healing_potion', name: 'Healing Potion', healPct: 40, heals: heals(40), count: healing }, { templateId: 'major_potion', name: 'Major Potion', healPct: 60, heals: heals(60), count: major }];
+inventory.potionRows = po === '0' ? [{ templateId: 'healing_potion', name: 'Healing Potion', healPct: 40, heals: heals(40), count: inventory.potions }] : po === 'one' ? rowsOf(0, inventory.potions, 0) : po === 'short' ? rowsOf(2, 1, 0) : rowsOf(4, 2, 1);
+inventory.potions = inventory.potionRows.reduce((sum, row) => sum + row.count, 0);
+const scrap = (inventory.materials.find((m) => m.id === 'scrap') ?? { count: 0 }).count;
+if (po === 'short') inventory.materials.forEach((m) => { if (m.id === 'scrap') m.count = 0 });
+const minors = inventory.potionRows[0].count;
+inventory.potionCombine = po === '0' ? null : { from: { templateId: 'minor_potion', name: 'Minor Potion', count: 3, have: po === 'one' ? 0 : minors }, materials: { scrap: 1 }, to: { templateId: 'major_potion', name: 'Major Potion' }, shortfall: { potions: Math.max(0, 3 - (po === 'one' ? 0 : minors)), materials: po === 'short' || scrap < 1 ? { scrap: 1 } : {} }, batches: po === 'short' || po === 'one' ? 0 : Math.min(Math.floor(minors / 3), scrap) };
 if (wb === 'done') { const w = inventory.gear.find((g) => g.equipped && g.kind === 'weapon'); if (w) { w.tier = 3; w.reinforced = 3; w.suffix = 'Mk III +3'; w.rarity = 'rare'; w.affix = { id: 'lucky', name: 'Lucky', blurb: 'Adds 20% gold from wins and finds.' }; w.label = 'Lucky Rare ' + w.name + ' Mk III +3' } }
 const decorateGear = () => {
   const held = Object.fromEntries(inventory.materials.map((m) => [m.id, m.count]));

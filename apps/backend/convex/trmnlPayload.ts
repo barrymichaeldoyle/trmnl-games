@@ -6,6 +6,7 @@ import type { Doc } from './_generated/dataModel'
 import { currentUser } from './lib/intent'
 
 import { bagUsed as countBag } from '@trmnl-games/desk-crawler/sim/core/bag'
+import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
 import { buildPayload, MAX_LOGS, MAX_RECAP_EVENTS, recapPeriod, type PayloadInput } from '@trmnl-games/desk-crawler/payload'
 import { readWorld, worldContent } from './world'
 import { readDeviceRanking } from './lib/rankingRead'
@@ -101,7 +102,8 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     weaponAttack = named(hero.weaponId)?.attack ?? 0
     armorDefense = named(hero.armorId)?.defense ?? 0
     heldItemName = label(named(hero.heldItemId))
-    potions = items.find((item) => item.kind === 'potion')?.quantity ?? 0
+    // D131: every strength counts; the device shows one number.
+    potions = potionsHeld(items)
     bagUsed = countBag({
       ...(hero.heldItemId === undefined ? {} : { heldItemId: hero.heldItemId }),
       ...(hero.weaponId === undefined ? {} : { weaponId: hero.weaponId }),

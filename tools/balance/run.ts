@@ -18,6 +18,7 @@ import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/si
 import { nextEarlyPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
 import { currentRung, FEATURES, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield } from '@trmnl-games/desk-crawler/sim/core/workbench'
+import { combineBatches, potionItem, potionRows, potionStrengths, potionsHeld, strengthById, strengthOf } from '@trmnl-games/desk-crawler/sim/core/potions'
 import { createRng } from '@trmnl-games/desk-crawler/sim/core/rng'
 import { ACHIEVEMENTS, ACHIEVEMENT_FAMILIES, rarityBand } from '@trmnl-games/desk-crawler/content/achievements'
 import { allSatisfied } from '@trmnl-games/desk-crawler/sim/core/achievements'
@@ -80,6 +81,11 @@ export interface HeroLog {
   potionsFound: number
   potionsUsed: number
   potionFullFallbacks: number
+  /** D131: finds and drinks per strength id, majors made by combining, and the final count per strength. */
+  potionsFoundByStrength: Map<string, number>
+  potionsUsedByStrength: Map<string, number>
+  potionsCombined: number
+  finalPotionsByStrength: Map<string, number>
   finalPotions: number
   retreats: number
   rescues: number
@@ -160,12 +166,13 @@ function bestInSlot(content: ContentCatalog): { attack: number; defense: number 
  * the harness: it counts equips and sales, picks a stance once stances are unlocked, answers a pending decision with its
  * default, and buys the merchant's bag or pouch offer (else its potions) when it can afford it.
  */
-export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy): { hero: HeroState; inventory: ItemSnapshot[]; bought: number; salvaged: number; workbenchGold: number; steps: string[] } {
+export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy): { hero: HeroState; inventory: ItemSnapshot[]; bought: number; salvaged: number; workbenchGold: number; steps: string[]; combined: number } {
   let bought = 0
   let salvaged = 0
   let workbenchGold = 0
+  let combined = 0
   const steps: string[] = []
-  if (!['exploring', 'resting', 'sleeping'].includes(hero.status)) return { hero, inventory, bought, salvaged, workbenchGold, steps }
+  if (!['exploring', 'resting', 'sleeping'].includes(hero.status)) return { hero, inventory, bought, salvaged, workbenchGold, steps, combined }
   const h: Mutable<HeroState> = { ...hero }
   const counters = { ...h.counters }
   h.counters = counters
@@ -222,12 +229,11 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   if (h.choice !== undefined && content.choices !== undefined) {
     const event = eventById(content, h.choice.eventId)
     const option = event === undefined ? undefined : optionOf(event, event.defaultOptionId)
-    const potionRow = kept.find((item) => item.kind === 'potion')
     if (option !== undefined) {
-      const change = resolveEffect(content, h, potionRow?.quantity ?? 0, option.effect, h.choice.biomeTier)
+      const change = resolveEffect(content, h, potionsHeld(kept), option.effect, h.choice.biomeTier)
       h.gold += change.gold
       h.hp += change.hp
-      if (change.potions > 0 && potionRow !== undefined) kept = kept.map((item) => (item.id === potionRow.id ? { ...item, quantity: item.quantity + change.potions } : item))
+      if (change.potions > 0) kept = withPotions(content, kept, content.potion.templateId, change.potions)
     }
     delete h.choice
     counters.choicesMade += 1
@@ -241,10 +247,7 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
       counters.purchases += 1
       if (offer.id === 'bag') h.bagCapacity = content.bagLadder.tiers.find((tier) => tier.id === offer.tierId)?.capacity ?? h.bagCapacity
       else if (offer.id === 'pouch') h.potionCap = content.potionPouch?.tiers.find((tier) => tier.id === offer.tierId)?.cap ?? potionCap(content, h)
-      else {
-        const potionRow = kept.find((item) => item.kind === 'potion')
-        if (potionRow !== undefined) kept = kept.map((item) => (item.id === potionRow.id ? { ...item, quantity: Math.min(potionCap(content, h), item.quantity + offer.quantity) } : item))
-      }
+      else kept = withPotions(content, kept, content.potion.templateId, Math.min(offer.quantity, potionCap(content, h) - potionsHeld(kept)))
       delete h.merchant
     }
   }
@@ -283,6 +286,20 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
       }
     }
   }
+  // D131: combine every batch the pouch and the materials allow, as a player clearing minors would.
+  const recipe = content.potions?.combine
+  if (recipe !== undefined && policy.workbench !== false) {
+    const batches = combineBatches(content, kept, heldMaterials(kept))
+    const from = strengthById(content, recipe.from)!
+    const to = strengthById(content, recipe.to)!
+    if (batches > 0) {
+      kept = withPotions(content, kept, from.templateId, -recipe.count * batches)
+      kept = withPotions(content, kept, to.templateId, batches)
+      kept = withMaterials(content, kept, Object.fromEntries(Object.entries(recipe.materials).map(([id, n]) => [id, -n * batches])))
+      counters.potionsCombined += batches
+      combined += batches
+    }
+  }
   const hardest = policy.staySafe ? content.biomes.find(b => b.safe)! : content.biomes.filter((b) => b.unlockLevel <= h.level).at(-1)!
   if (h.status === 'sleeping') {
     h.wakeAtTick = tick + 1
@@ -292,7 +309,19 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
     h.targetBiomeId = hardest.id
     h.arriveAtTick = tick + 1
   }
-  return { hero: h, inventory: kept, bought, salvaged, workbenchGold, steps }
+  return { hero: h, inventory: kept, bought, salvaged, workbenchGold, steps, combined }
+}
+
+/** Add (or spend, with negative counts) potions of one strength; a row that reaches zero goes. Ids are stable per strength so the sort order holds. */
+function withPotions(content: ContentCatalog, inventory: ItemSnapshot[], templateId: string, n: number): ItemSnapshot[] {
+  if (n === 0) return inventory
+  const existing = inventory.find((row) => row.kind === 'potion' && row.templateId === templateId)
+  const quantity = (existing?.quantity ?? 0) + n
+  if (quantity < 0) throw new Error(`spent more ${templateId} than held`)
+  const rows = inventory.filter((row) => row !== existing)
+  const strength = strengthOf(content, templateId) ?? potionStrengths(content)[0]!
+  if (quantity > 0) rows.push({ ...potionItem(content, strength, quantity), id: existing?.id ?? `p-${templateId}` })
+  return rows.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 }
 
 /** Add (or spend, with negative counts) materials in the stack rows; a row that reaches zero goes. Ids are stable per material so the sort order holds. */
@@ -333,6 +362,10 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       potionsFound: 0,
       potionsUsed: 0,
       potionFullFallbacks: 0,
+      potionsFoundByStrength: new Map(),
+      potionsUsedByStrength: new Map(),
+      potionsCombined: 0,
+      finalPotionsByStrength: new Map(),
       finalPotions: 0,
       retreats: 0,
       rescues: 0,
@@ -382,9 +415,11 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         let salvaged: number
         let workbenchGold: number
         let steps: string[]
-        ;({ hero, inventory, bought, salvaged, workbenchGold, steps } = visit(hero, inventory, tick, content, policy))
+        let combined: number
+        ;({ hero, inventory, bought, salvaged, workbenchGold, steps, combined } = visit(hero, inventory, tick, content, policy))
         log.itemsSalvaged += salvaged
         log.workbenchGold += workbenchGold
+        log.potionsCombined += combined
         for (const step of steps) if (!log.stepTick.has(step)) log.stepTick.set(step, tick)
         if (bought > 0) {
           log.bagPurchases += 1
@@ -454,7 +489,19 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       if (outcome?.variant === 'loot' && outcome.potionFullFallback) log.potionFullFallbacks += 1
       // A found potion can cancel this tick's decrement, leaving no item directive.
       // Count the encounter outcome so gross supply and usage still conserve the stack.
-      if (outcome?.variant === 'loot' && outcome.found === 'potion') log.potionsFound += 1
+      if (outcome?.variant === 'loot' && outcome.found === 'potion') {
+        log.potionsFound += 1
+        const strength = strengthOf(content, outcome.templateId ?? content.potion.templateId)?.id ?? 'healing'
+        log.potionsFoundByStrength.set(strength, (log.potionsFoundByStrength.get(strength) ?? 0) + 1)
+      }
+      if (result.metrics.potionsUsed) {
+        // The drink's row: the decrement, or, when a find of the same strength cancelled it, the row the story names.
+        const decrement = result.itemChanges.find((change) => change.type === 'potion_decrement')
+        const drunk = decrement?.type === 'potion_decrement' ? inventory.find((item) => item.id === decrement.itemId)?.templateId : undefined
+        const word = /Drank a (\w+) potion\./.exec(result.event?.summary ?? '')?.[1]
+        const strength = drunk !== undefined ? strengthOf(content, drunk)?.id ?? 'healing' : word ?? 'healing'
+        log.potionsUsedByStrength.set(strength, (log.potionsUsedByStrength.get(strength) ?? 0) + 1)
+      }
       for (const change of result.itemChanges) {
         if (change.type !== 'create') continue
         if (change.item.kind === 'potion') continue
@@ -502,7 +549,8 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
     log.finalLevel = hero.level
     log.finalGold = hero.gold
     log.goldEarned = hero.counters.goldEarned
-    log.finalPotions = inventory.find(item => item.kind === 'potion')?.quantity ?? 0
+    log.finalPotions = potionsHeld(inventory)
+    for (const row of potionRows(inventory)) log.finalPotionsByStrength.set(strengthOf(content, row.templateId)?.id ?? 'healing', row.quantity)
     log.materialsHeld = heldMaterials(inventory)
     const finalRung = currentRung(content, hero)?.id
     if (finalRung !== undefined) log.finalRung = finalRung
@@ -565,6 +613,8 @@ export function summarize(policy: Policy, logs: HeroLog[], totalDays: number, co
     usefulGearPerDay: round1(sum(l => l.usefulGearFound) / logs.length / totalDays),
     equippedUpgradesPerHero: round1(sum(l => l.equippedUpgrades) / logs.length),
     potions: { acquiredPerHeroDay: round1(sum(l => l.potionsFound) / logs.length / totalDays), usedPerHeroDay: round1(sum(l => l.potionsUsed) / logs.length / totalDays), fullStackFallbacksPerHeroDay: round1(sum(l => l.potionFullFallbacks) / logs.length / totalDays), finalCount: { p10: pct(logs.map(l => l.finalPotions), 0.1), median: pct(logs.map(l => l.finalPotions), 0.5), p90: pct(logs.map(l => l.finalPotions), 0.9) } },
+    // D131: finds, drinks and the final pouch per strength (per hero over the run), plus majors combined and the Scrap it took.
+    potionStrengths: content.potions === undefined ? null : potionStrengthReport(logs, content, totalDays),
     retreatsPerHeroDay: round1(sum(l => l.retreats) / logs.length / totalDays),
     rescuesPerHeroDay: round1(sum(l => l.rescues) / logs.length / totalDays),
     bestInSlot: censored(logs.map((l) => l.bestInSlotTick)),
@@ -647,6 +697,23 @@ function careerReport(logs: HeroLog[], totalDays: number, content: ContentCatalo
     finalRung: Object.fromEntries([...standing.entries()].sort((a, b) => b[1] - a[1])),
     waitingOnCompanionPct: round1((logs.filter((l) => rungs.find((r) => r.id === l.finalRung)?.companion).length / logs.length) * 100),
     days: totalDays,
+  }
+}
+
+/** D131 reports: per strength, finds and drinks per hero-day and the median final count; majors combined per hero and the material that took. */
+function potionStrengthReport(logs: HeroLog[], content: ContentCatalog, totalDays: number) {
+  const perHeroDay = (pick: (l: HeroLog) => number) => round1(logs.reduce((sum, l) => sum + pick(l), 0) / logs.length / totalDays)
+  const recipe = content.potions!.combine
+  return {
+    byStrength: Object.fromEntries(content.potions!.strengths.map((s) => [s.id, {
+      foundPerHeroDay: perHeroDay((l) => l.potionsFoundByStrength.get(s.id) ?? 0),
+      usedPerHeroDay: perHeroDay((l) => l.potionsUsedByStrength.get(s.id) ?? 0),
+      finalMedian: pct(logs.map((l) => l.finalPotionsByStrength.get(s.id) ?? 0), 0.5),
+    }])),
+    combinedPerHero: round1(logs.reduce((sum, l) => sum + l.potionsCombined, 0) / logs.length),
+    combinedMedian: pct(logs.map((l) => l.potionsCombined), 0.5),
+    materialsSpentPerHero: Object.fromEntries(Object.entries(recipe.materials).map(([id, n]) => [id, round1((logs.reduce((sum, l) => sum + l.potionsCombined, 0) / logs.length) * n)])),
+    restTicksPerHeroDay: perHeroDay((l) => l.stateTicks.get('resting') ?? 0),
   }
 }
 
@@ -739,6 +806,10 @@ function main() {
       console.log(`  workbench: ${Object.entries(w.steps).map(([k, s]) => `${k} ${s.median}d (${s.reached}/${r.heroes})`).join('; ')}`)
     }
     console.log(`  potions ${JSON.stringify(r.potions)}; useful gear/day ${r.usefulGearPerDay}; equipped upgrades/hero ${r.equippedUpgradesPerHero}`)
+    if (r.potionStrengths) {
+      const p = r.potionStrengths
+      console.log(`  strengths: ${Object.entries(p.byStrength).map(([id, s]) => `${id} found ${s.foundPerHeroDay}/d used ${s.usedPerHeroDay}/d end ${s.finalMedian}`).join('; ')}; combined/hero ${p.combinedPerHero} (median ${p.combinedMedian}); spent ${JSON.stringify(p.materialsSpentPerHero)}; rest ticks/hero-day ${p.restTicksPerHeroDay}`)
+    }
     console.log(`  bag ${r.bag.reach.map((b) => `${b.capacity}: ${b.median}d (p10 ${b.p10}, p90 ${b.p90})`).join('; ')}; finds/hero ${r.bag.findsPerHero}; buys/hero ${r.bag.purchasesPerHero}; gold spent median ${r.bag.goldSpentMedian}`)
     console.log(`  XP last day ${JSON.stringify(r.xpLastDay)}; last 7 days ${JSON.stringify(r.xpLast7Days)}`)
     for (const [day, a] of Object.entries(r.achievements)) {

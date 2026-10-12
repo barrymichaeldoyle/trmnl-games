@@ -33,6 +33,18 @@ const price = (cost: { gold: number; materials: Readonly<Record<string, number>>
 const TIER_STEPS = WORKBENCH?.steps.filter((s) => s.kind === 'tier') ?? []
 const REINFORCE_STEPS = WORKBENCH?.steps.filter((s) => s.kind === 'reinforce') ?? []
 const MATERIALS_LINE = WORKBENCH === undefined ? '' : WORKBENCH.materials.map((m) => `${m.name} from ${m.rarities.join(' and ')} gear`).join(', ')
+/** D131: potion strengths, their drops per biome tier and the combine recipe, read from the active catalog. */
+const POTIONS = catalogs[ACTIVE_CONTENT].potions
+const STRENGTHS_LINE = POTIONS === undefined ? '' : ((parts) => `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`)(POTIONS.strengths.map((s) => `${s.name.toLowerCase()} (${s.healPct}%)`))
+/** "the Office Cubicles drop mostly minor potions; the Server Room mostly healing potions, with some majors; …" */
+const DROPS_LINE = POTIONS === undefined ? '' : catalogs[ACTIVE_CONTENT].biomes.map((biome) => {
+  const weights = POTIONS.dropWeightsByTier[biome.tier] ?? {}
+  const ranked = POTIONS.strengths.filter((s) => (weights[s.id] ?? 0) > 0).sort((a, b) => (weights[b.id] ?? 0) - (weights[a.id] ?? 0))
+  const top = ranked[0]
+  const rest = ranked.slice(1).map((s) => `${s.name.toLowerCase()}s`)
+  return top === undefined ? '' : `the ${biome.name} drop${ranked.length === 1 ? ' only' : ' mostly'} ${top.name.toLowerCase()}s${rest.length === 0 ? '' : `, with some ${rest.join(' and ')}`}`
+}).filter(Boolean).join('; ')
+const COMBINE_LINE = POTIONS === undefined ? '' : ((from, to) => `${POTIONS.combine.count} ${from?.name.toLowerCase() ?? 'minor potion'}s and ${Object.entries(POTIONS.combine.materials).map(([id, n]) => `${n} ${MATERIAL_NAME(id)}`).join(', ')} become one ${to?.name.toLowerCase() ?? 'major potion'}`)(POTIONS.strengths.find((s) => s.id === POTIONS.combine.from), POTIONS.strengths.find((s) => s.id === POTIONS.combine.to))
 /** P35: the career ladder and the levels features arrive at, read from the active catalog. */
 const CAREER = catalogs[ACTIVE_CONTENT].career
 const UNLOCKS = catalogs[ACTIVE_CONTENT].unlocks
@@ -131,7 +143,13 @@ export const Route = createFileRoute('/help/desk-crawler')({
         </>
       ) : null}
       <h2 id="potions">Potions</h2>
-      <p>A healing potion restores 40% of your hero's maximum HP, rounded up. Your hero drinks one automatically when HP falls below the stance's potion level while exploring, and the adventure log notes it. With no potions left, your hero rests below the stance's rest level and sets off again once recovered. You can also drink one yourself from the Hero page whenever your hero is exploring or resting and not at full HP. Potions are found while exploring and never take up bag space.</p>
+      {POTIONS === undefined
+        ? <p>A healing potion restores 40% of your hero's maximum HP, rounded up. Your hero drinks one automatically when HP falls below the stance's potion level while exploring, and the adventure log notes it. With no potions left, your hero rests below the stance's rest level and sets off again once recovered. You can also drink one yourself from the Hero page whenever your hero is exploring or resting and not at full HP. Potions are found while exploring and never take up bag space.</p>
+        : <>
+          <p>Potions come in {POTIONS.strengths.length} strengths: {STRENGTHS_LINE}, each restoring that share of your hero's maximum HP, rounded up. Finds depend on where your hero is: {DROPS_LINE}. A new hero starts with healing potions, and the merchant and office decisions hand out healing potions too. All strengths share one pouch and never take up bag space.</p>
+          <p>Your hero drinks automatically when HP falls below the stance's potion level while exploring: the weakest potion that puts it back above the stance's potion level, or the strongest it has when nothing weaker would do. The adventure log names what it drank. With no potions left, your hero rests below the rest level and sets off again once recovered. You can also drink one yourself from the Hero page whenever your hero is exploring, resting or travelling and not at full HP; with more than one strength in the pouch, the Hero page asks which.</p>
+          <p><strong>Combining.</strong> On the Bag page, {COMBINE_LINE}. It never makes more potions than it takes, so the pouch cannot overflow, and nothing combines by itself.</p>
+        </>}
       <p>Potions are kept in a pouch. A new hero carries a {POUCHES[0]?.name ?? 'Thermos'} that holds {POUCHES[0]?.cap ?? 20}. Bigger pouches are bought with gold on the Bag page, one at a time: {rungs(SHOP_POUCHES)}.{MERCHANT_LINE} When the pouch is full, a potion find becomes gold instead.</p>
       <h2 id="the-wandering-merchant">The wandering merchant</h2>
       <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and the next pouch or bag{MERCHANT_OFF > 0 ? ` at ${MERCHANT_OFF}% off the Bag page price` : ''}. Each offer sells once. The merchant moves on after four adventures or after your last purchase. Missing a visit costs nothing.</p>

@@ -4,7 +4,7 @@ import { Link } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
 
-type Counters = { combatWins: number; retreats: number; deaths: number; rescues: number; goldEarned: number; itemsFound: number; ticksExplored: number; eliteWins: number; potionsUsed: number; trapsAvoided: number; itemsSold: number }
+type Counters = { combatWins: number; retreats: number; deaths: number; rescues: number; goldEarned: number; itemsFound: number; ticksExplored: number; eliteWins: number; potionsUsed: number; potionsCombined: number; trapsAvoided: number; itemsSold: number }
 
 const hours = (ticks: number) => {
   const total = Math.round((ticks * 15) / 60)
@@ -46,6 +46,7 @@ export function Records({ counters, lifetimeXp, stopped = false, withRank = true
     ['Time adventuring', hours(counters.ticksExplored), 'clock', 'text-sky-ink'],
     ['Elites beaten', counters.eliteWins.toLocaleString(), 'star', 'text-hp-ink'],
     ['Potions drunk', counters.potionsUsed.toLocaleString(), 'potion', 'text-rare-ink'],
+    ['Potions combined', counters.potionsCombined.toLocaleString(), 'potion', 'text-rare-ink'],
     ['Traps avoided', counters.trapsAvoided.toLocaleString(), 'trap', 'text-rare-ink'],
     ['Items sold', counters.itemsSold.toLocaleString(), 'tag', 'text-gold-ink'],
   ]

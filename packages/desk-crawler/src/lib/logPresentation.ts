@@ -6,6 +6,8 @@ export interface LogDeltas {
   readonly hp: number
   /** Gross acquisition from the stored loot outcome, derived on read, not net stack change. */
   readonly potionsFound?: number
+  /** D131: the found potion's strength as a word ("minor potion"); absent reads as a healing potion. */
+  readonly potionFound?: string
   /** Bag slots gained, from the stored bag upgrade (D61). */
   readonly bagSlots?: number
   /** HP a potion restored, shown apart from net HP so the player learns what a potion does. */
@@ -20,8 +22,9 @@ export interface LogDeltas {
 }
 
 /** Reveal only display changes, never the simulator's internal event detail. */
-export function displayLogDeltas(entry: { readonly deltas: LogDeltas; readonly detail: { readonly outcome: { readonly variant: string; readonly found?: string; readonly potionFullFallback?: boolean; readonly offers?: readonly unknown[] }; readonly bagUpgrade?: { readonly from: number; readonly to: number }; readonly pouchUpgrade?: { readonly from: number; readonly to: number }; readonly potionHealing?: number; readonly effectGained?: string } | { readonly operation: string; readonly bagSlots?: number; readonly potionsBought?: number; readonly effectGained?: string } | { readonly achievementId: string } }): LogDeltas {
+export function displayLogDeltas(entry: { readonly deltas: LogDeltas; readonly detail: { readonly outcome: { readonly variant: string; readonly found?: string; readonly templateId?: string; readonly potionFullFallback?: boolean; readonly offers?: readonly unknown[] }; readonly bagUpgrade?: { readonly from: number; readonly to: number }; readonly pouchUpgrade?: { readonly from: number; readonly to: number }; readonly potionHealing?: number; readonly effectGained?: string } | { readonly operation: string; readonly bagSlots?: number; readonly potionsBought?: number; readonly effectGained?: string } | { readonly achievementId: string } }): LogDeltas {
   const outcome = 'outcome' in entry.detail ? entry.detail.outcome : null
+  const potionFound = outcome?.variant === 'loot' && outcome.found === 'potion' ? potionWordFor(outcome.templateId) : undefined
   const offers = outcome?.variant === 'merchant' ? outcome.offers?.length ?? 0 : 0
   const potionsBought = 'operation' in entry.detail ? entry.detail.potionsBought ?? 0 : 0
   const pouchCap = 'outcome' in entry.detail ? entry.detail.pouchUpgrade?.to ?? 0 : 0
@@ -30,7 +33,17 @@ export function displayLogDeltas(entry: { readonly deltas: LogDeltas; readonly d
   const bagSlots = upgrade ? upgrade.to - upgrade.from : 'operation' in entry.detail ? entry.detail.bagSlots ?? 0 : 0
   // A manual drink's whole HP delta is the potion; an automatic drink stores its share beside combat damage.
   const potionHealing = 'outcome' in entry.detail ? entry.detail.potionHealing ?? 0 : 'operation' in entry.detail && entry.detail.operation === 'use_potion' ? Math.max(0, entry.deltas.hp) : 0
-  return { ...entry.deltas, potionsFound: outcome?.variant === 'loot' && outcome.found === 'potion' && !outcome.potionFullFallback ? 1 : 0, bagSlots, potionHealing, offers, potionsBought, pouchCap, ...(effectGained === undefined ? {} : { effectGained }) }
+  return { ...entry.deltas, potionsFound: outcome?.variant === 'loot' && outcome.found === 'potion' && !outcome.potionFullFallback ? 1 : 0, ...(potionFound === undefined ? {} : { potionFound }), bagSlots, potionHealing, offers, potionsBought, pouchCap, ...(effectGained === undefined ? {} : { effectGained }) }
+}
+
+/**
+ * D131: the word for a found potion's template. Logs before v14 carry no template and were healing potions; the
+ * template ids are catalog content, so the map stays here rather than reading a catalog on every log line.
+ */
+export function potionWordFor(templateId: string | undefined): string {
+  if (templateId === undefined) return 'healing potion'
+  const stem = templateId.replace(/_potion$/, '').replace(/_/g, ' ')
+  return `${stem} potion`
 }
 
 /** Shared display copy. Persisted, versioned simulator summaries stay replayable. */
@@ -58,7 +71,7 @@ export function logPresentation(entry: { readonly summary: string; readonly kind
   const changes = [
     deltas.xpEarned ? signed(deltas.xpEarned, 'XP') : null,
     deltas.gold ? goldChange(deltas.gold) : null,
-    deltas.potionsFound ? signed(deltas.potionsFound, deltas.potionsFound === 1 ? 'healing potion' : 'healing potions') : null,
+    deltas.potionsFound ? signed(deltas.potionsFound, `${deltas.potionFound ?? 'healing potion'}${deltas.potionsFound === 1 ? '' : 's'}`) : null,
     // Net HP stays the single HP figure (D48); the potion chip names the part a potion restored.
     deltas.hp ? signed(deltas.hp, 'HP') : null,
     deltas.potionHealing && deltas.potionHealing !== deltas.hp ? `${signed(deltas.potionHealing, 'HP')} from potion` : null,

@@ -1,5 +1,6 @@
 import { bagUsed } from './bag'
 import { potionCap } from './pouch'
+import { strengthOf } from './potions'
 import { maxHp, xpToLeave } from './stats'
 import { todoProblems } from './todo'
 import { careerProblems } from './career'
@@ -92,7 +93,9 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
 
   if (inventory.length > MAX_INVENTORY_ROWS) fail('INVENTORY_SIZE', `${inventory.length} rows`)
   const ids = new Set<string>()
-  let potionRows = 0
+  // D131: one row per potion strength, every strength under one pouch cap.
+  const potionTemplates = new Set<string>()
+  let potionTotal = 0
   const materialRows = new Set<string>()
   for (let i = 0; i < inventory.length; i += 1) {
     const item = inventory[i]!
@@ -103,8 +106,11 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
       if (!isCount(value)) fail('ITEM_STAT', `item ${item.id} has an invalid number`)
     }
     if (item.kind === 'potion') {
-      potionRows += 1
+      if (potionTemplates.has(item.templateId)) fail('POTION_ROWS', `two rows of ${item.templateId}`)
+      potionTemplates.add(item.templateId)
       if (item.quantity < 1 || item.quantity > potionCap(content, hero)) fail('POTION_QTY', `potion quantity ${item.quantity}`)
+      potionTotal += item.quantity
+      if (content.potions !== undefined && strengthOf(content, item.templateId) === undefined) fail('POTION_KIND', `unknown potion ${item.templateId}`)
     } else if (item.kind === 'material') {
       // D129: one row per material kind, checked under a catalog that knows the workbench; an earlier catalog carries it.
       if (materialRows.has(item.templateId)) fail('MATERIAL_ROWS', `two rows of ${item.templateId}`)
@@ -121,7 +127,7 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
       if (problem !== undefined) fail('WORKBENCH', problem)
     }
   }
-  if (potionRows > 1) fail('POTION_ROWS', 'more than one potion stack')
+  if (potionTotal > potionCap(content, hero)) fail('POTION_QTY', `${potionTotal} potions over the pouch`)
 
   const byId = new Map(inventory.map((item) => [item.id, item]))
   const ref = (id: string | undefined, kind: 'weapon' | 'armor' | 'gear', code: string) => {

@@ -3,8 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { nextSlotAfter } from '@trmnl-games/desk-crawler/sim/schedule'
-import { POTION_HEAL_PCT } from '@trmnl-games/desk-crawler/content/sustain'
-import { pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { api } from '@trmnl-games/backend/api'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { useIntent } from '../../../lib/intent'
@@ -47,6 +45,9 @@ type Affix = { id: string; name: string; blurb: string }
 type WorkbenchRules = { affix: { gold: number; materials: MaterialCount }; affixes: Affix[] }
 type Review = { kind: 'sell' | 'salvage'; items: Gear[] }
 type Biome = { id: string; name: string; unlocked: boolean }
+/** D131: one potion strength in the pouch (every strength is listed, empty ones too), and the combine recipe. */
+type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
+type Combine = { from: { templateId: string; name: string; count: number; have: number }; materials: MaterialCount; to: { templateId: string; name: string }; shortfall: { potions: number; materials: MaterialCount }; batches: number }
 
 const SALE_LIMIT = 30
 const statOf = (item: Gear) => item.kind === 'weapon' ? item.attack : item.defense
@@ -90,6 +91,7 @@ function Inventory() {
   const salvageMany = useIntent(api.inventory.salvageMany, { onFeedback: notify })
   const upgrade = useIntent(api.inventory.upgrade, { onFeedback: notify })
   const chooseAffix = useIntent(api.inventory.chooseAffix, { onFeedback: notify })
+  const combine = useIntent(api.inventory.combinePotions, { onFeedback: notify })
   const claim = useIntent(api.inventory.claimHeld, { onFeedback: notify })
   const resume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
   const buyBag = useIntent(api.inventory.buyBag, { onFeedback: notify })
@@ -115,7 +117,12 @@ function Inventory() {
   const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
   const deltaOf = (item: Gear) => { const current = equippedOf(item.kind); return statOf(item) - (current ? statOf(current) : 0) }
-  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending
+  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending
+  // D131: the strengths in the pouch and the combine recipe; one row and no recipe under a catalog without strengths.
+  const potionRows = bag.potionRows as PotionRow[]
+  const potionCombine = bag.potionCombine as Combine | null
+  const heldStrengths = potionRows.filter((row) => row.count > 0)
+  const healsLine = heldStrengths.length === 0 ? `+${potionRows[0]?.heals ?? 0} HP each` : heldStrengths.length === 1 ? `+${heldStrengths[0]!.heals} HP each` : `+${heldStrengths[0]!.heals} to +${heldStrengths.at(-1)!.heals} HP`
   const full = bag.used >= bag.capacity
   // Quiet warning at 80% of the current bag (D61).
   const filling = bag.used >= Math.ceil(bag.capacity * 0.8)
@@ -198,8 +205,8 @@ function Inventory() {
           })}
           <div className="flex min-w-0 flex-col gap-1.5">
             <h3 className="caps text-sm text-muted">Potions</h3>
-            <PotionSlot count={bag.potions} label={`${count(bag.potions, 'potion')}, each heals ${POTION_HEAL_PCT}% of max HP`} onClick={() => setOpenId('potions')} />
-            <p className="text-sm leading-snug">+{pctOf(hero.maxHp, POTION_HEAL_PCT)} HP each</p>
+            <PotionSlot count={bag.potions} label={`${count(bag.potions, 'potion')}, ${heldStrengths.map((row) => `${row.count} ${row.name.toLowerCase()}`).join(', ') || 'none'}`} onClick={() => setOpenId('potions')} />
+            <p className="text-sm leading-snug tabular-nums">{healsLine}</p>
           </div>
         </div>
       </Card>
@@ -243,10 +250,24 @@ function Inventory() {
         </div>
       </div> : null}
 
-      <Sheet open={openId === 'potions'} onClose={() => setOpenId(null)} label="Potions">
+      <Sheet open={openId === 'potions'} onClose={() => { if (!combine.pending) setOpenId(null) }} label="Potions">
         <SheetTitle>Potions</SheetTitle>
         <p className="mt-2 tabular-nums">You have <strong className="text-rare-ink">{bag.potions}</strong>. Your {bag.pouch.name.toLowerCase()} holds {bag.pouch.cap}.</p>
-        <p className="mt-2 text-sm text-muted tabular-nums">Each heals {POTION_HEAL_PCT}% of max HP (+{pctOf(hero.maxHp, POTION_HEAL_PCT)} HP). Drunk automatically when needed, or from Hero. Potions take no bag slots.</p>
+        {/* D131: one line per strength, weakest first, with what one drink restores for this hero. */}
+        <ul aria-label="Potions by strength" className="mt-3 flex flex-col gap-1 tabular-nums">
+          {potionRows.map((row) => <li key={row.templateId} className={`flex items-center justify-between gap-3 ${row.count === 0 ? 'text-muted' : ''}`}><span>{row.name} <span className="text-sm text-muted">· {row.healPct}%, +{row.heals} HP</span></span><strong className={row.count === 0 ? '' : 'text-rare-ink'}>{row.count}</strong></li>)}
+        </ul>
+        <p className="mt-2 text-sm text-muted">Your hero drinks the weakest potion that keeps it adventuring, or you choose one from Hero. Potions take no bag slots.</p>
+        {potionCombine ? <div className="mt-4 border-t-2 border-faint pt-3">
+          <p className="tabular-nums"><strong>Combine:</strong> {potionCombine.from.count} {potionCombine.from.name.toLowerCase()}s + {materialsText(potionCombine.materials, materials)} → 1 {potionCombine.to.name.toLowerCase()}.</p>
+          {potionCombine.batches > 0
+            ? <div className="mt-2 flex flex-wrap gap-2">
+              <Button disabled={!manageable || busy} pending={combine.pending} busyLabel="Combining…" onClick={() => combine.run({ batches: 1 }, `Combined into a ${potionCombine.to.name.toLowerCase()}.`)}>Combine 1</Button>
+              {potionCombine.batches > 1 ? <Button variant="secondary" disabled={!manageable || busy} pending={combine.pending} busyLabel="Combining…" onClick={() => combine.run({ batches: Math.min(10, potionCombine.batches) }, `Combined into ${Math.min(10, potionCombine.batches)} ${potionCombine.to.name.toLowerCase()}s.`)}>Combine {Math.min(10, potionCombine.batches)}</Button> : null}
+            </div>
+            : <p className="mt-1 text-sm tabular-nums">Needs {[potionCombine.shortfall.potions > 0 ? `${potionCombine.shortfall.potions} more ${potionCombine.from.name.toLowerCase()}${potionCombine.shortfall.potions === 1 ? '' : 's'}` : null, Object.keys(potionCombine.shortfall.materials).length > 0 ? `${materialsText(potionCombine.shortfall.materials, materials)}${potionCombine.shortfall.potions > 0 ? '' : ' more'}` : null].filter(Boolean).join(' and ')}.</p>}
+          <ErrorNote message={combine.error ?? null} />
+        </div> : null}
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Link to="/app/desk-crawler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY} justify-center`}>Go to Hero</Link>
           <Button allowOffline variant="secondary" onClick={() => setOpenId(null)}>Close</Button>

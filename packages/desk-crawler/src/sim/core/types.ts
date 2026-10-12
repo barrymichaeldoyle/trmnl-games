@@ -503,6 +503,27 @@ export interface WorkbenchRule {
   readonly affix: { readonly gold: number; readonly materials: MaterialCount }
 }
 
+/** D131: one potion strength, its own stack row keyed by `templateId`. */
+export interface PotionStrength {
+  readonly id: string
+  readonly templateId: string
+  readonly name: string
+  /** Percent of maximum HP one drink restores, rounded up. */
+  readonly healPct: number
+}
+
+/**
+ * D131: potion strengths. `strengths` ascend by heal; one of them is `content.potion`, the potion the starter kit,
+ * the merchant and decisions hand out. A potion find draws its strength from `dropWeightsByTier` (out of 100 per
+ * biome tier, keyed by strength id) on the reward stream. `combine` is the one recipe: `count` of `from` plus
+ * `materials` make one `to`. The drinking rule needs no numbers: weakest that clears the drinking line, else strongest.
+ */
+export interface PotionRule {
+  readonly strengths: readonly PotionStrength[]
+  readonly dropWeightsByTier: Readonly<Record<number, Readonly<Record<string, number>>>>
+  readonly combine: { readonly from: string; readonly count: number; readonly materials: MaterialCount; readonly to: string }
+}
+
 export interface ContentCatalog {
   readonly contentVersion: string
   readonly constants: SimulationConstants
@@ -539,6 +560,8 @@ export interface ContentCatalog {
   readonly career?: CareerRule
   /** Absent before v13 (D129): no salvage, no materials, no workbench. */
   readonly workbench?: WorkbenchRule
+  /** Absent before v14 (D131): one potion, healing `constants.potionHealPct`. */
+  readonly potions?: PotionRule
   readonly narrative: Readonly<{ biomes: Readonly<Record<string, BiomeNarrative>>; shared: SharedNarrative; monsters: Readonly<Record<string, MonsterNarrative>> }>
 }
 
@@ -598,6 +621,8 @@ export interface HeroCounters {
   readonly itemsSalvaged: number
   readonly gearUpgraded: number
   readonly topReinforcement: number
+  /** D131: major potions made by combining, written by the intent. */
+  readonly potionsCombined: number
 }
 
 /** Counter names that hold one number (everything except `monsterWins`). */

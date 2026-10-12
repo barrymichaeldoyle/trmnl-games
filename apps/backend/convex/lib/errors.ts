@@ -44,6 +44,9 @@ export type ErrorCode =
   | 'WORKBENCH_UNAVAILABLE'
   | 'NO_POTION'
   | 'FULL_HP'
+  /** D131: combining needs more of the source potion, or the catalog has no potion strengths. */
+  | 'NOT_ENOUGH_POTIONS'
+  | 'POTIONS_UNAVAILABLE'
   | 'RECAP_CHANGED'
   | 'DELETION_CONFIRMATION_REQUIRED'
   | 'DELETION_LINK_EXPIRED'

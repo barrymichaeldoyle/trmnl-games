@@ -79,6 +79,8 @@ export const heroCounters = v.object({
   itemsSalvaged: v.optional(v.number()),
   gearUpgraded: v.optional(v.number()),
   topReinforcement: v.optional(v.number()),
+  /** D131: major potions made by combining. */
+  potionsCombined: v.optional(v.number()),
 })
 
 /** P35: the hero's place on the career ladder, written by the simulator. */

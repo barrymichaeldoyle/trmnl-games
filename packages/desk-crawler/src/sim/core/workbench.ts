@@ -121,8 +121,8 @@ export function workbenchSuffix(content: ContentCatalog, item: Pick<ItemSnapshot
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V'] as const
 
-/** Stack rows a hero can hold outside the bag: one potion row plus one per material kind. */
-export const stackRowKinds = (content: ContentCatalog): number => 1 + (content.workbench?.materials.length ?? 0)
+/** Stack rows a hero can hold outside the bag: one potion row per strength (D131) plus one per material kind. */
+export const stackRowKinds = (content: ContentCatalog): number => (content.potions?.strengths.length ?? 1) + (content.workbench?.materials.length ?? 0)
 
 /**
  * Rows the bounded inventory read must hold under this catalog: the top bag, two equipped, one held, the stack rows.

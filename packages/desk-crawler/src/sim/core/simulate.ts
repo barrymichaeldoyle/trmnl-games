@@ -3,6 +3,7 @@ import { isBagFull, milestoneUpgrade, nextEarlyTier } from './bag'
 import { eventById, optionOf, resolveEffect } from './choice'
 import { affixById, effectById, effectiveStats, liveEffects, scaled, withEffect } from './modifiers'
 import { nextEarlyPouchTier, potionCap, pouchMilestoneUpgrade } from './pouch'
+import { autoPotion, potionItem, potionRows, potionStrengths, potionWord, potionsHeld, rollPotionStrength, strengthOf } from './potions'
 import { assertHeroInvariants, SimulationInvariantError } from './invariants'
 import { codePoints, composeSummary, fill, rarityLabel, variant, withArticle, type NarrativeVars } from './narrative'
 import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } from './raid'
@@ -33,6 +34,7 @@ import type {
   MerchantOffer,
   MerchantVisit,
   PendingChoice,
+  PotionStrength,
   PouchTier,
   RaidLaunch,
 } from './types'
@@ -251,12 +253,13 @@ class TickRun {
     const option = event === undefined ? undefined : optionOf(event, event.defaultOptionId)
     delete h.choice
     if (event === undefined || option === undefined) return undefined
-    const potionRow = input.inventory.find((item) => item.kind === 'potion')
-    const change = resolveEffect(content, h, potionRow?.quantity ?? 0, option.effect, pending.biomeTier)
+    const change = resolveEffect(content, h, potionsHeld(input.inventory), option.effect, pending.biomeTier)
     h.gold += change.gold
     if (change.gold > 0) h.counters.goldEarned += change.gold
     h.hp += change.hp
-    for (let i = 0; i < change.potions; i += 1) this.gainPotion(potionRow?.id)
+    // A decision hands out the catalog potion (healing under D131), whatever else the pouch holds.
+    const catalogPotion = strengthOf(content, content.potion.templateId) ?? potionStrengths(content)[0]!
+    for (let i = 0; i < change.potions; i += 1) this.gainPotion(catalogPotion)
     const granted = this.grantEffect(option.effect.effectId)
     h.counters.choicesDefaulted += 1
     this.metrics.choicesDefaulted = 1
@@ -291,21 +294,24 @@ class TickRun {
     const c = content.constants
     const sustain = this.sustain()
     const max = maxHp(h.level)
-    const potionRow = input.inventory.find((item) => item.kind === 'potion')
-    let potionQty = potionRow?.quantity ?? 0
+    // D131: every strength counts against the one pouch; the drink is the weakest that puts the hero back above its drinking line.
+    let potionQty = potionsHeld(input.inventory)
     let potionsUsed = 0
     let potionHealing = 0
+    let drank: string | undefined
 
-    if (h.hp * 100 < max * sustain.autoPotionBelowPct && potionRow !== undefined && potionQty > 0) {
-      potionHealing = Math.min(max - h.hp, pctOf(max, c.potionHealPct))
+    const drink = potionQty > 0 && h.hp * 100 < max * sustain.autoPotionBelowPct ? autoPotion(content, potionRows(input.inventory), h.hp, max, sustain.autoPotionBelowPct) : undefined
+    if (drink !== undefined) {
+      potionHealing = Math.min(max - h.hp, pctOf(max, drink.healPct))
       h.hp += potionHealing
       potionQty -= 1
       potionsUsed = 1
-      this.changes.push({ type: 'potion_decrement', itemId: potionRow.id, deleteRow: potionQty === 0 })
+      drank = drink.row.name
+      this.changes.push({ type: 'potion_decrement', itemId: drink.row.id, deleteRow: drink.row.quantity === 1 })
       this.metrics.potionsUsed = 1
       h.counters.potionsUsed += 1
     }
-    const potionSuffix = potionsUsed > 0 ? ['Drank a potion.'] : []
+    const potionSuffix = potionsUsed > 0 ? [content.potions === undefined ? 'Drank a potion.' : `Drank a ${potionWord(drank ?? 'potion')}.`] : []
 
     if (h.hp * 100 < max * sustain.restBelowPct) {
       h.status = 'resting'
@@ -498,6 +504,7 @@ class TickRun {
         }
         let jackpot = false
         let potionFullFallback = false
+        let potionTemplate: string | undefined
         const rollGold = () => {
           goldGranted = this.rng.reward.int(biome.lootGold.min, biome.lootGold.max)
           jackpot = this.rng.reward.chance(c.jackpot.chancePct)
@@ -519,15 +526,21 @@ class TickRun {
           primary = this.narrate(jackpot ? narrative.jackpot : shared.potionFullGold, vars)
           compact = fill('+{gold} gold.', vars)
         } else if (found === 'potion') {
-          this.gainPotion(potionRow?.id)
+          // D131: the strength is a reward draw by biome tier, taken only under a catalog with strengths.
+          const strength = rollPotionStrength(content, this.rng.reward, biome.tier)
+          this.gainPotion(strength)
+          if (content.potions !== undefined) {
+            vars.potion = potionWord(strength.name)
+            potionTemplate = strength.templateId
+          }
           primary = this.narrate(shared.lootPotion, vars)
-          compact = 'Found a potion.'
+          compact = content.potions === undefined ? 'Found a potion.' : fill('Found a {potion}.', vars)
         } else {
           rollGold()
           primary = this.narrate(jackpot ? narrative.jackpot : narrative.lootGold, vars)
           compact = fill('Found {gold} gold.', vars)
         }
-        outcome = { variant: 'loot', found: potionFullFallback ? 'gold' : found, goldGranted, jackpot, potionFullFallback }
+        outcome = { variant: 'loot', found: potionFullFallback ? 'gold' : found, goldGranted, jackpot, potionFullFallback, ...(potionTemplate === undefined ? {} : { templateId: potionTemplate }) }
         break
       }
       case 'trap': {
@@ -810,8 +823,13 @@ class TickRun {
     return Math.max(1, Math.floor(((2 * attack - defense) * variance) / 200))
   }
 
-  private gainPotion(rowId: string | undefined): void {
-    const pendingDelete = this.changes.findIndex((change) => change.type === 'potion_decrement' && change.itemId === rowId)
+  /** One more potion of a strength: its row, or a new row for the strength (D131: one row per strength, one pouch). */
+  private gainPotion(strength: PotionStrength): void {
+    const { content, input } = this
+    // Before D131 the one potion row is the row, whatever template it carries.
+    const row = content.potions === undefined ? potionRows(input.inventory)[0] : potionRows(input.inventory).find((item) => item.templateId === strength.templateId)
+    const rowId = row?.id
+    const pendingDelete = rowId === undefined ? -1 : this.changes.findIndex((change) => change.type === 'potion_decrement' && change.itemId === rowId)
     if (pendingDelete >= 0) {
       // Drank and found a potion in the same tick: the stack is unchanged.
       this.changes.splice(pendingDelete, 1)
@@ -821,12 +839,14 @@ class TickRun {
       this.changes.push({ type: 'potion_increment', itemId: rowId })
       return
     }
-    const { potion, contentVersion } = this.content
-    this.changes.push({
-      type: 'create',
-      destination: 'potion_stack',
-      item: { templateId: potion.templateId, contentVersion, kind: 'potion', name: potion.name, rarity: 'common', requiredLevel: 1, attack: 0, defense: 0, saleValue: 0, quantity: 1 },
-    })
+    // A second potion of a strength with no row yet (a decision's bundle) joins the row this tick creates.
+    const at = this.changes.findIndex((change) => change.type === 'create' && change.destination === 'potion_stack' && change.item.templateId === strength.templateId)
+    const pending = this.changes[at]
+    if (pending !== undefined && pending.type === 'create') {
+      this.changes[at] = { ...pending, item: { ...pending.item, quantity: pending.item.quantity + 1 } }
+      return
+    }
+    this.changes.push({ type: 'create', destination: 'potion_stack', item: potionItem(content, strength, 1) })
   }
 
   private generateGear(tier: number): NewItem {

@@ -34,6 +34,7 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `decision made` | Browser, after `heroes.choose` commits (D79); defaults resolved by the simulator are counted in `choicesDefaulted`, not here | `option_id` |
 | `merchant purchase` | Browser, after `inventory.buyOffer` commits (D78) | `offer` (`potions`, `pouch` or `bag`) |
 | `pouch bought` | Browser, after `inventory.buyPouch` commits (D77) | `tier` |
+| `potion combined` | Browser, after `inventory.combinePotions` commits (D131) | `batches` |
 | `bag bought` | Browser, after `inventory.buyBag` commits (D61) | `tier` |
 | `waitlist joined` | Browser, after `waitlist.join` or `waitlist.joinWithAccount` succeeds (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); never the email |
 | `feedback sent` | Browser, after `feedback.send` succeeds (D107) | none; never the message |

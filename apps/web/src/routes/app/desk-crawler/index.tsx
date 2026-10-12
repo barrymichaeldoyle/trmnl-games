@@ -2,8 +2,6 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { POTION_HEAL_PCT } from '@trmnl-games/desk-crawler/content/sustain'
-import { pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
 import { useIntent } from '../../../lib/intent'
@@ -17,6 +15,7 @@ import { KeepsakeCallout } from './-keepsakes'
 import { TodoCard, type TodoView } from './-todo'
 import { GoalCard, LockedCard, type CareerView, type UnlockView } from './-career'
 import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
+import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
@@ -115,8 +114,13 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   // Anything that could set the hero back or slow it down asks first (the to-do swap, pause, travel, stance, a costly decision).
   const [ask, setAsk] = useState<Ask | null>(null)
   const close = () => setAsk(null)
-  const healing = Math.min(hero.maxHp - hero.hp, pctOf(hero.maxHp, POTION_HEAL_PCT))
+  // D131: the strengths in the pouch. One strength drinks at once; more than one opens a picker. The button's figure
+  // is what the default drink would do: the smallest potion that heals to full, else the strongest.
+  const strengths = ((bag?.potionRows ?? []) as PotionRow[]).filter((row) => row.count > 0)
+  const fit = strengths.find((row) => hero.hp + row.heals >= hero.maxHp) ?? strengths.at(-1) ?? null
+  const healing = fit === null ? 0 : Math.min(hero.maxHp - hero.hp, fit.heals)
   const potionLabel = !bag ? 'Drink potion' : !bag.potions ? 'No potions' : hero.hp >= hero.maxHp ? `Drink potion (${bag.potions})` : `Drink potion +${healing} HP (${bag.potions})`
+  const drink = () => (strengths.length > 1 ? setAsk({ kind: 'potion' }) : potion.run(fit === null ? {} : { templateId: fit.templateId }, `${fit === null ? 'Potion' : fit.name} drunk, +${healing} HP.`))
   const chosenStance = hero.stances.find((option) => option.id === hero.stance) ?? null
   // P35: a feature the hero's level has not reached shows as a locked card where its card will be.
   const locked = (feature: UnlockView[number]['feature']) => hero.unlocks?.find((entry) => entry.feature === feature && !entry.unlocked) ?? null
@@ -143,7 +147,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
               </Button>
             ) : null}
             {canDrink ? (
-              <Button icon="potion" variant={hero.hp < hero.maxHp && bag?.potions ? 'primary' : 'secondary'} pending={potion.pending} busyLabel="Drinking…" disabled={hero.hp >= hero.maxHp || !bag?.potions} onClick={() => potion.run({}, `Potion drunk, +${healing} HP.`)}>
+              <Button icon="potion" variant={hero.hp < hero.maxHp && bag?.potions ? 'primary' : 'secondary'} pending={potion.pending} busyLabel="Drinking…" disabled={hero.hp >= hero.maxHp || !bag?.potions} onClick={drink}>
                 {potionLabel}
               </Button>
             ) : null}
@@ -239,15 +243,17 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         {!canAct && hero.status !== 'travelling' && stopNote ? <p className="mt-3 text-sm text-muted">{stopNote}</p> : null}
       </section>
 
-      <AskSheets ask={ask} hero={hero} close={close} intents={{ pause, travel, stance, choose }} />
+      <AskSheets ask={ask} hero={hero} close={close} intents={{ pause, travel, stance, choose, potion }} strengths={strengths} />
 
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </div>
   )
 }
 
-type Ask = { kind: 'pause' } | { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string }
+type Ask = { kind: 'pause' } | { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string } | { kind: 'potion' }
 type Run<A> = { pending: boolean; run: (args: A, message?: string) => Promise<boolean> }
+/** D131: one potion strength in the pouch, with the HP one drink restores for this hero. */
+type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
 
 const KNOCKOUT = 'a knockout costs 10% of your gold and about two hours'
 const pct = (value: number) => `${value}%`
@@ -256,7 +262,7 @@ const pct = (value: number) => `${value}%`
  * The confirmations for the Hero page's commands that could cost progress or pace. Each says what the action costs and
  * whether it can be undone; only its confirm button commits.
  */
-function AskSheets({ ask, hero, close, intents }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { pause: Run<Record<string, never>>; travel: Run<{ biomeId: string }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }> } }) {
+function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { pause: Run<Record<string, never>>; travel: Run<{ biomeId: string }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }> }; strengths: readonly PotionRow[] }) {
   const healthy = hero.simulationState !== 'quarantined'
   const here = hero.biomes.findIndex((b) => b.id === hero.biomeId)
   const common = { onClose: close, disabled: !healthy }
@@ -299,6 +305,26 @@ function AskSheets({ ask, hero, close, intents }: { ask: Ask | null; hero: HeroV
           <li>It applies from the next adventure, and you can switch back any time.</li>
         </Consequences>
       </ConfirmSheet>
+    )
+  }
+  if (ask?.kind === 'potion') {
+    // D131: which strength to drink. Each row says what it restores now and how many are left.
+    return (
+      <Sheet open onClose={() => { if (!intents.potion.pending) close() }} label="Drink a potion">
+        <SheetTitle>Which potion?</SheetTitle>
+        <p className="mt-2 text-sm text-muted tabular-nums">{hero.hp} of {hero.maxHp} HP. Your hero drinks the weakest one that keeps it adventuring; you can pick.</p>
+        <ul className="mt-3 flex flex-col gap-2">
+          {strengths.map((row) => (
+            <li key={row.templateId}>
+              <Button className="w-full" variant="secondary" icon="potion" disabled={!healthy} pending={intents.potion.pending} busyLabel="Drinking…" onClick={async () => { if (await intents.potion.run({ templateId: row.templateId }, `${row.name} drunk, +${Math.min(hero.maxHp - hero.hp, row.heals)} HP.`)) close() }}>
+                {/* The figures sit on their own small line, as the decision buttons do, so nothing wraps mid-number in the pixel face. */}
+                <span className="flex flex-col items-center gap-1">{row.name}<span className="label-px tabular-nums">+{Math.min(hero.maxHp - hero.hp, row.heals)} HP · {row.count} left</span></span>
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <Button allowOffline variant="secondary" className="mt-3 w-full" disabled={intents.potion.pending} onClick={close}>Not now</Button>
+      </Sheet>
     )
   }
   if (ask?.kind === 'choice' && hero.choice) {

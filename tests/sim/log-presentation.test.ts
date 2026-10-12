@@ -70,7 +70,7 @@ describe('story and stat changes', () => {
     const strings = (value: unknown): string[] => typeof value === 'string' ? [value] : value && typeof value === 'object' ? Object.values(value).flatMap(strings) : []
     for (const catalog of Object.values(catalogs)) {
       for (const template of strings(catalog.narrative)) {
-        const summary = fill(template, { gold: 5, xp: 14, damage: 12, heal: 20, monster: 'Cable Serpent', item: 'Rare Mace', destination: 'Office Cubicles', ticks: 8, capacity: 16 })
+        const summary = fill(template, { gold: 5, xp: 14, damage: 12, heal: 20, monster: 'Cable Serpent', item: 'Rare Mace', destination: 'Office Cubicles', ticks: 8, capacity: 16, potion: 'major potion' })
         const { narrative } = present(summary)
         expect(narrative, `${catalog.contentVersion}: ${template}`).not.toMatch(/\d+ (?:gold|HP|XP)/)
         expect(narrative).not.toMatch(/:\s*\.|for\s*\.|with\s*\./)
