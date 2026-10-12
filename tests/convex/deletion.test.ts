@@ -39,10 +39,9 @@ describe('account deletion (D22)', () => {
 
   it('denies authority at once, purges game data, deletes the Clerk user and keeps only revocation hashes', async () => {
     const heroId = await seedHero(t, {}, 'Ana')
-    // D111: desk drawer items are ordinary item rows, so the same purge removes them.
+    // A spare bag item is an ordinary item row, so the same purge removes it.
     await t.run(async (ctx) => {
-      const drawerItem = await ctx.db.insert('items', { ...starterKit(contentV1).weapon, heroId, createdAt: Date.now() })
-      await ctx.db.patch(heroId, { drawer: [drawerItem] })
+      await ctx.db.insert('items', { ...starterKit(contentV1).weapon, heroId, createdAt: Date.now() })
     })
     const tokenHash = sha256Hex('installation-token-ana')
     await linkGrant(t, 'Ana', tokenHash)

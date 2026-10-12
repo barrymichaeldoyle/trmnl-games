@@ -1,5 +1,5 @@
 import { applyItemChanges } from './apply'
-import { drawerHasRoom, hasRoomForFind, isBagFull, milestoneUpgrade, nextEarlyTier } from './bag'
+import { isBagFull, milestoneUpgrade, nextEarlyTier } from './bag'
 import { eventById, optionOf, resolveEffect } from './choice'
 import { affixById, effectById, effectiveStats, liveEffects, scaled, withEffect } from './modifiers'
 import { nextEarlyPouchTier, potionCap, pouchMilestoneUpgrade } from './pouch'
@@ -134,9 +134,9 @@ class TickRun {
         return this.finish('paused')
       case 'sleeping': {
         if (h.wakeAtTick === undefined || input.tick < h.wakeAtTick) return this.finish('sleeping')
-        // P32: waking needs the held slot clear and room for the next find, in the bag or the desk drawer.
-        if (h.heldItemId !== undefined || !hasRoomForFind(h, input.inventory, this.content)) {
-          throw new SimulationInvariantError('WAKE_PRECONDITION', 'wake is due but the held slot is not clear or there is no room for a find')
+        // Waking needs the held slot clear and a free bag slot for the next find.
+        if (h.heldItemId !== undefined || isBagFull(h, input.inventory)) {
+          throw new SimulationInvariantError('WAKE_PRECONDITION', 'wake is due but the held slot is not clear or the bag is full')
         }
         delete h.wakeAtTick
         this.metrics.wakes = 1
@@ -607,7 +607,6 @@ class TickRun {
     if (pouchUpgrade !== undefined) this.metrics.pouchUpgrades = 1
 
     let heldFind = false
-    let drawerFind = false
     let disposition: Disposition = 'advanced'
     if (gear !== undefined) {
       h.counters.itemsFound += 1
@@ -615,11 +614,9 @@ class TickRun {
       if (gear.rarity === 'epic') h.counters.epicFinds += 1
       const affix = affixById(content, gear.affixId)
       const item = `${affix ? `${affix.name} ` : ''}${rarityLabel(gear.rarity)} ${gear.name}`
-      // P32: a find that overflows the bag goes in the desk drawer while it has room; only then is it held.
-      const overflow = isBagFull(h, input.inventory)
-      drawerFind = overflow && drawerHasRoom(h, content)
-      heldFind = overflow && !drawerFind
-      const destination = heldFind ? 'held' : drawerFind ? 'drawer' : 'bag'
+      // A find that overflows the bag is held and the hero sleeps until the player makes room (D18/D19, D123).
+      heldFind = isBagFull(h, input.inventory)
+      const destination = heldFind ? 'held' : 'bag'
       this.changes.push({ type: 'create', destination, item: gear })
       if (heldFind) {
         h.status = 'sleeping'
@@ -628,17 +625,10 @@ class TickRun {
         disposition = 'inventory_sleep_started'
         consequences.unshift('Bag full. Holding it until you make room.')
       }
-      // The first drawer find says where it went; later ones read as ordinary finds (the device marks them).
-      const firstDrawerFind = drawerFind && h.counters.drawerFinds === 0
-      if (drawerFind) h.counters.drawerFinds += 1
-      const drawerLine = firstDrawerFind ? this.narrate(outcome.variant === 'loot' ? content.deskDrawer!.firstUse : content.deskDrawer!.firstDrop, { item }) : undefined
       if (outcome.variant === 'loot') {
-        primary = drawerLine ?? this.narrate([...shared.lootGear, ...narrative.lootGear], { item })
-        compact = drawerLine ?? `Found ${withArticle(item)}.`
+        primary = this.narrate([...shared.lootGear, ...narrative.lootGear], { item })
+        compact = `Found ${withArticle(item)}.`
         outcome = { ...outcome, templateId: gear.templateId, rarity: gear.rarity, destination }
-      } else if (drawerLine !== undefined) {
-        // Like the held-find line, the first drawer line leads so a long summary never trims it.
-        consequences.unshift(drawerLine)
       } else {
         consequences.push(`Found ${withArticle(item)}.`)
       }
@@ -649,7 +639,7 @@ class TickRun {
     return this.finish(
       disposition,
       { kind: logKind, summary: composeSummary(primary, compact, consequences, c.summaryMaxCodePoints), outcome, encounterKind: kind },
-      { potionsUsed, potionHealing, levelsGained, goldPenalty, heldFind, drawerFind, xpGranted, ...(upgrade === undefined ? {} : { bagUpgrade: upgrade }), ...(pouchUpgrade === undefined ? {} : { pouchUpgrade }), ...(effectGained === undefined ? {} : { effectGained: effectGained.id }) },
+      { potionsUsed, potionHealing, levelsGained, goldPenalty, heldFind, xpGranted, ...(upgrade === undefined ? {} : { bagUpgrade: upgrade }), ...(pouchUpgrade === undefined ? {} : { pouchUpgrade }), ...(effectGained === undefined ? {} : { effectGained: effectGained.id }) },
     )
   }
 
@@ -853,7 +843,7 @@ class TickRun {
   private finish(
     disposition: Disposition,
     event?: { kind: LogKind; summary: string; outcome: OutcomeDetail; encounterKind?: EncounterKind },
-    extra: { potionsUsed?: number; potionHealing?: number; levelsGained?: number; goldPenalty?: number; heldFind?: boolean; drawerFind?: boolean; xpGranted?: number; bagUpgrade?: BagUpgrade; pouchUpgrade?: BagUpgrade; effectGained?: string } = {},
+    extra: { potionsUsed?: number; potionHealing?: number; levelsGained?: number; goldPenalty?: number; heldFind?: boolean; xpGranted?: number; bagUpgrade?: BagUpgrade; pouchUpgrade?: BagUpgrade; effectGained?: string } = {},
   ): SimulationResult {
     const { h, input } = this
     const nextHero = toHeroState(h)
@@ -870,7 +860,6 @@ class TickRun {
       levelsGained: extra.levelsGained ?? 0,
       goldPenalty: extra.goldPenalty ?? 0,
       heldFind: extra.heldFind ?? false,
-      ...(extra.drawerFind ? { drawerFind: true } : {}),
       ...(extra.bagUpgrade === undefined ? {} : { bagUpgrade: extra.bagUpgrade }),
       ...(extra.pouchUpgrade === undefined ? {} : { pouchUpgrade: extra.pouchUpgrade }),
       ...(extra.effectGained === undefined ? {} : { effectGained: extra.effectGained }),
@@ -906,7 +895,6 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
   if (out.id !== hero.id || out.class !== hero.class) fail('IDENTITY', 'simulator changed hero identity')
   if (out.weaponId !== hero.weaponId || out.armorId !== hero.armorId) fail('EQUIPMENT', 'simulator changed equipment')
   if (out.heldItemId !== hero.heldItemId) fail('HELD', 'simulator cannot set held IDs directly')
-  if ((out.drawer ?? []).join() !== (hero.drawer ?? []).join()) fail('DRAWER', 'simulator cannot set drawer IDs directly')
   if (result.itemChanges.filter((change) => change.type === 'create').length > 1) fail('CREATES', 'more than one new row')
   const xpEarned = result.event?.deltas.xpEarned ?? 0
   if (out.lifetimeXp - hero.lifetimeXp !== xpEarned) fail('XP_CONSERVATION', 'lifetime XP delta differs from granted XP')

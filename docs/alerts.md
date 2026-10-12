@@ -8,7 +8,7 @@ Source: the original brief listed "web push choice/merchant/death", to come late
 
 | Event | Stopped or losing something? | Player can act? | Verdict |
 | --- | --- | --- | --- |
-| Hero asleep with a full bag and full desk drawer | Yes: no XP, no adventures until the player acts | Yes: sell, claim, resume | **Alert** |
+| Hero asleep with a full bag | Yes: no XP, no adventures until the player acts | Yes: sell, claim, resume | **Alert** |
 | Merchant offering the next bag or pouch the hero can afford | Yes: the offer vanishes after four adventures (an hour), and under content v10 (D122) it is 25% off the Bag page price, a real saving on a real step up the ladder | Yes: buy | **Alert** |
 | Merchant offering only potions | No: potions are a small convenience and the next visit sells them too | Yes | No alert: it would buzz a phone several times a day for nothing |
 | Decision pending | No: the default resolves it after a day and play continues, and D79 promises a choice never needs intervention | Yes, but the default is fine | No alert: the game's own rule says nothing is waiting |
@@ -26,7 +26,7 @@ Email is out (Barry, 2026-10-09). A push lands on the phone the player already u
 ## What a player sees
 
 - **Settings → Alerts:** one card, off by default. "Get a nudge on this phone when your hero needs you" with an "Allow on this device" button that runs the browser permission prompt only after the player taps it, a list of enabled devices with Remove buttons, and two switches, each saying what it is and how often it can arrive:
-  - "Hero asleep: the bag and drawer are full and adventures have stopped. Once per nap."
+  - "Hero asleep: the bag is full and adventures have stopped. Once per nap." (until D123 removed the drawer, "the bag and drawer are full")
   - "Merchant deal: a bag or pouch you can afford is on sale for about an hour. At most once a day."
   - Quiet hours, on by default from 21:00 to 08:00 in the browser's timezone, editable in whole hours.
 - **The alert itself:** short, in the game's voice, and it carries no data that would be a privacy problem on a lock screen: "Baz's bag is full, so they've stopped for a nap. Make room to send them back out." or "A merchant is offering Baz a Messenger Bag at a discount, and they have the gold. The offer lasts about an hour." Tapping opens the right companion page (Bag or Merchant).
@@ -95,7 +95,7 @@ Web push is free: the browser vendors run the push services. The sender runs eve
 | A3 `merchant` kind | Affordable bag or pouch rule in the adapter, immediate send, the once-a-day cap, quiet-hours drop | A potion-only visit never alerts (test); a bought offer is skipped at recheck |
 | A4 Settings and help | Alerts card, device list, help section, analytics events | Phone previews pass at 390 wide |
 
-The [desk drawer](desk-drawer.md) reduces how often `asleep` fires, so alerts are last in the suggested build order and tuned against the sleep that remains in production.
+The [desk drawer](desk-drawer.md) reduced how often `asleep` fired, so alerts were last in the suggested build order and tuned against the sleep that remained in production. With the drawer gone (D123) the alert fires at the first find that does not fit the bag, which the companion and help copy now say.
 
 ## Decisions taken in this revision
 

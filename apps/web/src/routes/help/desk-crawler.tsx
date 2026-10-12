@@ -3,8 +3,6 @@ import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
 import { ProsePage, SUPPORT_EMAIL } from '../../lib/prose'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 
-/** D111: the desk drawer paragraph appears once the active catalog has a drawer. */
-const DRAWER = catalogs[ACTIVE_CONTENT].deskDrawer?.capacity ?? 0
 /** D112: the to-do list section appears once the active catalog has one. */
 const TODO = catalogs[ACTIVE_CONTENT].todo
 const STANDUP = TODO === undefined ? '' : `${String(TODO.refillHour).padStart(2, '0')}:00`
@@ -120,12 +118,11 @@ export const Route = createFileRoute('/help/desk-crawler')({
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
       <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. A full bag alone does not stop adventures: the next piece you find is held safely, then your hero sleeps until you make room. The held find is never automatically sold or discarded.</p>
-      {DRAWER > 0 ? <p>Your hero also has a desk drawer with {DRAWER} slots. When the bag is full, new finds go in the drawer and your hero keeps adventuring; it only stops when the drawer is full too. On the Bag page you can sell a drawer item, equip it, or move it into the bag when there’s a free slot. Nothing in the drawer is ever sold or thrown away for you.</p> : null}
       <h2 id="bigger-bags">Bigger bags</h2>
       <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements and no bag drops: save up and buy.{MERCHANT_LINE}</p>
       <ol className="[&_li]:list-decimal">
         <li>Open Bag in the companion. Equip any upgrades and sell spare gear to free space.</li>
-        <li>If a find is being held, choose Claim find{DRAWER > 0 ? ' (with the bag full, it goes in the desk drawer)' : ''}. Leave at least one free slot after claiming it so adventures can resume.</li>
+        <li>If a find is being held, choose Claim find. Leave at least one free slot after claiming it so adventures can resume.</li>
         <li>Choose Resume adventures. You can pick an unlocked destination at the same time. Your hero sets off again within 15 minutes.</li>
       </ol>
       <p>Equipping gear does not free a slot. Selling gear or claiming a find does not wake your hero automatically. Bag sleep is separate from your TRMNL’s Sleep Mode; a sleeping display never stops the game.</p>
@@ -141,7 +138,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <h2 id="alerts">Alerts</h2>
       <p>Your TRMNL is the main way to keep up with your hero, but Settings can also send a phone notification in two cases, each off until you turn it on:</p>
       <ul>
-        <li><strong>Hero asleep:</strong> the bag{DRAWER > 0 ? ' and desk drawer are' : ' is'} full and adventures have stopped. It comes half an hour after the nap starts, so nothing arrives if you are already sorting out the bag, and once per nap.</li>
+        <li><strong>Hero asleep:</strong> the bag is full and adventures have stopped. It comes half an hour after the nap starts, so nothing arrives if you are already sorting out the bag, and once per nap.</li>
         <li><strong>Merchant deal:</strong> a merchant is selling the next bag or pouch{MERCHANT_OFF > 0 ? ` at ${MERCHANT_OFF}% off` : ''} and your hero has the gold. At most once a day. A merchant with only potions never sends one.</li>
       </ul>
       <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a nap alert waits until they end, and a merchant deal that turns up then is skipped. Before sending, the game checks that the alert still holds, so you never hear about a nap that is already over or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>

@@ -23,7 +23,6 @@ export function toHeroState(hero: Doc<'heroes'>): HeroState {
     ...(hero.weaponId === undefined ? {} : { weaponId: hero.weaponId }),
     ...(hero.armorId === undefined ? {} : { armorId: hero.armorId }),
     ...(hero.heldItemId === undefined ? {} : { heldItemId: hero.heldItemId }),
-    ...(hero.drawer === undefined || hero.drawer.length === 0 ? {} : { drawer: hero.drawer }),
     bagCapacity: hero.bagCapacity,
     lastLevelUpTick: hero.lastLevelUpTick,
     counters: withCounterDefaults(hero.counters),
@@ -107,8 +106,6 @@ export async function applyResult(
     } else {
       const id: Id<'items'> = await ctx.db.insert('items', { ...change.item, heroId: hero._id, createdAt: now })
       if (change.destination === 'held') patch.heldItemId = id
-      // P32: a drawer find joins the end of the drawer the tick read.
-      if (change.destination === 'drawer') patch.drawer = [...(hero.drawer ?? []), id]
     }
   }
   await ctx.db.patch(hero._id, patch)

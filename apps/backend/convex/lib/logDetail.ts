@@ -54,6 +54,7 @@ const outcome = v.union(
     found: v.union(v.literal('gear'), v.literal('potion'), v.literal('gold'), v.literal('bag'), v.literal('pouch')),
     templateId: v.optional(v.string()),
     rarity: v.optional(rarity),
+    // `drawer` is legacy (D111, removed in D123): logs written under content v8 to v10 may carry it.
     destination: v.optional(v.union(v.literal('bag'), v.literal('drawer'), v.literal('held'))),
     goldGranted: v.number(),
     jackpot: v.boolean(),
@@ -127,7 +128,7 @@ export const simulationDetail = v.object({
   levelsGained: v.number(),
   goldPenalty: v.number(),
   heldFind: v.boolean(),
-  /** P32: the find went in the desk drawer. */
+  /** Legacy (D111, removed in D123): the find went in the desk drawer. Stored logs from content v8 to v10 may carry it. */
   drawerFind: v.optional(v.boolean()),
   bagUpgrade: v.optional(v.object({ from: v.number(), to: v.number(), tierId: v.string(), source: v.union(v.literal('milestone'), v.literal('find')) })),
   /** The potion pouch grew (D77). */

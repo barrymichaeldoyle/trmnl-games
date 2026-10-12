@@ -17,7 +17,8 @@ const SYSTEM_GLYPHS: ReadonlyArray<[RegExp, GlyphName]> = [
   [/^Your shift begins\b/, 'door'],
   [/^Set off\b/, 'travel'],
   [/^Drank\b/, 'potion'],
-  [/^(?:Claimed|Moved|Put)\b/, 'drawer'],
+  // "Moved" and "Put" are legacy desk drawer lines (D111, removed in D123); they keep the bag glyph with claims.
+  [/^(?:Claimed|Moved|Put)\b/, 'bag'],
   [/^Swapped a task\b/, 'todo'],
   [/\bstance\b/i, 'shield'],
 ]

@@ -21,7 +21,6 @@ export type ErrorCode =
   | 'ITEM_NOT_AVAILABLE'
   | 'ITEM_EQUIPPED'
   | 'ITEM_HELD'
-  | 'ITEM_IN_DRAWER'
   | 'TODO_UNAVAILABLE'
   | 'TASK_DONE'
   | 'SWAP_USED'

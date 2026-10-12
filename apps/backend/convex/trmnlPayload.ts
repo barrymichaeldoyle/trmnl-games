@@ -97,7 +97,6 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
       ...(hero.heldItemId === undefined ? {} : { heldItemId: hero.heldItemId }),
       ...(hero.weaponId === undefined ? {} : { weaponId: hero.weaponId }),
       ...(hero.armorId === undefined ? {} : { armorId: hero.armorId }),
-      ...(hero.drawer === undefined ? {} : { drawer: hero.drawer }),
     }, items.map((item) => ({ id: item._id as string, kind: item.kind })))
     const recent = await ctx.db
       .query('tickLogs')
@@ -106,9 +105,9 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
       .take(MAX_LOGS)
     // D110: a raid rival whose name has since changed or gone reads "Hidden player" here too.
     const summaries = await maskRaidSummaries(ctx, recent)
-    // D111: a loot find that went in the desk drawer takes the drawer glyph. D112: a stand-up, or several tasks ticked
-    // off at once, carries its count form for rows too narrow for the labels.
-    logs = recent.map((log, index) => ({ at: log.at, kind: log.kind === 'loot' && 'drawerFind' in log.detail && log.detail.drawerFind ? 'drawer' : log.kind, summary: summaries[index]!, deltas: displayLogDeltas(log), ...todoCompact(log) }))
+    // D112: a stand-up, or several tasks ticked off at once, carries its count form for rows too narrow for the labels.
+    // A legacy drawer find (D111, removed in D123) reads as the loot line it is.
+    logs = recent.map((log, index) => ({ at: log.at, kind: log.kind, summary: summaries[index]!, deltas: displayLogDeltas(log), ...todoCompact(log) }))
     // The most recently completed night or day period in the owner's local time (D75), the same one buildPayload labels.
     const period = recapPeriod(now, utcOffset)
     const window = await ctx.db
@@ -167,7 +166,6 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     potions,
     bagUsed,
     bagCapacity: hero?.bagCapacity ?? 0,
-    drawerUsed: hero?.drawer?.length ?? 0,
     heldItemName,
     logs,
     ...(activity ? { activity } : {}),

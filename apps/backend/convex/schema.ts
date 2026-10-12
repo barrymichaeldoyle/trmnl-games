@@ -67,7 +67,7 @@ export const heroCounters = v.object({
   raidsWon: v.optional(v.number()),
   raidsRepelled: v.optional(v.number()),
   raidsLost: v.optional(v.number()),
-  /** P32: gear finds the desk drawer caught. */
+  /** Legacy (D111, removed in D123): gear finds the desk drawer caught. Read by nothing; kept so stored counters validate. */
   drawerFinds: v.optional(v.number()),
   /** P31: to-do tasks ticked off. */
   tasksCompleted: v.optional(v.number()),
@@ -363,7 +363,10 @@ export default defineSchema({
     weaponId: v.optional(v.id('items')),
     armorId: v.optional(v.id('items')),
     heldItemId: v.optional(v.id('items')),
-    /** P32: gear in the desk drawer, newest last, at most the catalog's drawer size; absent means empty. */
+    /**
+     * Legacy (D111, removed in D123): the desk drawer's item ids. No production hero held one at removal; a stored list is
+     * ignored and its items count as bag gear. Kept optional so an old dev document still validates; drop it in a later release.
+     */
     drawer: v.optional(v.array(v.id('items'))),
     /** D61: unequipped gear the bag holds, always a ladder tier's capacity. */
     bagCapacity: v.number(),

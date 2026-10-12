@@ -20,7 +20,7 @@ const clock = (hour: number) => `${String(hour).padStart(2, '0')}:00`
 
 /** The two kinds (alerts.md), each saying what it is and how often it can arrive. */
 const KINDS: readonly AlertKindCopy[] = [
-  { id: 'asleep', name: 'Hero asleep', blurb: 'The bag and drawer are full and adventures have stopped. Once per nap.' },
+  { id: 'asleep', name: 'Hero asleep', blurb: 'The bag is full and adventures have stopped. Once per nap.' },
   { id: 'merchant', name: 'Merchant deal', blurb: 'A bag or pouch you can afford is on sale for about an hour. At most once a day.' },
 ]
 

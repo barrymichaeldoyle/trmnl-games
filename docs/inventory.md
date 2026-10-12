@@ -11,7 +11,7 @@ D61, amended by D122 (content v10, 2026-10-11): bag capacity grows per hero. A n
 
 Content v1 to v9 keep D61's three sources (milestones at levels 4, 8 and 12, an 8‰ find per loot encounter, purchases at most one tier ahead of the guaranteed tier) and replay unchanged; the one-ahead rule applies only to milestone tiers, so a catalog may mix a milestone floor with shop tiers above it. Capacity never shrinks. The MVP ceiling is 20 slots, deliberately below the old 30 so crafting, raids and later content can offer bigger bags. Warn quietly at 80% of current capacity.
 
-Cadence under v10 (harness, visits buy every rung they can afford): daily managers finish the ladder on day 7.2, three-day managers on day 9.5 and weekly managers on day 14.6, sleeping 27% of the month against 26% under v9; an unattended hero stays on the Tote Bag plus the desk drawer and sleeps 89% (see [gold-only ladders](evidence/gold-only-ladders.md), earlier [bag ladder evidence](evidence/bag-ladder.md)). At 20 slots (~4.7 gear/day) the comfortable visit is every three to four days. Manual equip/sell/biome choices remain intentional.
+Cadence under v10 (harness, visits buy every rung they can afford): daily managers finish the ladder on day 7.2, three-day managers on day 9.5 and weekly managers on day 14.6, sleeping 27% of the month against 26% under v9 (measured with the desk drawer, which D123 removed: without it the weekly figure is about 43%, see [D123 evidence](evidence/no-drawer.md)); an unattended hero stays on the Tote Bag and sleeps 89% (see [gold-only ladders](evidence/gold-only-ladders.md), earlier [bag ladder evidence](evidence/bag-ladder.md)). At 20 slots (~4.7 gear/day) the comfortable visit is every three to four days. Manual equip/sell/biome choices remain intentional.
 
 Under the ladder, unequipping needs a free bag slot; swapping is always possible, and equipping into an empty slot frees one. Rows stay bounded: 20 bag + 2 equipped + 1 held + 1 potion = 24, within the 32-row read.
 
@@ -23,7 +23,7 @@ At 30 bag gear, keep adventuring until another actual gear find. Store that find
 
 The authoritative held reference is `heroes.heldItemId`; held gear uses an ordinary owned item row and is excluded from bag/equipment until claimed. Maximum reads: 30 bag gear + one held gear + one potion row = 32. No independent location/equipped flags or expanding queue. A full bag alone does not sleep, and no browser/device/check-in clock triggers it.
 
-Desk drawer (D111, content v8, [spec](desk-drawer.md)): under a catalog with `deskDrawer`, a find that overflows the bag goes in the hero's six-slot drawer (`heroes.drawer`, an ordered id list) and the hero keeps adventuring; only a find that arrives with the drawer full too is held as above. Bag-side rows stay at 20 bag + 2 equipped + 1 held + 1 potion = 24, plus 6 drawer rows = 30, within the 32-row read. Resume needs the held slot empty and a free slot in the bag or the drawer. Nothing in the drawer is ever sold or discarded automatically.
+The desk drawer (D111, content v8 to v10, [spec](desk-drawer.md)) was a six-slot overflow that caught finds once the bag was full. Barry removed it on 2026-10-12 (D123, content v11) as an unnecessary complication: the bag is the only container, and a find that does not fit is held as above. The legacy `heroes.drawer` field stays optional in the schema until a later release drops it; no production hero held anything in it.
 
 ## Return journey
 

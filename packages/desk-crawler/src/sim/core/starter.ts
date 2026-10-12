@@ -52,7 +52,6 @@ export function zeroCounters(): HeroCounters {
     raidsWon: 0,
     raidsRepelled: 0,
     raidsLost: 0,
-    drawerFinds: 0,
     tasksCompleted: 0,
   }
 }

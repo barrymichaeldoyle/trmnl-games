@@ -19,7 +19,7 @@ Implementation was authorized on 2026-10-03. This index includes the original pl
 | [Gameplay](gameplay.md) | State machine, simulation rules, initial balance and content |
 | [Raids](raids.md) | Desk raids: passive, unavoidable, chance-driven hero-versus-hero raids, stance-only odds, ledger application, work slices (D110) |
 | [Quests](quests.md) | Approved (D112, content v9): daily quests as a passive, place-aware office to-do list paying gold only; refill and timezone rules |
-| [Desk drawer](desk-drawer.md) | Proposed (P32, the lost-and-found row): a six-slot drawer that delays inventory sleep, intents and migration |
+| [Desk drawer](desk-drawer.md) | Built (D111, content v8) and removed (D123, content v11, 2026-10-12): the six-slot overflow that delayed inventory sleep; kept as the record of what shipped and why it went |
 | [Alerts](alerts.md) | Built (D114): opt-in web push only for a stopped hero and an affordable merchant bag or pouch |
 | [Slow Cast](slow-cast.md) | Built (D115, hidden until its listing): the second game, a passive pixel art fishing simulator; waters, species, gear ladders, shared weather, platform profile and the engine extraction it needs |
 | [Architecture](architecture.md) | Service boundaries, planned file structure, implementation spikes |

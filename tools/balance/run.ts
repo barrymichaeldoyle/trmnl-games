@@ -1,8 +1,7 @@
 /**
  * Deterministic balance harness (quality.md, A03). Runs the real pure simulator
  * in memory; never touches a database. Usage:
- *   pnpm balance [--heroes 500] [--days 30] [--content v3] [--stance cautious|balanced|bold] [--drawer 6] [--json out.json]
- * `--drawer N` overrides the desk drawer size (P32) of a catalog that has one, for the size comparison.
+ *   pnpm balance [--heroes 500] [--days 30] [--content v3] [--stance cautious|balanced|bold] [--json out.json]
  * Under a catalog with to-do rules (P31) the report adds the to-do list, each hero lives in its own timezone, and a
  * daily cohort that moves its TRMNL clock forward four hours every morning measures timezone abuse.
  */
@@ -92,8 +91,6 @@ export interface HeroLog {
   bagMilestones: number
   bagPurchases: number
   bagGoldSpent: number
-  /** P32: gear finds the desk drawer caught. */
-  drawerFinds: number
   /** P31: tasks ticked off per 96-tick day, whether the hero spent most of that day asleep, and the gold they paid. */
   tasksByDay: number[]
   asleepDays: boolean[]
@@ -119,8 +116,6 @@ function args() {
     content: get('--content', ACTIVE_CONTENT) as CatalogId,
     /** D76: every hero plays this stance; omitted means no stance (the catalog constants). */
     stance: argv.includes('--stance') ? (get('--stance', 'balanced') as StanceId) : undefined,
-    /** P32: desk drawer size override; only meaningful for a catalog with a drawer. */
-    drawer: argv.includes('--drawer') ? Number(get('--drawer', '')) : undefined,
     json: get('--json', ''),
     ticks: argv.includes('--ticks') ? Number(get('--ticks', '')) : undefined,
   }
@@ -159,8 +154,6 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   if (weapon && policy.equipGear !== false) h.weaponId = weapon.id
   if (armor && policy.equipGear !== false) h.armorId = armor.id
   delete h.heldItemId
-  // P32: the visit sells the drawer along with the bag.
-  delete h.drawer
   let gold = h.gold
   const kept = inventory.filter((item) => {
     if (item.kind === 'potion' || item.id === h.weaponId || item.id === h.armorId) return true
@@ -228,7 +221,6 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       bagMilestones: 0,
       bagPurchases: 0,
       bagGoldSpent: 0,
-      drawerFinds: 0,
       tasksByDay: [],
       asleepDays: [],
       taskGold: 0,
@@ -351,7 +343,6 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       }
     }
     if (ticks % TICKS_PER_DAY !== 0) log.dailyXp.push(dayXp)
-    log.drawerFinds = hero.counters.drawerFinds
     log.finalLevel = hero.level
     log.finalGold = hero.gold
     log.goldEarned = hero.counters.goldEarned
@@ -411,7 +402,6 @@ export function summarize(policy: Policy, logs: HeroLog[], totalDays: number, co
     deathByBiome: deathRate,
     stateSharePct: states,
     firstInventorySleep: censored(logs.map(l => l.firstSleepTick)),
-    drawerFindsPerHero: round1(sum((l) => l.drawerFinds) / logs.length),
     gearPerDay: round1(sum((l) => l.gearFound) / logs.length / totalDays),
     usefulGearPerDay: round1(sum(l => l.usefulGearFound) / logs.length / totalDays),
     equippedUpgradesPerHero: round1(sum(l => l.equippedUpgrades) / logs.length),
@@ -511,21 +501,20 @@ function main() {
   if (options.ticks !== undefined && (!Number.isSafeInteger(options.ticks) || options.ticks < 1 || options.ticks > 365 * TICKS_PER_DAY)) throw new Error('--ticks must be an integer from 1 to 35040')
   const catalog = catalogs[options.content]
   if (!catalog) throw new Error(`unknown content ${options.content}`)
-  if (options.drawer !== undefined && (catalog.deskDrawer === undefined || !Number.isSafeInteger(options.drawer) || options.drawer < 1 || options.drawer > 8)) throw new Error('--drawer needs a catalog with a desk drawer and a size from 1 to 8')
-  const content: ContentCatalog = options.drawer === undefined ? catalog : { ...catalog, deskDrawer: { ...catalog.deskDrawer!, capacity: options.drawer } }
+  const content: ContentCatalog = catalog
   const started = Date.now()
   const ticks = options.ticks ?? options.days * TICKS_PER_DAY
   const totalDays = ticks / TICKS_PER_DAY
   const policies = content.todo === undefined ? POLICIES : [...POLICIES, TIMEZONE_ABUSE]
   const reports = policies.map((policy) => summarize(policy, simulateCohort(policy, options.heroes, totalDays, content, ticks, options.stance), totalDays, content))
-  const meta = { reportVersion: 2, contentVersion: content.contentVersion, stance: options.stance ?? null, deskDrawer: content.deskDrawer?.capacity ?? null, simulationVersion: SIMULATION_VERSION, heroes: options.heroes, days: totalDays, ticks, seconds: (Date.now() - started) / 1000, cumulativeXpToLevel8: cumulativeXpToReach(8), deathDenominator: 'hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability', uncertainty: 'Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast' }
+  const meta = { reportVersion: 2, contentVersion: content.contentVersion, stance: options.stance ?? null, simulationVersion: SIMULATION_VERSION, heroes: options.heroes, days: totalDays, ticks, seconds: (Date.now() - started) / 1000, cumulativeXpToLevel8: cumulativeXpToReach(8), deathDenominator: 'hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability', uncertainty: 'Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast' }
   if (options.json) writeFileSync(options.json, JSON.stringify({ meta, reports }, null, 2) + '\n')
   console.log(JSON.stringify(meta))
   for (const r of reports) {
     console.log(`\n== ${r.policy} (${r.heroes} heroes x ${r.days} days)`)
     for (const x of r.reach) console.log(`  L${x.level}: p10 ${x.p10}d  median ${x.median}d  p90 ${x.p90}d  reached ${x.reached}/${r.heroes}`)
     console.log(`  final level median ${r.finalLevelMedian}; death hero-days ${JSON.stringify(r.deathByBiome)}`)
-    console.log(`  state % ${JSON.stringify(r.stateSharePct)}; first sleep ${JSON.stringify(r.firstInventorySleep)}; drawer finds/hero ${r.drawerFindsPerHero}`)
+    console.log(`  state % ${JSON.stringify(r.stateSharePct)}; first sleep ${JSON.stringify(r.firstInventorySleep)}`)
     console.log(`  gear/day ${r.gearPerDay}; best-in-slot ${JSON.stringify(r.bestInSlot)}; gold end ${JSON.stringify(r.goldDayEnd)}; gold day 30 median ${r.goldDay30}`)
     console.log(`  jackpot gold share ${r.jackpotGoldShare}%; elites/hero-day ${r.elitesPerHeroDay}`)
     if (r.todo) {

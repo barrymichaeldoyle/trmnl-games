@@ -1,5 +1,7 @@
 # Desk drawer: L1 rules and harness (P32)
 
+**Historical.** The drawer was removed on 2026-10-12 (D123, content v11); see [no-drawer.md](no-drawer.md). The `--drawer` harness flag below no longer exists.
+
 Date: 2026-10-09 · Simulation version 1 · Content v8 (not active until the switch; production stays on v7 until then) · Harness: `pnpm balance --heroes 300 --days 30 --content v8 --drawer N` ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw report for the chosen size: [balance-v8-desk-drawer-30-days.json](balance-v8-desk-drawer-30-days.json).
 
 ## What L1 built

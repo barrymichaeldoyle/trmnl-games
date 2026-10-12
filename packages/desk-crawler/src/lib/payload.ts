@@ -68,8 +68,6 @@ export interface PayloadInput {
   readonly potions: number
   readonly bagUsed: number
   readonly bagCapacity: number
-  /** P32: gear in the desk drawer; absent or 0 hides the HUD's "+N". */
-  readonly drawerUsed?: number
   readonly heldItemName: string | null
   /** `compact`: D112's count form of a to-do line, for rows too narrow for its labels. */
   readonly logs: ReadonlyArray<{ readonly at: number; readonly kind: string; readonly summary: string; readonly deltas?: LogDeltas; readonly compact?: string }>
@@ -428,7 +426,8 @@ export function buildPayload(input: PayloadInput) {
     potions: input.potions,
     bag_used: input.bagUsed,
     bag_capacity: input.bagCapacity,
-    drawer_used: input.drawerUsed ?? 0,
+    // D123: the desk drawer is gone; the field stays at 0 so template v49/v50 (which read it) keep rendering until v51 is uploaded.
+    drawer_used: 0,
     // D103: the stance outlasts its log line, so the HUD shows it under its gauge mark; empty under a catalog without stances.
     stance: stance ? stance.id : ('' as const),
     stance_name: stance?.name ?? '',

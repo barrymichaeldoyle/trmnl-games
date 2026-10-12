@@ -28,7 +28,7 @@ A task is a catalog template plus a target. The content version that introduces 
 | `defeat_monster` | Defeat 4 Paper Imps | combat wins against that monster |
 | `defeat_any` | Win 10 fights | combat wins |
 | `explore_biome` | Explore the Server Room for 8 adventures | exploring ticks spent in that biome |
-| `find_gear` | Find 2 pieces of gear | gear finds, held finds and desk drawer finds included |
+| `find_gear` | Find 2 pieces of gear | gear finds, held finds included (and desk drawer finds while the drawer existed, D111 to D123) |
 | `earn_gold` | Earn 150 gold on adventures | `goldEarned` from encounters (never sales, raids or task rewards) |
 | `avoid_traps` | Dodge 3 traps | traps avoided |
 | `elite` | Beat an elite | elite wins (offered from level 4; elites are 3% of fights, so about one a day) |

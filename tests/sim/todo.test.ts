@@ -323,7 +323,7 @@ describe('the stand-up (P31)', () => {
       ;({ hero: h, inventory } = applyItemChanges(result.nextHero, inventory, result.itemChanges, () => `n${String(next++).padStart(5, '0')}`))
       // Sell every spare at once so the hero never sleeps on a full bag and every morning could refill.
       inventory = inventory.filter((item) => item.kind === 'potion' || item.id === h.weaponId || item.id === h.armorId)
-      const { heldItemId: _held, drawer: _drawer, wakeAtTick: _wake, ...awake } = h
+      const { heldItemId: _held, wakeAtTick: _wake, ...awake } = h
       h = { ...awake, status: h.status === 'sleeping' ? 'exploring' : h.status }
     }
     expect(refills / days).toBeLessThanOrEqual(1.25)

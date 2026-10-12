@@ -17,9 +17,10 @@ import { contentV9 } from './v9'
  * middle rungs are cheaper than v9's so a weekly manager can climb at its
  * first visits instead of sleeping on a small bag, and the top rung stays dear
  * enough that a daily manager is still saving for it in its second week. The
- * pouch keeps its v4 prices. Monsters, gear, stances, choices, effects, raids,
- * the drawer and the to-do list are v9; the bag and pouch draws still consume
- * their reward-stream rolls, so other outcomes replay unchanged.
+ * pouch keeps its v4 prices. Monsters, gear, stances, choices, effects, raids
+ * and the to-do list are v9; the bag and pouch draws still consume their
+ * reward-stream rolls, so other outcomes replay unchanged. The desk drawer
+ * that v8 to v10 carried was removed in D123 (see v11).
  */
 export const contentV10: ContentCatalog = {
   ...contentV9,

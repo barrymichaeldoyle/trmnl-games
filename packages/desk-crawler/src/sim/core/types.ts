@@ -294,16 +294,6 @@ export interface RaidRule {
   readonly narrative: RaidNarrative
 }
 
-/** P32: the desk drawer catches gear finds once the bag is full; the hero sleeps only when it is full too. */
-export interface DeskDrawerRule {
-  /** Slots, one size for every hero. */
-  readonly capacity: number
-  /** The hero's first drawer find, from loot. Placeholder: {item}. */
-  readonly firstUse: readonly string[]
-  /** The same moment for a combat drop, after the victory line; short and without a placeholder so the summary keeps it. */
-  readonly firstDrop: readonly string[]
-}
-
 /** P31: what a to-do task counts, always something the pure core already resolves in a tick. */
 export type TodoKind = 'defeat_monster' | 'defeat_any' | 'explore_biome' | 'find_gear' | 'earn_gold' | 'avoid_traps' | 'elite'
 
@@ -464,8 +454,6 @@ export interface ContentCatalog {
   readonly effectSources?: Readonly<{ trapHit?: string; eliteVictory?: string }>
   /** Absent before v7 (D110). */
   readonly raids?: RaidRule
-  /** Absent before v8 (P32): without it a find that overflows the bag is held at once, as before. */
-  readonly deskDrawer?: DeskDrawerRule
   /** Absent before v9 (P31): without it a hero has no to-do list and draws nothing from the `quest` stream. */
   readonly todo?: TodoRule
   readonly narrative: Readonly<{ biomes: Readonly<Record<string, BiomeNarrative>>; shared: SharedNarrative; monsters: Readonly<Record<string, MonsterNarrative>> }>
@@ -517,8 +505,6 @@ export interface HeroCounters {
   readonly raidsWon: number
   readonly raidsRepelled: number
   readonly raidsLost: number
-  /** Gear finds that went in the desk drawer because the bag was full (P32). */
-  readonly drawerFinds: number
   /** To-do tasks ticked off (P31). */
   readonly tasksCompleted: number
 }
@@ -545,8 +531,6 @@ export interface HeroState {
   readonly weaponId?: string
   readonly armorId?: string
   readonly heldItemId?: string
-  /** P32: gear in the desk drawer, newest last, at most the catalog's drawer capacity; absent means empty. */
-  readonly drawer?: readonly string[]
   /** Unequipped gear the bag holds; always a ladder tier's capacity (D61). */
   readonly bagCapacity: number
   readonly lastLevelUpTick: number
@@ -620,7 +604,7 @@ export type NewItem = Omit<ItemSnapshot, 'id'>
 export type ItemChange =
   | { readonly type: 'potion_decrement'; readonly itemId: string; readonly deleteRow: boolean }
   | { readonly type: 'potion_increment'; readonly itemId: string }
-  | { readonly type: 'create'; readonly destination: 'bag' | 'drawer' | 'held' | 'potion_stack'; readonly item: NewItem }
+  | { readonly type: 'create'; readonly destination: 'bag' | 'held' | 'potion_stack'; readonly item: NewItem }
 
 // ---------------------------------------------------------------- input/output
 
@@ -683,7 +667,8 @@ export type OutcomeDetail =
       readonly found: 'gear' | 'potion' | 'gold' | 'bag' | 'pouch'
       readonly templateId?: string
       readonly rarity?: Rarity
-      readonly destination?: 'bag' | 'drawer' | 'held'
+      /** `drawer` is a legacy stored value (D111, removed in D123); the simulator writes only `bag` or `held`. */
+      readonly destination?: 'bag' | 'held' | 'drawer'
       readonly goldGranted: number
       readonly jackpot: boolean
       readonly potionFullFallback: boolean
@@ -733,8 +718,6 @@ export interface LogDetail {
   readonly levelsGained: number
   readonly goldPenalty: number
   readonly heldFind: boolean
-  /** P32: the tick's gear find went in the desk drawer. Absent when it did not. */
-  readonly drawerFind?: boolean
   /** The bag grew this tick (D61). */
   readonly bagUpgrade?: BagUpgrade
   /** The potion pouch grew this tick (D77). */
