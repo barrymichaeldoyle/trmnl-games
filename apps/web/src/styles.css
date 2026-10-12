@@ -232,6 +232,16 @@
   }
 }
 
+/* D129: a claimed goal's confetti: each piece flies out to its own offset, turns, and fades, in four steps a stage. */
+.confetti {
+  animation: confetti 1100ms steps(8, end) both;
+}
+@keyframes confetti {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  60% { transform: translate(var(--dx), var(--dy)) rotate(var(--spin)); opacity: 1; }
+  100% { transform: translate(calc(var(--dx) * 1.2), calc(var(--dy) * 0.4)) rotate(calc(var(--spin) * 2)); opacity: 0; }
+}
+
 @keyframes coin-hop {
   0% { transform: translateY(0); }
   25% { transform: translateY(-4px); }

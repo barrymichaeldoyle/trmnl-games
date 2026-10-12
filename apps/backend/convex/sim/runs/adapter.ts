@@ -93,7 +93,7 @@ export async function applyResult(
     // P31: an earlier catalog carries the list untouched, so this never clears one.
     todo: next.todo === undefined ? undefined : { ...next.todo, tasks: next.todo.tasks.map((task) => ({ ...task })) },
     // P35: same for the career state.
-    career: next.career === undefined ? undefined : { ...next.career, reached: next.career.reached.map((entry) => ({ ...entry })) },
+    career: next.career === undefined ? undefined : { ...next.career, reached: next.career.reached.map((entry) => ({ ...entry })), unclaimed: next.career.unclaimed === undefined ? undefined : next.career.unclaimed.map((entry) => ({ ...entry })) },
     lastLevelUpTick: next.lastLevelUpTick,
     counters: next.counters,
   }

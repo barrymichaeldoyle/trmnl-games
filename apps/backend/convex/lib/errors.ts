@@ -26,6 +26,8 @@ export type ErrorCode =
   | 'SWAP_USED'
   /** P35: the feature unlocks at a later level. */
   | 'LOCKED'
+  /** D129: no goal reward is waiting. */
+  | 'NOTHING_TO_CLAIM'
   | 'BAG_FULL'
   | 'BAG_UNAVAILABLE'
   | 'POUCH_UNAVAILABLE'

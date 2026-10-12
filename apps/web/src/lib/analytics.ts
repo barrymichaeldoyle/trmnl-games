@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {
@@ -151,6 +151,7 @@ export const currentGame = () => (typeof window !== 'undefined' && /(^|\/)slow-c
 const INTENT_EVENTS: Record<string, [AnalyticsEvent, string, string]> = {
   'heroes:setStance': ['stance changed', 'stance', 'stance'],
   'heroes:choose': ['decision made', 'optionId', 'option_id'],
+  'heroes:claimGoal': ['goal claimed', 'rungId', 'rung'],
   'inventory:buyOffer': ['merchant purchase', 'offerId', 'offer'],
   'inventory:buyPouch': ['pouch bought', 'tierId', 'tier'],
   'inventory:buyBag': ['bag bought', 'tierId', 'tier'],

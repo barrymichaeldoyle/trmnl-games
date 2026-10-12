@@ -47,7 +47,6 @@ function HeroHome() {
       <h1 className="sr-only">{hero.name}, your hero</h1>
       <KeepsakeCallout />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
-      {hero.career ? <GoalCard career={hero.career} level={hero.level} /> : null}
       <ReturnNudge />
       <HeroSheet hero={hero} />
     </div>
@@ -128,6 +127,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
+      {hero.career ? <GoalCard career={hero.career} level={hero.level} notify={notify} /> : null}
       <section ref={commands} aria-label="Commands" className="flex flex-col gap-2">
         {canDrink || hero.status === 'paused' || hero.status === 'sleeping' ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.

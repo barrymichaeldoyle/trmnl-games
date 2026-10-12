@@ -111,7 +111,8 @@ export function guaranteeDue(content: ContentCatalog, hero: HeroState): Guarante
 
 /**
  * Apply the ladder to a finished tick: unlock lines for levels crossed this tick, then the current rung. A rung that
- * holds pays its gold through the hero's gold like a task, logs a goal line, and the pointer moves to the next rung,
+ * holds sets its gold aside as an unclaimed reward (D129: the companion's Claim button pays it, so the moment is the
+ * player's and the ladder still moves without a visit), logs a goal line, and the pointer moves to the next rung,
  * which pays at the next evaluation if the hero has already done it, so every rung is reached in order and one pays
  * per tick. A hero without a place on the ladder joins at the first rung it had not satisfied when the tick began:
  * an existing hero skips what it has done without pay or lines, a new hero starts at the first rung with its first
@@ -142,10 +143,11 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
     const current = rules.rungs[state.rung]
     if (current !== undefined && rungSatisfied(current, hero, content)) {
       const gold = current.gold
-      hero = { ...hero, gold: hero.gold + gold, counters: { ...hero.counters, goldEarned: hero.counters.goldEarned + gold, careerRungs: hero.counters.careerRungs + 1 } }
+      hero = { ...hero, counters: { ...hero.counters, careerRungs: hero.counters.careerRungs + 1 } }
       metrics.careerRungs = 1
       const next = state.rung + 1
-      state = { rung: next, startedTick: tick, reached: [...state.reached, { id: current.id, tick, ...(input.tickAt === undefined ? {} : { at: input.tickAt }) }] }
+      const when = input.tickAt === undefined ? {} : { at: input.tickAt }
+      state = { rung: next, startedTick: tick, reached: [...state.reached, { id: current.id, tick, ...when }], unclaimed: [...(state.unclaimed ?? []), ...(gold > 0 ? [{ id: current.id, gold, tick, ...when }] : [])] }
       const following = rules.rungs[next]
       events.push(careerEvent(input, result, { variant: 'career', phase: 'reached', id: current.id, title: current.title, ...(following === undefined ? {} : { next: following.title }), gold }))
     }
@@ -186,7 +188,26 @@ function careerEvent(input: SimulationInput, result: SimulationResult, outcome: 
     heldFind: false,
     outcome,
   }
-  return { kind: 'career', summary: codePoints(full) <= content.constants.summaryMaxCodePoints ? full : compact, detail, deltas: { xpEarned: 0, gold: outcome.gold, hp: 0 } }
+  // D129: the gold is set aside, not paid, so the line's deltas carry none; the outcome keeps the amount to claim.
+  return { kind: 'career', summary: codePoints(full) <= content.constants.summaryMaxCodePoints ? full : compact, detail, deltas: { xpEarned: 0, gold: 0, hp: 0 } }
+}
+
+export type ClaimRefusal = 'NO_LADDER' | 'NOTHING_TO_CLAIM'
+
+/**
+ * The claim intent (D129): pay one waiting reward, oldest first unless a rung is named. Pure, so the intent and its
+ * tests share it; the adapter adds the gold to the hero and logs the command line.
+ */
+export function claimReward(hero: HeroState, content: ContentCatalog, rungId?: string): { career: CareerState; reward: { id: string; title: string; gold: number } } | { refusal: ClaimRefusal } {
+  const state = hero.career
+  if (content.career === undefined || state === undefined) return { refusal: 'NO_LADDER' }
+  const waiting = state.unclaimed ?? []
+  const reward = rungId === undefined ? waiting[0] : waiting.find((entry) => entry.id === rungId)
+  if (reward === undefined) return { refusal: 'NOTHING_TO_CLAIM' }
+  const rest = waiting.filter((entry) => entry !== reward)
+  const { unclaimed: _u, ...without } = state
+  const title = content.career.rungs.find((rung) => rung.id === reward.id)?.title ?? reward.id
+  return { career: rest.length === 0 ? without : { ...without, unclaimed: rest }, reward: { id: reward.id, title, gold: reward.gold } }
 }
 
 /** Cross-field checks on a stored career state under a catalog with a ladder. */
@@ -197,6 +218,13 @@ export function careerProblems(state: CareerState, content: ContentCatalog): str
   if (state.armedAt !== undefined && (!Number.isSafeInteger(state.armedAt) || state.armedAt < 0)) return 'invalid guarantee mark'
   if (state.fired && state.armedAt !== undefined) return 'a fired guarantee is no longer armed'
   if ((state.armedAt === undefined) !== (state.armedCount === undefined)) return 'an armed guarantee carries its event count'
+  const pending = new Set<string>()
+  for (const reward of state.unclaimed ?? []) {
+    if (!rungs.some((rung) => rung.id === reward.id)) return `unknown unclaimed rung ${reward.id}`
+    if (pending.has(reward.id)) return `rung ${reward.id} unclaimed twice`
+    pending.add(reward.id)
+    if (!Number.isSafeInteger(reward.gold) || reward.gold < 0 || !Number.isSafeInteger(reward.tick) || reward.tick < 0) return `invalid unclaimed reward for ${reward.id}`
+  }
   if (state.armedCount !== undefined && (!Number.isSafeInteger(state.armedCount) || state.armedCount < 0)) return 'invalid guarantee count'
   if (state.reached.length > rungs.length) return 'more rungs reached than the ladder has'
   const seen = new Set<string>()

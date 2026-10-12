@@ -161,6 +161,7 @@ if (params.has('career')) {
   hero.level = mode === 'new' ? 1 : hero.level;
   hero.career = { rung, total: rungs.length, current: rung < rungs.length ? { id: rungs[rung].id, title: rungs[rung].title, blurb: rungs[rung].blurb, gold: rungs[rung].gold, companion: rungs[rung].companion ?? false, value: rungs[rung].predicate.kind === 'counter' && rungs[rung].predicate.counter === 'choicesMade' ? 0 : 1, target: 1 } : null,
     rungs: rungs.map((r, i) => ({ id: r.id, title: r.title, blurb: r.blurb, gold: r.gold, companion: r.companion ?? false, state: i < rung ? 'done' : i === rung ? 'current' : 'ahead', reachedAt: i < rung && i >= 4 ? now - 864e5 * (rung - i) : null })) };
+  hero.career.unclaimed = mode === 'new' ? [] : [{ id: 'first_trip', title: 'Travel to the Server Room', gold: 25, at: now - 864e5 * 2 }, { id: 'laptop_backpack', title: 'Buy the Laptop Backpack', gold: 30, at: now - 864e5 }];
   if (mode === 'new') hero.career.current = { ...hero.career.current, value: 0, target: 1 };
   if (mode !== 'new' && mode !== 'done') hero.career.current.value = 2, hero.career.current.target = 3, hero.career.current.title = 'Finish three to-do tasks', hero.career.current.blurb = rungs[3].blurb, hero.career.current.companion = false;
   hero.unlocks = [['todo', 'the to-do list', 2], ['stances', 'stances', 3], ['choices', 'office decisions', 5], ['merchant', 'the wandering merchant', 6], ['raids', 'desk raids', 7]].map(([feature, label, level]) => ({ feature, label, level, unlocked: hero.level >= level }));

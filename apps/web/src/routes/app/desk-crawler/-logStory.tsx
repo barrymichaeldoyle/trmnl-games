@@ -20,6 +20,7 @@ const SYSTEM_GLYPHS: ReadonlyArray<[RegExp, GlyphName]> = [
   // "Moved" and "Put" are legacy desk drawer lines (D111, removed in D123); they keep the bag glyph with claims.
   [/^(?:Claimed|Moved|Put)\b/, 'bag'],
   [/^Swapped a task\b/, 'todo'],
+  [/^Claimed \d+ gold for a goal\b/, 'career'],
   [/\bstance\b/i, 'shield'],
 ]
 

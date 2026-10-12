@@ -24,7 +24,7 @@ import { hereBiomeId, isLocal, nextStandupAfter, swapTask as swapTodoTask, swapU
 import { deriveStreamSeed } from '@trmnl-games/desk-crawler/sim/seed'
 import { worldContent } from './world'
 import { toHeroState } from './sim/runs/adapter'
-import { currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 
 const intentResult = v.object({
@@ -307,6 +307,28 @@ function todoView(content: ContentCatalog, hero: Doc<'heroes'>, utcOffset: numbe
   }
 }
 
+/**
+ * D129: claim one waiting goal reward. The ladder set the gold aside when the rung was reached; this pays it, counts
+ * it as earned, and logs a command line. Oldest first unless a rung is named; a duplicate receipt finds nothing waiting.
+ */
+export const claimGoal = mutation({
+  args: { operationId: v.string(), rungId: v.optional(v.string()) },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'heroes.claimGoal', { rungId: args.rungId ?? null }, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      const content = worldContent(await readWorld(ctx))
+      const claimed = claimReward(toHeroState(hero), content, args.rungId)
+      if ('refusal' in claimed) throw appError(claimed.refusal === 'NO_LADDER' ? 'INVALID_STATE' : 'NOTHING_TO_CLAIM', claimed.refusal === 'NO_LADDER' ? 'The career ladder is not here yet.' : 'No goal reward is waiting.')
+      const counters = withCounterDefaults(hero.counters)
+      const gold = claimed.reward.gold
+      await ctx.db.patch(hero._id, { gold: hero.gold + gold, counters: { ...counters, goldEarned: counters.goldEarned + gold }, career: { ...claimed.career, reached: claimed.career.reached.map((entry) => ({ ...entry })), unclaimed: claimed.career.unclaimed === undefined ? undefined : claimed.career.unclaimed.map((entry) => ({ ...entry })) } })
+      await commandLog(ctx, hero, 'claim_goal', `Claimed ${gold} gold for a goal: ${claimed.reward.title}.`, { xpEarned: 0, gold, hp: 0 })
+      await awardAfterIntent(ctx, hero, content, (await readWorld(ctx))?.currentTick ?? 0)
+      return { changed: true, gold }
+    }),
+})
+
 /** P35: the companion's goal line and Career page. Null under a catalog without a ladder or before the hero's first evaluation under it. */
 function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const rules = content.career
@@ -315,9 +337,12 @@ function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const heroState: HeroState = toHeroState(hero)
   const rung = currentRung(content, heroState)
   const reachedAt = new Map(state.reached.map((entry) => [entry.id, entry.at ?? null]))
+  const titleOf = (id: string) => rules.rungs.find((rung) => rung.id === id)?.title ?? id
   return {
     rung: state.rung,
     total: rules.rungs.length,
+    // D129: rewards waiting for the Claim button, oldest first.
+    unclaimed: (state.unclaimed ?? []).map((reward) => ({ id: reward.id, title: titleOf(reward.id), gold: reward.gold, at: reward.at ?? null })),
     current: rung === undefined ? null : { id: rung.id, title: rung.title, blurb: rung.blurb, gold: rung.gold, companion: rung.companion ?? false, ...measureRung(rung.predicate, heroState, content) },
     // Every rung in order: done before the ladder arrived (no tick), reached under it (with its tick), current, or ahead.
     rungs: rules.rungs.map((entry, index) => ({

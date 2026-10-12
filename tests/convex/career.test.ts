@@ -61,11 +61,22 @@ describe('career ladder backend (P35)', () => {
     const line = rows.find((log) => log.kind === 'career')!
     expect(line.summary).toBe('Goal reached: Win your first fight. Next: Equip a piece of gear you found.')
     expect(line.detail).toMatchObject({ outcome: { variant: 'career', phase: 'reached', id: 'first_win', gold: 10 } })
-    expect(line.deltas).toEqual({ xpEarned: 0, gold: 10, hp: 0 })
+    expect(line.deltas).toEqual({ xpEarned: 0, gold: 0, hp: 0 })
+    expect(hero.career?.unclaimed).toEqual([{ id: 'first_win', gold: 10, tick: expect.any(Number), at: expect.any(Number) }])
+    // D129: the claim pays it once and logs a command line; a second claim finds nothing waiting.
+    const before = hero.gold
+    const claimed = await as(t, 'Ana').mutation(api.heroes.claimGoal, { operationId: opId() })
+    expect(claimed).toMatchObject({ changed: true, gold: 10 })
+    const after = await heroDoc(t, heroId)
+    expect(after.gold).toBe(before + 10)
+    expect(after.counters.goldEarned).toBe((hero.counters.goldEarned ?? 0) + 10)
+    expect(after.career?.unclaimed).toBeUndefined()
+    expect((await logs(t, heroId)).at(-1)).toMatchObject({ source: 'command', summary: 'Claimed 10 gold for a goal: Win your first fight.', deltas: { gold: 10 } })
+    expect(await errorCode(as(t, 'Ana').mutation(api.heroes.claimGoal, { operationId: opId() }))).toBe('NOTHING_TO_CLAIM')
     // The goal line follows its tick's story with the next sequence number.
     const story = rows.find((log) => log.tick === line.tick && log.kind !== 'career' && log.kind !== 'achievement')!
     expect(line.sequence).toBe(story.sequence + 1)
-    expect(hero.logSequence).toBe(Math.max(...(await logs(t, heroId)).map((log) => log.sequence)))
+    expect((await heroDoc(t, heroId)).logSequence).toBe(Math.max(...(await logs(t, heroId)).map((log) => log.sequence)))
   })
 
   it('writes no ladder under v11', { timeout: 30_000 }, async () => {

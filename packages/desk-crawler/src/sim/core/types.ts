@@ -655,6 +655,8 @@ export interface CareerState {
   readonly fired?: true
   /** Rungs reached under the ladder, in order, with the tick and its wall slot when the input carried one; rungs already satisfied when the ladder arrived are not listed. */
   readonly reached: readonly { readonly id: string; readonly tick: number; readonly at?: number }[]
+  /** Rewards reached but not yet claimed in the companion (D129): the rung's gold waits here, never expires, and `heroes.claimGoal` pays it. */
+  readonly unclaimed?: readonly { readonly id: string; readonly gold: number; readonly tick: number; readonly at?: number }[]
 }
 
 /** One to-do task. The biome and monster it names, its target and its reward are fixed when it is written. */

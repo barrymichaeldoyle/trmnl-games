@@ -129,6 +129,7 @@ counters.careerRungs, counters.itemsEquipped                                    
 5. **The raid pool needs no `level` field**: the pick already reads the target hero live, so the level check happens there.
 6. **No analytics event**: a goal is reached inside a tick, not by a companion action, so the engagement report counts rungs instead.
 7. Rung 9 names the Laptop Backpack (13 slots), the first shop rung under the D122 ladder; the spec's "Satchel" was a placeholder.
+8. **The gold waits for a Claim button (D130).** Barry asked for a claim step with confetti. The pointer still moves on its own (a gate would stall device-only players at every rung); the rung's gold sits in `career.unclaimed` until `heroes.claimGoal` pays it, and the Goal card shows each waiting reward with Claim and a confetti burst before the next goal. All gold sinks are companion actions, so nothing is lost by a player who never claims.
 
 ## Open points for Barry (settled 2026-10-12)
 

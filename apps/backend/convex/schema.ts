@@ -89,6 +89,8 @@ export const careerState = v.object({
   armedCount: v.optional(v.number()),
   fired: v.optional(v.literal(true)),
   reached: v.array(v.object({ id: v.string(), tick: v.number(), at: v.optional(v.number()) })),
+  /** D129: rewards waiting for the companion's Claim button. */
+  unclaimed: v.optional(v.array(v.object({ id: v.string(), gold: v.number(), tick: v.number(), at: v.optional(v.number()) }))),
 })
 
 /** P31: the office to-do list, three tasks written by the simulator and swapped by `heroes.swapTask`. */

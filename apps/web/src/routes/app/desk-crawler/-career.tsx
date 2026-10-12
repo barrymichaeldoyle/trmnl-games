@@ -1,12 +1,19 @@
 import { Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { api } from '@trmnl-games/backend/api'
+import { useIntent } from '../../../lib/intent'
+import { Button } from '../../../lib/ui'
 import { Glyph, SectionTitle } from '../../../lib/glyphs'
 import { LocalTime } from '../../../lib/localTime'
+import { captureAnalytics } from '../../../lib/analytics'
 import { PixelIcon } from './-pixelIcon'
 
 /** heroes.mine's `career` (P35): the current rung with its progress, and every rung's state for the Career page. */
 export type CareerView = {
   rung: number
   total: number
+  /** D129: rewards waiting for the Claim button, oldest first. */
+  unclaimed?: Array<{ id: string; title: string; gold: number; at: number | null }>
   current: { id: string; title: string; blurb: string; gold: number; companion: boolean; value: number; target: number } | null
   rungs: Array<{ id: string; title: string; blurb: string; gold: number; companion: boolean; state: 'done' | 'current' | 'ahead'; reachedAt: number | null }>
 }
@@ -19,24 +26,61 @@ const PREVIEW = 2
 
 const reachedOn = (date: Date) => date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
 
+/** Confetti pieces: a fixed scatter so the burst reads the same every time, in the game's four inks. */
+const CONFETTI = Array.from({ length: 28 }, (_, i) => ({ x: ((i * 37) % 100) - 50, y: -(40 + ((i * 53) % 70)), spin: ((i * 97) % 360), delay: (i * 13) % 120, tone: ['bg-gold', 'bg-xp', 'bg-hp', 'bg-sky'][i % 4]! }))
+
+/** A one-shot pixel confetti burst over its parent (D129); reduced motion collapses it to a flash. */
+function Confetti() {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-1/2 h-0 overflow-visible">
+      {CONFETTI.map((piece, i) => (
+        <span key={i} className={`confetti absolute left-1/2 size-2 ${piece.tone}`} style={{ '--dx': `${piece.x * 2.6}px`, '--dy': `${piece.y * 1.6}px`, '--spin': `${piece.spin}deg`, animationDelay: `${piece.delay}ms` } as React.CSSProperties} />
+      ))}
+    </span>
+  )
+}
+
 /**
- * The hero page's goal line (P35): the one thing to do next, its office blurb, the gold it pays and, where the rung
- * counts something, how far along it is. A companion rung says where to do it. Nothing here is a control: the goal
- * is reached by playing, and the Career page under More holds the whole ladder.
+ * The hero page's goal card (P35, D129): rewards waiting to be claimed come first, one at a time with a Claim button
+ * that pops confetti and pays the gold; then the one thing to do next, its office blurb, the gold it will set aside
+ * and, where the rung counts something, how far along it is. The ladder itself moves without a visit; only the gold
+ * waits here, and it never expires.
  */
-export function GoalCard({ career, level }: { career: CareerView; level: number }) {
+export function GoalCard({ career, level, notify }: { career: CareerView; level: number; notify?: (feedback: { error: string | null; message: string | null }) => void }) {
   const goal = career.current
+  const waiting = career.unclaimed ?? []
+  const claim = useIntent(api.heroes.claimGoal, notify ? { onFeedback: notify } : {})
+  const [burst, setBurst] = useState(0)
+  useEffect(() => {
+    if (burst === 0) return
+    const timer = setTimeout(() => setBurst(0), 1400)
+    return () => clearTimeout(timer)
+  }, [burst])
   const counted = goal !== null && goal.target > 1
   const pct = goal === null ? 0 : Math.max(0, Math.min(100, Math.round((Math.min(goal.value, goal.target) * 100) / Math.max(1, goal.target))))
+  const reward = waiting[0]
   return (
-    <section aria-labelledby="goal-title" className="window flex min-w-0 flex-col gap-2 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
+    <section aria-labelledby="goal-title" className="window relative flex min-w-0 flex-col gap-2 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
+      {burst > 0 ? <Confetti key={burst} /> : null}
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <SectionTitle id="goal-title" glyph="career">Goal</SectionTitle>
+        <SectionTitle id="goal-title" glyph="career">{reward ? 'Goal reached' : 'Goal'}</SectionTitle>
         <Link to="/app/desk-crawler/career" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
           Career{career.rung > 0 ? ` · ${Math.min(career.rung, career.total)} of ${career.total}` : ''}
         </Link>
       </div>
-      {goal ? (
+      {reward ? (
+        <>
+          <p className="font-display text-2xl leading-tight font-bold">{reward.title}</p>
+          <p className="text-sm">Your hero got there{reward.at !== null ? <> on <LocalTime at={reward.at} format={reachedOn} /></> : ''}. The reward is yours to collect.</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button icon="coin" pending={claim.pending} busyLabel="Claiming…" onClick={async () => { if (await claim.run({ rungId: reward.id }, `+${reward.gold} gold claimed.`)) { setBurst((n) => n + 1); captureAnalytics('goal claimed', { rung: reward.id }) } }}>
+              Claim +{reward.gold.toLocaleString()} gold
+            </Button>
+            {waiting.length > 1 ? <span className="text-xs font-semibold text-muted">{waiting.length - 1} more waiting</span> : null}
+          </div>
+          {goal ? <p className="border-t-2 border-dashed border-rule pt-2 text-xs font-semibold text-muted">Next goal: {goal.title}</p> : null}
+        </>
+      ) : goal ? (
         <>
           <p className="font-display text-2xl leading-tight font-bold">{goal.title}</p>
           <p className="text-sm">{goal.blurb}</p>

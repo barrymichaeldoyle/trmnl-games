@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { applyItemChanges } from '@trmnl-games/desk-crawler/sim/core/apply'
-import { canRaid, careerLine, effectiveStance, firstOpenRung, guaranteeDue, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { canRaid, careerLine, claimReward, effectiveStance, firstOpenRung, guaranteeDue, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { maxHp, xpToLeave } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -136,23 +136,30 @@ describe('the career ladder (P35)', () => {
     for (let seed = 0; seed < 300; seed += 1) {
       const old = run(h, inventory, 10 + seed, seed, v11)
       const now = run(h, inventory, 10 + seed, seed, v12)
-      const bonus = careerLines(now).reduce((sum, e) => sum + e.deltas.gold, 0)
       const { career: _c, ...nowHero } = now.nextHero
-      expect({ ...nowHero, gold: nowHero.gold - bonus, counters: { ...nowHero.counters, goldEarned: nowHero.counters.goldEarned - bonus, careerRungs: 0 } }).toEqual(old.nextHero)
+      expect({ ...nowHero, counters: { ...nowHero.counters, careerRungs: 0 } }).toEqual(old.nextHero)
       expect(now.event === undefined ? undefined : { ...now.event, detail: { ...now.event.detail, contentVersion: 'v11' } }).toEqual(old.event)
       expect(JSON.parse(JSON.stringify(now.itemChanges).replaceAll('"v12"', '"v11"'))).toEqual(old.itemChanges)
       expect((now.extraEvents ?? []).filter((e) => e.kind !== 'career').map((e) => ({ ...e, detail: { ...e.detail, contentVersion: 'v11' } }))).toEqual(old.extraEvents ?? [])
     }
   })
 
-  it('starts a new hero at the first rung and pays it with the first win', () => {
+  it('starts a new hero at the first rung and sets its reward aside with the first win', () => {
     const { hero: h, inventory } = hero()
     const result = find(h, inventory, 10, (r) => r.metrics.victories === 1)
-    expect(result.nextHero.career).toEqual({ rung: 1, startedTick: 10, armedAt: 1, armedCount: result.nextHero.counters.itemsFound, reached: [{ id: 'first_win', tick: 10, at: EPOCH + 10 * QUARTER }] })
+    expect(result.nextHero.career).toEqual({ rung: 1, startedTick: 10, armedAt: 1, armedCount: result.nextHero.counters.itemsFound, reached: [{ id: 'first_win', tick: 10, at: EPOCH + 10 * QUARTER }], unclaimed: [{ id: 'first_win', gold: 10, tick: 10, at: EPOCH + 10 * QUARTER }] })
     expect(result.nextHero.counters.careerRungs).toBe(1)
     const line = careerLines(result)[0]!
-    expect(line.deltas).toEqual({ xpEarned: 0, gold: 10, hp: 0 })
-    expect(result.nextHero.gold - h.gold).toBe(10 + (result.event!.detail.outcome.variant === 'combat' ? result.event!.detail.outcome.goldGranted : 0))
+    // D129: the gold waits for the claim; the line pays nothing itself but says what is waiting.
+    expect(line.deltas).toEqual({ xpEarned: 0, gold: 0, hp: 0 })
+    expect(line.detail.outcome).toMatchObject({ variant: 'career', gold: 10 })
+    expect(result.nextHero.gold - h.gold).toBe(result.event!.detail.outcome.variant === 'combat' ? result.event!.detail.outcome.goldGranted : 0)
+    // The claim pays it once, oldest first or by name, and refuses when nothing waits.
+    const claimed = claimReward(result.nextHero, v12)
+    expect(claimed).toEqual({ career: { ...result.nextHero.career!, unclaimed: undefined }, reward: { id: 'first_win', title: 'Win your first fight', gold: 10 } })
+    if ('career' in claimed) expect(claimReward({ ...result.nextHero, career: claimed.career }, v12)).toEqual({ refusal: 'NOTHING_TO_CLAIM' })
+    expect(claimReward(result.nextHero, v12, 'level_2')).toEqual({ refusal: 'NOTHING_TO_CLAIM' })
+    expect(claimReward(result.nextHero, v11)).toEqual({ refusal: 'NO_LADDER' })
     // A tick without the win keeps the hero on the rung, with the guarantee armed from its first adventure.
     const quiet = find(h, inventory, 10, (r) => r.metrics.victories === 0 && r.metrics.encounter !== 'none')
     expect(quiet.nextHero.career).toEqual({ rung: 0, startedTick: 10, armedAt: 1, armedCount: quiet.nextHero.counters.retreats, reached: [] })
@@ -192,7 +199,8 @@ describe('the career ladder (P35)', () => {
     const result = run(h, inventory, 10, 1)
     expect(result.event).toBeUndefined()
     expect(careerLines(result).map((e) => e.summary)).toEqual(['Goal reached: Sell a piece of gear. Next: Pick a stance.'])
-    expect(result.nextHero.gold).toBe(h.gold + 20)
+    expect(result.nextHero.gold).toBe(h.gold)
+    expect(result.nextHero.career?.unclaimed).toEqual([{ id: 'first_sale', gold: 20, tick: 10, at: EPOCH + 10 * QUARTER }])
   })
 
   it('ends with a last line and then counts nothing', () => {

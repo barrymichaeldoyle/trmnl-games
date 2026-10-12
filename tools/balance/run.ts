@@ -209,6 +209,14 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   counters.itemsSalvaged += salvaged
   counters.goldEarned += gold - hero.gold
   if (salvaged > 0) kept = withMaterials(content, kept, yielded)
+  // D129: claim every goal reward waiting since the last visit.
+  if (h.career?.unclaimed !== undefined) {
+    const claimed = h.career.unclaimed.reduce((sum, reward) => sum + reward.gold, 0)
+    h.gold += claimed
+    counters.goldEarned += claimed
+    const { unclaimed: _u, ...career } = h.career
+    h.career = career
+  }
   // P35: the once-only companion deeds. The stance pick keeps the cohort's sustain (balanced unless --stance).
   if (content.stances !== undefined && unlocked(content, h.level, 'stances') && counters.stanceChanges === 0) counters.stanceChanges = 1
   if (h.choice !== undefined && content.choices !== undefined) {
@@ -427,7 +435,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         const outcome = extra.detail.outcome
         if (outcome.variant !== 'career' || outcome.phase !== 'reached') continue
         log.rungTick.set(outcome.id, tick)
-        log.careerGold += extra.deltas.gold
+        log.careerGold += outcome.gold
       }
       if (result.metrics.guarantees && rungBefore !== undefined) log.guaranteeFires.set(rungBefore, (log.guaranteeFires.get(rungBefore) ?? 0) + 1)
       if (content.unlocks !== undefined) for (const feature of FEATURES) if (!log.unlockTick.has(feature) && result.nextHero.level >= content.unlocks[feature]) log.unlockTick.set(feature, tick)

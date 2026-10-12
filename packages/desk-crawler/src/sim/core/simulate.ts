@@ -936,6 +936,7 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
   if (result.event && result.event.summary.trim() === '') fail('SUMMARY_EMPTY', 'event without summary')
   for (const extra of result.extraEvents ?? []) {
     if ((extra.kind !== 'todo' && extra.kind !== 'career') || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0 || extra.deltas.gold < 0) fail('EXTRA_EVENT', 'to-do and career lines add gold only')
+    if (extra.kind === 'career' && extra.deltas.gold !== 0) fail('CAREER_GOLD', 'a goal line sets its gold aside for the claim; it pays nothing itself')
     if (codePoints(extra.summary) > input.content.constants.summaryMaxCodePoints) fail('SUMMARY_LENGTH', extra.summary)
   }
   const todoLines = (result.extraEvents ?? []).filter((extra) => extra.kind === 'todo')
