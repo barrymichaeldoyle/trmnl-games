@@ -22,7 +22,7 @@ Rules carried over from the [TRMNL experience](trmnl-experience.md) and [keepsak
 - Nothing is time-limited, seasonal, streak-based or dependent on refresh rate, device count or companion visits. Every achievement is earned by the passive hero or by an explicit companion action the player already takes (buying a bag, selling gear, claiming a keepsake).
 - Achievements have no XP, gold, gear, combat or ranking effect. Cosmetic titles stay a v3.0 question.
 - Retroactive by construction: an achievement is a predicate over lifetime counters, so a hero who did the deed before the achievement existed earns it on the first tick after release. Counters that do not exist cannot be backfilled, which is why O14 exists.
-- Missing one is never shown as failure. A family card appears once its first tier is earned. Unearned families show only their category and rarity under a "?" so the page stays short and does not nag. Legendary tiers are never previewed, so the top rung stays a surprise.
+- Missing one is never shown as failure. A family card appears once its first tier is earned. On the Achievements page (D126) each shelf holds its unearned families as dashed "?" slots showing only the first tier's rarity, never a name or a requirement. Legendary tiers are never previewed, so the top rung stays a surprise.
 
 ## Catalog rules
 

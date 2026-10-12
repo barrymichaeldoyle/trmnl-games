@@ -8,7 +8,7 @@
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
  *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
- *   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
+ *   achievements=1 (a veteran's achievement shelves over 41 heroes)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
@@ -52,6 +52,7 @@ export const Outlet = () => { const Page = useContext(OutletContext); return Pag
 
 // Queries from the fixture; mutations settle locally.
 write('data.js', `import fixture from './fixture.json';
+import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
 import { useCallback, useState } from 'react';
 const params = new URLSearchParams(location.search);
 const flag = (name) => params.get(name) === '1';
@@ -72,6 +73,23 @@ if (flag('effects')) hero.effects = [{ id: 'coffee', name: 'Coffee rush', blurb:
 if (flag('merchant')) { hero.merchantTicksLeft = 3; inventory.merchant = { offers: [{ id: 'potions', name: 'Three potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 3, ticksLeft: 3, biomeId: hero.biomeId } }
 if (flag('recap')) data.recap = { ...data.recap, baseline: { at: Date.now() - 36e5 * 26 }, xpGained: 212, levelsGained: 1, newEvents: 19, counters: { combatWins: 7, goldEarned: 43, itemsFound: 2, deaths: 1 } };
 if (params.get('keepsake') === 'done') { data.keepsakes.lastClaimWeek = 9999; data.keepsakes.nextAvailableAt = Date.now() + 86400000 * 3 }
+// A veteran's shelves: most families started at varied tiers, one close to its next tier, and rarity over 41 heroes.
+if (flag('achievements')) {
+  const a = data.achievements, now = Date.now(), unlocked = [], counts = {};
+  a.families.forEach((f, i) => {
+    const reached = i % 7 === 6 ? 0 : Math.min(f.tiers, 1 + ((i * 3) % (f.tiers + 1)));
+    const defs = ACHIEVEMENTS.filter((d) => d.family === f.family);
+    defs.forEach((d) => { counts[d.id] = Math.max(1, Math.round(41 / (d.tier * d.tier + (i % 4)))) });
+    if (reached === 0) { f.earned = null; f.tier = 0; f.next = { id: defs[0].id, tier: 1 }; f.value = 0; f.target = 1; return }
+    const top = defs[reached - 1];
+    defs.slice(0, reached).forEach((d, k) => unlocked.push({ id: d.id, unlockedAt: now - 86400000 * (i + 1) + k * 3600000 }));
+    f.tier = reached; f.earned = { id: top.id, name: top.name, blurb: top.blurb, tier: reached, unlockedAt: now - 86400000 * (i + 1) + (reached - 1) * 3600000 };
+    const next = defs[reached];
+    f.next = next ? { id: next.id, tier: next.tier } : null; f.target = next ? (next.predicate.atLeast ?? 1) : 0; f.value = next ? Math.floor(f.target * ((i * 37) % 97) / 100) : 0;
+  });
+  counts[a.families[2].earned?.id] = 1;
+  a.unlocked = unlocked; a.rarity = { counts, totalPlayers: 41, scoreAt: now - 1800000 };
+}
 if (flag('quiet')) { data.log = []; data.achievements.families.forEach((f) => { f.earned = null }); data.achievements.unlocked = [] }
 const raidsOn = flag('raids');
 if (flag('public')) hero.publicProfile = true;

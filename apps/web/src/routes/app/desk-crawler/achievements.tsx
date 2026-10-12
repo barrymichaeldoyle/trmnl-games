@@ -9,5 +9,5 @@ import { Achievements } from './-achievements'
 export const Route = createFileRoute('/app/desk-crawler/achievements')({
   head: () => seo({ title: 'Achievements', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.achievements.mine, {})),
-  component: () => <Achievements as="h1" />,
+  component: Achievements,
 })
