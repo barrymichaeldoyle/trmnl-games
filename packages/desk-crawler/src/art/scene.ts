@@ -24,7 +24,7 @@ const GROUND = 37
 const HERO_X = 24
 const SUBJECT_X = 92
 
-export type BiomeArt = 'office_cubicles' | 'server_room' | 'cafeteria_depths'
+export type BiomeArt = 'office_cubicles' | 'server_room' | 'cafeteria_depths' | 'archive' | 'parking_garage'
 export type Subject = { kind: 'monster'; id: keyof typeof monsterArt; elite: boolean } | { kind: 'prop'; id: PropId } | { kind: 'none' }
 
 const star = sprite(`
@@ -202,7 +202,79 @@ function cafeteria(c: Canvas): void {
   for (const [x, y] of [[76, 15], [77, 13], [76, 11]] as const) c.paint(x, y, '#')
 }
 
-const BACKDROPS: Record<BiomeArt, (c: Canvas, time: SceneTime) => void> = { office_cubicles: office, server_room: serverRoom, cafeteria_depths: cafeteria }
+function archive(c: Canvas): void {
+  // Rolling shelves either side, boxes on every shelf, one hanging light over the middle (D133).
+  for (const left of [0, 118]) {
+    c.region = 'shelf'
+    c.rect(left, 6, 34, 1, '#')
+    c.vline(left, 6, 30)
+    c.vline(left + 33, 6, 30)
+    for (const y of [13, 20, 27]) c.hline(left, left + 33, y)
+    c.region = 'box'
+    for (const [y, pattern] of [[8, [2, 9, 17, 25]], [15, [3, 12, 21]], [22, [2, 10, 16, 24]]] as const) {
+      for (const x of pattern) {
+        c.rect(left + x, y, 7, 5, ':')
+        c.hline(left + x, left + x + 6, y, '#')
+        c.vline(left + x, y, y + 4)
+        c.vline(left + x + 6, y, y + 4)
+      }
+    }
+  }
+  // The one working light: a cord, a shade and a cone of lit paper.
+  c.region = 'lamp'
+  c.vline(76, 0, 4)
+  c.hline(72, 80, 5)
+  c.hline(70, 82, 6, ':')
+  c.region = 'light'
+  for (let y = 7; y < 17; y += 1) {
+    c.paint(76 - (y - 6), y, '#')
+    c.paint(76 + (y - 6), y, '#')
+    c.hline(77 - (y - 6), 75 + (y - 6), y, '.')
+  }
+  // A ceiling of pipes and the dust line along the floor.
+  c.region = 'pipe'
+  c.hline(0, STAGE_WIDTH - 1, 1)
+  c.region = 'dust'
+  for (let x = 2; x < STAGE_WIDTH; x += 5) c.paint(x, GROUND - 1, '#')
+}
+
+function parkingGarage(c: Canvas): void {
+  // Concrete pillars clear of the hero and the foe, a ramp curving away on the right, pipes and a strip light on the
+  // ceiling, a level sign, the bay line and two puddles (D133).
+  c.region = 'pipe'
+  c.hline(0, STAGE_WIDTH - 1, 0)
+  c.hline(0, STAGE_WIDTH - 1, 2)
+  for (let x = 4; x < STAGE_WIDTH; x += 24) c.vline(x, 0, 2)
+  c.region = 'tube'
+  c.rect(74, 4, 26, 3, '#')
+  c.rect(75, 5, 24, 1, 'w')
+  for (const left of [6, 60, 146]) {
+    c.region = 'pillar'
+    const wide = left + 8 > STAGE_WIDTH ? STAGE_WIDTH - left : 8
+    c.rect(left, 6, wide, 24, '#')
+    c.rect(left + 1, 7, wide - 2, 22, ':')
+    c.region = 'band'
+    c.rect(left + 1, 20, wide - 2, 2, 'w')
+  }
+  c.region = 'ramp'
+  for (let x = 124; x < 146; x += 1) {
+    const y = 30 - Math.round(((x - 124) * 12) / 22)
+    c.paint(x, y, '#')
+    c.paint(x, y + 1, '#')
+  }
+  c.region = 'sign'
+  c.rect(100, 7, 13, 8, '#')
+  c.rect(101, 8, 11, 6, 'w')
+  c.hline(104, 108, 9)
+  c.vline(106, 9, 12)
+  c.region = 'bay'
+  c.hline(0, STAGE_WIDTH - 1, 34, '=')
+  c.region = 'puddle'
+  c.rect(42, 35, 18, 2, ':')
+  c.rect(118, 35, 14, 2, ':')
+}
+
+const BACKDROPS: Record<BiomeArt, (c: Canvas, time: SceneTime) => void> = { office_cubicles: office, server_room: serverRoom, cafeteria_depths: cafeteria, archive, parking_garage: parkingGarage }
 
 /** Draw a sprite with a 1px white halo so it stays legible over busy backdrops. */
 function drawWithHalo(c: Canvas, s: Sprite, left: number, top: number, region: string): void {

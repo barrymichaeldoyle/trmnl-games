@@ -37,8 +37,14 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
   if (!isCount(hero.hp) || hero.hp > max) fail('HP', `hp ${hero.hp} outside 0..${max}`)
   if (!isCount(hero.lastLevelUpTick)) fail('LEVEL_TICK', 'invalid last level-up tick')
   for (const [name, value] of Object.entries(hero.counters)) {
-    if (name === 'monsterWins') continue
+    if (name === 'monsterWins' || name === 'biomesVisited') continue
     if (typeof value !== 'number' || !isCount(value)) fail('COUNTER', `counter ${name} invalid`)
+  }
+  // D133: arrivals per biome; a biome id is never retired, so every key must be one the catalog knows.
+  const knownBiomes = new Set(content.biomes.map((biome) => biome.id))
+  for (const [id, visits] of Object.entries(hero.counters.biomesVisited ?? {})) {
+    if (!knownBiomes.has(id)) fail('COUNTER', `visits for unknown biome ${id}`)
+    if (!isCount(visits)) fail('COUNTER', `visits for ${id} invalid`)
   }
   const monsterIds = new Set(content.monsters.map((monster) => monster.id))
   for (const [id, wins] of Object.entries(hero.counters.monsterWins)) {

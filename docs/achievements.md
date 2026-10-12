@@ -175,8 +175,10 @@ Single-tier achievements over several counters.
 | `floor_cleared_1` | Cubicles Cleared | Twenty-five of each in the Office Cubicles. | tier III of all four Office Cubicles families |
 | `floor_cleared_2` | Server Room Cleared | Twenty-five of each in the Server Room. | tier III of all four Server Room families |
 | `floor_cleared_3` | Cafeteria Cleared | Twenty-five of each in the Cafeteria Depths. | tier III of all four Cafeteria Depths families |
+| `floor_cleared_4` | Archive Cleared | Twenty-five of each in the Archive. | tier III of all four Archive families (catalog version 7, D133) |
+| `floor_cleared_5` | Garage Cleared | Twenty-five of each in the Parking Garage. | tier III of all four Parking Garage families (catalog version 7, D133) |
 
-Set pieces are recomputed when the catalog version changes, so adding a biome in v2.0 makes Office Census harder for new unlocks and never revokes an earned one.
+Set pieces are recomputed when the catalog version changes, so adding a biome in v2.0 makes Office Census harder for new unlocks and never revokes an earned one. Content v16 (D133) did exactly that: Office Census now needs all twenty monsters and Full Tour all five floors under the pinned catalog.
 
 ### Counter families
 
@@ -261,6 +263,7 @@ Each release appends families for its new system under a new catalog version; it
 | v1.1 To-do list | Tasks done (to-do tasks ticked off), built as catalog version 4 on 2026-10-09 (D112) |
 | v2.0 Salvage and the workbench | Salvaged (gear stripped for parts) and Workbench (workbench jobs), built as catalog version 5 on 2026-10-12 (D129) |
 | v2.0 Potion strengths | Potion mixing (major potions combined), built as catalog version 6 on 2026-10-12 (D131) |
+| v2.0 The Archive and the Parking Garage | Eight monster families on the shared ladder (Box File Beetle, Shelf Lurker, Microfilm Phantom, Auditor; Trolley Swarm, Oil Slick, Barrier Golem, Ghost Car) and two set pieces (Archive Cleared, Garage Cleared), built as catalog version 7 on 2026-10-12 (D133); the levels family's tier III and IV blurbs now name the floors they open, a copy change |
 | v1.2 Other people | Office raider (raids won) and Desk defender (raids repelled) shipped as catalog version 3 on 2026-10-08 (D110); later meetings completed, meetings with the same hero, world events survived |
 | v2.0 Depth | Archive and Parking Garage monsters (five tiers each), salvage, upgrades, persistent elite defeats, dungeon clears |
 | v2.1 Guilds | Raid contributions, hall contributions |

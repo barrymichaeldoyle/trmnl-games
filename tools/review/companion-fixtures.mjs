@@ -13,6 +13,7 @@
  *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
  *   career=1 (P35: the goal card, the Career page and the unlocks, plus career log lines)   career=new (level 1, everything locked)   career=done (the ladder finished)
+ *   notes=1 (D133: /field-notes for a level-17 veteran with most notes open)   notes=new (a fresh hero, the Office's note only)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
  * Slow Cast (D115): /app/slow-cast, /cooler, /shop, /logbook, /settings, with sc=full (cooler full), sc=empty (empty cooler, no bait here),
@@ -56,7 +57,8 @@ export const Outlet = () => { const Page = useContext(OutletContext); return Pag
 // Queries from the fixture; mutations settle locally.
 write('data.js', `import fixture from './fixture.json';
 import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
-import { contentV15 } from '../../packages/desk-crawler/src/content/v15';
+import { contentV16 } from '../../packages/desk-crawler/src/content/v16';
+import { loreView } from '../../packages/desk-crawler/src/sim/core/biomes';
 import { useCallback, useState } from 'react';
 const params = new URLSearchParams(location.search);
 const flag = (name) => params.get(name) === '1';
@@ -168,7 +170,7 @@ decorateGear();
 // level-1 hero with everything still locked; career=done a finished ladder.
 if (params.has('career')) {
   const mode = params.get('career');
-  const rungs = contentV15.career.rungs.filter((r) => !r.retired);
+  const rungs = contentV16.career.rungs.filter((r) => !r.retired);
   const rung = mode === 'new' ? 1 : mode === 'done' ? rungs.length : 9;
   const now = Date.now();
   hero.level = mode === 'new' ? 1 : hero.level;
@@ -184,6 +186,15 @@ if (params.has('career')) {
     { id: 'career2', at: now - 36e5 * 5, tick: 896, kind: 'career', summary: 'Unlocked: stances.', source: 'tick', deltas: { xpEarned: 0, gold: 0, hp: 0 } },
   );
 }
+// D133: the five floors from the catalog, and the field notes. notes=1 is a level-17 veteran in the Parking Garage with most
+// notes open; notes=new a fresh hero with only the Office's; otherwise the notes follow the fixture hero's wins.
+if (params.get('notes') === '1') {
+  hero.level = 17; hero.biomeId = 'parking_garage';
+  hero.counters = { ...hero.counters, monsterWins: { paper_imp: 212, rogue_roomba: 180, stapler_mimic: 150, dust_daemon: 171, cable_serpent: 96, overheated_rack: 80, firewall_gremlin: 77, legacy_mainframe: 71, coffee_slime: 140, crumb_golem: 121, microwave_wraith: 118, leftovers_hydra: 99, box_file_beetle: 31, shelf_lurker: 25, microfilm_phantom: 1, trolley_swarm: 2 }, biomesVisited: { server_room: 4, cafeteria_depths: 3, archive: 2, parking_garage: 1 } };
+}
+if (params.get('notes') === 'new') { hero.level = 1; hero.biomeId = 'office_cubicles'; hero.counters = { ...hero.counters, monsterWins: {}, biomesVisited: undefined } }
+hero.biomes = contentV16.biomes.map((b) => ({ id: b.id, name: b.name, unlockLevel: b.unlockLevel, unlocked: b.unlockLevel <= hero.level, safe: b.safe }));
+hero.lore = loreView(contentV16, { biomeId: hero.biomeId, counters: { monsterWins: hero.counters.monsterWins ?? {}, biomesVisited: hero.counters.biomesVisited } });
 // D112: todo=1 gives the hero a to-do list with each state the card draws; todo=used spends the swap.
 if (params.has('todo')) {
   hero.todo = { swapAvailable: params.get('todo') !== 'used', nextStandupAt: Date.now() + 36e5 * 14, refillHour: 7, tasks: [
@@ -300,6 +311,7 @@ import { Route as Settings } from '../../apps/web/src/routes/app/desk-crawler/se
 import { Route as Log } from '../../apps/web/src/routes/app/desk-crawler/log';
 import { Route as DcAchievements } from '../../apps/web/src/routes/app/desk-crawler/achievements';
 import { Route as Career } from '../../apps/web/src/routes/app/desk-crawler/career';
+import { Route as FieldNotes } from '../../apps/web/src/routes/app/desk-crawler/field-notes';
 import { Route as Keepsakes } from '../../apps/web/src/routes/app/desk-crawler/keepsakes';
 import { Route as Device } from '../../apps/web/src/routes/app/desk-crawler/trmnl';
 import { Route as Profile } from '../../apps/web/src/routes/desk-crawler/heroes.$alias';
@@ -315,7 +327,7 @@ import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
-const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
+const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
   '/app/slow-cast': ScDock.options.component, '/app/slow-cast/cooler': ScCooler.options.component, '/app/slow-cast/shop': ScShop.options.component, '/app/slow-cast/logbook': ScLogbook.options.component, '/app/slow-cast/settings': ScSettings.options.component, '/app/slow-cast/rankings': ScRankings.options.component, '/app/slow-cast/achievements': ScAchievements.options.component };
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);

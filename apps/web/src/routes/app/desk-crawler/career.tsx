@@ -19,5 +19,5 @@ function CareerPage() {
   if (!hero) return <LoadingState label="Loading your hero…" />
   const career = hero.career as CareerView | null
   if (!career) return <p className="text-muted">The career ladder arrives with your hero's next adventure.</p>
-  return <CareerLadder career={career} unlocks={hero.unlocks as UnlockView | null} />
+  return <CareerLadder career={career} unlocks={hero.unlocks as UnlockView | null} floors={hero.biomes as Array<{ name: string; unlockLevel: number }>} />
 }

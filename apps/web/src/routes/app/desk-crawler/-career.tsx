@@ -21,6 +21,14 @@ export type CareerView = {
 /** heroes.mine's `unlocks` (P35): each gated feature, its level and whether this hero has it. */
 export type UnlockView = Array<{ feature: 'todo' | 'stances' | 'choices' | 'merchant' | 'raids'; label: string; level: number; unlocked: boolean }>
 
+/** " The Server Room opens at level 4, the Cafeteria Depths at level 8, the Archive at level 12 and the Parking Garage at level 16." */
+function floorsLine(floors: ReadonlyArray<{ name: string; unlockLevel: number }>): string {
+  const later = floors.filter((floor) => floor.unlockLevel > 1).map((floor, i) => `${i === 0 ? 'The' : 'the'} ${floor.name} at level ${floor.unlockLevel}`)
+  if (later.length === 0) return ''
+  const list = later.length === 1 ? later[0]! : `${later.slice(0, -1).join(', ')} and ${later.at(-1)}`
+  return ` ${list.replace(/^The (.*?) at level (\d+)/, 'The $1 opens at level $2')}.`
+}
+
 /** How many rungs the Career page previews past the current one; the rest stay a "?" like unearned achievements. */
 const PREVIEW = 2
 
@@ -124,7 +132,7 @@ export function LockedCard({ title, glyph, level, blurb }: { title: string; glyp
  * arrived say so; the current rung is marked; the next two are previewed and the rest stay a "?". Under it, which
  * features this hero's level has opened and the level each of the others arrives at.
  */
-export function CareerLadder({ career, unlocks }: { career: CareerView; unlocks: UnlockView | null }) {
+export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerView; unlocks: UnlockView | null; floors?: ReadonlyArray<{ name: string; unlockLevel: number }> }) {
   const reached = career.rungs.filter((rung) => rung.state === 'done').length
   return (
     <div className="flex min-w-0 flex-col gap-8">
@@ -167,7 +175,7 @@ export function CareerLadder({ career, unlocks }: { career: CareerView; unlocks:
       {unlocks ? (
         <section aria-labelledby="unlocks-title" className="flex min-w-0 flex-col gap-3">
           <SectionTitle id="unlocks-title" glyph="door" tone="text-sky-ink">What opens when</SectionTitle>
-          <p className="text-sm text-muted">Features arrive by level, whether or not you visit. The Server Room opens at level 4 and the Cafeteria Depths at level 8.</p>
+          <p className="text-sm text-muted">Features arrive by level, whether or not you visit.{floorsLine(floors)}</p>
           <ul className="grid gap-2 sm:grid-cols-2">
             {unlocks.map((entry) => (
               <li key={entry.feature} className={`flex items-center gap-3 border-[3px] px-3 py-2 ${entry.unlocked ? 'border-night bg-panel' : 'border-dashed border-faint text-muted'}`}>

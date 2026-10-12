@@ -10,6 +10,7 @@ import { pathToFileURL } from 'node:url'
 import { ACTIVE_CONTENT, catalogs, type CatalogId } from '@trmnl-games/desk-crawler/content'
 import { applyItemChanges } from '@trmnl-games/desk-crawler/sim/core/apply'
 import { nextEarlyTier } from '@trmnl-games/desk-crawler/sim/core/bag'
+import { topGearTier } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { cumulativeXpToReach } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -153,7 +154,7 @@ function streams(heroIndex: number, tick: number) {
 }
 
 function bestInSlot(content: ContentCatalog): { attack: number; defense: number } {
-  const top = Math.max(...content.biomes.map((b) => b.tier))
+  const top = topGearTier(content)
   const tier = content.gearTiers[top]!
   const bonus = Math.max(...content.rarities.map((r) => r.statBonus))
   const offset = (kind: 'weapon' | 'armor') => Math.max(...content.gearTemplates.filter((t) => t.tier === top && t.kind === kind).map((t) => t.statOffset ?? 0))
@@ -604,7 +605,8 @@ export function summarize(policy: Policy, logs: HeroLog[], totalDays: number, co
     policy: policy.name,
     heroes: logs.length,
     days: totalDays,
-    reach: [2, 4, 8, 12].map(reach),
+    // D133: level 2, every floor's unlock level and the ladder's top, so new floors report their own date.
+    reach: [...new Set([2, ...content.biomes.map((b) => b.unlockLevel).filter((l) => l > 1), 12])].sort((a, b) => a - b).map(reach),
     finalLevelMedian: pct(logs.map((l) => l.finalLevel), 0.5),
     deathByBiome: deathRate,
     stateSharePct: states,

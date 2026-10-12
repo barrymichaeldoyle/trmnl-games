@@ -30,6 +30,14 @@ const MONSTER: Record<keyof typeof monsterArt, string> = {
   crumb_golem: '#d9a75e',
   microwave_wraith: '#9fd8e0',
   leftovers_hydra: '#7fae4a',
+  box_file_beetle: '#b5793f',
+  shelf_lurker: '#6e6e82',
+  microfilm_phantom: '#a9c4de',
+  auditor: '#8a7aa8',
+  trolley_swarm: '#a9b4c6',
+  oil_slick: '#6b3fa0',
+  barrier_golem: '#f2c14e',
+  ghost_car: '#b8c6d6',
 }
 
 const PROP: Record<PropId, string> = {
@@ -135,7 +143,7 @@ export function bwryInk(hex: string): BwryInk {
  * (dark where the device inks, light where it leaves paper), so shading reads as texture rather than black noise.
  * Missing paper is clear, so the biome bands show through.
  */
-type Tones = { readonly ink?: string; readonly paper?: string; readonly shade?: readonly [string, string] }
+export type Tones = { readonly ink?: string; readonly paper?: string; readonly shade?: readonly [string, string] }
 
 /** Foreground ink: the hero, their foe and props outline in the page's night rather than flat black. */
 const INK = '#1b1530'
@@ -180,9 +188,36 @@ const BACKDROP: Record<BiomeArt, Record<SceneTime, Record<string, Tones>>> = {
     }
     return { day: tones, night: tones }
   })(),
+  archive: (() => {
+    const tones: Record<string, Tones> = {
+      shelf: { ink: '#5a4632' },
+      box: { ink: '#7a5a34', shade: ['#b08a52', '#d9b985'] },
+      lamp: { ink: '#4a3f33', shade: ['#6b5a48', '#8a7660'] },
+      light: { shade: ['#ffe9a8', '#fff6d6'] },
+      pipe: { ink: '#6b6257' },
+      dust: { ink: '#9c8f7a' },
+      ground: { ink: '#4a3a28' },
+    }
+    return { day: tones, night: tones }
+  })(),
+  parking_garage: (() => {
+    const tones: Record<string, Tones> = {
+      pipe: { ink: '#4b5563' },
+      tube: { ink: '#3a3f4a', paper: '#f4f7ff' },
+      pillar: { ink: '#3f4756', shade: ['#8a93a3', '#a9b2c0'] },
+      band: { ink: '#3f4756', paper: '#f2c14e' },
+      ramp: { ink: '#3f4756' },
+      sign: { ink: '#2b3550', paper: '#f2c14e' },
+      bay: { ink: '#f2c14e' },
+      puddle: { shade: ['#3f5a7a', '#6f8fb0'] },
+      ground: { ink: '#2b3140' },
+    }
+    return { day: tones, night: tones }
+  })(),
 }
 
-const FOE: Record<string, Tones> = {
+/** How each foe and prop paints on the companion: paper and shade over the page's ink; exported for the Field notes page (D133). */
+export const FOE: Record<string, Tones> = {
   'monster:paper_imp': { paper: '#fbf6e6', shade: ['#b8a878', '#e9dfc0'] },
   'monster:rogue_roomba': { paper: '#c9ced9', shade: ['#4f5466', '#6c7287'] },
   'monster:stapler_mimic': { paper: '#d0d6de', shade: ['#a8302b', '#d4473f'] },
@@ -195,6 +230,14 @@ const FOE: Record<string, Tones> = {
   'monster:crumb_golem': { paper: '#fff3d6', shade: ['#b07a3a', '#e0b46e'] },
   'monster:microwave_wraith': { paper: '#e6eaef', shade: ['#4fa8b8', '#9fd8e0'] },
   'monster:leftovers_hydra': { paper: '#9fcf6a', shade: ['#5d8a35', '#7fae4a'] },
+  'monster:box_file_beetle': { paper: '#f0e2c2', shade: ['#8a5a2c', '#b5793f'] },
+  'monster:shelf_lurker': { paper: '#e6e0d2', shade: ['#4a4a5a', '#6e6e82'] },
+  'monster:microfilm_phantom': { paper: '#dfe8f0', shade: ['#6f8fb0', '#a9c4de'] },
+  'monster:auditor': { paper: '#e9e4f0', shade: ['#5a4a7a', '#8a7aa8'] },
+  'monster:trolley_swarm': { paper: '#dfe3ea', shade: ['#6f7b8f', '#a9b4c6'] },
+  'monster:oil_slick': { paper: '#3a3f4a', shade: ['#6b3fa0', '#2fbf9f'] },
+  'monster:barrier_golem': { paper: '#f2c14e', shade: ['#8a5a00', '#c98f1a'] },
+  'monster:ghost_car': { paper: '#d9e4ee', shade: ['#6f7b8f', '#b8c6d6'] },
   'prop:chest': { paper: '#d9a066', shade: ['#8a5a2c', '#b5793f'] },
   'prop:gold': { paper: '#f2c14e' },
   'prop:potion': { paper: '#e6eef5', shade: ['#b8303a', '#e0505a'] },

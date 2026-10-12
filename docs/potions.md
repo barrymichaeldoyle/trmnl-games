@@ -47,7 +47,7 @@ The loot table does not change: 20 of 100 loot draws are a potion, and a full po
 | 2 (Server Room) | 25 | 60 | 15 |
 | 3 (Cafeteria Depths) | 10 | 50 | 40 |
 
-A later biome tier authors its own row. The draw happens only under a catalog with the rule, so a world pinned to v13 replays exactly as before; v14 is a new content version because the draw, the summaries and the change-row labels change meaning.
+A later biome tier authors its own row: content v16 (D133) adds tier 4 (the Archive, minor 5 / healing 45 / major 50) and tier 5 (the Parking Garage, 0 / 35 / 65). The draw happens only under a catalog with the rule, so a world pinned to v13 replays exactly as before; v14 is a new content version because the draw, the summaries and the change-row labels change meaning.
 
 ### Drinking
 

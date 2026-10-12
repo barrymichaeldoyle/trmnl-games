@@ -8,6 +8,7 @@ import { recapPeriod } from '@trmnl-games/desk-crawler/payload'
 import { monsterArt } from '@trmnl-games/desk-crawler/art/monsters'
 import { BWRY_PALETTE, bwryInk, BwryInk } from '@trmnl-games/desk-crawler/art/sceneColour'
 import { contentV1 } from '@trmnl-games/desk-crawler/content/v1'
+import { catalogs } from '@trmnl-games/desk-crawler/content'
 
 describe('scene art', () => {
   it('maps hero state and the latest event to a pose and subject', () => {
@@ -21,6 +22,14 @@ describe('scene art', () => {
 
   it('has art for every monster in the catalog', () => {
     for (const monster of contentV1.monsters) expect(monster.id in monsterArt).toBe(true)
+    // D133: the Archive and Parking Garage monsters, and both backdrops, are served.
+    for (const monster of catalogs.v16.monsters) expect(monster.id in monsterArt).toBe(true)
+    for (const biome of catalogs.v16.biomes) expect(parseScenePath(scenePath(biome.id, 'fight', { kind: 'monster', id: biome.monsterIds[0]!, elite: true }, FULL_SCALE))).not.toBeNull()
+    for (const id of ['box_file_beetle', 'shelf_lurker', 'microfilm_phantom', 'auditor', 'trolley_swarm', 'oil_slick', 'barrier_golem', 'ghost_car'] as const) {
+      const art = monsterArt[id]
+      expect(art.width).toBeLessThanOrEqual(34)
+      expect(art.height).toBeLessThanOrEqual(22)
+    }
   })
 
   it('serves allowlisted day/night paths and preserves v3 night URLs', () => {

@@ -25,6 +25,7 @@ import { hereBiomeId, isLocal, nextStandupAfter, swapTask as swapTodoTask, swapU
 import { deriveStreamSeed } from '@trmnl-games/desk-crawler/sim/seed'
 import { worldContent } from './world'
 import { toHeroState } from './sim/runs/adapter'
+import { loreView } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 
@@ -102,7 +103,10 @@ export const mine = query({
       // P35: the current goal and the ladder so far, and which features this hero's level has opened.
       career: careerView(worldContent(world), hero),
       unlocks: unlocksView(worldContent(world), hero.level),
-      biomes: content.biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe })),
+      // D133: the floors the world actually runs, so a new floor shows and takes travel only once the world has switched to its catalog.
+      biomes: worldContent(world).biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe })),
+      // D133: every floor's field note and its monsters' notes, open or not, for the Field notes page; null before v16.
+      lore: loreView(worldContent(world), { biomeId: hero.biomeId, counters: { monsterWins: hero.counters.monsterWins ?? {}, ...(hero.counters.biomesVisited === undefined ? {} : { biomesVisited: hero.counters.biomesVisited }) } }),
       world: world
         ? {
             currentTick: world.currentTick,
@@ -141,7 +145,8 @@ export const changeBiome = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'heroes.changeBiome', { biomeId: args.biomeId }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      const biome = catalogs[ACTIVE_CONTENT].biomes.find((b) => b.id === args.biomeId)
+      // D133: validated against the world's pinned catalog, never the code's, so travel cannot name a floor the simulator does not know yet.
+      const biome = worldContent(await readWorld(ctx)).biomes.find((b) => b.id === args.biomeId)
       if (!biome) throw appError('INVALID_INPUT', 'Unknown destination.')
       if (hero.status !== 'exploring' && hero.status !== 'resting') throw appError('INVALID_STATE', 'Your hero cannot travel right now.')
       if (biome.unlockLevel > hero.level) throw appError('BIOME_LOCKED', `${biome.name} unlocks at level ${biome.unlockLevel}.`)

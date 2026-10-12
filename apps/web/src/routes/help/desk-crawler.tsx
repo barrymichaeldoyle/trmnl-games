@@ -45,6 +45,13 @@ const DROPS_LINE = POTIONS === undefined ? '' : catalogs[ACTIVE_CONTENT].biomes.
   return top === undefined ? '' : `the ${biome.name} drop${ranked.length === 1 ? ' only' : ' mostly'} ${top.name.toLowerCase()}s${rest.length === 0 ? '' : `, with some ${rest.join(' and ')}`}`
 }).filter(Boolean).join('; ')
 const COMBINE_LINE = POTIONS === undefined ? '' : ((from, to) => `${POTIONS.combine.count} ${from?.name.toLowerCase() ?? 'minor potion'}s and ${Object.entries(POTIONS.combine.materials).map(([id, n]) => `${n} ${MATERIAL_NAME(id)}`).join(', ')} become one ${to?.name.toLowerCase() ?? 'major potion'}`)(POTIONS.strengths.find((s) => s.id === POTIONS.combine.from), POTIONS.strengths.find((s) => s.id === POTIONS.combine.to))
+/** D133: the floors in order, their levels and whether the catalog has field notes, read from the active catalog. */
+const FLOORS = catalogs[ACTIVE_CONTENT].biomes
+const LORE = catalogs[ACTIVE_CONTENT].lore
+/** "the Server Room at level 4, the Cafeteria Depths at level 8, the Archive at level 12 and the Parking Garage at level 16". */
+const FLOORS_LINE = ((parts) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`))(FLOORS.filter((b) => b.unlockLevel > 1).map((b) => `the ${b.name} at level ${b.unlockLevel}`))
+/** "5, 16, 30, 45 or 65 depending on the floor". */
+const TASK_PAY = TODO === undefined ? '' : ((parts) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} or ${parts.at(-1)}`))([...new Set(FLOORS.map((b) => b.tier))].sort((a, b) => a - b).map((tier) => String(TODO.rewardByTier[tier] ?? '')))
 /** P35: the career ladder and the levels features arrive at, read from the active catalog. */
 const CAREER = catalogs[ACTIVE_CONTENT].career
 const UNLOCKS = catalogs[ACTIVE_CONTENT].unlocks
@@ -57,6 +64,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['getting-started', 'Getting started'],
   ['if-the-qr-sends-you-back-to-setup', 'If the QR sends you back to setup'],
   ['how-time-works', 'How time works'],
+  ['floors', 'Floors'],
   ['desk-keepsakes', 'Desk keepsakes'],
   ...(CAREER !== undefined ? [['career', 'Career'] as const] : []),
   ['stances', 'Stances'],
@@ -100,6 +108,14 @@ export const Route = createFileRoute('/help/desk-crawler')({
         The game world advances every 15 minutes whether or not your screen is on. Your TRMNL shows a snapshot and refreshes on its own schedule.
         Sleep Mode, slower refresh and other playlist items never reduce your hero's progress. Adventure times in the companion use your browser's local timezone.
       </p>
+      <h2 id="floors">Floors</h2>
+      <p>The building has {FLOORS.length} floors, and your hero starts in the {FLOORS[0]?.name}. Each opens at a level, whether or not you visit: {FLOORS_LINE}. Your TRMNL says “New area unlocked” when one does; travelling there is up to you, from the world map on the Hero page. Deeper floors have tougher monsters, more gold, better potions and bigger to-do pay. The {FLOORS[0]?.name} can't knock a hero out; every other floor can.</p>
+      <ul>
+        {FLOORS.map((floor) => (
+          <li key={floor.id}><strong>{floor.name}</strong>{floor.unlockLevel > 1 ? ` (level ${floor.unlockLevel})` : ' (from the start)'}: {floor.monsterIds.map((id) => catalogs[ACTIVE_CONTENT].monsters.find((m) => m.id === id)?.name ?? id).join(', ')}.</li>
+        ))}
+      </ul>
+      {LORE !== undefined ? <p>The Field notes page under More keeps what your hero has written down about each floor and monster. A floor's note opens the first time your hero stands on it, a monster's note with the first win over it. Notes are for reading; they change nothing in play.</p> : null}
       <h2 id="desk-keepsakes">Desk keepsakes</h2>
       <p>Keep Desk Crawler in your playlist and look for “Keepsake code” and a six-digit code, like 482 917, in the screen’s title bar (narrow portrait mashups shorten it to “Keepsake”). Enter that code in the companion’s Settings to collect a permanent office souvenir. Full-screen and mashup layouts both show it; the companion preview hides it.</p>
       <p>You can collect one keepsake each week, with a new code from Monday at 00:00 UTC. Last week’s code works too if your screen refreshes slowly. If you miss a week, you get the same design the week after. After collecting the full set, you can collect more of each. Keepsakes do not change XP, gear or rankings, and extra devices or faster refresh earn no extras.</p>
@@ -109,7 +125,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <p>Your hero always has one goal, shown at the top of the Hero page: “Win your first fight”, “Equip a piece of gear you found”, “Reach the Server Room”, “Buy the Laptop Backpack”. Some are reached by adventuring; the rest are things you do here, on the Bag or Hero page. Reaching a goal shows “Goal reached” on your TRMNL and sets a little gold aside ({CAREER_GOLD.toLocaleString('en-US')} across the whole ladder); press Claim on the Hero page to collect it, whenever you like. Goals never give XP, never expire and never fail; the next one simply waits, and the ladder keeps moving whether or not you have claimed.</p>
           <ul>
             <li>The Career page under More lists the {CAREER.rungs.filter((rung) => !rung.retired).length} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
-            {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The Server Room opens at level 4 and the Cafeteria Depths at level 8, as before.</li> : null}
+            {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
             <li>A few early goals come with a guarantee, so a new hero is never left waiting on luck: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is the ordinary roll.</li>
           </ul>
         </>
@@ -121,7 +137,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li><strong>Balanced</strong>, the default, drinks below 50%, rests below 35% and sets off again at 75%, with the usual XP.</li>
         <li><strong>Bold</strong> drinks below 35%, rests below 20% and sets off again at 60%. It earns 115% XP from wins but gets knocked out more often.</li>
       </ul>
-      <p>Office Cubicles can't knock a hero out, so Bold has no knockout risk there. In the Server Room and the Cafeteria Depths a knockout costs gold and sends your hero back to Office Cubicles, and Bold is knocked out most often.</p>
+      <p>Office Cubicles can't knock a hero out, so Bold has no knockout risk there. On every other floor a knockout costs gold and sends your hero back to Office Cubicles, and Bold is knocked out most often.</p>
       <h2 id="desk-raids">Desk raids</h2>
       <p>While exploring, heroes sometimes raid each other's desks. It happens by itself, to every active hero{UNLOCKS === undefined ? '' : ` from level ${UNLOCKS.raids}`}, with nothing to press and no way to aim it.{UNLOCKS === undefined ? '' : ` Below level ${UNLOCKS.raids} a hero neither raids nor gets raided.`} The raid shows up in both heroes' adventure logs with the other player's public name, and the Hero page keeps a record of your hero's raids.</p>
       <ul>
@@ -134,7 +150,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       {TODO !== undefined ? (
         <>
           <h2 id="to-do-list">To-do list</h2>
-          <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”.{arrives('todo')} It works through them by itself while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TODO.rewardByTier[1]}, {TODO.rewardByTier[2]} or {TODO.rewardByTier[3]} depending on the area. Tasks never give XP, so they never change the rankings.</p>
+          <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”.{arrives('todo')} It works through them by itself while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TASK_PAY} depending on the floor. Tasks never give XP, so they never change the rankings.</p>
           <ul>
             <li>Every morning at {STANDUP} your TRMNL's local time, the stand-up gives new tasks for the ones that are done. Your screen lists them.</li>
             <li>Tasks never expire and an unfinished task costs nothing. A task your hero can't get on with is swapped by itself after two stand-ups.</li>

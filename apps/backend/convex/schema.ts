@@ -45,6 +45,8 @@ export const heroCounters = v.object({
   itemsFound: v.number(),
   ticksExplored: v.number(),
   monsterWins: v.optional(v.record(v.string(), v.number())),
+  /** D133: arrivals per biome id; written by the simulator from content v16 on. */
+  biomesVisited: v.optional(v.record(v.string(), v.number())),
   eliteWins: v.optional(v.number()),
   jackpots: v.optional(v.number()),
   rareFinds: v.optional(v.number()),

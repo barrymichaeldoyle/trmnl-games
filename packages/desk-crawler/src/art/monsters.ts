@@ -1,6 +1,6 @@
 import { sprite } from './canvas'
 
-/* Twelve monsters, ~24x24, facing left toward the hero. Reserved art (LICENSE). */
+/* Twenty monsters, ~24x24, facing left toward the hero. Reserved art (LICENSE). */
 
 // ---------------------------------------------------------------- Office Cubicles
 
@@ -225,6 +225,157 @@ export const leftoversHydra = sprite(`
       ###############
 `)
 
+// ---------------------------------------------------------------- Archive (D133)
+
+export const boxFileBeetle = sprite(`
+         ##################
+        #wwwwwwwwwwwwwwwww#
+   ###  #w###############w#
+  #www###w#=============#w#
+ #w#w#ww#w#=w#w=========#w#
+ #wwwwww#w#=============#w#
+ #ww#ww#ww#=============#w#
+  #ww#w#w#w###############w#
+   ###  #wwwwwwwwwwwwwwwww#
+        ###################
+         ##   ##   ##   ##
+        ##   ##   ##   ##
+`)
+
+export const shelfLurker = sprite(`
+      ############
+     #::::::::::::#
+     #::::::::::::#
+     #:wwww::wwww:#
+     #:w##w::w##w:#
+     #:w##w::w##w:#
+     #:wwww::wwww:#
+     #::::::::::::#
+     #::########::#
+     #::::::::::::#
+    ##::::::::::::##
+  ###::::::::::::::#
+ #w#:::::::::::::::#
+ #w#:::::::::::::::#
+  ###::::::::::::::#
+    ##::::::::::::##
+     #::::::::::::#
+     ##############
+`)
+
+export const microfilmPhantom = sprite(`
+        #######
+       #w#####w#
+       #w#w#w#w#
+       #w#####w#
+      ##wwwwwww##
+     #w#wwwwwww#w#
+    #w#wwwwwwwww#w#
+   #w#ww###w###ww#w#
+   #w#ww#w#w#w#ww#w#
+   #w#ww###w###ww#w#
+   #w#wwwwwwwwwww#w#
+   #w#wwww###wwww#w#
+   #w#wwwwwwwwwww#w#
+   #w#w#w#w#w#w#w#w#
+   # # # # # # # # #
+`)
+
+export const auditor = sprite(`
+         ########
+        #wwwwwwww#
+       #wwwwwwwwww#
+      ###wwwwwwww###
+     #w#w#wwwwww#w#w#
+      ###wwwwwwww###
+       #www####www#
+        #wwwwwwww#
+         #ww##ww#
+      ####ww##ww####
+    ##wwww#w##w#wwww##
+   #wwwwww#w##w#wwwwww#
+  #ww#####w####w#####ww#
+  #w#:::::#w##w#wwwwww#w#
+  #w#:::::#w##w#wwwwww#w#
+  #w#:::::#wwwwwwwwwww#w#
+  ###:::::#wwwwwwwwwww###
+    ######:::::::::::#
+         #:::::::::#
+          #:::::::#
+           #:::::#
+`)
+
+// ---------------------------------------------------------------- Parking Garage (D133)
+
+export const trolleySwarm = sprite(`
+                           ##
+                          #ww#
+                         #ww#
+         ############   #ww#
+        #w=w=w=w=w=w#  #ww#
+   ############=w=w=#  #w#
+  #w=w=w=w=w=w#w=w=w# #w#
+  #=w=w=w=w=w=#=w=w=##w#
+  #w=w=w=w=w=w#w=w=w=ww#
+  ##=w=w=w=w=##=w=w=w=w#
+   ##########=w=w=w=w=#
+   ##   ##   ##########
+   ##   ##   ##      ##
+             ##      ##
+`)
+
+export const oilSlick = sprite(`
+          ####       ####
+         #wwww#     #wwww#
+         #w##w#     #w##w#
+         #wwww#     #wwww#
+         ##::##     ##::##
+       ###::::#######::::###
+     ##::::::::::::::::::::##
+   ##::::::.:.:.:.:.:.::::::::##
+  #:::::.:.:.:.:.:.:.:.:.:::::::#
+  #:::::::::::::::::::::::::::::#
+   ##############################
+`)
+
+export const barrierGolem = sprite(`
+                     ####
+                    #w#w#
+                   #w#w#
+                  #w#w#
+                 #w#w#
+      ########  #w#w#
+     #wwwwwwww##w#w#
+     #w##ww##ww#w##
+     #wwwwwwwww###
+     #w#######w#
+     #wwwwwwwww#
+    ##wwwwwwwww##
+    #w=========w#
+    #wwwwwwwwwww#
+    #w#########w#
+    #wwwwwwwwwww#
+    #############
+    ##   ###   ##
+    ##   ###   ##
+`)
+
+export const ghostCar = sprite(`
+           ###########
+         ##w.w.w.w.w.w##
+        #w.##.#.##.#.w.#
+       #w.#w#.#.#w#.w.w#
+      ##.w#w#.#.#w#.#.w##
+     #w#.##################w#
+    #w:#.w.w.w.w.w.w.w.w.#:w#
+    #w:#w.w.w.w.w.w.w.w.w#:w#
+    ###########################
+      ####             ####
+     #w##w#           #w##w#
+     #w##w#           #w##w#
+      ####             ####
+`)
+
 export const monsterArt = {
   paper_imp: paperImp,
   rogue_roomba: rogueRoomba,
@@ -238,4 +389,12 @@ export const monsterArt = {
   crumb_golem: crumbGolem,
   microwave_wraith: microwaveWraith,
   leftovers_hydra: leftoversHydra,
+  box_file_beetle: boxFileBeetle,
+  shelf_lurker: shelfLurker,
+  microfilm_phantom: microfilmPhantom,
+  auditor,
+  trolley_swarm: trolleySwarm,
+  oil_slick: oilSlick,
+  barrier_golem: barrierGolem,
+  ghost_car: ghostCar,
 } as const

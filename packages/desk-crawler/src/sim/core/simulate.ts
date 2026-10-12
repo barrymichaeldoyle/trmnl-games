@@ -2,6 +2,7 @@ import { applyItemChanges } from './apply'
 import { isBagFull, milestoneUpgrade, nextEarlyTier } from './bag'
 import { eventById, optionOf, resolveEffect } from './choice'
 import { affixById, effectById, effectiveStats, liveEffects, scaled, withEffect } from './modifiers'
+import { gearTierOf } from './biomes'
 import { nextEarlyPouchTier, potionCap, pouchMilestoneUpgrade } from './pouch'
 import { autoPotion, potionItem, potionRows, potionStrengths, potionWord, potionsHeld, rollPotionStrength, strengthOf } from './potions'
 import { assertHeroInvariants, SimulationInvariantError } from './invariants'
@@ -42,7 +43,7 @@ import type {
 export const SIMULATION_VERSION = 1
 
 type Mutable<T> = { -readonly [K in keyof T]: T[K] }
-type WorkingHero = Mutable<Omit<HeroState, 'counters'>> & { counters: Mutable<Omit<HeroCounters, 'monsterWins'>> & { monsterWins: Record<string, number> } }
+type WorkingHero = Mutable<Omit<HeroState, 'counters'>> & { counters: Mutable<Omit<HeroCounters, 'monsterWins' | 'biomesVisited'>> & { monsterWins: Record<string, number>; biomesVisited?: Record<string, number> } }
 
 const ZERO_METRICS: TickMetrics = {
   encounter: 'none',
@@ -103,7 +104,7 @@ class TickRun {
   private raidApplied = false
 
   constructor(private readonly input: SimulationInput) {
-    this.h = { ...input.hero, counters: { ...input.hero.counters, monsterWins: { ...input.hero.counters.monsterWins } } }
+    this.h = { ...input.hero, counters: { ...input.hero.counters, monsterWins: { ...input.hero.counters.monsterWins }, ...(input.hero.counters.biomesVisited === undefined ? {} : { biomesVisited: { ...input.hero.counters.biomesVisited } }) } }
     this.content = input.content
     this.rng = {
       encounter: createRng(input.streams.encounter),
@@ -194,6 +195,8 @@ class TickRun {
     delete h.arriveAtTick
     h.status = 'exploring'
     h.counters.trips += 1
+    // D133: the floor's field note opens on the first arrival; the count is per biome and never falls.
+    h.counters.biomesVisited = { ...h.counters.biomesVisited, [to]: (h.counters.biomesVisited?.[to] ?? 0) + 1 }
     const arrivals = [...this.content.narrative.shared.arrive, ...this.content.narrative.biomes[to]!.arrive]
     const text = this.narrate(arrivals, { destination: this.biome(to).name })
     return this.finish('arrived', {
@@ -398,7 +401,7 @@ class TickRun {
           xpGranted = scaled(Math.max(1, Math.floor((this.rng.reward.int(monster.xp.min, monster.xp.max) * (elite ? c.elite.xpMultiplier : 1) * this.sustain().victoryXpPct) / 100)), mods.xpPct)
           goldGranted = scaled(this.rng.reward.int(monster.gold.min, monster.gold.max) * (elite ? c.elite.goldMultiplier : 1), mods.goldPct)
           gearDropped = this.rng.reward.chance(c.combatGearDropPct)
-          if (gearDropped) gear = this.generateGear(biome.tier)
+          if (gearDropped) gear = this.generateGear(gearTierOf(biome))
           h.counters.combatWins += 1
           h.counters.monsterWins[monster.id] = (h.counters.monsterWins[monster.id] ?? 0) + 1
           if (elite) h.counters.eliteWins += 1
@@ -517,7 +520,7 @@ class TickRun {
           vars.gold = goldGranted
         }
         if (found === 'gear') {
-          gear = this.generateGear(biome.tier)
+          gear = this.generateGear(gearTierOf(biome))
           primary = ''
           compact = ''
         } else if (found === 'potion' && potionQty >= potionCap(content, h)) {
@@ -926,7 +929,7 @@ class TickRun {
 /** Drop undefined optional fields so the result satisfies exact optional property types. */
 function toHeroState(h: WorkingHero): HeroState {
   const entries = Object.entries(h).filter(([, value]) => value !== undefined)
-  return { ...(Object.fromEntries(entries) as unknown as HeroState), counters: { ...h.counters, monsterWins: { ...h.counters.monsterWins } } }
+  return { ...(Object.fromEntries(entries) as unknown as HeroState), counters: { ...h.counters, monsterWins: { ...h.counters.monsterWins }, ...(h.counters.biomesVisited === undefined ? {} : { biomesVisited: { ...h.counters.biomesVisited } }) } }
 }
 
 function validateOutput(input: SimulationInput, result: SimulationResult): void {

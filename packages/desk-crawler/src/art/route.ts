@@ -6,7 +6,7 @@ import { composeScene, FULL_SCALE, LARGE_SCALE, MEDIUM_SCALE, SCENE_VERSION, sce
 import { BWRY_PALETTE, bwryInk, BwryInk, sceneColours } from './sceneColour'
 import type { SceneTime } from './sceneTime'
 
-const BIOMES = new Set<BiomeArt>(['office_cubicles', 'server_room', 'cafeteria_depths'])
+const BIOMES = new Set<BiomeArt>(['office_cubicles', 'server_room', 'cafeteria_depths', 'archive', 'parking_garage'])
 const SCALES = new Set([FULL_SCALE, SMALL_SCALE, LARGE_SCALE, MEDIUM_SCALE])
 
 /**

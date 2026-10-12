@@ -37,6 +37,8 @@ const BANDS: Record<BiomeArt, readonly [string, string, string, string]> = {
   office_cubicles: ['#e7b96f', '#f3d394', '#fbe9c2', '#c98f5a'],
   server_room: ['#5d8fd6', '#78a9e4', '#9fd0f0', '#ffd166'],
   cafeteria_depths: ['#f08a6b', '#f9b394', '#ffd9c2', '#d9534f'],
+  archive: ['#b8956a', '#d1b58c', '#efe1c2', '#8a6a44'],
+  parking_garage: ['#6b7280', '#8a93a3', '#b8c0cc', '#4b5563'],
 }
 /** Band rows on the 40-row stage, at the companion's 18 / 14 / 40 / 28% split. */
 const band = (y: number) => (y < 7 ? 0 : y < 13 ? 1 : y < 29 ? 2 : 3)

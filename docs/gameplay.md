@@ -47,8 +47,12 @@ Weights are integer probabilities out of 100. They must sum to 100 in content va
 | `office_cubicles` / Office Cubicles | 1 | 30 | 30 | 10 | 30 | Safe, tier 1 |
 | `server_room` / Server Room | 4 | 40 | 25 | 15 | 20 | Tier 2 |
 | `cafeteria_depths` / Cafeteria Depths | 8 | 45 | 25 | 15 | 15 | Tier 3 |
+| `archive` / Archive | 12 | 50 | 25 | 15 | 10 | Tier 4, drops tier-3 gear (D133, content v16) |
+| `parking_garage` / Parking Garage | 16 | 50 | 25 | 15 | 10 | Tier 5, drops tier-3 gear (D133, content v16) |
 
-Approved content floor (D26): 4 monsters per biome (12 total), and 4 summary variants for each of combat/loot/trap/rest per biome (48 total), plus required lifecycle summaries. Variants describe the actual outcome; cosmetic RNG never alters rewards. Examples: Rogue Roomba, Paper Imp, Cable Serpent, Dust Daemon, Coffee Slime, Crumb Golem. Tone: mildly absurd office fantasy, warm, concise, no insults tied to personal identity.
+The Archive and the Parking Garage (D133, [spec](biomes.md)) are difficulty tiers 4 and 5 for monsters, to-do targets and pay, potion drops and merchant and decision gold, but name tier 3 as the gear tier they drop (`gearTier`), since the workbench ceiling is its own slice. Their field notes (one per floor and per monster, read on the companion once the hero has stood there or beaten it) change nothing in play.
+
+Approved content floor (D26): 4 monsters per biome (12 total; 20 under content v16), and 4 summary variants for each of combat/loot/trap/rest per biome (48 total), plus required lifecycle summaries. Variants describe the actual outcome; cosmetic RNG never alters rewards. Examples: Rogue Roomba, Paper Imp, Cable Serpent, Dust Daemon, Coffee Slime, Crumb Golem. Tone: mildly absurd office fantasy, warm, concise, no insults tied to personal identity.
 
 | Tier | Monster HP | ATK | DEF | XP on victory | Gold on victory | Trap damage |
 | --- | --- | --- | --- | --- | --- | --- |

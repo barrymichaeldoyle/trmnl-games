@@ -224,7 +224,7 @@ An arcade palette: a dark plum-black screen, one lighter window step, cream lett
 - **Screen White**: the e-ink screen inside the bezel; nowhere else.
 
 ### Biome Bands
-Each biome's game screen is four bands (ceiling, upper wall, wall, floor in an 18 / 14 / 40 / 28% grid), and its world-map tile wears the upper-wall band: Office Cubicles in carpet tan (Cubicle Tan, bands #e7b96f, #f3d394, #fbe9c2, #c98f5a), Server Room in status-LED blue (Travel Sky, bands #5d8fd6, #78a9e4, #9fd0f0, #ffd166), Cafeteria Depths in ketchup coral (Cafeteria Coral, bands #f08a6b, #f9b394, #ffd9c2, #d9534f). The floor band carries a 6px night rule at 25% opacity.
+Each biome's game screen is four bands (ceiling, upper wall, wall, floor in an 18 / 14 / 40 / 28% grid), and its world-map tile wears the upper-wall band: Office Cubicles in carpet tan (Cubicle Tan, bands #e7b96f, #f3d394, #fbe9c2, #c98f5a), Server Room in status-LED blue (Travel Sky, bands #5d8fd6, #78a9e4, #9fd0f0, #ffd166), Cafeteria Depths in ketchup coral (Cafeteria Coral, bands #f08a6b, #f9b394, #ffd9c2, #d9534f), the Archive in old-paper buff (bands #b8956a, #d1b58c, #efe1c2, #8a6a44) and the Parking Garage in concrete grey (bands #6b7280, #8a93a3, #b8c0cc, #4b5563), both since content v16 (D133). The floor band carries a 6px night rule at 25% opacity.
 
 ### Named Rules
 **The One Meaning Rule.** Each game colour means one stat everywhere: red is health and harm, green is XP and recovery, gold is coins and the current choice, sky is travel and defence, violet is rare. A new surface reuses these meanings; it does not invent a sixth.

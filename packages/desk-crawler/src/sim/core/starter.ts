@@ -74,6 +74,8 @@ export function withCounterDefaults(counters: Partial<HeroCounters> & Pick<HeroC
     const value = counters[key]
     if (value !== undefined) (full as Record<string, unknown>)[key] = value
   }
+  // D133: the optional arrival record rides along when present; it is never defaulted, so stored heroes need no backfill.
+  if (counters.biomesVisited !== undefined) full.biomesVisited = counters.biomesVisited
   return full
 }
 

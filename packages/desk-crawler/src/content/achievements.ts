@@ -8,7 +8,7 @@ import type { NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 6
+export const ACHIEVEMENTS_VERSION = 7
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -198,8 +198,8 @@ counter('gold', 'Gold earned', 'Lifetime', 'goldEarned', [100, 1000, 10000, 1000
 family('levels', 'Levels', 'Lifetime', [
   ['Promoted', 'The Server Room is open.'],
   ['Team Lead', 'The Cafeteria Depths are open.'],
-  ['Middle Management', 'Rolling Suitcase territory.'],
-  ['Director', 'Your calendar is all meetings.'],
+  ['Middle Management', 'The Archive is open.'],
+  ['Director', 'The Parking Garage is open.'],
   ['Corner Office', 'It has a window, and the blind works.'],
 ], (i) => ({ kind: 'level', atLeast: [4, 8, 12, 16, 20][i]! }))
 counter('knockouts', 'Knock-outs', 'Lifetime', 'deaths', [1, 5, 25, 100], [
@@ -330,6 +330,67 @@ counter('mixing', 'Potion mixing', 'Lifetime', 'potionsCombined', [1, 10, 50], [
   ['Tea Round', 'Ten majors mixed. The kettle has opinions.'],
   ['Head of Pharmacy', 'Fifty majors. Facilities want the sink back.'],
 ])
+
+// ---------------------------------------------------------------- v2.0 The Archive and the Parking Garage (catalog version 7, D133; appended, never edited)
+
+monster('box_file_beetle', 'Box File Beetle', 'Archive', [
+  ['Pressed Flat', 'Filed under B, for beetle.'],
+  ['Ring Binder', 'Five beetles, one lever arch file.'],
+  ['Records Clerk', 'Twenty-five, in date order.'],
+  ['Head of Records', 'Nothing walks out of the Archive on your watch.'],
+  ['Deep Storage', 'Five hundred beetles. The basement is quiet now.'],
+])
+monster('shelf_lurker', 'Shelf Lurker', 'Archive', [
+  ['Shelves Shut', 'Rolled them closed and did not look back.'],
+  ['Aisle Monitor', 'Five lurkers, five aisles.'],
+  ['Night Librarian', 'You know which shelf it moved to.'],
+  ['Stack Supervisor', 'A hundred lurkers. The light stays on now.'],
+  ['Keeper of the Stacks', 'Five hundred. Nothing lurks here without asking.'],
+])
+monster('microfilm_phantom', 'Microfilm Phantom', 'Archive', [
+  ['Rewound', 'Back to the start of the reel.'],
+  ['Reel Change', 'Five phantoms, five reels.'],
+  ['Microfilm Operator', 'Twenty-five reels and a very tired eye.'],
+  ['Reading Room', 'A hundred reels, all catalogued.'],
+  ['Digitised', 'Five hundred. The reader has been switched off at the wall.'],
+])
+monster('auditor', 'Auditor', 'Archive', [
+  ['Receipt Found', 'For once, you had the paperwork.'],
+  ['Books Balanced', 'Five audits with nothing to report.'],
+  ['Clean Audit', 'Twenty-five audits. Not a discrepancy among them.'],
+  ['Audit Committee', 'A hundred. The Auditor now asks you for receipts.'],
+  ['Signed Off', 'Five hundred audits. The books are closed for good.'],
+])
+monster('trolley_swarm', 'Trolley Swarm', 'Parking Garage', [
+  ['Chained Up', 'A pound coin got them back.'],
+  ['Trolley Return', 'Five swarms sent back up the ramp.'],
+  ['Bay Attendant', 'Twenty-five swarms. The lift is clear.'],
+  ['Trolley Park', 'A hundred swarms, chained in rows.'],
+  ['Rolling Stock', 'Five hundred. The supermarket wants its trolleys back.'],
+])
+monster('oil_slick', 'Oil Slick', 'Parking Garage', [
+  ['Sanded Over', 'Grit beats shine.'],
+  ['Drain Cleared', 'Five slicks down the drain.'],
+  ['Spill Kit', 'Twenty-five slicks. The kit has a dent.'],
+  ['Dry Floor', 'A hundred slicks mopped. The sign came down.'],
+  ['Teflon', 'Five hundred. Nothing sticks to you.'],
+])
+monster('barrier_golem', 'Barrier Golem', 'Parking Garage', [
+  ['Walked Under', 'An expired ticket does wonders.'],
+  ['Season Ticket', 'Five golems lifted.'],
+  ['Permit Holder', 'Twenty-five. The barrier knows your face.'],
+  ['Free Parking', 'A hundred golems. The arm stays up for you.'],
+  ['Barrier Free', 'Five hundred. The garage gave up on tickets.'],
+])
+monster('ghost_car', 'Ghost Car', 'Parking Garage', [
+  ['Clamped', 'It was back by morning. You knew it would be.'],
+  ['Ticketed', 'Five tickets under one wiper.'],
+  ['Towed', 'Twenty-five tows. It keeps coming back.'],
+  ['Impounded', 'A hundred. The pound has a bay with its name on it.'],
+  ['Scrapped', 'Five hundred. The lights still come on in the yard.'],
+])
+family('floor_cleared_4', 'Archive Cleared', 'Set piece', [['Archive Cleared', 'Twenty-five of each in the Archive.']], () => ({ kind: 'biomeMonsters', biomeId: 'archive', atLeast: 25 }))
+family('floor_cleared_5', 'Garage Cleared', 'Set piece', [['Garage Cleared', 'Twenty-five of each in the Parking Garage.']], () => ({ kind: 'biomeMonsters', biomeId: 'parking_garage', atLeast: 25 }))
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

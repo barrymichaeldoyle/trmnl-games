@@ -2,6 +2,7 @@ import type { ContentCatalog, Modifiers } from '../sim/core/types'
 import { zeroCounters } from '../sim/core/starter'
 import { potionProblems } from '../sim/core/potions'
 import { inventoryRowsNeeded, workbenchProblems } from '../sim/core/workbench'
+import { gearTierOf, loreProblems } from '../sim/core/biomes'
 
 /** Content limits from the specs: name budgets (domain-contracts.md) and the D26 content floor. */
 export const CONTENT_LIMITS = {
@@ -230,8 +231,10 @@ export function validateCatalog(content: ContentCatalog): string[] {
       if (monster === undefined) problems.push(`biome ${biome.id} references missing monster ${id}`)
       else if (monster.tier !== biome.tier) problems.push(`monster ${id} tier does not match ${biome.id}`)
     }
+    // D133: a biome drops its gear tier's templates (its own tier unless it names a lower one), which must exist.
+    if (biome.gearTier !== undefined && (content.gearTiers[biome.gearTier] === undefined || biome.gearTier > biome.tier)) problems.push(`biome ${biome.id} gear tier must be a gear tier at or below its own`)
     for (const kind of ['weapon', 'armor'] as const) {
-      if (!content.gearTemplates.some((t) => t.tier === biome.tier && t.kind === kind)) problems.push(`biome ${biome.id} has no ${kind} templates`)
+      if (!content.gearTemplates.some((t) => t.tier === gearTierOf(biome) && t.kind === kind)) problems.push(`biome ${biome.id} has no ${kind} templates`)
     }
     const narrative = content.narrative.biomes[biome.id]
     if (narrative === undefined) {
@@ -266,6 +269,7 @@ export function validateCatalog(content: ContentCatalog): string[] {
   if (inventoryRowsNeeded(content) > 32) problems.push('bag capacity exceeds the 32-row inventory read')
   problems.push(...workbenchProblems(content))
   problems.push(...potionProblems(content))
+  problems.push(...loreProblems(content))
   const permille = content.bagLadder.findPermille
   if (!Number.isSafeInteger(permille) || permille < 0 || permille > 1000) problems.push('bag find chance must be 0–1000 permille')
   for (const [id, lines] of Object.entries(content.narrative.monsters)) {

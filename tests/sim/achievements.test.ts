@@ -3,7 +3,11 @@ import { ACHIEVEMENTS, ACHIEVEMENT_BY_ID, ACHIEVEMENT_FAMILIES, MONSTER_LADDER, 
 import { allSatisfied, familyProgress, measure, newlyUnlocked, satisfied, type AchievementState } from '@trmnl-games/desk-crawler/sim/core/achievements'
 import { zeroCounters } from '@trmnl-games/desk-crawler/sim/core/starter'
 import type { HeroCounters } from '@trmnl-games/desk-crawler/sim/core/types'
+import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { baseState, content, findSeed, run } from './helpers'
+
+/** D133: monster and floor families appended for the Archive and the Parking Garage resolve under the catalog that has them. */
+const current = catalogs.v16
 
 const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<AchievementState> = {}): AchievementState => ({
   level: 1,
@@ -15,29 +19,29 @@ const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<Achievement
 
 describe('achievement catalog (D65)', () => {
   it('holds the launch set with unique, catalog-backed ids', () => {
-    expect(ACHIEVEMENTS).toHaveLength(165)
+    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2)
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1)
+    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2)
     for (const def of ACHIEVEMENTS) {
       expect(ACHIEVEMENT_FAMILIES.some((f) => f.id === def.family)).toBe(true)
       expect(def.name.length).toBeLessThanOrEqual(24)
       expect(def.blurb.length).toBeLessThanOrEqual(90)
       const predicate = def.predicate
-      if (predicate.kind === 'monster') expect(content.monsters.some((m) => m.id === predicate.monsterId)).toBe(true)
-      if (predicate.kind === 'biomeMonsters') expect(content.biomes.some((b) => b.id === predicate.biomeId)).toBe(true)
+      if (predicate.kind === 'monster') expect(current.monsters.some((m) => m.id === predicate.monsterId)).toBe(true)
+      if (predicate.kind === 'biomeMonsters') expect(current.biomes.some((b) => b.id === predicate.biomeId)).toBe(true)
       // Never satisfied by a fresh hero except by doing something.
-      expect(measure(def.predicate, state(), content).target).toBeGreaterThan(0)
+      expect(measure(def.predicate, state(), current).target).toBeGreaterThan(0)
     }
   })
 
   it('gives every monster five tiers on the shared ladder, strictly increasing within each family', () => {
-    for (const monster of content.monsters) {
+    for (const monster of current.monsters) {
       const tiers = ACHIEVEMENTS.filter((a) => a.family === `slay_${monster.id}`)
       expect(tiers.map((t) => t.tier)).toEqual([1, 2, 3, 4, 5])
       expect(tiers.map((t) => (t.predicate.kind === 'monster' ? t.predicate.atLeast : -1))).toEqual([...MONSTER_LADDER])
     }
     for (const family of ACHIEVEMENT_FAMILIES) {
-      const targets = ACHIEVEMENTS.filter((a) => a.family === family.id).map((a) => measure(a.predicate, state(), content).target)
+      const targets = ACHIEVEMENTS.filter((a) => a.family === family.id).map((a) => measure(a.predicate, state(), current).target)
       const thresholds = ACHIEVEMENTS.filter((a) => a.family === family.id).map((a) => ('atLeast' in a.predicate ? a.predicate.atLeast : 0))
       for (let i = 1; i < thresholds.length; i += 1) expect(thresholds[i]!).toBeGreaterThan(thresholds[i - 1]!)
       expect(targets.every((t) => t > 0)).toBe(true)

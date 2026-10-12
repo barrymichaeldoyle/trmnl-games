@@ -61,6 +61,8 @@ const SHELVES: ReadonlyArray<{ category: string; title: string; glyph: GlyphName
   { category: 'Office Cubicles monster', title: 'Office Cubicles', glyph: 'combat', tone: 'text-hp-ink' },
   { category: 'Server Room monster', title: 'Server Room', glyph: 'combat', tone: 'text-hp-ink' },
   { category: 'Cafeteria Depths monster', title: 'Cafeteria Depths', glyph: 'combat', tone: 'text-hp-ink' },
+  { category: 'Archive monster', title: 'Archive', glyph: 'combat', tone: 'text-hp-ink' },
+  { category: 'Parking Garage monster', title: 'Parking Garage', glyph: 'combat', tone: 'text-hp-ink' },
   { category: 'Set piece', title: 'Set pieces', glyph: 'star', tone: 'text-gold-ink' },
   { category: 'Decisions', title: 'Decisions', glyph: 'choice', tone: 'text-gold-ink' },
   { category: 'Raids', title: 'Raids', glyph: 'raid', tone: 'text-rare-ink' },

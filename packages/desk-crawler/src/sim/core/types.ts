@@ -82,7 +82,10 @@ export interface BiomeTemplate {
   readonly unlockLevel: number
   /** Office Cubicles: lethal damage becomes a rescue instead of death. */
   readonly safe: boolean
+  /** Difficulty tier: monsters, to-do targets and rewards, potion drops, merchant and decision gold all key by it. */
   readonly tier: number
+  /** D133: the gear tier whose templates drop here; absent means `tier`. The Archive and the Parking Garage drop tier-3 gear. */
+  readonly gearTier?: number
   readonly weights: Readonly<Record<EncounterKind, number>>
   /** Ordered list; uniform selection. */
   readonly monsterIds: readonly string[]
@@ -526,6 +529,15 @@ export interface PotionRule {
   readonly combine: { readonly from: string; readonly count: number; readonly materials: MaterialCount; readonly to: string }
 }
 
+/**
+ * D133: field notes. One short note per biome and per monster, read in the companion once the hero has been there or
+ * beaten it; nothing is drawn, stored or logged, so a catalog without lore changes nothing in play.
+ */
+export interface LoreRule {
+  readonly biomes: Readonly<Record<string, string>>
+  readonly monsters: Readonly<Record<string, string>>
+}
+
 export interface ContentCatalog {
   readonly contentVersion: string
   readonly constants: SimulationConstants
@@ -564,6 +576,8 @@ export interface ContentCatalog {
   readonly workbench?: WorkbenchRule
   /** Absent before v14 (D131): one potion, healing `constants.potionHealPct`. */
   readonly potions?: PotionRule
+  /** Absent before v16 (D133): no field notes. */
+  readonly lore?: LoreRule
   readonly narrative: Readonly<{ biomes: Readonly<Record<string, BiomeNarrative>>; shared: SharedNarrative; monsters: Readonly<Record<string, MonsterNarrative>> }>
 }
 
@@ -625,10 +639,12 @@ export interface HeroCounters {
   readonly topReinforcement: number
   /** D131: major potions made by combining, written by the intent. */
   readonly potionsCombined: number
+  /** D133: arrivals per biome id, written by the simulator from content v16's deploy on; absent on heroes that have not travelled since. */
+  readonly biomesVisited?: Readonly<Record<string, number>>
 }
 
-/** Counter names that hold one number (everything except `monsterWins`). */
-export type NumericCounter = Exclude<keyof HeroCounters, 'monsterWins'>
+/** Counter names that hold one number (everything except the records `monsterWins` and `biomesVisited`). */
+export type NumericCounter = Exclude<keyof HeroCounters, 'monsterWins' | 'biomesVisited'>
 
 export interface HeroState {
   readonly id: string

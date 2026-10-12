@@ -12,6 +12,14 @@ const samples: Array<[string, Parameters<typeof composeScene>[0], Parameters<typ
   ['office-rest', 'office_cubicles', 'rest', { kind: 'prop', id: 'campfire' }],
   ['server-ko', 'server_room', 'knocked_out', { kind: 'monster', id: 'legacy_mainframe', elite: false }],
   ['cafe-sleep', 'cafeteria_depths', 'sleep', { kind: 'prop', id: 'full_bag' }],
+  ['archive-fight', 'archive', 'fight', { kind: 'monster', id: 'auditor', elite: false }],
+  ['archive-beetle', 'archive', 'fight', { kind: 'monster', id: 'box_file_beetle', elite: true }],
+  ['archive-lurker', 'archive', 'fight', { kind: 'monster', id: 'shelf_lurker', elite: false }],
+  ['archive-phantom', 'archive', 'idle', { kind: 'monster', id: 'microfilm_phantom', elite: false }],
+  ['garage-fight', 'parking_garage', 'fight', { kind: 'monster', id: 'ghost_car', elite: false }],
+  ['garage-trolleys', 'parking_garage', 'fight', { kind: 'monster', id: 'trolley_swarm', elite: false }],
+  ['garage-slick', 'parking_garage', 'fight', { kind: 'monster', id: 'oil_slick', elite: true }],
+  ['garage-barrier', 'parking_garage', 'knocked_out', { kind: 'monster', id: 'barrier_golem', elite: false }],
 ]
 for (const [name, biome, pose, subject] of samples) {
   const { width, height, ink } = composeScene(biome, pose, subject).scaled(FULL_SCALE)
