@@ -9,10 +9,11 @@ import { captureAnalytics } from '../../../lib/analytics'
 import { seo } from '../../../lib/seo'
 import { Button, Card, LoadingState, NoticeBar, useFocusWithin, useNotice } from '../../../lib/ui'
 import { preload } from '../../../lib/preload'
-import { DeskKeepsakes } from './-keepsakes'
 import { AlertsCard } from './-alerts'
+import { MoreLinks } from './-moreLinks'
 
-export const Route = createFileRoute('/app/desk-crawler/settings')({ head: () => seo({ title: 'Settings', index: false }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), convexQuery(api.heroes.mine, {}), convexQuery(api.connections.mine, {}), convexQuery(api.keepsakes.mine, {}), convexQuery(api.alerts.mine, {})), component: Settings })
+/** The More tab (D124): the pages that are not play (achievements, keepsakes, the device) above the settings. */
+export const Route = createFileRoute('/app/desk-crawler/settings')({ head: () => seo({ title: 'More', index: false }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), convexQuery(api.heroes.mine, {}), convexQuery(api.connections.mine, {}), convexQuery(api.alerts.mine, {})), component: Settings })
 
 function Settings() {
   const { data: me } = useQuery(convexQuery(api.users.me, {}))
@@ -43,8 +44,10 @@ function Settings() {
   const healthy = hero.simulationState !== 'quarantined'
   return (
     <>
+      <h1 className="font-display text-3xl font-bold">More</h1>
+      <MoreLinks />
       <header>
-        <h1 className="font-display text-3xl font-bold">Settings</h1>
+        <h2 className="font-display text-2xl font-bold">Settings</h2>
         <p className="mt-2">Playing as <strong>{me.user.publicAlias}</strong>, the name other players see on leaderboards and TRMNL screens.</p>
       </header>
       <Card title="Adventures" icon="travel"><div ref={adventures}>
@@ -93,7 +96,6 @@ function Settings() {
         )}
       </div></Card>
       {hero.activationState === 'active' ? <AlertsCard notify={notify} /> : null}
-      <DeskKeepsakes />
       <Card title="TRMNL installations" icon="plug">
         <p className="mb-3 text-sm text-muted">TRMNL plugin installations showing your hero.</p>
         {connections === undefined ? <LoadingState label="Loading installations…" /> : connections.length > 0 ? (
@@ -149,7 +151,6 @@ function Settings() {
         <p className="mt-4 text-sm">To delete your sign-in and every game, go to <Link to="/account" className="underline underline-offset-4">Account</Link>.</p>
       </details>
       <nav aria-label="Help" className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-        <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">TRMNL and setup help</Link>
         <Link to="/support" className="inline-flex min-h-11 items-center underline underline-offset-4">Contact support</Link>
         <Link to="/feedback" search={{ from: '/app/desk-crawler/settings' }} className="inline-flex min-h-11 items-center underline underline-offset-4">Send feedback</Link>
       </nav>

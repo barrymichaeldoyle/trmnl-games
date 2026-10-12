@@ -9,6 +9,7 @@ import { Button, Card, LoadingState } from '../../../lib/ui'
 import { preload } from '../../../lib/preload'
 import { levelGroup } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { LocalTime } from '../../../lib/localTime'
+import { Records } from './-records'
 
 export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: () => seo({ title: 'Rankings', index: false }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {})), component: Leaderboard })
 
@@ -107,6 +108,8 @@ function Leaderboard() {
           {data.totalPlayers > data.entries.length ? <p className="mt-3 text-sm text-muted">Top {data.entries.length} of {data.totalPlayers.toLocaleString()} heroes.</p> : null}
         </Card>
       )}
+      {/* The lifetime counts sit under the board (D124): standing and records are one subject. */}
+      {hero ? <Records counters={hero.counters} lifetimeXp={hero.lifetimeXp} withRank={false} /> : null}
     </>
   )
 }

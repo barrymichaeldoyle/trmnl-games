@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {

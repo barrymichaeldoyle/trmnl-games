@@ -106,7 +106,7 @@ function LockedCard({ family, rarity }: { family: Family; rarity: View['rarity']
 }
 
 /** Achievements under Records (achievements.md): permanent, retroactive, no task list and no timers. */
-export function Achievements() {
+export function Achievements({ as = 'h2' }: { as?: 'h1' | 'h2' }) {
   const { data } = useQuery(convexQuery(api.achievements.mine, {}))
   const [openId, setOpenId] = useState<string | null>(null)
   if (!data) return null
@@ -117,7 +117,7 @@ export function Achievements() {
   return (
     <section aria-labelledby="achievements-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <SectionTitle id="achievements-title" glyph="achievement">Achievements</SectionTitle>
+        <SectionTitle id="achievements-title" glyph="achievement" as={as}>Achievements</SectionTitle>
         <span className="text-sm text-muted tabular-nums">{view.unlocked.length} of {ACHIEVEMENTS.length}</span>
       </div>
       {view.rarity ? (

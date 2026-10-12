@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
 import { useEffect, useRef, useState } from 'react'
+import { Glyph } from '../../../lib/glyphs'
 import { api } from '@trmnl-games/backend/api'
 import { afterVisibleVisit } from '../../../lib/visibleVisit'
 import { LocalTime } from '../../../lib/localTime'
@@ -138,5 +139,59 @@ function Ledger({ summary }: { summary: Summary }) {
       )}
       {bag}
     </section>
+  )
+}
+
+/**
+ * The Hero page's one-line pointer at the tally (D124): the recap itself, and its acknowledgement, live on the Log tab,
+ * so this reads the live summary without touching the baseline. Nothing shows on a first visit or a quiet return.
+ */
+export function ReturnNudge() {
+  const { data } = useQuery(convexQuery(api.heroes.returnSummary, {}))
+  const summary = data as Summary | undefined
+  if (!summary || summary.baseline === null) return null
+  const parts = [
+    [summary.xpGained ?? 0, 'XP', 'XP'],
+    [summary.levelsGained ?? 0, 'level', 'levels'],
+    [summary.counters?.combatWins ?? 0, 'fight won', 'fights won'],
+    [summary.counters?.goldEarned ?? 0, 'gold', 'gold'],
+    [summary.counters?.itemsFound ?? 0, 'item found', 'items found'],
+    [summary.counters?.deaths ?? 0, 'knockout', 'knockouts'],
+  ].filter(([value]) => (value as number) > 0).map(([value, one, many]) => `+${(value as number).toLocaleString()} ${value === 1 ? one : many}`)
+  if (parts.length === 0) return null
+  return (
+    <Link to="/app/desk-crawler/log" className="flex min-h-11 items-center justify-between gap-3 border-[3px] border-gold px-3 py-2 text-sm">
+      <span className="min-w-0"><strong className="text-gold-ink">While you were away:</strong> {parts.join(', ')}</span>
+      <span className="label-px flex shrink-0 items-center gap-1.5 whitespace-nowrap text-gold-ink">See the log <Glyph name="play" size={8} /></span>
+    </Link>
+  )
+}
+
+/**
+ * The recap above stays frozen for the visit (D25); this line counts what
+ * arrives while the page is open, from the live hero subscription.
+ */
+export function LiveGain() {
+  const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
+  const start = useRef(hero)
+  start.current ??= hero
+  if (!hero || !start.current) return null
+  const gained = (
+    [
+      ['XP', hero.lifetimeXp - start.current.lifetimeXp],
+      ['level', hero.level - start.current.level],
+      ['fight won', hero.counters.combatWins - start.current.counters.combatWins],
+      ['gold', hero.counters.goldEarned - start.current.counters.goldEarned],
+      ['item found', hero.counters.itemsFound - start.current.counters.itemsFound],
+      ['knockout', hero.counters.deaths - start.current.counters.deaths],
+    ] as const
+  ).filter(([, value]) => value > 0)
+  if (gained.length === 0) return null
+  const label = (unit: string, value: number) => (unit === 'XP' || unit === 'gold' || value === 1 ? unit : unit.replace(/^(\w+)/, '$1s'))
+  return (
+    // Steps in again each time it changes, so a fresh gain while the page is open is noticed.
+    <p key={gained.map(([unit, value]) => unit + value).join()} role="status" className="hud notice-rise border-[3px] border-gold px-3 py-2 text-hud-sm text-gold-ink">
+      While you've been here: {gained.map(([unit, value]) => `+${value.toLocaleString()} ${label(unit, value)}`).join(', ')}
+    </p>
   )
 }

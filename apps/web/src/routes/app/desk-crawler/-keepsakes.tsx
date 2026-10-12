@@ -114,7 +114,7 @@ export function KeepsakeCallout() {
         <h2 id="keepsake-callout-title" className="mt-0.5 font-display text-lg leading-tight font-bold sm:text-2xl">{earned ? `${earned.name} is on your shelf` : 'Keepsake code ready'}</h2>
       </div>
       {earned
-        ? <Link to="/app/desk-crawler/settings" hash="desk-keepsakes" className={`${LINK_BUTTON} ${BUTTON_SECONDARY} grow justify-center whitespace-nowrap sm:grow-0`}>Shelf</Link>
+        ? <Link to="/app/desk-crawler/keepsakes" className={`${LINK_BUTTON} ${BUTTON_SECONDARY} grow justify-center whitespace-nowrap sm:grow-0`}>Shelf</Link>
         : <Button allowOffline variant={open ? 'secondary' : 'primary'} className="grow whitespace-nowrap sm:grow-0" aria-expanded={open} aria-controls="keepsake-callout-form" onClick={() => setOpen((value) => !value)}>{open ? 'Later' : 'Enter code'}</Button>}
     </div>
     {open && !earned ? (
@@ -128,13 +128,14 @@ export function KeepsakeCallout() {
   </section>
 }
 
+/** The keepsakes page's content (D46): the next design, the code form and the shelf. Its heading is the page's h1. */
 export function DeskKeepsakes() {
   const form = useKeepsakeClaim()
   const { collection, collectedThisWeek, next, error, message } = form
 
   return <section id="desk-keepsakes" aria-labelledby="keepsakes-title" className="window min-w-0 scroll-mt-20 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
     <div className="flex flex-wrap items-baseline justify-between gap-2">
-      <h2 id="keepsakes-title" className="flex items-center gap-3 font-display text-2xl font-bold"><Glyph name="keepsake" size={24} className="text-gold-ink" />Desk keepsakes</h2>
+      <h1 id="keepsakes-title" className="flex items-center gap-3 font-display text-3xl font-bold"><Glyph name="keepsake" size={24} className="text-gold-ink" />Desk keepsakes</h1>
       {collection ? <p className="text-sm tabular-nums">{collection.totalCollected.toLocaleString()} collected</p> : null}
     </div>
     <p className="mt-3 max-w-prose text-sm text-muted">Once a week your TRMNL shows a keepsake code. Enter it here to add that week’s design to your shelf.</p>

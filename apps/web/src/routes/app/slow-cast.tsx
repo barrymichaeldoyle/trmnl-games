@@ -41,7 +41,7 @@ function Shell() {
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
   // A cooler or bait alert's tap lands here with ?alert=<kind>; counted once the page is ready.
   useAlertOpened(!isPending)
-  const banner = status && status !== 'live' ? <p className="label-px mx-auto mt-3 w-full max-w-3xl px-4 text-muted">{status === 'hidden' ? 'Hidden: only admins can see Slow Cast' : 'Preview: only admins can open Slow Cast'}</p> : null
+  const banner = status && status !== 'live' ? <p className="mx-auto mt-3 w-full max-w-3xl px-4 text-sm font-semibold text-muted">{status === 'hidden' ? 'Hidden: only admins can see Slow Cast' : 'Preview: only admins can open Slow Cast'}</p> : null
   if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label="Loading Slow Cast…" /></main>
   if (dock?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title="Removing Slow Cast progress"><p>Your account and your other games stay. You can start again from TRMNL once removal finishes.</p></Card></main>
   if (!dock?.angler) {

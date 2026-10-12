@@ -4,8 +4,15 @@ import { RARITY_TONE } from '../../../lib/palette'
 
 const byId = new Map(contentV1.species.map((s) => [s.id, s]))
 const byName = new Map(contentV1.species.map((s) => [s.name, s]))
-// Longest first, so "Conger Eel" wins over "Eel" and "Common Carp" over "Carp".
-const NAMES = new RegExp(`\\b(${[...byName.keys()].sort((a, b) => b.length - a.length).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'g')
+const waterByName = new Map(contentV1.waters.map((w) => [w.name, w]))
+const waterById = new Map<string, { name: string }>(contentV1.waters.map((w) => [w.id, w]))
+// Longest first, so "Conger Eel" wins over "Eel" and "Common Carp" over "Carp". Waters are marked in stories too.
+const NAMES = new RegExp(`\\b(${[...byName.keys(), ...waterByName.keys()].sort((a, b) => b.length - a.length).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'g')
+
+/** A water's name in bold sky ink, so places stand out from fish (gold and rarity tones) and from the prose around them. */
+export function WaterName({ id, children }: { id: string; children?: ReactNode }) {
+  return <strong className="font-semibold text-sky-ink">{children ?? waterById.get(id)?.name ?? id}</strong>
+}
 
 /** A fish's name in bold, coloured by rarity as the logbook's gems are. */
 export function FishName({ id, children }: { id: string; children?: ReactNode }) {
@@ -13,10 +20,10 @@ export function FishName({ id, children }: { id: string; children?: ReactNode })
   return <strong className={`font-semibold ${RARITY_TONE[species?.rarity ?? 'common'] ?? ''}`}>{children ?? species?.name ?? id}</strong>
 }
 
-/** A story line with every species name in it set as a FishName. Stories stored before D121 say gold; they read coins. */
+/** A story line with every species name set as a FishName and every water as a WaterName. Stories stored before D121 say gold; they read coins. */
 export function FishText({ text }: { text: string }) {
   const parts = text.replace(/\bgold\b/g, 'coins').split(NAMES)
-  return <>{parts.map((part, i) => (i % 2 === 1 && byName.has(part) ? <FishName key={i} id={byName.get(part)!.id} /> : <Fragment key={i}>{part}</Fragment>))}</>
+  return <>{parts.map((part, i) => (i % 2 === 1 && byName.has(part) ? <FishName key={i} id={byName.get(part)!.id} /> : i % 2 === 1 && waterByName.has(part) ? <WaterName key={i} id={waterByName.get(part)!.id} /> : <Fragment key={i}>{part}</Fragment>))}</>
 }
 
 /** Who takes a bait, split into the fish that take nothing else and the rest; only fish in `seen` are named. */

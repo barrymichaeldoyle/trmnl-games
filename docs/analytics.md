@@ -109,5 +109,6 @@ Every event carries `game`, now taken from the page: `slow-cast` under `/app/slo
 | `water changed` | Travel chosen | `water` |
 | `bait changed` | Bait put on the hook | `bait` |
 | `logbook viewed` | The Log tab opened | `species_logged` |
+| `game switched` | A game chosen in the header's switcher (D124) | `from`, `to` (game slugs) |
 
 `alerts changed` names Slow Cast's switches (`coolerFull`, `baitOut`) and `alert opened` accepts `cooler_full` and `bait_out`. No per-cast events.

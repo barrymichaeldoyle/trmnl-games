@@ -1,33 +1,27 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { lazy, Suspense, useRef, useState } from 'react'
+import { useState } from 'react'
 import { POTION_HEAL_PCT } from '@trmnl-games/desk-crawler/content/sustain'
 import { pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
-import { artUrl, useIntent } from '../../../lib/intent'
+import { useIntent } from '../../../lib/intent'
 import { BUTTON_PRIMARY, Button, LoadingState, NoticeBar, useFocusWithin, useNotice } from '../../../lib/ui'
 import { BIOME_SWATCH } from '../../../lib/palette'
 import { preload } from '../../../lib/preload'
 import { Glyph, SectionTitle } from '../../../lib/glyphs'
-import { ReturnRecap } from './-recap'
+import { ReturnNudge } from './-recap'
 import { GameScreen, latestLogQuery } from './-gameScreen'
-import { AdventureLog } from './-log'
-import { Records } from './-records'
-import { Raids } from './-raids'
-import { Achievements } from './-achievements'
 import { KeepsakeCallout } from './-keepsakes'
 import { TodoCard, type TodoView } from './-todo'
 import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
 import { AlertNudge } from './-alerts'
 
-const DevicePreview = lazy(() => import('./-devicePreview').then((module) => ({ default: module.DevicePreview })))
-
 export const Route = createFileRoute('/app/desk-crawler/')({
   head: () => seo({ title: 'Hero', index: false }),
   loader: ({ context }) =>
-    preload(context, convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.returnSummary, {}), convexQuery(api.leaderboard.view, {}), convexQuery(api.achievements.mine, {}), convexQuery(api.keepsakes.mine, {}), convexQuery(api.raids.recent, {}), latestLogQuery()),
+    preload(context, convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.returnSummary, {}), convexQuery(api.keepsakes.mine, {}), latestLogQuery()),
   component: HeroHome,
 })
 
@@ -36,8 +30,9 @@ type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number 
 /**
  * The game screen leads, after an unclaimed weekly keepsake's callout (a
  * reason to go and look at the TRMNL): the hero's scene in colour under a
- * platformer HUD, then the few commands the game asks for, the world map, the quest log and
- * what the owner's TRMNL is showing.
+ * platformer HUD, then the few commands the game asks for, the to-do list, the stance and the world map.
+ * What happened lives on the Log tab, standing on Ranks, and the rest behind More (D124): on a phone this page
+ * was seven screens tall when it held all of it.
  */
 function HeroHome() {
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
@@ -51,78 +46,9 @@ function HeroHome() {
       <h1 className="sr-only">{hero.name}, your hero</h1>
       <KeepsakeCallout />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
+      <ReturnNudge />
       <HeroSheet hero={hero} />
-      {/* Reading order on phones: tally, quest log, records, achievements, then the device. Wide screens pair the tally and log with the rest. */}
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-8">
-          <div className="flex flex-col gap-3">
-            <ReturnRecap />
-            <LiveGain hero={hero} />
-          </div>
-          <AdventureLog />
-        </div>
-        <div className="flex min-w-0 flex-col gap-8">
-          <Records counters={hero.counters} lifetimeXp={hero.lifetimeXp} stopped={hero.status === 'paused' || (hero.status === 'sleeping' && hero.wakeAtTick === null)} />
-          <Raids enabled={hero.raidsEnabled === true} />
-          <Achievements />
-          <section aria-labelledby="trmnl-title" className="flex flex-col gap-3">
-            <SectionTitle id="trmnl-title" glyph="screen" tone="text-ink">On your TRMNL</SectionTitle>
-            <Suspense fallback={<DeviceStandIn sceneUrl={artUrl(hero.scenePath)} heroName={hero.name} />}>
-              <DevicePreview sceneUrl={artUrl(hero.scenePath)} heroName={hero.name} />
-            </Suspense>
-            <Link to="/app/desk-crawler/settings" hash="desk-keepsakes" className="inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">Enter a keepsake code</Link>
-          </section>
-        </div>
-      </div>
     </div>
-  )
-}
-
-/**
- * What the device preview looks like before its chunk and template render
- * arrive: the same bezel at the TRMNL X aspect ratio holding the hero's scene,
- * with the control rows' height reserved, so nothing moves when it takes over.
- */
-function DeviceStandIn({ sceneUrl, heroName }: { sceneUrl: string; heroName: string }) {
-  return (
-    <figure className="flex flex-col gap-3" aria-busy="true">
-      <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)]">
-        <div className="relative overflow-hidden rounded-md bg-white" style={{ aspectRatio: '1872 / 1404' }}>
-          <img src={sceneUrl} alt={`${heroName}'s current scene`} width={760} height={200} decoding="async" className="absolute inset-0 m-auto w-full [image-rendering:pixelated]" />
-        </div>
-      </div>
-      <figcaption className="text-sm text-muted">
-        {/* Matches the preview's two control rows: 44px tabs, 8px gap, 44px device picker. */}
-        <div aria-hidden="true" className="h-24" />
-        <p className="mt-3">Loading what your TRMNL shows…</p>
-      </figcaption>
-    </figure>
-  )
-}
-
-/**
- * The recap above stays frozen for the visit (D25); this line counts what
- * arrives while the page is open, from the live hero subscription.
- */
-function LiveGain({ hero }: { hero: { lifetimeXp: number; level: number; counters: { combatWins: number; goldEarned: number; itemsFound: number; deaths: number } } }) {
-  const start = useRef(hero)
-  const gained = (
-    [
-      ['XP', hero.lifetimeXp - start.current.lifetimeXp],
-      ['level', hero.level - start.current.level],
-      ['fight won', hero.counters.combatWins - start.current.counters.combatWins],
-      ['gold', hero.counters.goldEarned - start.current.counters.goldEarned],
-      ['item found', hero.counters.itemsFound - start.current.counters.itemsFound],
-      ['knockout', hero.counters.deaths - start.current.counters.deaths],
-    ] as const
-  ).filter(([, value]) => value > 0)
-  if (gained.length === 0) return null
-  const label = (unit: string, value: number) => (unit === 'XP' || unit === 'gold' || value === 1 ? unit : unit.replace(/^(\w+)/, '$1s'))
-  return (
-    // Steps in again each time it changes, so a fresh gain while the page is open is noticed.
-    <p key={gained.map(([unit, value]) => unit + value).join()} role="status" className="hud notice-rise border-[3px] border-gold px-3 py-2 text-hud-sm text-gold-ink">
-      While you've been here: {gained.map(([unit, value]) => `+${value.toLocaleString()} ${label(unit, value)}`).join(', ')}
-    </p>
   )
 }
 

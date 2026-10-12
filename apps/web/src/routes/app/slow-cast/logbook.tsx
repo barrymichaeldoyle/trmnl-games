@@ -10,7 +10,7 @@ import { Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { Gem, SpriteIcon } from '../desk-crawler/-bagSlots'
 import { FishIcon } from './-art'
 import { FlyBox } from './-flyBox'
-import { FishName } from './-fish'
+import { WaterName, FishName } from './-fish'
 
 /** The logbook: every species by water, then the fly box. A caught fish shows its count, best weight and where to find it; an unseen one is a silhouette with its bait (epics give nothing away). */
 export const Route = createFileRoute('/app/slow-cast/logbook')({
@@ -42,7 +42,7 @@ function LogbookPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Logbook</h1>
-        <span className="label-px text-muted">{seen} of {total} species</span>
+        <span className="text-sm text-muted">{seen} of {total} species</span>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
         <Link to="/app/slow-cast/achievements" className="underline underline-offset-4">Achievements</Link>
@@ -51,7 +51,7 @@ function LogbookPage() {
         </ul>
       </div>
       {book.map(({ water, species }) => (
-        <Card key={water.id} title={water.name}>
+        <Card key={water.id} title={water.name} icon="pin">
           <ul className="grid gap-3 sm:grid-cols-2">
             {species.map((s) => (
               <li key={s.id} className="flex items-start gap-3 border border-rule p-3">
@@ -67,7 +67,7 @@ function LogbookPage() {
                         {s.weather ? ` · ${s.weather.map((w) => WEATHER_LABEL[w]).join(' or ')}` : ''}
                       </p>
                     </>
-                  ) : <p className="text-sm text-muted">{s.baits ? `Bait: ${s.baits.map((b) => BAIT_LABEL[b]).join(' or ')}` : s.rarity === 'epic' ? 'Needs the right bait, hour and weather.' : `A ${s.rarity} fish of ${water.name}.`}</p>}
+                  ) : <p className="text-sm text-muted">{s.baits ? `Bait: ${s.baits.map((b) => BAIT_LABEL[b]).join(' or ')}` : s.rarity === 'epic' ? 'Needs the right bait, hour and weather.' : <>A {s.rarity} fish of <WaterName id={water.id} />.</>}</p>}
                 </div>
               </li>
             ))}

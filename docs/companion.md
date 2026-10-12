@@ -44,7 +44,7 @@ Public pages and the authenticated companion share a footer stating “Unofficia
 | `/privacy`, `/terms`, `/support`, `/changelog` | Public | Privacy policy, terms of use, launch support and release notes |
 | `/admin` | Verified admin | Tick/board health, failures, cleanup, guarded recovery |
 
-Mobile navigation: Hero, Bag, Rankings, Connections; settings under account menu. Desktop may use a compact side navigation. No guild/daily/merchant placeholders in MVP.
+Mobile navigation (D124): five tabs, Hero, Bag, Log, Ranks and More, under `/app/desk-crawler`. Hero holds play (the keepsake callout, game screen, commands, to-do, stance and world map, with a one-line return nudge); Log holds the return tally, the quest log and raids; Ranks the board and the Records card; More links to Achievements (`/achievements`), Desk keepsakes (`/keepsakes`), On your TRMNL (`/trmnl`) and the help page, then the settings (`/settings`). The site header's My games link becomes a game switcher inside a companion when the listing shows another game. No guild/daily/merchant placeholders in MVP.
 
 ## Onboarding
 

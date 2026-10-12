@@ -13,19 +13,26 @@ import { SwitchAccount } from '../../lib/switchAccount'
 import { WaitlistAccount } from '../../lib/waitlist'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { useAlertOpened } from './desk-crawler/-alerts'
+import { gamesQuery } from '../../lib/gameAccess'
 
 /** Companion shell: auth gate, setup states and mobile-first navigation (companion.md). */
 export const Route = createFileRoute('/app/desk-crawler')({
   head: () => seo({ title: 'Companion', index: false }),
-  loader: ({ context }) => preload(context, convexQuery(api.users.me, {})),
+  // The listing feeds the header's game switcher, so it is in the server render too.
+  loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), gamesQuery),
   component: AppShell,
 })
 
+/**
+ * Five tabs, the shape Slow Cast uses (D124): play on Hero, gear on Bag, what happened on Log, standing on Ranks, and
+ * everything else behind More. Five share a phone's width, so the last three take short names.
+ */
 const NAV = [
   { to: '/app/desk-crawler', label: 'Hero', glyph: 'hero' },
   { to: '/app/desk-crawler/inventory', label: 'Bag', glyph: 'bag' },
+  { to: '/app/desk-crawler/log', label: 'Log', glyph: 'quest' },
   { to: '/app/desk-crawler/leaderboard', label: 'Ranks', glyph: 'trophy' },
-  { to: '/app/desk-crawler/settings', label: 'Settings', glyph: 'cog' },
+  { to: '/app/desk-crawler/settings', label: 'More', glyph: 'cog' },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; glyph: GlyphName }>
 
 function AppShell() {
@@ -41,8 +48,6 @@ function SignedInApp() {
   useAnalyticsView(setupState === 'active' ? 'companion ready' : 'setup screen shown', { setup_state: setupState, has_active_installation: me?.hasActiveInstallation ?? false }, !isPending && me?.user?.state !== 'deleting' && me?.gameState !== 'deleting')
   // P33: an alert's tap lands here with ?alert=<kind>; counted once identity is known.
   useAlertOpened(!isPending)
-  // The hero page spreads into two columns on wide screens; the other tabs keep a reading width.
-  const wide = useLocation({ select: (location) => location.pathname.replace(/\/$/, '') === '/app/desk-crawler' })
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
   if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label="Loading Desk Crawler…" /></main>
   if (me?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title="Removing Desk Crawler progress"><p>Your account stays available. You can start again from TRMNL once removal finishes.</p></Card></main>
@@ -81,7 +86,7 @@ function SignedInApp() {
     <>
       <nav aria-label="Desk Crawler" className="hud sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
         {/* One width on every tab: following the page width made the tabs resize and jump when switching. */}
-        <ul className="mx-auto flex min-h-13 max-w-6xl items-stretch">
+        <ul className="mx-auto flex min-h-13 max-w-3xl items-stretch">
           <li className="hidden items-center pr-4 pl-2 sm:flex">
             <img src="/games/desk-crawler/favicon.svg" alt="" width={24} height={24} className="[image-rendering:pixelated]" />
             <span className="ml-3 text-xs text-gold-ink">Desk Crawler</span>
@@ -112,7 +117,7 @@ function SignedInApp() {
           })}
         </ul>
       </nav>
-      <main id="main" className={`mx-auto flex w-full min-w-0 flex-col gap-8 px-3 pt-6 min-[375px]:px-4 pb-[max(2rem,env(safe-area-inset-bottom))] ${wide ? 'max-w-6xl' : 'max-w-3xl'}`}>
+      <main id="main" className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-8 px-3 pt-6 min-[375px]:px-4 pb-[max(2rem,env(safe-area-inset-bottom))]">
         {me.user?.nameRepairRequired ? <NameRepair /> : null}
         <Outlet />
       </main>

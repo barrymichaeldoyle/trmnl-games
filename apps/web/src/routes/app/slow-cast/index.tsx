@@ -1,6 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { poseFor, type SceneKey } from '@trmnl-games/slow-cast/art/scene'
 import { sceneKeyFromUrl } from '@trmnl-games/slow-cast/art/sceneColour'
@@ -9,7 +10,7 @@ import { preload } from '../../../lib/preload'
 import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/slowCast'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishIcon, Scene } from './-art'
-import { FishName, FishText } from './-fish'
+import { FishName, FishText, WaterName } from './-fish'
 import { Rows } from './-rows'
 import { LocalTime } from '../../../lib/localTime'
 
@@ -63,25 +64,29 @@ function DockPage() {
       <section aria-labelledby="dock-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 id="dock-title" className="font-display text-3xl font-bold">{angler.alias}</h1>
-          <span className="label-px text-muted">{angler.title} · {angler.gold} coins</span>
+          <span className="text-sm text-muted"><strong className="text-ink">{angler.title}</strong> · <span className="text-gold-ink">{angler.gold} coins</span></span>
         </div>
         {scene ? <Scene sceneKey={scene} alt={`${angler.alias} fishing at ${here?.name ?? 'the water'}`} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
         <div className="flex flex-col gap-1">
           <p className="text-lg font-semibold">
-            {angler.status === 'paused' ? <>Fishing is paused. <Link to="/app/slow-cast/settings" className="font-normal underline underline-offset-4">Resume on the More page</Link>.</> : destination ? <>Heading to {destination.name}.{firstCastThere ? <> First cast there at {firstCastThere}.</> : null}</> : `Casting at ${here?.name ?? 'the water'}.`}
+            {angler.status === 'paused' ? <>Fishing is paused. <Link to="/app/slow-cast/settings" className="font-normal underline underline-offset-4">Resume on the More page</Link>.</> : destination ? <>Heading to <WaterName id={destination.id} />.{firstCastThere ? <> First cast there at {firstCastThere}.</> : null}</> : <>Casting at {here ? <WaterName id={here.id} /> : 'the water'}.</>}
           </p>
           {here ? <p className="text-muted">{BAND_LABEL[here.band]}, {WEATHER_LABEL[here.weather]?.toLowerCase()} · Bite chance {here.bitePercent}%</p> : null}
           {dock.nextTickAt && !destination && angler.status !== 'paused' ? <p className="text-sm text-muted">Next cast at {time(dock.nextTickAt)}.</p> : null}
         </div>
+        {/* The logbook meter counts species towards the next title; the sentence under it says what the title is, in words a first visit can follow. */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <Meter label={angler.nextTitle ? `Logbook · ${angler.nextTitle.name} at ${angler.nextTitle.species}` : 'Logbook'} value={angler.speciesLogged} max={angler.nextTitle?.species ?? angler.speciesTotal} tone="xp" />
+          <div className="flex flex-col gap-1">
+            <Meter label="Logbook" value={angler.speciesLogged} max={angler.nextTitle?.species ?? angler.speciesTotal} tone="xp" />
+            <p className="text-sm text-muted">{angler.nextTitle ? <>{angler.speciesLogged} of {angler.nextTitle.species} species logged. <strong className="text-ink">{angler.nextTitle.name}</strong> is the next title, at {angler.nextTitle.species}.</> : <>Every title earned: {angler.speciesLogged} of {angler.speciesTotal} species logged.</>}</p>
+          </div>
           <Meter label={angler.cooler.name} value={angler.cooler.used} max={angler.cooler.capacity} tone="gold" />
         </div>
         {!coolerFull && catches.length > 0 ? (
           <p className="text-sm"><Link to="/app/slow-cast/cooler" className="underline underline-offset-4">Sell {catches.length} fish for {coolerValue} coins</Link></p>
         ) : null}
-        {goal ? <p className="text-sm"><span className="text-muted">Next goal</span> · <Link to="/app/slow-cast/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
+        {goal ? <p className="text-sm"><span className="text-muted">Next goal:</span> <Link to="/app/slow-cast/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
         {coolerFull ? (
           <p className="font-semibold text-hp-ink">
             The cooler is full, so new catches are released. <Link to="/app/slow-cast/cooler" className="underline underline-offset-4">Sell your catch</Link>.
@@ -132,14 +137,14 @@ function DockPage() {
           {dock.waters?.map((water) => (
             <li key={water.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
               <div className="min-w-0">
-                <p className="font-semibold">{water.name}{water.id === angler.waterId ? ' (here)' : ''}</p>
+                <p className="font-semibold"><WaterName id={water.id} />{water.id === angler.waterId ? <span className="text-muted"> · here</span> : water.id === angler.travelTo ? <span className="text-muted"> · heading there</span> : ''}</p>
                 {water.open ? (
                   <>
                     <p className="text-sm text-muted">{BAND_LABEL[water.band]}, {WEATHER_LABEL[water.weather]?.toLowerCase()} until {time(water.weatherUntil)}</p>
                     <p className="text-sm text-muted">Bait: {water.baits.map((b) => BAIT_LABEL[b]).join(', ')}</p>
                     {held(water).length === 0 ? <p className="text-sm text-hp-ink">You have none of its bait.</p> : null}
                   </>
-                ) : <p className="text-sm text-muted">{water.opensAfter ? `Opens after ${water.opensAfter.species} ${water.opensAfter.waterName} species (${Math.min(water.opensAfter.logged, water.opensAfter.species)} logged)` : 'Opens later'}{water.access ? `, with the ${water.access === 'waders' ? 'Waders' : 'Pier Permit'}` : ''}</p>}
+                ) : <p className="text-sm text-muted">{water.opensAfter ? <>Opens once {water.opensAfter.species} <WaterName id={water.opensAfter.waterId}>{water.opensAfter.waterName}</WaterName> species are in your logbook ({Math.min(water.opensAfter.logged, water.opensAfter.species)} so far)</> : 'Opens later'}{water.access ? <>, with the <strong>{water.access === 'waders' ? 'Waders' : 'Pier Permit'}</strong> from the shop</> : ''}.</p>}
               </div>
               {water.open && water.id !== angler.waterId && water.id !== angler.travelTo ? (
                 <Button variant="secondary" disabled={travel.pending} onClick={() => {
@@ -182,18 +187,18 @@ function sceneFromDock(dock: Dock): SceneKey | null {
  * The one thing to work towards next: the nearest locked water (the species its logbook gate needs, then its pass),
  * else the next rod, else the next cooler. Null once everything is owned.
  */
-function nextGoal(dock: Dock): string | null {
+function nextGoal(dock: Dock): ReactNode {
   const angler = dock.angler!
   const gold = angler.gold
-  const afford = (price: number) => (gold >= price ? `${price} coins (you have it)` : `${price - gold} coins to go`)
+  const afford = (price: number) => (gold >= price ? `${price} coins, which you have` : `${price - gold} more coins`)
   const locked = dock.waters?.find((w) => !w.open)
   if (locked) {
     const pass = dock.shop?.access.find((a) => a.water === locked.id && !a.owned)
     const gate = locked.opensAfter
-    if (gate && gate.logged < gate.species) return `${locked.name}: log ${gate.species - gate.logged} more ${gate.waterName} species${pass ? ` and get the ${pass.name}` : ''}`
-    if (pass) return `${pass.name} to fish ${locked.name}, ${afford(pass.price)}`
+    if (gate && gate.logged < gate.species) return <>log {gate.species - gate.logged} more <WaterName id={gate.waterId} /> species to open <WaterName id={locked.id} />{pass ? <>, and buy the <strong>{pass.name}</strong></> : null}</>
+    if (pass) return <>the <strong>{pass.name}</strong> to fish <WaterName id={locked.id} />, {afford(pass.price)}</>
   }
-  if (dock.shop?.rod) return `${dock.shop.rod.name}, ${afford(dock.shop.rod.price)}`
-  if (dock.shop?.cooler) return `${dock.shop.cooler.name}, ${afford(dock.shop.cooler.price)}`
+  if (dock.shop?.rod) return <>the <strong>{dock.shop.rod.name}</strong>, {afford(dock.shop.rod.price)}</>
+  if (dock.shop?.cooler) return <>the <strong>{dock.shop.cooler.name}</strong>, {afford(dock.shop.cooler.price)}</>
   return null
 }

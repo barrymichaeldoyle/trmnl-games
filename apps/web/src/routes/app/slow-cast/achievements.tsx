@@ -29,7 +29,7 @@ function AchievementsPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Achievements</h1>
-        <span className="label-px text-muted">{mine.earnedCount} earned</span>
+        <span className="text-sm text-muted">{mine.earnedCount} earned</span>
       </div>
       {CATEGORIES.map((category) => {
         const families = mine.families.filter((f) => f.category === category)
@@ -53,7 +53,7 @@ function AchievementsPage() {
                 <li key={f.family} className="border-b border-rule pb-3 last:border-b-0">
                   <p className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="font-semibold">{f.earned ? f.earned.name : f.name}</span>
-                    <span className="label-px text-muted">{f.earned ? `Tier ${f.earned.tier} of ${f.tiers}` : 'Not yet'}{f.earned && rarity(f.earned.id) !== null ? ` · ${rarity(f.earned.id)}% of anglers` : ''}</span>
+                    <span className="text-sm text-muted">{f.earned ? `Tier ${f.earned.tier} of ${f.tiers}` : 'Not yet'}{f.earned && rarity(f.earned.id) !== null ? ` · ${rarity(f.earned.id)}% of anglers` : ''}</span>
                   </p>
                   {f.earned ? <p className="text-sm text-muted">{f.earned.blurb}</p> : null}
                   {f.next ? <p className="text-sm">Next: {f.next.name} · {Math.min(f.value, f.target).toLocaleString()} of {f.target.toLocaleString()}</p> : <p className="text-sm text-xp-ink">Every tier earned.</p>}

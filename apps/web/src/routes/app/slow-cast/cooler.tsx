@@ -43,7 +43,7 @@ function CoolerPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Cooler</h1>
-        <span className="label-px text-muted">{dock.angler.cooler.name} · {catches.length}/{dock.angler.cooler.capacity} · {dock.angler.gold} coins</span>
+        <span className="text-sm text-muted"><strong className="text-ink">{dock.angler.cooler.name}</strong> · {catches.length} of {dock.angler.cooler.capacity} · <span className="text-gold-ink">{dock.angler.gold} coins</span></span>
       </div>
       {catches.length === 0 ? (
         <Card><p>The cooler is empty. Fish land here as the angler catches them.</p></Card>

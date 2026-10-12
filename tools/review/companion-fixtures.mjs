@@ -5,7 +5,7 @@
  *
  *   node tools/review/companion-fixtures.mjs && pnpm exec vite --config .previews/submission-companion/vite.config.mjs
  *
- * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /leaderboard, /settings). Query parameters:
+ * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
  *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
@@ -215,6 +215,10 @@ import { Route as Hero } from '../../apps/web/src/routes/app/desk-crawler/index'
 import { Route as Bag } from '../../apps/web/src/routes/app/desk-crawler/inventory';
 import { Route as Ranks } from '../../apps/web/src/routes/app/desk-crawler/leaderboard';
 import { Route as Settings } from '../../apps/web/src/routes/app/desk-crawler/settings';
+import { Route as Log } from '../../apps/web/src/routes/app/desk-crawler/log';
+import { Route as DcAchievements } from '../../apps/web/src/routes/app/desk-crawler/achievements';
+import { Route as Keepsakes } from '../../apps/web/src/routes/app/desk-crawler/keepsakes';
+import { Route as Device } from '../../apps/web/src/routes/app/desk-crawler/trmnl';
 import { Route as Profile } from '../../apps/web/src/routes/desk-crawler/heroes.$alias';
 import { Route as ScShell } from '../../apps/web/src/routes/app/slow-cast';
 import { Route as ScDock } from '../../apps/web/src/routes/app/slow-cast/index';
@@ -228,7 +232,7 @@ import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
-const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component,
+const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
   '/app/slow-cast': ScDock.options.component, '/app/slow-cast/cooler': ScCooler.options.component, '/app/slow-cast/shop': ScShop.options.component, '/app/slow-cast/logbook': ScLogbook.options.component, '/app/slow-cast/settings': ScSettings.options.component, '/app/slow-cast/rankings': ScRankings.options.component, '/app/slow-cast/achievements': ScAchievements.options.component };
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);

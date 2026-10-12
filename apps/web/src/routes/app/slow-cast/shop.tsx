@@ -8,7 +8,7 @@ import { preload } from '../../../lib/preload'
 import { formatWeight, type Dock } from '../../../lib/slowCast'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
-import { FishList, baitCatches } from './-fish'
+import { FishList, WaterName, baitCatches } from './-fish'
 import { Rows } from './-rows'
 
 /** The tackle shop: the next rod and cooler, the passes and bait tubs, each at a fixed price and confirmed before buying. */
@@ -67,7 +67,7 @@ function ShopPage() {
               {n === 1 ? 'Buy 1 tub' : `Buy ${n} tubs`}
             </Button>
           ))}
-          {b.tubsThatFit === 0 ? <span className="label-px text-muted">Full</span> : null}
+          {b.tubsThatFit === 0 ? <span className="text-sm text-muted">No room for another tub</span> : null}
         </div>
       </li>
     )
@@ -76,7 +76,7 @@ function ShopPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Tackle shop</h1>
-        <span className="label-px text-gold-ink">{gold} coins</span>
+        <span className="text-sm font-semibold text-gold-ink">{gold} coins</span>
       </div>
 
       <Card title="Rod">
@@ -125,9 +125,9 @@ function ShopPage() {
               <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
                 <div className="min-w-0">
                   <p className="font-semibold">{item.name}</p>
-                  <p className="text-sm text-muted">Lets you fish {water}{gate ? `, which opens after ${gate.species} ${gate.waterName} species (${gate.species - missing} logged)` : ''}.</p>
+                  <p className="text-sm text-muted">Lets you fish <WaterName id={item.water}>{water}</WaterName>{gate ? <>, which opens once {gate.species} <WaterName id={gate.waterId}>{gate.waterName}</WaterName> species are in your logbook ({gate.species - missing} so far)</> : ''}.</p>
                 </div>
-                {item.owned ? <span className="label-px text-xp-ink">Owned</span> : (
+                {item.owned ? <span className="text-sm font-semibold text-xp-ink">Owned</span> : (
                   <Button variant="secondary" disabled={gold < item.price || buying} onClick={() => setOffer({ title: `Buy the ${item.name}?`, price: item.price, rows: [['Opens', water[0]!.toUpperCase() + water.slice(1)], ['Fish there', gate && missing > 0 ? `After ${missing} more ${gate.waterName} species` : 'Straight away']], buy: () => access.run({ access: item.id }, `Bought the ${item.name}.`) })}>
                     Buy for {item.price} coins
                   </Button>

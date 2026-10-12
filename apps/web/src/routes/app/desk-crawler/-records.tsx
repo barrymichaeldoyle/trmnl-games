@@ -32,7 +32,8 @@ function Rank({ stopped }: { stopped: boolean }) {
   )
 }
 
-export function Records({ counters, lifetimeXp, stopped = false }: { counters: Counters; lifetimeXp: number; stopped?: boolean }) {
+/** `withRank` draws the seven-day rank and the link to the Rankings page; the Rankings page itself leaves both out. */
+export function Records({ counters, lifetimeXp, stopped = false, withRank = true }: { counters: Counters; lifetimeXp: number; stopped?: boolean; withRank?: boolean }) {
   // Each record wears its stat's glyph in that stat's ink (the One Meaning Rule); the label still names it.
   const rows: Array<[string, string, GlyphName, string]> = [
     ['Lifetime XP', lifetimeXp.toLocaleString(), 'levelup', 'text-xp-ink'],
@@ -52,11 +53,11 @@ export function Records({ counters, lifetimeXp, stopped = false }: { counters: C
     <section aria-labelledby="records-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
         <SectionTitle id="records-title" glyph="medal">Records</SectionTitle>
-        <Link to="/app/desk-crawler/leaderboard" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
+        {withRank ? <Link to="/app/desk-crawler/leaderboard" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
           All rankings
-        </Link>
+        </Link> : null}
       </div>
-      <Rank stopped={stopped} />
+      {withRank ? <Rank stopped={stopped} /> : null}
       {/* Two columns even on phones: twelve single rows made the section a screen tall. */}
       <dl className="grid grid-cols-2 gap-x-3 min-[480px]:gap-x-6">
         {rows.map(([label, value, glyph, tone]) => (

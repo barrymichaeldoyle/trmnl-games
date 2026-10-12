@@ -8,11 +8,9 @@ import { preload } from '../../lib/preload'
 import { BUTTON_PRIMARY, LINK_BUTTON } from '../../lib/ui'
 import { games } from '@trmnl-games/platform'
 import { gamesQuery, useGames } from '../../lib/gameAccess'
+import { HERO_STATUS, anglerLine } from '../../lib/gameSwitcher'
 
 const dockQuery = convexQuery(api.slowCast.anglers.dock, {})
-
-/** Short library labels; the hero page carries the full status sentence. */
-const STATUS_LABEL: Record<string, string> = { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' }
 
 export const Route = createFileRoute('/app/')({ head: () => seo({ title: 'My games', index: false }), loader: async ({ context }) => {
   await preload(context, convexQuery(api.users.me, {}), gamesQuery)
@@ -33,7 +31,7 @@ function Library() {
             <div>
               <h2 id="library-dc" className="font-display text-2xl font-bold text-gold-ink">Desk Crawler</h2>
               {me?.hero ? (
-                <p className="mt-1 text-muted"><strong className="text-ink">{me.hero.name}</strong> <span className="label-px ml-1">{me.hero.activationState === 'active' ? STATUS_LABEL[me.hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}</span></p>
+                <p className="mt-1 text-muted"><strong className="text-ink">{me.hero.name}</strong> <span className="label-px ml-1">{me.hero.activationState === 'active' ? HERO_STATUS[me.hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}</span></p>
               ) : (
                 <p className="mt-1 text-muted">{me?.gameState === 'deleting' ? 'Removing your game progress…' : 'An office RPG that plays itself on your TRMNL.'}</p>
               )}
@@ -62,7 +60,7 @@ function UpcomingGames() {
         <h2 id="library-sc" className="font-display text-2xl font-bold text-gold-ink">{games['slow-cast'].name}</h2>
       </div>
       {!angler && !loading ? <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen" width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
-      {loading ? null : <p className="text-muted">{angler ? `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}` : games['slow-cast'].description}</p>}
+      {loading ? null : <p className="text-muted">{angler ? anglerLine(angler) : games['slow-cast'].description}</p>}
       {game.status !== 'live' ? <p className="label-px self-start">{game.status === 'hidden' ? 'Hidden: only admins can see this' : 'Coming soon'}</p> : null}
       {game.canOpen && !loading ? <Link to="/app/slow-cast" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{angler ? 'Open Slow Cast' : 'About Slow Cast'}</Link> : null}
     </section>
