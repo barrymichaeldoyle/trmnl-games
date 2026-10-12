@@ -7,10 +7,11 @@ import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
 import { Button, Meter } from '../../../lib/ui'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { LocalTime } from '../../../lib/localTime'
+import { AchievementHint } from './-achievementHint'
 
 type Earned = { id: string; name: string; blurb: string; tier: number; unlockedAt: number | null }
 type Family = { family: string; name: string; category: string; tier: number; tiers: number; earned: Earned | null; next: { id: string; tier: number } | null; value: number; target: number }
-type View = { unlocked: Array<{ id: string }>; families: Family[]; rarity: { counts: Record<string, number>; totalPlayers: number; scoreAt: number } | null }
+type View = { unlocked: Array<{ id: string; unlockedAt: number }>; families: Family[]; rarity: { counts: Record<string, number>; totalPlayers: number; scoreAt: number } | null }
 
 const BAND_TONE: Record<RarityBand, string> = { common: 'text-muted', uncommon: 'text-xp-ink', rare: 'text-rare-ink', legendary: 'text-gold-ink' }
 const BAND_LABEL: Record<RarityBand, string> = { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary' }
@@ -160,8 +161,10 @@ function EarnedSheet({ family, rarity, onClose }: { family: EarnedFamily | null;
 
 /** The case at the top: how much of the collection is found, the rarest one held and the latest. Rarest and latest open their sheets. */
 function Summary({ view, earned, onOpen }: { view: View; earned: EarnedFamily[]; onOpen: (family: string) => void }) {
+  // Only what the last hourly tally has counted: one earned since then would read as held by nobody.
+  const counted = (f: EarnedFamily) => (view.rarity?.counts[f.earned.id] ?? 0) > 0
   const share = (f: EarnedFamily) => (view.rarity && view.rarity.totalPlayers > 0 ? (view.rarity.counts[f.earned.id] ?? 0) / view.rarity.totalPlayers : 1)
-  const rarest = view.rarity ? earned.reduce<EarnedFamily | null>((best, f) => (best === null || share(f) < share(best) ? f : best), null) : null
+  const rarest = view.rarity ? earned.filter(counted).reduce<EarnedFamily | null>((best, f) => (best === null || share(f) < share(best) ? f : best), null) : null
   const latest = earned.reduce<EarnedFamily | null>((best, f) => ((f.earned.unlockedAt ?? 0) > (best?.earned.unlockedAt ?? 0) ? f : best), null)
   // The next tier nearest to coming, by share of its target: something to look forward to, never a task.
   const progress = (f: EarnedFamily) => (f.next && f.target > 0 ? Math.min(f.value, f.target) / f.target : -1)
@@ -188,6 +191,7 @@ function Summary({ view, earned, onOpen }: { view: View; earned: EarnedFamily[];
           ))}
         </dl>
       ) : null}
+      <AchievementHint families={view.families} latestAt={view.unlocked.length > 0 ? Math.max(...view.unlocked.map((u) => u.unlockedAt)) : null} />
       {view.rarity ? <p className="text-xs text-muted">Rarity is the share of ranked heroes holding each one, as of the last hourly update.</p> : null}
     </div>
   )

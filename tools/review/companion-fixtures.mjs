@@ -8,7 +8,7 @@
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
  *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
- *   achievements=1 (a veteran's achievement shelves over 41 heroes)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
+ *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
@@ -90,6 +90,7 @@ if (flag('achievements')) {
   counts[a.families[2].earned?.id] = 1;
   a.unlocked = unlocked; a.rarity = { counts, totalPlayers: 41, scoreAt: now - 1800000 };
 }
+if (flag('fresh') && data.achievements.unlocked.length) data.achievements.unlocked[0].unlockedAt = Date.now() - 600000; // an achievement ten minutes ago hides the hint (D127)
 if (flag('quiet')) { data.log = []; data.achievements.families.forEach((f) => { f.earned = null }); data.achievements.unlocked = [] }
 const raidsOn = flag('raids');
 if (flag('public')) hero.publicProfile = true;
