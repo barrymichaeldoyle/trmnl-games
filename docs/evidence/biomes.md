@@ -1,6 +1,6 @@
 # The Archive and the Parking Garage, with field notes: build evidence (D133)
 
-Date: 2026-10-12 · Simulation version 1 · Content v16 (production switch from v15 pending) · Achievement catalog version 7 · Harness: `pnpm balance --heroes 300 --days 90 --content v16 --json docs/evidence/balance-v16-biomes-90-days.json` against the v15 run from D132 ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw reports: [v16](balance-v16-biomes-90-days.json), [v15 baseline](balance-v15-stances-90-days.json).
+Date: 2026-10-12 · Simulation version 1 · Content v16 (live in production since about 19:10 UTC the same day; run 818, the first on v16, completed clean) · Achievement catalog version 7 · Harness: `pnpm balance --heroes 300 --days 90 --content v16 --json docs/evidence/balance-v16-biomes-90-days.json` against the v15 run from D132 ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw reports: [v16](balance-v16-biomes-90-days.json), [v15 baseline](balance-v15-stances-90-days.json).
 
 ## What was built
 

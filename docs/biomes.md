@@ -1,6 +1,6 @@
 # The Archive and the Parking Garage, with field notes
 
-Status: built 2026-10-12 as content v16 (D133, [evidence](evidence/biomes.md)); the production switch from v15 is Barry's. Two floors below the Cafeteria Depths, and a bestiary-style lore layer for all five floors and twenty monsters.
+Status: built and live 2026-10-12 as content v16 (D133, [evidence](evidence/biomes.md)); production switched from v15 at about 19:10 UTC, run 818 clean. Two floors below the Cafeteria Depths, and a bestiary-style lore layer for all five floors and twenty monsters.
 
 ## Why now
 
