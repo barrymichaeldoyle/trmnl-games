@@ -162,7 +162,7 @@ export function ReturnNudge() {
   return (
     <Link to="/app/desk-crawler/log" className="flex min-h-11 items-center justify-between gap-3 border-[3px] border-gold px-3 py-2 text-sm">
       <span className="min-w-0"><strong className="text-gold-ink">While you were away:</strong> {parts.join(', ')}</span>
-      <span className="label-px flex shrink-0 items-center gap-1.5 whitespace-nowrap text-gold-ink">See the log <Glyph name="play" size={8} /></span>
+      <span className="flex shrink-0 items-center gap-1.5 font-semibold whitespace-nowrap text-gold-ink">See the log <Glyph name="play" size={8} /></span>
     </Link>
   )
 }

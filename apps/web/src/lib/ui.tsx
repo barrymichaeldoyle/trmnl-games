@@ -137,7 +137,8 @@ export function Meter({ label, value, max, tone = 'xp' }: { label: string; value
   return (
     <div className="min-w-0">
       <div className="flex flex-wrap items-baseline justify-between gap-x-2 text-sm">
-        <span className={`label-px ${METER_INK[tone]}`}>{label}</span>
+        {/* Sentence case: every meter sits in reading content, not in a HUD panel, so its label reads as a word, not a tag. */}
+        <span className={`font-semibold ${METER_INK[tone]}`}>{label}</span>
         <span className="min-w-0 max-w-full tabular-nums [overflow-wrap:anywhere]">
           {value}/{max}
         </span>
