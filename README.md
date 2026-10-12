@@ -13,7 +13,7 @@ Confirmed on 2026-10-03:
 - Month 1: one Warrior class, three office biomes (five since content v16: the Archive and the Parking Garage follow the Cafeteria), forgiving death and automatic revival.
 - Public **Third Party marketplace plugin** with TRMNL OAuth from the first release.
 - TRMNL-exclusive MVP: a verified saved installation activates the hero; the web app is its companion.
-- Free gameplay; TRMNL Creator Fund is the intended sole MVP revenue source, subject to eligibility and actual payouts.
+- Free gameplay; the TRMNL Creator Fund is the main revenue source, with an optional GitHub Sponsors link that changes nothing in play (D134).
 - TanStack Start + Vite + Clerk + Convex; Cloudflare Workers hosts the web app.
 - Continuous integration and delivery; monthly themes group larger improvements. No separate beta program.
 - Use existing Convex, Clerk, and Resend subscriptions; keep additional costs low.

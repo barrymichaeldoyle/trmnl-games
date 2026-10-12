@@ -35,6 +35,7 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `merchant purchase` | Browser, after `inventory.buyOffer` commits (D78) | `offer` (`potions`, `pouch` or `bag`) |
 | `pouch bought` | Browser, after `inventory.buyPouch` commits (D77) | `tier` |
 | `potion combined` | Browser, after `inventory.combinePotions` commits (D131) | `batches` |
+| `sponsor link opened` | Browser, on a click of the GitHub Sponsors link (D134) | `place` (`more` or `footer`) |
 | `bag bought` | Browser, after `inventory.buyBag` commits (D61) | `tier` |
 | `waitlist joined` | Browser, after `waitlist.join` or `waitlist.joinWithAccount` succeeds (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); never the email |
 | `feedback sent` | Browser, after `feedback.send` succeeds (D107) | none; never the message |

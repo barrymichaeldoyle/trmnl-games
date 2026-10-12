@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState, type ReactNode } from 'react'
-import { analyticsConfigured, openAnalyticsPreferences } from './analytics'
+import { analyticsConfigured, captureAnalytics, openAnalyticsPreferences } from './analytics'
 import { PlatformHeader } from './platformHeader'
 
 /**
@@ -53,7 +53,10 @@ export function SiteLinks({ className = '' }: { className?: string }) {
           <a href="https://x.com/barrymdoyle" className="underline underline-offset-4">X</a>
         </p>
         <p>Also for TRMNL: <a href="https://trmnl.com/recipes/485545" className="underline underline-offset-4">Formula 1 Race Weekend</a>, powered by <a href="https://grandprixpicks.com" className="underline underline-offset-4">GrandPrixPicks.com</a>.</p>
-        <p><a href="https://github.com/barrymichaeldoyle/trmnl-games" className="underline underline-offset-4">Source on GitHub</a></p>
+        <p>
+          <a href="https://github.com/barrymichaeldoyle/trmnl-games" className="underline underline-offset-4">Source on GitHub</a>{' · '}
+          <a href={SPONSOR_URL} className="underline underline-offset-4" onClick={() => captureAnalytics('sponsor link opened', { place: 'footer' })}>Sponsor on GitHub</a>
+        </p>
       </div>
     </footer>
   )
@@ -67,6 +70,8 @@ function AnalyticsLink() {
 }
 
 export const SUPPORT_EMAIL = 'barry@barrymichaeldoyle.com'
+/** Optional support for the games (D134): a plain link out, with nothing in play attached to it. */
+export const SPONSOR_URL = 'https://github.com/sponsors/barrymichaeldoyle'
 /** One release status line, shared by the public pages and the companion's start card. */
 export const RELEASE_STATUS = 'Free. Awaiting TRMNL marketplace review.'
 /** Shown on the privacy and terms pages; bump whenever either changes. */

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ProsePage, SUPPORT_EMAIL } from '../lib/prose'
+import { ProsePage, SPONSOR_URL, SUPPORT_EMAIL } from '../lib/prose'
 import { seo } from '../lib/seo'
 
 export const Route = createFileRoute('/support')({
@@ -20,6 +20,11 @@ export const Route = createFileRoute('/support')({
           Setup and screen questions: see <a href="/help/desk-crawler">TRMNL help</a>.
         </li>
       </ul>
+      <h2>Supporting the games</h2>
+      <p>
+        Desk Crawler is free to play and stays that way. If you want to chip in towards running it, you can <a href={SPONSOR_URL}>sponsor Barry on GitHub</a>.
+        Sponsoring is optional and changes nothing in the game: no gold, gear, XP or rank.
+      </p>
       <h2>Public names</h2>
       <p>
         Public names may not contain hateful or sexual content, threats or harassment, contact details, or impersonation of other players or staff.

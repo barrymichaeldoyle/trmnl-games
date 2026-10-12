@@ -1,6 +1,8 @@
 import { Link } from '@tanstack/react-router'
 import { Card } from '../../../lib/ui'
 import { Glyph, type GlyphName } from '../../../lib/glyphs'
+import { captureAnalytics } from '../../../lib/analytics'
+import { SPONSOR_URL } from '../../../lib/prose'
 
 /** The More tab's pages (D124), each a row with its glyph: what the Hero tab used to hold under the world map. */
 const MORE_LINKS = [
@@ -27,6 +29,16 @@ export function MoreLinks() {
             </Link>
           </li>
         ))}
+        {/* The one way to give money (D134): optional, off-site, and nothing in the game changes for it. */}
+        <li>
+          <a href={SPONSOR_URL} className="flex min-h-12 items-center gap-3 py-2" onClick={() => captureAnalytics('sponsor link opened', { place: 'more' })}>
+            <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center border-2 border-night bg-night text-gold-ink"><Glyph name="heart" size={20} /></span>
+            <span className="flex min-w-0 flex-col">
+              <span className="font-semibold underline underline-offset-4">Sponsor on GitHub</span>
+              <span className="text-sm text-muted">Help keep the games running. Optional; nothing in play changes.</span>
+            </span>
+          </a>
+        </li>
       </ul>
     </Card>
   )

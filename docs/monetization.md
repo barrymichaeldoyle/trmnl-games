@@ -2,7 +2,7 @@
 
 ## Confirmed direction
 
-Desk Crawler's MVP is exclusively for TRMNL users, with a free companion website and public sample preview. The TRMNL Creator Fund is the intended sole revenue source. No player subscriptions, purchases, ads, paid resurrection or reward boosts are planned.
+Desk Crawler's MVP is exclusively for TRMNL users, with a free companion website and public sample preview. The TRMNL Creator Fund is the main revenue source. The only other one is an optional [GitHub Sponsors](https://github.com/sponsors/barrymichaeldoyle) link (D134) in the companion's More tab, the site footer and the Support page. Sponsoring changes nothing in play: no gold, gear, XP, rank or cosmetic. No player subscriptions, in-game purchases, ads, paid resurrection or reward boosts are planned.
 
 A saved installation is required once to activate a hero. Removing installations afterwards preserves the hero and passive progress. A premium experience means polished setup, readable e-ink, authored content, reliable progression and support.
 
@@ -35,4 +35,4 @@ Improve retention by making the screen useful and delightful. Respect mixed play
 
 D46 adds optional [Desk keepsakes](playlist-retention.md): a permanent cosmetic collection claimed with a weekly screen code, hidden from the companion preview. One per account/week, with cached-screen grace and no missed-week penalty, extra XP or ranking benefit. Requests alone never award keepsakes. This encourages watching the game but cannot prove playlist inclusion or hardware display; TRMNL’s own dashboard preview can also reveal the code. No guaranteed Creator Fund revenue is assumed.
 
-Review current fund rules and costs monthly. Any future paid tier, broader platform support or inactivity/progression policy requires a separate explicit product decision.
+Review current fund rules and costs monthly. A supporter mark linked to a GitHub account was discussed on 2026-10-12 and deferred: it would need a Clerk GitHub connection, Sponsors webhooks and opt-in display, because GitHub lets sponsors stay private. Any future paid tier, broader platform support or inactivity/progression policy requires a separate explicit product decision.
