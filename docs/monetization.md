@@ -2,7 +2,7 @@
 
 ## Confirmed direction
 
-Desk Crawler's MVP is exclusively for TRMNL users, with a free companion website and public sample preview. The TRMNL Creator Fund is the main revenue source. The only other one is an optional [GitHub Sponsors](https://github.com/sponsors/barrymichaeldoyle) link (D134) in the companion's More tab, the site footer and the Support page. Sponsoring changes nothing in play: no gold, gear, XP, rank or cosmetic. No player subscriptions, in-game purchases, ads, paid resurrection or reward boosts are planned.
+Desk Crawler's MVP is exclusively for TRMNL users, with a free companion website and public sample preview. The TRMNL Creator Fund is the main revenue source. The only other one is an optional [GitHub Sponsors](https://github.com/sponsors/barrymichaeldoyle) link (D134) in the companion's More tab, the site footer and the Support page. Sponsoring changes nothing in play: no gold, gear, XP, rank or cosmetic. On 2026-10-12 TRMNL's published fund posts, marketplace going-live steps and plugin licence had no rule on donations, sponsorships or payment links (D134). No player subscriptions, in-game purchases, ads, paid resurrection or reward boosts are planned.
 
 A saved installation is required once to activate a hero. Removing installations afterwards preserves the hero and passive progress. A premium experience means polished setup, readable e-ink, authored content, reliable progression and support.
 
