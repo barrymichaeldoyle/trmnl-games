@@ -1,5 +1,6 @@
 import type { ContentCatalog, Modifiers } from '../sim/core/types'
 import { zeroCounters } from '../sim/core/starter'
+import { inventoryRowsNeeded, workbenchProblems } from '../sim/core/workbench'
 
 /** Content limits from the specs: name budgets (domain-contracts.md) and the D26 content floor. */
 export const CONTENT_LIMITS = {
@@ -259,8 +260,9 @@ export function validateCatalog(content: ContentCatalog): string[] {
       if (tier.milestone === undefined && tier.price !== undefined && tier.price <= (tiers[i - 1]!.price ?? 0)) problems.push(`bag ${tier.id} must cost more than the previous tier`)
     }
   })
-  // Bounded reads (MAX_INVENTORY_ROWS): bag + two equipped + held + potion.
-  if (Math.max(...tiers.map((tier) => tier.capacity)) + 4 > 32) problems.push('bag capacity exceeds the 32-row inventory read')
+  // Bounded reads (MAX_INVENTORY_ROWS): bag + two equipped + held + the stack rows (potion, and D129 materials).
+  if (inventoryRowsNeeded(content) > 32) problems.push('bag capacity exceeds the 32-row inventory read')
+  problems.push(...workbenchProblems(content))
   const permille = content.bagLadder.findPermille
   if (!Number.isSafeInteger(permille) || permille < 0 || permille > 1000) problems.push('bag find chance must be 0–1000 permille')
   for (const [id, lines] of Object.entries(content.narrative.monsters)) {

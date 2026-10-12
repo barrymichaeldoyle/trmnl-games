@@ -1,6 +1,6 @@
 # Salvage and the workbench: materials, upgrades and reinforcement (D129)
 
-Proposed 2026-10-12 as P36 and approved as D129 the same day, when Barry handed over the open points ("just go with what you think is best"). Not built: it is the design amendment the [roadmap](roadmap.md) requires before v2.0 Depth starts, covering its first two slices together: salvage (P26) and owned-gear upgrades (P27), with O13 settled. Potion strengths (P30), bigger bags, legendary gear and elite encounters stay separate slices and are only named where this design must leave room for them.
+Proposed 2026-10-12 as P36 and approved as D129 the same day, when Barry handed over the open points ("just go with what you think is best"). Built the same day as content v13 through slices W1 to W4 ([evidence](evidence/workbench.md)); the production switch (W5) waits on Barry. It is the design amendment the [roadmap](roadmap.md) requires before v2.0 Depth starts, covering its first two slices together: salvage (P26) and owned-gear upgrades (P27), with O13 settled. Potion strengths (P30), bigger bags, legendary gear and elite encounters stay separate slices and are only named where this design must leave room for them.
 
 Companions: [inventory](inventory.md) (the bag, sale and sleep rules this extends), [achievements](achievements.md) (the counters and the next catalog version), [objectives](objectives.md) (D128, whose ladder gains rungs for the new actions) and the [gold-only ladders evidence](evidence/gold-only-ladders.md) (the gold figures that motivate this release).
 
@@ -117,11 +117,11 @@ The harness gains a workbench policy for its managed cohorts: salvage everything
 
 | Slice | Scope | Done when |
 | --- | --- | --- |
-| W1 Rules and harness | Content v13 `workbench` rule and validator, `material` item kind, `tier` and `reinforced` fields, pure functions `salvageYield`, `nextStep`, `applyStep`, `applyAffix`, `bagUsed` counting gear only, invariants, derived read bound, counters. Harness workbench policy and the v12 90-day baseline | v12 replays unchanged seed by seed; every step costs more than the yield of its result; the 90-day report shows gold at days 30/60/90 and the +3 day per cohort |
-| W2 Backend | Schema (additive), the three intents, `inventory.mine` additions, command log lines, counters written | Duplicate receipts cannot salvage, upgrade or pay twice; an equipped item cannot be salvaged; a held item cannot be upgraded; refusals name the shortfall; no new reads per tick |
-| W3 Companion and help | Salvage beside Sell (sheet and multi-select), Materials strip, Workbench card and affix picker, help section from the catalog, analytics | Phone previews pass at 390 wide with the longest label ("Vampiric Rare Insulated Cardigan Mk III +3") |
-| W4 Achievements and career | Next achievement catalog version with Salvaged and Workbench; ladder rungs 20 to 22 under v13 | Rarity publishes for both families; a hero at rung 19 moves to rung 20 on the switch with no payment |
-| W5 Evidence and switch | Evidence page with the harness tables, gate below, production switch between runs | First v13 run completes clean; existing heroes keep every item, stat and rank |
+| W1 Rules and harness (done 2026-10-12) | Content v13 `workbench` rule and validator, `material` item kind, `tier` and `reinforced` fields, pure functions `salvageYield`, `nextStep`, `applyStep`, `applyAffix`, `bagUsed` counting gear only, invariants, derived read bound, counters. Harness workbench policy and the v12 90-day baseline | v12 replays unchanged seed by seed; every step costs more than the yield of its result; the 90-day report shows gold at days 30/60/90 and the +3 day per cohort |
+| W2 Backend (done 2026-10-12) | Schema (additive), the three intents, `inventory.mine` additions, command log lines, counters written | Duplicate receipts cannot salvage, upgrade or pay twice; an equipped item cannot be salvaged; a held item cannot be upgraded; refusals name the shortfall; no new reads per tick |
+| W3 Companion and help (done 2026-10-12) | Salvage beside Sell (sheet and multi-select), Materials strip, Workbench card and affix picker, help section from the catalog, analytics | Phone previews pass at 390 wide with the longest label ("Vampiric Rare Insulated Cardigan Mk III +3") |
+| W4 Achievements and career (done 2026-10-12) | Next achievement catalog version with Salvaged and Workbench; ladder rungs 20 to 22 under v13 | Rarity publishes for both families; a hero at rung 19 moves to rung 20 on the switch with no payment |
+| W5 Evidence and switch (evidence done 2026-10-12; switch waits on Barry) | Evidence page with the harness tables, gate below, production switch between runs | First v13 run completes clean; existing heroes keep every item, stat and rank |
 
 Gate (from the roadmap's v2.0 gate, narrowed to these slices): existing items replay identically under v13; no step can be paid twice; no item can be made unequippable by its owner; a sleeping hero can still free its bag; no new per-tick reads; the derived read bound holds; and the harness shows the gold hoard falling without the Cafeteria knockout rate rising past the v12 baseline by more than the measured +3 effect.
 
@@ -134,3 +134,15 @@ Settled 2026-10-12 when Barry handed over the open points; each went the way the
 3. **Names and glyphs stay Scrap, Parts and Components** with the paperclip, screwdriver and circuit board; W3 may swap a name that does not fit the phone strip, nothing else.
 4. **The step table is the harness's starting point.** Two constraints survive tuning: salvage after upgrade is always a loss, and the +3 pair costs more than a daily manager holds at day 30.
 5. **No refund on salvaging upgraded gear.** The sheet shows the yield before the player confirms, and a refund rule invites loops.
+
+## Changes while building
+
+Recorded 2026-10-12, W1 to W4 ([evidence](evidence/workbench.md)).
+
+1. **Salvage pays the tier a piece was found at, not its current tier.** The spec's "an upgraded item yields by its current tier" would have let Scrap plus gold become Components: an epic tier-1 find raised to Mk II for 6 Scrap and 150 gold would have salvaged for 6 Components. Yields now ignore `tier`, so no step can raise a yield and the validator's loss rule becomes "every step costs something". The sheet says so: "Salvaging it later still pays what it was found at, not what was spent."
+2. **The error code is `WORKBENCH_UNAVAILABLE`**, in the style of `BAG_UNAVAILABLE`, rather than the spec's `UNAVAILABLE`.
+3. **The workbench is one card on the Bag page**, after the gear window, rather than a card inside each equipped item's sheet: the materials strip, then one row per equipped piece with its next step, price, resulting stat, shortfall and (for rare and epic) Choose affix. The item sheet keeps Salvage beside Sell and shows the yield. One place to read on a phone, and the sheet stays short.
+4. **Rung 22 reads a counter.** "Reinforce an item to +3" is `topReinforcement ≥ 3`, a grow-only counter of the highest reinforcement any item reached, written by the upgrade intent, so career predicates stay over bounded counters and the ladder needs no inventory read.
+5. **The harness sells until both ladders are bought, then salvages**, and never chooses an affix (it cannot judge one). Weapon steps are applied before armor steps at each visit.
+6. **Materials sit in the Workbench card**, not under the potion row of the Equipped card, which has no room for a fourth column at 320 px.
+7. **`inventory.mine` carries the view**: `materials`, `workbench` (affix price and list) and per item `salvage`, `suffix`, `reinforced`, `nextStep` and `affixable`, so the page never recomputes catalog rules.

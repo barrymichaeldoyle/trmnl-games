@@ -3,6 +3,7 @@ import { potionCap } from './pouch'
 import { maxHp, xpToLeave } from './stats'
 import { todoProblems } from './todo'
 import { careerProblems } from './career'
+import { isGear, itemProblems } from './workbench'
 import type { ContentCatalog, HeroState, ItemSnapshot } from './types'
 
 /** A recognized pure-core failure. The adapter quarantines the hero; it never retries blindly. */
@@ -92,6 +93,7 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
   if (inventory.length > MAX_INVENTORY_ROWS) fail('INVENTORY_SIZE', `${inventory.length} rows`)
   const ids = new Set<string>()
   let potionRows = 0
+  const materialRows = new Set<string>()
   for (let i = 0; i < inventory.length; i += 1) {
     const item = inventory[i]!
     if (ids.has(item.id)) fail('ITEM_DUPLICATE', item.id)
@@ -103,8 +105,20 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
     if (item.kind === 'potion') {
       potionRows += 1
       if (item.quantity < 1 || item.quantity > potionCap(content, hero)) fail('POTION_QTY', `potion quantity ${item.quantity}`)
+    } else if (item.kind === 'material') {
+      // D129: one row per material kind, checked under a catalog that knows the workbench; an earlier catalog carries it.
+      if (materialRows.has(item.templateId)) fail('MATERIAL_ROWS', `two rows of ${item.templateId}`)
+      materialRows.add(item.templateId)
+      if (item.quantity < 1) fail('MATERIAL_QTY', `material quantity ${item.quantity}`)
+      if (content.workbench !== undefined) {
+        const problem = itemProblems(content, item)
+        if (problem !== undefined) fail('MATERIAL', problem)
+      }
     } else if (item.quantity !== 1) {
       fail('GEAR_QTY', `gear ${item.id} quantity ${item.quantity}`)
+    } else {
+      const problem = itemProblems(content, item)
+      if (problem !== undefined) fail('WORKBENCH', problem)
     }
   }
   if (potionRows > 1) fail('POTION_ROWS', 'more than one potion stack')
@@ -114,7 +128,7 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
     if (id === undefined) return
     const item = byId.get(id)
     if (item === undefined) fail(code, `missing item ${id}`)
-    else if (kind === 'gear' ? item.kind === 'potion' : item.kind !== kind) fail(code, `item ${id} has wrong kind`)
+    else if (kind === 'gear' ? !isGear(item.kind) : item.kind !== kind) fail(code, `item ${id} has wrong kind`)
   }
   ref(hero.weaponId, 'weapon', 'WEAPON_REF')
   ref(hero.armorId, 'armor', 'ARMOR_REF')

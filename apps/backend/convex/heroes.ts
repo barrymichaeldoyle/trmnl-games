@@ -4,6 +4,7 @@ import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
+import { isGear } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { appError } from './lib/errors'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
 import { deriveStats } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -399,7 +400,7 @@ export const returnSummary = query({
       .query('items')
       .withIndex('by_heroId', (q) => q.eq('heroId', hero._id))
       .take(40)
-    const unequipped = items.filter((item) => item.kind !== 'potion' && item._id !== hero.weaponId && item._id !== hero.armorId && item._id !== hero.heldItemId).length
+    const unequipped = items.filter((item) => isGear(item.kind) && item._id !== hero.weaponId && item._id !== hero.armorId && item._id !== hero.heldItemId).length
     const baseline = hero.companionVisitBaseline ?? null
     return {
       baseline,

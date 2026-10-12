@@ -1,4 +1,5 @@
 import type { BagLadder, BagTier, ContentCatalog, HeroState, ItemSnapshot } from './types'
+import { isGear } from './workbench'
 
 /**
  * Bag capacity rules (D61). Each hero stores a capacity from the content's
@@ -12,7 +13,8 @@ type ProgressHero = Pick<HeroState, 'level' | 'counters' | 'bagCapacity'>
 /** Gear occupying bag slots. */
 export function bagUsed(hero: BagHero, inventory: readonly Pick<ItemSnapshot, 'id' | 'kind'>[]): number {
   const outside = new Set([hero.heldItemId, hero.weaponId, hero.armorId])
-  return inventory.filter((item) => item.kind !== 'potion' && !outside.has(item.id)).length
+  // D129: potions and materials are stack rows outside the bag.
+  return inventory.filter((item) => isGear(item.kind) && !outside.has(item.id)).length
 }
 
 export function isBagFull(hero: BagHero & Pick<HeroState, 'bagCapacity'>, inventory: readonly Pick<ItemSnapshot, 'id' | 'kind'>[]): boolean {

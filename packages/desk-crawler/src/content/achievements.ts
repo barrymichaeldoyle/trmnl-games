@@ -8,7 +8,7 @@ import type { NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 4
+export const ACHIEVEMENTS_VERSION = 5
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -308,6 +308,19 @@ counter('tasks_done', 'Tasks done', 'Lifetime', 'tasksCompleted', [1, 10, 50, 25
   ['Inbox Zero-ish', 'Ten tasks ticked off.'],
   ['Getting Things Done', 'Fifty tasks ticked off without a single reminder.'],
   ['Employee of the Month', 'Two hundred and fifty tasks ticked off.'],
+])
+
+// ---------------------------------------------------------------- v2.0 Salvage and the workbench (catalog version 5, D129; appended, never edited)
+
+counter('salvaged', 'Salvaged', 'Lifetime', 'itemsSalvaged', [1, 25, 100], [
+  ['Recycling Bin', 'Stripped a piece of gear for parts instead of selling it.'],
+  ['Spare Parts Drawer', 'Twenty-five pieces broken down. The drawer rattles.'],
+  ['Scrapyard Foreman', 'A hundred pieces salvaged. Nothing leaves this office whole.'],
+])
+counter('workbench', 'Workbench', 'Lifetime', 'gearUpgraded', [1, 5, 15], [
+  ['Tinkerer', 'Took a piece of gear to the workbench and made it better.'],
+  ['Shop Steward', 'Five workbench jobs. The bench has a dent now.'],
+  ['Master of the Works', 'Fifteen jobs, and a sign on the bench that says so.'],
 ])
 
 /** Families in display order. */

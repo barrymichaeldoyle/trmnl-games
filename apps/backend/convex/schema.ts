@@ -28,7 +28,8 @@ export const heroStatus = v.union(
 )
 
 export const rarity = v.union(v.literal('common'), v.literal('uncommon'), v.literal('rare'), v.literal('epic'))
-export const itemKind = v.union(v.literal('weapon'), v.literal('armor'), v.literal('potion'))
+/** D129: `material` rows are the workbench's stack rows, outside the bag like potions. */
+export const itemKind = v.union(v.literal('weapon'), v.literal('armor'), v.literal('potion'), v.literal('material'))
 
 /**
  * Lifetime counters (D65): grow-only safe integers; `monsterWins` is keyed by catalog monster id.
@@ -74,6 +75,10 @@ export const heroCounters = v.object({
   /** P35: gear equipped in the companion, and career rungs reached. */
   itemsEquipped: v.optional(v.number()),
   careerRungs: v.optional(v.number()),
+  /** D129: gear salvaged, workbench steps applied, and the highest reinforcement reached. */
+  itemsSalvaged: v.optional(v.number()),
+  gearUpgraded: v.optional(v.number()),
+  topReinforcement: v.optional(v.number()),
 })
 
 /** P35: the hero's place on the career ladder, written by the simulator. */
@@ -435,6 +440,9 @@ export default defineSchema({
     createdAt: v.number(),
     /** D81: affix rolled at generation; absent on common, uncommon and older gear. */
     affixId: v.optional(v.string()),
+    /** D129: the tier the workbench raised the item to and its reinforcement; absent on untouched gear. */
+    tier: v.optional(v.number()),
+    reinforced: v.optional(v.number()),
   })
     .index('by_heroId', ['heroId'])
     .index('by_heroId_and_kind', ['heroId', 'kind']),

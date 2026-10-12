@@ -6,6 +6,7 @@
  *   node tools/review/companion-fixtures.mjs && pnpm exec vite --config .previews/submission-companion/vite.config.mjs
  *
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
+ *   workbench=1 (D129, default: a few materials and the workbench card)   workbench=rich (every job affordable)   workbench=done (a +3 weapon)   workbench=0 (no workbench)
  *   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
@@ -116,6 +117,32 @@ if (raidsOn) {
   );
 }
 if (long) inventory.gear.filter((g) => !g.equipped).slice(0, 2).forEach((g) => { g.label = 'Rare Microwave-Slaying ' + g.name + ' of the Cafeteria Depths'; g.rarity = 'rare' });
+// D129: the workbench. Every piece gets its salvage yield and next step; workbench=rich holds the materials and gold for every job,
+// workbench=done shows a fully reinforced weapon, workbench=0 hides it (a catalog without one).
+const wb = params.get('workbench') ?? '1';
+const MATERIAL_OF = { common: 'scrap', uncommon: 'parts', rare: 'components', epic: 'components' };
+const TIER_OF = { letter_opener: 1, ruler_blade: 1, cardigan: 1, lanyard_mail: 1, cable_cutter: 2, keyboard_mace: 2, insulated_cardigan: 2, anti_static_vest: 2, ladle_of_ruin: 3, spork_halberd: 3, apron_of_warding: 3, oven_mitt_plate: 3 };
+const STEPS = [{ kind: 'tier', to: 2, label: 'Upgrade to Mk II', gold: 150, materials: { scrap: 6 } }, { kind: 'tier', to: 3, label: 'Upgrade to Mk III', gold: 500, materials: { scrap: 6, parts: 4 } }, { kind: 'reinforce', to: 1, label: 'Reinforce to +1', gold: 1000, materials: { scrap: 8, parts: 2 } }, { kind: 'reinforce', to: 2, label: 'Reinforce to +2', gold: 3000, materials: { scrap: 12, parts: 4, components: 1 } }, { kind: 'reinforce', to: 3, label: 'Reinforce to +3', gold: 8000, materials: { scrap: 16, parts: 6, components: 2 } }];
+inventory.materials = wb === '0' ? [] : [{ id: 'scrap', name: 'Scrap', glyph: 'scrap', count: wb === 'rich' ? 60 : 7 }, { id: 'parts', name: 'Parts', glyph: 'parts', count: wb === 'rich' ? 20 : 1 }, { id: 'components', name: 'Components', glyph: 'components', count: wb === 'rich' ? 6 : 0 }];
+inventory.workbench = wb === '0' ? null : { affix: { gold: 1500, materials: { components: 2 } }, affixes: [{ id: 'vampiric', name: 'Vampiric', blurb: 'Heals 5% of maximum HP after every win.' }, { id: 'lucky', name: 'Lucky', blurb: 'Adds 20% gold from wins and finds.' }, { id: 'sturdy', name: 'Sturdy', blurb: 'Takes 40% less damage from traps.' }, { id: 'thrifty', name: 'Thrifty', blurb: 'A retreat costs nothing and a knockout costs 5% of gold instead of 10%.' }] };
+if (wb === 'rich') hero.gold = 24000;
+if (wb === 'done') { const w = inventory.gear.find((g) => g.equipped && g.kind === 'weapon'); if (w) { w.tier = 3; w.reinforced = 3; w.suffix = 'Mk III +3'; w.rarity = 'rare'; w.affix = { id: 'lucky', name: 'Lucky', blurb: 'Adds 20% gold from wins and finds.' }; w.label = 'Lucky Rare ' + w.name + ' Mk III +3' } }
+const decorateGear = () => {
+  const held = Object.fromEntries(inventory.materials.map((m) => [m.id, m.count]));
+  inventory.gear.forEach((g) => {
+    const tier = TIER_OF[g.templateId] ?? 1;
+    g.salvage = wb === '0' ? {} : { [MATERIAL_OF[g.rarity]]: tier * (g.rarity === 'epic' ? 3 : 1) };
+    g.suffix = g.suffix ?? ''; g.reinforced = g.reinforced ?? 0;
+    g.affixable = wb !== '0' && (g.rarity === 'rare' || g.rarity === 'epic');
+    if (wb === '0') { g.nextStep = null; return }
+    const step = g.reinforced >= 3 ? null : STEPS.find((s) => (s.kind === 'tier' ? s.to === (g.tier ?? tier) + 1 : (g.tier ?? tier) === 3 && s.to === g.reinforced + 1)) ?? null;
+    if (!step) { g.nextStep = null; return }
+    const shortfall = Object.fromEntries(Object.entries(step.materials).filter(([id, n]) => (held[id] ?? 0) < n).map(([id, n]) => [id, n - (held[id] ?? 0)]));
+    const requiredLevel = step.kind === 'tier' ? [1, 1, 4, 8][step.to] : g.requiredLevel;
+    const from = g.kind === 'weapon' ? g.attack : g.defense;
+    g.nextStep = { kind: step.kind, label: step.label, gold: step.gold, materials: step.materials, stat: { from, to: from + (step.kind === 'tier' ? 4 : 1) }, requiredLevel, shortfall, affordable: Object.keys(shortfall).length === 0 && hero.gold >= step.gold && requiredLevel <= hero.level };
+  });
+};
 const templates = ['letter_opener', 'ruler_blade', 'cable_cutter', 'keyboard_mace', 'ladle_of_ruin', 'spork_halberd', 'cardigan', 'lanyard_mail', 'insulated_cardigan', 'anti_static_vest', 'apron_of_warding', 'oven_mitt_plate'];
 if (many > 0) {
   const spare = inventory.gear.filter((g) => !g.equipped && !g.held);
@@ -123,6 +150,7 @@ if (many > 0) {
   inventory.capacity = Math.max(inventory.capacity, many); inventory.used = many;
 }
 if (held) { inventory.gear.unshift({ id: 'held', kind: 'weapon', templateId: 'spork_halberd', name: 'Spork Halberd', label: 'Rare Spork Halberd', rarity: 'rare', requiredLevel: 4, attack: 11, defense: 0, saleValue: 19, affix: null, equipped: false, held: true }); inventory.heldItemId = 'held'; inventory.used = inventory.capacity; inventory.canResume = false }
+decorateGear();
 // P35: career=1 gives the hero its place on the ladder (goal card, Career page, unlocks) and the two log lines; career=new a
 // level-1 hero with everything still locked; career=done a finished ladder.
 if (params.has('career')) {

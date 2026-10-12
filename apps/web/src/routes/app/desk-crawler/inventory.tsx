@@ -30,16 +30,36 @@ type Gear = {
   attack: number
   defense: number
   saleValue: number
-  affix: { name: string; blurb: string } | null
+  affix: { id: string; name: string; blurb: string } | null
   equipped: boolean
   held: boolean
+  /** D129: what salvaging yields, the workbench suffix ("Mk II +1"), the next step and whether an affix can be fitted. */
+  salvage: MaterialCount
+  suffix: string
+  reinforced: number
+  nextStep: Step | null
+  affixable: boolean
 }
+type MaterialCount = Record<string, number>
+type Step = { kind: 'tier' | 'reinforce'; label: string; gold: number; materials: MaterialCount; stat: { from: number; to: number }; requiredLevel: number; shortfall: MaterialCount; affordable: boolean }
+type Material = { id: string; name: string; glyph: string; count: number }
+type Affix = { id: string; name: string; blurb: string }
+type WorkbenchRules = { affix: { gold: number; materials: MaterialCount }; affixes: Affix[] }
+type Review = { kind: 'sell' | 'salvage'; items: Gear[] }
 type Biome = { id: string; name: string; unlocked: boolean }
 
 const SALE_LIMIT = 30
 const statOf = (item: Gear) => item.kind === 'weapon' ? item.attack : item.defense
 const statLabel = (item: Gear) => item.kind === 'weapon' ? 'attack' : 'defense'
 const count = (n: number, noun: string) => `${n} ${n === 1 ? noun : `${noun}s`}`
+/** The materials several pieces yield together. */
+const yieldOf = (items: readonly Gear[]): MaterialCount => items.reduce<Record<string, number>>((total, item) => { for (const [id, n] of Object.entries(item.salvage)) total[id] = (total[id] ?? 0) + n; return total }, {})
+/** "6 Scrap and 1 Parts", in the catalog's order; "nothing" for an empty count. */
+function materialsText(counts: MaterialCount, materials: readonly Material[]): string {
+  const parts = materials.filter((m) => (counts[m.id] ?? 0) > 0).map((m) => `${counts[m.id]} ${m.name}`)
+  if (parts.length === 0) return 'nothing'
+  return parts.length === 1 ? parts[0]! : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
+}
 
 /**
  * The bag as a bag (D97): the two equipped slots and the potion stack, then every slot of the current bag with each
@@ -50,16 +70,16 @@ const count = (n: number, noun: string) => `${n} ${n === 1 ? noun : `${noun}s`}`
 function Inventory() {
   const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
-  const [mode, setMode] = useState<'browse' | 'sell'>('browse')
+  const [mode, setMode] = useState<'browse' | 'sell' | 'salvage'>('browse')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [openId, setOpenId] = useState<string | 'potions' | null>(null)
-  const [sale, setSale] = useState<Gear[] | null>(null)
+  const [review, setReview] = useState<Review | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [destination, setDestination] = useState('')
   const { notice, notify: announce, dismiss } = useNotice()
   // Errors inside an open sheet show there; the pinned notice carries the rest (the sheet would hide it).
   const sheetOpen = useRef(false)
-  sheetOpen.current = openId !== null || sale !== null
+  sheetOpen.current = openId !== null || review !== null
   const notify = (feedback: { error: string | null; message: string | null }) => {
     if (feedback.error && sheetOpen.current) return
     announce(feedback)
@@ -67,6 +87,9 @@ function Inventory() {
   const equip = useIntent(api.inventory.equip, { onFeedback: notify })
   const unequip = useIntent(api.inventory.unequip, { onFeedback: notify })
   const sellMany = useIntent(api.inventory.sellMany, { onFeedback: notify })
+  const salvageMany = useIntent(api.inventory.salvageMany, { onFeedback: notify })
+  const upgrade = useIntent(api.inventory.upgrade, { onFeedback: notify })
+  const chooseAffix = useIntent(api.inventory.chooseAffix, { onFeedback: notify })
   const claim = useIntent(api.inventory.claimHeld, { onFeedback: notify })
   const resume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
   const buyBag = useIntent(api.inventory.buyBag, { onFeedback: notify })
@@ -86,10 +109,13 @@ function Inventory() {
   const chosen = sellable.filter((item) => selected.has(item.id))
   const goldOf = (items: Gear[]) => items.reduce((sum, item) => sum + item.saleValue, 0)
   const rareOf = (items: Gear[]) => items.filter((item) => item.rarity === 'rare' || item.rarity === 'epic').length
-  const validSale = sale === null || saleIsCurrent(sale, gear)
+  const materials = bag.materials as Material[]
+  const workbench = bag.workbench as WorkbenchRules | null
+  const validReview = review === null || saleIsCurrent(review.items, gear)
+  const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
   const deltaOf = (item: Gear) => { const current = equippedOf(item.kind); return statOf(item) - (current ? statOf(current) : 0) }
-  const busy = equip.pending || unequip.pending || sellMany.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending
+  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending
   const full = bag.used >= bag.capacity
   // Quiet warning at 80% of the current bag (D61).
   const filling = bag.used >= Math.ceil(bag.capacity * 0.8)
@@ -105,11 +131,11 @@ function Inventory() {
     const next = new Set(retainSellableSelection(current, gear))
     if (next.has(id)) next.delete(id)
     else if (next.size < SALE_LIMIT) next.add(id)
-    else announce({ error: `A sale holds up to ${SALE_LIMIT} items. Sell these first, then select more.`, message: null })
+    else announce({ error: `${mode === 'salvage' ? 'A salvage' : 'A sale'} holds up to ${SALE_LIMIT} items. ${mode === 'salvage' ? 'Salvage' : 'Sell'} these first, then select more.`, message: null })
     return next
   })
   const leaveSale = () => { setMode('browse'); setSelected(new Set()) }
-  const tap = (item: Gear) => { if (mode === 'sell' && !item.held) toggle(item.id); else setOpenId(item.id) }
+  const tap = (item: Gear) => { if (mode !== 'browse' && !item.held) toggle(item.id); else setOpenId(item.id) }
 
   async function act<A>(item: Gear | null, intent: { run: (args: A, message?: string) => Promise<boolean> }, args: A, message: string) {
     setBusyId(item?.id ?? null)
@@ -118,10 +144,14 @@ function Inventory() {
     if (done) setOpenId(null)
     return done
   }
-  async function sellChosen() {
-    if (!sale || !validSale || !manageable) return
-    if (await sellMany.run({ itemIds: sale.map((item) => item.id) }, `Sold ${count(sale.length, 'item')} for ${goldOf(sale)} gold.`)) {
-      setSale(null)
+  async function confirmReview() {
+    if (!review || !validReview || !manageable) return
+    const ids = review.items.map((item) => item.id)
+    const done = review.kind === 'sell'
+      ? await sellMany.run({ itemIds: ids }, `Sold ${count(review.items.length, 'item')} for ${goldOf(review.items)} gold.`)
+      : await salvageMany.run({ itemIds: ids }, `Salvaged ${count(review.items.length, 'item')} for ${materialsText(yieldOf(review.items), materials)}.`)
+    if (done) {
+      setReview(null)
       leaveSale()
     }
   }
@@ -179,32 +209,37 @@ function Inventory() {
         <div className="flex min-h-11 items-center justify-between gap-3">
           {/* The page header already names the bag; this window is its gear. */}
           <h2 id="bag-gear-title" className="flex min-w-0 items-center gap-3 font-display text-xl font-bold sm:text-2xl"><Glyph name="bag" size={24} className="text-gold-ink" /><span className="truncate">Gear</span></h2>
-          {mode === 'sell'
+          {mode !== 'browse'
             ? <Button allowOffline variant="secondary" className="w-28 shrink-0 whitespace-nowrap" disabled={busy} onClick={leaveSale}>Done</Button>
-            : <Button allowOffline variant="secondary" className="w-28 shrink-0 whitespace-nowrap" icon="tag" disabled={sellable.length === 0} onClick={() => setMode('sell')}>Sell</Button>}
+            : <div className="flex shrink-0 gap-2">
+              <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="tag" disabled={sellable.length === 0} onClick={() => setMode('sell')}>Sell</Button>
+              {/* D129: the second way out of the bag, beside Sell. */}
+              {workbench ? <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="scrap" disabled={sellable.length === 0} onClick={() => setMode('salvage')}>Salvage</Button> : null}
+            </div>}
         </div>
         <p className="mt-1 min-h-5 text-sm text-muted">
-          {mode === 'sell'
+          {mode !== 'browse'
             ? <>Tap gear to select it.{sellable.length > chosen.length ? <> <button type="button" className="font-semibold text-ink underline underline-offset-4" onClick={() => setSelected(new Set(sellable.slice(0, SALE_LIMIT).map((item) => item.id)))}>Select all</button></> : null}</>
-            : inBag.length === 0 ? 'No spare gear yet. Finds land here.' : full ? 'Bag full. The next find is held, and adventures stop until you make room.' : filling ? 'Bag nearly full. Sell gear you no longer need.' : 'Tap a piece to compare, equip or sell it.'}
+            : inBag.length === 0 ? 'No spare gear yet. Finds land here.' : full ? 'Bag full. The next find is held, and adventures stop until you make room.' : filling ? `Bag nearly full. ${workbench ? 'Sell or salvage' : 'Sell'} gear you no longer need.` : `Tap a piece to compare, equip${workbench ? ', sell or salvage' : ' or sell'} it.`}
         </p>
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
           {held ? <li><Slot item={held} held label={slotLabel(held)} busy={busyId === held.id} onClick={() => setOpenId(held.id)} /></li> : null}
-          {inBag.map((item) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode === 'sell'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} downgrade={deltaOf(item) < 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
+          {inBag.map((item) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode !== 'browse'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} downgrade={deltaOf(item) < 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
           {Array.from({ length: Math.max(0, slots - inBag.length) }, (_, index) => <li key={`empty-${index}`}><EmptySlot /></li>)}
         </ul>
       </section>
 
+      {workbench ? <Workbench rules={workbench} materials={materials} equipped={[equippedOf('weapon'), equippedOf('armor')]} hero={hero} disabled={!manageable || busy} intents={{ upgrade, chooseAffix }} /> : null}
       {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} discountPct={bag.ladder.merchantDiscountPct} disabled={!manageable || busy} intent={buyOffer} /> : null}
       <div className="grid gap-8 sm:grid-cols-2">
         <BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} />
         <PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} />
       </div>
 
-      {mode === 'sell' ? <div className="window sticky bottom-0 z-20 -mx-3 px-3 pt-3 min-[375px]:-mx-4 min-[375px]:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0">
+      {mode !== 'browse' ? <div className="window sticky bottom-0 z-20 -mx-3 px-3 pt-3 min-[375px]:-mx-4 min-[375px]:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0">
         <div className="flex items-center justify-between gap-3">
-          <p role="status" className="min-w-0 text-sm tabular-nums">{chosen.length === 0 ? 'Nothing selected' : <>{count(chosen.length, 'item')} for <span className="text-gold-ink">{goldOf(chosen)} gold</span>{rareOf(chosen) > 0 ? `, ${rareOf(chosen)} rare` : ''}</>}</p>
-          <Button allowOffline disabled={!manageable || busy || chosen.length === 0} onClick={() => setSale(chosen)}>Sell {chosen.length > 0 ? chosen.length : ''}</Button>
+          <p role="status" className="min-w-0 text-sm tabular-nums">{chosen.length === 0 ? 'Nothing selected' : mode === 'sell' ? <>{count(chosen.length, 'item')} for <span className="text-gold-ink">{goldOf(chosen)} gold</span>{rareOf(chosen) > 0 ? `, ${rareOf(chosen)} rare` : ''}</> : <>{count(chosen.length, 'item')} for <span className="text-rare-ink">{materialsText(yieldOf(chosen), materials)}</span></>}</p>
+          <Button allowOffline disabled={!manageable || busy || chosen.length === 0} onClick={() => setReview({ kind: mode === 'sell' ? 'sell' : 'salvage', items: chosen })}>{mode === 'sell' ? 'Sell' : 'Salvage'} {chosen.length > 0 ? chosen.length : ''}</Button>
         </div>
       </div> : null}
 
@@ -219,35 +254,35 @@ function Inventory() {
       </Sheet>
 
       <Sheet open={openId !== null && openId !== 'potions'} onClose={() => setOpenId(null)} label="Gear">
-        {opened ? <ItemSheet key={opened.id} item={opened} hero={hero} current={equippedOf(opened.kind)} manageable={manageable} reason={reason} busy={busy} claimBlocked={claimBlocked} intents={{ equip, unequip, claim }} onClose={() => setOpenId(null)} onEquip={() => act(opened, equip, { itemId: opened.id }, `${opened.label} equipped.`)} onUnequip={() => act(opened, unequip, { slot: opened.kind }, `${opened.label} unequipped.`)} onClaim={() => act(opened, claim, {}, claimMessage(opened))} onSell={() => { setOpenId(null); setSale([opened]) }} /> : <>
+        {opened ? <ItemSheet key={opened.id} item={opened} hero={hero} current={equippedOf(opened.kind)} manageable={manageable} reason={reason} busy={busy} claimBlocked={claimBlocked} intents={{ equip, unequip, claim }} onClose={() => setOpenId(null)} onEquip={() => act(opened, equip, { itemId: opened.id }, `${opened.label} equipped.`)} onUnequip={() => act(opened, unequip, { slot: opened.kind }, `${opened.label} unequipped.`)} onClaim={() => act(opened, claim, {}, claimMessage(opened))} onSell={() => { setOpenId(null); setReview({ kind: 'sell', items: [opened] }) }} onSalvage={workbench ? () => { setOpenId(null); setReview({ kind: 'salvage', items: [opened] }) } : null} materials={materials} /> : <>
           <SheetTitle>Gone from your bag</SheetTitle>
-          <p className="mt-2 text-sm">That piece was sold or moved from another screen.</p>
+          <p className="mt-2 text-sm">That piece was sold, salvaged or moved from another screen.</p>
           <Button allowOffline variant="secondary" className="mt-4 w-full" onClick={() => setOpenId(null)}>Close</Button>
         </>}
       </Sheet>
 
-      <Sheet open={sale !== null} onClose={() => { if (!sellMany.pending) setSale(null) }} label="Sell gear">
-        {sale ? <>
-          <SheetTitle>Sell {count(sale.length, 'item')} for <span className="text-gold-ink">{goldOf(sale)} gold</span>?</SheetTitle>
-          <p className="mt-2 text-sm">This cannot be undone.{rareOf(sale) > 0 ? ` Includes ${count(rareOf(sale), 'rare item')}.` : ''}</p>
-          <ul aria-label="Items in this sale" className="mt-3 max-h-48 overflow-y-auto border-y-2 border-rule text-sm">{sale.map((item) => <li key={item.id} className="flex items-center justify-between gap-3 border-b border-rule py-1.5 last:border-b-0"><span className={`flex min-w-0 items-center gap-2 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}><Gem rarity={item.rarity} scale={2} /><span className="truncate">{item.label}</span></span><span className="shrink-0 tabular-nums text-gold-ink">{item.saleValue} gold</span></li>)}</ul>
-          {!validSale ? <p role="alert" className="mt-3 text-sm font-semibold">Your gear changed. Close this and select the items again.</p> : null}
+      <Sheet open={review !== null} onClose={() => { if (!reviewing?.pending) setReview(null) }} label={review?.kind === 'salvage' ? 'Salvage gear' : 'Sell gear'}>
+        {review && reviewing ? <>
+          <SheetTitle>{review.kind === 'sell' ? <>Sell {count(review.items.length, 'item')} for <span className="text-gold-ink">{goldOf(review.items)} gold</span>?</> : <>Salvage {count(review.items.length, 'item')} for <span className="text-rare-ink">{materialsText(yieldOf(review.items), materials)}</span>?</>}</SheetTitle>
+          <p className="mt-2 text-sm">This cannot be undone.{rareOf(review.items) > 0 ? ` Includes ${count(rareOf(review.items), 'rare item')}.` : ''}{review.kind === 'salvage' ? ' Materials go to the workbench and are never sold.' : ''}</p>
+          <ul aria-label={review.kind === 'sell' ? 'Items in this sale' : 'Items to salvage'} className="mt-3 max-h-48 overflow-y-auto border-y-2 border-rule text-sm">{review.items.map((item) => <li key={item.id} className="flex items-center justify-between gap-3 border-b border-rule py-1.5 last:border-b-0"><span className={`flex min-w-0 items-center gap-2 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}><Gem rarity={item.rarity} scale={2} /><span className="truncate">{item.label}</span></span>{review.kind === 'sell' ? <span className="shrink-0 tabular-nums text-gold-ink">{item.saleValue} gold</span> : <span className="shrink-0 tabular-nums text-rare-ink">{materialsText(item.salvage, materials)}</span>}</li>)}</ul>
+          {!validReview ? <p role="alert" className="mt-3 text-sm font-semibold">Your gear changed. Close this and select the items again.</p> : null}
           {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : null}
-          <div className="mt-3 empty:hidden"><ErrorNote message={sellMany.error} /></div>
+          <div className="mt-3 empty:hidden"><ErrorNote message={reviewing.error} /></div>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <Button disabled={!manageable || busy || !validSale} pending={sellMany.pending} busyLabel="Selling…" onClick={sellChosen}>Confirm</Button>
-            <Button allowOffline variant="secondary" disabled={sellMany.pending} onClick={() => setSale(null)}>Cancel</Button>
+            <Button disabled={!manageable || busy || !validReview} pending={reviewing.pending} busyLabel={review.kind === 'sell' ? 'Selling…' : 'Salvaging…'} onClick={confirmReview}>Confirm</Button>
+            <Button allowOffline variant="secondary" disabled={reviewing.pending} onClick={() => setReview(null)}>Cancel</Button>
           </div>
         </> : null}
       </Sheet>
 
-      <NoticeBar notice={notice} lifted={mode === 'sell'} onDismiss={dismiss} />
+      <NoticeBar notice={notice} lifted={mode !== 'browse'} onDismiss={dismiss} />
     </div>
   )
 }
 
 /** One piece: its icon, stats against the equipped piece, affix and sale value, then the actions open to it. */
-function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked, intents, onClose, onEquip, onUnequip, onClaim, onSell }: {
+function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked, intents, onClose, onEquip, onUnequip, onClaim, onSell, onSalvage, materials }: {
   item: Gear
   hero: { level: number }
   current: Gear | null
@@ -261,6 +296,9 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
   onUnequip: () => void
   onClaim: () => void
   onSell: () => void
+  /** D129: absent under a catalog without a workbench. */
+  onSalvage: (() => void) | null
+  materials: readonly Material[]
 }) {
   const delta = statOf(item) - (current ? statOf(current) : 0)
   const canEquip = item.requiredLevel <= hero.level
@@ -283,6 +321,7 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
       {item.affix ? <><dt className="caps text-muted">{item.affix.name}</dt><dd>{item.affix.blurb}</dd></> : null}
       <dt className="caps text-muted">Sells for</dt>
       <dd className="tabular-nums text-gold-ink">{item.saleValue} gold</dd>
+      {onSalvage ? <><dt className="caps text-muted">Salvages for</dt><dd className="tabular-nums text-rare-ink">{materialsText(item.salvage, materials)}</dd></> : null}
     </dl>
     {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : item.held && claimBlocked ? <p className="mt-3 text-sm">Sell an item or get a bigger bag to claim this find.</p> : !item.equipped && !item.held && !canEquip ? <p className="mt-3 text-sm">Your hero can wear this from level {item.requiredLevel}. It can still be sold.</p> : null}
     <div className="mt-3 empty:hidden"><ErrorNote message={error} /></div>
@@ -312,8 +351,9 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
           : <>
             <Button variant={delta > 0 && canEquip ? 'primary' : 'secondary'} disabled={!manageable || busy || !canEquip} pending={intents.equip.pending} busyLabel="Equipping…" onClick={() => (weaker ? setConfirming('equip') : onEquip())}>Equip</Button>
             <Button allowOffline variant="secondary" disabled={!manageable || busy} onClick={onSell}>Sell</Button>
+            {onSalvage ? <Button allowOffline variant="secondary" icon="scrap" disabled={!manageable || busy} onClick={onSalvage}>Salvage</Button> : null}
           </>}
-      <Button allowOffline variant="quiet" className={item.equipped || item.held ? '' : 'col-span-2'} disabled={busy} onClick={onClose}>Close</Button>
+      <Button allowOffline variant="quiet" className={item.equipped || item.held || onSalvage ? '' : 'col-span-2'} disabled={busy} onClick={onClose}>Close</Button>
     </div>}
   </>
 }
@@ -339,7 +379,7 @@ function howToGet(milestone: string | null, findable: boolean, discount: number)
 }
 type Offer = { id: 'potions' | 'pouch' | 'bag'; name: string; quantity: number; price: number; tierId?: string }
 type Visit = { offers: Offer[]; expiresAtTick: number; ticksLeft: number; biomeId: string }
-type PurchaseIntent<A> = { pending: boolean; run: (args: A, message?: string) => Promise<boolean> }
+type PurchaseIntent<A> = { pending: boolean; error?: string | null; run: (args: A, message?: string) => Promise<boolean> }
 
 /** D77/D122: the potion pouch, its next tier and how to get it, beside the bag ladder. */
 function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch; potions: number; gold: number; disabled: boolean; intent: PurchaseIntent<{ tierId: string }> }) {
@@ -417,6 +457,92 @@ function BagLadder({ ladder, capacity, gold, disabled, intent }: { ladder: Ladde
       </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? `You can buy it from level ${next.lockedUntilLevel}.` : 'You can buy it after your next bag milestone.'}</p> : null}
     </> : <p className="mt-3 text-sm text-muted">This is the biggest bag for now.</p>}
   </Card>
+}
+
+/**
+ * D129: the workbench. The materials strip, then one row per equipped piece with its next step (the tier, then the
+ * reinforcement), its price, the stat it reaches and what is short; rare and epic gear add an affix picker. Every job
+ * asks first. Nothing here is automatic or random.
+ */
+function Workbench({ rules, materials, equipped, hero, disabled, intents }: { rules: WorkbenchRules; materials: readonly Material[]; equipped: readonly (Gear | null)[]; hero: { level: number; gold: number }; disabled: boolean; intents: { upgrade: PurchaseIntent<{ itemId: Id<'items'> }>; chooseAffix: PurchaseIntent<{ itemId: Id<'items'>; affixId: string }> } }) {
+  const [asking, setAsking] = useState<Gear | null>(null)
+  const [fitting, setFitting] = useState<Gear | null>(null)
+  const [affixId, setAffixId] = useState<string | null>(null)
+  const affixPrice = rules.affix
+  const affixShort = Object.fromEntries(Object.entries(affixPrice.materials).filter(([id, n]) => (materials.find((m) => m.id === id)?.count ?? 0) < n).map(([id, n]) => [id, n - (materials.find((m) => m.id === id)?.count ?? 0)]))
+  const affixAffordable = Object.keys(affixShort).length === 0 && hero.gold >= affixPrice.gold
+  const step = asking?.nextStep ?? null
+  return <Card title="Workbench" icon="components">
+    <p className="text-sm">Salvaged gear becomes materials. Spend them, with gold, to improve what your hero wears. Materials never sell and take no bag space.</p>
+    <ul aria-label="Materials" className="mt-3 flex flex-wrap gap-x-4 gap-y-1 tabular-nums">
+      {materials.map((m) => <li key={m.id} className="flex items-center gap-1.5"><Glyph name={m.glyph as 'scrap'} size={16} className="text-rare-ink" /><strong>{m.count}</strong> {m.name}</li>)}
+    </ul>
+    <ul className="mt-4 flex flex-col gap-4">
+      {(['weapon', 'armor'] as const).map((kind, index) => {
+        const item = equipped[index] ?? null
+        const next = item?.nextStep ?? null
+        return <li key={kind} className="border-t-2 border-faint pt-3">
+          <h3 className="caps text-sm text-muted">{kind === 'weapon' ? 'Weapon' : 'Armor'}</h3>
+          {item === null ? <p className="mt-1 text-sm text-muted">Nothing equipped. Equip a {kind} to work on it.</p> : <>
+            <p className={`mt-1 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}>{item.label}</p>
+            {next ? <>
+              <p className="mt-1 text-sm tabular-nums">{next.label}: {priceText(next, materials)}. {statLabel(item).charAt(0).toUpperCase() + statLabel(item).slice(1)} {next.stat.from} → <strong>{next.stat.to}</strong>.</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Button variant={next.affordable ? 'primary' : 'secondary'} disabled={disabled || !next.affordable} pending={intents.upgrade.pending && asking?.id === item.id} busyLabel="Working…" onClick={() => setAsking(item)}>{next.kind === 'tier' ? 'Upgrade' : 'Reinforce'}</Button>
+                {item.affixable ? <Button variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>Choose affix</Button> : null}
+              </div>
+              {!next.affordable ? <p className="mt-2 text-sm tabular-nums">{shortText(next, hero, materials)}</p> : null}
+            </> : <>
+              <p className="mt-1 text-sm text-muted">Fully reinforced.</p>
+              {item.affixable ? <Button className="mt-2" variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>Choose affix</Button> : null}
+            </>}
+          </>}
+        </li>
+      })}
+    </ul>
+    <ConfirmSheet open={asking !== null && step !== null} title={asking && step ? `${step.label} on the ${asking.label}?` : ''} confirmLabel={step ? `${step.kind === 'tier' ? 'Upgrade' : 'Reinforce'} for ${step.gold} gold` : ''} busyLabel="Working…" cancelLabel="Not now" pending={intents.upgrade.pending} disabled={disabled} onClose={() => { if (!intents.upgrade.pending) setAsking(null) }} onConfirm={async () => { if (!asking || !step || intents.upgrade.pending) return; await intents.upgrade.run({ itemId: asking.id }, `${asking.label}: ${step.label.toLowerCase()}.`); setAsking(null) }}>
+      {asking && step ? <Consequences>
+        <li>{statLabel(asking).charAt(0).toUpperCase() + statLabel(asking).slice(1)} goes from {step.stat.from} to <strong>{step.stat.to}</strong>. The piece stays equipped and keeps its name{asking.affix ? ' and trait' : ''}.</li>
+        <li>Spends {materialsText(step.materials, materials)}.</li>
+        <li>Costs {step.gold} gold, leaving you {hero.gold - step.gold}.</li>
+        <li>Salvaging it later still pays what it was found at, not what was spent.</li>
+      </Consequences> : null}
+    </ConfirmSheet>
+    <Sheet open={fitting !== null} onClose={() => { if (!intents.chooseAffix.pending) setFitting(null) }} label="Choose an affix">
+      {fitting ? <>
+        <SheetTitle>Choose an affix for the {fitting.label}</SheetTitle>
+        <p className="mt-2 text-sm tabular-nums">Costs {materialsText(affixPrice.materials, materials)} and {affixPrice.gold} gold. The old trait is replaced; nothing else changes.</p>
+        <ul className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Affix">
+          {rules.affixes.map((affix) => {
+            const current = fitting.affix?.id === affix.id
+            const picked = affixId === affix.id
+            return <li key={affix.id}>
+              <button type="button" role="radio" aria-checked={picked} disabled={current} onClick={() => setAffixId(affix.id)} className={`flex w-full flex-col border-2 px-3 py-2 text-left ${picked ? 'border-gold bg-raised' : 'border-edge'} disabled:opacity-60`}>
+                <span className="font-semibold">{affix.name}{current ? <span className="ml-2 text-sm text-muted">fitted now</span> : null}</span>
+                <span className="text-sm text-muted">{affix.blurb}</span>
+              </button>
+            </li>
+          })}
+        </ul>
+        {!affixAffordable ? <p className="mt-3 text-sm tabular-nums">{Object.keys(affixShort).length > 0 ? `Needs ${materialsText(affixShort, materials)} more.` : `You have ${hero.gold} gold.`}</p> : null}
+        <div className="mt-3 empty:hidden"><ErrorNote message={intents.chooseAffix.error ?? null} /></div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button disabled={disabled || !affixAffordable || affixId === null} pending={intents.chooseAffix.pending} busyLabel="Fitting…" onClick={async () => { if (!fitting || affixId === null) return; const name = rules.affixes.find((a) => a.id === affixId)?.name ?? 'the affix'; if (await intents.chooseAffix.run({ itemId: fitting.id, affixId }, `${name} fitted to the ${fitting.label}.`)) setFitting(null) }}>Fit for {affixPrice.gold} gold</Button>
+          <Button allowOffline variant="secondary" disabled={intents.chooseAffix.pending} onClick={() => setFitting(null)}>Cancel</Button>
+        </div>
+      </> : null}
+    </Sheet>
+  </Card>
+}
+
+/** "6 Scrap and 4 Parts + 500 gold". */
+const priceText = (step: Step, materials: readonly Material[]) => `${materialsText(step.materials, materials)} + ${step.gold} gold`
+
+/** Why the step is out of reach, one reason at a time: the level, then the materials, then the gold. */
+function shortText(step: Step, hero: { level: number; gold: number }, materials: readonly Material[]): string {
+  if (step.requiredLevel > hero.level) return `${step.label.replace('Upgrade to ', '')} needs level ${step.requiredLevel}.`
+  if (Object.keys(step.shortfall).length > 0) return `Needs ${materialsText(step.shortfall, materials)} more.`
+  return `You have ${hero.gold} gold.`
 }
 
 /** A piece's own figure stays neutral; only a comparison takes a colour (green better, red worse). */

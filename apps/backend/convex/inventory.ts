@@ -14,6 +14,8 @@ import type { ContentCatalog, HeroState } from '@trmnl-games/desk-crawler/sim/co
 import { readWorld, worldContent } from './world'
 import { awardAfterIntent } from './lib/achievements'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
+import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield, workbenchSuffix } from '@trmnl-games/desk-crawler/sim/core/workbench'
+import type { ItemSnapshot, MaterialCount } from '@trmnl-games/desk-crawler/sim/core/types'
 
 const currentTick = async (ctx: QueryCtx) => (await readWorld(ctx))?.currentTick ?? 0
 
@@ -110,8 +112,70 @@ function merchantView(hero: Doc<'heroes'>, tick: number) {
   return { offers: hero.merchant.offers, expiresAtTick: hero.merchant.expiresAtTick, ticksLeft: hero.merchant.expiresAtTick - tick, biomeId: hero.merchant.biomeId }
 }
 
-/** "Vampiric Rare Keyboard Mace": the affix adjective (looked up in the active catalog), the rarity, the name. */
-const itemLabel = (item: Doc<'items'>) => `${affixById(catalogs[ACTIVE_CONTENT], item.affixId)?.name ?? ''} ${item.rarity === 'common' ? '' : item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)} ${item.name}`.replace(/\s+/g, ' ').trim()
+/** "Vampiric Rare Keyboard Mace Mk III +2": the affix adjective (looked up in the active catalog), the rarity, the name, the workbench suffix (D129). */
+const itemLabel = (item: Doc<'items'>) => `${affixById(catalogs[ACTIVE_CONTENT], item.affixId)?.name ?? ''} ${item.rarity === 'common' ? '' : item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)} ${item.name} ${workbenchSuffix(catalogs[ACTIVE_CONTENT], snapshotOf(item))}`.replace(/\s+/g, ' ').trim()
+
+/** The pure-core view of an item document. */
+const snapshotOf = (item: Doc<'items'>): ItemSnapshot => ({
+  id: item._id as string,
+  templateId: item.templateId,
+  contentVersion: item.contentVersion,
+  kind: item.kind,
+  name: item.name,
+  rarity: item.rarity,
+  requiredLevel: item.requiredLevel,
+  attack: item.attack,
+  defense: item.defense,
+  saleValue: item.saleValue,
+  quantity: item.quantity,
+  ...(item.affixId === undefined ? {} : { affixId: item.affixId }),
+  ...(item.tier === undefined ? {} : { tier: item.tier }),
+  ...(item.reinforced === undefined ? {} : { reinforced: item.reinforced }),
+})
+
+/** "6 Scrap and 1 Parts", in catalog order. */
+function materialsText(content: ContentCatalog, count: MaterialCount): string {
+  const parts = (content.workbench?.materials ?? []).filter((m) => (count[m.id] ?? 0) > 0).map((m) => `${count[m.id]} ${m.name}`)
+  return parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
+}
+
+/**
+ * D129: add (or, with negative counts, spend) materials in the hero's stack rows: one row per material kind, no empty
+ * row. Spending below zero is a programming error; the intents check the shortfall first.
+ */
+async function adjustMaterials(ctx: MutationCtx, hero: Doc<'heroes'>, items: Doc<'items'>[], content: ContentCatalog, delta: MaterialCount): Promise<void> {
+  for (const [id, n] of Object.entries(delta)) {
+    if (n === 0) continue
+    const row = items.find((item) => item.kind === 'material' && item.templateId === id)
+    const quantity = (row?.quantity ?? 0) + n
+    if (quantity < 0) throw new Error(`spent more ${id} than held`)
+    if (row === undefined) {
+      const material = content.workbench?.materials.find((m) => m.id === id)
+      if (material === undefined) throw new Error(`unknown material ${id}`)
+      await ctx.db.insert('items', { heroId: hero._id, templateId: id, contentVersion: content.contentVersion, kind: 'material', name: material.name, rarity: 'common', requiredLevel: 1, attack: 0, defense: 0, saleValue: 0, quantity, createdAt: Date.now() })
+    } else if (quantity === 0) await ctx.db.delete(row._id)
+    else await ctx.db.patch(row._id, { quantity })
+  }
+}
+
+/** The workbench as the companion shows it for one piece of gear (D129): the next step, its price, the result, and what is short. */
+function stepView(content: ContentCatalog, hero: Doc<'heroes'>, item: Doc<'items'>, held: MaterialCount) {
+  const snapshot = snapshotOf(item)
+  const step = nextStep(content, snapshot)
+  if (step === undefined) return null
+  const next = applyStep(content, snapshot, step)
+  const short = materialShortfall(held, step.materials)
+  return {
+    kind: step.kind,
+    label: step.kind === 'tier' ? `Upgrade to ${workbenchSuffix(content, next)}` : `Reinforce to +${step.to}`,
+    gold: step.gold,
+    materials: step.materials,
+    stat: item.kind === 'weapon' ? { from: item.attack, to: next.attack } : { from: item.defense, to: next.defense },
+    requiredLevel: next.requiredLevel,
+    shortfall: short,
+    affordable: hero.gold >= step.gold && Object.keys(short).length === 0 && next.requiredLevel <= hero.level,
+  }
+}
 
 /** Bag, held find, potions and capacity for the owner's hero. */
 export const mine = query({
@@ -125,9 +189,14 @@ export const mine = query({
     const content = await contentOf(ctx)
     const capacity = hero.bagCapacity
     const used = bagUsed(asBagHero(hero), asSnapshots(items))
+    const held = heldMaterials(items.map(snapshotOf))
+    const workbench = content.workbench
     return {
       capacity,
       used,
+      // D129: the material rows and the workbench's prices, absent under a catalog without one.
+      materials: (workbench?.materials ?? []).map((m) => ({ id: m.id, name: m.name, glyph: m.glyph, count: held[m.id] ?? 0 })),
+      workbench: workbench === undefined ? null : { affix: workbench.affix, affixes: (content.affixes ?? []).map((affix) => ({ id: affix.id, name: affix.name, blurb: affix.blurb })) },
       ladder: bagLadderView(content, hero),
       pouch: pouchView(content, hero),
       merchant: merchantView(hero, await currentTick(ctx)),
@@ -137,7 +206,7 @@ export const mine = query({
       potions: items.find((item) => item.kind === 'potion')?.quantity ?? 0,
       canResume: hero.status === 'sleeping' && hero.heldItemId === undefined && !bagFull(hero, items) && hero.wakeAtTick === undefined,
       gear: items
-        .filter((item) => item.kind !== 'potion')
+        .filter((item) => isGear(item.kind))
         .map((item) => ({
           id: item._id,
           kind: item.kind,
@@ -149,9 +218,15 @@ export const mine = query({
           attack: item.attack,
           defense: item.defense,
           saleValue: item.saleValue,
-          affix: ((affix) => (affix ? { name: affix.name, blurb: affix.blurb } : null))(affixById(catalogs[ACTIVE_CONTENT], item.affixId)),
+          affix: ((affix) => (affix ? { id: affix.id, name: affix.name, blurb: affix.blurb } : null))(affixById(catalogs[ACTIVE_CONTENT], item.affixId)),
           equipped: item._id === hero.weaponId || item._id === hero.armorId,
           held: item._id === hero.heldItemId,
+          // D129: what salvaging yields, the workbench's next step, and whether an affix can be fitted.
+          salvage: salvageYield(content, snapshotOf(item)),
+          suffix: workbenchSuffix(content, snapshotOf(item)),
+          reinforced: item.reinforced ?? 0,
+          nextStep: workbench === undefined ? null : stepView(content, hero, item, held),
+          affixable: workbench !== undefined && (content.affixRarities ?? []).includes(item.rarity),
         }))
         .sort((a, b) => Number(b.held) - Number(a.held) || Number(b.equipped) - Number(a.equipped) || b.attack + b.defense - (a.attack + a.defense)),
     }
@@ -189,7 +264,7 @@ export const equip = mutation({
       const hero = await requirePlayableHero(ctx, user)
       if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be changed while your hero is recovering or paused.")
       const item = await ctx.db.get(args.itemId)
-      if (item === null || item.heroId !== hero._id || item.kind === 'potion') throw appError('ITEM_NOT_AVAILABLE', 'That item is not available.')
+      if (item === null || item.heroId !== hero._id || !isGear(item.kind)) throw appError('ITEM_NOT_AVAILABLE', 'That item is not available.')
       if (item._id === hero.heldItemId) throw appError('ITEM_HELD', 'Claim the held find first.')
       if (item.requiredLevel > hero.level) throw appError('LEVEL_REQUIREMENT', `Requires level ${item.requiredLevel}.`)
       const slot = item.kind === 'weapon' ? 'weaponId' : 'armorId'
@@ -225,7 +300,7 @@ async function sellItems(ctx: MutationCtx, hero: Doc<'heroes'>, itemIds: Id<'ite
   const items: Doc<'items'>[] = []
   for (const id of itemIds) {
     const item = await ctx.db.get(id)
-    if (item === null || item.heroId !== hero._id || item.kind === 'potion') throw appError('ITEM_NOT_AVAILABLE', 'One of those items is not available.')
+    if (item === null || item.heroId !== hero._id || !isGear(item.kind)) throw appError('ITEM_NOT_AVAILABLE', 'One of those items is not available.')
     if (item._id === hero.weaponId || item._id === hero.armorId) throw appError('ITEM_EQUIPPED', 'Unequip an item before selling it.')
     if (item._id === hero.heldItemId) throw appError('ITEM_HELD', 'Claim the held find first.')
     items.push(item)
@@ -404,5 +479,119 @@ export const buyOffer = mutation({
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'buy_offer', summary, { xpEarned: 0, gold: -offer.price, hp: 0 }, offer.id === 'potions' ? { potionsBought: offer.quantity } : offer.id === 'bag' ? { bagSlots: count - hero.bagCapacity } : {})
       await awardAfterIntent(ctx, hero, content, tick)
       return { changed: true, gold: -offer.price, count }
+    }),
+})
+
+/** D129: the bag items a salvage or sale may take: the hero's own gear, neither equipped nor held, each once. */
+async function bagGear(ctx: MutationCtx, hero: Doc<'heroes'>, itemIds: Id<'items'>[]): Promise<Doc<'items'>[]> {
+  if (new Set(itemIds).size !== itemIds.length) throw appError('INVALID_INPUT', 'Each item can only be chosen once.')
+  const items: Doc<'items'>[] = []
+  for (const id of itemIds) {
+    const item = await ctx.db.get(id)
+    if (item === null || item.heroId !== hero._id || !isGear(item.kind)) throw appError('ITEM_NOT_AVAILABLE', 'One of those items is not available.')
+    if (item._id === hero.weaponId || item._id === hero.armorId) throw appError('ITEM_EQUIPPED', 'Unequip an item before salvaging it.')
+    if (item._id === hero.heldItemId) throw appError('ITEM_HELD', 'Claim the held find first.')
+    items.push(item)
+  }
+  return items
+}
+
+/** D129: strip up to 30 player-selected bag items for materials, atomically under one receipt. Never automatic. */
+export const salvageMany = mutation({
+  args: { operationId: v.string(), itemIds: v.array(v.id('items')) },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.salvageMany', { itemIds: args.itemIds }, async (user) => {
+      if (args.itemIds.length < 1 || args.itemIds.length > 30) throw appError('INVALID_INPUT', 'Choose between 1 and 30 items.')
+      const hero = await requirePlayableHero(ctx, user)
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be salvaged while your hero is recovering or paused.")
+      const content = await contentOf(ctx)
+      if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+      const chosen = await bagGear(ctx, hero, args.itemIds)
+      const yielded = addMaterials(...chosen.map((item) => salvageYield(content, snapshotOf(item))))
+      for (const item of chosen) await ctx.db.delete(item._id)
+      await adjustMaterials(ctx, hero, await heroItems(ctx, hero._id), content, yielded)
+      const counters = withCounterDefaults(hero.counters)
+      await ctx.db.patch(hero._id, { counters: { ...counters, itemsSalvaged: counters.itemsSalvaged + chosen.length } })
+      const what = chosen.length === 1 ? `the ${itemLabel(chosen[0]!)}` : `${chosen.length} items`
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'salvage_many', `Salvaged ${what} for ${materialsText(content, yielded)}.`, { xpEarned: 0, gold: 0, hp: 0 }, { materials: yielded })
+      await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
+      return { changed: true, count: chosen.length }
+    }),
+})
+
+/** Refuse a workbench price the hero cannot pay, naming the shortfall. */
+function requireAffordable(content: ContentCatalog, hero: Doc<'heroes'>, held: MaterialCount, price: { gold: number; materials: MaterialCount }): void {
+  const short = materialShortfall(held, price.materials)
+  if (Object.keys(short).length > 0) throw appError('NOT_ENOUGH_MATERIALS', `Needs ${materialsText(content, short)} more.`)
+  if (hero.gold < price.gold) throw appError('NOT_ENOUGH_GOLD', `That costs ${price.gold} gold.`)
+}
+
+/** The owned, unheld gear a workbench step may change; equipped gear is fine, since the item changes in place. */
+async function workbenchItem(ctx: MutationCtx, hero: Doc<'heroes'>, itemId: Id<'items'>): Promise<Doc<'items'>> {
+  const item = await ctx.db.get(itemId)
+  if (item === null || item.heroId !== hero._id || !isGear(item.kind)) throw appError('ITEM_NOT_AVAILABLE', 'That item is not available.')
+  if (item._id === hero.heldItemId) throw appError('ITEM_HELD', 'Claim the held find first.')
+  return item
+}
+
+/**
+ * D129: apply the item's next workbench step (the next tier, then the next reinforcement), rewriting its copied stats
+ * in place under this receipt. The step is determined by the item, so there is nothing to choose; a step whose result
+ * the hero could not wear is refused.
+ */
+export const upgrade = mutation({
+  args: { operationId: v.string(), itemId: v.id('items') },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.upgrade', { itemId: args.itemId }, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "The workbench is closed while your hero is recovering or paused.")
+      const content = await contentOf(ctx)
+      if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+      const item = await workbenchItem(ctx, hero, args.itemId)
+      const snapshot = snapshotOf(item)
+      const step = nextStep(content, snapshot)
+      if (step === undefined) throw appError('INVALID_STATE', 'This item is fully reinforced.')
+      const next = applyStep(content, snapshot, step)
+      if (next.requiredLevel > hero.level) throw appError('LEVEL_TOO_LOW', `${workbenchSuffix(content, next)} needs level ${next.requiredLevel}.`)
+      const items = await heroItems(ctx, hero._id)
+      requireAffordable(content, hero, heldMaterials(items.map(snapshotOf)), step)
+      await ctx.db.patch(item._id, { attack: next.attack, defense: next.defense, requiredLevel: next.requiredLevel, saleValue: next.saleValue, tier: next.tier, reinforced: next.reinforced, contentVersion: next.contentVersion })
+      await adjustMaterials(ctx, hero, items, content, Object.fromEntries(Object.entries(step.materials).map(([id, n]) => [id, -n])))
+      const counters = withCounterDefaults(hero.counters)
+      await ctx.db.patch(hero._id, { gold: hero.gold - step.gold, counters: { ...counters, gearUpgraded: counters.gearUpgraded + 1, topReinforcement: Math.max(counters.topReinforcement, next.reinforced ?? 0) } })
+      const summary = step.kind === 'tier' ? `Upgraded the ${itemLabel(item)} to ${workbenchSuffix(content, next)}.` : `Reinforced the ${itemLabel(item)} to +${step.to}.`
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, step.kind === 'tier' ? 'upgrade' : 'reinforce', summary, { xpEarned: 0, gold: -step.gold, hp: 0 }, { materials: step.materials })
+      await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
+      return { changed: true, gold: -step.gold }
+    }),
+})
+
+/** D129: fit a chosen affix to rare or epic gear, replacing whatever it had. A choice, not a reroll. */
+export const chooseAffix = mutation({
+  args: { operationId: v.string(), itemId: v.id('items'), affixId: v.string() },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.chooseAffix', { itemId: args.itemId, affixId: args.affixId }, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "The workbench is closed while your hero is recovering or paused.")
+      const content = await contentOf(ctx)
+      if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+      const item = await workbenchItem(ctx, hero, args.itemId)
+      if (!(content.affixRarities ?? []).includes(item.rarity)) throw appError('ITEM_NOT_AVAILABLE', 'Only rare and epic gear can take an affix.')
+      const affix = affixById(content, args.affixId)
+      if (affix === undefined) throw appError('INVALID_INPUT', 'Unknown affix.')
+      if (item.affixId === affix.id) throw appError('INVALID_INPUT', `The ${itemLabel(item)} is already ${affix.name}.`)
+      const items = await heroItems(ctx, hero._id)
+      const price = content.workbench.affix
+      requireAffordable(content, hero, heldMaterials(items.map(snapshotOf)), price)
+      await ctx.db.patch(item._id, { affixId: affix.id })
+      await adjustMaterials(ctx, hero, items, content, Object.fromEntries(Object.entries(price.materials).map(([id, n]) => [id, -n])))
+      const counters = withCounterDefaults(hero.counters)
+      await ctx.db.patch(hero._id, { gold: hero.gold - price.gold, counters: { ...counters, gearUpgraded: counters.gearUpgraded + 1 } })
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'choose_affix', `Fitted ${affix.name} to the ${itemLabel({ ...item, affixId: undefined })}.`, { xpEarned: 0, gold: -price.gold, hp: 0 }, { materials: price.materials })
+      await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
+      return { changed: true, gold: -price.gold }
     }),
 })

@@ -55,6 +55,9 @@ export function zeroCounters(): HeroCounters {
     tasksCompleted: 0,
     itemsEquipped: 0,
     careerRungs: 0,
+    itemsSalvaged: 0,
+    gearUpgraded: 0,
+    topReinforcement: 0,
   }
 }
 

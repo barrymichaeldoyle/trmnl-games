@@ -36,6 +36,10 @@ export type ErrorCode =
   | 'NOT_ENOUGH_GOLD'
   | 'HELD_ITEM_PENDING'
   | 'LEVEL_REQUIREMENT'
+  /** D129: the workbench step would make the item unequippable, the materials are short, or the catalog has no workbench. */
+  | 'LEVEL_TOO_LOW'
+  | 'NOT_ENOUGH_MATERIALS'
+  | 'WORKBENCH_UNAVAILABLE'
   | 'NO_POTION'
   | 'FULL_HP'
   | 'RECAP_CHANGED'

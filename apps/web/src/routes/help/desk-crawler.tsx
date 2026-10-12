@@ -21,6 +21,18 @@ const SHOP_POUCHES = POUCHES.filter((tier) => tier.milestone === undefined && ti
 const TOTE = BAGS.find((tier) => tier.milestone?.ticksExplored !== undefined)
 const TOP_BAG = BAGS.at(-1)?.capacity ?? 0
 const MERCHANT_LINE = MERCHANT_OFF > 0 ? ` A wandering merchant sometimes offers the next one at ${MERCHANT_OFF}% off.` : ''
+/** D129: the workbench's materials and prices, read from the active catalog. */
+const WORKBENCH = catalogs[ACTIVE_CONTENT].workbench
+const MATERIAL_NAME = (id: string) => WORKBENCH?.materials.find((m) => m.id === id)?.name ?? id
+/** "6 Scrap and 4 Parts plus 500 gold". */
+const price = (cost: { gold: number; materials: Readonly<Record<string, number>> }) => {
+  const parts = Object.entries(cost.materials).map(([id, n]) => `${n} ${MATERIAL_NAME(id)}`)
+  const mats = parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
+  return `${mats} plus ${gold(cost.gold)}`
+}
+const TIER_STEPS = WORKBENCH?.steps.filter((s) => s.kind === 'tier') ?? []
+const REINFORCE_STEPS = WORKBENCH?.steps.filter((s) => s.kind === 'reinforce') ?? []
+const MATERIALS_LINE = WORKBENCH === undefined ? '' : WORKBENCH.materials.map((m) => `${m.name} from ${m.rarities.join(' and ')} gear`).join(', ')
 /** P35: the career ladder and the levels features arrive at, read from the active catalog. */
 const CAREER = catalogs[ACTIVE_CONTENT].career
 const UNLOCKS = catalogs[ACTIVE_CONTENT].unlocks
@@ -45,6 +57,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['rare-and-epic-gear', 'Rare and epic gear'],
   ['when-your-bag-fills-up', 'When your bag fills up'],
   ['bigger-bags', 'Bigger bags'],
+  ...(WORKBENCH !== undefined ? [['salvage-and-the-workbench', 'Salvage and the workbench'] as const] : []),
   ['getting-knocked-out', 'Getting knocked out'],
   ['recaps', 'Recaps'],
   ['understanding-rankings', 'Understanding rankings'],
@@ -144,6 +157,12 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li>Choose Resume adventures. You can pick an unlocked destination at the same time. Your hero sets off again within 15 minutes.</li>
       </ol>
       <p>Equipping gear does not free a slot. Selling gear or claiming a find does not wake your hero automatically. Bag sleep is separate from your TRMNL’s Sleep Mode; a sleeping display never stops the game.</p>
+      {WORKBENCH !== undefined ? <>
+        <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
+        <p>Spare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {MATERIALS_LINE}. Epic gear pays {WORKBENCH.epicYieldMultiplier} times as much. Materials sit beside your potions, take no bag space and are never sold. Nothing is salvaged unless you choose it.</p>
+        <p>The workbench spends materials and gold on the gear your hero wears, in place: the piece keeps its name and trait, and only its numbers change. Each piece has one next step. {TIER_STEPS.map((s, i) => `${i === 0 ? 'Raising a tier-1 piece to Mk II' : `Mk II to Mk III`} costs ${price(s)}`).join('; ')}; a piece can only be raised to a tier your hero’s level could equip. Once a piece is Mk III (or was found there), reinforcement adds one point a step: {REINFORCE_STEPS.map((s) => `+${s.to} for ${price(s)}`).join(', ')}. {REINFORCE_STEPS.length > 0 ? `After +${REINFORCE_STEPS.at(-1)!.to} the piece is finished.` : ''} Rare and epic gear can also have a trait of your choosing fitted for {price(WORKBENCH.affix)}, replacing the one it has.</p>
+        <p>Upgrades never fail, nothing is rolled, and the workbench never acts on its own. Salvaging an upgraded piece pays what it was found at, not what you spent on it, so build what you will wear.</p>
+      </> : null}
       <h2 id="getting-knocked-out">Getting knocked out</h2>
       <p>Your hero revives automatically after about two hours and returns to Office Cubicles. You keep your XP and equipment; getting knocked out costs 10% of your current gold. You do not need to open the companion or press anything.</p>
       <h2 id="recaps">Recaps</h2>

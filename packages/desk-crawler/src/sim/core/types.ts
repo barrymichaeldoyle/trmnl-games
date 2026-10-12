@@ -13,7 +13,8 @@ export type StreamSeeds = Readonly<Record<Exclude<StreamName, 'raid' | 'quest'>,
 export type HeroStatus = 'exploring' | 'resting' | 'travelling' | 'dead' | 'paused' | 'sleeping'
 export type EncounterKind = 'combat' | 'loot' | 'trap' | 'rest'
 export type GearKind = 'weapon' | 'armor'
-export type ItemKind = GearKind | 'potion'
+/** D129: `material` rows are the workbench's stack rows, outside the bag like potions. */
+export type ItemKind = GearKind | 'potion' | 'material'
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic'
 /** How carefully the hero looks after itself between fights (D76). */
 export type StanceId = 'cautious' | 'balanced' | 'bold'
@@ -472,6 +473,36 @@ export interface BagLadder {
   readonly findPermille: number
 }
 
+/** D129: one material kind, the stack row a rarity band salvages into. */
+export interface MaterialTemplate {
+  readonly id: string
+  readonly name: string
+  /** Rarities whose gear yields this material; every rarity in the catalog belongs to exactly one. */
+  readonly rarities: readonly Rarity[]
+  /** Glyph name shared by the companion and any later device nod. */
+  readonly glyph: string
+}
+
+/** Materials by id, with the count each costs or yields. */
+export type MaterialCount = Readonly<Record<string, number>>
+
+/** One step the workbench can apply to an owned item: the next gear tier, or one more reinforcement on the top tier. */
+export type WorkbenchStep =
+  | { readonly kind: 'tier'; readonly toTier: number; readonly gold: number; readonly materials: MaterialCount }
+  | { readonly kind: 'reinforce'; readonly to: number; readonly gold: number; readonly materials: MaterialCount }
+
+/**
+ * D129: salvage and the workbench. Salvage strips bag gear into materials (the item's tier in units of its rarity's
+ * material; epic gear yields `epicYieldMultiplier` times that). Steps are applied in catalog order, tier steps first;
+ * `affix` is the price of fitting a chosen affix to rare or epic gear. Nothing here is drawn: every step is explicit.
+ */
+export interface WorkbenchRule {
+  readonly materials: readonly MaterialTemplate[]
+  readonly epicYieldMultiplier: number
+  readonly steps: readonly WorkbenchStep[]
+  readonly affix: { readonly gold: number; readonly materials: MaterialCount }
+}
+
 export interface ContentCatalog {
   readonly contentVersion: string
   readonly constants: SimulationConstants
@@ -506,6 +537,8 @@ export interface ContentCatalog {
   readonly unlocks?: UnlockRule
   /** Absent before v12 (P35): no career ladder, no goal lines, no guarantees. */
   readonly career?: CareerRule
+  /** Absent before v13 (D129): no salvage, no materials, no workbench. */
+  readonly workbench?: WorkbenchRule
   readonly narrative: Readonly<{ biomes: Readonly<Record<string, BiomeNarrative>>; shared: SharedNarrative; monsters: Readonly<Record<string, MonsterNarrative>> }>
 }
 
@@ -561,6 +594,10 @@ export interface HeroCounters {
   readonly itemsEquipped: number
   /** Career rungs reached under a catalog with a ladder (P35). */
   readonly careerRungs: number
+  /** D129: gear stripped for materials, workbench steps applied (upgrades, reinforcements and affix choices), and the highest reinforcement any item has reached. Written by the intents. */
+  readonly itemsSalvaged: number
+  readonly gearUpgraded: number
+  readonly topReinforcement: number
 }
 
 /** Counter names that hold one number (everything except `monsterWins`). */
@@ -667,6 +704,10 @@ export interface ItemSnapshot {
   readonly quantity: number
   /** Affix rolled at generation (D81); absent on common and uncommon gear and on gear from earlier catalogs. */
   readonly affixId?: string
+  /** D129: the gear tier the workbench raised this item to; absent means its template's tier. */
+  readonly tier?: number
+  /** D129: reinforcement steps applied on top of the tier (0 to the catalog's cap); absent means 0. */
+  readonly reinforced?: number
 }
 
 /** A new item before the adapter allocates its database ID. */

@@ -13,10 +13,11 @@ import { nextEarlyTier } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { cumulativeXpToReach } from '@trmnl-games/desk-crawler/sim/core/stats'
-import type { ContentCatalog, HeroState, ItemSnapshot, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog, HeroState, ItemSnapshot, MaterialCount, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
 import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
 import { nextEarlyPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
 import { currentRung, FEATURES, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { createRng } from '@trmnl-games/desk-crawler/sim/core/rng'
 import { ACHIEVEMENTS, ACHIEVEMENT_FAMILIES, rarityBand } from '@trmnl-games/desk-crawler/content/achievements'
 import { allSatisfied } from '@trmnl-games/desk-crawler/sim/core/achievements'
@@ -41,6 +42,8 @@ export interface Policy {
   readonly buyBags?: boolean
   /** P31: move the TRMNL clock four hours forward every morning (wrapping from +14 to -12) to farm refills. */
   readonly timezoneAbuse?: boolean
+  /** D129: once both ladders are bought, salvage spare gear instead of selling it and apply every affordable workbench step (default true for visiting cohorts under a catalog with a workbench). */
+  readonly workbench?: boolean
 }
 
 export const POLICIES: readonly Policy[] = [
@@ -111,6 +114,12 @@ export interface HeroLog {
   guaranteeFires: Map<string, number>
   careerGold: number
   finalRung?: string
+  /** D129: gear salvaged, materials held at the end, gold spent on the workbench, the first tick each slot reached each step, and gold at days 30/60/90. */
+  itemsSalvaged: number
+  materialsHeld: MaterialCount
+  workbenchGold: number
+  stepTick: Map<string, number>
+  goldByDay: Map<number, number>
 }
 
 function args() {
@@ -151,13 +160,16 @@ function bestInSlot(content: ContentCatalog): { attack: number; defense: number 
  * the harness: it counts equips and sales, picks a stance once stances are unlocked, answers a pending decision with its
  * default, and buys the merchant's bag or pouch offer (else its potions) when it can afford it.
  */
-export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy): { hero: HeroState; inventory: ItemSnapshot[]; bought: number } {
+export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy): { hero: HeroState; inventory: ItemSnapshot[]; bought: number; salvaged: number; workbenchGold: number; steps: string[] } {
   let bought = 0
-  if (!['exploring', 'resting', 'sleeping'].includes(hero.status)) return { hero, inventory, bought }
+  let salvaged = 0
+  let workbenchGold = 0
+  const steps: string[] = []
+  if (!['exploring', 'resting', 'sleeping'].includes(hero.status)) return { hero, inventory, bought, salvaged, workbenchGold, steps }
   const h: Mutable<HeroState> = { ...hero }
   const counters = { ...h.counters }
   h.counters = counters
-  const gear = inventory.filter((item) => item.kind !== 'potion')
+  const gear = inventory.filter((item) => isGear(item.kind))
   const best = (kind: 'weapon' | 'armor') =>
     gear
       .filter((item) => item.kind === kind && item.requiredLevel <= h.level)
@@ -178,15 +190,25 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   delete h.heldItemId
   let gold = h.gold
   let sold = 0
+  // D129: a player sells while a bag or pouch is still to buy, then salvages. Yields pile into the material rows.
+  const workbench = policy.workbench !== false && content.workbench !== undefined && nextEarlyTier(content, h) === undefined && nextEarlyPouchTier(content, { level: h.level, ...(h.potionCap === undefined ? {} : { potionCap: h.potionCap }) }) === undefined
+  let yielded: MaterialCount = {}
   let kept = inventory.filter((item) => {
-    if (item.kind === 'potion' || item.id === h.weaponId || item.id === h.armorId) return true
+    if (!isGear(item.kind) || item.id === h.weaponId || item.id === h.armorId) return true
+    if (workbench) {
+      yielded = addMaterials(yielded, salvageYield(content, item))
+      salvaged += 1
+      return false
+    }
     gold += item.saleValue
     sold += 1
     return false
   })
   h.gold = gold
   counters.itemsSold += sold
+  counters.itemsSalvaged += salvaged
   counters.goldEarned += gold - hero.gold
+  if (salvaged > 0) kept = withMaterials(content, kept, yielded)
   // P35: the once-only companion deeds. The stance pick keeps the cohort's sustain (balanced unless --stance).
   if (content.stances !== undefined && unlocked(content, h.level, 'stances') && counters.stanceChanges === 0) counters.stanceChanges = 1
   if (h.choice !== undefined && content.choices !== undefined) {
@@ -234,6 +256,25 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
     h.gold -= pouch.price
     h.potionCap = pouch.cap
   }
+  // D129: every affordable workbench step on the equipped pieces, weapon first, as a player with the materials would.
+  if (workbench) {
+    for (const slot of ['weaponId', 'armorId'] as const) {
+      for (;;) {
+        const item = kept.find((row) => row.id === h[slot])
+        const step = item === undefined ? undefined : nextStep(content, item)
+        if (item === undefined || step === undefined || h.gold < step.gold) break
+        if (Object.keys(materialShortfall(heldMaterials(kept), step.materials)).length > 0) break
+        const next = applyStep(content, item, step)
+        if (next.requiredLevel > h.level) break
+        h.gold -= step.gold
+        workbenchGold += step.gold
+        kept = withMaterials(content, kept.map((row) => (row.id === item.id ? next : row)), Object.fromEntries(Object.entries(step.materials).map(([id, n]) => [id, -n])))
+        counters.gearUpgraded += 1
+        counters.topReinforcement = Math.max(counters.topReinforcement, next.reinforced ?? 0)
+        steps.push(`${item.kind}:${step.kind === 'tier' ? `Mk ${step.toTier}` : `+${step.to}`}`)
+      }
+    }
+  }
   const hardest = policy.staySafe ? content.biomes.find(b => b.safe)! : content.biomes.filter((b) => b.unlockLevel <= h.level).at(-1)!
   if (h.status === 'sleeping') {
     h.wakeAtTick = tick + 1
@@ -243,7 +284,21 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
     h.targetBiomeId = hardest.id
     h.arriveAtTick = tick + 1
   }
-  return { hero: h, inventory: kept, bought }
+  return { hero: h, inventory: kept, bought, salvaged, workbenchGold, steps }
+}
+
+/** Add (or spend, with negative counts) materials in the stack rows; a row that reaches zero goes. Ids are stable per material so the sort order holds. */
+function withMaterials(content: ContentCatalog, inventory: ItemSnapshot[], delta: MaterialCount): ItemSnapshot[] {
+  let rows = [...inventory]
+  for (const [id, n] of Object.entries(delta)) {
+    if (n === 0) continue
+    const existing = rows.find((row) => row.kind === 'material' && row.templateId === id)
+    const quantity = (existing?.quantity ?? 0) + n
+    if (quantity < 0) throw new Error(`spent more ${id} than held`)
+    rows = rows.filter((row) => row !== existing)
+    if (quantity > 0) rows.push({ id: `m-${id}`, templateId: id, contentVersion: content.contentVersion, kind: 'material', name: content.workbench?.materials.find((m) => m.id === id)?.name ?? id, rarity: 'common', requiredLevel: 1, attack: 0, defense: 0, saleValue: 0, quantity })
+  }
+  return rows.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 }
 
 export function simulateCohort(policy: Policy, heroes: number, days: number, content: ContentCatalog, ticks = days * TICKS_PER_DAY, stance?: StanceId): HeroLog[] {
@@ -297,6 +352,11 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       rungTick: new Map(),
       guaranteeFires: new Map(),
       careerGold: 0,
+      itemsSalvaged: 0,
+      materialsHeld: {},
+      workbenchGold: 0,
+      stepTick: new Map(),
+      goldByDay: new Map(),
     }
     let dayTasks = 0
     let daySleep = 0
@@ -311,7 +371,13 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       if (policy.everyDays > 0 && (tick - offset) % (policy.everyDays * TICKS_PER_DAY) === 0) {
         const before = hero
         let bought: number
-        ;({ hero, inventory, bought } = visit(hero, inventory, tick, content, policy))
+        let salvaged: number
+        let workbenchGold: number
+        let steps: string[]
+        ;({ hero, inventory, bought, salvaged, workbenchGold, steps } = visit(hero, inventory, tick, content, policy))
+        log.itemsSalvaged += salvaged
+        log.workbenchGold += workbenchGold
+        for (const step of steps) if (!log.stepTick.has(step)) log.stepTick.set(step, tick)
         if (bought > 0) {
           log.bagPurchases += 1
           log.bagGoldSpent += bought
@@ -411,6 +477,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         if ((w?.attack ?? 0) >= bis.attack && (a?.defense ?? 0) >= bis.defense) log.bestInSlotTick = tick
       }
       if (tick === 30 * TICKS_PER_DAY) log.goldDay30 = hero.gold
+      if (tick % (30 * TICKS_PER_DAY) === 0) log.goldByDay.set(tick / TICKS_PER_DAY, hero.gold)
       if (tick % TICKS_PER_DAY === 0 && (ACHIEVEMENT_DAYS as readonly number[]).includes(tick / TICKS_PER_DAY)) {
         log.achievementsByDay.set(tick / TICKS_PER_DAY, allSatisfied({ level: hero.level, bagCapacity: hero.bagCapacity, counters: hero.counters, keepsakeTotal: 0 }, content).map((a) => a.id))
       }
@@ -428,6 +495,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
     log.finalGold = hero.gold
     log.goldEarned = hero.counters.goldEarned
     log.finalPotions = inventory.find(item => item.kind === 'potion')?.quantity ?? 0
+    log.materialsHeld = heldMaterials(inventory)
     const finalRung = currentRung(content, hero)?.id
     if (finalRung !== undefined) log.finalRung = finalRung
     logs.push(log)
@@ -496,6 +564,7 @@ export function summarize(policy: Policy, logs: HeroLog[], totalDays: number, co
     goldDay30: totalDays >= 30 ? pct(logs.map((l) => l.goldDay30 ?? 0), 0.5) : null,
     todo: content.todo === undefined ? null : todoReport(logs, totalDays),
     career: content.career === undefined ? null : careerReport(logs, totalDays, content, censored),
+    workbench: content.workbench === undefined ? null : workbenchReport(logs, content, censored),
     jackpotGoldShare: Math.round((sum((l) => l.jackpotGold) / Math.max(1, sum((l) => l.goldEarned))) * 1000) / 10,
     elitesPerHeroDay: Math.round((sum((l) => l.elites) / logs.length / totalDays) * 100) / 100,
     bag: {
@@ -574,6 +643,22 @@ function careerReport(logs: HeroLog[], totalDays: number, content: ContentCatalo
 }
 
 /**
+ * D129 reports: gold at each 30-day mark, materials held at the end, gear salvaged and gold spent on the workbench
+ * per hero, and the day each slot reached each step (censored percentiles), so the sink can be read against the hoard.
+ */
+function workbenchReport(logs: HeroLog[], content: ContentCatalog, censored: (ticks: (number | undefined)[]) => { p10: number | string; median: number | string; p90: number | string; reached: number }) {
+  const days = [...new Set(logs.flatMap((l) => [...l.goldByDay.keys()]))].sort((a, b) => a - b)
+  const keys = [...new Set(logs.flatMap((l) => [...l.stepTick.keys()]))].sort()
+  return {
+    goldByDay: Object.fromEntries(days.map((day) => [`day${day}`, { median: pct(logs.map((l) => l.goldByDay.get(day) ?? 0), 0.5), p90: pct(logs.map((l) => l.goldByDay.get(day) ?? 0), 0.9) }])),
+    materialsHeldMedian: Object.fromEntries(content.workbench!.materials.map((m) => [m.id, pct(logs.map((l) => l.materialsHeld[m.id] ?? 0), 0.5)])),
+    salvagedPerHero: round1(logs.reduce((sum, l) => sum + l.itemsSalvaged, 0) / logs.length),
+    workbenchGoldMedian: pct(logs.map((l) => l.workbenchGold), 0.5),
+    steps: Object.fromEntries(keys.map((key) => [key, censored(logs.map((l) => l.stepTick.get(key)))])),
+  }
+}
+
+/**
  * Share of heroes holding each achievement at each snapshot day, plus a band
  * census, so a release can check that monster tier V stays Legendary at day 30.
  */
@@ -619,7 +704,7 @@ function main() {
   const totalDays = ticks / TICKS_PER_DAY
   const policies = content.todo === undefined ? POLICIES : [...POLICIES, TIMEZONE_ABUSE]
   const reports = policies.map((policy) => summarize(policy, simulateCohort(policy, options.heroes, totalDays, content, ticks, options.stance), totalDays, content))
-  const meta = { reportVersion: 2, contentVersion: content.contentVersion, stance: options.stance ?? null, simulationVersion: SIMULATION_VERSION, heroes: options.heroes, days: totalDays, ticks, seconds: (Date.now() - started) / 1000, cumulativeXpToLevel8: cumulativeXpToReach(8), deathDenominator: 'hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability', uncertainty: 'Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast' }
+  const meta = { reportVersion: 3, contentVersion: content.contentVersion, stance: options.stance ?? null, simulationVersion: SIMULATION_VERSION, heroes: options.heroes, days: totalDays, ticks, seconds: (Date.now() - started) / 1000, cumulativeXpToLevel8: cumulativeXpToReach(8), deathDenominator: 'hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability', uncertainty: 'Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast' }
   if (options.json) writeFileSync(options.json, JSON.stringify({ meta, reports }, null, 2) + '\n')
   console.log(JSON.stringify(meta))
   for (const r of reports) {
@@ -639,6 +724,11 @@ function main() {
       console.log(`  unlocks: ${Object.entries(c.unlocks ?? {}).map(([f, u]) => `${f} L${u.level} ${u.median}d`).join('; ')}`)
       console.log(`  career: ${c.rungs.map((x) => `${x.id} ${x.median}d (${x.reached}/${r.heroes}${x.guaranteeFiresPerHero === null ? '' : `, forced ${x.guaranteeFiresPerHero}/hero`})`).join('; ')}`)
       console.log(`  career: gold ${c.careerGoldSharePct}% of all gold (${c.careerGoldPerHero}/hero); rungs reached median ${c.rungsReachedMedian}; waiting on a companion rung at the end ${c.waitingOnCompanionPct}%; standing ${JSON.stringify(c.finalRung)}`)
+    }
+    if (r.workbench) {
+      const w = r.workbench
+      console.log(`  workbench: gold ${Object.entries(w.goldByDay).map(([d, g]) => `${d} ${g.median} (p90 ${g.p90})`).join('; ')}; spent median ${w.workbenchGoldMedian}; salvaged/hero ${w.salvagedPerHero}; held ${JSON.stringify(w.materialsHeldMedian)}`)
+      console.log(`  workbench: ${Object.entries(w.steps).map(([k, s]) => `${k} ${s.median}d (${s.reached}/${r.heroes})`).join('; ')}`)
     }
     console.log(`  potions ${JSON.stringify(r.potions)}; useful gear/day ${r.usefulGearPerDay}; equipped upgrades/hero ${r.equippedUpgradesPerHero}`)
     console.log(`  bag ${r.bag.reach.map((b) => `${b.capacity}: ${b.median}d (p10 ${b.p10}, p90 ${b.p90})`).join('; ')}; finds/hero ${r.bag.findsPerHero}; buys/hero ${r.bag.purchasesPerHero}; gold spent median ${r.bag.goldSpentMedian}`)

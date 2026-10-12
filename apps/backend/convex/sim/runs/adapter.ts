@@ -52,6 +52,8 @@ export function toInventory(items: readonly Doc<'items'>[]): ItemSnapshot[] {
       saleValue: item.saleValue,
       quantity: item.quantity,
       ...(item.affixId === undefined ? {} : { affixId: item.affixId }),
+      ...(item.tier === undefined ? {} : { tier: item.tier }),
+      ...(item.reinforced === undefined ? {} : { reinforced: item.reinforced }),
     }))
     .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 }

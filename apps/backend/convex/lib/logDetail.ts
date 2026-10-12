@@ -162,6 +162,8 @@ export const commandDetail = v.object({
   effectGained: v.optional(v.string()),
   /** The stance a `set_stance` line switched away from (D103): switches with nothing logged between them merge into it. */
   stanceFrom: v.optional(v.union(v.literal('cautious'), v.literal('balanced'), v.literal('bold'))),
+  /** D129: materials a salvage yielded or a workbench step spent, by material id. */
+  materials: v.optional(v.record(v.string(), v.number())),
 })
 
 /** One earned achievement (D65); the name is copied so reads never need the catalog. */
