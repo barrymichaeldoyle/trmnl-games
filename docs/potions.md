@@ -1,6 +1,6 @@
 # Potion strengths: minor, healing and major potions (D131)
 
-Proposed 2026-10-07 as P30 and approved as D131 on 2026-10-12, when Barry chose, with the marketplace review still open and no public players, content that early players see over late-game sinks ("new biomes and potion strengths ... lore") and handed over the order ("do what you think is best"). It is the v2.0 Depth slice the [roadmap](roadmap.md) lists after salvage and the workbench ([D129](salvage.md)), built as content v14. Bigger bags, new biomes and lore stay separate slices.
+Proposed 2026-10-07 as P30 and approved as D131 on 2026-10-12, when Barry chose, with the marketplace review still open and no public players, content that early players see over late-game sinks ("new biomes and potion strengths ... lore") and handed over the order ("do what you think is best"). It is the v2.0 Depth slice the [roadmap](roadmap.md) lists after salvage and the workbench ([D129](salvage.md)), built as content v14 the same day ([evidence](evidence/potions.md)) and switched on in production at about 17:52 UTC (V5, run 813 clean). Bigger bags, new biomes and lore stay separate slices.
 
 Companions: [gameplay](gameplay.md) (the sustain steps and loot table this changes), [inventory](inventory.md) (the stack rows and read bound), [salvage](salvage.md) (the materials the combine rule spends) and [achievements](achievements.md) (the next catalog version).
 
@@ -108,7 +108,7 @@ Nothing below is a target; the harness sets the published numbers.
 | V2 Backend | Schema (additive counter), `usePotion` by strength, `combinePotions`, `inventory.mine` additions, every potion read summed across rows, command log lines | Duplicate receipts cannot combine twice; a combine never overflows the pouch; a drink of an empty strength is refused by name; the merchant and a decision add to the healing row beside other rows |
 | V3 Companion and help | Drink picker on the Hero page, potion sheet with strengths and Combine on the Bag page, log labels, help section from the catalog, analytics | Phone previews pass at 390 and 320 wide with three strengths held and the combine shortfall shown |
 | V4 Achievements | Achievement catalog version 6 with Potion mixing | Rarity publishes for the family; a hero with no combines gains nothing on the switch |
-| V5 Evidence and switch | Evidence page with the harness tables, gate below, production switch between runs | First v14 run completes clean; existing heroes keep their potion row as healing potions |
+| V5 Evidence and switch (done 2026-10-12, 17:52 UTC) | Evidence page with the harness tables, gate below, production switch between runs | First v14 run completes clean; existing heroes keep their potion row as healing potions |
 
 Gate (from the roadmap's v2.0 gate, narrowed to this slice): existing potion rows replay identically under v13; a hero never holds more potions than its pouch after any combine, find or purchase; no step can be paid twice; no new per-tick reads; the derived read bound holds; and the harness shows Office and Server Room knockout rates and the level-8 date within the v13 baseline's spread, with majors reaching the Cafeteria cohorts.
 

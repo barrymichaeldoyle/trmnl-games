@@ -1,6 +1,6 @@
 # Potion strengths: build evidence (D131)
 
-Date: 2026-10-12 · Simulation version 1 · Content v14 (built; production runs v13 until Barry switches it between runs) · Harness: `pnpm balance --heroes 300 --days 90 --content v14 --json docs/evidence/balance-v14-potions-90-days.json` against the v13 baseline from D129 ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw reports: [v14](balance-v14-potions-90-days.json), [v13 baseline](balance-v13-workbench-90-days.json).
+Date: 2026-10-12 · Simulation version 1 · Content v14 (live in production since 17:52 UTC the same day) · Harness: `pnpm balance --heroes 300 --days 90 --content v14 --json docs/evidence/balance-v14-potions-90-days.json` against the v13 baseline from D129 ([tools/balance/run.ts](../../tools/balance/run.ts)) · Local Node 24, pure simulator in memory, no database. Raw reports: [v14](balance-v14-potions-90-days.json), [v13 baseline](balance-v13-workbench-90-days.json).
 
 ## What V1 to V4 built
 
@@ -50,4 +50,4 @@ The harness never picks a strength by hand (it drinks only automatically), so th
 
 ## Switch
 
-Deployed with the push to main. The production switch from v13 to v14 is Barry's (`world:setActiveContentVersion` between runs); `ACTIVE_CONTENT` is v14 for new worlds. Existing heroes need no migration: the one potion row every hero holds is `healing_potion`, which v14 reads as the healing strength, and achievement catalog version 6 evaluates on each hero's next tick with nothing to award until a hero combines.
+Deployed with the push to main (commit c04debf, Workers build passed). Barry switched the production world from v13 to v14 at about 17:52 UTC on 2026-10-12 (`world:setActiveContentVersion` returned `{ from: "v13", to: "v14" }`), between runs 812 and 813. The first v14 run (tick 813, wall slot 18:00 UTC) completed clean: one eligible hero, one processed, nothing quarantined, no `simulationFailures` row, and the hero's `achievementsVersion` moved to 6. Existing heroes needed no migration: the one potion row every hero holds is `healing_potion`, which v14 reads as the healing strength (the live hero's 20-potion Thermos is a full pouch of healing potions), and achievement catalog version 6 evaluates on each hero's next tick with nothing to award until a hero combines.
