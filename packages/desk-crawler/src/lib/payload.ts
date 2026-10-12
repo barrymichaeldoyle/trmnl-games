@@ -298,7 +298,6 @@ export function buildPayload(input: PayloadInput) {
       potions: 0,
       bag_used: null,
       bag_capacity: null,
-      drawer_used: 0,
       stance: '' as const,
       stance_name: '',
       held_item: '',
@@ -426,8 +425,6 @@ export function buildPayload(input: PayloadInput) {
     potions: input.potions,
     bag_used: input.bagUsed,
     bag_capacity: input.bagCapacity,
-    // D123: the desk drawer is gone; the field stays at 0 so template v49/v50 (which read it) keep rendering until v51 is uploaded.
-    drawer_used: 0,
     // D103: the stance outlasts its log line, so the HUD shows it under its gauge mark; empty under a catalog without stances.
     stance: stance ? stance.id : ('' as const),
     stance_name: stance?.name ?? '',
