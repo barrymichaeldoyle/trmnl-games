@@ -6,7 +6,7 @@ export const SITE_NAME = PLATFORM_NAME
 export const OG_VERSION = 2
 /** Desk Crawler's own social card, for its public pages. */
 export const DESK_CRAWLER_OG = { path: `/games/desk-crawler/og.png?v=${OG_VERSION}`, alt: 'Desk Crawler: Pip the office warrior squares up to a Cable Serpent in the Server Room' }
-export const SITE_DESCRIPTION = 'Games for your TRMNL e-ink display. Start with Desk Crawler, an office RPG that plays itself on your desk.'
+const SITE_DESCRIPTION = 'Games for your TRMNL e-ink display. Start with Desk Crawler, an office RPG that plays itself on your desk.'
 
 /** schema.org description of the site, for the home page's structured data. */
 export const SITE_JSON_LD = { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/`, description: SITE_DESCRIPTION }

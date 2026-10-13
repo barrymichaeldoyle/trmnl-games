@@ -12,7 +12,7 @@ import { Glyph } from './glyphs'
 
 /** Short status words for a character, shared by the library tiles and the switcher. */
 export const HERO_STATUS: Record<string, string> = { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' }
-export const heroLine = (hero: { name: string; activationState: string; status: string }) => `${hero.name} · ${hero.activationState === 'active' ? HERO_STATUS[hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}`
+const heroLine = (hero: { name: string; activationState: string; status: string }) => `${hero.name} · ${hero.activationState === 'active' ? HERO_STATUS[hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}`
 export const anglerLine = (angler: { title: string; activationState: string; status: string }) => `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}`
 
 /** The game whose companion the path is inside, if any. */
@@ -27,7 +27,7 @@ export function currentGame(pathname: string): GameSlug | null {
  * see one game only keeps a plain link, so nobody meets an empty menu. The visible part depends on the pathname and
  * the preloaded listing alone, so the server render and the first client render agree.
  */
-export function GameSwitcher({ slug }: { slug: GameSlug }) {
+function GameSwitcher({ slug }: { slug: GameSlug }) {
   const listing = useGames()
   const others = listing?.games.filter((game) => game.slug !== slug) ?? []
   const [open, setOpen] = useState(false)

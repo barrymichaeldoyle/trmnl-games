@@ -19,10 +19,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@noble/hashes": "^2.4.0",
     "@trmnl-games/engine": "workspace:*",
-    "fflate": "0.8.3",
-    "qrcode-generator": "^2.0.4"
+    "fflate": "0.8.3"
   },
   "devDependencies": {
     "typescript": "~6.0.3"

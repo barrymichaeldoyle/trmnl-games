@@ -31,7 +31,7 @@ export function fillBag(inventory: ItemSnapshot[], count: number): ItemSnapshot[
   return [...inventory, ...extra].sort((a, b) => (a.id < b.id ? -1 : 1))
 }
 
-export function input(hero: HeroState, inventory: ItemSnapshot[], tick: number, seed: number): SimulationInput {
+function input(hero: HeroState, inventory: ItemSnapshot[], tick: number, seed: number): SimulationInput {
   return { hero, inventory, tick, content, simulationVersion: SIMULATION_VERSION, streams: seeds(seed) }
 }
 

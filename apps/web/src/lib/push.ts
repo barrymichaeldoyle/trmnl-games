@@ -3,8 +3,8 @@
  * The worker's scope is the companion only and it caches nothing.
  */
 
-export const PUSH_WORKER = '/push-sw.js'
-export const PUSH_SCOPE = '/app/'
+const PUSH_WORKER = '/push-sw.js'
+const PUSH_SCOPE = '/app/'
 
 /** `ios-install`: iOS Safari outside a Home Screen install, where web push cannot work (iOS 16.4+ needs the install). */
 export type PushSupport = 'checking' | 'ready' | 'denied' | 'ios-install' | 'unsupported'
@@ -38,7 +38,7 @@ export async function currentSubscription(): Promise<PushSubscription | null> {
 }
 
 /** How long one step of setting up alerts may take before the button gives up and offers a retry. */
-export const PUSH_STEP_MS = 15_000
+const PUSH_STEP_MS = 15_000
 
 /** Reject after `ms`, so a browser step that never settles cannot leave the button spinning. */
 function within<T>(promise: Promise<T>, ms: number): Promise<T> {

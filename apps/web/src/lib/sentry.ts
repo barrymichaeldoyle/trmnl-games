@@ -2,7 +2,7 @@ import type { Breadcrumb, ErrorEvent } from '@sentry/tanstackstart-react'
 import { scrubAnalyticsText, scrubAnalyticsValue } from './analytics'
 
 /** Public ingest key for the `trmnl-games` Sentry project (D113). Safe to ship: it can only submit events. */
-export const SENTRY_DSN = 'https://2a8e9aa1794a981433d256ab0c409126@o299144.ingest.us.sentry.io/4512227006808064'
+const SENTRY_DSN = 'https://2a8e9aa1794a981433d256ab0c409126@o299144.ingest.us.sentry.io/4512227006808064'
 const PRODUCTION_ORIGIN = 'https://trmnlgames.com'
 
 /** Shared by the Worker and the browser: no request bodies, headers, cookies, query strings, credentials or identity. */

@@ -24,7 +24,7 @@ const SYSTEM_GLYPHS: ReadonlyArray<[RegExp, GlyphName]> = [
   [/\bstance\b/i, 'shield'],
 ]
 
-export const glyphFor = (entry: { kind: string; summary: string }): GlyphName =>
+const glyphFor = (entry: { kind: string; summary: string }): GlyphName =>
   entry.kind === 'system' ? (SYSTEM_GLYPHS.find(([pattern]) => pattern.test(entry.summary))?.[1] ?? 'system') : (entry.kind as GlyphName)
 
 /** Change chips take their stat's colour; losses keep the stat colour too, the sign carries direction. */

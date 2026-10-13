@@ -4,6 +4,7 @@ packages:
 allowBuilds:
   '@sentry/cli': true
   core-js: false
+  simple-git-hooks: false
   esbuild: true
   workerd: true
 fetchTimeout: 600000

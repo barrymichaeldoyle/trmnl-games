@@ -27,7 +27,7 @@ const INK = '#1b1530'
  * A monster's 1-bit sprite as a crisp inline SVG, painted as the hero page paints it: outline in ink, paper in the
  * foe's fill, shades on the art's checker. A closed note shows the silhouette only, in the muted tone.
  */
-export function MonsterSprite({ id, open }: { id: string; open: boolean }) {
+function MonsterSprite({ id, open }: { id: string; open: boolean }) {
   const art = monsterArt[id as keyof typeof monsterArt]
   const paths = useMemo(() => {
     if (art === undefined) return null

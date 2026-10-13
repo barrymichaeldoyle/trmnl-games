@@ -10,7 +10,7 @@ import { fishTones, flyTones, type Tones } from '@trmnl-games/slow-cast/art/tone
  * `art/tones.ts`. Ink cells take the outline tone, white cells the paper tone and shaded cells alternate the two
  * shade tones on the device's checker, so a fish's scales read as texture rather than black noise.
  */
-export function PaintedSprite({ sprite, tones, scale = 3, className = '' }: { sprite: Sprite; tones: Tones; scale?: number; className?: string }) {
+function PaintedSprite({ sprite, tones, scale = 3, className = '' }: { sprite: Sprite; tones: Tones; scale?: number; className?: string }) {
   const paths = new Map<string, string>()
   sprite.rows.forEach((row, y) => {
     ;[...row].forEach((ch, x) => {

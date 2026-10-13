@@ -2,7 +2,7 @@ import type { PostHog, PostHogConfig, CaptureResult } from 'posthog-js'
 
 export type AnalyticsConsent = 'allowed' | 'declined' | null
 export type AnalyticsIdentity = { id: string; email: string | null; public_alias: string | null; hero_name: string | null } | null
-export const CONSENT_KEY = 'tg_analytics_consent_v1'
+const CONSENT_KEY = 'tg_analytics_consent_v1'
 export const CONSENT_EVENT = 'tg:analytics-consent'
 export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
@@ -145,7 +145,7 @@ export function captureAnalytics(event: AnalyticsEvent, properties: Record<strin
 }
 
 /** The game a page belongs to, for every event's `game` property (D115); platform pages count as Desk Crawler's, as before. */
-export const currentGame = () => (typeof window !== 'undefined' && /(^|\/)slow-cast(\/|$)/.test(window.location.pathname) ? 'slow-cast' : 'desk-crawler')
+const currentGame = () => (typeof window !== 'undefined' && /(^|\/)slow-cast(\/|$)/.test(window.location.pathname) ? 'slow-cast' : 'desk-crawler')
 
 /** v1.1 choices worth measuring: intent → event and the one catalog id argument it may carry. */
 const INTENT_EVENTS: Record<string, [AnalyticsEvent, string, string]> = {

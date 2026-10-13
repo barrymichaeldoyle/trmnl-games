@@ -15,7 +15,7 @@ import { LocalTime } from '../../../lib/localTime'
 
 const arrivesAt = (date: Date) => date.toLocaleString(undefined, { weekday: 'long', hour: 'numeric', minute: '2-digit' })
 
-export function KeepsakeIcon({ pixels }: { pixels: readonly string[] }) {
+function KeepsakeIcon({ pixels }: { pixels: readonly string[] }) {
   const path = pixels.flatMap((row, y) => [...row.matchAll(/#+/g)].map((run) => `M${run.index} ${y}h${run[0].length}v1h-${run[0].length}z`)).join('')
   return <svg viewBox="0 0 8 8" width="32" height="32" fill="currentColor" shapeRendering="crispEdges" aria-hidden="true" className="shrink-0"><path d={path} /></svg>
 }

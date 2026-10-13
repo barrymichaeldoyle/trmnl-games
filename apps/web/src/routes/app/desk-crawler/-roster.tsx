@@ -44,7 +44,7 @@ function waiting(ticks: number, biome: string): string {
 const clock = (at: number) => new Date(at).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' })
 
 /** How the roster works, in three lines: shown above the heroes and in the recruit sheet. */
-export const RosterRules = () => (
+const RosterRules = () => (
   <Consequences>
     <li>One hero adventures at a time. The others wait exactly where you left them, with no adventures and no catch-up.</li>
     <li>Each hero has its own gear, gold, potions and goals. Achievements belong to you, whichever hero earns them.</li>

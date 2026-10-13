@@ -1,7 +1,5 @@
 import { Show, SignInButton, useAuth } from '@clerk/tanstack-react-start'
 import { PlatformHeader } from './platformHeader'
-
-export { PlatformHeader }
 import { Link, useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button, LoadingState } from './ui'
