@@ -43,7 +43,8 @@ function baseScene(status: string, hasWake: boolean, latest: LatestEvent | null)
   if (latest?.kind === 'levelup') return { pose: 'idle', subject: { kind: 'prop', id: 'level_up' } }
   if (monster) return { pose: 'fight', subject: monster }
   if (outcome?.variant === 'loot') {
-    if (outcome.found === 'gear') return { pose: 'idle', subject: { kind: 'prop', id: 'gear' } }
+    // D145: another player's spare comes out of the lost-property box.
+    if (outcome.found === 'gear') return { pose: 'idle', subject: { kind: 'prop', id: outcome.spare === undefined ? 'gear' : 'lost_property' } }
     if (outcome.found === 'potion') return { pose: 'idle', subject: { kind: 'prop', id: 'potion' } }
     return { pose: 'idle', subject: { kind: 'prop', id: outcome.jackpot === true ? 'gold' : 'chest' } }
   }
@@ -56,6 +57,8 @@ function baseScene(status: string, hasWake: boolean, latest: LatestEvent | null)
     const prop = MEETING_PROPS[String(outcome.kindId)]
     return { pose: 'idle', subject: { kind: 'coworker', heroClass: outcome.rivalClass === 'rogue' ? 'rogue' : 'warrior', ...(prop === undefined ? {} : { prop }) } }
   }
+  // D145: the owner is told who found its spare: the finder, beside the lost-property box.
+  if (outcome?.variant === 'lost_property') return { pose: 'idle', subject: { kind: 'coworker', heroClass: outcome.rivalClass === 'rogue' ? 'rogue' : 'warrior', prop: 'lost_property' } }
   return { pose: 'idle', subject: { kind: 'none' } }
 }
 

@@ -15,6 +15,7 @@ import { RARITY_TONE } from '../../../lib/palette'
 import { EmptySlot, Gem, PotionSlot, Sheet, SheetTitle, Slot, SlotPreview } from './-bagSlots'
 import { useNow } from './-pulse'
 import { ConfirmButtons, ConfirmSheet, Consequences } from './-confirm'
+import { WithName } from './-withName'
 
 export const Route = createFileRoute('/app/desk-crawler/inventory')({ head: () => seo({ title: 'Bag', index: false }), loader: ({ context }) => preload(context, convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.mine, {})), component: Inventory })
 
@@ -37,6 +38,8 @@ type Gear = {
   reinforced: number
   nextStep: Step | null
   affixable: boolean
+  /** D145: another player's found spare: their public name (masked once renamed) and whether it links to their page. */
+  spareOf: { ownerName: string; profile: boolean } | null
 }
 type MaterialCount = Record<string, number>
 type Step = { kind: 'tier' | 'reinforce'; label: string; gold: number; materials: MaterialCount; stat: { from: number; to: number }; requiredLevel: number; shortfall: MaterialCount; affordable: boolean }
@@ -133,7 +136,7 @@ function Inventory() {
   const slotLabel = (item: Gear) => {
     const delta = deltaOf(item)
     const compare = item.requiredLevel > hero.level ? `requires level ${item.requiredLevel}` : delta > 0 ? `${delta} better than equipped` : delta < 0 ? `${-delta} worse than equipped` : 'same as equipped'
-    return `${item.label}, ${item.rarity}, +${statOf(item)} ${statLabel(item)}, ${compare}${item.held ? ', held find' : ''}`
+    return `${item.label}, ${item.rarity}, +${statOf(item)} ${statLabel(item)}, ${compare}${item.held ? ', held find' : ''}${item.spareOf ? `, ${item.spareOf.ownerName}'s spare` : ''}`
   }
   const toggle = (id: string) => setSelected((current) => {
     const next = new Set(retainSellableSelection(current, gear))
@@ -342,6 +345,7 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
       <dd className="tabular-nums"><StatOf item={item} />{!item.equipped ? <Delta delta={delta} /> : null}</dd>
       {!item.equipped ? <><dt className="caps text-muted">Equipped</dt><dd className="tabular-nums">{current ? <>{current.label}, <StatOf item={current} /></> : <span className="text-muted">Nothing</span>}</dd></> : null}
       {item.affix ? <><dt className="caps text-muted">{item.affix.name}</dt><dd>{item.affix.blurb}</dd></> : null}
+      {item.spareOf ? <><dt className="caps text-muted">Name on it</dt><dd><WithName text="{name}, in marker. Found in lost property." name={item.spareOf.ownerName} profile={item.spareOf.profile} /></dd></> : null}
       <dt className="caps text-muted">Sells for</dt>
       <dd className="tabular-nums text-gold-ink">{item.saleValue} gold</dd>
       {onSalvage ? <><dt className="caps text-muted">Salvages for</dt><dd className="tabular-nums text-rare-ink">{materialsText(item.salvage, materials)}</dd></> : null}

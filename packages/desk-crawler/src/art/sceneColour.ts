@@ -60,6 +60,8 @@ const PROP: Record<PropId, string> = {
   shredder: '#a9b4c6',
   whiteboard: '#e6eef5',
   water_cooler: '#9fd8e0',
+  // D145: the lost-property box.
+  lost_property: '#b5793f',
 }
 
 /** The hero's white cells are skin, except the blade, which each pose holds in a different place. */
@@ -268,6 +270,7 @@ export const FOE: Record<string, Tones> = {
   'prop:shredder': { paper: '#e6eaef', shade: ['#4f5466', '#6c7287'] },
   'prop:whiteboard': { paper: '#ffffff' },
   'prop:water_cooler': { paper: '#e6f4fa', shade: ['#3f8fb0', '#6fc0dd'] },
+  'prop:lost_property': { paper: '#f4e7c4', shade: ['#8a5a2c', '#b5793f'] },
   cloak: { ink: '#2e2160', shade: ['#6750b8', '#7a5cc8'] },
   crown: { ink: '#8a5a00', paper: '#ffd166' },
 }

@@ -36,10 +36,10 @@ export const Route = createFileRoute('/privacy')({
         happy to share and never include contact details in it.
       </p>
       <p>
-        In Desk Crawler, heroes raid each other's desks and meet each other by chance. When your hero raids, is raided or meets another hero, your public name appears in the other player's adventure log, in the companion and on their TRMNL, as it already does on the leaderboards. If you change your name or delete your account, those stories show "Hidden player" instead.
+        In Desk Crawler, heroes raid each other's desks and meet each other by chance. When your hero raids, is raided or meets another hero, your public name appears in the other player's adventure log, in the companion and on their TRMNL, as it already does on the leaderboards. When your hero is knocked out it can drop a spare item with your public name on it, which another player's hero may find and keep; your name then shows on that item in their companion and on their hero page. If you change your name or delete your account, those stories and items show "Hidden player" instead, or lose the name.
       </p>
       <p>
-        Your Desk Crawler hero has a public page: anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gear, gold, the adventure log and your account details stay private. The page is on by default. Hide my hero page in Settings hides it straight away, and you can show it again at any time.
+        Your Desk Crawler hero has a public page: anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gold, the adventure log and your account details stay private, and so does your gear, except other players' spares your hero holds, which show with the names on them. The page is on by default. Hide my hero page in Settings hides it straight away, and you can show it again at any time.
       </p>
       <p>
         Signed-in players can follow a public hero page. We store who follows whom so their companion can list the players they follow. Nobody is told they were followed, and no page shows who follows a player, except that a player named as someone's rival sees who named them. If you change your public name, hide your page or delete your progress, other players stop seeing your hero in their list, and deleting removes those records.

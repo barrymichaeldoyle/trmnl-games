@@ -18,6 +18,8 @@ export const GLYPHS: Record<string, readonly string[]> = {
   raid: ['........', '........', '.######.', '########', '#..##..#', '########', '.##..##.', '........'],
   /** D141: a meeting with a coworker: a steaming mug. Companion only; the device draws meetings with the system glyph. */
   meeting: ['..#..#..', '.#..#...', '........', '######..', '#....###', '#....#.#', '#....###', '.####...'],
+  /** D145: lost property: a name badge. Companion only; the device draws the owner's notice with the system glyph. */
+  lost_property: ['..####..', '.#....#.', '########', '#......#', '#.####.#', '#......#', '#.##...#', '########'],
   /** D112: a to-do task ticked off, and the stand-up's new tasks: a checkbox with its tick. */
   todo: ['########', '#......#', '#.....##', '#....#.#', '##..#..#', '#.##...#', '#......#', '########'],
   /** P35: a career rung reached or a feature unlocked: the ladder. */

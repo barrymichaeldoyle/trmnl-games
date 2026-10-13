@@ -61,6 +61,8 @@ const ROSTER_LEVEL = catalogs[ACTIVE_CONTENT].unlocks?.roster
 /** D141: meetings, their boons and the level they arrive at, read from the active catalog. */
 const MEETINGS = catalogs[ACTIVE_CONTENT].meetings
 const MEETING_LEVEL = catalogs[ACTIVE_CONTENT].unlocks?.meetings
+/** D145: lost property, read from the active catalog. */
+const LOST_PROPERTY = catalogs[ACTIVE_CONTENT].lostProperty
 const EFFECTS = catalogs[ACTIVE_CONTENT].effects ?? []
 /** "+10% attack" or "traps hurt 30% less": a meeting boon's one modifier in words. */
 const boonLine = (m: { attackPct?: number; defensePct?: number; xpPct?: number; goldPct?: number; trapDamagePct?: number }) =>
@@ -112,6 +114,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['stances', 'Stances'],
   ['desk-raids', 'Desk raids'],
   ...(MEETINGS !== undefined ? [['meetings', 'Meetings'] as const] : []),
+  ...(LOST_PROPERTY !== undefined ? [['lost-property', 'Lost property'] as const] : []),
   ...(TODO !== undefined ? [['to-do-list', 'To-do list'] as const] : []),
   ['potions', 'Potions'],
   ['the-wandering-merchant', 'The wandering merchant'],
@@ -221,6 +224,18 @@ export const Route = createFileRoute('/help/desk-crawler')({
           </ul>
         </>
       ) : null}
+      {LOST_PROPERTY !== undefined ? (
+        <>
+          <h2 id="lost-property">Lost property</h2>
+          <p>When your hero is knocked out outside the Office, it drops a spare of its weapon or armour on that floor, with your public name on it in marker. Your hero keeps everything it was wearing. Later, another player's hero exploring that floor may find the spare instead of an ordinary find, and your TRMNL tells you who found it.</p>
+          <ul>
+            <li>Your hero can find other players' spares the same way. A spare is ordinary gear: equip it, sell it, salvage it or take it to the workbench. It comes at the plain stats for its kind and rarity, without the first owner's upgrades.</li>
+            <li>The name stays on it. The Bag page and the Log tab's Lost property card show whose it was, and so does your hero page while you hold it.</li>
+            <li>Nothing is lost and nothing extra is found: a spare only ever takes the place of a find your hero was making anyway. Career goals and Christmas presents are always new.</li>
+            <li>Only one spare of yours lies about at a time. If your hero is knocked out again before anyone finds it, the new spare replaces the old one.</li>
+          </ul>
+        </>
+      ) : null}
       {TODO !== undefined ? (
         <>
           <h2 id="to-do-list">To-do list</h2>
@@ -291,7 +306,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>The screen shows the seven-day XP Top 5 for your level group, with your own row marked, or added below the list when you sit lower. The companion also offers a 24-hour view and a lifetime board. Rankings publish hourly, so a recent adventure or level-up can appear before your rank updates.</p>
       <p>Paused and sleeping heroes keep their progress, but their recent XP ages out. After seven days without earned XP, they leave the weekly board until they earn XP again. Lifetime progress stays recorded.</p>
       <h2 id="sharing-your-hero">Sharing your hero</h2>
-      <p>Your hero has a public page with its level, rank, current floor, lifetime counts and achievements. Gear, gold and the adventure log are never shown. Your name links to the page from the rankings and from other players' raids and meetings, and that's where other players follow you. Settings has Share and Copy link buttons, and a shared link shows a picture card of your hero with its name, level and rank. If you'd rather not have a page, Hide my hero page in Settings hides it straight away. Nobody can then follow you or name you their rival.</p>
+      <p>Your hero has a public page with its level, rank, current floor, lifetime counts and achievements. Gold and the adventure log are never shown, and gear only when it's another player's spare your hero is holding. Your name links to the page from the rankings and from other players' raids and meetings, and that's where other players follow you. Settings has Share and Copy link buttons, and a shared link shows a picture card of your hero with its name, level and rank. If you'd rather not have a page, Hide my hero page in Settings hides it straight away. Nobody can then follow you or name you their rival.</p>
       <h2 id="following-and-rivals">Following and rivals</h2>
       <p>Signed in, you can follow another player from their public hero page, up to 20 players. Everyone you follow is listed under Rankings, with their hero's level, rank and where they are, and links to their pages. Mark one of them as your rival to keep them at the top of the list with a line saying who is ahead. Your rival also gets raided more: half your hero's raids go after their desk when they can be raided. Your rival is told who named them and can name you back. Following anyone else changes nothing in play, and nobody is told when you follow them. If a player hides their page, you see only their name until they show it again. If they change their public name, they drop off your list.</p>
       <h2 id="names">Names</h2>

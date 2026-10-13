@@ -1,6 +1,6 @@
 # Lost property (graveyard items, P41)
 
-Proposed and approved 2026-10-13 as D145. Barry asked what the roadmap's v1.2 stretch row "Graveyard items" meant, then asked for a spec and left the decisions to the lead ("I trust you to make the best decisions using the information you already have"). [Settled points](#settled-points) records each one. Nothing is built yet.
+Proposed and approved 2026-10-13 as D145. Barry asked what the roadmap's v1.2 stretch row "Graveyard items" meant, then asked for a spec and left the decisions to the lead ("I trust you to make the best decisions using the information you already have"). [Settled points](#settled-points) records each one. Barry said "let's build it" the same day and asked for public hero pages to show the spares a hero holds. All five slices were built that day as content v21 and achievement catalog version 11 ([evidence](evidence/lost-property.md)); [changes while building](#changes-while-building) lists where they differ from this spec. Production stays on v20 until Barry switches the world.
 
 Companions: [the roadmap](roadmap.md) (the v1.2 stretch row: "only after item-transfer ownership and death-rule changes are designed"), [the source brief](source-brief.md) (the graveyard row: "other heroes find named dropped gear"), [gameplay](gameplay.md) (death and safe-biome protection), [inventory](inventory.md) (owned item rows and the bounded read), [meetings](meetings.md) (the pool, ledger and apply-once path this copies), [salvage](salvage.md) (workbench fields on gear) and [D144](decisions.md) (public hero pages and name masking).
 
@@ -110,6 +110,21 @@ Each slice ships on its own, keeps every earlier payload and template meaning, a
 | L5 Achievements and admin | Achievement catalog version 11 with Lost and found; `admin:engagement` reports spares dropped, found and lying; analytics doc | Rarity publishes for the family |
 
 L1 blocks the rest. L2 can start while L1's harness runs; the production switch waits for L1's gate. L3 and L4 are independent once L2's query exists. L5 is last so the family counts real finds from the switch.
+
+## Changes while building
+
+- **Public hero pages show held spares.** Barry asked for it when he approved the build: a hero's page lists the other players' spares it holds, with the names on them, and counts "Spares found". This is the one exception to D109's "never gear" on public pages. The help and privacy pages say so.
+- **Where a spare lies.** The row's shard is the graveyard stream's third draw on the knockout tick, so no other random number is needed.
+- **Only exploring heroes look.** The adapter plans a find only for a hero that starts the tick exploring. A resting hero never reaches a loot draw.
+- **A rare spare counts as a rare find.** The finder's `itemsFound`, `rareFinds` and `epicFinds` grow as for any find. The harness confirms finds per day are unchanged.
+- **The notice can land in the same run as the find,** when the owner is evaluated after the finder. The row is then gone before the run ends.
+- **One prop for both scenes.** Instead of a labelled-gear prop plus a coworker holding the item, both scenes use the lost-property box: on its own for the finder, and beside the finder for the owner. Both are new segments under scene version 5.
+- **The log filter is "Other people"** (raids, meetings and lost-property notices). The finder's line stays a `loot` entry under Finds.
+- **The Lost property card lists the spares held, not the last five found.** The bag's item rows already hold them (bounded at 40), so the card, the bag and the public page share one read. History lives in the log.
+- **No retention job.** The table holds at most one row per hero, so nothing piles up.
+- **Achievement names:** Lost and Found, Label Reader, Head of Lost Property ("Lost Property Office" was already the 5,000-finds tier).
+- **The day-30 gold gate.** "Medians move by less than 1%" held for levels but not for final gold, which moves several percent either way from raid pairings alone. Gold earned stayed within 2% ([evidence](evidence/lost-property.md#progress)).
+- **Spares are more common than guessed:** 1–3% of loot gear finds in the harness, not "rare", because bold heroes deep in the building are knocked out often.
 
 ## Settled points
 

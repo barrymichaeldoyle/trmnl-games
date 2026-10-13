@@ -245,9 +245,10 @@ export const glyphUri = (kind: string, size: number) => {
 
 /**
  * The companion's open-task box (D112) never appears on the device, so it costs no markup there. The meeting mug (D141)
- * is left out too, so meetings shipped without a template change: the device draws them with the system glyph.
+ * and the lost-property badge (D145) are left out too, so both shipped without a template change: the device draws
+ * them with the system glyph.
  */
-const GLYPH_KINDS = Object.keys(GLYPHS).filter((kind) => kind !== 'todoOpen' && kind !== 'meeting')
+const GLYPH_KINDS = Object.keys(GLYPHS).filter((kind) => kind !== 'todoOpen' && kind !== 'meeting' && kind !== 'lost_property')
 
 /** Each glyph assigned once per layout (`glyph16_combat`...), so log lines only pick a variable instead of repeating the SVG. */
 const glyphAssigns = (sizes: readonly number[]) =>

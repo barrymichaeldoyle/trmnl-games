@@ -270,6 +270,27 @@ export const waterCooler = sprite(`
  ##    ##
 `)
 
+/* D145: the lost-property box: a spare's hilt sticking out, a name label in marker on the front. */
+
+export const lostPropertyBox = sprite(`
+        #
+       #w#
+       #w#
+     #######
+       #:#
+ ##################
+ #wwwwwwwwwwwwwwww#
+ ##################
+ #::::::::::::::::#
+ #::##########::::#
+ #::#wwwwwwww#::::#
+ #::#w##w###w#::::#
+ #::#wwwwwwww#::::#
+ #::##########::::#
+ #::::::::::::::::#
+ ##################
+`)
+
 export const propArt = {
   chest: chestClosed,
   gold: chestGold,
@@ -286,6 +307,7 @@ export const propArt = {
   shredder,
   whiteboard,
   water_cooler: waterCooler,
+  lost_property: lostPropertyBox,
 } as const
 
 /** D141: the prop each meeting kind stands between the two heroes, by kind id; a kind without one leaves the floor bare. */

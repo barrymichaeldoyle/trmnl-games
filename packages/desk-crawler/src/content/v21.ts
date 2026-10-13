@@ -12,7 +12,7 @@ const lostProperty: LostPropertyRule = {
   lookPermille: 100,
   narrative: {
     dropped: 'Dropped a spare {item}.',
-    found: ['Found a {item} with {rival} written on it in marker.', 'Found a {item} under a desk. It says {rival} on the handle.', 'Fished a {item} out of lost property. Label: {rival}.'],
+    found: ['Found a {item} with {rival} written on it in marker.', 'Found a {item} under a desk. The label says {rival}.', 'Fished a {item} out of lost property. Label: {rival}.'],
     foundCompact: "Found {rival}'s {item}.",
     returned: ['{rival} found your spare {item} in the {destination}.', '{rival} picked up your spare {item} in the {destination}.'],
     returnedCompact: '{rival} found your spare {item}.',

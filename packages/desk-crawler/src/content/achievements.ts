@@ -8,7 +8,7 @@ import type { HeroClass, NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 10
+export const ACHIEVEMENTS_VERSION = 11
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -430,6 +430,14 @@ counter('networking', 'Networking', 'Coworkers', 'meetings', [1, 10, 50], [
   ['Water Cooler Moment', 'Met another hero on the floor.'],
   ['Familiar Face', 'Ten meetings. People wave when you walk past.'],
   ['Office Fixture', 'Fifty meetings. Nobody remembers the office before you.'],
+])
+
+// ---------------------------------------------------------------- D145 Lost property (catalog version 11; appended, never edited)
+
+counter('lost_and_found', 'Lost and found', 'Coworkers', 'lostPropertyFound', [1, 10, 25], [
+  ['Lost and Found', "Found another hero's spare, name and all."],
+  ['Label Reader', "Ten spares found. You know everyone's handwriting."],
+  ['Head of Lost Property', 'Twenty-five spares found. People check with you first.'],
 ])
 
 /** Families in display order. */

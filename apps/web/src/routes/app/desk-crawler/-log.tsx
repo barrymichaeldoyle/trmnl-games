@@ -17,8 +17,8 @@ const FILTERS = [
   { key: 'finds', label: 'Finds', kinds: ['loot'], glyph: 'loot' },
   { key: 'milestones', label: 'Milestones', kinds: ['levelup', 'achievement', 'career', 'occasion', 'death', 'revive', 'travel'], glyph: 'levelup' },
   { key: 'rest', label: 'Rest & traps', kinds: ['rest', 'trap'], glyph: 'rest' },
-  // D141: raids and meetings are the two ways another player's hero turns up.
-  { key: 'raids', label: 'Raids & meetings', kinds: ['raid', 'meeting'], glyph: 'raid' },
+  // D141, D145: raids, meetings and lost property are the ways another player's hero turns up.
+  { key: 'raids', label: 'Other people', kinds: ['raid', 'meeting', 'lost_property'], glyph: 'raid' },
   { key: 'todo', label: 'To-do', kinds: ['todo'], glyph: 'todo' },
 ] as const
 

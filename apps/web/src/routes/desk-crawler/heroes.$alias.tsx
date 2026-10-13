@@ -9,6 +9,8 @@ import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 import { Button, Card, NoticeBar, useNotice } from '../../lib/ui'
 import { useIntent } from '../../lib/intent'
 import { Rarity } from '../app/desk-crawler/-achievements'
+import { WithName } from '../app/desk-crawler/-withName'
+import { RARITY_TONE } from '../../lib/palette'
 
 type Profile = {
   alias: string
@@ -24,6 +26,9 @@ type Profile = {
   achievements: Array<{ id: string; tier: number; name: string; blurb: string; family: string }>
   rarity: { counts: Record<string, number>; totalPlayers: number; scoreAt: number } | null
   achievementCount: number
+  /** D145: other players' spares the hero holds, with the name on each; and how many it has found. */
+  lostProperty?: Array<{ name: string; rarity: string; kind: 'weapon' | 'armor'; ownerName: string; profile: boolean }>
+  lostPropertyFound?: number
 }
 
 const profileQuery = (alias: string) => convexQuery(api.profiles.view, { alias })
@@ -83,6 +88,8 @@ function Found({ profile }: { profile: Profile }) {
   // D110: the raid record, once there is one; never who was raided or the gold that moved.
   const raids = profile.raids
   if (raids && raids.won + raids.failed + raids.repelled + raids.lost > 0) rows.push(['Raids won', raids.won], ['Raiders repelled', raids.repelled])
+  if ((profile.lostPropertyFound ?? 0) > 0) rows.push(['Spares found', profile.lostPropertyFound!])
+  const spares = profile.lostProperty ?? []
   return (
     <>
       <header className="flex flex-col gap-2">
@@ -101,6 +108,18 @@ function Found({ profile }: { profile: Profile }) {
           {rows.map(([label, value]) => <div key={label} className="flex flex-col"><dt className="text-sm text-muted">{label}</dt><dd className="hud text-base tabular-nums">{value.toLocaleString()}</dd></div>)}
         </dl>
       </Card>
+      {spares.length > 0 ? (
+        <Card title="Lost property">
+          <p className="text-sm text-muted">Other players' spares {profile.heroName} found and kept, names and all.</p>
+          <ul aria-label="Spares held" className="mt-2 flex flex-col gap-1">
+            {spares.map((spare, index) => (
+              <li key={`${spare.name}-${spare.ownerName}-${index}`} className="min-w-0 break-words">
+                <span className={`font-semibold ${RARITY_TONE[spare.rarity] ?? ''}`}>{spare.name}</span>, <WithName text="{name}'s" name={spare.ownerName} profile={spare.profile} />
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
       <Card title={`Achievements (${profile.achievementCount})`}>
         {profile.achievements.length === 0 ? <p>No achievements yet.</p> : (
           <ul className="flex flex-col gap-3">

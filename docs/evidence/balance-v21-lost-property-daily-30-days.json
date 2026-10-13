@@ -7,7 +7,7 @@
     "days": 30,
     "policy": "daily",
     "lookPermille": 100,
-    "seconds": 138.343
+    "seconds": 139.773
   },
   "withSpares": {
     "stances": {
@@ -20,7 +20,9 @@
         "level8MedianDays": 8,
         "level12MedianDays": 13.7,
         "finalLevelMedian": 23,
-        "finalGoldMedian": 6033
+        "finalGoldMedian": 6033,
+        "goldEarnedMedian": 20726,
+        "workbenchGoldMedian": 9500
       },
       "balanced": {
         "heroes": 100,
@@ -31,7 +33,9 @@
         "level8MedianDays": 7.8,
         "level12MedianDays": 13,
         "finalLevelMedian": 24,
-        "finalGoldMedian": 6099
+        "finalGoldMedian": 6099,
+        "goldEarnedMedian": 21758,
+        "workbenchGoldMedian": 10000
       },
       "bold": {
         "heroes": 100,
@@ -42,7 +46,9 @@
         "level8MedianDays": 7.8,
         "level12MedianDays": 13.4,
         "finalLevelMedian": 24,
-        "finalGoldMedian": 3818
+        "finalGoldMedian": 3818,
+        "goldEarnedMedian": 19904,
+        "workbenchGoldMedian": 9000
       }
     },
     "all": {
@@ -86,7 +92,9 @@
         "level8MedianDays": 8,
         "level12MedianDays": 13.7,
         "finalLevelMedian": 23,
-        "finalGoldMedian": 6293
+        "finalGoldMedian": 6293,
+        "goldEarnedMedian": 20600,
+        "workbenchGoldMedian": 9000
       },
       "balanced": {
         "heroes": 100,
@@ -97,7 +105,9 @@
         "level8MedianDays": 7.8,
         "level12MedianDays": 12.9,
         "finalLevelMedian": 24,
-        "finalGoldMedian": 6235
+        "finalGoldMedian": 6235,
+        "goldEarnedMedian": 22006,
+        "workbenchGoldMedian": 9000
       },
       "bold": {
         "heroes": 100,
@@ -108,7 +118,9 @@
         "level8MedianDays": 7.8,
         "level12MedianDays": 13.4,
         "finalLevelMedian": 24,
-        "finalGoldMedian": 3856
+        "finalGoldMedian": 3856,
+        "goldEarnedMedian": 19656,
+        "workbenchGoldMedian": 9000
       }
     }
   },
@@ -123,7 +135,9 @@
         "level8MedianDays": 8,
         "level12MedianDays": 13.8,
         "finalLevelMedian": 23,
-        "finalGoldMedian": 6758
+        "finalGoldMedian": 6758,
+        "goldEarnedMedian": 20647,
+        "workbenchGoldMedian": 9000
       },
       "balanced": {
         "heroes": 100,
@@ -134,7 +148,9 @@
         "level8MedianDays": 7.8,
         "level12MedianDays": 12.8,
         "finalLevelMedian": 24,
-        "finalGoldMedian": 5929
+        "finalGoldMedian": 5929,
+        "goldEarnedMedian": 21740,
+        "workbenchGoldMedian": 9000
       },
       "bold": {
         "heroes": 100,
@@ -145,7 +161,9 @@
         "level8MedianDays": 7.8,
         "level12MedianDays": 13.4,
         "finalLevelMedian": 24,
-        "finalGoldMedian": 3580
+        "finalGoldMedian": 3580,
+        "goldEarnedMedian": 19697,
+        "workbenchGoldMedian": 9000
       }
     }
   }
