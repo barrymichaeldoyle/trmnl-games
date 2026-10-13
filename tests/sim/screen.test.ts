@@ -611,7 +611,6 @@ describe('HUD hearts and counters (D72)', () => {
 describe('to-do tasks and the goal on the X full landscape (D138)', () => {
   const withTasks = (extra: Record<string, unknown> = {}) =>
     buildPayload({
-      ...(payload() as never),
       now: NOW,
       world: { currentTick: 120, lastCompletedTick: 120, lastCompletedAt: NOW - 60_000, createdAt: NOW - 86_400_000, ticksPaused: false, maintenanceMode: false },
       ownerAlias: 'barrymichaeldoyle',
