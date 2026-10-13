@@ -1,6 +1,6 @@
 # Meetings (P39)
 
-Proposed 2026-10-13 after Barry picked the roadmap's v1.2 "Meetings" row as the next feature. Barry approved it the same day by handing over the open points, so every recommendation stands (D141); [settled points](#settled-points) records them. All five slices were built the same day as content v20 and achievement catalog version 10 ([evidence](evidence/meetings.md)); [changes while building](#changes-while-building) lists where they differ from this spec. Production runs v19 until the world is switched to v20.
+Proposed 2026-10-13 after Barry picked the roadmap's v1.2 "Meetings" row as the next feature. Barry approved it the same day by handing over the open points, so every recommendation stands (D141); [settled points](#settled-points) records them. All five slices were built the same day as content v20 and achievement catalog version 10 ([evidence](evidence/meetings.md)); [changes while building](#changes-while-building) lists where they differ from this spec. Live in production since run 891 (13:30 UTC on 2026-10-13).
 
 Companions: [raids](raids.md) (the ledger, pool and apply path this reuses), [the roadmap](roadmap.md) (the v1.2 row and its gate), [gameplay](gameplay.md) (effects, D80), [world events](world-events.md) (the scene layers), [achievements](achievements.md) (the planned "meetings completed" family) and [the source brief](source-brief.md), whose meetings row reads "shared stories/buffs/trade; start with stories only".
 
