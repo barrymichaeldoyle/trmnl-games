@@ -3,7 +3,7 @@ import { contentV18 } from '@trmnl-games/desk-crawler/content/v18'
 import { contentV19 } from '@trmnl-games/desk-crawler/content/v19'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { codePoints } from '@trmnl-games/desk-crawler/sim/core/narrative'
-import { occasionAt, occasionStarts } from '@trmnl-games/desk-crawler/sim/core/occasions'
+import { localDay, occasionAt, occasionCalendar, occasionStarts } from '@trmnl-games/desk-crawler/sim/core/occasions'
 import { planRaid } from '@trmnl-games/desk-crawler/sim/core/raid'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { scaled } from '@trmnl-games/desk-crawler/sim/core/modifiers'
@@ -60,6 +60,16 @@ describe('office calendar (D139)', () => {
     // An offset outside ±14 hours reads UTC; a catalog without occasions has none.
     expect(occasionAt(contentV19, lateOct30, 20 * 3600)).toBeUndefined()
     expect(occasionAt(contentV18, noon('2026-10-31'), 0)).toBeUndefined()
+  })
+
+  it('tells the companion today’s occasion with its days left and the next one to start', () => {
+    const on = (date: string) => occasionCalendar(contentV19, localDay(noon(date), 0))
+    expect(on('2026-10-13')).toEqual({ next: { rule: expect.objectContaining({ id: 'bosses_day' }), inDays: 3 } })
+    expect(on('2026-10-17')).toEqual({ next: { rule: expect.objectContaining({ id: 'halloween' }), inDays: 14 } })
+    expect(on('2026-10-31')).toMatchObject({ live: { rule: { id: 'halloween' }, daysLeft: 1 }, next: { rule: { id: 'diwali' }, inDays: 8 } })
+    expect(on('2026-12-24')).toMatchObject({ live: { rule: { id: 'christmas' }, daysLeft: 3 }, next: { rule: { id: 'new_year' }, inDays: 7 } })
+    expect(on('2026-12-25')).toMatchObject({ live: { rule: { id: 'christmas' }, daysLeft: 2 } })
+    expect(occasionCalendar(contentV18, localDay(noon('2026-10-31'), 0))).toEqual({})
   })
 
   it('plays an ordinary day exactly as v18', () => {

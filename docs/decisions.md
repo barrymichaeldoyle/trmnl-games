@@ -471,3 +471,5 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 2026-10-13, D139 switch: production on v19 since about 10:31 UTC; run 880 clean, nothing quarantined.
 
 2026-10-13, D139 W2 and W4: scene version 5 dresses every scene for the occasion on the device's local date, with art for all eighteen occasions: garlands (some spelling SALE, BOSS and the digits of pi), cobwebs, floor props, hero hats on both classes, monster hats and office window views. v4 and v3 scene paths stay served; no template change.
+
+2026-10-13, D139 W3 and W5: the companion shows today's occasion as a chip with its bonus and the next one on the calendar, ATK and DEF include occasion bonuses, the help page lists the office calendar, `admin:engagement` counts occasions and mishaps (no browser event), and achievement catalog version 9 adds Office calendar (1, 6, 12) and Thirteenth Floor. World events (D139) is complete.

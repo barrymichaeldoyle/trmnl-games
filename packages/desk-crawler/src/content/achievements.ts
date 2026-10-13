@@ -8,7 +8,7 @@ import type { HeroClass, NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 8
+export const ACHIEVEMENTS_VERSION = 9
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -414,6 +414,15 @@ family('rogue_gold', 'Deep Pockets', 'Roster', [
   ['Petty Cash', 'Your Rogue has earned 10,000 gold.'],
   ['Slush Fund', 'Your Rogue has earned 50,000 gold. Accounts are asking questions.'],
 ], (i) => ({ kind: 'classCounter', heroClass: 'rogue', counter: 'goldEarned', atLeast: [1000, 10000, 50000][i]! }))
+
+// ---------------------------------------------------------------- D139 Office calendar (catalog version 9; appended, never edited)
+
+counter('office_calendar', 'Office calendar', 'Office calendar', 'occasionsSeen', [1, 6, 12], [
+  ['Signed the Card', 'On duty for an office occasion.'],
+  ['Party Committee', 'Six office occasions at the desk.'],
+  ['Office Institution', 'Twelve occasions. Someone saves you cake now.'],
+])
+family('thirteenth_floor', 'Thirteenth Floor', 'Raids', [['Thirteenth Floor', 'Caught in a Friday the 13th raid that went wrong for everyone.']], () => ({ kind: 'counter', counter: 'raidMishaps', atLeast: 1 }))
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

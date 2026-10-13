@@ -19,6 +19,7 @@ import { readWorld } from './world'
 import { FULL_SCALE } from '@trmnl-games/desk-crawler/art/scene'
 import { sceneFor, scenePath } from '@trmnl-games/desk-crawler/art/sceneKey'
 import { sceneOccasion } from '@trmnl-games/desk-crawler/payload'
+import { localDay, occasionAt, occasionCalendar, occasionModifiers } from '@trmnl-games/desk-crawler/sim/core/occasions'
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { raidWinChance } from '@trmnl-games/desk-crawler/sim/core/raid'
 import { maskRaidSummaries } from './lib/raids'
@@ -55,7 +56,10 @@ export const mine = query({
       .take(40)
     const world = await readWorld(ctx)
     // D80/D81: the stats the hero fights with, affixes and live effects included.
-    const stats = effectiveStats(content, { ...hero, ...(hero.effects === undefined ? {} : { effects: hero.effects }) }, items.map((item) => ({ ...item, id: item._id })), world?.currentTick ?? 0)
+    // D139: the occasion on the owner's last TRMNL date counts too, as it does in the tick.
+    const now = Date.now()
+    const occasionMods = occasionModifiers(occasionAt(worldContent(world), now, user.trmnlUtcOffset))
+    const stats = effectiveStats(content, { ...hero, ...(hero.effects === undefined ? {} : { effects: hero.effects }) }, items.map((item) => ({ ...item, id: item._id })), world?.currentTick ?? 0, occasionMods)
     // Achievement logs (D65) and to-do lines (D112) follow their gameplay event; the scene keeps showing that event.
     const newest = (await ctx.db
       .query('tickLogs')
@@ -66,7 +70,7 @@ export const mine = query({
     return {
       id: hero._id,
       // D139: dressed for the occasion on the owner's last TRMNL date; the companion sets the sky from the browser's clock.
-      scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', sceneOccasion(content, Date.now(), user.trmnlUtcOffset)),
+      scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', sceneOccasion(worldContent(world), now, user.trmnlUtcOffset)),
       name: hero.name,
       alias: user.publicAlias,
       activationState: hero.activationState,
@@ -110,6 +114,8 @@ export const mine = query({
       class: hero.class,
       className: worldContent(world).classes?.[hero.class]?.name ?? 'Warrior',
       roster: await rosterSummary(ctx, worldContent(world), hero),
+      // D139: today's occasion and its effect, and the next one on the calendar; null before v19.
+      calendar: calendarView(worldContent(world), now, user.trmnlUtcOffset),
       // D133: the floors the world actually runs, so a new floor shows and takes travel only once the world has switched to its catalog.
       biomes: worldContent(world).biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe })),
       // D133: every floor's field note and its monsters' notes, open or not, for the Field notes page; null before v16.
@@ -167,6 +173,15 @@ export const changeBiome = mutation({
 })
 
 /** The pending choice as the hero page shows it: the situation, each option's label and concrete change, and the adventures left. */
+function calendarView(content: ContentCatalog, now: number, utcOffset: number | undefined) {
+  if (content.occasions === undefined) return null
+  const { live, next } = occasionCalendar(content, localDay(now, utcOffset))
+  return {
+    today: live === undefined ? null : { id: live.rule.id, name: live.rule.name, effect: live.rule.effectLabel ?? null, daysLeft: live.daysLeft },
+    next: next === undefined ? null : { id: next.rule.id, name: next.rule.name, effect: next.rule.effectLabel ?? null, inDays: next.inDays },
+  }
+}
+
 function choiceView(content: ContentCatalog, hero: Doc<'heroes'>, potionsHeld: number, tick: number) {
   const pending = hero.choice
   if (!pending || tick >= pending.expiresAtTick) return null

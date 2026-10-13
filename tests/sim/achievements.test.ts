@@ -19,9 +19,9 @@ const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<Achievement
 
 describe('achievement catalog (D65)', () => {
   it('holds the launch set with unique, catalog-backed ids', () => {
-    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3)
+    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1)
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3)
+    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2)
     for (const def of ACHIEVEMENTS) {
       expect(ACHIEVEMENT_FAMILIES.some((f) => f.id === def.family)).toBe(true)
       expect(def.name.length).toBeLessThanOrEqual(24)
@@ -156,5 +156,16 @@ describe('Tasks done (D112, catalog version 4)', () => {
     expect(earned(9)).toEqual(['tasks_done_1'])
     expect(earned(50)).toEqual(['tasks_done_1', 'tasks_done_2', 'tasks_done_3'])
     expect(earned(250)).toHaveLength(4)
+  })
+})
+
+describe('Office calendar (D139, catalog version 9)', () => {
+  it('counts occasions seen at 1, 6 and 12, and a Friday the 13th mishap once', () => {
+    const earned = (overrides: Partial<HeroCounters>) => allSatisfied(state(overrides), content).filter((a) => a.family === 'office_calendar' || a.family === 'thirteenth_floor').map((a) => a.id)
+    expect(earned({})).toEqual([])
+    expect(earned({ occasionsSeen: 1 })).toEqual(['office_calendar_1'])
+    expect(earned({ occasionsSeen: 12 })).toEqual(['office_calendar_1', 'office_calendar_2', 'office_calendar_3'])
+    expect(earned({ raidMishaps: 1 })).toEqual(['thirteenth_floor'])
+    expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'thirteenth_floor')).toMatchObject({ category: 'Raids' })
   })
 })

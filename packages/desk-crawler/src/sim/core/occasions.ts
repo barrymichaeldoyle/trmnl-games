@@ -142,3 +142,21 @@ export const raidLaunchPct = (live: LiveOccasion | undefined): number => live?.r
 
 /** The catalog's raid mishap rule, for a target applying a ledger mishap after its day has passed. */
 export const mishapRule = (content: ContentCatalog): RaidMishapRule | undefined => content.occasions?.find((rule) => rule.effect?.raidMishap !== undefined)?.effect?.raidMishap
+
+/** The local day an occurrence key starts on (`<id>@<YYYY-MM-DD>`). */
+const startDayOf = (key: string): number => Date.parse(`${key.slice(key.indexOf('@') + 1)}T00:00:00Z`) / DAY_MS
+
+/**
+ * For the companion (D139): the occasion live on a local day with the days it has left, and the next one to start
+ * after today, within a year.
+ */
+export function occasionCalendar(content: ContentCatalog, day: number): { live?: { rule: OccasionRule; daysLeft: number }; next?: { rule: OccasionRule; inDays: number } } {
+  if (content.occasions === undefined) return {}
+  const today = occasionOnDay(content, day)
+  const live = today === undefined ? undefined : { rule: today.rule, daysLeft: startDayOf(today.key) + today.rule.days - day }
+  for (let ahead = 1; ahead <= 400; ahead += 1) {
+    const found = occasionOnDay(content, day + ahead)
+    if (found !== undefined && startDayOf(found.key) === day + ahead) return { ...(live === undefined ? {} : { live }), next: { rule: found.rule, inDays: ahead } }
+  }
+  return live === undefined ? {} : { live }
+}

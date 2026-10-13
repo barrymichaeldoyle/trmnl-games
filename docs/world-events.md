@@ -38,12 +38,12 @@ Each occasion is a catalog rule with an id, a date rule, a length in local days,
 | Take Your Dog to Work Day | Friday after the 3rd Sunday of June | Fri 25 Jun 2027 | 1 | A dog sitting beside the hero, a water bowl | +10% defense |
 | Talk Like a Pirate Day | 19 Sep | Sun 19 Sep 2027 | 1 | A pirate hat and a paper parrot | Cosmetic only: pirate story lines |
 | International Coffee Day | 1 Oct | Fri 1 Oct 2027 | 1 | A coffee machine, a steaming mug on every desk | +10% attack |
-| Boss's Day | 16 Oct | Sat 16 Oct 2027 | 1 | A "World's Best Boss" banner, a mug with a bow on it | Cosmetic only: boss story lines |
+| Boss's Day | 16 Oct | Fri 16 Oct 2026 | 1 | A "World's Best Boss" banner, a mug with a bow on it | Cosmetic only: boss story lines |
 | Leap Day | 29 Feb | Tue 29 Feb 2028 | 1 | A frog on the filing cabinet, a calendar page with an extra square | +29% gold |
 
 Halloween is 18 days away, which makes it the obvious first occasion: it proves the whole pipeline against a real date, and on a dungeon game it's the costume holiday. Every effect uses a modifier kind the simulator already has, with three exceptions: Black Friday's price cut and merchant odds (one new modifier each), Christmas's gift (a one-off grant, below) and Friday the 13th's raid mishap (a third raid outcome, below). No effect changes the raid win odds, the death rule or the career ladder.
 
-Eighteen occasions in all, about one every three weeks. Boss's Day is this Friday (16 October 2026), too soon to draw, so its first showing is in 2027. Diwali on 8 November is the second deadline after Halloween. Take Your Dog to Work Day is the summer occasion because it doesn't assume a hemisphere. Barry's rule for the list is that more is better: cutting an occasion later means deleting its row, and a stored `lastOccasion` key for a deleted occasion matches nothing and costs nothing. Sponsored occasions could take a row's place later. They would need their own check against TRMNL's terms, since D134 covered only a sponsor link.
+Eighteen occasions in all, about one every three weeks. Boss's Day falls on Friday 16 October 2026, three days after approval; the art for all eighteen was finished the same day, so it is the first occasion players see. Diwali on 8 November is the second deadline after Halloween. Take Your Dog to Work Day is the summer occasion because it doesn't assume a hemisphere. Barry's rule for the list is that more is better: cutting an occasion later means deleting its row, and a stored `lastOccasion` key for a deleted occasion matches nothing and costs nothing. Sponsored occasions could take a row's place later. They would need their own check against TRMNL's terms, since D134 covered only a sponsor link.
 
 ## Rules
 
@@ -120,6 +120,11 @@ W2 and W4, built 2026-10-13 as scene version 5 (`art/occasions.ts`; review sheet
 - **Window views** for Christmas (snow and a drift on the sill), New Year, Diwali and Lunar New Year (fireworks) and Valentine's Day (hearts); the other occasions keep the day or night sky.
 - **Four-ink panels** print each hat and prop in one ink from its companion colour (Santa hats red, the pumpkin, tree and pot of gold yellow); garlands and window views stay in black like the backdrop.
 - **Previews** take `--occasion <id>` (`tools/trmnl/preview.ts`); the device template is unchanged and the sweep of the Halloween previews passed on every layout and device.
+W3 and W5, built 2026-10-13:
+
+- **No browser analytics event.** Occasions happen in the simulation, like raids, so the planned `occasion` property on browser events was dropped; `admin:engagement` counts announcements, heroes who saw one, mishaps and each hero's last occurrence from game data instead.
+- **The companion's calendar** is a gold chip for today's occasion beside the effects and a "Next on the office calendar" line, both on the owner's last TRMNL date; the help page lists every occasion with its date in words and its bonus, read from the catalog.
+- **Achievements** are catalog version 9: Office calendar at 1, 6 and 12 occasions and Thirteenth Floor for a mishap.
 - **Diwali's table runs to 2031.** Lunar New Year's runs to 2036. Both come from published calendars and need extending before they run out.
 
 ## Settled points

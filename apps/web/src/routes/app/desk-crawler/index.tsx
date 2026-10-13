@@ -85,7 +85,13 @@ type HeroView = {
   /** P37: the hero's class name and the roster in brief; null under a catalog without classes. */
   className?: string
   roster?: { unlockLevel: number; open: boolean; heroes: number; warriorLevel: number | null } | null
+  /** D139: today's occasion and the next one on the office calendar; null before the world runs one. */
+  calendar?: { today: Occasion | null; next: (Omit<Occasion, 'daysLeft'> & { inDays: number }) | null } | null
 }
+
+type Occasion = { id: string; name: string; effect: string | null; daysLeft: number }
+
+const inDays = (days: number) => (days === 1 ? 'tomorrow' : `in ${days} days`)
 
 type Choice = { eventId: string; title: string; prompt: string; expiresAtTick: number; ticksLeft: number; defaultOptionId: string; options: Array<{ id: string; label: string; change: { gold: number; hp: number; potions: number } }> }
 
@@ -168,7 +174,14 @@ function HeroSheet({ hero }: { hero: HeroView }) {
             ) : null}
           </div>
         ) : null}
-        {hero.effects.length > 0 ? <ul aria-label="Effects" className="flex flex-wrap gap-2 text-sm">{hero.effects.map((effect) => <li key={effect.id} className={`border-[3px] px-2 py-1 ${effect.kind === 'bane' ? 'border-hp-ink' : 'border-night'}`}><strong>{effect.name}</strong> · {effect.blurb} · <span className="whitespace-nowrap">{effect.ticksLeft === 1 ? 'one adventure' : `${effect.ticksLeft} adventures`} left</span></li>)}</ul> : null}
+        {hero.effects.length > 0 || hero.calendar?.today ? (
+          <ul aria-label="Effects" className="flex flex-wrap gap-2 text-sm">
+            {/* D139: today's occasion leads the effects, with its one plain bonus. */}
+            {hero.calendar?.today ? <li className="border-[3px] border-gold px-2 py-1"><strong>{hero.calendar.today.name}</strong>{hero.calendar.today.effect ? ` · ${hero.calendar.today.effect}` : ''} · <span className="whitespace-nowrap">{hero.calendar.today.daysLeft === 1 ? 'today' : `${hero.calendar.today.daysLeft} days left`}</span></li> : null}
+            {hero.effects.map((effect) => <li key={effect.id} className={`border-[3px] px-2 py-1 ${effect.kind === 'bane' ? 'border-hp-ink' : 'border-night'}`}><strong>{effect.name}</strong> · {effect.blurb} · <span className="whitespace-nowrap">{effect.ticksLeft === 1 ? 'one adventure' : `${effect.ticksLeft} adventures`} left</span></li>)}
+          </ul>
+        ) : null}
+        {hero.calendar?.next ? <p className="text-sm text-muted">Next on the office calendar: <strong>{hero.calendar.next.name}</strong> {inDays(hero.calendar.next.inDays)}{hero.calendar.next.effect ? ` (${hero.calendar.next.effect})` : ''}. <Link to="/help/desk-crawler" hash="office-calendar" className="underline underline-offset-4">See the calendar</Link></p> : null}
         {hero.status === 'sleeping' && hero.wakeAtTick === null ? <AlertNudge /> : null}
         {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>A merchant is visiting.</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">See the offers in your bag</Link> within {hero.merchantTicksLeft === 1 ? 'one adventure' : `${hero.merchantTicksLeft} adventures`}.</p> : null}
         {!healthy ? <p className="text-sm">Paused for a service check. <Link to="/support" className="underline underline-offset-4">Contact support</Link> if it lasts.</p> : null}

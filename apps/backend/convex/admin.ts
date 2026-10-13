@@ -93,6 +93,8 @@ export const engagement = internalQuery({
       tasks: { completed: sum((c) => c.tasksCompleted), heroes: reached((c) => c.tasksCompleted) },
       // P35: career rungs reached under the ladder, equips, and where heroes stand on it.
       career: { rungs: sum((c) => c.careerRungs), heroes: reached((c) => c.careerRungs), equips: sum((c) => c.itemsEquipped), standing: tally(heroes.map((h) => h.career?.rung ?? 'none')) },
+      // D139: occasions announced to heroes, Friday the 13th mishaps, and the last occurrence each hero saw.
+      occasions: { seen: sum((c) => c.occasionsSeen), heroes: reached((c) => c.occasionsSeen), mishaps: sum((c) => c.raidMishaps), heroesInAMishap: reached((c) => c.raidMishaps), lastSeen: tally(heroes.map((h) => h.occasion?.key ?? 'none')) },
       analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
     }
   },

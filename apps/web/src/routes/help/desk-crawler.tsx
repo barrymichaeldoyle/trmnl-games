@@ -63,6 +63,36 @@ const CAREER_GOLD = CAREER?.rungs.reduce((sum, rung) => sum + rung.gold, 0) ?? 0
 /** " It arrives at level 3." or nothing under a catalog without unlocks. */
 const arrives = (feature: 'todo' | 'stances' | 'choices' | 'merchant' | 'raids') => (UNLOCKS === undefined ? '' : ` It arrives at level ${UNLOCKS[feature]}.`)
 
+/** D139: the office calendar, read from the active catalog, with each date rule in words. */
+const OCCASIONS = catalogs[ACTIVE_CONTENT].occasions
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const NTH = ['first', 'second', 'third', 'fourth', 'fifth']
+type Occasion = NonNullable<typeof OCCASIONS>[number]
+function occasionDate(rule: Occasion): string {
+  const date = rule.date
+  const span = rule.days > 1 ? `, for ${rule.days} days` : ''
+  switch (date.kind) {
+    case 'fixed':
+      return `${date.day} ${MONTHS[date.month - 1]}${span}`
+    case 'nth_weekday': {
+      const base = `the ${NTH[date.nth - 1]} ${WEEKDAYS[date.weekday]} of ${MONTHS[date.month - 1]}`
+      const offset = date.offsetDays ?? 0
+      return `${offset === 0 ? base : `the ${WEEKDAYS[(date.weekday + offset) % 7]} after ${base}`}${span}`
+    }
+    case 'friday_13th':
+      return 'any Friday the 13th'
+    case 'easter':
+      return date.offsetDays === -2 ? `Good Friday to Easter Monday` : `${Math.abs(date.offsetDays)} days ${date.offsetDays < 0 ? 'before' : 'after'} Easter Sunday${span}`
+    case 'table': {
+      // Lunar New Year and Diwali move each year; name the next one.
+      const next = date.dates.find((iso) => Date.parse(`${iso}T23:59:59Z`) >= Date.now())
+      const [y, m, d] = (next ?? '').split('-').map(Number)
+      return next === undefined ? 'a date that moves each year' : `a date that moves each year (next ${d} ${MONTHS[m! - 1]} ${y})`
+    }
+  }
+}
+
 /** The page's sections, for the jump list at the top: on a phone the page runs to about twenty screens. */
 const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['getting-started', 'Getting started'],
@@ -79,6 +109,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['the-wandering-merchant', 'The wandering merchant'],
   ['decisions', 'Decisions'],
   ['effects', 'Effects'],
+  ...(OCCASIONS !== undefined ? [['office-calendar', 'Office calendar'] as const] : []),
   ['rare-and-epic-gear', 'Rare and epic gear'],
   ['when-your-bag-fills-up', 'When your bag fills up'],
   ['bigger-bags', 'Bigger bags'],
@@ -193,6 +224,17 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>Sometimes the office asks your hero something small, like chipping in for a cake or staying late. Your screen says “A decision is waiting in the companion.” and the Hero page shows both options with exactly what each one changes. If you don't answer within about a day, the option marked as the default happens by itself, so adventures never wait for you.</p>
       <h2 id="effects">Effects</h2>
       <p>Some moments leave your hero with a short effect, listed on the Hero page with the adventures it has left. Beating an elite makes your hero Fired up (+10% attack for eight adventures). Chipping in for cake makes your hero Well fed (+10% XP for eight adventures). A trap leaves your hero Bruised (−15% defense for four adventures). Your hero holds at most three effects. Any rest shakes off bad effects, and a knockout clears them all.</p>
+      {OCCASIONS !== undefined ? (
+        <>
+          <h2 id="office-calendar">Office calendar</h2>
+          <p>Holidays and office occasions dress your hero's scene for the day: decorations along the ceiling, something on the floor, sometimes a hat, and in the Office Cubicles a different view from the window. They follow your TRMNL's local date. The first time your hero sees one, the adventure log names it, and most bring one small bonus while they last. The Hero page shows today's occasion and the next one.</p>
+          <ul>
+            {OCCASIONS.map((rule) => <li key={rule.id}><strong>{rule.name}</strong>, {occasionDate(rule)}: {rule.id === 'friday_13th' ? 'every desk raid goes wrong (below).' : rule.effectLabel ? `${rule.effectLabel}.` : 'decorations only.'}</li>)}
+          </ul>
+          <p><strong>Friday the 13th.</strong> Desk raids start twice as often, and every one of them goes wrong: nobody wins, and both heroes lose 20% of their maximum HP and 5% of their gold, which nobody gets. It counts as a mishap, not a win or a loss, in your hero's raid record.</p>
+          <p><strong>Christmas.</strong> Your hero finds one wrapped gift each Christmas: a piece of gear from the floor it's on, on its first adventure of the three days.</p>
+        </>
+      ) : null}
       <h2 id="rare-and-epic-gear">Rare and epic gear</h2>
       <p>Gear comes as common, uncommon, rare or epic. Epic gear is the rarest, about one find in a hundred, and the strongest. Rare and epic gear also carry one special trait, shown in the item's name and explained on the Bag page:</p>
       <ul>

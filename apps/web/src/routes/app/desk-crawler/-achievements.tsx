@@ -66,6 +66,7 @@ const SHELVES: ReadonlyArray<{ category: string; title: string; glyph: GlyphName
   { category: 'Set piece', title: 'Set pieces', glyph: 'star', tone: 'text-gold-ink' },
   { category: 'Decisions', title: 'Decisions', glyph: 'choice', tone: 'text-gold-ink' },
   { category: 'Raids', title: 'Raids', glyph: 'raid', tone: 'text-rare-ink' },
+  { category: 'Office calendar', title: 'Office calendar', glyph: 'star', tone: 'text-gold-ink' },
 ]
 
 function shelvesOf(families: Family[]) {
