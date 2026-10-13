@@ -62,9 +62,9 @@ export function FloorGrid({ headingId, headingLevel: Heading = 'h2' }: { heading
         {FLOORS.map((floor) => (
           <li key={floor.id} className="flex flex-col gap-2">
             <FloorScene id={floor.id} name={floor.name} featured={floor.featured} />
-            <div className="flex items-baseline justify-between gap-2">
+            <div className="flex flex-col">
               <h3 className="font-display text-xl font-bold">{floor.name}</h3>
-              <span className="label-px shrink-0 text-faint">{floor.level === 1 ? 'Start' : `Level ${floor.level}`}</span>
+              <p className="text-sm text-faint">{floor.level === 1 ? 'From the start' : `Opens at level ${floor.level}`}</p>
             </div>
             <p className="text-sm leading-relaxed text-muted">{floor.monsters.join(', ')}</p>
           </li>
@@ -103,9 +103,9 @@ export function HowItPlays({ headingId }: { headingId: string }) {
 
 const FEATURES: ReadonlyArray<{ glyph: GlyphName; tone: string; title: string; body: string }> = [
   { glyph: 'sword', tone: 'text-hp-ink', title: 'Desk raids', body: 'Heroes raid each other’s desks for gold while they explore. Your stance tilts the coin toss; level and gear never count.' },
-  { glyph: 'trophy', tone: 'text-gold-ink', title: 'Weekly rankings', body: 'Your screen shows the seven-day XP Top 5 for your level group. The companion adds 24-hour and lifetime boards.' },
-  { glyph: 'shield', tone: 'text-sky-ink', title: 'Stances', body: 'Cautious drinks a potion below 65% HP and rests below 50%. Bold waits until 35% and earns 15% more XP, with more knockouts.' },
-  { glyph: 'coin', tone: 'text-gold-ink', title: 'Decisions and a merchant', body: 'Chip in for the cake or stay late. A wandering merchant sometimes sells the next bag at a discount.' },
+  { glyph: 'trophy', tone: 'text-gold-ink', title: 'Weekly rankings', body: 'Your screen shows the seven-day XP Top 5 for your level group. The companion app also shows 24-hour and lifetime boards.' },
+  { glyph: 'shield', tone: 'text-sky-ink', title: 'Stances', body: 'Choose how careful your hero is. Bolder heroes earn more and get knocked out more often; how much more is something you find out on the screen.' },
+  { glyph: 'coin', tone: 'text-gold-ink', title: 'Decisions and a merchant', body: 'Chip in for the cake or stay late. A wandering merchant sometimes sells items at a discount.' },
   { glyph: 'cog', tone: 'text-rare-ink', title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage spares and upgrade what you wear.' },
   { glyph: 'quest', tone: 'text-xp-ink', title: 'A career to climb', body: 'One goal at a time, a daily to-do list from the morning stand-up, and new features as your hero levels up.' },
   { glyph: 'hero', tone: 'text-sky-ink', title: 'A second hero', body: `Everyone starts as a Warrior. At level ${UNLOCKS.roster} you can recruit a Rogue, who earns more gold and has an edge in desk raids.` },
@@ -143,7 +143,7 @@ export function Faq({ headingId }: { headingId: string }) {
           <details key={item.q} className="border-b border-rule">
             {/* The site's pixel triangle (styles.css) marks each row open or closed. */}
             <summary className="min-h-14 cursor-pointer py-3 font-semibold hover:text-gold-ink">{item.q}</summary>
-            <p className="max-w-prose pb-5 pl-4 leading-relaxed text-muted">{item.a}</p>
+            <p className="max-w-prose pb-5 pl-[1.125rem] leading-relaxed text-muted">{item.a}</p>
           </details>
         ))}
       </div>
@@ -159,7 +159,7 @@ export function Faq({ headingId }: { headingId: string }) {
 export function LaunchSignup({ source, instance }: { source: 'pitch' | 'landing' | 'home'; instance?: string }) {
   return (
     <div className="flex flex-col gap-4">
-      <p className="label-px self-start border-2 border-xp-ink/60 px-2 py-1 text-xp-ink">{RELEASE_STATUS}</p>
+      <p className="text-sm font-semibold text-xp-ink">{RELEASE_STATUS}</p>
       <Show when="signed-out"><WaitlistForm source={source} instance={instance} /></Show>
       <Show when="signed-in">
         <Link to="/app/desk-crawler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open Desk Crawler</Link>

@@ -44,12 +44,12 @@ function Landing() {
 
         <div className="grid gap-14 md:grid-cols-2 md:gap-x-16">
           <Topic id="choices-heading" glyph="shield" tone="text-sky-ink" title="Choices that change the run" help="stances">
-            <p>Pick a stance on the Hero page. Cautious drinks a potion below 65% HP and wins more desk raids. Bold waits until 35%, earns 15% more XP from wins and gets knocked out more often. Balanced sits between them.</p>
+            <p>Pick a stance on the Hero page: Cautious, Balanced or Bold. It changes how your hero handles danger and how its desk raids go. Which one pays best depends on the floor, and working that out is part of the game.</p>
             <p>Now and then the office asks something small, like chipping in for a cake or staying late. Both options say exactly what they change, and if you don’t answer within about a day the default happens on its own.</p>
           </Topic>
           <Topic id="gear-heading" glyph="cog" tone="text-rare-ink" title="Gear, bags and the workbench" help="salvage-and-the-workbench">
             <p>Gear comes as common, uncommon, rare or epic. Rare and epic pieces carry a trait: Vampiric heals after every win, Lucky adds gold, Sturdy takes less damage from traps and Thrifty loses less when things go wrong.</p>
-            <p>When the bag fills, your hero naps until you make room. Sell spare gear for gold, or salvage it for materials and upgrade the pieces your hero wears. Bigger bags and potion pouches are bought with gold, and a wandering merchant sometimes sells the next one at a discount.</p>
+            <p>When the bag fills, your hero naps until you make room. Sell spare gear for gold, or salvage it for materials and upgrade the pieces your hero wears. Bigger bags and potion pouches are bought with gold, and a wandering merchant sometimes sells items at a discount.</p>
           </Topic>
           <Topic id="players-heading" glyph="sword" tone="text-hp-ink" title="Other players" help="desk-raids">
             <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. Nobody aims a raid and level never counts: it’s a coin toss tilted by stance, and the loser hands over 5% of its gold.</p>

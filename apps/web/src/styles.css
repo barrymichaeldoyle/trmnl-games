@@ -14,6 +14,19 @@
   font-display: swap;
 }
 /*
+ * Digits for Pixelify Sans headings (D137): its 5 reads as an S and its 2 as a Z, so 0-9 come from Press Start 2P,
+ * moved onto the baseline and renamed (tools/fonts/pixel_digits.py; OFL in public/fonts/), scaled to Pixelify's cap
+ * height (0.631em over 0.875em). Every weight maps to it so bold headings never get a smeared synthetic bold.
+ */
+@font-face {
+  font-family: "TG Pixel Digits";
+  src: url("/fonts/tg-pixel-digits.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0030-0039;
+  size-adjust: 72.1%;
+}
+/*
  * Local stand-ins sized to the pixel faces (measured in Chrome, D137): while a face is still downloading, text set in
  * its stand-in takes the same width and line height, so the swap does not reflow the page. Pixelify Sans is 6.15% wider
  * than Arial with a 0.92em ascent and 0.28em descent; Press Start 2P is 1em per letter, 1.65 times Courier New.
@@ -36,7 +49,7 @@
 }
 
 @theme {
-  --font-display: "Pixelify Sans", "Pixelify Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "TG Pixel Digits", "Pixelify Sans", "Pixelify Sans Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-hud: "Press Start 2P", "Press Start 2P Fallback", ui-monospace, monospace;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -171,15 +184,23 @@
 @layer base {
   summary { list-style: none; display: flex; align-items: center; gap: 0.5rem; }
   summary::-webkit-details-marker { display: none; }
+  /* One 10px box in both states, the triangle turned rather than reshaped, so the label beside it never moves (D137). */
   summary::before {
     content: "";
-    width: 6px;
+    width: 10px;
     height: 10px;
     flex: none;
     background: currentColor;
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
+    clip-path: polygon(20% 0, 80% 50%, 20% 100%);
   }
-  details[open] > summary::before { width: 10px; height: 6px; clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  details[open] > summary::before { transform: rotate(90deg); }
+  /* Disclosures slide open and shut where the browser can animate to auto height; elsewhere, and under reduced motion, they snap. */
+  @media (prefers-reduced-motion: no-preference) {
+    :root { interpolate-size: allow-keywords; }
+    summary::before { transition: transform 200ms ease; }
+    details::details-content { block-size: 0; overflow-y: clip; transition: block-size 250ms ease, content-visibility 250ms allow-discrete; }
+    details[open]::details-content { block-size: auto; }
+  }
   ::selection {
     background: var(--color-gold);
     color: var(--color-night);

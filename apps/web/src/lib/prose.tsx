@@ -1,31 +1,101 @@
 import { Show } from '@clerk/tanstack-react-start'
-import { Link } from '@tanstack/react-router'
-import { useEffect, useState, type ReactNode } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from 'react'
 import { analyticsConfigured, captureAnalytics, openAnalyticsPreferences } from './analytics'
 import { PlatformHeader, SITE_FRAME } from './platformHeader'
 
+/** Prose styling for a reading page's body: section headings, lists and underlined links. */
+const PROSE = 'leading-relaxed [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-gold-ink [&_li]:ml-5 [&_li]:list-disc [&_a]:underline'
+
 /**
- * A public reading page under the site header. `contents` adds a jump list of its sections under the title, for pages
- * long enough to need one; each entry's id must match its section heading's id.
+ * A public reading page under the site header. `contents` adds a jump list of its sections, for pages long enough to
+ * need one; each entry's id must match its section heading's id. On phones the list sits under the title; from 1024px
+ * it is a sidebar that stays in view and marks the section being read.
  */
 export function ProsePage({ title, updated, contents, children }: { title: string; updated?: string; contents?: ReadonlyArray<readonly [string, string]>; children: ReactNode }) {
+  const heading = (
+    <header className="flex flex-col gap-4 lg:col-start-2">
+      <h1 className="font-display text-4xl font-bold">{title}</h1>
+      {updated ? <p className="text-sm text-muted">Last updated {updated}</p> : null}
+    </header>
+  )
+  if (!contents) {
+    return (
+      <SiteShell>
+        <main id="main" className={`mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-10 ${PROSE}`}>{heading}{children}</main>
+      </SiteShell>
+    )
+  }
   return (
     <SiteShell>
-      <main id="main" className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-10 leading-relaxed [&_h2]:mt-6 [&_h2]:scroll-mt-6 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-gold-ink [&_li]:ml-5 [&_li]:list-disc [&_a]:underline">
-        <h1 className="font-display text-4xl font-bold">{title}</h1>
-        {updated ? <p className="text-sm text-muted">Last updated {updated}</p> : null}
-        {contents ? (
-          <nav aria-labelledby="contents-title" className="window px-3 pt-3 pb-2 min-[375px]:px-4 sm:px-5">
-            <h2 id="contents-title" className="!mt-0 !text-xl">On this page</h2>
-            {/* Two columns even on phones, so twenty sections stay about half a screen; each link keeps a 44px row so it is an easy tap. */}
-            <ul className="mt-1 grid grid-cols-2 gap-x-4 sm:gap-x-6">
-              {contents.map(([id, label]) => <li key={id} className="!ml-0 !list-none"><a href={`#${id}`} className="flex min-h-11 items-center py-1 text-sm leading-snug underline-offset-4">{label}</a></li>)}
-            </ul>
-          </nav>
-        ) : null}
-        {children}
+      {/* One nav for every width: the grid places it under the title on phones and in the left column from 1024px. */}
+      <main id="main" className="mx-auto w-full max-w-2xl px-4 py-10 lg:grid lg:max-w-6xl lg:grid-cols-[15rem_minmax(0,42rem)] lg:justify-center lg:gap-x-12 lg:px-6">
+        {heading}
+        <Contents contents={contents} />
+        <div className={`mt-4 flex flex-col gap-4 lg:col-start-2 ${PROSE}`}>{children}</div>
       </main>
     </SiteShell>
+  )
+}
+
+/** The id of the section being read: the last listed heading whose top has passed just under the top of the window. */
+function useCurrentSection(ids: readonly string[]): string | null {
+  const [current, setCurrent] = useState<string | null>(null)
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      frame = 0
+      let found: string | null = null
+      for (const id of ids) {
+        const top = document.getElementById(id)?.getBoundingClientRect().top
+        if (top !== undefined && top <= 120) found = id
+      }
+      setCurrent(found)
+    }
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(update) }
+    update()
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    return () => { window.removeEventListener('scroll', schedule); window.removeEventListener('resize', schedule); cancelAnimationFrame(frame) }
+  }, [ids])
+  return current
+}
+
+/**
+ * Scrolls smoothly to a section (instantly under reduced motion) and moves focus there. The jump goes through the
+ * router, which owns hash scrolling: a plain anchor or history call made it jump on its own, instantly, over the top.
+ */
+function useJumpTo() {
+  const navigate = useNavigate()
+  return (event: MouseEvent<HTMLAnchorElement>, id: string) => {
+    const target = document.getElementById(id)
+    if (!target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+    event.preventDefault()
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    void navigate({ to: '.', hash: id, replace: true, resetScroll: false, hashScrollIntoView: { behavior: reduced ? 'auto' : 'smooth', block: 'start' } })
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
+    target.focus({ preventScroll: true })
+  }
+}
+
+function Contents({ contents }: { contents: ReadonlyArray<readonly [string, string]> }) {
+  const ids = useMemo(() => contents.map(([id]) => id), [contents])
+  const current = useCurrentSection(ids)
+  const jumpTo = useJumpTo()
+  return (
+    <nav aria-labelledby="contents-title" className="mt-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-0">
+      <div className="window px-3 pt-3 pb-2 min-[375px]:px-4 sm:px-5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:px-4">
+        <h2 id="contents-title" className="font-display text-xl font-semibold text-gold-ink">On this page</h2>
+        {/* Two columns on phones, so twenty sections stay about half a screen, with 44px rows for an easy tap; one tighter column in the sidebar. */}
+        <ul className="mt-1 grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:grid-cols-1">
+          {contents.map(([id, label]) => (
+            <li key={id}>
+              <a href={`#${id}`} onClick={(event) => jumpTo(event, id)} aria-current={current === id ? 'location' : undefined} className="flex min-h-11 items-center border-l-2 border-transparent py-1 pl-2 text-sm leading-snug text-muted hover:text-ink hover:underline underline-offset-4 aria-[current=location]:border-gold aria-[current=location]:font-semibold aria-[current=location]:text-gold-ink lg:min-h-0 lg:py-1.5">{label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
   )
 }
 
@@ -45,7 +115,7 @@ const FOOTER_LINK = 'inline-flex min-h-11 items-center text-muted underline-offs
 function FooterGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex flex-col">
-      <h2 className="label-px mb-1 text-faint">{title}</h2>
+      <h2 className="mb-1 text-sm font-semibold text-ink">{title}</h2>
       {/* Each link keeps a 44px row, so the list stays an easy tap without extra gaps. */}
       <ul className="flex flex-col">{children}</ul>
     </div>

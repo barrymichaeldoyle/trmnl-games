@@ -53,6 +53,7 @@ export const Route = createRootRouteWithContext<{
       // Both pixel faces are small latin subsets; preloading them keeps HUD text from reflowing when they swap in.
       { rel: 'preload', href: '/fonts/press-start-2p-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       { rel: 'preload', href: '/fonts/pixelify-sans-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+      { rel: 'preload', href: '/fonts/tg-pixel-digits.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       ...(CLERK_ORIGIN ? [{ rel: 'preconnect', href: CLERK_ORIGIN }, { rel: 'preconnect', href: CLERK_ORIGIN, crossOrigin: 'anonymous' as const }] : []),
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.ico', sizes: '16x16 32x32' },

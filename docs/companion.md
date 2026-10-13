@@ -36,6 +36,10 @@ Clerk's UI on demand (D137): `ClerkProvider` gets `ui={{ ClerkUI: LazyClerkUI }}
 
 Font swap without reflow (D137): `styles.css` adds "Pixelify Sans Fallback" (local Arial or Helvetica, size-adjust 106.15%) and "Press Start 2P Fallback" (local Courier New or Menlo, 165.14%) with ascent and descent overrides measured in Chrome, next in each pixel face's stack. With the fonts held back 1.5 s, the home page's layout shift went from 0.049 on a 412px phone to 0. Remeasure if either font file changes.
 
+Digits in headings (D137): Pixelify Sans draws a 5 that reads as an S, so 0-9 in `font-display` text come from "TG Pixel Digits", Press Start 2P's digits moved onto the baseline and renamed under the OFL (`tools/fonts/pixel_digits.py`, 804 bytes, preloaded), scaled to Pixelify's cap height through `unicode-range` and `size-adjust`.
+
+Public-page labels are sentence case (D137): the uppercase `label-px` style stays in the companion's HUD, but the home page, game page and footer use plain small text for the eyebrow, release status, floor levels and footer headings. Disclosure triangles keep one 10px box and rotate, so a summary's label never moves, and `details` animate open and shut through `::details-content` where the browser supports it (not under reduced motion). Reading pages with a contents list show it as a sticky sidebar from 1024px that marks the current section; its links scroll smoothly through the router's `hashScrollIntoView` (instant under reduced motion) and move focus to the heading.
+
 ## Routes and information hierarchy
 
 | Route | Audience | Main content |
