@@ -5,7 +5,7 @@ import { ConvexError } from 'convex/values'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
-import { DESK_KEEPSAKES, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { DESK_KEEPSAKES, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL, SAMPLE_KEEPSAKE_CODE } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { errorMessage } from '../../../lib/intent'
 import { useOnline } from '../../../lib/network'
 import { Submission } from '../../../lib/submission'
@@ -59,7 +59,9 @@ function useKeepsakeClaim() {
     try {
       await submission.current.run({ code: normalized }, async (input) => {
         const result = await mutate(input)
-        if (result.outcome === 'invalid_code') setError('That code doesn’t match your TRMNL connection. Check the digits on your screen, or wait for its next refresh.')
+        // The code from the home page's sample screen gets an easter egg, but only once the server has turned it down (D137).
+        if (result.outcome === 'invalid_code' && normalized === SAMPLE_KEEPSAKE_CODE.replace(/\s/g, '')) setMessage('That’s the code from the sample screen on our home page. Pip already took that keepsake home. Yours is in the title bar of your own TRMNL.')
+        else if (result.outcome === 'invalid_code') setError('That code doesn’t match your TRMNL connection. Check the digits on your screen, or wait for its next refresh.')
         else if (result.outcome === 'already_claimed') setMessage('This week’s keepsake is already on your shelf. The next code arrives next week.')
         else {
           const item = DESK_KEEPSAKES[(result.totalCollected - 1) % DESK_KEEPSAKES.length]!

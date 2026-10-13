@@ -8,6 +8,7 @@
 import { ACTIVE_CONTENT, catalogs } from '../content'
 import { MAX_LOGS, MAX_RECAP_EVENTS, type ActivityEntry, type PayloadInput } from '../lib/payload'
 import type { OutcomeDetail } from '../sim/core/types'
+import { SAMPLE_KEEPSAKE_CODE } from '../content/keepsakes'
 
 export const PREVIEW_NOW = Date.UTC(2026, 9, 4, 8, 20)
 /** The sample owner is in Johannesburg (UTC+2); TRMNL renders Liquid in UTC and the screen route adds `utc_offset`. */
@@ -15,7 +16,7 @@ export const PREVIEW_UTC_OFFSET = 2 * 3600
 /** The end of the recap period the preview clock falls in: the night recap, which ends at 07:00 in Johannesburg (D75). */
 export const PREVIEW_PERIOD_END = Date.UTC(2026, 9, 4, 5, 0)
 /** Preview-only sample of the verified device-envelope field; never an actual redeemable code. */
-export const PREVIEW_KEEPSAKE_CODE = '482 917'
+export const PREVIEW_KEEPSAKE_CODE = SAMPLE_KEEPSAKE_CODE
 /** Screens that never show a keepsake code. */
 export const KEEPSAKE_FREE_SCENARIOS: ReadonlySet<string> = new Set(['unlinked', 'unlinkedPaused'])
 /** Scenarios that render without the owner's UTC offset, to prove the fallback. */

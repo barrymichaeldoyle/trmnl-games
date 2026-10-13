@@ -14,6 +14,11 @@ export const DESK_KEEPSAKES = [
   { id: 'trophy', name: 'Employee of the Quest', description: 'Your name, spelt slightly wrong.', pixels: ['.######.', '##....##', '#.#..#.#', '.######.', '..####..', '...##...', '..####..', '.######.'] },
 ] as const
 
+/**
+ * The keepsake code on the public sample screen and in previews; never a redeemable code (D137). The companion answers it
+ * with an easter egg when the server turns it down, so a player whose real code happens to match still collects.
+ */
+export const SAMPLE_KEEPSAKE_CODE = '482 917'
 export const KEEPSAKE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 /** Monday 00:00 UTC; the client never chooses the award period. */
 const MONDAY_EPOCH = Date.UTC(1970, 0, 5)
