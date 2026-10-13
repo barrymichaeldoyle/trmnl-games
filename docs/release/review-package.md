@@ -7,10 +7,10 @@
 | Field | Draft |
 | --- | --- |
 | Name | Desk Crawler |
-| Description (≤35) | A quiet office RPG for your TRMNL (33 characters; saved and verified 2026-10-05) |
+| Description (≤50) | An idle office RPG that plays itself on your desk (49 characters; saved 2026-10-13 after approval and verified on the public listing; was "A quiet office RPG for your TRMNL"). The edit form now allows 50 characters |
 | Icon | [`docs/assets/plugin-icon.png`](../assets/plugin-icon.png) (512×512, 1-bit pixel art; saved in plugin 564) |
-| Featured image candidate | [Current full-layout sample](featured-image.png), 800×480; v24 source template with fictional hero/ranks, no redeemable code. Prepared locally; not uploaded |
-| Saved featured image | Regenerated from the original live installation; current 800×480 Baz scene verified on the install page, blob `19296090`, no redeemable code |
+| Featured image candidate | [Fictional sample at 800×480](listing-featured-image.png): the `--marketing --recap --keepsakes --inline-art` preview at template v53 on the OG full layout (Pip, level 7, full board, sample keepsake code that finds the Easter Egg). TRMNL has no featured-image upload (the edit form's only file input is the icon), so it can only reach the listing if TRMNL sets it. The older v24 [sample](featured-image.png) stays as history |
+| Saved featured image | Generated with **Generate marketplace preview** on Barry's setting 498157 on 2026-10-13: Baz at level 6 in the Office Cubicles at template v53 with the day recap, blob `19333690`, replacing a level-2 v32-era capture (blob `19302435`). The weekly board shows one player; regenerate once real players fill it |
 | Categories | games, entertainment (saved and verified 2026-10-05) |
 | Supported refresh | Every 15 minutes (slower is fine; progress never depends on refresh) |
 | Installation URL | `https://trmnlgames.com/connect/trmnl/desk-crawler/install` |
