@@ -47,6 +47,7 @@ function HeroHome() {
       {/* The page's title for assistive tech, ahead of the keepsake callout; the game screen's HUD names the hero visibly. */}
       <h1 className="sr-only">{hero.name}, your hero</h1>
       <KeepsakeCallout />
+      <PlaylistNudge activatedAt={hero.activatedAt} />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
       <ReturnNudge />
       <HeroSheet hero={hero} />
@@ -54,9 +55,28 @@ function HeroHome() {
   )
 }
 
+/** How long after the Save the Hero page reminds a new player to add the plugin to a playlist. */
+const PLAYLIST_NUDGE_MS = 48 * 3_600_000
+
+/**
+ * TRMNL adds the plugin to a playlist on Save, but the device shows it only when the playlist comes round to it, and a
+ * new player can take the wait for a fault. For two days after the Save the Hero page points at what to check.
+ */
+function PlaylistNudge({ activatedAt }: { activatedAt?: number | null }) {
+  if (!activatedAt || Date.now() - activatedAt > PLAYLIST_NUDGE_MS) return null
+  return (
+    <div className="border-[3px] border-sky px-3 py-2 text-sm">
+      <strong className="block text-sky-ink">Not seeing your hero on your TRMNL yet?</strong>
+      <span className="mt-1 block">Your TRMNL shows its playlist one plugin at a time, so Desk Crawler appears when its turn comes round.</span>
+      <Link to="/help/desk-crawler" hash="not-on-your-screen" className="mt-1 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">What to check</Link>
+    </div>
+  )
+}
+
 // heroes.mine is validated as v.any(), so its shape is read structurally here.
 type HeroView = {
   name: string
+  activatedAt?: number | null
   level: number
   status: string
   hp: number

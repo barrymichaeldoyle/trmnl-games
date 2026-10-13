@@ -5,7 +5,7 @@ import { analyticsConfigured, captureAnalytics, openAnalyticsPreferences } from 
 import { PlatformHeader, SITE_FRAME } from './platformHeader'
 
 /** Prose styling for a reading page's body: section headings, lists and underlined links. */
-const PROSE = 'leading-relaxed [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-gold-ink [&_li]:ml-5 [&_li]:list-disc [&_a]:underline'
+const PROSE = 'leading-relaxed [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-gold-ink [&_h3]:mt-4 [&_h3]:font-semibold [&_h3]:text-lg [&_li]:ml-5 [&_li]:list-disc [&_a]:underline'
 
 /**
  * A public reading page under the site header. `contents` adds a jump list of its sections, for pages long enough to

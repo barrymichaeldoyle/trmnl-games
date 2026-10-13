@@ -57,7 +57,7 @@ function InstallPage() {
     <Page>
       <h1 className="font-display text-3xl font-bold">Connect TRMNL to Desk Crawler</h1>
       <Show when="signed-out">
-        <p>Sign in or create your TRMNL Games account to continue.</p>
+        <p>Sign in or create your TRMNL Games account. Next you’ll name your hero, then click Save back in TRMNL to start.</p>
         <SignIn routing="hash" forceRedirectUrl="/connect/trmnl/desk-crawler/install" signUpForceRedirectUrl="/connect/trmnl/desk-crawler/install" />
       </Show>
       <Show when="signed-in">
@@ -73,7 +73,7 @@ function ConnectForm() {
   const [error, setError] = useState<string | null>(null)
   const [reconnectCallback, setReconnectCallback] = useState<string | null>(null)
   const [alias, setAlias] = useState('')
-  const [heroName, setHeroName] = useState('Steve')
+  const [heroName, setHeroName] = useState('')
   const [heroGender, setHeroGender] = useState<HeroGender>('male')
   const inFlight = useRef(false)
   if (me === undefined) return <LoadingState label="Loading your account…" />
@@ -125,16 +125,17 @@ function ConnectForm() {
         </p>
       ) : null}
       {needsProfile ? (
-        <NameField label="Public name" note="Shown to other players on leaderboards and TRMNL screens. No contact details." rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
+        <NameField label="Your public name" note="This is you, in every TRMNL game. Other players see it on the rankings and in raid stories, so leave out contact details. You can change it once a week." rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
       ) : (
         <p>
-          Signed in as <strong>{me?.user?.publicAlias}</strong>.
+          Signed in as <strong>{me?.user?.publicAlias}</strong>, your public name.
         </p>
       )}
       {needsHero ? (
         <>
-          <NameField label="Hero name" note="Also public." rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} disabled={submitting} />
+          <NameField label="Your hero’s name" note="The character on your TRMNL screen. Renaming it later costs 200 gold in the game." rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} placeholder="Steve" disabled={submitting} />
           <GenderPicker value={heroGender} onChange={setHeroGender} note="Changes how your hero looks, nothing else." disabled={submitting} />
+          <RankingsPreview alias={(needsProfile ? alias : me?.user?.publicAlias ?? '').trim()} hero={heroName.trim()} />
         </>
       ) : (
         <p>
@@ -148,8 +149,25 @@ function ConnectForm() {
         </p>
       ) : null}
       <Button type="submit" pending={submitting} busyLabel="Connecting…">Connect this TRMNL installation</Button>
-      <p className="text-sm text-muted">Next, TRMNL asks you to save the plugin. Saving starts your hero's adventures.</p>
+      <p className="text-sm text-muted">Next, TRMNL asks you to save the plugin. Saving starts your hero’s adventures.</p>
     </form>
+  )
+}
+
+/** How the two names sit together on the rankings (leaderboard.tsx): you in bold, your hero underneath. */
+function RankingsPreview({ alias, hero }: { alias: string; hero: string }) {
+  return (
+    <div className="flex flex-col gap-1" aria-hidden="true">
+      <p className="text-sm text-muted">On the rankings you’ll look like this:</p>
+      <div className="flex min-w-0 items-start gap-3 border-2 border-rule px-3 py-2">
+        <span className="w-4 font-bold tabular-nums">1</span>
+        <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
+          <span className="block font-semibold">{alias || 'Your public name'}</span>
+          <span className="block text-sm text-muted">{hero || 'Steve'}</span>
+        </span>
+        <span className="shrink-0 text-sm font-semibold text-gold-ink">Level 1</span>
+      </div>
+    </div>
   )
 }
 

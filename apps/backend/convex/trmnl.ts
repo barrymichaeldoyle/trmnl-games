@@ -8,7 +8,7 @@ import { gameStatusOf } from './platform'
 import { v } from 'convex/values'
 import { internal } from './_generated/api'
 import type { Doc, Id } from './_generated/dataModel'
-import { action, internalMutation, mutation, query, type MutationCtx } from './_generated/server'
+import { action, internalMutation, internalQuery, mutation, query, type MutationCtx } from './_generated/server'
 
 import { createHero } from './lib/heroCreate'
 import { appError } from './lib/errors'
@@ -419,3 +419,32 @@ export const completeReconnection = mutation({
     return { operationId: result.operationId, changed: result.changed }
   },
 })
+
+/**
+ * How first installs went over the last `hours` (default 24), per game, without analytics consent: an attempt is
+ * written when a player connects (after sign-in and naming), and completes when TRMNL confirms the Save. "Not saved"
+ * counts connects whose 20-minute window closed without a Save, plus ones a later connect replaced. Visitors who leave
+ * before Connect write nothing here. `npx convex run --prod trmnl:installSummary '{"hours":24}'`.
+ */
+export const installSummary = internalQuery({
+  args: { hours: v.optional(v.number()) },
+  returns: v.array(v.object({ game: v.string(), connected: v.number(), saved: v.number(), waiting: v.number(), notSaved: v.number(), players: v.number() })),
+  handler: async (ctx, { hours }) => {
+    const now = Date.now()
+    const since = now - (hours ?? 24) * 3_600_000
+    const rows = (await ctx.db.query('trmnlInstallAttempts').withIndex('by_expiresAt', (q) => q.gte('expiresAt', since + INSTALL_ATTEMPT_MS)).take(2_000)).filter((row) => row.createdAt >= since)
+    const games = new Map<string, { connected: number; saved: number; waiting: number; notSaved: number; players: Set<string> }>()
+    for (const row of rows) {
+      const game = row.gameSlug ?? DESK_CRAWLER
+      const tally = games.get(game) ?? { connected: 0, saved: 0, waiting: 0, notSaved: 0, players: new Set<string>() }
+      tally.connected++
+      tally.players.add(row.userId)
+      if (row.state === 'completed') tally.saved++
+      else if (row.state === 'pending' && row.expiresAt > now) tally.waiting++
+      else tally.notSaved++
+      games.set(game, tally)
+    }
+    return [...games].map(([game, { players, ...counts }]) => ({ game, ...counts, players: players.size }))
+  },
+})
+

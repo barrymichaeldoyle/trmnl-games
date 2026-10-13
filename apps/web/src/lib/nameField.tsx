@@ -34,7 +34,7 @@ export function nameProblem(value: string, rule: NameRule, noun: string): string
  * leaves the browser. A character the rule refuses shows at once; a short name waits until you leave the field or
  * submit. The form cannot submit while the name has a problem, and the browser's own bubble is replaced by the note.
  */
-export function NameField({ label, note, rule, noun, value, onChange, name, disabled, small = false }: {
+export function NameField({ label, note, rule, noun, value, onChange, name, disabled, placeholder, small = false }: {
   label: ReactNode
   note?: ReactNode
   rule: NameRule
@@ -43,6 +43,7 @@ export function NameField({ label, note, rule, noun, value, onChange, name, disa
   onChange: (value: string) => void
   name?: string
   disabled?: boolean
+  placeholder?: string
   small?: boolean
 }) {
   const id = useId()
@@ -75,6 +76,7 @@ export function NameField({ label, note, rule, noun, value, onChange, name, disa
         autoComplete="off"
         spellCheck={false}
         disabled={disabled}
+        placeholder={placeholder}
         aria-invalid={shown ? true : undefined}
         aria-describedby={described}
         className={`min-h-11 min-w-0 border-2 bg-ground px-3 text-base ${shown ? 'border-hp' : 'border-edge'}`}

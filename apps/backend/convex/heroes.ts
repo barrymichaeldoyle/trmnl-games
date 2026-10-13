@@ -77,6 +77,8 @@ export const mine = query({
       name: hero.name,
       alias: user.publicAlias,
       activationState: hero.activationState,
+      // When TRMNL confirmed the Save: the companion reminds a new player to add the plugin to a playlist for a day or two.
+      activatedAt: hero.activatedAt ?? null,
       simulationState: hero.simulationState,
       level: hero.level,
       xp: hero.xp,

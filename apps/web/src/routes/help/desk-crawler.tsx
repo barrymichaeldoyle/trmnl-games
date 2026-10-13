@@ -133,7 +133,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['names', 'Names'],
   ['gender', 'Gender'],
   ['alerts', 'Alerts'],
-  ['if-the-screen-looks-old', 'If the screen looks old'],
+  ['troubleshooting', 'Troubleshooting'],
   ['disconnecting-and-removing', 'Disconnecting and removing'],
   ['help', 'Help'],
 ]
@@ -322,7 +322,16 @@ export const Route = createFileRoute('/help/desk-crawler')({
       </ul>
       <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a nap alert waits until they end, and a merchant deal that turns up then is skipped. Before sending, the game checks that the alert still holds, so you never hear about a nap that is already over or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>
       <p>Choose Allow on this device in Settings, then accept your browser’s prompt. On iPhone and iPad, first add TRMNL Games to your Home Screen (Share, then Add to Home Screen) and open it from there. Each device you allow is listed in Settings with a Remove button; removing the last one turns alerts off.</p>
-      <h2 id="if-the-screen-looks-old">If the screen looks old</h2>
+      <h2 id="troubleshooting">Troubleshooting</h2>
+      <h3 id="not-on-your-screen">Your hero isn't on your screen</h3>
+      <ul>
+        <li>Clicking Save adds Desk Crawler to your TRMNL playlist. Your device shows the playlist one plugin at a time, at its refresh rate, so Desk Crawler appears when its turn comes round. With several plugins and a slow refresh rate that can take a while.</li>
+        <li>Open Playlists in TRMNL and check that Desk Crawler is there, on the device you're looking at if you have more than one, and that no schedule hides it at this time of day.</li>
+        <li>Sleep Mode stops the screen refreshing overnight. Your hero keeps adventuring, and the screen catches up when the device wakes.</li>
+        <li>A screen that says "The first adventure starts within 15 minutes" is working. The first story arrives on the next quarter hour.</li>
+        <li>The companion's Hero page always shows what your hero is doing, whatever the screen shows.</li>
+      </ul>
+      <h3 id="if-the-screen-looks-old">The screen looks old</h3>
       <ul>
         <li>"Updates delayed" means the game service is running late. Nothing is lost and you don't need to do anything.</li>
         <li>If the companion website is current but the screen is not, check the plugin's refresh setting and playlist position in TRMNL.</li>
