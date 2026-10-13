@@ -8,6 +8,7 @@ import { RELEASE_STATUS } from './prose'
 import { BUTTON_PRIMARY, Button, LINK_BUTTON } from './ui'
 import { useAnalyticsView } from './analyticsProvider'
 import { WaitlistForm } from './waitlist'
+import { PRELOAD_CLERK_UI } from './clerkUi'
 
 /**
  * The real device screen, framed like a TRMNL: the labelled sample shared by the public pages and the signed-out
@@ -196,7 +197,7 @@ export function DeskCrawlerSignedOut() {
       <section className="flex flex-col gap-3 border-t border-rule pt-6" aria-labelledby="signin-heading">
         <h2 id="signin-heading" className="font-display text-xl font-semibold">Already playing?</h2>
         <p>Sign in to open your hero, bag and rankings.</p>
-        <div><SignInButton mode="modal"><Button variant="secondary">Sign in</Button></SignInButton></div>
+        <div><SignInButton mode="modal"><Button variant="secondary" {...PRELOAD_CLERK_UI}>Sign in</Button></SignInButton></div>
       </section>
     </main>
   )

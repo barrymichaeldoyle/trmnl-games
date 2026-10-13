@@ -14,6 +14,7 @@ import { NetworkProvider } from '../lib/network'
 import { AnalyticsProvider } from '../lib/analyticsProvider'
 import { useDeployWatch } from '../lib/deployWatch'
 import { queriesHeldForAuth } from '../lib/authHold'
+import { LazyClerkUI, clerkFrontendHost } from '../lib/clerkUi'
 
 /** Server-only: read the Clerk session and mint a Convex token from the "convex" JWT template. */
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
@@ -23,16 +24,11 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
 })
 
 /**
- * Clerk's frontend origin, read from the publishable key (pk_live_ or pk_test_ plus the base64 host and a trailing $), so
- * the browser can open its connections while the page parses: Clerk's scripts load without credentials and its API
- * calls with them, which need separate connections.
+ * Clerk's frontend origin, so the browser can open its connections while the page parses: Clerk's scripts load without
+ * credentials and its API calls with them, which need separate connections.
  */
-const CLERK_ORIGIN = (() => {
-  try {
-    const host = atob(String(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? '').split('_')[2] ?? '').replace(/\$$/, '')
-    return /^[a-z0-9.-]+$/i.test(host) ? `https://${host}` : null
-  } catch { return null }
-})()
+const CLERK_HOST = clerkFrontendHost(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined)
+const CLERK_ORIGIN = CLERK_HOST ? `https://${CLERK_HOST}` : null
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -99,7 +95,8 @@ function RootComponent() {
   const context = useRouteContext({ from: Route.id })
   useDeployWatch()
   return (
-    <ClerkProvider>
+    // Clerk's UI downloads when a page first needs it, not on every page (lib/clerkUi).
+    <ClerkProvider ui={{ ClerkUI: LazyClerkUI }}>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <ReleaseSignedOutQueries client={context.convexClient} />
         <NetworkProvider><Outlet /><AnalyticsProvider /></NetworkProvider>

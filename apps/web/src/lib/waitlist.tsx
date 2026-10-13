@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { captureAnalytics } from './analytics'
 import { errorMessage } from './intent'
 import { Button, ErrorNote } from './ui'
+import { PRELOAD_CLERK_UI } from './clerkUi'
 
 /** Set after a signup so the account the visitor creates next attaches to that entry without asking again. */
 const JOINED_KEY = 'tg_waitlist_joined_v1'
@@ -49,7 +50,7 @@ export function WaitlistForm({ source, instance = '' }: { source: 'notify' | 'pi
         <p><strong>You're on the list.</strong> We'll send one email to {joined} when Desk Crawler is in the TRMNL marketplace, then delete your address.</p>
         <div className="flex flex-col gap-2 border-l-4 border-rule pl-4">
           <p className="text-sm text-muted">You can also create your TRMNL Games account now. You'll still install Desk Crawler from TRMNL at launch, and you'll already be signed in.</p>
-          <div><SignUpButton mode="modal" forceRedirectUrl="/app/desk-crawler"><Button variant="secondary">Create account (optional)</Button></SignUpButton></div>
+          <div><SignUpButton mode="modal" forceRedirectUrl="/app/desk-crawler"><Button variant="secondary" {...PRELOAD_CLERK_UI}>Create account (optional)</Button></SignUpButton></div>
         </div>
       </div>
     )

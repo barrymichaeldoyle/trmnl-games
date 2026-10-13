@@ -1,6 +1,7 @@
 import { Show, SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import { Link, useLocation } from '@tanstack/react-router'
 import { GamesLink, currentGame } from './gameSwitcher'
+import { PRELOAD_CLERK_UI } from './clerkUi'
 
 /** The site's outer frame: header, footer and the home page share it, so the bar never changes width between pages. */
 export const SITE_FRAME = 'mx-auto w-full max-w-6xl px-3 min-[375px]:px-4 sm:px-6'
@@ -24,7 +25,7 @@ export function PlatformHeader() {
           <Show when="signed-out">
             <Link to="/games/desk-crawler" className={`${NAV_LINK} max-sm:hidden`} activeProps={{ 'aria-current': 'page', className: 'underline' }}>Desk Crawler</Link>
             <Link to="/help/desk-crawler" className={NAV_LINK} activeProps={{ 'aria-current': 'page', className: 'underline' }}>Help</Link>
-            <SignInButton mode="modal"><button type="button" className="hud text-hud-sm min-h-10 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">Sign in</button></SignInButton>
+            <SignInButton mode="modal"><button type="button" {...PRELOAD_CLERK_UI} className="hud text-hud-sm min-h-10 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">Sign in</button></SignInButton>
           </Show>
           <Show when="signed-in">
             <GamesLink />

@@ -8,6 +8,7 @@ import { errorMessage } from '../lib/intent'
 import { ProsePage, SUPPORT_EMAIL } from '../lib/prose'
 import { seo } from '../lib/seo'
 import { Button, ErrorNote } from '../lib/ui'
+import { PRELOAD_CLERK_UI } from '../lib/clerkUi'
 
 const MAX = 2000
 const MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('TRMNL Games feedback')}`
@@ -27,7 +28,7 @@ function FeedbackPage() {
       <Show when="signed-in"><FeedbackForm page={from} /></Show>
       <Show when="signed-out">
         <p>Sign in first, so a reply can reach you.</p>
-        <div><SignInButton mode="modal" forceRedirectUrl={from ? `/feedback?from=${encodeURIComponent(from)}` : '/feedback'}><Button>Sign in to send feedback</Button></SignInButton></div>
+        <div><SignInButton mode="modal" forceRedirectUrl={from ? `/feedback?from=${encodeURIComponent(from)}` : '/feedback'}><Button {...PRELOAD_CLERK_UI}>Sign in to send feedback</Button></SignInButton></div>
         <p className="text-sm text-muted">Can't sign in or create an account? Email <a href={MAILTO}>{SUPPORT_EMAIL}</a> instead.</p>
       </Show>
     </ProsePage>

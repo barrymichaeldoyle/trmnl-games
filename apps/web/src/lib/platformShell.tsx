@@ -6,6 +6,7 @@ import { Button, LoadingState } from './ui'
 import { OfflineNote } from './network'
 import { SiteFooter } from './prose'
 import { DeskCrawlerSignedOut } from './deskCrawlerPitch'
+import { PRELOAD_CLERK_UI } from './clerkUi'
 
 export function AuthShell({ children }: { children: ReactNode }) {
   const { isLoaded } = useAuth()
@@ -21,7 +22,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
           <section aria-labelledby="signin-title" className="flex flex-col gap-4">
             <h1 id="signin-title" className="font-display text-3xl font-bold">Sign in to TRMNL Games</h1>
             <p>Your heroes, your games and your account settings are here once you sign in.</p>
-            <div><SignInButton mode="modal"><Button>Sign in</Button></SignInButton></div>
+            <div><SignInButton mode="modal"><Button {...PRELOAD_CLERK_UI}>Sign in</Button></SignInButton></div>
           </section>
           <section aria-labelledby="new-here" className="flex flex-col gap-3 border-t border-rule pt-6">
             <h2 id="new-here" className="font-display text-xl font-semibold">New here?</h2>
