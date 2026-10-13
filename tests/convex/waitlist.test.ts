@@ -118,6 +118,19 @@ describe('Desk Crawler launch list (D105)', () => {
     expect(await rows()).toEqual([])
   })
 
+  it('sends one marked test copy without touching the list', async () => {
+    await t.mutation(api.waitlist.join, { email: 'ana@example.com', source: 'notify' })
+    expect(await t.action(internal.waitlist.sendLaunchTest, { to: 'Barry@Example.com', installUrl: INSTALL })).toEqual({ sent: true })
+    const single = fetchMock.mock.calls.filter(([url]) => url === 'https://api.resend.com/emails')
+    expect(single).toHaveLength(1)
+    const message = JSON.parse(single[0]![1]!.body as string)
+    expect(message).toMatchObject({ to: ['barry@example.com'], subject: '[Test] Desk Crawler is live on TRMNL' })
+    expect(message.html).toContain(`href="${INSTALL}"`)
+    expect(batches()).toHaveLength(0)
+    expect(await rows()).toMatchObject([{ state: 'waiting' }])
+    expect(await t.action(internal.waitlist.sendLaunchTest, { to: 'nope', installUrl: INSTALL })).toEqual({ sent: false })
+  })
+
   it('sends nothing without a key or an https install link', async () => {
     await t.mutation(api.waitlist.join, { email: 'ana@example.com', source: 'notify' })
     expect(await t.action(internal.waitlist.sendLaunch, { installUrl: 'trmnl.com' })).toMatchObject({ status: 'disabled' })

@@ -189,6 +189,9 @@ export const requeue = internalMutation({
   },
 })
 
+const LAUNCH_INTRO = 'Desk Crawler is now free in the TRMNL marketplace. It is an idle office RPG that plays itself on your TRMNL. Every fifteen minutes your hero fights a Stapler Mimic or finds a Keyboard Mace, and your screen shows how it went. You check in every few days to sort the loot.'
+const LAUNCH_STEPS = 'Then sign in or create a TRMNL Games account, name your hero and click Save in TRMNL. Your first adventure follows shortly.'
+
 /** D148: the launch reset runs just before this email goes out. */
 export const LAUNCH_BETA_NOTE = 'If you played during the beta, your hero started again from level 1 today. It keeps its name, and your account and TRMNL setup are unchanged.'
 
@@ -202,11 +205,11 @@ export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUr
     subject: 'Desk Crawler is live on TRMNL',
     headers: { 'List-Unsubscribe': `<${unsubscribe.toString()}>` },
     text: [
-      'Desk Crawler is now free in the TRMNL marketplace. It is an idle office RPG that plays itself on your TRMNL. Your hero takes on an adventure every fifteen minutes, and your screen shows how it went.',
+      LAUNCH_INTRO,
       '',
       `Install it here: ${args.installUrl}`,
       '',
-      'Install the plugin, sign in or create a TRMNL Games account, name your hero and click Save in TRMNL. Your first adventure follows shortly.',
+      LAUNCH_STEPS,
       '',
       LAUNCH_BETA_NOTE,
       '',
@@ -229,7 +232,7 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Desk Crawler is live on TRMNL</title></head>
 <body style="margin:0;padding:0;background:#f4f1ff;${font}">
-<div style="display:none;max-height:0;overflow:hidden">Free in the TRMNL marketplace. Your hero sets out within fifteen minutes of setup.</div>
+<div style="display:none;max-height:0;overflow:hidden">An idle office RPG for the e-ink display on your desk, free to install.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ff"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:3px solid #0c0a1c">
 <tr><td style="background:#0c0a1c;padding:20px 24px">
@@ -239,7 +242,7 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
 </tr></table>
 </td></tr>
 <tr><td style="padding:24px 24px 8px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
-<p style="margin:0 0 16px">Desk Crawler is now free in the TRMNL marketplace. It is an idle office RPG that plays itself on your TRMNL. Your hero takes on an adventure every fifteen minutes, and your screen shows how it went.</p>
+<p style="margin:0 0 16px">${LAUNCH_INTRO}</p>
 </td></tr>
 <tr><td style="padding:0 24px"><img src="${asset('/games/desk-crawler/screen-sample.png')}" width="506" alt="Example Desk Crawler screen on a TRMNL X: Pip explores the Server Room, with health, XP, equipment, adventure stories and weekly rankings." style="display:block;width:100%;max-width:506px;height:auto;border:8px solid #3a3566;border-radius:12px;background:#ffffff"></td></tr>
 <tr><td align="center" style="padding:24px">
@@ -248,7 +251,7 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
 </td></tr></table>
 </td></tr>
 <tr><td style="padding:0 24px 24px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
-<p style="margin:0 0 16px">Install the plugin, sign in or create a TRMNL Games account, name your hero and click Save in TRMNL. Your first adventure follows shortly.</p>
+<p style="margin:0 0 16px">${LAUNCH_STEPS}</p>
 <p style="margin:0">${LAUNCH_BETA_NOTE}</p>
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #ddd8f0;${font};color:#5b5677;font-size:13px;line-height:1.5">
@@ -260,9 +263,36 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
 </body></html>`
 }
 
+const LAUNCH_REPLY_TO = 'barry@barrymichaeldoyle.com'
+const launchSender = () => ({ origin: new URL(process.env.COMPANION_ORIGIN ?? 'https://trmnlgames.com').origin, from: process.env.WAITLIST_FROM ?? 'TRMNL Games <hello@trmnlgames.com>' })
+
+/**
+ * Sends one copy of the launch email to `to`, subject marked [Test], so it can be read in a real inbox before
+ * `sendLaunch`. It touches no list row; its unsubscribe link names no entry and does nothing.
+ * `npx convex run --prod waitlist:sendLaunchTest '{"to":"you@example.com","installUrl":"https://trmnl.com/..."}'`.
+ */
+export const sendLaunchTest = internalAction({
+  args: { to: v.string(), installUrl: v.string() },
+  returns: v.object({ sent: v.boolean() }),
+  handler: async (_ctx, { to, installUrl }) => {
+    const resendKey = process.env.RESEND_API_KEY
+    const key = linkKey()
+    const email = normalizeEmail(to)
+    if (!resendKey || !key || !email || !/^https:\/\//.test(installUrl)) return { sent: false }
+    const message = launchEmail({ id: 'test' as Id<'waitlist'>, email, installUrl, ...launchSender(), key })
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      signal: AbortSignal.timeout(20_000),
+      headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...message, subject: `[Test] ${message.subject}`, reply_to: LAUNCH_REPLY_TO }),
+    })
+    return { sent: response.ok }
+  },
+})
+
 /**
  * Sends the launch email to everyone waiting, LAUNCH_BATCH at a time, through
- * Resend's batch endpoint. Run once, after approval and with Barry's go-ahead:
+ * Resend's batch endpoint. Run once, after approval and with Barry's go-ahead (it reschedules itself until the list is empty):
  * `npx convex run --prod waitlist:sendLaunch '{"installUrl":"https://trmnl.com/..."}'`.
  * Rows are claimed before sending, so a second concurrent run never double-sends.
  */
@@ -275,15 +305,14 @@ export const sendLaunch = internalAction({
     if (!resendKey || !key || !/^https:\/\//.test(installUrl)) return { sent: 0, failed: 0, status: 'disabled' }
     const batch = await ctx.runMutation(internal.waitlist.claimLaunchBatch, {})
     if (batch.length === 0) return { sent: 0, failed: 0, status: 'done' }
-    const origin = new URL(process.env.COMPANION_ORIGIN ?? 'https://trmnlgames.com').origin
-    const from = process.env.WAITLIST_FROM ?? 'TRMNL Games <hello@trmnlgames.com>'
+    const { origin, from } = launchSender()
     let ok = false
     try {
       const response = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
         signal: AbortSignal.timeout(20_000),
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json', 'Idempotency-Key': `waitlist-launch/${sha256Hex(batch.map((row) => row.id).join(','))}` },
-        body: JSON.stringify(batch.map((row) => ({ ...launchEmail({ ...row, installUrl, origin, from, key }), reply_to: 'barry@barrymichaeldoyle.com' }))),
+        body: JSON.stringify(batch.map((row) => ({ ...launchEmail({ ...row, installUrl, origin, from, key }), reply_to: LAUNCH_REPLY_TO }))),
       })
       ok = response.ok
     } catch { ok = false }
