@@ -10,7 +10,7 @@ import { preload } from '../../lib/preload'
 import { captureAnalytics } from '../../lib/analytics'
 import { useAnalyticsView } from '../../lib/analyticsProvider'
 import { SwitchAccount } from '../../lib/switchAccount'
-import { WaitlistAccount } from '../../lib/waitlist'
+import { InstallLink } from '../../lib/deskCrawlerPitch'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import { gamesQuery } from '../../lib/gameAccess'
@@ -60,7 +60,7 @@ function SignedInApp() {
             <p className="mt-3 text-sm text-muted">Scanning this QR opens the companion. Creating a hero starts from the plugin’s Install button in TRMNL.</p>
           </> : <>
             <p>Install the Desk Crawler plugin from the TRMNL marketplace, connect it here, then save it in TRMNL. Your hero sets out from there.</p>
-            <WaitlistAccount />
+            <InstallLink place="start card" className="mt-3" />
           </>}
           <div className="mt-3"><SwitchAccount returnTo="/app/desk-crawler" /></div>
           <p className="mt-3 text-sm text-muted">{RELEASE_STATUS}</p>

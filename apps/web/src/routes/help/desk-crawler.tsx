@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
-import { ProsePage, SUPPORT_EMAIL } from '../../lib/prose'
+import { DESK_CRAWLER_INSTALL_URL, ProsePage, SUPPORT_EMAIL } from '../../lib/prose'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 
 /** D112: the to-do list section appears once the active catalog has one. */
@@ -143,14 +143,14 @@ export const Route = createFileRoute('/help/desk-crawler')({
     <ProsePage title="Desk Crawler on TRMNL" contents={CONTENTS}>
       <h2 id="getting-started">Getting started</h2>
       <ul>
-        <li>Install Desk Crawler from the TRMNL plugin marketplace and choose Install.</li>
+        <li>Open <a href={DESK_CRAWLER_INSTALL_URL}>Desk Crawler in the TRMNL marketplace</a> and choose Install.</li>
         <li>Sign in to Desk Crawler, pick a public name and a hero name, and connect the installation.</li>
         <li>Back in TRMNL, click Save. Your hero's first adventure starts within 15 minutes.</li>
         <li>Add the plugin to a playlist, or to a mashup if you want your hero beside other plugins. All four layout sizes are supported.</li>
       </ul>
       <h2 id="if-the-qr-sends-you-back-to-setup">If the QR sends you back to setup</h2>
       <p>The QR opens the companion for the account you are signed in with. It does not start a new installation. Check the signed-in email shown on the setup page and use Switch account if you originally connected with a different account.</p>
-      <p>If setup says “Reconnect Desk Crawler”, your TRMNL connection exists but the hero is missing. This can happen after the pre-launch game reset. Install a fresh copy of Desk Crawler from TRMNL, sign in with the same account, choose a new hero name, connect, then click Save back in TRMNL. Once the new copy works, remove the old copy from your playlist.</p>
+      <p>If setup says “Reconnect Desk Crawler”, your TRMNL connection exists but the hero is missing. This can happen after the pre-launch game reset. Install a fresh copy of <a href={DESK_CRAWLER_INSTALL_URL}>Desk Crawler from TRMNL</a>, sign in with the same account, choose a new hero name, connect, then click Save back in TRMNL. Once the new copy works, remove the old copy from your playlist.</p>
       <p>If setup says “Save in TRMNL to start”, your hero is already prepared. Return to that installation in TRMNL and click Save.</p>
       <h2 id="how-time-works">How time works</h2>
       <p>

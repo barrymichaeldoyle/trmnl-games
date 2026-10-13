@@ -1,6 +1,6 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { DeviceSample, FloorGrid, HowItPlays, LaunchSignup } from '../../lib/deskCrawlerPitch'
+import { DeviceSample, FloorGrid, HowItPlays, InstallCta } from '../../lib/deskCrawlerPitch'
 import { UNLOCKS } from '../../lib/facts.gen'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { SITE_FRAME } from '../../lib/platformHeader'
@@ -39,7 +39,7 @@ function Landing() {
                 your desk shows what happened. Every few days you open the companion to sort gear and pick the next floor.
               </p>
             </header>
-            <LaunchSignup source="landing" />
+            <InstallCta place="landing" />
           </div>
           <DeviceSample caption="Sample hero on a TRMNL X. Your own hero starts when you install the plugin and save it in TRMNL." priority />
         </section>
@@ -73,8 +73,8 @@ function Landing() {
         </div>
 
         <section aria-labelledby="start-heading" className="window flex flex-col gap-4 p-5 sm:p-8 lg:max-w-3xl">
-          <h2 id="start-heading" className="font-display text-3xl font-bold text-gold-ink">Start with one email</h2>
-          <LaunchSignup source="landing" instance="end" />
+          <h2 id="start-heading" className="font-display text-3xl font-bold text-gold-ink">Start your hero</h2>
+          <InstallCta place="landing end" />
           <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center self-start underline underline-offset-4">Setup and TRMNL help</Link>
         </section>
       </main>

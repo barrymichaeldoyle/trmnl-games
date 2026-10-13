@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
-import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
+import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, InstallCta } from '../lib/deskCrawlerPitch'
 import { FAQ_JSON_LD } from '../lib/deskCrawlerFaq'
 import { Glyph } from '../lib/glyphs'
 import { SITE_FRAME } from '../lib/platformHeader'
@@ -43,7 +43,7 @@ function SlowCastSection() {
   )
 }
 
-/** The platform front page: Desk Crawler's screen and launch list first, then what the game holds. */
+/** The platform front page: Desk Crawler's screen and install link first, then what the game holds. */
 function Home() {
   return (
     <SiteShell>
@@ -55,7 +55,7 @@ function Home() {
               <h1 id="home-title" className="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">An office RPG that plays itself on your desk</h1>
               <p className="max-w-prose text-lg leading-relaxed text-muted">Every 15 minutes your hero fights a Stapler Mimic, finds a Keyboard Mace or gets knocked out, and your TRMNL e-ink screen shows what happened. You check in every few days to sort the loot.</p>
             </div>
-            <LaunchSignup source="home" />
+            <InstallCta place="home" />
           </div>
           <DeviceSample caption="A real Desk Crawler screen on a TRMNL X, with a sample hero." priority />
         </section>
@@ -76,8 +76,8 @@ function Home() {
           <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
             <Faq headingId="faq-heading" />
             <section aria-labelledby="launch-heading" className="window flex flex-col gap-4 self-start p-5 sm:p-6">
-              <h2 id="launch-heading" className="font-display text-2xl font-bold text-gold-ink">Get Desk Crawler at launch</h2>
-              <LaunchSignup source="home" instance="footer" />
+              <h2 id="launch-heading" className="font-display text-2xl font-bold text-gold-ink">Get Desk Crawler</h2>
+              <InstallCta place="home end" />
             </section>
           </div>
           <AfterListing><SlowCastSection /></AfterListing>

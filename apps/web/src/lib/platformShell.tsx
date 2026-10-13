@@ -4,7 +4,8 @@ import { Link, useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button, LoadingState } from './ui'
 import { OfflineNote } from './network'
-import { SiteFooter } from './prose'
+import { DESK_CRAWLER_INSTALL_URL, SiteFooter } from './prose'
+import { captureAnalytics } from './analytics'
 import { DeskCrawlerSignedOut } from './deskCrawlerPitch'
 import { PRELOAD_CLERK_UI } from './clerkUi'
 
@@ -29,7 +30,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
             <p className="text-muted">TRMNL Games makes games for the TRMNL e-ink display. The first, Desk Crawler, is an office RPG that plays itself on your desk.</p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
               <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>
-              <Link to="/desk-crawler/waiting-list" className="inline-flex min-h-11 items-center underline underline-offset-4">Get one email at launch</Link>
+              <a href={DESK_CRAWLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place: 'sign-in page' })} className="inline-flex min-h-11 items-center underline underline-offset-4">Install on TRMNL</a>
             </div>
           </section>
         </main>}

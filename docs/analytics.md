@@ -42,7 +42,8 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `hero unfollowed` | Browser, after `follows.unfollow` commits (D143) | none; never who |
 | `rival set` | Browser, after `follows.setRival` commits (D143) | `change` (`set` or `cleared`); never who |
 | `bag bought` | Browser, after `inventory.buyBag` commits (D61) | `tier` |
-| `waitlist joined` | Browser, after `waitlist.join` or `waitlist.joinWithAccount` succeeds (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); `place` (`top`, or `footer` / `end` for the second form on the home and game pages, D137; absent for `account`); never the email |
+| `install link opened` | Browser, on a click of a link to the marketplace listing (D147) | `place` (`home`, `home end`, `landing`, `landing end`, `qr pitch`, `start card`, `sign-in page`, `footer`) |
+| `waitlist joined` | Retired with the launch-list forms (D147); was sent after `waitlist.join` or `waitlist.joinWithAccount` succeeded (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); `place` (`top`, or `footer` / `end` for the second form on the home and game pages, D137; absent for `account`); never the email |
 | `feedback sent` | Browser, after `feedback.send` succeeds (D107) | none; never the message |
 | `profile shared` | Browser, after Share completes or Copy link copies the public hero page link in Settings (D109); a cancelled share sheet sends nothing | `method` (`share` or `copy`); never the link or name |
 | `task swapped` | Browser, after `heroes.swapTask` commits on the Hero page's To-do card (D112) | `template_id` (the swapped task's kind, such as `avoid_traps`); never the slot, biome, monster or label |

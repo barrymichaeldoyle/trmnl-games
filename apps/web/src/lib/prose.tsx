@@ -138,7 +138,7 @@ export function SiteFooter() {
           <nav aria-label="Site" className="col-span-2 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 md:col-span-4">
             <FooterGroup title="Games">
               <li><Link to="/" className={FOOTER_LINK}>Desk Crawler</Link></li>
-              <li><Link to="/desk-crawler/waiting-list" className={FOOTER_LINK}>Launch list</Link></li>
+              <li><a href={DESK_CRAWLER_INSTALL_URL} className={FOOTER_LINK} onClick={() => captureAnalytics('install link opened', { place: 'footer' })}>Install on TRMNL</a></li>
               <Show when="signed-in"><li><Link to="/app" className={FOOTER_LINK}>My games</Link></li></Show>
             </FooterGroup>
             <FooterGroup title="Help">
@@ -184,7 +184,9 @@ export const SUPPORT_EMAIL = 'barry@barrymichaeldoyle.com'
 /** Optional support for the games (D134): a plain link out, with nothing in play attached to it. */
 export const SPONSOR_URL = 'https://github.com/sponsors/barrymichaeldoyle'
 /** One release status line, shared by the public pages and the companion's start card. */
-export const RELEASE_STATUS = 'Free. Awaiting TRMNL marketplace review.'
+export const RELEASE_STATUS = 'Free on the TRMNL marketplace.'
+/** Desk Crawler's public marketplace listing (plugin 564): its Install button starts the TRMNL connect flow. */
+export const DESK_CRAWLER_INSTALL_URL = 'https://trmnl.com/integrations/desk-crawler'
 /** Shown on the privacy and terms pages; bump whenever either changes. */
 export const POLICY_UPDATED = '8 October 2026'
 /** The privacy policy alone changed on 9 October 2026 (D110: public names in other players' raid stories). */

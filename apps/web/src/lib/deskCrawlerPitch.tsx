@@ -4,10 +4,10 @@ import { FAQ } from './deskCrawlerFaq'
 import { FLOORS, UNLOCKS } from './facts.gen'
 import { Glyph, type GlyphName } from './glyphs'
 import { BIOME_BANDS } from './palette'
-import { RELEASE_STATUS } from './prose'
+import { DESK_CRAWLER_INSTALL_URL, RELEASE_STATUS } from './prose'
 import { BUTTON_PRIMARY, Button, LINK_BUTTON } from './ui'
 import { useAnalyticsView } from './analyticsProvider'
-import { WaitlistForm } from './waitlist'
+import { captureAnalytics } from './analytics'
 import { PRELOAD_CLERK_UI } from './clerkUi'
 
 /**
@@ -154,19 +154,26 @@ export function Faq({ headingId }: { headingId: string }) {
   )
 }
 
+/** The marketplace listing's Install button, counted by where it sits. */
+export function InstallLink({ place, className = '' }: { place: string; className?: string }) {
+  return <a href={DESK_CRAWLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place })} className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY} ${className}`}>Install on TRMNL</a>
+}
+
 /**
- * Release status, the launch list and the TRMNL requirement: the block every pitch ends its first screen with. A
- * signed-in visitor gets the companion instead of the form: it shows their hero, or offers the launch email on the
- * account (WaitlistAccount) when they have none yet.
+ * Release status, the install link and the TRMNL requirement: the block every pitch ends its first screen with. A
+ * signed-in visitor gets the companion first: it shows their hero, or how to start one.
  */
-export function LaunchSignup({ source, instance }: { source: 'pitch' | 'landing' | 'home'; instance?: string }) {
+export function InstallCta({ place }: { place: string }) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm font-semibold text-xp-ink">{RELEASE_STATUS}</p>
-      <Show when="signed-out"><WaitlistForm source={source} instance={instance} /></Show>
+      <Show when="signed-out">
+        <InstallLink place={place} />
+        <p className="text-sm text-muted">Install it in TRMNL, sign in here to name your hero, then click Save in TRMNL. The first adventure shows up within 15 minutes.</p>
+      </Show>
       <Show when="signed-in">
         <Link to="/app/desk-crawler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open Desk Crawler</Link>
-        <p className="text-sm text-muted">You’re signed in. The companion shows your hero, or a launch email for your account if you haven’t started one.</p>
+        <p className="text-sm text-muted">You’re signed in. No hero yet? <a href={DESK_CRAWLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place })} className="underline underline-offset-4 hover:text-ink">Install Desk Crawler on TRMNL</a> and connect it with this account.</p>
       </Show>
       <p className="text-sm text-muted">Needs a <a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">TRMNL e-ink display</a>. The game runs on our servers; the screen shows what happened.</p>
     </div>
@@ -189,9 +196,9 @@ export function DeskCrawlerSignedOut() {
       <DeviceSample caption="Sample hero on a TRMNL X." priority />
       <section className="flex flex-col gap-3" aria-labelledby="play-heading">
         <h2 id="play-heading" className="font-display text-xl font-semibold">Want your own hero?</h2>
-        <p>Desk Crawler needs a <a href="https://trmnl.com" className="underline underline-offset-4">TRMNL</a> display. Install the plugin from the TRMNL marketplace and your hero sets out from there.</p>
+        <p>Desk Crawler needs a <a href="https://trmnl.com" className="underline underline-offset-4">TRMNL</a> display. Install the plugin from the TRMNL marketplace, sign in here to name your hero, then click Save in TRMNL.</p>
         <p className="text-sm text-muted">{RELEASE_STATUS}</p>
-        <WaitlistForm source="pitch" />
+        <InstallLink place="qr pitch" />
         <div className="flex flex-wrap items-center gap-4">
           <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>
           <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">Setup and TRMNL help</Link>

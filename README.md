@@ -1,12 +1,12 @@
 # Desk Crawler
 
-**[Play at trmnlgames.com](https://trmnlgames.com)** · **[Join the waiting list](https://trmnlgames.com/desk-crawler/waiting-list)** for one email when it reaches the TRMNL marketplace.
+**[Install Desk Crawler on TRMNL](https://trmnl.com/integrations/desk-crawler)** · **[Play at trmnlgames.com](https://trmnlgames.com)**
 
 Also by the same author: **[Formula 1 Race Weekend](https://trmnl.com/recipes/485545)**, a TRMNL plugin that follows the current F1 weekend with sessions, weather, grid and results, powered by [GrandPrixPicks.com](https://grandprixpicks.com).
 
 A passive multiplayer office RPG for your desk. A hero explores every 15 minutes, finds equipment, survives mishaps, and climbs a global leaderboard. Built exclusively for TRMNL: install the plugin to start your hero, watch the story on e-ink, and use the companion website for occasional decisions.
 
-**Phase: in marketplace review, v1.1 shipped.** Plugin 564 was submitted to TRMNL on 2026-10-07. The companion, Convex backend and TRMNL integration are live, with production on content v12 (stances, potion pouch, merchant, decisions, effects, affixes, epic gear, desk raids, the to-do list, gold-only bag and pouch ladders, and from v12 the career ladder with level-gated unlocks) and device template v52. See the [roadmap](docs/roadmap.md) for what comes next. See [implementation status](docs/status.md) and [release checks](docs/evidence/release.md) for verified behavior and remaining gates. Run `pnpm install` then `pnpm check` and `pnpm balance`.
+**Phase: live on the TRMNL marketplace.** Plugin 564 was submitted to TRMNL on 2026-10-07 and is listed at https://trmnl.com/integrations/desk-crawler. The companion, Convex backend and TRMNL integration are live, with production on content v12 (stances, potion pouch, merchant, decisions, effects, affixes, epic gear, desk raids, the to-do list, gold-only bag and pouch ladders, and from v12 the career ladder with level-gated unlocks) and device template v52. See the [roadmap](docs/roadmap.md) for what comes next. See [implementation status](docs/status.md) and [release checks](docs/evidence/release.md) for verified behavior and remaining gates. Run `pnpm install` then `pnpm check` and `pnpm balance`.
 
 Confirmed on 2026-10-03:
 
