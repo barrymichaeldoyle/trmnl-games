@@ -169,7 +169,7 @@ export function InstallCta({ place }: { place: string }) {
       <p className="text-sm font-semibold text-xp-ink">{RELEASE_STATUS}</p>
       <Show when="signed-out">
         <InstallLink place={place} />
-        <p className="text-sm text-muted">Install it in TRMNL, sign in here to name your hero, then click Save in TRMNL. The first adventure shows up within 15 minutes.</p>
+        <p className="text-sm text-muted">Then sign in here to name your hero and click Save. The first adventure shows up within 15 minutes.</p>
       </Show>
       <Show when="signed-in">
         <Link to="/app/desk-crawler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open Desk Crawler</Link>
@@ -196,8 +196,7 @@ export function DeskCrawlerSignedOut() {
       <DeviceSample caption="Sample hero on a TRMNL X." priority />
       <section className="flex flex-col gap-3" aria-labelledby="play-heading">
         <h2 id="play-heading" className="font-display text-xl font-semibold">Want your own hero?</h2>
-        <p>Desk Crawler needs a <a href="https://trmnl.com" className="underline underline-offset-4">TRMNL</a> display. Install the plugin from the TRMNL marketplace, sign in here to name your hero, then click Save in TRMNL.</p>
-        <p className="text-sm text-muted">{RELEASE_STATUS}</p>
+        <p>Desk Crawler is free and needs a <a href="https://trmnl.com" className="underline underline-offset-4">TRMNL</a> display. Install it from the marketplace, sign in here to name your hero, then click Save.</p>
         <InstallLink place="qr pitch" />
         <div className="flex flex-wrap items-center gap-4">
           <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>

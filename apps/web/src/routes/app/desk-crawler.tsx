@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { Card, CountBadge, LoadingState } from '../../lib/ui'
-import { RELEASE_STATUS } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { NameRepair } from './desk-crawler/-nameRepair'
 import { preload } from '../../lib/preload'
@@ -59,11 +58,10 @@ function SignedInApp() {
             <p>Your TRMNL installation is connected, but this account has no hero. Start a fresh installation of Desk Crawler in TRMNL, connect it using this account, choose a hero name, then click Save in TRMNL.</p>
             <p className="mt-3 text-sm text-muted">Scanning this QR opens the companion. Creating a hero starts from the plugin’s Install button in TRMNL.</p>
           </> : <>
-            <p>Install the Desk Crawler plugin from the TRMNL marketplace, connect it here, then save it in TRMNL. Your hero sets out from there.</p>
+            <p>Install Desk Crawler from the TRMNL marketplace, connect it here, then click Save. Your hero sets out from there.</p>
             <InstallLink place="start card" className="mt-3" />
           </>}
           <div className="mt-3"><SwitchAccount returnTo="/app/desk-crawler" /></div>
-          <p className="mt-3 text-sm text-muted">{RELEASE_STATUS}</p>
           <Link to="/help/desk-crawler" onClick={() => captureAnalytics('setup help opened', { setup_state: setupState })} className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">How to connect Desk Crawler</Link>
         </Card>
       </main>
