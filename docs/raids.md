@@ -67,6 +67,10 @@ The clamp means a target that spent its gold between the raid and the applicatio
 
 Side effects commit at most once for both parties: the raider's inside its evaluation under its `lastTick` guard, the target's through the ledger row's state. That is the v1.2 gate for meetings, met by construction.
 
+### Friday the 13th mishaps (D139, not built)
+
+Under the world events calendar, a raid launched on the raider's local Friday the 13th is a mishap: launch chances double for that day, the contest draw is still taken but ignored, nobody wins, and both sides lose `ceil(20% of maximum HP)` and `floor(5% of current gold)`, with no gold changing hands. The ledger outcome gains `mishap` and a `raidMishaps` counter counts them. [Spec](world-events.md#friday-the-13th-every-raid-goes-wrong).
+
 ### Counters, achievements, recap
 
 Four grow-only counters on the hero: `raidsLaunched`, `raidsWon`, `raidsRepelled`, `raidsLost` (lost as the target). Achievement catalog version 3 appends two families: Office raider (raids won: 1, 10, 50) and Desk defender (raids repelled: 1, 10, 50). The morning stand-up recap (D83) gains one fact behind a raid mark: raids won and lost in the period, read from the counter differences like every other fact. A raid knockout counts in `deaths` like any other.
