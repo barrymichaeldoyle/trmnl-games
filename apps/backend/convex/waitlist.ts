@@ -205,8 +205,6 @@ const LAUNCH_FEATURES: ReadonlyArray<{ title: string; body: string }> = [
   { title: 'Weekly keepsakes', body: 'A six-digit code appears on your screen each week. Enter it in the companion to collect an office souvenir.' },
 ]
 
-/** D148: the launch reset runs just before this email goes out. */
-export const LAUNCH_BETA_NOTE = 'If you played during the beta, your hero started again from level 1 today. It keeps its name, and your account and TRMNL setup are unchanged.'
 
 export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUrl: string; origin: string; from: string; key: string }) {
   const unsubscribe = new URL('/desk-crawler/unsubscribe', args.origin)
@@ -228,8 +226,6 @@ export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUr
       '',
       ...LAUNCH_FEATURES.flatMap((feature) => [`${feature.title}: ${feature.body}`, '']),
       `Install Desk Crawler: ${args.installUrl}`,
-      '',
-      LAUNCH_BETA_NOTE,
       '',
       'You are getting this one email because you joined the Desk Crawler launch list at trmnlgames.com. Your address has now been removed from that list, and no further emails will follow.',
       '',
@@ -279,9 +275,6 @@ ${features}
 </table></td></tr>
 <tr><td align="center" style="padding:24px">
 ${button}
-</td></tr>
-<tr><td style="padding:0 24px 24px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
-<p style="margin:0">${LAUNCH_BETA_NOTE}</p>
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #ddd8f0;${font};color:#5b5677;font-size:13px;line-height:1.5">
 <p style="margin:0 0 8px">You are getting this one email because you joined the Desk Crawler launch list at trmnlgames.com. Your address has now been removed from that list, and no further emails will follow.</p>
