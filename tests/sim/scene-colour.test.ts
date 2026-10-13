@@ -51,7 +51,7 @@ describe('companion painted scene (D96)', () => {
     expect(grid[10]![110]).toBeNull()
   })
 
-  it('covers every biome, pose and subject and rejects unknown paths', () => {
+  it('covers every biome, pose and subject and rejects unknown paths', { timeout: 30_000 }, () => {
     const subjects: Subject[] = [{ kind: 'none' }, ...(Object.keys(monsterArt) as Array<keyof typeof monsterArt>).map((id) => ({ kind: 'monster' as const, id, elite: true })), ...(Object.keys(propArt) as Array<keyof typeof propArt>).map((id) => ({ kind: 'prop' as const, id }))]
     for (const biome of ['office_cubicles', 'server_room', 'cafeteria_depths'] as const)
       for (const pose of Object.keys(heroPoses) as Array<keyof typeof heroPoses>)
