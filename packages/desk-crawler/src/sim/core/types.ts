@@ -36,6 +36,7 @@ export type LogKind =
   | 'raid'
   | 'todo'
   | 'career'
+  | 'occasion'
   | 'system'
 
 // ---------------------------------------------------------------- content
@@ -444,6 +445,57 @@ export interface RaidLaunch {
   readonly gold: number
   /** The target's HP loss as a share of its maximum HP. */
   readonly targetHpPct: number
+  /** D139: a Friday the 13th mishap; `raiderWon` is false and `gold` is the raider's own loss. */
+  readonly mishap?: true
+}
+
+/**
+ * D139: when an occasion falls, as a rule over the local calendar. `fixed` is a month and day; `nth_weekday` the nth
+ * weekday of a month (weekday 0 is Sunday) moved by `offsetDays`; `friday_13th` any Friday the 13th; `easter` Easter
+ * Sunday moved by `offsetDays`; `table` a list of ISO dates, for calendars that are not computed (Lunar New Year, Diwali).
+ */
+export type OccasionDateRule =
+  | { readonly kind: 'fixed'; readonly month: number; readonly day: number }
+  | { readonly kind: 'nth_weekday'; readonly month: number; readonly weekday: number; readonly nth: number; readonly offsetDays?: number }
+  | { readonly kind: 'friday_13th' }
+  | { readonly kind: 'easter'; readonly offsetDays: number }
+  | { readonly kind: 'table'; readonly dates: readonly string[] }
+
+/** D139 Friday the 13th: every raid goes wrong for both sides. */
+export interface RaidMishapRule {
+  /** Launch chances are scaled by this share for the day (200 doubles them). */
+  readonly launchPct: number
+  /** What each side loses: a share of maximum HP and of current gold (thrifty takes its points off). The gold goes nowhere. */
+  readonly hpPct: number
+  readonly goldLossPct: number
+  /** Placeholder {rival}: the raider's line and the target's line. */
+  readonly raider: readonly string[]
+  readonly target: readonly string[]
+}
+
+/** D139: at most one effect per occasion. */
+export interface OccasionEffect {
+  readonly modifiers?: Modifiers
+  /** Black Friday: the merchant's prices scaled by this share (50 halves them), and its loot weight by this share. */
+  readonly merchantPricePct?: number
+  readonly merchantWeightPct?: number
+  /** Christmas: the hero's first exploring adventure of the occasion finds gear, once per occurrence. */
+  readonly gift?: Readonly<{ lines: readonly string[] }>
+  readonly raidMishap?: RaidMishapRule
+}
+
+/** D139: one occasion on the office calendar. */
+export interface OccasionRule {
+  readonly id: string
+  readonly name: string
+  readonly date: OccasionDateRule
+  /** Local calendar days it runs, from its date. */
+  readonly days: number
+  /** The plain effect as the companion states it ("Merchant prices −50%"); absent for a cosmetic occasion. */
+  readonly effectLabel?: string
+  readonly effect?: OccasionEffect
+  /** The announcement, one per occurrence, the hero's first evaluation inside it. */
+  readonly lines: readonly string[]
 }
 
 /** A ledger raid landing on this hero (the target side), oldest pending first. */
@@ -454,6 +506,8 @@ export interface IncomingRaid {
   readonly raiderWon: boolean
   readonly gold: number
   readonly targetHpPct: number
+  /** D139: a Friday the 13th mishap; nobody won and the target loses its own share of gold. */
+  readonly mishap?: true
 }
 
 /**
@@ -608,6 +662,8 @@ export interface ContentCatalog {
   readonly potions?: PotionRule
   /** Absent before v16 (D133): no field notes. */
   readonly lore?: LoreRule
+  /** Absent before v19 (D139): no occasions. Ordered: when two overlap, the earlier one is live. */
+  readonly occasions?: readonly OccasionRule[]
   readonly narrative: Readonly<{ biomes: Readonly<Record<string, BiomeNarrative>>; shared: SharedNarrative; monsters: Readonly<Record<string, MonsterNarrative>> }>
 }
 
@@ -669,6 +725,9 @@ export interface HeroCounters {
   readonly topReinforcement: number
   /** D131: major potions made by combining, written by the intent. */
   readonly potionsCombined: number
+  /** D139: occasions the hero was on duty for, and Friday the 13th raid mishaps from either side. */
+  readonly occasionsSeen: number
+  readonly raidMishaps: number
   /** D133: arrivals per biome id, written by the simulator from content v16's deploy on; absent on heroes that have not travelled since. */
   readonly biomesVisited?: Readonly<Record<string, number>>
 }
@@ -713,6 +772,13 @@ export interface HeroState {
   readonly todo?: TodoList
   /** P35: where the hero stands on the career ladder; absent until its first evaluation under a catalog with one. */
   readonly career?: CareerState
+  /** D139: the last occurrence the hero was announced (`<id>@<start date>`), and whether its gift was found. */
+  readonly occasion?: OccasionMark
+}
+
+export interface OccasionMark {
+  readonly key: string
+  readonly gifted?: true
 }
 
 /** P35: the hero's place on the career ladder. */
@@ -885,7 +951,10 @@ export type OutcomeDetail =
       /** The tick the raider launched it. */
       readonly raidTick: number
       readonly outcome: 'survived' | 'death' | 'rescue'
+      /** D139: a Friday the 13th mishap; `won` is false for both sides. */
+      readonly mishap?: true
     }
+  | { readonly variant: 'occasion'; readonly occasionId: string; readonly key: string }
   | {
       readonly variant: 'todo'
       /** `done`: tasks ticked off this tick; `standup`: the tasks the refill wrote. */

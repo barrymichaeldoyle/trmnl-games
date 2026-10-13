@@ -465,3 +465,5 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 2026-10-13, D138: the X full landscape shows today's to-do tasks above a fitted board and the current goal under the stories (template v53).
 
 2026-10-13, D139: Barry approved the world events plan (P38) with every recommendation, added Lunar New Year, Diwali, Boss's Day, Pi Day, Take Your Dog to Work Day, International Coffee Day and Leap Day, and made Friday the 13th a raid mishap for both sides. Halloween is the first deliverable, due before 31 October.
+
+2026-10-13, D139 W1: the calendar, effects, announcement lines, Christmas gift and Friday the 13th mishaps built as content v19 ([evidence](evidence/world-events.md)): an ordinary day replays v18 exactly; a year's occasions leave level medians unchanged and move day-90 gold under 1.2% (safe farming +5%); mishaps leave knockouts unchanged. Mishaps count apart from launches so the raid record stays exact. Production stays on v18 until Barry runs `npx convex run world:setActiveContentVersion '{"contentVersion":"v19"}' --prod`.

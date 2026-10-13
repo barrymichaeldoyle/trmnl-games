@@ -60,7 +60,7 @@ export const mine = query({
       .query('tickLogs')
       .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
       .order('desc')
-      .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
+      .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
     const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null, hero.class)
     return {
       id: hero._id,

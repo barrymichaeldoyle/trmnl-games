@@ -20,8 +20,9 @@ export function raidStream(streams: StreamSeeds, content: ContentCatalog): Rng |
 }
 
 /** Draws 1 to 3: whether the hero launches a raid if this tick reaches its encounter, where to look, where the target moves. */
-export function drawRaidPlan(rng: Rng, stance: StanceId | undefined, content: ContentCatalog): RaidPlan | undefined {
-  const launch = rng.int(1, 1000) <= content.raids!.launchPermille[stance ?? 'balanced']
+export function drawRaidPlan(rng: Rng, stance: StanceId | undefined, content: ContentCatalog, launchPct = 100): RaidPlan | undefined {
+  // D139: Friday the 13th scales the launch chance; the draw itself is the same one.
+  const launch = rng.int(1, 1000) <= Math.floor((content.raids!.launchPermille[stance ?? 'balanced'] * launchPct) / 100)
   const shard = Math.floor(rng.next() * 2 ** 32)
   const reshard = Math.floor(rng.next() * 2 ** 32)
   return launch ? { shard, reshard } : undefined
@@ -31,9 +32,9 @@ export function drawRaidPlan(rng: Rng, stance: StanceId | undefined, content: Co
  * For the adapter, before it calls the core: whether to look for a target this tick. Pure; the core takes the
  * same first draws from the same seed, so the two can never disagree.
  */
-export function planRaid(streams: StreamSeeds, stance: StanceId | undefined, content: ContentCatalog): RaidPlan | undefined {
+export function planRaid(streams: StreamSeeds, stance: StanceId | undefined, content: ContentCatalog, launchPct = 100): RaidPlan | undefined {
   const rng = raidStream(streams, content)
-  return rng === undefined ? undefined : drawRaidPlan(rng, stance, content)
+  return rng === undefined ? undefined : drawRaidPlan(rng, stance, content, launchPct)
 }
 
 /** The raider's chance to win, in percent: 50 moved by the two stances' edges and, since P37, the two classes' edges. */

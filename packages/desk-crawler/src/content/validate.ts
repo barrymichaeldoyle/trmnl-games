@@ -3,6 +3,7 @@ import { zeroCounters } from '../sim/core/starter'
 import { potionProblems } from '../sim/core/potions'
 import { inventoryRowsNeeded, workbenchProblems } from '../sim/core/workbench'
 import { gearTierOf, loreProblems } from '../sim/core/biomes'
+import { occasionProblems } from '../sim/core/occasions'
 
 /** Content limits from the specs: name budgets (domain-contracts.md) and the D26 content floor. */
 export const CONTENT_LIMITS = {
@@ -289,6 +290,7 @@ export function validateCatalog(content: ContentCatalog): string[] {
   problems.push(...workbenchProblems(content))
   problems.push(...potionProblems(content))
   problems.push(...loreProblems(content))
+  problems.push(...occasionProblems(content))
   const permille = content.bagLadder.findPermille
   if (!Number.isSafeInteger(permille) || permille < 0 || permille > 1000) problems.push('bag find chance must be 0–1000 permille')
   for (const [id, lines] of Object.entries(content.narrative.monsters)) {

@@ -33,6 +33,7 @@ export function toHeroState(hero: Doc<'heroes'>): HeroState {
     ...(hero.effects === undefined ? {} : { effects: hero.effects }),
     ...(hero.todo === undefined ? {} : { todo: hero.todo }),
     ...(hero.career === undefined ? {} : { career: hero.career }),
+    ...(hero.occasion === undefined ? {} : { occasion: hero.occasion }),
   }
 }
 
@@ -94,6 +95,8 @@ export async function applyResult(
     todo: next.todo === undefined ? undefined : { ...next.todo, tasks: next.todo.tasks.map((task) => ({ ...task })) },
     // P35: same for the career state.
     career: next.career === undefined ? undefined : { ...next.career, reached: next.career.reached.map((entry) => ({ ...entry })), unclaimed: next.career.unclaimed === undefined ? undefined : next.career.unclaimed.map((entry) => ({ ...entry })) },
+    // D139: an earlier catalog carries the mark untouched, so this never clears one.
+    occasion: next.occasion === undefined ? undefined : { ...next.occasion },
     lastLevelUpTick: next.lastLevelUpTick,
     counters: next.counters,
   }

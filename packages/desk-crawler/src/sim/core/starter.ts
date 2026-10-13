@@ -59,6 +59,8 @@ export function zeroCounters(): HeroCounters {
     gearUpgraded: 0,
     topReinforcement: 0,
     potionsCombined: 0,
+    occasionsSeen: 0,
+    raidMishaps: 0,
   }
 }
 

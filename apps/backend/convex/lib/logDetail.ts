@@ -107,7 +107,11 @@ const outcome = v.union(
     /** Adapter annotation: the rival's owner and public-name version, so reads can mask a repaired name. */
     rivalUserId: v.optional(v.string()),
     rivalNameVersion: v.optional(v.number()),
+    /** D139: a Friday the 13th mishap; `won` is false for both sides. */
+    mishap: v.optional(v.literal(true)),
   }),
+  /** D139: an occasion's announcement, once per occurrence. */
+  v.object({ variant: v.literal('occasion'), occasionId: v.string(), key: v.string() }),
   /** P31: to-do tasks ticked off, or the tasks a stand-up wrote. */
   v.object({
     variant: v.literal('todo'),

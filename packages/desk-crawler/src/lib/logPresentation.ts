@@ -83,6 +83,6 @@ export function logPresentation(entry: { readonly summary: string; readonly kind
   ].filter((part): part is string => part !== null)
   // "No effect" explains an adventure that changed nothing (a coffee break at full HP); travel and companion actions
   // (kind `system`) were never meant to change stats, so they stand alone.
-  const quiet = entry.kind === 'travel' || entry.kind === 'system'
+  const quiet = entry.kind === 'travel' || entry.kind === 'system' || entry.kind === 'occasion'
   return { narrative, changes: changes.length > 0 || quiet ? changes : ['No effect'] }
 }

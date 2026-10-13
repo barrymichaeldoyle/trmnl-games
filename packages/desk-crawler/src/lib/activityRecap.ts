@@ -62,6 +62,8 @@ export function activityRecap(entries: readonly ActivityEntry[], period: RecapPe
     }
     // P35: goal and unlock lines are the ladder's commentary on the period, not events in it.
     if (entry.detail.outcome.variant === 'career') continue
+    // D139: an occasion's announcement is not something the hero did.
+    if (entry.detail.outcome.variant === 'occasion') continue
     events++
     const { outcome, levelsGained } = entry.detail
     totals.xp += entry.deltas.xpEarned

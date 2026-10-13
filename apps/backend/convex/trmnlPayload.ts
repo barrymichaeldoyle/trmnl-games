@@ -133,9 +133,10 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     // The scene follows the newest gameplay event; the celebration follows the newest log, which may be an achievement (D65).
     // D112: to-do lines follow their tick's story, so neither the scene nor the celebration ever follows one.
     // P35: a career line (a goal reached, a feature unlocked) is a celebration, never a scene.
-    const gameplay = recent.find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
+    // D139: an occasion line follows its tick's story like a to-do line; the dressed scene announces the occasion.
+    const gameplay = recent.find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
     if (gameplay) latestEvent = { kind: gameplay.kind, ...('outcome' in gameplay.detail ? { outcome: gameplay.detail.outcome } : {}) }
-    const newest = recent.find((log) => log.kind !== 'todo')
+    const newest = recent.find((log) => log.kind !== 'todo' && log.kind !== 'occasion')
     if (newest) {
       const title = 'achievementId' in newest.detail ? newest.detail.name : 'outcome' in newest.detail && newest.detail.outcome.variant === 'career' ? careerLine(newest.detail.outcome).compact.replace(/\.$/, '') : undefined
       newestEvent = { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}), ...(title === undefined ? {} : { title }) }

@@ -11,6 +11,8 @@ import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } fro
 import { createRng, pickOne, pickWeighted, type Rng } from './rng'
 import { applyTodo } from './todo'
 import { applyCareer, currentRung, effectiveStance, guaranteeDue, unlocked } from './career'
+import { applyOccasion } from './occasionLine'
+import { mishapRule, occasionForTick, occasionModifiers, raidLaunchPct, type LiveOccasion } from './occasions'
 import { applyXp, classRule, deriveStats, heroMaxHp, pctOf } from './stats'
 import type {
   BagTier,
@@ -89,7 +91,8 @@ export function simulateHero(input: SimulationInput): SimulationResult {
   assertHeroInvariants(input.hero, input.inventory, input.content)
   // P31: the to-do list reads the finished tick and adds its own lines after the tick's story; P35: the career
   // ladder reads the result of both and adds unlock and goal lines last.
-  const result = applyCareer(input, applyTodo(input, new TickRun(input).run()))
+  // D139: the occasion's announcement comes after both, once per occurrence.
+  const result = applyOccasion(input, applyCareer(input, applyTodo(input, new TickRun(input).run())))
   validateOutput(input, result)
   return result
 }
@@ -102,6 +105,8 @@ class TickRun {
   private metrics: Mutable<TickMetrics> = { ...ZERO_METRICS }
   private raidLaunch: RaidLaunch | undefined
   private raidApplied = false
+  /** D139: the occasion live on the hero's local date, if any. */
+  private readonly occasion: LiveOccasion | undefined
 
   constructor(private readonly input: SimulationInput) {
     this.h = { ...input.hero, counters: { ...input.hero.counters, monsterWins: { ...input.hero.counters.monsterWins }, ...(input.hero.counters.biomesVisited === undefined ? {} : { biomesVisited: { ...input.hero.counters.biomesVisited } }) } }
@@ -112,6 +117,12 @@ class TickRun {
       reward: createRng(input.streams.reward),
       narrative: createRng(input.streams.narrative),
     }
+    this.occasion = occasionForTick(input.content, input.tick, input.tickAt, input.utcOffsetSeconds)
+  }
+
+  /** What the hero fights with now: class, affixes, effects and the live occasion's modifiers. */
+  private stats() {
+    return effectiveStats(this.content, this.h, this.input.inventory, this.input.tick, occasionModifiers(this.occasion))
   }
 
   /**
@@ -343,7 +354,9 @@ class TickRun {
       ['trap', biome.weights.trap],
       ['rest', biome.weights.rest],
     ])
-    const kind: EncounterKind = forced === undefined ? rolled : forced === 'combat' || forced === 'elite' ? 'combat' : 'loot'
+    // D139 Christmas: the occurrence's gift turns the first free adventure into a gear find; a career guarantee goes first.
+    const gift = forced === undefined && this.giftDue()
+    const kind: EncounterKind = gift ? 'loot' : forced === undefined ? rolled : forced === 'combat' || forced === 'elite' ? 'combat' : 'loot'
     if (forced !== undefined) {
       this.metrics.guarantees = 1
       const { armedAt: _armed, armedCount: _count, ...career } = h.career!
@@ -372,7 +385,7 @@ class TickRun {
       case 'combat': {
         const monster = this.monster(pickOne(this.rng.encounter, biome.monsterIds))
         const elite = this.rng.encounter.chance(c.elite.chancePct) || forced === 'elite'
-        const stats = effectiveStats(content, h, input.inventory, input.tick)
+        const stats = this.stats()
         const mods = stats.modifiers
         let monsterHp = elite ? Math.floor((monster.hp * c.elite.hpMultiplierPct) / 100) : monster.hp
         const monsterHpStart = monsterHp
@@ -474,10 +487,11 @@ class TickRun {
           ['gear', c.lootWeights.gear],
           ['potion', c.lootWeights.potion],
           ['gold', c.lootWeights.gold],
-          ...(c.lootWeights.merchant === undefined ? [] : [['merchant', c.lootWeights.merchant] as const]),
+          // D139 Black Friday: the merchant's weight scaled for the day; still one draw.
+          ...(c.lootWeights.merchant === undefined ? [] : [['merchant', Math.floor((c.lootWeights.merchant * (this.occasion?.rule.effect?.merchantWeightPct ?? 100)) / 100)] as const]),
           ...(c.lootWeights.event === undefined ? [] : [['event', c.lootWeights.event] as const]),
         ])
-        if (forced === 'gear') found = 'gear'
+        if (forced === 'gear' || gift) found = 'gear'
         else if (forced === 'choice') found = 'event'
         else if (forced === 'merchant') found = 'merchant'
         // D79: one pending choice at a time; a second draw while one is open falls through to gold. P35: so does a
@@ -516,7 +530,7 @@ class TickRun {
             this.metrics.jackpots = 1
             h.counters.jackpots += 1
           }
-          goldGranted = scaled(goldGranted, effectiveStats(content, h, input.inventory, input.tick).modifiers.goldPct)
+          goldGranted = scaled(goldGranted, this.stats().modifiers.goldPct)
           vars.gold = goldGranted
         }
         if (found === 'gear') {
@@ -555,7 +569,7 @@ class TickRun {
           compact = 'Avoided a trap.'
         } else {
           damage = this.rng.combat.int(biome.trapDamage.min, biome.trapDamage.max)
-          const trapMods = effectiveStats(content, h, input.inventory, input.tick).modifiers
+          const trapMods = this.stats().modifiers
           if (trapMods.trapDamagePct > 0) damage = Math.max(1, Math.floor((damage * (100 - trapMods.trapDamagePct)) / 100))
           h.hp = Math.max(0, h.hp - damage)
           lethal = h.hp === 0
@@ -666,7 +680,14 @@ class TickRun {
         disposition = 'inventory_sleep_started'
         consequences.unshift('Bag full. Holding it until you make room.')
       }
-      if (outcome.variant === 'loot') {
+      if (outcome.variant === 'loot' && gift) {
+        // The mark makes it once per occurrence, whatever else the tick did.
+        h.occasion = { key: this.occasion!.key, gifted: true }
+        primary = this.narrate(this.occasion!.rule.effect!.gift!.lines, {})
+        compact = 'Unwrapped a gift.'
+        consequences.unshift(`Found ${withArticle(item)}.`)
+        outcome = { ...outcome, templateId: gear.templateId, rarity: gear.rarity, destination }
+      } else if (outcome.variant === 'loot') {
         primary = this.narrate([...shared.lootGear, ...narrative.lootGear], { item })
         compact = `Found ${withArticle(item)}.`
         outcome = { ...outcome, templateId: gear.templateId, rarity: gear.rarity, destination }
@@ -684,11 +705,17 @@ class TickRun {
     )
   }
 
+  /** D139: the live occasion has a gift this hero has not found in this occurrence. */
+  private giftDue(): boolean {
+    const live = this.occasion
+    return live?.rule.effect?.gift !== undefined && !(this.h.occasion?.key === live.key && this.h.occasion.gifted === true)
+  }
+
   /** A knockout outside Office Cubicles: the death gold loss (less thrifty), every effect cleared, revival scheduled. */
   private knockOut(): number {
     const { h, content, input } = this
     const c = content.constants
-    const goldPenalty = Math.floor((h.gold * Math.max(0, c.deathGoldLossPct - effectiveStats(content, h, input.inventory, input.tick).modifiers.goldLossPct)) / 100)
+    const goldPenalty = Math.floor((h.gold * Math.max(0, c.deathGoldLossPct - this.stats().modifiers.goldLossPct)) / 100)
     h.gold -= goldPenalty
     h.status = 'dead'
     // D80 death ordering: a knockout clears every effect, boon or bane; revival starts clean.
@@ -710,12 +737,27 @@ class TickRun {
     const rng = raidStream(input.streams, content)
     // P35: no launch draw before raids unlock; the adapter checks the same level before it looks for a target.
     if (rng === undefined || !unlocked(content, h.level, 'raids')) return undefined
-    if (drawRaidPlan(rng, this.stance(), content) === undefined) return undefined
+    if (drawRaidPlan(rng, this.stance(), content, raidLaunchPct(this.occasion)) === undefined) return undefined
     const target = input.raidTarget
     if (target === undefined || target.heroId === h.id) return undefined
     const rules = content.raids!
+    // The contest draw is taken even on Friday the 13th, so the stream's positions never move.
     const raiderWon = rng.chance(raidWinChance(content, this.stance(), target.stance, classRule(content, h.class)?.raidEdgePct ?? 0, target.classEdgePct ?? 0))
-    const thrifty = effectiveStats(content, h, input.inventory, input.tick).modifiers.goldLossPct
+    const thrifty = this.stats().modifiers.goldLossPct
+    const mishap = this.occasion?.rule.effect?.raidMishap
+    if (mishap !== undefined) {
+      // D139: nobody wins. Each side loses its own share of gold, which goes nowhere, and the same share of HP.
+      const lost = raidGoldLoss(h.gold, mishap.goldLossPct, thrifty)
+      h.gold -= lost
+      // Not a launch in the record: "raids failed" stays launched minus won.
+      h.counters.ticksExplored += 1
+      h.counters.raidMishaps += 1
+      this.metrics.raidsLaunched = 1
+      const hpLost = Math.min(h.hp, raidHpLoss(heroMaxHp(this.content, h), mishap.hpPct))
+      h.hp -= hpLost
+      this.raidLaunch = { targetHeroId: target.heroId, tick: input.tick, raiderWon: false, gold: lost, targetHpPct: mishap.hpPct, mishap: true }
+      return this.finishRaid('raider', target.heroId, target.name, false, lost, hpLost, input.tick, mishap.raider)
+    }
     const gold = raiderWon ? raidGoldLoss(target.gold, rules.goldLossPct, target.goldLossPct ?? 0) : raidGoldLoss(h.gold, rules.goldLossPct, thrifty)
     if (raiderWon) {
       h.gold += gold
@@ -742,6 +784,18 @@ class TickRun {
     const { h, content, input } = this
     const raid = input.incomingRaid
     if (raid === undefined || content.raids === undefined) return undefined
+    if (raid.mishap === true) {
+      // D139: the target loses its own share of gold, as it would on the day; a catalog without the rule uses the raid share.
+      const rule = mishapRule(content)
+      const gold = raidGoldLoss(h.gold, rule?.goldLossPct ?? content.raids.goldLossPct, this.stats().modifiers.goldLossPct)
+      h.gold -= gold
+      h.counters.raidMishaps += 1
+      const hpLost = Math.min(h.hp, raidHpLoss(heroMaxHp(this.content, h), raid.targetHpPct))
+      h.hp -= hpLost
+      this.raidApplied = true
+      this.metrics.raidsApplied = 1
+      return this.finishRaid('target', raid.raiderHeroId, raid.raiderName, false, gold, hpLost, raid.tick, rule?.target ?? content.raids.narrative.raided)
+    }
     const won = !raid.raiderWon
     let gold: number
     if (won) {
@@ -762,12 +816,13 @@ class TickRun {
   }
 
   /** One raid log entry from this hero's side; lethal raid damage resolves like any lethal encounter. */
-  private finishRaid(role: 'raider' | 'target', rivalHeroId: string, rivalName: string, won: boolean, gold: number, hpLost: number, raidTick: number): SimulationResult {
+  private finishRaid(role: 'raider' | 'target', rivalHeroId: string, rivalName: string, won: boolean, gold: number, hpLost: number, raidTick: number, mishapLines?: readonly string[]): SimulationResult {
     const { h, content } = this
     const lines = content.raids!.narrative
     const vars = { rival: rivalName, gold }
-    const pool = role === 'raider' ? (won ? lines.raidWon : lines.raidLost) : won ? lines.repelled : lines.raided
-    const compactTemplate = role === 'raider' ? (won ? 'Raided {rival}.' : 'Caught raiding {rival}.') : won ? 'Caught {rival} raiding.' : 'Raided by {rival}.'
+    const mishap = mishapLines !== undefined
+    const pool = mishapLines ?? (role === 'raider' ? (won ? lines.raidWon : lines.raidLost) : won ? lines.repelled : lines.raided)
+    const compactTemplate = mishap ? (role === 'raider' ? 'A raid on {rival} went wrong.' : "{rival}'s raid went wrong.") : role === 'raider' ? (won ? 'Raided {rival}.' : 'Caught raiding {rival}.') : won ? 'Caught {rival} raiding.' : 'Raided by {rival}.'
     const primary = this.narrate(pool, vars)
     const compact = fill(compactTemplate, vars)
     let kind: LogKind = 'raid'
@@ -795,7 +850,7 @@ class TickRun {
     }
     return this.finish(
       'advanced',
-      { kind, summary: composeSummary(primary, compact, consequences, content.constants.summaryMaxCodePoints), outcome: { variant: 'raid', role, rivalHeroId, rivalName, won, gold, hpLost, raidTick, outcome } },
+      { kind, summary: composeSummary(primary, compact, consequences, content.constants.summaryMaxCodePoints), outcome: { variant: 'raid', role, rivalHeroId, rivalName, won, gold, hpLost, raidTick, outcome, ...(mishap ? { mishap: true as const } : {}) } },
       { goldPenalty },
     )
   }
@@ -808,9 +863,11 @@ class TickRun {
     const { h, content } = this
     const rule = content.merchant!
     const quantity = this.rng.reward.int(1, rule.maxPotionsOffered)
-    const offers: MerchantOffer[] = [{ id: 'potions', name: quantity === 1 ? 'Healing potion' : `${quantity} healing potions`, quantity, price: rule.potionPrice * biomeTier * quantity }]
+    // D139 Black Friday: every price on a visit that opens that day is scaled for the whole visit.
+    const sale = (price: number) => Math.max(1, Math.floor((price * (this.occasion?.rule.effect?.merchantPricePct ?? 100)) / 100))
+    const offers: MerchantOffer[] = [{ id: 'potions', name: quantity === 1 ? 'Healing potion' : `${quantity} healing potions`, quantity, price: sale(rule.potionPrice * biomeTier * quantity) }]
     // D122: the merchant undercuts the companion's ladder price, so a visit is a deal rather than a convenience.
-    const discounted = (price: number) => Math.max(1, Math.floor((price * (100 - (rule.ladderDiscountPct ?? 0))) / 100))
+    const discounted = (price: number) => sale(Math.max(1, Math.floor((price * (100 - (rule.ladderDiscountPct ?? 0))) / 100)))
     const pouch = nextEarlyPouchTier(content, h)
     if (pouch?.price !== undefined) offers.push({ id: 'pouch', name: pouch.name, quantity: 1, price: discounted(pouch.price), tierId: pouch.id })
     const bag = nextEarlyTier(content, h)
@@ -958,13 +1015,16 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
   }
   if (result.event && result.event.summary.trim() === '') fail('SUMMARY_EMPTY', 'event without summary')
   for (const extra of result.extraEvents ?? []) {
-    if ((extra.kind !== 'todo' && extra.kind !== 'career') || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0 || extra.deltas.gold < 0) fail('EXTRA_EVENT', 'to-do and career lines add gold only')
+    if ((extra.kind !== 'todo' && extra.kind !== 'career' && extra.kind !== 'occasion') || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0 || extra.deltas.gold < 0) fail('EXTRA_EVENT', 'to-do and career lines add gold only')
+    if (extra.kind === 'occasion' && extra.deltas.gold !== 0) fail('OCCASION_LINE', 'an occasion line changes nothing itself')
     if (extra.kind === 'career' && extra.deltas.gold !== 0) fail('CAREER_GOLD', 'a goal line sets its gold aside for the claim; it pays nothing itself')
     if (codePoints(extra.summary) > input.content.constants.summaryMaxCodePoints) fail('SUMMARY_LENGTH', extra.summary)
   }
   const todoLines = (result.extraEvents ?? []).filter((extra) => extra.kind === 'todo')
   const careerLines = (result.extraEvents ?? []).filter((extra) => extra.kind === 'career')
   if (input.content.todo === undefined && (out.todo !== hero.todo || todoLines.length > 0)) fail('TODO', 'no to-do list without to-do rules')
+  const occasionLines = (result.extraEvents ?? []).filter((extra) => extra.kind === 'occasion').length
+  if (occasionLines > 1 || out.counters.occasionsSeen - hero.counters.occasionsSeen !== occasionLines) fail('OCCASION_COUNT', 'one announcement per tick and the counter follows it')
   if (input.content.career === undefined && input.content.unlocks === undefined && (out.career !== hero.career || careerLines.length > 0)) fail('CAREER', 'no career lines without a ladder')
   const reached = careerLines.filter((extra) => extra.detail.outcome.variant === 'career' && extra.detail.outcome.phase === 'reached').length
   if (reached > 1 || out.counters.careerRungs - hero.counters.careerRungs !== reached) fail('CAREER_COUNT', 'one rung pays per tick and the counter follows it')

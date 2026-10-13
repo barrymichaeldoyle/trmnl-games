@@ -10,6 +10,7 @@ import { applyResult, storedDetail, toHeroState, toInventory } from './adapter'
 import { joinRaidPool, nextIncomingRaid, pickRaidTarget, raidRival, settleRaids, type PendingRaid, type RaidPick } from '../../lib/raids'
 import { planRaid, type RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
 import { canRaid, effectiveStance } from '@trmnl-games/desk-crawler/sim/core/career'
+import { occasionAt, raidLaunchPct } from '@trmnl-games/desk-crawler/sim/core/occasions'
 import { writeRankInput } from '../../leaderboard'
 import { achievementState, awardAchievements, keepsakeTotal, tallyUnlocks } from '../../lib/achievements'
 import { needsFullPass } from '@trmnl-games/desk-crawler/sim/core/achievements'
@@ -83,14 +84,16 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
   let pending: PendingRaid | undefined
   if (content.raids !== undefined) {
     // P35: the same level gate and the same stance the core uses, so the two never disagree about a launch.
-    plan = canRaid(content, hero.level) ? planRaid(streams, effectiveStance(content, hero), content) : undefined
+    // D139: Friday the 13th doubles the launch share, read from the same wall slot and offset the core reads.
+    const launchPct = raidLaunchPct(occasionAt(content, run.wallSlot, owner.trmnlUtcOffset))
+    plan = canRaid(content, hero.level) ? planRaid(streams, effectiveStance(content, hero), content, launchPct) : undefined
     if (plan !== undefined) pick = await pickRaidTarget(ctx, hero, plan, run.tick, content)
     pending = await nextIncomingRaid(ctx, hero._id)
   }
   let result
   const recentLogs = (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(4))
     // Achievements, P31 to-do lines and P35 career lines are not stories, so they never steer the next variant.
-    .filter((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
+    .filter((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
     .slice(0, 2)
   try {
     result = simulateHero({

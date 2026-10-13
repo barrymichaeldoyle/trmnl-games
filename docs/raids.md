@@ -67,9 +67,9 @@ The clamp means a target that spent its gold between the raid and the applicatio
 
 Side effects commit at most once for both parties: the raider's inside its evaluation under its `lastTick` guard, the target's through the ledger row's state. That is the v1.2 gate for meetings, met by construction.
 
-### Friday the 13th mishaps (D139, not built)
+### Friday the 13th mishaps (D139, content v19)
 
-Under the world events calendar, a raid launched on the raider's local Friday the 13th is a mishap: launch chances double for that day, the contest draw is still taken but ignored, nobody wins, and both sides lose `ceil(20% of maximum HP)` and `floor(5% of current gold)`, with no gold changing hands. The ledger outcome gains `mishap` and a `raidMishaps` counter counts them. [Spec](world-events.md#friday-the-13th-every-raid-goes-wrong).
+Under the world events calendar, a raid launched on the raider's local Friday the 13th is a mishap: launch chances double for that day (the adapter's `planRaid` takes the same share from the same wall slot and offset), the contest draw is still taken but ignored, nobody wins, and both sides lose `ceil(20% of maximum HP)` and `floor(5% of current gold)`, thrifty points off, with no gold changing hands. The ledger row carries `mishap: true`. Both sides count it in `raidMishaps` and in none of the launched, won, repelled or lost counters, so the record's "raids failed" stays launched minus won; the companion's record shows Mishaps once there is one, and v19's "Take part in a desk raid" goal counts mishaps too. [Spec](world-events.md#friday-the-13th-every-raid-goes-wrong).
 
 ### Counters, achievements, recap
 

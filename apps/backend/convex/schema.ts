@@ -83,6 +83,9 @@ export const heroCounters = v.object({
   topReinforcement: v.optional(v.number()),
   /** D131: major potions made by combining. */
   potionsCombined: v.optional(v.number()),
+  /** D139: occasions announced to this hero, and Friday the 13th raid mishaps from either side. */
+  occasionsSeen: v.optional(v.number()),
+  raidMishaps: v.optional(v.number()),
 })
 
 /** P35: the hero's place on the career ladder, written by the simulator. */
@@ -156,6 +159,7 @@ export const logKind = v.union(
   v.literal('raid'),
   v.literal('todo'),
   v.literal('career'),
+  v.literal('occasion'),
   v.literal('system'),
 )
 
@@ -419,6 +423,8 @@ export default defineSchema({
     todo: v.optional(todoList),
     /** P35: the career ladder state, written at the hero's first evaluation under a catalog with a ladder. */
     career: v.optional(careerState),
+    /** D139: the last occasion occurrence announced (`<id>@<start date>`) and whether its gift was found. */
+    occasion: v.optional(v.object({ key: v.string(), gifted: v.optional(v.literal(true)) })),
     eligibleFromTick: v.number(),
     lastTick: v.number(),
     lastProgressTick: v.number(),
@@ -492,6 +498,8 @@ export default defineSchema({
     raiderHpLost: v.number(),
     /** The target's HP loss as a share of its maximum HP. */
     targetHpPct: v.number(),
+    /** D139: a Friday the 13th mishap; `raiderWon` is false, `gold` is the raider's own loss and the target loses its own share. */
+    mishap: v.optional(v.literal(true)),
     state: v.union(v.literal('pending'), v.literal('applied')),
     appliedTick: v.optional(v.number()),
     /** What the target actually lost or gained once applied (a loss is clamped to the gold it held). */

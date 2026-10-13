@@ -1,6 +1,6 @@
 # World events: the office calendar (P38)
 
-Proposed 2026-10-13 after Barry chose the roadmap's v1.2 "World events" row as the next feature. He also set its shape: events follow the office holiday calendar (Thanksgiving, Black Friday, Christmas, New Year, Valentine's Day, Easter and so on) instead of being run by an admin, so they need no ongoing work and can be prepared well ahead. And the event should show up in the scene itself, which he called first prize for novelty. Barry approved it the same day with every recommendation (D139). He added one idea of his own: on Friday the 13th, raids should go wrong for both sides ([below](#friday-the-13th-every-raid-goes-wrong)). Nothing here is built yet. [Settled points](#settled-points) records the answers.
+Proposed 2026-10-13 after Barry chose the roadmap's v1.2 "World events" row as the next feature. He also set its shape: events follow the office holiday calendar (Thanksgiving, Black Friday, Christmas, New Year, Valentine's Day, Easter and so on) instead of being run by an admin, so they need no ongoing work and can be prepared well ahead. And the event should show up in the scene itself, which he called first prize for novelty. Barry approved it the same day with every recommendation (D139). He added one idea of his own: on Friday the 13th, raids should go wrong for both sides ([below](#friday-the-13th-every-raid-goes-wrong)). [Settled points](#settled-points) records the answers. W1 (the calendar, effects, announcement, gift and raid mishaps) is built as content v19; [changes while building](#changes-while-building) lists where it differs from this spec. The scene dressing (W2) is next.
 
 Companions: [the roadmap](roadmap.md) (the v1.2 row this replaces), [trmnl-experience](trmnl-experience.md) (the scene and its slots), [achievements](achievements.md) (the planned "world events survived" family), [quests](quests.md) (the stored `utc_offset` this reuses) and [the source brief](source-brief.md), whose "admin/cron 6–24h modifiers" this replaces with a fixed calendar.
 
@@ -53,7 +53,7 @@ Eighteen occasions in all, about one every three weeks. Boss's Day is this Frida
 
 **Effects.** Each occasion contributes one modifier set to `activeModifiers` while the hero's local date is inside it. There are no stacking rules to learn, because only one occasion is ever live. The companion's Hero page shows it as an effect chip with its plain number ("Black Friday: merchant prices −50%"), next to potions and affixes.
 
-**Christmas gift.** This is the only grant. On the hero's first adventure on 24, 25 or 26 December it finds a gift box with gear at its floor's tier, keyed by `lastOccasion` so a year gives one gift. If the bag is full, it falls back to gold, as finds already do.
+**Christmas gift.** This is the only grant. On the hero's first adventure on 24, 25 or 26 December it finds a gift box with gear at its floor's tier, keyed by `lastOccasion` so a year gives one gift. If the bag is full it is held and the hero sleeps until there is room, as with any gear find.
 
 ### Friday the 13th: every raid goes wrong
 
@@ -66,7 +66,7 @@ This is the one occasion that changes a system instead of adding a bonus. Barry'
 - **Apply path.** Unchanged. The raider applies its side in its own evaluation, and the target applies the ledger row at its next one. The ledger's outcome gains `mishap`, and the target's gold loss is its own 5%, clamped to what it holds.
 - **Draws.** The mishap needs no new random draw. The contest draw (position 4) is still taken and then ignored, so the `raid` stream's later positions don't move. Older catalogs have no occasion rules and replay unchanged.
 - **Story lines.** Each side reads a concrete accident with the other hero's name, from a short list: "The sprinkler went off over **Quill**'s desk mid-raid. You both got soaked." and from the target's side "**Baz** came to raid the desk just as a ceiling tile came down on you both." Others: the fire drill, a coffee spill across both keyboards, the shredder eating the loot. The gold and HP chips sit beside the line as usual.
-- **Counters and scene.** A new `raidMishaps` counter, separate from won, repelled and lost, so the win/loss record is untouched and the Hero page's raid list shows a mishap as its own entry. The device scene after a mishap shows the hero standing beside the black cat.
+- **Counters and scene.** A new `raidMishaps` counter, separate from launched, won, repelled and lost, so the win/loss record is untouched and the Hero page's raid list shows a mishap as its own entry. The device scene after a mishap shows the hero standing beside the black cat.
 
 ### Boards
 
@@ -100,6 +100,17 @@ A new catalog version appends an Office calendar family, read from the hero's `o
 3. **W3 Companion.** The painted scene with the server's occasion, the effect chip, the Next occasion line, a help section, and an `occasion` property on existing analytics events.
 4. **W4 The rest of the year's art.** Authored in date order, each deployed and preview-checked at least a week before its date. Diwali comes next, before 8 November, then Friday the 13th before 13 November, then Thanksgiving and Black Friday.
 5. **W5 Achievements and docs.** The catalog version, achievements.md, gameplay, help and data-model.
+
+## Changes while building
+
+W1, built 2026-10-13 as content v19 ([evidence](evidence/world-events.md)):
+
+- **Mishaps aren't launches.** A raider's mishap counts only in `raidMishaps`, not in `raidsLaunched`, so the record's "raids failed" (launched minus won) stays exact. v19's "Take part in a desk raid" goal adds `raidMishaps` to its counters so a mishap still counts as taking part.
+- **A full bag holds the gift.** The Christmas gift is an ordinary gear find, so a full bag holds it and the hero sleeps, instead of the gold fallback this spec first described. The gift waits for a free adventure: a career guarantee due that tick goes first, and a bag or pouch find that tick moves the gift to the next adventure.
+- **The announcement is a log kind of its own.** `occasion` lines change nothing, so they carry no chips. The device draws them with the system glyph (unknown kinds fall back to it), so the device template doesn't change. They don't steer the next story variant, like to-do and career lines.
+- **The line is picked by tick, not drawn.** Announcement lines use no random draw, so a tick on an occasion takes exactly the draws it would take without one, and an ordinary day on v19 replays v18 exactly.
+- **Effects are snapshotted where they apply.** Black Friday's prices are fixed when a merchant visit opens and hold for the whole visit, even past midnight.
+- **Diwali's table runs to 2031.** Lunar New Year's runs to 2036. Both come from published calendars and need extending before they run out.
 
 ## Settled points
 

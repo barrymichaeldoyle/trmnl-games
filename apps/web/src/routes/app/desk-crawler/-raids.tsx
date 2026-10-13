@@ -6,11 +6,12 @@ import { PixelIcon } from './-pixelIcon'
 import { KIND_BADGE } from '../../../lib/palette'
 import { LocalTime } from '../../../lib/localTime'
 
-type Raid = { tick: number; at: number; role: 'raider' | 'target'; rivalName: string; won: boolean; gold: number; hpLost: number | null; pending: boolean }
+type Raid = { tick: number; at: number; role: 'raider' | 'target'; rivalName: string; won: boolean; gold: number; hpLost: number | null; pending: boolean; mishap?: true }
 
 /** One raid from this hero's side, in the log's own voice. */
 const describe = (raid: Raid) =>
-  raid.role === 'raider' ? (raid.won ? `Raided ${raid.rivalName}'s desk` : `Caught raiding ${raid.rivalName}'s desk`) : raid.won ? `Caught ${raid.rivalName} raiding` : `Raided by ${raid.rivalName}`
+  raid.mishap ? (raid.role === 'raider' ? `A raid on ${raid.rivalName}'s desk went wrong` : `${raid.rivalName}'s raid went wrong`)
+  : raid.role === 'raider' ? (raid.won ? `Raided ${raid.rivalName}'s desk` : `Caught raiding ${raid.rivalName}'s desk`) : raid.won ? `Caught ${raid.rivalName} raiding` : `Raided by ${raid.rivalName}`
 
 const when = (day: Date) => {
   const today = new Date()
@@ -26,12 +27,14 @@ export function Raids({ enabled }: { enabled: boolean }) {
   const { data } = useQuery(convexQuery(api.raids.recent, {}))
   if (!data) return null
   const { record, raids } = data
-  if (!enabled && record.launched + record.repelled + record.lost === 0) return null
+  if (!enabled && record.launched + record.repelled + record.lost + record.mishaps === 0) return null
   const tally: Array<[string, number]> = [
     ['Raids won', record.won],
     ['Raids failed', record.launched - record.won],
     ['Raiders repelled', record.repelled],
     ['Desk raided', record.lost],
+    // D139: Friday the 13th raids, which nobody wins; shown once there has been one.
+    ...(record.mishaps > 0 ? [['Mishaps', record.mishaps] as [string, number]] : []),
   ]
   return (
     <section aria-labelledby="raids-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
@@ -55,7 +58,7 @@ export function Raids({ enabled }: { enabled: boolean }) {
               <div className="min-w-0">
                 <p className="pt-1">{describe(raid)}</p>
                 <p className="flex flex-wrap gap-x-3 text-xs font-semibold tabular-nums">
-                  <span className={raid.won ? 'text-xp-ink' : 'text-hp-ink'}>{raid.won ? 'Won' : 'Lost'}</span>
+                  <span className={raid.won ? 'text-xp-ink' : 'text-hp-ink'}>{raid.mishap ? 'Mishap' : raid.won ? 'Won' : 'Lost'}</span>
                   <LocalTime className="text-muted" at={raid.at} format={when} />
                   <span className="text-gold-ink">{raid.won ? '+' : '−'}{raid.gold.toLocaleString()} gold</span>
                   {raid.hpLost !== null ? <span className="text-hp-ink">−{raid.hpLost} HP</span> : null}

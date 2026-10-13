@@ -85,7 +85,7 @@ export async function nextIncomingRaid(ctx: MutationCtx, heroId: Id<'heroes'>): 
   const name = raiderOwner !== null && raiderOwner.publicNameVersion === row.raiderNameVersion ? row.raiderName : visibleName(raiderOwner)
   return {
     row,
-    incoming: { raiderHeroId: row.raiderHeroId, raiderName: name, tick: row.tick, raiderWon: row.raiderWon, gold: row.gold, targetHpPct: row.targetHpPct },
+    incoming: { raiderHeroId: row.raiderHeroId, raiderName: name, tick: row.tick, raiderWon: row.raiderWon, gold: row.gold, targetHpPct: row.targetHpPct, ...(row.mishap ? { mishap: true as const } : {}) },
   }
 }
 
@@ -117,6 +117,7 @@ export async function settleRaids(
         gold: launch.gold,
         raiderHpLost: outcome?.variant === 'raid' ? outcome.hpLost : 0,
         targetHpPct: launch.targetHpPct,
+        ...(launch.mishap ? { mishap: true as const } : {}),
         state: 'pending',
       })
       await ctx.db.patch(pick.poolRowId, { raidedAtTick: tick, shard: plan.reshard })
@@ -167,7 +168,8 @@ export async function recentRaids(ctx: QueryCtx, heroId: Id<'heroes'>, limit: nu
       const storedVersion = role === 'raider' ? row.targetNameVersion : row.raiderNameVersion
       const rival = await ctx.db.get(rivalUserId)
       const name = rival !== null && rival.state === 'active' && !rival.nameRepairRequired && rival.publicNameVersion === storedVersion ? storedName : HIDDEN_RIVAL
-      const won = role === 'raider' ? row.raiderWon : !row.raiderWon
+      // D139: a mishap has no winner.
+      const won = row.mishap ? false : role === 'raider' ? row.raiderWon : !row.raiderWon
       return {
         tick: row.tick,
         at: row._creationTime,
@@ -178,6 +180,7 @@ export async function recentRaids(ctx: QueryCtx, heroId: Id<'heroes'>, limit: nu
         gold: role === 'raider' ? row.gold : (row.targetGold ?? row.gold),
         hpLost: role === 'raider' ? row.raiderHpLost : (row.targetHpLost ?? null),
         pending: row.state === 'pending',
+        ...(row.mishap ? { mishap: true as const } : {}),
       }
     }),
   )
