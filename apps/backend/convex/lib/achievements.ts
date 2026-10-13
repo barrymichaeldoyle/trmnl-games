@@ -15,8 +15,8 @@ import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 /** At most this many unlock rows are read per owner; the catalog is far smaller. */
 export const MAX_UNLOCK_ROWS = 1024
 
-export function achievementState(hero: Pick<Doc<'heroes'>, 'level' | 'bagCapacity' | 'counters'>, keepsakeTotal: number): AchievementState {
-  return { level: hero.level, bagCapacity: hero.bagCapacity, counters: withCounterDefaults(hero.counters), keepsakeTotal }
+export function achievementState(hero: Pick<Doc<'heroes'>, 'level' | 'bagCapacity' | 'counters'> & { class?: Doc<'heroes'>['class'] }, keepsakeTotal: number): AchievementState {
+  return { level: hero.level, bagCapacity: hero.bagCapacity, counters: withCounterDefaults(hero.counters), keepsakeTotal, ...(hero.class === undefined ? {} : { heroClass: hero.class }) }
 }
 
 export async function keepsakeTotal(ctx: QueryCtx, userId: Id<'users'>): Promise<number> {

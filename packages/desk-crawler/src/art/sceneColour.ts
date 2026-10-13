@@ -1,5 +1,5 @@
 import { Canvas, inked, type Sprite } from './canvas'
-import type { HeroPose } from './hero'
+import { poseParts, type BasePose, type HeroPose } from './hero'
 import type { monsterArt } from './monsters'
 import { encodePngIndexed } from './png'
 import type { PropId } from './props'
@@ -14,6 +14,8 @@ import type { SceneTime } from './sceneTime'
  * whole stage instead (`paintedSceneUri`, D96).
  */
 const HERO = { skin: '#f2c39b', steel: '#c9d3e0', cardigan: '#e0604f' }
+/** P37: the Rogue's tunic, where the Warrior wears its cardigan. */
+const ROGUE_TUNIC = '#3f8a5a'
 const CLOAK = '#7a5cc8'
 const CROWN = '#f2c14e'
 
@@ -53,7 +55,7 @@ const PROP: Record<PropId, string> = {
 }
 
 /** The hero's white cells are skin, except the blade, which each pose holds in a different place. */
-const HERO_STEEL: Record<HeroPose, (x: number, y: number) => boolean> = {
+const HERO_STEEL: Record<BasePose, (x: number, y: number) => boolean> = {
   idle: (x) => x >= 17,
   fight: (x) => x >= 17,
   walk: (x) => x >= 17,
@@ -84,7 +86,7 @@ function enclosed(rows: readonly string[], width: number): boolean[][] {
 function fillFor(placement: Placement, pose: HeroPose): (ch: string, x: number, y: number) => string {
   switch (placement.role) {
     case 'hero':
-      return (ch, x, y) => (ch === 'w' ? (HERO_STEEL[pose](x, y) ? HERO.steel : HERO.skin) : HERO.cardigan)
+      return (ch, x, y) => (ch === 'w' ? (HERO_STEEL[poseParts(pose).base](x, y) ? HERO.steel : HERO.skin) : poseParts(pose).heroClass === 'rogue' ? ROGUE_TUNIC : HERO.cardigan)
     case 'cloak':
       return () => CLOAK
     case 'crown':
@@ -251,7 +253,7 @@ export const FOE: Record<string, Tones> = {
   crown: { ink: '#8a5a00', paper: '#ffd166' },
 }
 
-const WARRIOR = {
+const WARRIOR_TONES = {
   hair: '#5a3a24',
   skin: '#f2c39b',
   shirt: '#f4f1ff',
@@ -262,11 +264,24 @@ const WARRIOR = {
   blanket: ['#3f6fb0', '#5d8fd6'],
 } as const
 
+/** P37: the Rogue in the Warrior's parts: a dark hood for the hair, a green tunic and scarf for the cardigan. */
+const ROGUE: Record<keyof typeof WARRIOR_TONES, string | readonly [string, string]> = {
+  ...WARRIOR_TONES,
+  hair: '#2f3b2c',
+  shirt: '#d8d2b8',
+  trousers: '#3a3226',
+  cardigan: ['#2f6b45', '#3f8a5a'],
+  blanket: ['#6b5a8a', '#8a78a8'],
+}
+
 /** Rows the face drops by when the hero sits; the standing poses' hair, shirt and legs rules then hold. */
-const SITTING_DROP: Partial<Record<HeroPose, number>> = { idle: 0, fight: 0, walk: 0, rest: 5 }
+const SITTING_DROP: Partial<Record<BasePose, number>> = { idle: 0, fight: 0, walk: 0, rest: 5 }
 
 /** The warrior's parts, by where they sit in each pose's grid (hero.ts): the art draws them all in the same few inks. */
-function warriorTone(pose: HeroPose, ch: string, x: number, y: number, height: number): string {
+function warriorTone(heroPose: HeroPose, ch: string, x: number, y: number, height: number): string {
+  // P37: a Rogue pose is the Warrior's grid with a hood, so the same rules pick the part and the class picks the ink.
+  const { base: pose, heroClass } = poseParts(heroPose)
+  const WARRIOR = (heroClass === 'rogue' ? ROGUE : WARRIOR_TONES) as typeof WARRIOR_TONES
   const drop = SITTING_DROP[pose]
   const shade = ch === ':' || ch === '.' || ch === '='
   if (drop === undefined) {

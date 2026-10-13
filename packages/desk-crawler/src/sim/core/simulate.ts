@@ -11,7 +11,7 @@ import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } fro
 import { createRng, pickOne, pickWeighted, type Rng } from './rng'
 import { applyTodo } from './todo'
 import { applyCareer, currentRung, effectiveStance, guaranteeDue, unlocked } from './career'
-import { applyXp, deriveStats, maxHp, pctOf } from './stats'
+import { applyXp, classRule, deriveStats, heroMaxHp, pctOf } from './stats'
 import type {
   BagTier,
   BagUpgrade,
@@ -210,7 +210,7 @@ class TickRun {
     const { h, content } = this
     const previousBiomeId = h.biomeId
     const reviveAtTick = h.reviveAtTick!
-    const hp = pctOf(maxHp(h.level), content.constants.reviveHpPct)
+    const hp = pctOf(heroMaxHp(this.content, h), content.constants.reviveHpPct)
     h.status = 'exploring'
     h.biomeId = content.safeBiomeId
     h.hp = hp
@@ -274,7 +274,7 @@ class TickRun {
     const { h, content } = this
     const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid()
     if (expired !== undefined) return expired
-    const max = maxHp(h.level)
+    const max = heroMaxHp(this.content, h)
     const healing = Math.min(max - h.hp, pctOf(max, content.constants.restingHealPct))
     h.hp += healing
     h.counters.restTicks += 1
@@ -296,7 +296,7 @@ class TickRun {
     if (expired !== undefined) return expired
     const c = content.constants
     const sustain = this.sustain()
-    const max = maxHp(h.level)
+    const max = heroMaxHp(this.content, h)
     // D131: every strength counts against the one pouch; the drink is the weakest that puts the hero back above its drinking line.
     let potionQty = potionsHeld(input.inventory)
     let potionsUsed = 0
@@ -408,7 +408,7 @@ class TickRun {
           this.metrics.victories = 1
           if (elite) this.metrics.elites = 1
           // D81 vampiric: a little health after every win; D80: an elite win fires the hero up.
-          if (mods.healOnVictoryPct > 0 && h.hp > 0) h.hp = Math.min(maxHp(h.level), h.hp + pctOf(maxHp(h.level), mods.healOnVictoryPct))
+          if (mods.healOnVictoryPct > 0 && h.hp > 0) h.hp = Math.min(heroMaxHp(this.content, h), h.hp + pctOf(heroMaxHp(this.content, h), mods.healOnVictoryPct))
           if (elite) effectGained = this.grantEffect(content.effectSources?.eliteVictory)
           Object.assign(vars, { xp: xpGranted, gold: goldGranted })
           const victories = [...narrative.victory, ...(content.narrative.monsters[monster.id]?.victory ?? [])]
@@ -615,7 +615,7 @@ class TickRun {
       h.xp = level.xp
       h.lifetimeXp += xpGranted
       if (levelsGained > 0) {
-        if (h.hp > 0) h.hp = Math.min(maxHp(h.level), h.hp + level.maxHpGain)
+        if (h.hp > 0) h.hp = Math.min(heroMaxHp(this.content, h), h.hp + heroMaxHp(this.content, h) - heroMaxHp(this.content, { level: h.level - levelsGained, class: h.class }))
         h.lastLevelUpTick = input.tick
         this.metrics.levelUps = levelsGained
         if (logKind !== 'death') logKind = 'levelup'
@@ -714,7 +714,7 @@ class TickRun {
     const target = input.raidTarget
     if (target === undefined || target.heroId === h.id) return undefined
     const rules = content.raids!
-    const raiderWon = rng.chance(raidWinChance(content, this.stance(), target.stance))
+    const raiderWon = rng.chance(raidWinChance(content, this.stance(), target.stance, classRule(content, h.class)?.raidEdgePct ?? 0, target.classEdgePct ?? 0))
     const thrifty = effectiveStats(content, h, input.inventory, input.tick).modifiers.goldLossPct
     const gold = raiderWon ? raidGoldLoss(target.gold, rules.goldLossPct, target.goldLossPct ?? 0) : raidGoldLoss(h.gold, rules.goldLossPct, thrifty)
     if (raiderWon) {
@@ -727,7 +727,7 @@ class TickRun {
     h.counters.ticksExplored += 1
     h.counters.raidsLaunched += 1
     this.metrics.raidsLaunched = 1
-    const hpLost = Math.min(h.hp, raidHpLoss(maxHp(h.level), raiderWon ? rules.winnerHpPct : rules.loserHpPct))
+    const hpLost = Math.min(h.hp, raidHpLoss(heroMaxHp(this.content, h), raiderWon ? rules.winnerHpPct : rules.loserHpPct))
     h.hp -= hpLost
     this.raidLaunch = { targetHeroId: target.heroId, tick: input.tick, raiderWon, gold, targetHpPct: raiderWon ? rules.loserHpPct : rules.winnerHpPct }
     return this.finishRaid('raider', target.heroId, target.name, raiderWon, gold, hpLost, input.tick)
@@ -754,7 +754,7 @@ class TickRun {
       h.gold -= gold
       h.counters.raidsLost += 1
     }
-    const hpLost = Math.min(h.hp, raidHpLoss(maxHp(h.level), raid.targetHpPct))
+    const hpLost = Math.min(h.hp, raidHpLoss(heroMaxHp(this.content, h), raid.targetHpPct))
     h.hp -= hpLost
     this.raidApplied = true
     this.metrics.raidsApplied = 1

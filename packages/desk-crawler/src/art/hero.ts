@@ -1,4 +1,4 @@
-import { sprite } from './canvas'
+import { sprite, type Sprite } from './canvas'
 
 /*
  * The Warrior: an office adventurer with tousled hair, cardigan, lanyard badge
@@ -162,6 +162,27 @@ export const heroCloak = sprite(`
 
 export const CLOAKED_POSES = new Set(['idle', 'fight', 'walk'])
 
+/*
+ * The Rogue (P37): the Warrior's body under a pointed hood, with a scarf over the lower face. The head rows replace
+ * the Warrior's in the standing and sitting poses; lying down only the colours differ (the companion's palette).
+ */
+const ROGUE_HEAD = [
+  '     ##',
+  '      ######',
+  '      #########',
+  '     ####wwwww##',
+  '     ###wwwwwww#',
+  '     ##ww#ww#ww#',
+  '     ##wwwwwwww#',
+  '      #:::::::#',
+  '       #:::::#',
+]
+
+/** The sprite with the Rogue's head over its first nine rows from `top`, leaving the blade's columns (17 on) as drawn. */
+function hooded(s: Sprite, top: number): Sprite {
+  return { ...s, rows: s.rows.map((row, y) => (y < top || y >= top + ROGUE_HEAD.length ? row : ROGUE_HEAD[y - top]!.padEnd(17) + row.slice(17))) }
+}
+
 export const heroPoses = {
   idle: heroIdle,
   fight: heroFight,
@@ -169,6 +190,22 @@ export const heroPoses = {
   rest: heroRest,
   sleep: heroSleep,
   knocked_out: heroKnockedOut,
+  rogue_idle: hooded(heroIdle, 0),
+  rogue_fight: hooded(heroFight, 0),
+  rogue_walk: hooded(heroWalk, 0),
+  rogue_rest: hooded(heroRest, 4),
+  rogue_sleep: heroSleep,
+  rogue_knocked_out: heroKnockedOut,
 } as const
 
 export type HeroPose = keyof typeof heroPoses
+/** The six poses every class draws. */
+export type BasePose = 'idle' | 'fight' | 'walk' | 'rest' | 'sleep' | 'knocked_out'
+
+/** P37: the pose a class draws for a base pose; the Warrior keeps the original names, so its image URLs never change. */
+export const classPose = (pose: BasePose, heroClass: 'warrior' | 'rogue' = 'warrior'): HeroPose => (heroClass === 'warrior' ? pose : (`${heroClass}_${pose}` as HeroPose))
+
+/** The base pose and class a pose draws. */
+export function poseParts(pose: HeroPose): { base: BasePose; heroClass: 'warrior' | 'rogue' } {
+  return pose.startsWith('rogue_') ? { base: pose.slice(6) as BasePose, heroClass: 'rogue' } : { base: pose as BasePose, heroClass: 'warrior' }
+}

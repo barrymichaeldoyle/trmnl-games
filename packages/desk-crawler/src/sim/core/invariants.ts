@@ -1,7 +1,7 @@
 import { bagUsed } from './bag'
 import { potionCap } from './pouch'
 import { strengthOf } from './potions'
-import { maxHp, xpToLeave } from './stats'
+import { heroMaxHp, xpToLeave } from './stats'
 import { todoProblems } from './todo'
 import { careerProblems } from './career'
 import { isGear, itemProblems } from './workbench'
@@ -33,7 +33,7 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
   if (!isCount(hero.xp) || hero.xp >= xpToLeave(hero.level)) fail('XP', `xp ${hero.xp} outside level ${hero.level}`)
   if (!isCount(hero.lifetimeXp)) fail('LIFETIME_XP', 'lifetime XP must be a safe nonnegative integer')
   if (!isCount(hero.gold)) fail('GOLD', `invalid gold ${hero.gold}`)
-  const max = maxHp(hero.level)
+  const max = heroMaxHp(content, hero)
   if (!isCount(hero.hp) || hero.hp > max) fail('HP', `hp ${hero.hp} outside 0..${max}`)
   if (!isCount(hero.lastLevelUpTick)) fail('LEVEL_TICK', 'invalid last level-up tick')
   for (const [name, value] of Object.entries(hero.counters)) {

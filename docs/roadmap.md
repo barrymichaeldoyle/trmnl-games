@@ -101,7 +101,7 @@ Core batch: player meetings, friends/rivals, world-event banner, shareable publi
 | Friends/rivals | Public-profile privacy and moderation; no friend requirement to progress |
 | World events | Versioned typed modifiers, UTC activation, snapshot per tick; admin permissions and rollback |
 | Profiles | Done 2026-10-09 (D109): an opt-in page per hero at `/desk-crawler/heroes/<public name>` (live 2026-10-08) with a public-safe projection and the same not-found for private and missing names; page loads limited to 60 a minute per IP (Workers rate-limiting binding); the raid record as counts (D110); a social card per hero, Share and Copy link in Settings and leaderboard links to public pages (2026-10-09). Public-safe projection, alias controls, rate limits; no equipment/private-log leakage |
-| Additional classes | Each passive tested; MP/spells only if their economy/state design is ready |
+| Additional classes | Started 2026-10-13 (D136, [design](classes.md)): a roster of one hero per class, one current at a time, and the Rogue as the second class from Warrior level 6 (content v18). Further classes follow live data on the Rogue; MP/spells only if their economy/state design is ready |
 | Graveyard items | Stretch; only after item-transfer ownership and death-rule changes are designed |
 
 Gate: meeting side effects commit at most once for both parties; social data does not add unbounded per-hero simulation reads; public-profile exposure is intentional. Measure follow adoption without imposing it as a launch blocker.

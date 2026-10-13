@@ -1,18 +1,18 @@
-import { maxHp } from './stats'
-import type { ContentCatalog, HeroCounters, HeroState, NewItem } from './types'
+import { heroMaxHp } from './stats'
+import type { ContentCatalog, HeroClass, HeroCounters, HeroState, NewItem } from './types'
 
 /**
  * Starting hero and kit (gameplay.md). Initialization, not an earned reward.
  * The adapter allocates item IDs, then sets weaponId/armorId to the starter rows.
  */
-export function starterHero(id: string, content: ContentCatalog, tick: number): HeroState {
+export function starterHero(id: string, content: ContentCatalog, tick: number, heroClass: HeroClass = 'warrior'): HeroState {
   return {
     id,
-    class: 'warrior',
+    class: heroClass,
     level: 1,
     xp: 0,
     lifetimeXp: 0,
-    hp: maxHp(1),
+    hp: heroMaxHp(content, { level: 1, class: heroClass }),
     gold: 0,
     status: 'exploring',
     biomeId: content.safeBiomeId,

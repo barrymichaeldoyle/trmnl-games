@@ -17,6 +17,7 @@ import { GoalCard, LockedCard, type CareerView, type UnlockView } from './-caree
 import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
+import { RosterCard } from './-rosterCard'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
   head: () => seo({ title: 'Hero', index: false }),
@@ -80,6 +81,9 @@ type HeroView = {
   wakeAtTick: number | null
   choice: Choice | null
   effects: Array<{ id: string; name: string; blurb: string; kind: 'boon' | 'bane'; ticksLeft: number }>
+  /** P37: the hero's class name and the roster in brief; null under a catalog without classes. */
+  className?: string
+  roster?: { unlockLevel: number; open: boolean; heroes: number; warriorLevel: number | null } | null
 }
 
 type Choice = { eventId: string; title: string; prompt: string; expiresAtTick: number; ticksLeft: number; defaultOptionId: string; options: Array<{ id: string; label: string; change: { gold: number; hp: number; potions: number } }> }
@@ -136,6 +140,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   return (
     <div className="flex min-w-0 flex-col gap-8">
       {hero.career ? <GoalCard career={hero.career} level={hero.level} notify={notify} /> : null}
+      {hero.roster ? <RosterCard roster={hero.roster} name={hero.name} className={hero.className ?? 'Warrior'} /> : null}
       <section ref={commands} aria-label="Commands" className="flex flex-col gap-2">
         {canDrink || hero.status === 'paused' || hero.status === 'sleeping' ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.

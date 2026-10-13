@@ -1,4 +1,4 @@
-import type { HeroPose } from './hero'
+import { classPose, type BasePose, type HeroPose } from './hero'
 import { SCENE_VERSION, type SceneTime } from './sceneTime'
 
 /**
@@ -17,7 +17,13 @@ export interface LatestEvent {
   readonly title?: string
 }
 
-export function sceneFor(status: string, hasWake: boolean, latest: LatestEvent | null): { pose: HeroPose; subject: SceneSubject } {
+/** P37: the scene in the hero's class's poses; the Warrior's paths are the ones every earlier screen used. */
+export function sceneFor(status: string, hasWake: boolean, latest: LatestEvent | null, heroClass: 'warrior' | 'rogue' = 'warrior'): { pose: HeroPose; subject: SceneSubject } {
+  const scene = baseScene(status, hasWake, latest)
+  return { pose: classPose(scene.pose, heroClass), subject: scene.subject }
+}
+
+function baseScene(status: string, hasWake: boolean, latest: LatestEvent | null): { pose: BasePose; subject: SceneSubject } {
   const outcome = latest?.outcome
   const monster = outcome?.variant === 'combat' ? { kind: 'monster' as const, id: String(outcome.monsterId), elite: outcome.elite === true } : null
   switch (status) {

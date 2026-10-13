@@ -55,9 +55,13 @@ const TASK_PAY = TODO === undefined ? '' : ((parts) => (parts.length <= 1 ? part
 /** P35: the career ladder and the levels features arrive at, read from the active catalog. */
 const CAREER = catalogs[ACTIVE_CONTENT].career
 const UNLOCKS = catalogs[ACTIVE_CONTENT].unlocks
+/** P37: the classes and the level the roster opens at, read from the active catalog. */
+const CLASSES = catalogs[ACTIVE_CONTENT].classes
+const ROSTER_LEVEL = catalogs[ACTIVE_CONTENT].unlocks?.roster
+const signed = (value: number) => (value > 0 ? `+${value}` : `−${Math.abs(value)}`)
 const CAREER_GOLD = CAREER?.rungs.reduce((sum, rung) => sum + rung.gold, 0) ?? 0
 /** " It arrives at level 3." or nothing under a catalog without unlocks. */
-const arrives = (feature: NonNullable<typeof UNLOCKS> extends Record<infer K, number> ? K : never) => (UNLOCKS === undefined ? '' : ` It arrives at level ${UNLOCKS[feature]}.`)
+const arrives = (feature: 'todo' | 'stances' | 'choices' | 'merchant' | 'raids') => (UNLOCKS === undefined ? '' : ` It arrives at level ${UNLOCKS[feature]}.`)
 
 /** The page's sections, for the jump list at the top: on a phone the page runs to about twenty screens. */
 const CONTENTS: ReadonlyArray<readonly [string, string]> = [
@@ -67,6 +71,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['floors', 'Floors'],
   ['desk-keepsakes', 'Desk keepsakes'],
   ...(CAREER !== undefined ? [['career', 'Career'] as const] : []),
+  ...(CLASSES !== undefined ? [['heroes-and-classes', 'Heroes and classes'] as const] : []),
   ['stances', 'Stances'],
   ['desk-raids', 'Desk raids'],
   ...(TODO !== undefined ? [['to-do-list', 'To-do list'] as const] : []),
@@ -128,6 +133,19 @@ export const Route = createFileRoute('/help/desk-crawler')({
             {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
             <li>One goal asks you to switch your stance to Bold, which raids twice as often as Balanced. Once it counts you can switch back whenever you like.</li>
             <li>A few early goals come with a guarantee, so a new hero is never left waiting on luck: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is the ordinary roll.</li>
+          </ul>
+        </>
+      ) : null}
+      {CLASSES !== undefined ? (
+        <>
+          <h2 id="heroes-and-classes">Heroes and classes</h2>
+          <p>Everyone starts as a Warrior. When your Warrior reaches level {ROSTER_LEVEL}, your TRMNL says “Unlocked: a second hero”, and you can recruit a Rogue from the Heroes page under More. The Rogue starts at level 1 with its own name, gear, gold, potions and goals.</p>
+          <ul>
+            <li>One hero adventures at a time, and that is the one your TRMNL shows and the one on the leaderboards. The other waits exactly where you left it: no adventures, no catch-up, and nothing runs out while it waits. A merchant visiting it leaves.</li>
+            <li>You can switch once a day. Switching straight back within ten minutes does not count. A hero that is knocked out or on the road has to recover or arrive first.</li>
+            <li>You can have one hero of each class. Achievements belong to you whichever hero earns them; a few belong to the Rogue alone.</li>
+            <li><strong>Warrior</strong>: {CLASSES.warrior.blurb}</li>
+            <li><strong>Rogue</strong>: {CLASSES.rogue.blurb} {CLASSES.rogue.hpPct}% health, attack {signed(CLASSES.rogue.modifiers.attackPct ?? 0)}%, defense {signed(CLASSES.rogue.modifiers.defensePct ?? 0)}%, {signed(CLASSES.rogue.modifiers.goldPct ?? 0)}% gold from every fight and find, and {CLASSES.rogue.raidEdgePct} points on its side of every desk raid. It levels at the Warrior's pace but gets knocked out a little more often.</li>
           </ul>
         </>
       ) : null}

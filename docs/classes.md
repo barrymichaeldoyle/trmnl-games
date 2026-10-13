@@ -1,6 +1,6 @@
 # Classes and the hero roster (P37)
 
-Proposed 2026-10-13 after Barry asked for several heroes per account, one active at a time, one hero per class, everyone starting as a Warrior, and a second class opening once the Warrior reaches a set level, before the raid goal. Nothing here is built. The open points at the end need Barry's call.
+Proposed 2026-10-13 as P37 after Barry asked for several heroes per account, one active at a time, one hero per class, everyone starting as a Warrior, and a second class opening once the Warrior reaches a set level, before the raid goal. Barry approved the whole plan with every recommendation the same day (D136), and it was built as content v18 with achievement catalog version 8 ([evidence](evidence/classes.md)). [Changes while building](#changes-while-building) lists where the build differs from this spec.
 
 Companions: [objectives](objectives.md) (the career ladder and level unlocks), [achievements](achievements.md) (D65, account-keyed unlocks), [raids](raids.md), [leaderboards](leaderboards.md), and the [roadmap](roadmap.md), whose v1.2 row "Additional classes" this replaces with a concrete plan.
 
@@ -69,7 +69,10 @@ Classes live in the catalog as a `classes` rule (stat percentages, passive modif
 4. **R4 Device.** Rogue sprite at every size the scene uses, payload class, template version, previews on all four layouts, ZIP upload.
 5. **R5 Achievements and docs.** Catalog version with the roster and Rogue families, achievements.md, gameplay, api, data-model.
 
-## Open points for Barry
+## Open points (settled 2026-10-13, D136)
+
+All seven settled as recommended.
+
 
 1. **Unlock level: 6 (recommended) or 5.** You asked for it before the raid goal. Level 6 is the last level before raids and stances, about day 4 to 5 for a daily player, and the ladder's raid goals sit at 7, so a player who recruits then still meets raids soon on either hero. Level 5 shares the level with office decisions. Reading your note as "offer the second hero before raids open, not after"; say if you meant something else.
 2. **Parked heroes freeze (recommended) or keep adventuring slowly.** Freezing is what "one active hero at a time" means and keeps every board fair; a slow background pace is a second simulation path with its own balance.
@@ -78,3 +81,13 @@ Classes live in the catalog as a `classes` rule (stat percentages, passive modif
 5. **No sharing of gold or items between heroes (recommended).** A shared stash is a later feature with its own economy check.
 6. **Lifetime boards: current hero only (recommended), or parked heroes keep their row.** Showing only the current hero keeps one row per person.
 7. **Rogue first, other classes later (recommended).** One class proves the roster; the next class follows live data.
+
+## Changes while building
+
+1. **Parked timers are tick numbers, so they move on.** A parked hero's effects, pending decision and nap end at absolute ticks; freezing it properly means the return (`roster.switchHero`) adds the gap to `wakeAtTick`, the choice's ticks and every effect's `untilTick`. The merchant still leaves at parking.
+2. **Recruiting is the day's switch.** Otherwise recruiting would be a free extra switch; the ten-minute undo returns to the hero just left. An undo keeps the day's clock from the original switch and cannot itself be undone.
+3. **Deletion covered only the current hero.** Both game deletion and account deletion deleted `activeHeroId` and its rows; they now delete every hero of the account (`purgeHeroes`), current or parked.
+4. **The class's numbers ride on the modifier resolver.** Attack, defense and gold shares join the affix and effect totals (`activeModifiers`), so the HUD, the device payload, raids and every fight read them from one place; maximum HP goes through `heroMaxHp` everywhere `maxHp(level)` was read.
+5. **The device template does not change.** The scene is a server-rendered image named by its pose, so a Rogue is new poses (`rogue_idle` and so on) under the same URL scheme; the Warrior's paths are unchanged and cached screens keep working. No template version or ZIP upload.
+6. **Lying-down Rogue poses share the Warrior's ink.** Sleeping and knocked-out heroes show no face on the 1-bit screen; the companion's colours (dark hood, green tunic) tell them apart.
+7. **The Rogue's numbers were fitted** to 93% health, +10% attack, −10% defense, +20% gold and +5 raid points; see the evidence page for the harness runs that set them.

@@ -330,6 +330,8 @@ export default defineSchema({
     userId: v.id('users'),
     state: v.union(v.literal('active'), v.literal('deleting')),
     activeHeroId: v.optional(v.id('heroes')),
+    /** P37: the last roster switch, for the one-a-day limit and the ten-minute undo back to `fromHeroId`. */
+    lastSwitch: v.optional(v.object({ at: v.number(), fromHeroId: v.optional(v.id('heroes')) })),
     createdAt: v.number(),
   }).index('by_userId', ['userId']),
 
@@ -366,9 +368,13 @@ export default defineSchema({
   heroes: defineTable({
     userId: v.id('users'),
     name: v.string(),
-    class: v.literal('warrior'),
+    /** P37: one hero per class per account (`by_userId_and_class`). */
+    class: v.union(v.literal('warrior'), v.literal('rogue')),
     createdAt: v.number(),
+    /** The account's current hero; since P37 a parked roster hero is false and carries `parkedAtTick`. */
     isActive: v.boolean(),
+    /** P37: the world tick the hero was parked at; its tick-stamped timers move on by the gap when it returns. */
+    parkedAtTick: v.optional(v.number()),
     schemaVersion: v.number(),
     activationState: v.union(v.literal('pending_trmnl'), v.literal('active')),
     activatedAt: v.optional(v.number()),
@@ -428,6 +434,7 @@ export default defineSchema({
     companionVisitBaseline: v.optional(v.object({ at: v.number(), level: v.number(), lifetimeXp: v.number(), logSequence: v.number(), counters: heroCounters })),
   })
     .index('by_userId_and_isActive', ['userId', 'isActive'])
+    .index('by_userId_and_class', ['userId', 'class'])
     .index('by_createdAt', ['createdAt'])
     .index('by_simulationState', ['simulationState']),
 

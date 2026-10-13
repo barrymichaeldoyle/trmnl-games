@@ -1,7 +1,7 @@
 import { currentHero, gameProfile } from './lib/gameProfile'
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation, query, type QueryCtx } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
 import { isGear } from '@trmnl-games/desk-crawler/sim/core/workbench'
@@ -26,7 +26,7 @@ import { deriveStreamSeed } from '@trmnl-games/desk-crawler/sim/seed'
 import { worldContent } from './world'
 import { toHeroState } from './sim/runs/adapter'
 import { loreView } from '@trmnl-games/desk-crawler/sim/core/biomes'
-import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 
 const intentResult = v.object({
@@ -61,7 +61,7 @@ export const mine = query({
       .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
       .order('desc')
       .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career')
-    const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null)
+    const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null, hero.class)
     return {
       id: hero._id,
       scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE),
@@ -77,8 +77,8 @@ export const mine = query({
       maxHp: stats.maxHp,
       attack: stats.attack,
       defense: stats.defense,
-      baseAttack: deriveStats(hero, items.map((item) => ({ ...item, id: item._id }))).attack,
-      baseDefense: deriveStats(hero, items.map((item) => ({ ...item, id: item._id }))).defense,
+      baseAttack: deriveStats(hero, items.map((item) => ({ ...item, id: item._id })), content).attack,
+      baseDefense: deriveStats(hero, items.map((item) => ({ ...item, id: item._id })), content).defense,
       effects: liveEffects(hero.effects, world?.currentTick ?? 0).map((active) => ({ id: active.id, name: effectById(content, active.id)?.name ?? active.id, blurb: effectById(content, active.id)?.blurb ?? '', kind: effectById(content, active.id)?.kind ?? 'boon', ticksLeft: active.untilTick - (world?.currentTick ?? 0) })),
       gold: hero.gold,
       status: hero.status,
@@ -103,6 +103,11 @@ export const mine = query({
       // P35: the current goal and the ladder so far, and which features this hero's level has opened.
       career: careerView(worldContent(world), hero),
       unlocks: unlocksView(worldContent(world), hero.level),
+      // P37: the hero's class, and the roster in brief: the level it opens at under the world's catalog (null before
+      // v18), whether this account's Warrior has reached it, and how many heroes the account holds.
+      class: hero.class,
+      className: worldContent(world).classes?.[hero.class]?.name ?? 'Warrior',
+      roster: await rosterSummary(ctx, worldContent(world), hero),
       // D133: the floors the world actually runs, so a new floor shows and takes travel only once the world has switched to its catalog.
       biomes: worldContent(world).biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe })),
       // D133: every floor's field note and its monsters' notes, open or not, for the Field notes page; null before v16.
@@ -367,10 +372,20 @@ function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
   }
 }
 
+/** P37: the roster in brief for the Hero page and the More tab; null under a catalog without classes. */
+async function rosterSummary(ctx: QueryCtx, content: ContentCatalog, hero: Doc<'heroes'>) {
+  const at = unlockLevel(content, 'roster')
+  if (at === undefined) return null
+  const heroes = await ctx.db.query('heroes').withIndex('by_userId_and_isActive', (q) => q.eq('userId', hero.userId)).take(4)
+  const warrior = heroes.find((entry) => entry.class === 'warrior')
+  return { unlockLevel: at, open: warrior !== undefined && warrior.level >= at, heroes: heroes.length, warriorLevel: warrior?.level ?? null }
+}
+
 /** P35: each gated feature with its level and whether this hero has it; null under a catalog without unlocks. */
 function unlocksView(content: ContentCatalog, level: number) {
   if (content.unlocks === undefined) return null
-  return FEATURES.map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: content.unlocks![feature], unlocked: unlocked(content, level, feature) }))
+  // P37: the roster opens per account on the Warrior's level, so `heroes.roster` reports it, not this per-hero list.
+  return FEATURES.filter((feature) => feature !== 'roster').map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: unlockLevel(content, feature)!, unlocked: unlocked(content, level, feature) }))
 }
 
 /** v1.2: show or hide the hero's public profile page. Off until the owner turns it on. */

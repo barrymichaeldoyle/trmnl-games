@@ -14,10 +14,10 @@ import { topGearTier } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { cumulativeXpToReach } from '@trmnl-games/desk-crawler/sim/core/stats'
-import type { ContentCatalog, HeroState, ItemSnapshot, MaterialCount, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog, HeroState, ItemSnapshot, HeroClass, MaterialCount, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
 import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
 import { nextEarlyPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
-import { currentRung, FEATURES, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { currentRung, FEATURES, unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
 import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { combineBatches, potionItem, potionRows, potionStrengths, potionsHeld, strengthById, strengthOf } from '@trmnl-games/desk-crawler/sim/core/potions'
 import { createRng } from '@trmnl-games/desk-crawler/sim/core/rng'
@@ -141,6 +141,8 @@ function args() {
     content: get('--content', ACTIVE_CONTENT) as CatalogId,
     /** D76: every hero plays this stance; omitted means no stance (the catalog constants). */
     stance: argv.includes('--stance') ? (get('--stance', 'balanced') as StanceId) : undefined,
+    /** P37: every hero plays this class; the default is the Warrior. */
+    heroClass: get('--class', 'warrior') as HeroClass,
     json: get('--json', ''),
     ticks: argv.includes('--ticks') ? Number(get('--ticks', '')) : undefined,
   }
@@ -346,7 +348,7 @@ function withMaterials(content: ContentCatalog, inventory: ItemSnapshot[], delta
   return rows.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 }
 
-export function simulateCohort(policy: Policy, heroes: number, days: number, content: ContentCatalog, ticks = days * TICKS_PER_DAY, stance?: StanceId): HeroLog[] {
+export function simulateCohort(policy: Policy, heroes: number, days: number, content: ContentCatalog, ticks = days * TICKS_PER_DAY, stance?: StanceId, heroClass: HeroClass = 'warrior'): HeroLog[] {
   const logs: HeroLog[] = []
   const bis = bestInSlot(content)
   const kit = starterKit(content)
@@ -354,7 +356,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
     let nextId = 0
     const id = () => `h${String(nextId++).padStart(6, '0')}`
     let inventory: ItemSnapshot[] = [{ ...kit.weapon, id: id() }, { ...kit.armor, id: id() }, { ...kit.potions, id: id() }]
-    let hero: HeroState = { ...starterHero(`hero-${index}`, content, 0), weaponId: inventory[0]!.id, armorId: inventory[1]!.id, ...(stance === undefined ? {} : { stance }) }
+    let hero: HeroState = { ...starterHero(`hero-${index}`, content, 0, heroClass), weaponId: inventory[0]!.id, armorId: inventory[1]!.id, ...(stance === undefined ? {} : { stance }) }
     const offset = (index * 37) % TICKS_PER_DAY
     const log: HeroLog = {
       reachTick: new Map(),
@@ -481,7 +483,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         log.careerGold += outcome.gold
       }
       if (result.metrics.guarantees && rungBefore !== undefined) log.guaranteeFires.set(rungBefore, (log.guaranteeFires.get(rungBefore) ?? 0) + 1)
-      if (content.unlocks !== undefined) for (const feature of FEATURES) if (!log.unlockTick.has(feature) && result.nextHero.level >= content.unlocks[feature]) log.unlockTick.set(feature, tick)
+      if (content.unlocks !== undefined) for (const feature of FEATURES) if (!log.unlockTick.has(feature) && unlockLevel(content, feature) !== undefined && result.nextHero.level >= unlockLevel(content, feature)!) log.unlockTick.set(feature, tick)
       if (result.event) recentSummaries = [result.event.summary, ...recentSummaries].slice(0, 2)
       if (result.metrics.encounter !== 'none') {
         log.exploringTicksByBiome.set(biomeBefore, (log.exploringTicksByBiome.get(biomeBefore) ?? 0) + 1)
@@ -694,7 +696,7 @@ function careerReport(logs: HeroLog[], totalDays: number, content: ContentCatalo
   const standing = new Map<string, number>()
   for (const l of logs) standing.set(l.finalRung ?? 'done', (standing.get(l.finalRung ?? 'done') ?? 0) + 1)
   return {
-    unlocks: content.unlocks === undefined ? null : Object.fromEntries(FEATURES.map((feature) => [feature, { level: content.unlocks![feature], ...censored(logs.map((l) => l.unlockTick.get(feature))) }])),
+    unlocks: content.unlocks === undefined ? null : Object.fromEntries(FEATURES.filter((feature) => unlockLevel(content, feature) !== undefined).map((feature) => [feature, { level: unlockLevel(content, feature)!, ...censored(logs.map((l) => l.unlockTick.get(feature))) }])),
     rungs: rungs.map((rung) => ({
       id: rung.id,
       companion: rung.companion ?? false,
@@ -788,7 +790,7 @@ function main() {
   const ticks = options.ticks ?? options.days * TICKS_PER_DAY
   const totalDays = ticks / TICKS_PER_DAY
   const policies = content.todo === undefined ? POLICIES : [...POLICIES, TIMEZONE_ABUSE]
-  const reports = policies.map((policy) => summarize(policy, simulateCohort(policy, options.heroes, totalDays, content, ticks, options.stance), totalDays, content))
+  const reports = policies.map((policy) => summarize(policy, simulateCohort(policy, options.heroes, totalDays, content, ticks, options.stance, options.heroClass), totalDays, content))
   const meta = { reportVersion: 3, contentVersion: content.contentVersion, stance: options.stance ?? null, simulationVersion: SIMULATION_VERSION, heroes: options.heroes, days: totalDays, ticks, seconds: (Date.now() - started) / 1000, cumulativeXpToLevel8: cumulativeXpToReach(8), deathDenominator: 'hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability', uncertainty: 'Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast' }
   if (options.json) writeFileSync(options.json, JSON.stringify({ meta, reports }, null, 2) + '\n')
   console.log(JSON.stringify(meta))

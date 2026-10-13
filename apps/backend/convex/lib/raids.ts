@@ -2,6 +2,7 @@ import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { currentHero } from './gameProfile'
 import { effectiveStats } from '@trmnl-games/desk-crawler/sim/core/modifiers'
+import { classRule } from '@trmnl-games/desk-crawler/sim/core/stats'
 import type { RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
 import type { ContentCatalog, IncomingRaid, RaidTarget, SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
 import { effectiveStance, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
@@ -62,9 +63,11 @@ export async function pickRaidTarget(ctx: MutationCtx, raider: Doc<'heroes'>, pl
   if (owner === null || (await currentHero(ctx, owner))?._id !== hero._id) return undefined
   const equipped = await Promise.all([hero.weaponId, hero.armorId].map((id) => (id === undefined ? null : ctx.db.get(id))))
   const inventory = equipped.flatMap((item) => (item === null ? [] : [{ ...item, id: item._id }]))
-  const thrifty = effectiveStats(content, { level: hero.level, ...(hero.weaponId ? { weaponId: hero.weaponId } : {}), ...(hero.armorId ? { armorId: hero.armorId } : {}) }, inventory, tick).modifiers.goldLossPct
+  const thrifty = effectiveStats(content, { level: hero.level, class: hero.class, ...(hero.weaponId ? { weaponId: hero.weaponId } : {}), ...(hero.armorId ? { armorId: hero.armorId } : {}) }, inventory, tick).modifiers.goldLossPct
+  // P37: the target's class edge, so the contest reads both sides' classes.
+  const classEdge = classRule(content, hero.class)?.raidEdgePct ?? 0
   return {
-    target: { heroId: hero._id, name: visibleName(owner), gold: hero.gold, ...(effectiveStance(content, hero) === undefined ? {} : { stance: effectiveStance(content, hero)! }), ...(thrifty > 0 ? { goldLossPct: thrifty } : {}) },
+    target: { heroId: hero._id, name: visibleName(owner), gold: hero.gold, ...(effectiveStance(content, hero) === undefined ? {} : { stance: effectiveStance(content, hero)! }), ...(thrifty > 0 ? { goldLossPct: thrifty } : {}), ...(classEdge !== 0 ? { classEdgePct: classEdge } : {}) },
     poolRowId: row._id,
     targetHeroId: hero._id,
     targetUser: owner,

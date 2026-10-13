@@ -1,5 +1,5 @@
 import { ACHIEVEMENTS, ACHIEVEMENT_FAMILIES, ACHIEVEMENTS_VERSION, type AchievementDef, type AchievementPredicate } from '../../content/achievements'
-import type { ContentCatalog, HeroCounters } from './types'
+import type { ContentCatalog, HeroClass, HeroCounters } from './types'
 
 /**
  * Pure achievement evaluation (achievements.md, D65). No database, clock or
@@ -14,6 +14,8 @@ export interface AchievementState {
   readonly bagCapacity: number
   readonly counters: HeroCounters
   readonly keepsakeTotal: number
+  /** P37: the evaluated hero's class; absent means warrior. */
+  readonly heroClass?: HeroClass
 }
 
 /** Current value and target of one predicate, for progress figures and tests. */
@@ -40,6 +42,11 @@ export function measure(predicate: AchievementPredicate, state: AchievementState
       const ids = biome?.monsterIds ?? []
       return { value: ids.filter((id) => at(id) >= predicate.atLeast).length, target: ids.length }
     }
+    // P37: only a hero of the class counts; any other reads zero, so a Warrior never earns a Rogue's tier.
+    case 'classLevel':
+      return { value: (state.heroClass ?? 'warrior') === predicate.heroClass ? state.level : 0, target: predicate.atLeast }
+    case 'classCounter':
+      return { value: (state.heroClass ?? 'warrior') === predicate.heroClass ? state.counters[predicate.counter] : 0, target: predicate.atLeast }
   }
 }
 

@@ -1,5 +1,5 @@
 import { potionCap } from './pouch'
-import { maxHp, pctOf } from './stats'
+import { heroMaxHp, pctOf } from './stats'
 import type { ChoiceEffect, ChoiceOption, ContentCatalog, EventTemplate, HeroState } from './types'
 
 /**
@@ -25,8 +25,8 @@ export interface ChoiceResolution {
 }
 
 /** The concrete change an effect makes to this hero: gold clamped at zero, HP within 1..max, potions within the pouch. */
-export function resolveEffect(content: ContentCatalog, hero: Pick<HeroState, 'level' | 'hp' | 'gold' | 'potionCap'>, potionsHeld: number, effect: ChoiceEffect, biomeTier: number): ChoiceResolution {
-  const max = maxHp(hero.level)
+export function resolveEffect(content: ContentCatalog, hero: Pick<HeroState, 'level' | 'hp' | 'gold' | 'potionCap'> & { readonly class?: HeroState['class'] }, potionsHeld: number, effect: ChoiceEffect, biomeTier: number): ChoiceResolution {
+  const max = heroMaxHp(content, hero)
   const goldChange = (effect.gold ?? 0) + (effect.goldPerTier ?? 0) * biomeTier
   const gold = Math.max(-hero.gold, goldChange)
   const hpChange = effect.hpPct === undefined ? 0 : effect.hpPct > 0 ? Math.min(max - hero.hp, pctOf(max, effect.hpPct)) : -Math.min(hero.hp - 1, pctOf(max, -effect.hpPct))

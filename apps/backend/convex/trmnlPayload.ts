@@ -172,6 +172,7 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
           ...(hero.merchant === undefined ? {} : { merchantExpiresAtTick: hero.merchant.expiresAtTick }),
           ...(hero.choice === undefined ? {} : { choiceExpiresAtTick: hero.choice.expiresAtTick }),
           ...(hero.stance === undefined ? {} : { stance: hero.stance }),
+          class: hero.class,
         }
       : null,
     weaponName,

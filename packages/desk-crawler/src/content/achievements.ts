@@ -1,4 +1,4 @@
-import type { NumericCounter } from '../sim/core/types'
+import type { HeroClass, NumericCounter } from '../sim/core/types'
 
 /**
  * Achievement catalog (achievements.md, D65). Content, versioned like the
@@ -8,7 +8,7 @@ import type { NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 7
+export const ACHIEVEMENTS_VERSION = 8
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -22,6 +22,10 @@ export type AchievementPredicate =
   | { readonly kind: 'everyBiome'; readonly atLeast: number }
   /** Every monster of one biome defeated at least `atLeast` times. */
   | { readonly kind: 'biomeMonsters'; readonly biomeId: string; readonly atLeast: number }
+  /** P37: the hero being evaluated is of this class and at least this level. */
+  | { readonly kind: 'classLevel'; readonly heroClass: HeroClass; readonly atLeast: number }
+  /** P37: the hero being evaluated is of this class and its counter is at least this. */
+  | { readonly kind: 'classCounter'; readonly heroClass: HeroClass; readonly counter: NumericCounter; readonly atLeast: number }
 
 export interface AchievementFamily {
   readonly id: string
@@ -391,6 +395,25 @@ monster('ghost_car', 'Ghost Car', 'Parking Garage', [
 ])
 family('floor_cleared_4', 'Archive Cleared', 'Set piece', [['Archive Cleared', 'Twenty-five of each in the Archive.']], () => ({ kind: 'biomeMonsters', biomeId: 'archive', atLeast: 25 }))
 family('floor_cleared_5', 'Garage Cleared', 'Set piece', [['Garage Cleared', 'Twenty-five of each in the Parking Garage.']], () => ({ kind: 'biomeMonsters', biomeId: 'parking_garage', atLeast: 25 }))
+
+// ---------------------------------------------------------------- P37 Classes and the roster (catalog version 8, D136; appended, never edited)
+
+family('rogue', 'The Rogue', 'Roster', [
+  ['New Hire', 'Recruited a Rogue. The corridors have a new regular.'],
+  ['Cutpurse', 'Your Rogue reached level 7, and the desk raids that come with it.'],
+  ['Stairwell Shadow', 'Your Rogue reached level 12. Nobody heard it come in.'],
+  ['Master of Keys', 'Your Rogue reached level 16. Every door in the building opens for it.'],
+], (i) => ({ kind: 'classLevel', heroClass: 'rogue', atLeast: [1, 7, 12, 16][i]! }))
+family('rogue_raids', 'Light Fingers', 'Roster', [
+  ['Pickpocket', 'Your Rogue won a desk raid.'],
+  ['Second-Storey Work', 'Ten raids won as a Rogue.'],
+  ['The Heist', 'Fifty raids won as a Rogue. The safe was never locked.'],
+], (i) => ({ kind: 'classCounter', heroClass: 'rogue', counter: 'raidsWon', atLeast: [1, 10, 50][i]! }))
+family('rogue_gold', 'Deep Pockets', 'Roster', [
+  ['Loose Change', 'Your Rogue has earned 1,000 gold.'],
+  ['Petty Cash', 'Your Rogue has earned 10,000 gold.'],
+  ['Slush Fund', 'Your Rogue has earned 50,000 gold. Accounts are asking questions.'],
+], (i) => ({ kind: 'classCounter', heroClass: 'rogue', counter: 'goldEarned', atLeast: [1000, 10000, 50000][i]! }))
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

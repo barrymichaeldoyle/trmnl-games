@@ -165,10 +165,10 @@ describe('the Archive and the Parking Garage (D133)', () => {
     const archiveWin = v16.career!.rungs.find((r) => r.id === 'archive_win')!
     expect(measureRung(archiveWin.predicate, fresh, v16)).toEqual({ value: 0, target: 1 })
     expect(measureRung(archiveWin.predicate, { ...fresh, counters: { ...fresh.counters, monsterWins: { shelf_lurker: 2 } } }, v16)).toEqual({ value: 2, target: 1 })
-    expect(ACHIEVEMENTS_VERSION).toBe(7)
+    expect(ACHIEVEMENTS_VERSION).toBeGreaterThanOrEqual(7)
     const families = ACHIEVEMENT_FAMILIES.map((f) => f.id)
     for (const id of ['box_file_beetle', 'shelf_lurker', 'microfilm_phantom', 'auditor', 'trolley_swarm', 'oil_slick', 'barrier_golem', 'ghost_car']) expect(families).toContain(`slay_${id}`)
-    expect(families.slice(-10)).toEqual(['slay_box_file_beetle', 'slay_shelf_lurker', 'slay_microfilm_phantom', 'slay_auditor', 'slay_trolley_swarm', 'slay_oil_slick', 'slay_barrier_golem', 'slay_ghost_car', 'floor_cleared_4', 'floor_cleared_5'])
+    expect(families.slice(families.indexOf('slay_box_file_beetle'), families.indexOf('slay_box_file_beetle') + 10)).toEqual(['slay_box_file_beetle', 'slay_shelf_lurker', 'slay_microfilm_phantom', 'slay_auditor', 'slay_trolley_swarm', 'slay_oil_slick', 'slay_barrier_golem', 'slay_ghost_car', 'floor_cleared_4', 'floor_cleared_5'])
     expect(ACHIEVEMENTS.find((a) => a.id === 'floor_cleared_5')?.predicate).toEqual({ kind: 'biomeMonsters', biomeId: 'parking_garage', atLeast: 25 })
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
     // Every floor's monster families share the shelf category the companion lists.

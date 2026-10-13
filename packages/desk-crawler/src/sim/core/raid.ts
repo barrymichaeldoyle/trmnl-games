@@ -36,10 +36,10 @@ export function planRaid(streams: StreamSeeds, stance: StanceId | undefined, con
   return rng === undefined ? undefined : drawRaidPlan(rng, stance, content)
 }
 
-/** The raider's chance to win, in percent: 50 moved only by the two stances' edges. */
-export function raidWinChance(content: ContentCatalog, raider: StanceId | undefined, target: StanceId | undefined): number {
+/** The raider's chance to win, in percent: 50 moved by the two stances' edges and, since P37, the two classes' edges. */
+export function raidWinChance(content: ContentCatalog, raider: StanceId | undefined, target: StanceId | undefined, raiderClassEdge = 0, targetClassEdge = 0): number {
   const edge = content.raids!.edgePct
-  return 50 + edge[raider ?? 'balanced'] - edge[target ?? 'balanced']
+  return 50 + edge[raider ?? 'balanced'] - edge[target ?? 'balanced'] + raiderClassEdge - targetClassEdge
 }
 
 /** A share of maximum HP, rounded up so a raid always costs at least one HP. */

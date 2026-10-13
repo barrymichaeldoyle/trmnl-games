@@ -40,6 +40,7 @@ import { Route as AppDeskCrawlerInventoryRouteImport } from './routes/app/desk-c
 import { Route as AppDeskCrawlerKeepsakesRouteImport } from './routes/app/desk-crawler/keepsakes'
 import { Route as AppDeskCrawlerLeaderboardRouteImport } from './routes/app/desk-crawler/leaderboard'
 import { Route as AppDeskCrawlerLogRouteImport } from './routes/app/desk-crawler/log'
+import { Route as AppDeskCrawlerRosterRouteImport } from './routes/app/desk-crawler/roster'
 import { Route as AppDeskCrawlerSettingsRouteImport } from './routes/app/desk-crawler/settings'
 import { Route as AppDeskCrawlerTrmnlRouteImport } from './routes/app/desk-crawler/trmnl'
 import { Route as AppSlowCastIndexRouteImport } from './routes/app/slow-cast/index'
@@ -213,6 +214,11 @@ const AppDeskCrawlerLogRoute = AppDeskCrawlerLogRouteImport.update({
   path: '/log',
   getParentRoute: () => AppDeskCrawlerRoute,
 } as any)
+const AppDeskCrawlerRosterRoute = AppDeskCrawlerRosterRouteImport.update({
+  id: '/roster',
+  path: '/roster',
+  getParentRoute: () => AppDeskCrawlerRoute,
+} as any)
 const AppDeskCrawlerSettingsRoute = AppDeskCrawlerSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -319,6 +325,7 @@ export interface FileRoutesByFullPath {
   '/app/desk-crawler/keepsakes': typeof AppDeskCrawlerKeepsakesRoute
   '/app/desk-crawler/leaderboard': typeof AppDeskCrawlerLeaderboardRoute
   '/app/desk-crawler/log': typeof AppDeskCrawlerLogRoute
+  '/app/desk-crawler/roster': typeof AppDeskCrawlerRosterRoute
   '/app/desk-crawler/settings': typeof AppDeskCrawlerSettingsRoute
   '/app/desk-crawler/trmnl': typeof AppDeskCrawlerTrmnlRoute
   '/app/slow-cast/achievements': typeof AppSlowCastAchievementsRoute
@@ -363,6 +370,7 @@ export interface FileRoutesByTo {
   '/app/desk-crawler/keepsakes': typeof AppDeskCrawlerKeepsakesRoute
   '/app/desk-crawler/leaderboard': typeof AppDeskCrawlerLeaderboardRoute
   '/app/desk-crawler/log': typeof AppDeskCrawlerLogRoute
+  '/app/desk-crawler/roster': typeof AppDeskCrawlerRosterRoute
   '/app/desk-crawler/settings': typeof AppDeskCrawlerSettingsRoute
   '/app/desk-crawler/trmnl': typeof AppDeskCrawlerTrmnlRoute
   '/app/slow-cast/achievements': typeof AppSlowCastAchievementsRoute
@@ -411,6 +419,7 @@ export interface FileRoutesById {
   '/app/desk-crawler/keepsakes': typeof AppDeskCrawlerKeepsakesRoute
   '/app/desk-crawler/leaderboard': typeof AppDeskCrawlerLeaderboardRoute
   '/app/desk-crawler/log': typeof AppDeskCrawlerLogRoute
+  '/app/desk-crawler/roster': typeof AppDeskCrawlerRosterRoute
   '/app/desk-crawler/settings': typeof AppDeskCrawlerSettingsRoute
   '/app/desk-crawler/trmnl': typeof AppDeskCrawlerTrmnlRoute
   '/app/slow-cast/achievements': typeof AppSlowCastAchievementsRoute
@@ -460,6 +469,7 @@ export interface FileRouteTypes {
     | '/app/desk-crawler/keepsakes'
     | '/app/desk-crawler/leaderboard'
     | '/app/desk-crawler/log'
+    | '/app/desk-crawler/roster'
     | '/app/desk-crawler/settings'
     | '/app/desk-crawler/trmnl'
     | '/app/slow-cast/achievements'
@@ -504,6 +514,7 @@ export interface FileRouteTypes {
     | '/app/desk-crawler/keepsakes'
     | '/app/desk-crawler/leaderboard'
     | '/app/desk-crawler/log'
+    | '/app/desk-crawler/roster'
     | '/app/desk-crawler/settings'
     | '/app/desk-crawler/trmnl'
     | '/app/slow-cast/achievements'
@@ -551,6 +562,7 @@ export interface FileRouteTypes {
     | '/app/desk-crawler/keepsakes'
     | '/app/desk-crawler/leaderboard'
     | '/app/desk-crawler/log'
+    | '/app/desk-crawler/roster'
     | '/app/desk-crawler/settings'
     | '/app/desk-crawler/trmnl'
     | '/app/slow-cast/achievements'
@@ -815,6 +827,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDeskCrawlerLogRouteImport
       parentRoute: typeof AppDeskCrawlerRoute
     }
+    '/app/desk-crawler/roster': {
+      id: '/app/desk-crawler/roster'
+      path: '/roster'
+      fullPath: '/app/desk-crawler/roster'
+      preLoaderRoute: typeof AppDeskCrawlerRosterRouteImport
+      parentRoute: typeof AppDeskCrawlerRoute
+    }
     '/app/desk-crawler/settings': {
       id: '/app/desk-crawler/settings'
       path: '/settings'
@@ -924,6 +943,7 @@ interface AppDeskCrawlerRouteChildren {
   AppDeskCrawlerKeepsakesRoute: typeof AppDeskCrawlerKeepsakesRoute
   AppDeskCrawlerLeaderboardRoute: typeof AppDeskCrawlerLeaderboardRoute
   AppDeskCrawlerLogRoute: typeof AppDeskCrawlerLogRoute
+  AppDeskCrawlerRosterRoute: typeof AppDeskCrawlerRosterRoute
   AppDeskCrawlerSettingsRoute: typeof AppDeskCrawlerSettingsRoute
   AppDeskCrawlerTrmnlRoute: typeof AppDeskCrawlerTrmnlRoute
   AppDeskCrawlerIndexRoute: typeof AppDeskCrawlerIndexRoute
@@ -937,6 +957,7 @@ const AppDeskCrawlerRouteChildren: AppDeskCrawlerRouteChildren = {
   AppDeskCrawlerKeepsakesRoute: AppDeskCrawlerKeepsakesRoute,
   AppDeskCrawlerLeaderboardRoute: AppDeskCrawlerLeaderboardRoute,
   AppDeskCrawlerLogRoute: AppDeskCrawlerLogRoute,
+  AppDeskCrawlerRosterRoute: AppDeskCrawlerRosterRoute,
   AppDeskCrawlerSettingsRoute: AppDeskCrawlerSettingsRoute,
   AppDeskCrawlerTrmnlRoute: AppDeskCrawlerTrmnlRoute,
   AppDeskCrawlerIndexRoute: AppDeskCrawlerIndexRoute,

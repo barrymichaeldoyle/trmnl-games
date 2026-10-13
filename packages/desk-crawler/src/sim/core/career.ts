@@ -9,7 +9,7 @@ import type { CareerPredicate, CareerRule, CareerRung, CareerState, ContentCatal
  * announce them are written here, once, on the tick the hero crosses the level.
  */
 
-export const FEATURES: readonly UnlockableFeature[] = ['todo', 'stances', 'choices', 'merchant', 'raids']
+export const FEATURES: readonly UnlockableFeature[] = ['todo', 'stances', 'choices', 'merchant', 'raids', 'roster']
 
 /** How each feature reads on the device and in the companion. */
 export const FEATURE_LABEL: Readonly<Record<UnlockableFeature, string>> = {
@@ -18,11 +18,23 @@ export const FEATURE_LABEL: Readonly<Record<UnlockableFeature, string>> = {
   choices: 'office decisions',
   merchant: 'the wandering merchant',
   raids: 'desk raids',
+  roster: 'a second hero',
 }
 
-/** Whether a hero at `level` has this feature under the catalog; a catalog without unlocks has everything on. */
+/** The level a feature opens at, or undefined when the catalog never opens it (the roster before P37). */
+export function unlockLevel(content: ContentCatalog, feature: UnlockableFeature): number | undefined {
+  if (feature === 'roster') return content.classes === undefined ? undefined : content.unlocks?.roster
+  return content.unlocks?.[feature]
+}
+
+/**
+ * Whether a hero at `level` has this feature under the catalog; a catalog without unlocks has everything on except
+ * the roster, which needs classes. The roster reads the account's Warrior's level (P37), so callers pass that.
+ */
 export function unlocked(content: ContentCatalog, level: number, feature: UnlockableFeature): boolean {
-  return content.unlocks === undefined || level >= content.unlocks[feature]
+  if (feature !== 'roster' && content.unlocks === undefined) return true
+  const at = unlockLevel(content, feature)
+  return at !== undefined && level >= at
 }
 
 /** The stance the hero plays by: its own once stances are unlocked, else balanced (undefined). */
@@ -160,7 +172,9 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
 
   if (unlocks !== undefined) {
     for (const feature of FEATURES) {
-      const level = unlocks[feature]
+      const level = unlockLevel(content, feature)
+      // P37: the roster opens on the Warrior's level, so only a Warrior announces it.
+      if (level === undefined || (feature === 'roster' && hero.class !== 'warrior')) continue
       if (before.level < level && hero.level >= level) {
         metrics.unlocks += 1
         events.push(careerEvent(input, result, { variant: 'career', phase: 'unlocked', id: feature, title: FEATURE_LABEL[feature], gold: 0 }))

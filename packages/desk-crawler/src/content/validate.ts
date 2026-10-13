@@ -35,6 +35,20 @@ export function validateCatalog(content: ContentCatalog): string[] {
     if (stance.restBelowPct > c.reviveHpPct) problems.push(`stance ${stance.id} would rest a hero straight after revival`)
   }
   if (content.stances && !(['cautious', 'balanced', 'bold'] as const).every((id) => content.stances?.[id]?.id === id)) problems.push('stances must define cautious, balanced and bold under their own ids')
+  // P37: both classes under their own ids; the Warrior is the untouched baseline; shares and edges stay modest.
+  if (content.classes) {
+    if (!(['warrior', 'rogue'] as const).every((id) => content.classes?.[id]?.id === id)) problems.push('classes must define warrior and rogue under their own ids')
+    const warrior = content.classes.warrior
+    if (warrior && (warrior.hpPct !== 100 || warrior.raidEdgePct !== 0 || Object.values(warrior.modifiers).some((value) => value !== 0))) problems.push('the warrior is the baseline: 100% HP, no modifiers, no raid edge')
+    for (const rule of Object.values(content.classes)) {
+      if (!Number.isSafeInteger(rule.hpPct) || rule.hpPct < 60 || rule.hpPct > 140) problems.push(`class ${rule.id} HP share must be 60 to 140%`)
+      if (!Number.isSafeInteger(rule.raidEdgePct) || Math.abs(rule.raidEdgePct) > 10) problems.push(`class ${rule.id} raid edge must be within 10 points`)
+      if (Object.values(rule.modifiers).some((value) => !Number.isSafeInteger(value) || Math.abs(value) > 50)) problems.push(`class ${rule.id} modifiers must be whole points within 50`)
+      if ([...rule.name].length < 1 || [...rule.name].length > 20 || [...rule.blurb].length < 1 || [...rule.blurb].length > 160 || [...rule.passive.name].length < 1 || [...rule.passive.blurb].length > 160) problems.push(`class ${rule.id} needs a name, a blurb and a passive within bounds`)
+    }
+    if (content.unlocks?.roster === undefined) problems.push('classes need a roster unlock level')
+  }
+  if (content.unlocks?.roster !== undefined && content.classes === undefined) problems.push('a roster unlock without classes')
   // D77/D78: the pouch ladder mirrors the bag ladder's rules; the merchant's numbers are bounded.
   const pouch = content.potionPouch
   if (pouch) {
@@ -104,8 +118,11 @@ export function validateCatalog(content: ContentCatalog): string[] {
       if (!Number.isSafeInteger(launch) || launch < 0 || launch > 100) problems.push(`raid launch chance for ${id} must be 0–100 permille`)
       if (!Number.isSafeInteger(raids.edgePct[id])) problems.push(`raid edge for ${id} must be an integer`)
     }
-    for (const raider of stances) for (const target of stances) {
-      const chance = 50 + raids.edgePct[raider] - raids.edgePct[target]
+    // P37: every class pair too, so no stance and class mix can make a raid a sure thing.
+    const classEdges = Object.values(content.classes ?? {}).map((rule) => rule.raidEdgePct)
+    const edges = classEdges.length === 0 ? [0] : classEdges
+    for (const raider of stances) for (const target of stances) for (const raiderEdge of edges) for (const targetEdge of edges) {
+      const chance = 50 + raids.edgePct[raider] - raids.edgePct[target] + raiderEdge - targetEdge
       if (!(chance >= 10 && chance <= 90)) problems.push(`raid win chance ${raider} on ${target} must stay within 10–90%`)
     }
     for (const [name, value] of [['goldLossPct', raids.goldLossPct], ['loserHpPct', raids.loserHpPct], ['winnerHpPct', raids.winnerHpPct]] as const) {

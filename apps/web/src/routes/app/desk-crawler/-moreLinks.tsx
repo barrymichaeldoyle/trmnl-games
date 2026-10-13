@@ -6,6 +6,7 @@ import { SPONSOR_URL } from '../../../lib/prose'
 
 /** The More tab's pages (D124), each a row with its glyph: what the Hero tab used to hold under the world map. */
 const MORE_LINKS = [
+  { to: '/app/desk-crawler/roster', label: 'Heroes', blurb: 'Your heroes, switching between them, and recruiting a new class.', glyph: 'hero' },
   { to: '/app/desk-crawler/career', label: 'Career', blurb: 'The ladder of goals, and what opens at each level.', glyph: 'career' },
   { to: '/app/desk-crawler/achievements', label: 'Achievements', blurb: 'Every one you have earned, and how rare it is.', glyph: 'achievement' },
   { to: '/app/desk-crawler/field-notes', label: 'Field notes', blurb: 'What your hero knows about every floor and monster.', glyph: 'quest' },

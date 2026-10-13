@@ -139,15 +139,9 @@ export const purgeGameStep = internalMutation({
       return null
     }
     const profile = await gameProfile(ctx, job.userId)
-    if (profile?.activeHeroId) {
-      const heroId = profile.activeHeroId
-      const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
-      const logs = await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).take(BATCH)
-      const windows = await ctx.db.query('heroScoreWindows').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
-      if (await deleteBatch(ctx, items) + await deleteBatch(ctx, logs) + await deleteBatch(ctx, windows) + await purgeRaidRows(ctx, heroId, BATCH) > 0) return await again()
-      if (await ctx.db.get(heroId)) await ctx.db.delete(heroId)
-      await ctx.db.patch(profile._id, { activeHeroId: undefined })
-    }
+    // P37: every hero on the roster, current or parked, one hero's rows per pass.
+    if ((await purgeHeroes(ctx, job.userId)) > 0) return await again()
+    if (profile?.activeHeroId) await ctx.db.patch(profile._id, { activeHeroId: undefined, lastSwitch: undefined })
     const user = await ctx.db.get(job.userId)
     if (user?.activeHeroId) await ctx.db.patch(user._id, { activeHeroId: undefined })
     const keepsakes = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', job.userId)).take(BATCH)
@@ -268,19 +262,11 @@ export const purgeStep = internalMutation({
         const unlocks = await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', job.userId!)).take(BATCH)
         if ((await deleteBatch(ctx, keepsakes)) + (await deleteBatch(ctx, unlocks)) + (await purgeAlertRows(ctx, job.userId, BATCH)) > 0) return await again()
         const profile = await gameProfile(ctx, job.userId)
-        const heroId = profile ? profile.activeHeroId : user?.activeHeroId
-        if (heroId) {
-          const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
-          const logs = await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).take(BATCH)
-          const windows = await ctx.db.query('heroScoreWindows').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
-          // D110: the hero's raid pool row and ledger rows; the other party keeps its own log line.
-          const removed = (await deleteBatch(ctx, items)) + (await deleteBatch(ctx, logs)) + (await deleteBatch(ctx, windows)) + (await purgeRaidRows(ctx, heroId, BATCH))
-          if (removed > 0) return await again()
-          // Copied names in published boards are masked by owner state and rotate out within two publications.
-          if (await ctx.db.get(heroId)) await ctx.db.delete(heroId)
-          if (user) await ctx.db.patch(job.userId, { activeHeroId: undefined })
-          if (profile) await ctx.db.patch(profile._id, { activeHeroId: undefined })
-        }
+        // P37: every hero on the roster, current or parked. Copied names in published boards are masked by owner
+        // state and rotate out within two publications.
+        if ((await purgeHeroes(ctx, job.userId!)) > 0) return await again()
+        if (user?.activeHeroId) await ctx.db.patch(job.userId, { activeHeroId: undefined })
+        if (profile?.activeHeroId) await ctx.db.patch(profile._id, { activeHeroId: undefined, lastSwitch: undefined })
         // D115: the account's Slow Cast angler and its rows.
         const sc = await slowCastProfile(ctx, job.userId)
         if (sc?.anglerId) {
@@ -503,6 +489,23 @@ export const recordDeletionEmail = internalMutation({
 })
 
 /** Bounded scrub of all known exact references; repeat until no account references remain. */
+/**
+ * P37: deletes one of the account's heroes per call, current or parked: its items, logs, score windows and raid rows
+ * first (D110: the other party keeps its own log line), then the hero. Returns how much it removed; 0 once none is left.
+ */
+async function purgeHeroes(ctx: MutationCtx, userId: Id<'users'>): Promise<number> {
+  const hero = await ctx.db.query('heroes').withIndex('by_userId_and_isActive', (q) => q.eq('userId', userId)).first()
+  if (hero === null) return 0
+  const heroId = hero._id
+  const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
+  const logs = await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).take(BATCH)
+  const windows = await ctx.db.query('heroScoreWindows').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
+  const removed = (await deleteBatch(ctx, items)) + (await deleteBatch(ctx, logs)) + (await deleteBatch(ctx, windows)) + (await purgeRaidRows(ctx, heroId, BATCH))
+  if (removed > 0) return removed
+  await ctx.db.delete(heroId)
+  return 1
+}
+
 async function scrubAccountReferences(ctx: MutationCtx, args: { userId: Id<'users'>; tokenIdentifier: string; heroRef?: string }): Promise<number> {
   let changed = 0
   for (const key of [`intent:${args.userId}`, `keepsake:${args.userId}`, `feedback:${args.tokenIdentifier}`]) {

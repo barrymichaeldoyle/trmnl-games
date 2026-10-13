@@ -14,6 +14,7 @@
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
  *   career=1 (P35: the goal card, the Career page and the unlocks, plus career log lines)   career=new (level 1, everything locked)   career=done (the ladder finished)
  *   notes=1 (D133: /field-notes for a level-17 veteran with most notes open)   notes=new (a fresh hero, the Office's note only)
+ *   roster=locked (P37: Warrior level 4, the Hero page's locked card)   roster=open (one hero, the Rogue ready to recruit)   roster=two (a parked Warrior, the Rogue current, switch spent)   roster=undo (the same, inside the ten-minute undo)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
  * Slow Cast (D115): /app/slow-cast, /cooler, /shop, /logbook, /settings, with sc=full (cooler full), sc=empty (empty cooler, no bait here),
@@ -79,6 +80,21 @@ if (flag('choice')) hero.choice = { eventId: 'late_night', title: 'The boss asks
 if (flag('effects')) hero.effects = [{ id: 'coffee', name: 'Coffee rush', blurb: '+3 ATK', kind: 'boon', ticksLeft: 3 }, { id: 'papercut', name: 'Paper cut', blurb: '-2 DEF', kind: 'bane', ticksLeft: 1 }];
 if (flag('merchant')) { hero.merchantTicksLeft = 3; inventory.merchant = { offers: [{ id: 'potions', name: 'Three potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 3, ticksLeft: 3, biomeId: hero.biomeId } }
 if (flag('recap')) data.recap = { ...data.recap, baseline: { at: Date.now() - 36e5 * 26 }, xpGained: 212, levelsGained: 1, newEvents: 19, counters: { combatWins: 7, goldEarned: 43, itemsFound: 2, deaths: 1 } };
+// P37: the roster. The Heroes page reads roster:mine; the Hero page reads hero.roster.
+const rosterMode = params.get('roster');
+const rogueRule = { id: 'rogue', name: 'Rogue', blurb: 'Works the corridors. Hits a bit harder and pockets more, but takes hits worse.', passive: { name: 'Light fingers', blurb: 'More gold from every fight and find, and an edge in desk raids, raiding or defending.' }, hpPct: 93, modifiers: { attackPct: 10, defensePct: -10, goldPct: 20 }, raidEdgePct: 5 };
+const warriorRule = { id: 'warrior', name: 'Warrior', blurb: 'Holds the desk. The most health and the steadiest fights, and nothing fancy.', passive: { name: 'Steady', blurb: 'No trick and no weakness: full health and defense.' }, hpPct: 100, modifiers: {}, raidEdgePct: 0 };
+const two = rosterMode === 'two' || rosterMode === 'undo';
+if (rosterMode === 'locked') hero.level = 4;
+if (two) { hero.name = 'Vex'; hero.level = 3; hero.class = 'rogue'; hero.className = 'Rogue' } else { hero.class = 'warrior'; hero.className = 'Warrior' }
+hero.roster = rosterMode ? { unlockLevel: 6, open: rosterMode !== 'locked', heroes: two ? 2 : 1, warriorLevel: rosterMode === 'locked' ? 4 : 9 } : null;
+const warriorRow = { id: 'w1', name: two ? 'Pip' : hero.name, class: 'warrior', className: 'Warrior', level: rosterMode === 'locked' ? 4 : 9, status: 'exploring', hp: 172, maxHp: 196, gold: 1840, biome: 'Cafeteria Depths', current: !two, parkedFor: two ? 52 : null };
+data.roster = rosterMode ? {
+  available: true, open: rosterMode !== 'locked', unlockLevel: 6, warriorLevel: warriorRow.level,
+  heroes: two ? [warriorRow, { id: 'r1', name: 'Vex', class: 'rogue', className: 'Rogue', level: 3, status: 'exploring', hp: 107, maxHp: 111, gold: 64, biome: 'Office Cubicles', current: true, parkedFor: null }] : [warriorRow],
+  classes: [{ ...warriorRule, recruited: true }, { ...rogueRule, recruited: two }],
+  canPark: true, nextAt: two ? Date.now() + 36e5 * 21 : null, undoHeroId: rosterMode === 'undo' ? 'w1' : null, undoUntil: rosterMode === 'undo' ? Date.now() + 6e5 : null,
+} : { available: false, open: false, unlockLevel: null, warriorLevel: null, heroes: [], classes: [], canPark: true, nextAt: null, undoHeroId: null, undoUntil: null };
 if (params.get('keepsake') === 'done') { data.keepsakes.lastClaimWeek = 9999; data.keepsakes.nextAvailableAt = Date.now() + 86400000 * 3 }
 // A veteran's shelves: most families started at varied tiers, one close to its next tier, and rarity over 41 heroes.
 if (flag('achievements')) {
@@ -257,6 +273,7 @@ const queries = {
     { family: 'species_salmon', name: 'Salmon', category: 'Species', tiers: 2, earned: null, next: { id: 'first_salmon', name: 'First Salmon', tier: 1 }, value: 0, target: 1 },
   ] }),
   'heroes:mine': () => hero,
+  'roster:mine': () => data.roster,
   'inventory:mine': () => inventory,
   'heroes:returnSummary': () => data.recap,
   'achievements:mine': () => data.achievements,
@@ -312,6 +329,7 @@ import { Route as Log } from '../../apps/web/src/routes/app/desk-crawler/log';
 import { Route as DcAchievements } from '../../apps/web/src/routes/app/desk-crawler/achievements';
 import { Route as Career } from '../../apps/web/src/routes/app/desk-crawler/career';
 import { Route as FieldNotes } from '../../apps/web/src/routes/app/desk-crawler/field-notes';
+import { Route as Roster } from '../../apps/web/src/routes/app/desk-crawler/roster';
 import { Route as Keepsakes } from '../../apps/web/src/routes/app/desk-crawler/keepsakes';
 import { Route as Device } from '../../apps/web/src/routes/app/desk-crawler/trmnl';
 import { Route as Profile } from '../../apps/web/src/routes/desk-crawler/heroes.$alias';
@@ -327,7 +345,7 @@ import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
-const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
+const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
   '/app/slow-cast': ScDock.options.component, '/app/slow-cast/cooler': ScCooler.options.component, '/app/slow-cast/shop': ScShop.options.component, '/app/slow-cast/logbook': ScLogbook.options.component, '/app/slow-cast/settings': ScSettings.options.component, '/app/slow-cast/rankings': ScRankings.options.component, '/app/slow-cast/achievements': ScAchievements.options.component };
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);

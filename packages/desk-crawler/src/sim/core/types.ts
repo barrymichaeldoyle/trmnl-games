@@ -18,6 +18,9 @@ export type ItemKind = GearKind | 'potion' | 'material'
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic'
 /** How carefully the hero looks after itself between fights (D76). */
 export type StanceId = 'cautious' | 'balanced' | 'bold'
+
+/** P37: a hero's class. An account holds at most one hero of each. */
+export type HeroClass = 'warrior' | 'rogue'
 export type LogKind =
   | 'combat'
   | 'loot'
@@ -140,6 +143,24 @@ export interface SharedNarrative {
 }
 
 /** One stance: the sustain thresholds it replaces (D76). The balanced stance mirrors the catalog constants. */
+/**
+ * P37: what a class changes, applied at the places stats already resolve: its modifiers join the affix and effect
+ * totals, its HP share scales maximum HP, and its raid edge adds to its side of every raid contest.
+ */
+export interface ClassRule {
+  readonly id: HeroClass
+  readonly name: string
+  /** One line for the roster: who the class is. */
+  readonly blurb: string
+  /** The passive's name and what it does, as the companion shows it. */
+  readonly passive: { readonly name: string; readonly blurb: string }
+  /** Maximum HP as a share of the level's base (100 leaves it untouched). */
+  readonly hpPct: number
+  readonly modifiers: Modifiers
+  /** Percentage points on the class's side of a raid contest, raiding or defending. */
+  readonly raidEdgePct: number
+}
+
 export interface StanceRule {
   readonly id: StanceId
   readonly name: string
@@ -337,8 +358,9 @@ export interface TodoRule {
 }
 
 /** P35: features that arrive at a level. Below it a hero behaves as under a catalog without that feature's rules. */
-export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids'
-export type UnlockRule = Readonly<Record<UnlockableFeature, number>>
+export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids' | 'roster'
+/** P37: `roster` is optional, so catalogs before it simply never open the roster. */
+export type UnlockRule = Readonly<Record<Exclude<UnlockableFeature, 'roster'>, number>> & { readonly roster?: number }
 
 /** P35: what a career rung asks for, over the same bounded state achievements read. */
 export type CareerPredicate =
@@ -409,6 +431,8 @@ export interface RaidTarget {
   readonly gold: number
   /** The target's own thrifty points (D81), so its gold loss is the one it would take at home. */
   readonly goldLossPct?: number
+  /** P37: the target's class raid edge, so the contest reads both classes; absent means none. */
+  readonly classEdgePct?: number
 }
 
 /** A raid this hero launched, for the adapter's ledger; the target applies it at its next evaluation. */
@@ -556,6 +580,8 @@ export interface ContentCatalog {
   readonly bagLadder: BagLadder
   /** Absent in catalogs before v3: every hero then behaves as balanced. */
   readonly stances?: Readonly<Record<StanceId, StanceRule>>
+  /** P37: every class's rule; absent means every hero plays as the untouched Warrior. */
+  readonly classes?: Readonly<Record<HeroClass, ClassRule>>
   /** Absent before v4 (D77/D78). */
   readonly potionPouch?: PotionPouch
   readonly merchant?: MerchantRule
@@ -652,7 +678,7 @@ export type NumericCounter = Exclude<keyof HeroCounters, 'monsterWins' | 'biomes
 
 export interface HeroState {
   readonly id: string
-  readonly class: 'warrior'
+  readonly class: HeroClass
   readonly level: number
   /** XP toward the next level. */
   readonly xp: number

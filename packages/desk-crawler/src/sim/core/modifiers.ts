@@ -1,5 +1,5 @@
-import { deriveStats, type DerivedStats } from './stats'
-import type { ActiveEffect, AffixRule, ContentCatalog, EffectRule, HeroState, ItemSnapshot, Modifiers } from './types'
+import { classRule, deriveStats, type DerivedStats } from './stats'
+import type { ActiveEffect, AffixRule, ContentCatalog, EffectRule, HeroClass, HeroState, ItemSnapshot, Modifiers } from './types'
 
 /**
  * Affix and effect resolution (D80/D81): one place sums every active modifier and derives the stats the hero fights
@@ -38,9 +38,9 @@ const add = (total: Modifiers, more: Modifiers): Modifiers => ({
   goldLossPct: (total.goldLossPct ?? 0) + (more.goldLossPct ?? 0),
 })
 
-/** Every modifier in play: the equipped items' affixes plus the hero's live effects. */
-export function activeModifiers(content: ContentCatalog, hero: Pick<HeroState, 'weaponId' | 'armorId' | 'effects'>, inventory: readonly ItemSnapshot[], tick: number): Required<Modifiers> {
-  let total: Modifiers = {}
+/** Every modifier in play: the hero's class (P37), the equipped items' affixes and the hero's live effects. */
+export function activeModifiers(content: ContentCatalog, hero: Pick<HeroState, 'weaponId' | 'armorId' | 'effects'> & { readonly class?: HeroClass }, inventory: readonly ItemSnapshot[], tick: number): Required<Modifiers> {
+  let total: Modifiers = classRule(content, hero.class)?.modifiers ?? {}
   for (const id of [hero.weaponId, hero.armorId]) {
     const item = id === undefined ? undefined : inventory.find((candidate) => candidate.id === id)
     const affix = affixById(content, item?.affixId)
@@ -57,8 +57,8 @@ export function activeModifiers(content: ContentCatalog, hero: Pick<HeroState, '
 export const scaled = (amount: number, pct: number): number => (amount <= 0 ? amount : Math.max(1, Math.floor((amount * (100 + pct)) / 100)))
 
 /** Derived stats with affixes and effects applied: what the hero actually fights with. */
-export function effectiveStats(content: ContentCatalog, hero: Pick<HeroState, 'level' | 'weaponId' | 'armorId' | 'effects'>, inventory: readonly ItemSnapshot[], tick: number): DerivedStats & { readonly modifiers: Required<Modifiers> } {
-  const base = deriveStats(hero, inventory)
+export function effectiveStats(content: ContentCatalog, hero: Pick<HeroState, 'level' | 'weaponId' | 'armorId' | 'effects'> & { readonly class?: HeroClass }, inventory: readonly ItemSnapshot[], tick: number): DerivedStats & { readonly modifiers: Required<Modifiers> } {
+  const base = deriveStats(hero, inventory, content)
   const modifiers = activeModifiers(content, hero, inventory, tick)
   return { ...base, attack: scaled(base.attack, modifiers.attackPct), defense: scaled(base.defense, modifiers.defensePct), modifiers }
 }

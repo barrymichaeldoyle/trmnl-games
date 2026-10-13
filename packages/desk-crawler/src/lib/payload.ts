@@ -2,8 +2,9 @@
  * Canonical TRMNL payload v1 (trmnl.md). Pure mapping: no reads, clocks, RNG or
  * writes. The caller supplies `now` and already-authorized, bounded inputs.
  */
-import type { ContentCatalog, StanceId } from '../sim/core/types'
-import { baseAttack, baseDefense, maxHp, xpToLeave } from '../sim/core/stats'
+import type { ContentCatalog, HeroClass, StanceId } from '../sim/core/types'
+import { baseAttack, baseDefense, classRule, heroMaxHp, xpToLeave } from '../sim/core/stats'
+import { scaled } from '../sim/core/modifiers'
 import { FULL_SCALE, LARGE_SCALE, MEDIUM_SCALE, SMALL_SCALE } from '../art/scene'
 import { QR_LARGE_SCALE, QR_SCALE, qrBasePath, qrPath, type QrTarget } from '../art/qr'
 import { sceneFor, scenePath, type LatestEvent } from '../art/sceneKey'
@@ -51,6 +52,8 @@ export interface PayloadHero {
   readonly choiceExpiresAtTick?: number
   /** D76: absent means balanced. */
   readonly stance?: StanceId
+  /** P37: absent means warrior. */
+  readonly class?: HeroClass
 }
 
 export interface PayloadInput {
@@ -312,7 +315,8 @@ export function buildPayload(input: PayloadInput) {
   }
 
   const stance = content.stances?.[hero.stance ?? 'balanced']
-  const max = maxHp(hero.level)
+  const max = heroMaxHp(content, hero)
+  const classMods = classRule(content, hero.class)?.modifiers ?? {}
   const xpToNext = xpToLeave(hero.level)
   const eta = (deadline: number | undefined) => (deadline === undefined ? 0 : Math.max(0, deadline - hero.lastTick))
   // Area names carry bold marks, rendered by the templates like log summaries.
@@ -393,13 +397,13 @@ export function buildPayload(input: PayloadInput) {
     home_qr_base: input.artBaseUrl ? `${input.artBaseUrl}${qrBasePath('home')}` : '',
     corner_qr_base: input.artBaseUrl ? `${input.artBaseUrl}${qrBasePath('corner')}` : '',
     first_run: firstRun,
-    ...sceneUrls(hero.biomeId, sceneFor(hero.status, hero.wakeAtTick !== undefined, input.latestEvent)),
+    ...sceneUrls(hero.biomeId, sceneFor(hero.status, hero.wakeAtTick !== undefined, input.latestEvent, hero.class)),
     hero_tick: hero.lastTick,
     hero_updated_at: hero.lastAdvancedAt === undefined ? null : iso(hero.lastAdvancedAt),
     data_state: hero.quarantined || servicePaused ? ('service_paused' as const) : ('ready' as const),
     hero_name: hero.name,
     owner_name: input.ownerAlias ?? '',
-    class: 'warrior',
+    class: hero.class ?? 'warrior',
     level: hero.level,
     xp: hero.xp,
     xp_to_next: xpToNext,
@@ -408,8 +412,8 @@ export function buildPayload(input: PayloadInput) {
     max_hp: max,
     hp_pct: clampPct(Math.round((hero.hp * 100) / max)),
     // The same derived stats the companion HUD shows (deriveStats): level base plus the equipped gear bonus.
-    attack: baseAttack(hero.level) + input.weaponAttack,
-    defense: baseDefense(hero.level) + input.armorDefense,
+    attack: scaled(baseAttack(hero.level) + input.weaponAttack, classMods.attackPct ?? 0),
+    defense: scaled(baseDefense(hero.level) + input.armorDefense, classMods.defensePct ?? 0),
     gold: hero.gold,
     status: hero.status,
     status_label: statusLabel,

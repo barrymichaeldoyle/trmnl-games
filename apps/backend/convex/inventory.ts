@@ -4,7 +4,7 @@ import type { Doc, Id } from './_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server'
 import { appError } from './lib/errors'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
-import { maxHp, pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
+import { heroMaxHp, pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { bagUsed, currentTier, guaranteedTierIndex, isBagFull, nextEarlyTier, nextTier } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { currentPouchTier, guaranteedPouchIndex, nextEarlyPouchTier, nextPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
 import { starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
@@ -206,7 +206,7 @@ export const mine = query({
       heldItemId: hero.heldItemId ?? null,
       potions: potionsHeld(items),
       // D131: one entry per strength in catalog order (count 0 included), and the combine recipe with what it would make.
-      potionRows: potionStrengths(content).map((strength) => ({ templateId: strength.templateId, name: strength.name, healPct: strength.healPct, heals: Math.min(maxHp(hero.level), pctOf(maxHp(hero.level), strength.healPct)), count: items.find((item) => item.kind === 'potion' && item.templateId === strength.templateId)?.quantity ?? 0 })),
+      potionRows: potionStrengths(content).map((strength) => ({ templateId: strength.templateId, name: strength.name, healPct: strength.healPct, heals: Math.min(heroMaxHp(content, hero), pctOf(heroMaxHp(content, hero), strength.healPct)), count: items.find((item) => item.kind === 'potion' && item.templateId === strength.templateId)?.quantity ?? 0 })),
       potionCombine: combineView(content, items, held),
       canResume: hero.status === 'sleeping' && hero.heldItemId === undefined && !bagFull(hero, items) && hero.wakeAtTick === undefined,
       gear: items
@@ -266,9 +266,9 @@ export const usePotion = mutation({
     await runIntent(ctx, args.operationId, 'inventory.usePotion', { ...(args.templateId === undefined ? {} : { templateId: args.templateId }) }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
       if (hero.status !== 'exploring' && hero.status !== 'resting' && hero.status !== 'travelling') throw appError('INVALID_STATE', 'Potions can be used while exploring, resting or travelling.')
-      const max = maxHp(hero.level)
-      if (hero.hp >= max) throw appError('FULL_HP', 'Your hero is already at full health.')
       const content = await contentOf(ctx)
+      const max = heroMaxHp(content, hero)
+      if (hero.hp >= max) throw appError('FULL_HP', 'Your hero is already at full health.')
       const rows = (await heroItems(ctx, hero._id)).filter((item) => item.kind === 'potion').map((item) => ({ ...item, id: item._id as string }))
       const chosen = args.templateId === undefined || content.potions === undefined
         ? bestFitPotion(content, rows, hero.hp, max)

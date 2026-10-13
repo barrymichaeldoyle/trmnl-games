@@ -9,7 +9,7 @@ import { internal } from './_generated/api'
 import type { Doc, Id } from './_generated/dataModel'
 import { action, internalMutation, mutation, query, type MutationCtx } from './_generated/server'
 
-import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
+import { createHero } from './lib/heroCreate'
 import { appError } from './lib/errors'
 import { sha256Hex } from './lib/hash'
 import { ALIAS_RULE, HERO_NAME_RULE, normalizeAlias, validateName, validateTimezone } from './lib/names'
@@ -177,52 +177,7 @@ export const linkInstall = internalMutation({
 
 /** Pending Warrior + starter kit + welcome log. Initialization, not an earned reward; no rank or simulation until activation. */
 async function prepareHero(ctx: MutationCtx, user: Doc<'users'>, name: string, now: number): Promise<Id<'heroes'>> {
-  const world = await getOrCreateWorld(ctx)
-  // The world's pinned catalog decides the starting bag, so a hero never starts on rules its ticks do not use.
-  const content = worldContent(world)
-  const base = starterHero('pending', content, world.currentTick)
-  const heroId = await ctx.db.insert('heroes', {
-    userId: user._id,
-    name,
-    class: 'warrior',
-    createdAt: now,
-    isActive: true,
-    schemaVersion: 1,
-    activationState: 'pending_trmnl',
-    level: base.level,
-    xp: base.xp,
-    lifetimeXp: base.lifetimeXp,
-    hp: base.hp,
-    gold: base.gold,
-    lastLevelUpTick: world.currentTick,
-    status: base.status,
-    biomeId: base.biomeId,
-    bagCapacity: base.bagCapacity,
-    eligibleFromTick: world.currentTick + 1,
-    lastTick: world.currentTick,
-    lastProgressTick: world.currentTick,
-    logSequence: 1,
-    simulationState: 'healthy',
-    counters: base.counters,
-    scoreHourXp: 0,
-  })
-  const kit = starterKit(content)
-  const weaponId = await ctx.db.insert('items', { ...kit.weapon, heroId, createdAt: now })
-  const armorId = await ctx.db.insert('items', { ...kit.armor, heroId, createdAt: now })
-  await ctx.db.insert('items', { ...kit.potions, heroId, createdAt: now })
-  await ctx.db.patch(heroId, { weaponId, armorId })
-  await setCurrentHero(ctx, user, heroId)
-  await ctx.db.insert('tickLogs', {
-    heroId,
-    source: 'lifecycle',
-    sequence: 1,
-    at: now,
-    kind: 'system',
-    summary: 'Your shift begins in the [[Office Cubicles]].',
-    detail: { v: 1, operation: 'hero_created' },
-    deltas: { xpEarned: 0, gold: 0, hp: 0 },
-  })
-  return heroId
+  return await createHero(ctx, user, { name, heroClass: 'warrior', now, active: false })
 }
 
 const confirmResult = v.object({

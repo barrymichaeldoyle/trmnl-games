@@ -1,4 +1,4 @@
-import type { HeroState, ItemSnapshot } from './types'
+import type { ClassRule, ContentCatalog, HeroClass, HeroState, ItemSnapshot } from './types'
 
 /** Shared stat formulas (gameplay.md). Used by the simulator, intents and UI comparisons. */
 export const maxHp = (level: number): number => 100 + 12 * (level - 1)
@@ -9,6 +9,15 @@ import { xpToLeave } from '@trmnl-games/engine/levels'
 
 export const pctOf = (value: number, pct: number): number => Math.ceil((value * pct) / 100)
 
+/** P37: the class's rule under this catalog; undefined for a Warrior-only catalog, which plays every hero untouched. */
+export const classRule = (content: Pick<ContentCatalog, 'classes'>, heroClass: HeroClass | undefined): ClassRule | undefined => content.classes?.[heroClass ?? 'warrior']
+
+/** P37: maximum HP for this hero's level and class, floored, so a class at 100% is exactly the level's base. */
+export function heroMaxHp(content: Pick<ContentCatalog, 'classes'>, hero: { readonly level: number; readonly class?: HeroClass }): number {
+  const pct = classRule(content, hero.class)?.hpPct ?? 100
+  return Math.floor((maxHp(hero.level) * pct) / 100)
+}
+
 export interface DerivedStats {
   readonly maxHp: number
   readonly attack: number
@@ -16,11 +25,12 @@ export interface DerivedStats {
   readonly xpToNext: number
 }
 
-export function deriveStats(hero: Pick<HeroState, 'level' | 'weaponId' | 'armorId'>, inventory: readonly ItemSnapshot[]): DerivedStats {
+/** Level and gear only; a class's attack and defense shares apply with the other modifiers (`effectiveStats`). */
+export function deriveStats(hero: Pick<HeroState, 'level' | 'weaponId' | 'armorId'> & { readonly class?: HeroClass }, inventory: readonly ItemSnapshot[], content: Pick<ContentCatalog, 'classes'> = {}): DerivedStats {
   const weapon = hero.weaponId === undefined ? undefined : inventory.find((item) => item.id === hero.weaponId)
   const armor = hero.armorId === undefined ? undefined : inventory.find((item) => item.id === hero.armorId)
   return {
-    maxHp: maxHp(hero.level),
+    maxHp: heroMaxHp(content, hero),
     attack: baseAttack(hero.level) + (weapon?.attack ?? 0),
     defense: baseDefense(hero.level) + (armor?.defense ?? 0),
     xpToNext: xpToLeave(hero.level),
