@@ -16,7 +16,6 @@ const slowCastEngine = engineTables(SLOW_CAST_TABLES, ['landed', 'released', 'go
  */
 
 /** Where a launch-list signup came from: the share link, the signed-out QR pitch, the game page, the home page or a signed-in account. */
-export const waitlistSource = v.union(v.literal('notify'), v.literal('pitch'), v.literal('landing'), v.literal('home'), v.literal('account'))
 
 export const heroStatus = v.union(
   v.literal('exploring'),
@@ -718,19 +717,6 @@ export default defineSchema({
     .index('by_tokenIdentifier', ['tokenIdentifier'])
     .index('by_tokenHash', ['tokenHash'])
     .index('by_expiresAt', ['expiresAt']),
-
-  /** Desk Crawler launch list (D105): one email at marketplace approval, then the row is deleted. */
-  waitlist: defineTable({
-    email: v.string(),
-    source: waitlistSource,
-    state: v.union(v.literal('waiting'), v.literal('sending'), v.literal('failed')),
-    attempts: v.number(),
-    tokenIdentifier: v.optional(v.string()),
-    createdAt: v.number(),
-  })
-    .index('by_email', ['email'])
-    .index('by_state', ['state'])
-    .index('by_tokenIdentifier', ['tokenIdentifier']),
 
   /** Player feedback (D107): signed-in only, emailed to Barry, deleted with the account. */
   feedback: defineTable({

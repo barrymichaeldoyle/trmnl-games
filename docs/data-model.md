@@ -225,9 +225,9 @@ State-changing companion requests carry a generated operation ID. Successful res
 
 Proposed simple MVP table: `key`, `windowStart`, `count`, `expiresAt`; indexes `by_key_window[key,windowStart]`, `by_expires[expiresAt]`. Use bounded per-user/per-operation windows; see [API](api.md). A current Convex rate-limiter component may replace this table after inspection; record the decision before adding either implementation.
 
-### `waitlist` (D105)
+### `waitlist` (D105, removed)
 
-Fields: `email` (trimmed, lower-case), `source: notify | pitch | landing | home | account`, `state: waiting | sending | failed`, `attempts`, `tokenIdentifier?` (only when a signed-in player joined or attached), `createdAt`. Indexes `by_email`, `by_state`, `by_tokenIdentifier`. Rows exist only until Resend accepts the launch email, an unsubscribe, or deletion of the attached account. A batch is claimed (`sending`) before it is sent, so concurrent runs never double-send; three refused attempts park a row as `failed` until `waitlist:requeue`.
+The launch list's table held each address until the launch email was accepted. The email went to all 16 addresses on 2026-10-13, the table emptied itself, and the table, its functions and the account-deletion step for attached entries were removed the same day (D151).
 
 ### `feedback` (D107)
 

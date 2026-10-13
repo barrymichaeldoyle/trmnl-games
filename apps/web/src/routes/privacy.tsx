@@ -57,7 +57,7 @@ export const Route = createFileRoute('/privacy')({
         <li>The time zone offset your TRMNL sends with each screen (for example UTC+2), so Desk Crawler's morning stand-up follows your day. We keep only the latest one.</li>
         <li>Short-lived operational records such as rate-limit counters and duplicate-request receipts.</li>
         <li>When you request account deletion: your verified primary email, a hash of the confirmation link, and delivery status. The link expires after 30 minutes; expired requests are removed by daily cleanup.</li>
-        <li>If you join the Desk Crawler launch list: your email address, where you signed up and, if you joined while signed in, a link to your account. We use it for one email when Desk Crawler reaches the TRMNL marketplace, nothing else.</li>
+        <li>The Desk Crawler launch list held email addresses for one email when Desk Crawler reached the TRMNL marketplace. That email went out on 13 October 2026, every address was deleted, and the list is closed.</li>
         <li>If you send feedback: your message, the page you sent it from, your public name and a link to your account. It is emailed to the developer with your verified primary email as the reply address.</li>
       </ul>
 
@@ -92,7 +92,7 @@ export const Route = createFileRoute('/privacy')({
         <li><strong>PostHog EU</strong> handles optional usage analytics, error reports and masked session recordings for support and product improvements.</li>
         <li><strong>Sentry</strong> (United States) receives error reports from our website's server and the game backend, and from your browser if you allow analytics, so we can find and fix bugs. A report holds the page path or the name of the game function that failed, and the technical details of the error. It never includes your account, email address, IP address, cookies, form contents, URL query strings or installation codes and tokens.</li>
         <li><strong>Your browser's push service</strong> (Google for Chrome and Android, Apple for Safari, Mozilla for Firefox) delivers Desk Crawler alerts if you turn them on. It receives the alert encrypted, so it can't read it, along with the push address your browser created.</li>
-        <li><strong>Resend</strong> delivers the account deletion confirmation email to your verified primary address, the one launch email to the launch list, and feedback you send to the developer. It receives those addresses and the email contents.</li>
+        <li><strong>Resend</strong> delivers the account deletion confirmation email to your verified primary address, the launch email (sent once, on 13 October 2026), and feedback you send to the developer. It receives those addresses and the email contents.</li>
       </ul>
 
       <h2>How long we keep it</h2>
@@ -100,7 +100,7 @@ export const Route = createFileRoute('/privacy')({
         <li>Your shared account: until you delete it. Game progress: until you delete that game or your account.</li>
         <li>Detailed adventure log: three days. Run summaries: 30 days. Recent XP for rankings: seven days.</li>
         <li>Duplicate-request receipts: 24 hours. TRMNL connection attempts: under a day.</li>
-        <li>Launch list: until the launch email is sent, then deleted. You can leave earlier with the link in that email, from the companion if you joined signed in, or by emailing us. Deleting your account removes an entry you joined with it.</li>
+        <li>Launch list: deleted when the launch email went out on 13 October 2026. We keep no copy.</li>
         <li>Feedback: until you delete your account, or earlier on request. Copies already emailed to the developer are deleted on request.</li>
         <li>Alert settings and devices: until you turn alerts off, remove the device, or delete Desk Crawler or your account. A device whose push address stops working is removed automatically. Records of individual alerts: seven days.</li>
         <li>Backups: about a week, after which deleted data is gone from them too.</li>
