@@ -33,6 +33,7 @@ Implementation was authorized on 2026-10-03. This index includes the original pl
 | [Desk drawer](desk-drawer.md) | Built (D111, content v8) and removed (D123, content v11, 2026-10-12): the six-slot overflow that delayed inventory sleep; kept as the record of what shipped and why it went |
 | [Alerts](alerts.md) | Built (D114): opt-in web push only for a stopped hero and an affordable merchant bag or pouch |
 | [Slow Cast](slow-cast.md) | Built (D115, hidden until its listing): the second game, a passive pixel art fishing simulator; waters, species, gear ladders, shared weather, platform profile and the engine extraction it needs |
+| [Paper Lives](paper-lives.md) | Proposed (P43, 2026-10-13): the third game, a text-first life simulator with a large MVP; years on a minimum and a close, one decision a year, traits, pets, family, the will, finite lives, the album and family tree, record boards and photos; the engine it reuses and the versions after the MVP |
 | [Architecture](architecture.md) | Service boundaries, planned file structure, implementation spikes |
 | [Domain contracts](domain-contracts.md) | Pure-core input/output, adapter ownership, typed event details |
 | [Data model](data-model.md) | Planned Convex tables, fields, indexes, invariants, retention |
