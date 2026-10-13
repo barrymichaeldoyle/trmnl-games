@@ -12,12 +12,15 @@ const raidRow = v.object({
   at: v.number(),
   role: v.union(v.literal('raider'), v.literal('target')),
   rivalName: v.string(),
+  profile: v.boolean(),
   won: v.boolean(),
   gold: v.number(),
   hpLost: v.union(v.number(), v.null()),
   pending: v.boolean(),
   /** D139: a Friday the 13th mishap, which nobody won. */
   mishap: v.optional(v.literal(true)),
+  /** D143: the raider went after its owner's rival (on either side, the rivalry is the raider's). */
+  rival: v.optional(v.literal(true)),
 })
 
 /** D110: the signed-in owner's last five raids, both directions, and its lifetime record. Null without a hero. */

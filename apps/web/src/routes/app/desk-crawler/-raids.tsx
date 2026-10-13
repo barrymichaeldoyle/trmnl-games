@@ -5,13 +5,14 @@ import { SectionTitle } from '../../../lib/glyphs'
 import { PixelIcon } from './-pixelIcon'
 import { KIND_BADGE } from '../../../lib/palette'
 import { LocalTime } from '../../../lib/localTime'
+import { WithName } from './-withName'
 
-type Raid = { tick: number; at: number; role: 'raider' | 'target'; rivalName: string; won: boolean; gold: number; hpLost: number | null; pending: boolean; mishap?: true }
+type Raid = { tick: number; at: number; role: 'raider' | 'target'; rivalName: string; profile: boolean; won: boolean; gold: number; hpLost: number | null; pending: boolean; mishap?: true; rival?: true }
 
 /** One raid from this hero's side, in the log's own voice. */
 const describe = (raid: Raid) =>
-  raid.mishap ? (raid.role === 'raider' ? `A raid on ${raid.rivalName}'s desk went wrong` : `${raid.rivalName}'s raid went wrong`)
-  : raid.role === 'raider' ? (raid.won ? `Raided ${raid.rivalName}'s desk` : `Caught raiding ${raid.rivalName}'s desk`) : raid.won ? `Caught ${raid.rivalName} raiding` : `Raided by ${raid.rivalName}`
+  raid.mishap ? (raid.role === 'raider' ? 'A raid on {name}\'s desk went wrong' : '{name}\'s raid went wrong')
+  : raid.role === 'raider' ? (raid.won ? 'Raided {name}\'s desk' : 'Caught raiding {name}\'s desk') : raid.won ? 'Caught {name} raiding' : 'Raided by {name}'
 
 const when = (day: Date) => {
   const today = new Date()
@@ -56,9 +57,11 @@ export function Raids({ enabled }: { enabled: boolean }) {
             <li key={`${raid.role}-${raid.tick}-${raid.rivalName}`} className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3">
               <span aria-hidden="true" className={`grid size-8 place-items-center border-2 border-night ${KIND_BADGE.raid}`}><PixelIcon kind="raid" plain className="text-night" /></span>
               <div className="min-w-0">
-                <p className="pt-1">{describe(raid)}</p>
+                <p className="pt-1 break-words"><WithName text={describe(raid)} name={raid.rivalName} profile={raid.profile} /></p>
                 <p className="flex flex-wrap gap-x-3 text-xs font-semibold tabular-nums">
                   <span className={raid.won ? 'text-xp-ink' : 'text-hp-ink'}>{raid.mishap ? 'Mishap' : raid.won ? 'Won' : 'Lost'}</span>
+                  {/* D143: a raid that went after the raider's rival, told on both sides. */}
+                  {raid.rival ? <span className="text-gold-ink">{raid.role === 'raider' ? 'Your rival' : "You're their rival"}</span> : null}
                   <LocalTime className="text-muted" at={raid.at} format={when} />
                   <span className="text-gold-ink">{raid.won ? '+' : '−'}{raid.gold.toLocaleString()} gold</span>
                   {raid.hpLost !== null ? <span className="text-hp-ink">−{raid.hpLost} HP</span> : null}

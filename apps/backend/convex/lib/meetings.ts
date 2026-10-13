@@ -153,6 +153,8 @@ export async function recentMeetings(ctx: QueryCtx, heroId: Id<'heroes'>, limit:
         at: row._creationTime,
         role,
         rivalName: visible ? storedName : HIDDEN_RIVAL,
+        // D109/D141: the name links to the other player's page while it's public.
+        profile: visible && (await currentHero(ctx, other))?.publicProfile === true,
         rivalClass: role === 'starter' ? row.partnerClass : row.starterClass,
         kindId: row.kindId,
         biomeId: row.biomeId,

@@ -9,8 +9,8 @@ import { readWorld, worldContent } from './world'
 
 /**
  * Friends and rivals (D143, friends.md). One-way, silent follows of public hero pages, per account, with one rival
- * among them. Nothing here affects play, and nothing returns who follows a given player. Every read is bounded by
- * `MAX_FOLLOWS`.
+ * among them. A plain follow is never shown to the followed player; a rival is (`rivalOf`), and half the follower's
+ * raid launches go after the rival when it can be raided (`lib/raids.ts`). Every read is bounded by `MAX_FOLLOWS`.
  */
 export const MAX_FOLLOWS = 20
 
@@ -29,7 +29,12 @@ const followRow = v.object({
     v.null(),
     v.object({ name: v.string(), heroClass: v.union(v.literal('warrior'), v.literal('rogue')), level: v.number(), status: heroStatus, biome: v.union(v.null(), v.string()), rank: v.union(v.null(), v.number()) }),
   ),
+  /** Raids your heroes launched at this player while they were your rival, from your side. */
+  raids: v.object({ won: v.number(), lost: v.number() }),
 })
+
+/** A player who named this owner their rival: their public name, and whether their page can be followed back. */
+const rivalOfRow = v.object({ name: v.string(), public: v.boolean(), followed: v.boolean() })
 
 const HIDDEN = 'Hidden player'
 
@@ -51,21 +56,33 @@ const findFollow = (ctx: QueryCtx, user: Doc<'users'>, followedUserId: Doc<'user
 
 /** Follow the player behind a public hero page. Following again after their rename refreshes the stored name version. */
 export const follow = mutation({
-  args: { operationId: v.string(), alias: v.string() },
+  // `rival` follows and makes them the rival in one step: Rival back.
+  args: { operationId: v.string(), alias: v.string(), rival: v.optional(v.boolean()) },
   returns: intentResult,
   handler: async (ctx, args) =>
-    await runIntent(ctx, args.operationId, 'follows.follow', { alias: normalizeAlias(args.alias) }, async (user) => {
+    await runIntent(ctx, args.operationId, 'follows.follow', { alias: normalizeAlias(args.alias), rival: args.rival === true }, async (user) => {
       const target = await followable(ctx, args.alias)
       if (target === null || target._id === user._id) throw appError('PLAYER_NOT_FOUND', 'That hero page is private, or there is no player by that name.')
-      const existing = await findFollow(ctx, user, target._id)
-      if (existing !== null) {
-        if (existing.followedNameVersion === target.publicNameVersion) return { changed: false }
-        await ctx.db.patch(existing._id, { followedNameVersion: target.publicNameVersion })
-        return { changed: true }
+      const all = await followsOf(ctx, user)
+      let row = all.find((follow) => follow.followedUserId === target._id) ?? null
+      let changed = false
+      if (row === null) {
+        if (all.length >= MAX_FOLLOWS) throw appError('FOLLOW_LIMIT', `You can follow up to ${MAX_FOLLOWS} players. Unfollow someone first.`)
+        const id = await ctx.db.insert('follows', { userId: user._id, followedUserId: target._id, followedNameVersion: target.publicNameVersion, createdAt: Date.now() })
+        row = (await ctx.db.get(id))!
+        changed = true
+      } else if (row.followedNameVersion !== target.publicNameVersion) {
+        // A follow from before their rename is a new acquaintance: refresh the name and start the record over.
+        await ctx.db.patch(row._id, { followedNameVersion: target.publicNameVersion, rival: undefined, raidsWon: undefined, raidsLost: undefined })
+        row = { ...row, rival: undefined }
+        changed = true
       }
-      if ((await followsOf(ctx, user)).length >= MAX_FOLLOWS) throw appError('FOLLOW_LIMIT', `You can follow up to ${MAX_FOLLOWS} players. Unfollow someone first.`)
-      await ctx.db.insert('follows', { userId: user._id, followedUserId: target._id, followedNameVersion: target.publicNameVersion, createdAt: Date.now() })
-      return { changed: true }
+      if (args.rival === true && row.rival !== true) {
+        for (const other of all) if (other.rival && other._id !== row._id) await ctx.db.patch(other._id, { rival: undefined })
+        await ctx.db.patch(row._id, { rival: true })
+        changed = true
+      }
+      return { changed }
     }),
 })
 
@@ -113,7 +130,7 @@ export const setRival = mutation({
 /** The owner's follows, rival first then newest, and the owner's own level and rank for the rival's head-to-head. */
 export const list = query({
   args: {},
-  returns: v.union(v.null(), v.object({ follows: v.array(followRow), limit: v.number(), own: v.object({ level: v.number(), rank: v.union(v.null(), v.number()) }) })),
+  returns: v.union(v.null(), v.object({ follows: v.array(followRow), rivalOf: v.array(rivalOfRow), rivalOfMore: v.boolean(), limit: v.number(), own: v.object({ level: v.number(), rank: v.union(v.null(), v.number()) }) })),
   handler: async (ctx) => {
     const user = await currentUser(ctx)
     const own = await currentHero(ctx, user)
@@ -133,7 +150,7 @@ export const list = query({
         const owner = await ctx.db.get(row.followedUserId)
         const named = owner !== null && owner.state === 'active' && !owner.nameRepairRequired && owner.publicNameVersion === row.followedNameVersion
         const hero = named ? await currentHero(ctx, owner) : null
-        const base = { id: row._id, rival: row.rival === true }
+        const base = { id: row._id, rival: row.rival === true, raids: { won: row.raidsWon ?? 0, lost: row.raidsLost ?? 0 } }
         if (!named || hero === null || hero.activationState !== 'active') return { ...base, state: 'gone' as const, name: HIDDEN, hero: null }
         if (hero.publicProfile !== true) return { ...base, state: 'private' as const, name: owner.publicAlias, hero: null }
         return {
@@ -144,7 +161,20 @@ export const list = query({
         }
       }),
     )
-    return { follows, limit: MAX_FOLLOWS, own: { level: own.level, rank: await rankOf(own._id) } }
+    // Players who named this owner their rival, while that is still current: a renamed owner is a stranger again.
+    const named = await ctx.db.query('follows').withIndex('by_followedUserId_and_rival', (q) => q.eq('followedUserId', user._id).eq('rival', true)).take(MAX_FOLLOWS + 1)
+    const followedIds = new Set(rows.map((row) => row.followedUserId))
+    const rivalOf = (
+      await Promise.all(
+        named.slice(0, MAX_FOLLOWS).filter((row) => row.followedNameVersion === user.publicNameVersion).map(async (row) => {
+          const owner = await ctx.db.get(row.userId)
+          if (owner === null || owner.state !== 'active' || owner.nameRepairRequired) return null
+          const hero = await currentHero(ctx, owner)
+          return { name: owner.publicAlias, public: hero !== null && hero.activationState === 'active' && hero.publicProfile === true, followed: followedIds.has(owner._id) }
+        }),
+      )
+    ).filter((row) => row !== null)
+    return { follows, rivalOf, rivalOfMore: named.length > MAX_FOLLOWS, limit: MAX_FOLLOWS, own: { level: own.level, rank: await rankOf(own._id) } }
   },
 })
 
@@ -166,7 +196,7 @@ export const status = query({
 /** Deletion (D143): the player's own follows and every follow pointing at them, one batch per call. */
 export async function purgeFollowRows(ctx: MutationCtx, userId: Doc<'users'>['_id'], batch: number): Promise<number> {
   const own = await ctx.db.query('follows').withIndex('by_userId_and_followedUserId', (q) => q.eq('userId', userId)).take(batch)
-  const pointing = await ctx.db.query('follows').withIndex('by_followedUserId', (q) => q.eq('followedUserId', userId)).take(batch)
+  const pointing = await ctx.db.query('follows').withIndex('by_followedUserId_and_rival', (q) => q.eq('followedUserId', userId)).take(batch)
   const seen = new Set<string>()
   for (const row of [...own, ...pointing]) {
     if (seen.has(row._id)) continue

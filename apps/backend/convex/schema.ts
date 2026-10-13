@@ -524,17 +524,21 @@ export default defineSchema({
 
   /**
    * D143: one player following another's public hero page, per account. The followed player's public-name version
-   * is copied so a rename ends the follow; `by_followedUserId` serves deletion only, never a follower list.
+   * is copied so a rename ends the follow. `by_followedUserId_and_rival` serves deletion and the "named you their
+   * rival" list; no query lists plain followers.
    */
   follows: defineTable({
     userId: v.id('users'),
     followedUserId: v.id('users'),
     followedNameVersion: v.number(),
     rival: v.optional(v.literal(true)),
+    /** D143: raids this follower's heroes launched at the rival through the rival roll, by outcome. */
+    raidsWon: v.optional(v.number()),
+    raidsLost: v.optional(v.number()),
     createdAt: v.number(),
   })
     .index('by_userId_and_followedUserId', ['userId', 'followedUserId'])
-    .index('by_followedUserId', ['followedUserId']),
+    .index('by_followedUserId_and_rival', ['followedUserId', 'rival']),
 
   /**
    * D110 raid ledger: the raider writes one row in its own tick; the target applies it once at its next exploring
@@ -558,6 +562,8 @@ export default defineSchema({
     targetHpPct: v.number(),
     /** D139: a Friday the 13th mishap; `raiderWon` is false, `gold` is the raider's own loss and the target loses its own share. */
     mishap: v.optional(v.literal(true)),
+    /** D143: the raider went after its owner's rival. */
+    rival: v.optional(v.literal(true)),
     state: v.union(v.literal('pending'), v.literal('applied')),
     appliedTick: v.optional(v.number()),
     /** What the target actually lost or gained once applied (a loss is clamped to the gold it held). */

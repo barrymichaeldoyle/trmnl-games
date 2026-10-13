@@ -5,8 +5,9 @@ import { SectionTitle } from '../../../lib/glyphs'
 import { PixelIcon } from './-pixelIcon'
 import { KIND_BADGE } from '../../../lib/palette'
 import { LocalTime } from '../../../lib/localTime'
+import { WithName } from './-withName'
 
-type Meeting = { tick: number; at: number; role: 'starter' | 'partner'; rivalName: string; kindName: string; boon: string; floor: string; pending: boolean }
+type Meeting = { tick: number; at: number; role: 'starter' | 'partner'; rivalName: string; profile: boolean; kindName: string; boon: string; floor: string; pending: boolean }
 
 const when = (day: Date) => {
   const today = new Date()
@@ -15,7 +16,7 @@ const when = (day: Date) => {
 }
 
 /** "Coffee run with Quill", in the log's own voice. */
-const describe = (meeting: Meeting) => `${meeting.kindName} with ${meeting.rivalName}`
+const describe = (meeting: Meeting) => `${meeting.kindName} with {name}`
 
 /**
  * Meetings (D141): the lifetime count and the last five meetings either way. Like raids they need no hand, so this
@@ -45,7 +46,7 @@ export function Meetings({ enabled }: { enabled: boolean }) {
             <li key={`${meeting.role}-${meeting.tick}-${meeting.rivalName}`} className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3">
               <span aria-hidden="true" className={`grid size-8 place-items-center border-2 border-night ${KIND_BADGE.meeting}`}><PixelIcon kind="meeting" plain className="text-night" /></span>
               <div className="min-w-0">
-                <p className="pt-1 break-words">{describe(meeting)}</p>
+                <p className="pt-1 break-words"><WithName text={describe(meeting)} name={meeting.rivalName} profile={meeting.profile} /></p>
                 <p className="flex flex-wrap gap-x-3 text-xs font-semibold tabular-nums">
                   {meeting.boon ? <span className="text-sky-ink">{meeting.boon}</span> : null}
                   <span className="text-muted">{meeting.floor}</span>

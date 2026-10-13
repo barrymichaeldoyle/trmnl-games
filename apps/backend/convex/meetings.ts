@@ -14,6 +14,7 @@ const meetingRow = v.object({
   at: v.number(),
   role: v.union(v.literal('starter'), v.literal('partner')),
   rivalName: v.string(),
+  profile: v.boolean(),
   rivalClass: v.union(v.literal('warrior'), v.literal('rogue')),
   kindId: v.string(),
   biomeId: v.string(),

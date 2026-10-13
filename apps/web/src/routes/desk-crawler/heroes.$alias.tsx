@@ -124,7 +124,7 @@ function Found({ profile }: { profile: Profile }) {
 
 /**
  * D143: Follow, then Following with Make rival and Unfollow, for a signed-in player with a hero. Nothing for a
- * visitor, on your own page, or when the page can't be followed. The followed player is never told.
+ * visitor, on your own page, or when the page can't be followed. A follow is silent; a rival is told on their card.
  */
 function FollowControls({ alias }: { alias: string }) {
   const { data: status } = useQuery(convexQuery(api.follows.status, { alias }))
@@ -139,7 +139,7 @@ function FollowControls({ alias }: { alias: string }) {
       {status.followId === null ? (
         <>
           <div><Button icon="eye" pending={follow.pending} busyLabel="Following…" disabled={status.full || busy} onClick={() => follow.run({ alias }, `Following ${alias}. Find them under Rankings.`)}>Follow</Button></div>
-          <p className="text-sm text-muted">{status.full ? 'You follow 20 players already. Unfollow someone under Rankings first.' : 'Keep an eye on this hero from your Rankings page. They aren\'t told.'}</p>
+          <p className="text-sm text-muted">{status.full ? 'You follow 20 players already. Unfollow someone under Rankings first.' : 'Keep an eye on this hero from your Rankings page. They aren\'t told unless you make them your rival.'}</p>
         </>
       ) : (
         <>

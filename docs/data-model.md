@@ -75,7 +75,7 @@ Fields: `starterHeroId`, `starterUserId`, `starterName`, `starterNameVersion`, `
 
 ### `follows` (D143)
 
-Fields: `userId` (the follower), `followedUserId`, `followedNameVersion` (the followed player's public-name version when followed; a mismatch reads as gone, so a rename ends the follow), `rival?: true` (at most one per follower), `createdAt`. Indexes: `by_userId_and_followedUserId` (the owner's list, at most 20 rows) and `by_followedUserId` (deletion only; no query lists a player's followers). Desk Crawler progress deletion and account deletion remove both directions in batches. See [friends](friends.md).
+Fields: `userId` (the follower), `followedUserId`, `followedNameVersion` (the followed player's public-name version when followed; a mismatch reads as gone, so a rename ends the follow), `rival?: true` (at most one per follower), `raidsWon?`, `raidsLost?` (rival raids from the follower's side), `createdAt`. Indexes: `by_userId_and_followedUserId` (the owner's list, at most 20 rows) and `by_followedUserId_and_rival` (deletion, and the "named you their rival" list; no query lists plain followers). The `raids` ledger gains `rival?: true` for a raid the rival roll aimed. Desk Crawler progress deletion and account deletion remove both directions in batches. See [friends](friends.md).
 
 ### `raids` (D110)
 

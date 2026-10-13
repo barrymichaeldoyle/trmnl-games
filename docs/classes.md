@@ -59,7 +59,7 @@ Classes live in the catalog as a `classes` rule (stat percentages, passive modif
 
 - **TRMNL.** The payload's `class` becomes the hero's class; the hero card and scene draw the class sprite. That is a template change: under the sync bot, the ZIP upload to trmnl.com goes with it. Top rows keep showing each row's class instead of the hard-coded `'warrior'`.
 - **Companion.** A Roster page under More (current hero, parked heroes with level and where they wait, recruit cards); the Hero page header gains a small switch control once a second hero exists; the switch uses the existing confirm sheet.
-- **Public profiles.** Stay per hero; a parked hero's page says it is parked.
+- **Public profiles.** The switch stays per hero, but the page at `/desk-crawler/heroes/<public name>` always shows the account's current hero, so a parked hero has no page of its own. Switching to a hero whose page is off makes the page private until that hero turns it on. (Corrected 2026-10-13: the spec first said a parked hero's page would say it is parked; the build never did that, since the page is addressed by the player's name, not the hero.)
 
 ## Work slices
 
