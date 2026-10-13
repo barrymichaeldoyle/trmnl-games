@@ -523,6 +523,20 @@ export default defineSchema({
     .index('by_state_and_tick', ['state', 'tick']),
 
   /**
+   * D143: one player following another's public hero page, per account. The followed player's public-name version
+   * is copied so a rename ends the follow; `by_followedUserId` serves deletion only, never a follower list.
+   */
+  follows: defineTable({
+    userId: v.id('users'),
+    followedUserId: v.id('users'),
+    followedNameVersion: v.number(),
+    rival: v.optional(v.literal(true)),
+    createdAt: v.number(),
+  })
+    .index('by_userId_and_followedUserId', ['userId', 'followedUserId'])
+    .index('by_followedUserId', ['followedUserId']),
+
+  /**
    * D110 raid ledger: the raider writes one row in its own tick; the target applies it once at its next exploring
    * or resting evaluation. Names are copied with their public-name versions so reads can mask a repaired name.
    */

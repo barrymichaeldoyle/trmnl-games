@@ -10,8 +10,9 @@ import { preload } from '../../../lib/preload'
 import { levelGroup } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { LocalTime } from '../../../lib/localTime'
 import { Records } from './-records'
+import { FollowingCard } from './-following'
 
-export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: () => seo({ title: 'Rankings', index: false }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {})), component: Leaderboard })
+export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: () => seo({ title: 'Rankings', index: false }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
 
 type Board = 'recent_7d' | 'recent_24h' | 'overall'
 const TABS: Array<{ board: Board; label: string }> = [
@@ -108,6 +109,8 @@ function Leaderboard() {
           {data.totalPlayers > data.entries.length ? <p className="mt-3 text-sm text-muted">Top {data.entries.length} of {data.totalPlayers.toLocaleString()} heroes.</p> : null}
         </Card>
       )}
+      {/* D143: the players this account follows, rival first, between the board and the records. */}
+      <FollowingCard />
       {/* The lifetime counts sit under the board (D124): standing and records are one subject. */}
       {hero ? <Records counters={hero.counters} lifetimeXp={hero.lifetimeXp} withRank={false} /> : null}
     </>

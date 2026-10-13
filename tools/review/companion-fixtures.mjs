@@ -308,6 +308,14 @@ const queries = {
   'trmnlPayload:mine': () => undefined,
   'raids:recent': () => data.raids,
   'meetings:recent': () => data.meetings,
+  // D143: follows=1 lists four followed players (a rival, a public hero, a hidden page, a renamed player); follow=following|rival|full sets the hero page's button.
+  'follows:list': () => flag('follows') ? { limit: 20, own: { level: hero.level, rank: 9 }, follows: [
+    { id: 'f1', rival: true, state: 'public', name: 'Quillfeather_Longname', hero: { name: 'Sir Staplesworth the Unbending', heroClass: 'rogue', level: hero.level + 2, status: 'exploring', biome: 'Parking Garage', rank: 4 } },
+    { id: 'f2', rival: false, state: 'public', name: 'Mo', hero: { name: 'Biscuit', heroClass: 'warrior', level: 3, status: 'resting', biome: 'Break Room', rank: 27 } },
+    { id: 'f3', rival: false, state: 'private', name: 'Bea', hero: null },
+    { id: 'f4', rival: false, state: 'gone', name: 'Hidden player', hero: null },
+  ] } : { limit: 20, own: { level: hero.level, rank: 9 }, follows: [] },
+  'follows:status': () => params.get('follow') === 'none' ? null : { followId: ['following', 'rival'].includes(params.get('follow')) ? 'f1' : null, rival: params.get('follow') === 'rival', full: params.get('follow') === 'full' },
   // The public hero page (D109) from the same fictional hero; raids=1 adds a raid record, private=1 reads as not found.
   'profiles:view': (args) => flag('private') ? null : { alias: args.alias, heroName: hero.name, heroClass: 'warrior', level: hero.level, status: hero.status, biome: 'Server Room', scenePath: hero.scenePath, adventuringSince: Date.now() - 86400000 * 12, rank: { rank: 3, totalPlayers: 41 }, lifetime: { combatWins: hero.counters.combatWins, itemsFound: hero.counters.itemsFound, trips: hero.counters.trips ?? 4, rescues: hero.counters.rescues, epicFinds: hero.counters.epicFinds ?? 1 }, raids: raidsOn ? { won: 5, failed: 4, repelled: 4, lost: 3 } : { won: 0, failed: 0, repelled: 0, lost: 0 }, achievements: data.achievements.families.filter((f) => f.earned).slice(0, 4).map((f) => ({ id: f.earned.id, tier: f.earned.tier, name: f.earned.name, blurb: f.earned.blurb, family: f.name })), rarity: null, achievementCount: data.achievements.unlocked.length },
 };

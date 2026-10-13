@@ -41,6 +41,9 @@ export const Route = createFileRoute('/privacy')({
       <p>
         If you turn on your Desk Crawler hero page in Settings, anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gear, gold, the adventure log and your account details stay private. The page is off until you turn it on, and turning it off hides it straight away.
       </p>
+      <p>
+        Signed-in players can follow a public hero page. We store who follows whom so their companion can list the players they follow. Nobody is told they were followed, and no page shows who follows a player. If you change your public name, hide your page or delete your progress, other players stop seeing your hero in their list, and deleting removes those records.
+      </p>
 
       <h2>What we store</h2>
       <ul>

@@ -6,7 +6,8 @@ import { tierLabel } from '@trmnl-games/desk-crawler/content/achievements'
 import { SiteShell } from '../../lib/prose'
 import { artUrl } from '../../lib/intent'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
-import { Card } from '../../lib/ui'
+import { Button, Card, NoticeBar, useNotice } from '../../lib/ui'
+import { useIntent } from '../../lib/intent'
 import { Rarity } from '../app/desk-crawler/-achievements'
 
 type Profile = {
@@ -93,6 +94,7 @@ function Found({ profile }: { profile: Profile }) {
         </p>
         <p>{STATUS[profile.status](profile.biome ?? 'office')}. Adventuring since {since}.</p>
       </header>
+      <FollowControls alias={profile.alias} />
       <img src={artUrl(profile.scenePath)} alt={`${profile.heroName} in the ${profile.biome ?? 'office'}`} width={760} height={200} className="w-full border-[3px] border-night bg-cream [image-rendering:pixelated]" />
       <Card title="Lifetime">
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
@@ -117,5 +119,39 @@ function Found({ profile }: { profile: Profile }) {
         )}
       </Card>
     </>
+  )
+}
+
+/**
+ * D143: Follow, then Following with Make rival and Unfollow, for a signed-in player with a hero. Nothing for a
+ * visitor, on your own page, or when the page can't be followed. The followed player is never told.
+ */
+function FollowControls({ alias }: { alias: string }) {
+  const { data: status } = useQuery(convexQuery(api.follows.status, { alias }))
+  const { notice, notify, dismiss } = useNotice()
+  const follow = useIntent(api.follows.follow, { onFeedback: notify })
+  const unfollow = useIntent(api.follows.unfollow, { onFeedback: notify })
+  const rival = useIntent(api.follows.setRival, { onFeedback: notify })
+  if (!status) return null
+  const busy = follow.pending || unfollow.pending || rival.pending
+  return (
+    <div className="flex flex-col gap-2">
+      {status.followId === null ? (
+        <>
+          <div><Button icon="eye" pending={follow.pending} busyLabel="Following…" disabled={status.full || busy} onClick={() => follow.run({ alias }, `Following ${alias}. Find them under Rankings.`)}>Follow</Button></div>
+          <p className="text-sm text-muted">{status.full ? 'You follow 20 players already. Unfollow someone under Rankings first.' : 'Keep an eye on this hero from your Rankings page. They aren\'t told.'}</p>
+        </>
+      ) : (
+        <>
+          <p className="font-semibold">{status.rival ? `Following ${alias}, your rival.` : `Following ${alias}.`}</p>
+          <div className="-ml-3 flex flex-wrap gap-x-2 min-[375px]:-ml-4">
+            <Button variant="quiet" disabled={busy} onClick={() => rival.run({ followId: status.rival ? null : status.followId }, status.rival ? 'Rival cleared.' : `${alias} is your rival.`)}>{status.rival ? 'Clear rival' : 'Make rival'}</Button>
+            <Button variant="quiet" disabled={busy} onClick={() => unfollow.run({ followId: status.followId! }, `Unfollowed ${alias}.`)}>Unfollow</Button>
+            <Link to="/app/desk-crawler/leaderboard" className="inline-flex min-h-11 items-center font-semibold text-muted underline underline-offset-4">Everyone you follow</Link>
+          </div>
+        </>
+      )}
+      <NoticeBar notice={notice} onDismiss={dismiss} />
+    </div>
   )
 }

@@ -5,6 +5,7 @@ import { purgeAngler } from './slowCast/purge'
 import { gameSlug as gameSlugValidator } from './schema'
 import { purgeRaidRows } from './lib/raids'
 import { purgeMeetingRows } from './lib/meetings'
+import { purgeFollowRows } from './follows'
 import { purgeAlertRows, purgeGameAlertRows } from './alerts'
 import { v } from 'convex/values'
 import { internal } from './_generated/api'
@@ -148,7 +149,8 @@ export const purgeGameStep = internalMutation({
     const keepsakes = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', job.userId)).take(BATCH)
     const unlocks = await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', job.userId)).take(BATCH)
     // P33: Desk Crawler's alert switches and outbox rows; devices and quiet hours are shared with Slow Cast (D115).
-    if (await deleteBatch(ctx, keepsakes) + await deleteBatch(ctx, unlocks) + await purgeGameAlertRows(ctx, job.userId, 'desk-crawler', BATCH) > 0) return await again()
+    // D143: follows both ways go with Desk Crawler progress.
+    if (await deleteBatch(ctx, keepsakes) + await deleteBatch(ctx, unlocks) + await purgeGameAlertRows(ctx, job.userId, 'desk-crawler', BATCH) + await purgeFollowRows(ctx, job.userId, BATCH) > 0) return await again()
     const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', DESK_CRAWLER)).take(BATCH)
     const legacy = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', undefined)).take(BATCH)
     if (await deleteBatch(ctx, receipts) + await deleteBatch(ctx, legacy) > 0) return await again()
@@ -261,7 +263,7 @@ export const purgeStep = internalMutation({
       case 'gameplay': {
         const keepsakes = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', job.userId!)).take(BATCH)
         const unlocks = await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', job.userId!)).take(BATCH)
-        if ((await deleteBatch(ctx, keepsakes)) + (await deleteBatch(ctx, unlocks)) + (await purgeAlertRows(ctx, job.userId, BATCH)) > 0) return await again()
+        if ((await deleteBatch(ctx, keepsakes)) + (await deleteBatch(ctx, unlocks)) + (await purgeAlertRows(ctx, job.userId, BATCH)) + (await purgeFollowRows(ctx, job.userId!, BATCH)) > 0) return await again()
         const profile = await gameProfile(ctx, job.userId)
         // P37: every hero on the roster, current or parked. Copied names in published boards are masked by owner
         // state and rotate out within two publications.

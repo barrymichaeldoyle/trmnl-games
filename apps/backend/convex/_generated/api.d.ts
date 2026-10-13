@@ -18,6 +18,7 @@ import type * as crons from "../crons.js";
 import type * as deletion from "../deletion.js";
 import type * as devSeed from "../devSeed.js";
 import type * as feedback from "../feedback.js";
+import type * as follows from "../follows.js";
 import type * as heroes from "../heroes.js";
 import type * as http from "../http.js";
 import type * as incidents from "../incidents.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   deletion: typeof deletion;
   devSeed: typeof devSeed;
   feedback: typeof feedback;
+  follows: typeof follows;
   heroes: typeof heroes;
   http: typeof http;
   incidents: typeof incidents;

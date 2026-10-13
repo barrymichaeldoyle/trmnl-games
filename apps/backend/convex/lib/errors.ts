@@ -50,6 +50,9 @@ export type ErrorCode =
   /** D142: the public name changed within the last 30 days, or today's name tag is sold. */
   | 'NAME_CHANGE_LIMIT'
   | 'NAME_TAG_SOLD_OUT'
+  /** D143: the hero page to follow is private or missing (one shape for both), or the account follows 20 already. */
+  | 'PLAYER_NOT_FOUND'
+  | 'FOLLOW_LIMIT'
   | 'RECAP_CHANGED'
   | 'DELETION_CONFIRMATION_REQUIRED'
   | 'DELETION_LINK_EXPIRED'
