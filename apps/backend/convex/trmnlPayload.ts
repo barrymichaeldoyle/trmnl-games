@@ -27,12 +27,15 @@ import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
  * read budget"). Returns null for any authorization failure; the HTTP layer
  * answers a generic 404. Read-only: confirmation/activation happen before this.
  */
+/** How often a screen request may refresh an instance's `lastScreenServedAt`. */
+export const SCREEN_SERVED_THROTTLE_MS = 60 * 60_000
+
 export const forInstance = internalQuery({
   args: { gameSlug: v.optional(v.literal('desk-crawler')), tokenHash: v.string(), uuid: v.string(), now: v.number(), instanceName: v.union(v.string(), v.null()), utcOffset: v.optional(v.union(v.number(), v.null())) },
   returns: v.union(
     v.null(),
     v.object({ outcome: v.literal('recoverable') }),
-    v.object({ outcome: v.literal('payload'), payload: v.any(), keepsakeCode: v.union(v.string(), v.null()), recordOffsetFor: v.optional(v.id('users')) }),
+    v.object({ outcome: v.literal('payload'), payload: v.any(), keepsakeCode: v.union(v.string(), v.null()), recordOffsetFor: v.optional(v.id('users')), screenServedFor: v.optional(v.id('trmnlInstances')) }),
   ),
   handler: async (ctx, args) => {
     const instance = await ctx.db
@@ -57,7 +60,10 @@ export const forInstance = internalQuery({
     const codeGrant = payload.status !== 'unlinked' && keepsakesOpen(args.now) && (!collection || collection.lastClaimWeek < week) ? await keepsakeGrant(ctx, user._id) : null
     // P31: the route stores the owner's offset only when it differs from the stored one, so most requests write nothing.
     const offsetChanged = args.utcOffset !== undefined && args.utcOffset !== null && args.utcOffset !== user.trmnlUtcOffset
-    return { outcome: 'payload' as const, payload, keepsakeCode: codeGrant ? keepsakeCode(codeGrant.tokenHash, user._id, week) : null, ...(offsetChanged ? { recordOffsetFor: user._id } : {}) }
+    // data-model.md: `lastScreenServedAt` is telemetry written at most once an hour per instance; the companion reads it to
+    // know TRMNL has fetched this installation's screen at least once.
+    const screenStale = instance.lastScreenServedAt === undefined || args.now - instance.lastScreenServedAt >= SCREEN_SERVED_THROTTLE_MS
+    return { outcome: 'payload' as const, payload, keepsakeCode: codeGrant ? keepsakeCode(codeGrant.tokenHash, user._id, week) : null, ...(offsetChanged ? { recordOffsetFor: user._id } : {}), ...(screenStale ? { screenServedFor: instance._id } : {}) }
   },
 })
 

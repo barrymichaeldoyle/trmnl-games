@@ -57,6 +57,20 @@ describe('weekly TRMNL keepsakes', () => {
     expect(await t.withIdentity({ issuer: 'issuer', subject: 'Nobody' }).query(api.keepsakes.mine, {})).toBeNull()
   })
 
+  it('records a served screen at most once an hour, and the hero says TRMNL has fetched one', async () => {
+    const served = () => t.run(async (ctx) => (await ctx.db.query('trmnlInstances').first())!.lastScreenServedAt)
+    expect((await owner().query(api.heroes.mine, {})).screenServed).toBe(false)
+    await envelope(t)
+    expect(await served()).toBe(NOW)
+    expect((await owner().query(api.heroes.mine, {})).screenServed).toBe(true)
+    vi.setSystemTime(NOW + 30 * 60_000)
+    await envelope(t)
+    expect(await served()).toBe(NOW)
+    vi.setSystemTime(NOW + 61 * 60_000)
+    await envelope(t)
+    expect(await served()).toBe(NOW + 61 * 60_000)
+  })
+
   it('claims once, replays the same receipt, and never alters game rewards or ranking state', async () => {
     const before = await t.run(async (ctx) => ({ hero: await ctx.db.get(heroId), items: await ctx.db.query('items').collect(), world: await ctx.db.query('worldState').first(), ranks: await ctx.db.query('heroRanks').collect(), logs: await ctx.db.query('tickLogs').collect() }))
     const code = (await envelope(t)).merge_variables.desk_keepsake_code!

@@ -149,6 +149,8 @@ http.route({
     }
     if (result === null || result.outcome !== 'payload') return notFound()
     if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
+    // Telemetry only: a failed write never fails a valid screen.
+    if (result.screenServedFor !== undefined) { try { await ctx.runMutation(internal.trmnl.recordScreenServed, { instanceId: result.screenServedFor, at: now }) } catch { /* next request retries */ } }
     return json(200, { ...screenMarkup, merge_variables: { ...sceneUrlsAt(result.payload, now, utcOffset), desk_keepsake_code: result.keepsakeCode, utc_offset: utcOffset } })
   }),
 })

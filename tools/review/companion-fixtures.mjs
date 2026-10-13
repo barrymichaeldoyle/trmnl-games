@@ -76,7 +76,7 @@ if (hero.status === 'dead') { hero.hp = 0; hero.reviveAtTick = hero.world.curren
 if (hero.status === 'resting') hero.hp = Math.round(hero.maxHp * 0.4);
 if (params.get('floor')) hero.biomeId = params.get('floor');
 // A hero saved in TRMNL an hour ago, for the first-days playlist reminder.
-if (flag('new')) hero.activatedAt = Date.now() - 3600000;
+if (flag('new')) { hero.activatedAt = Date.now() - 3600000; hero.screenServed = false }
 if (params.get('hp')) hero.hp = Math.round(hero.maxHp * Number(params.get('hp')) / 100);
 if (flag('choice')) hero.choice = { eventId: 'late_night', title: 'The boss asks for one more hour', prompt: 'The lights are dimming but the report is not done. Stay late for a bonus, or head home?', expiresAtTick: hero.world.currentTick + 4, ticksLeft: 4, defaultOptionId: 'home', options: [{ id: 'stay', label: 'Stay late', change: { gold: 50, hp: -6, potions: 0 } }, { id: 'home', label: 'Head home', change: { gold: 0, hp: 0, potions: 0 } }] };
 if (flag('effects')) hero.effects = [{ id: 'coffee', name: 'Coffee rush', blurb: '+3 ATK', kind: 'boon', ticksLeft: 3 }, { id: 'papercut', name: 'Paper cut', blurb: '-2 DEF', kind: 'bane', ticksLeft: 1 }];

@@ -287,6 +287,18 @@ export const recordUtcOffset = internalMutation({
   },
 })
 
+/** Screen telemetry (data-model.md): the route calls this at most once an hour per instance, outside the response's critical path. */
+export const recordScreenServed = internalMutation({
+  args: { instanceId: v.id('trmnlInstances'), at: v.number() },
+  returns: v.null(),
+  handler: async (ctx, { instanceId, at }) => {
+    const instance = await ctx.db.get(instanceId)
+    if (instance === null || (instance.lastScreenServedAt ?? 0) >= at) return null
+    await ctx.db.patch(instanceId, { lastScreenServedAt: at })
+    return null
+  },
+})
+
 export const uninstallInstance = internalMutation({
   args: { gameSlug: v.optional(gameSlugValidator), tokenHash: v.string(), uuid: v.string() },
   returns: v.boolean(),

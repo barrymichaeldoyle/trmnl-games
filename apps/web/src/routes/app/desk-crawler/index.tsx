@@ -47,7 +47,7 @@ function HeroHome() {
       {/* The page's title for assistive tech, ahead of the keepsake callout; the game screen's HUD names the hero visibly. */}
       <h1 className="sr-only">{hero.name}, your hero</h1>
       <KeepsakeCallout />
-      <PlaylistNudge activatedAt={hero.activatedAt} />
+      <PlaylistNudge activatedAt={hero.activatedAt} screenServed={hero.screenServed} />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
       <ReturnNudge />
       <HeroSheet hero={hero} />
@@ -60,10 +60,11 @@ const PLAYLIST_NUDGE_MS = 48 * 3_600_000
 
 /**
  * TRMNL adds the plugin to a playlist on Save, but the device shows it only when the playlist comes round to it, and a
- * new player can take the wait for a fault. For two days after the Save the Hero page points at what to check.
+ * new player can take the wait for a fault. For two days after the Save, and only until TRMNL first fetches the screen,
+ * the Hero page points at what to check.
  */
-function PlaylistNudge({ activatedAt }: { activatedAt?: number | null }) {
-  if (!activatedAt || Date.now() - activatedAt > PLAYLIST_NUDGE_MS) return null
+function PlaylistNudge({ activatedAt, screenServed }: { activatedAt?: number | null; screenServed?: boolean }) {
+  if (screenServed || !activatedAt || Date.now() - activatedAt > PLAYLIST_NUDGE_MS) return null
   return (
     <div className="border-[3px] border-sky px-3 py-2 text-sm">
       <strong className="block text-sky-ink">Not seeing your hero on your TRMNL yet?</strong>
@@ -77,6 +78,7 @@ function PlaylistNudge({ activatedAt }: { activatedAt?: number | null }) {
 type HeroView = {
   name: string
   activatedAt?: number | null
+  screenServed?: boolean
   level: number
   status: string
   hp: number

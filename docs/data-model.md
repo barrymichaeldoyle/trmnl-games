@@ -201,7 +201,7 @@ Indexes: `by_uuid[uuid]`, `by_grant[grantId]`, `by_user[userId]`.
 
 The authenticated success callback normally creates/upserts the instance. An authenticated first screen request may confirm it if the one-shot callback was lost. Uninstalled/disconnected UUID tombstones are not automatically reactivated by an old screen request. Tombstone reinstallation requires a current owner-authorized attempt targeting that UUID; success events alone are insufficient. Verify token/UUID behavior before implementation.
 
-Optional `lastScreenServedAt` records successful response assembly, not renderer/display acknowledgement. Do not count screens as hero ticks. Poll telemetry, if enabled, is throttled to at most one write per hour per instance and is outside the critical response path. A missed telemetry write must not fail a valid screen response.
+Optional `lastScreenServedAt` records successful response assembly, not renderer/display acknowledgement. Do not count screens as hero ticks. Poll telemetry is throttled to at most one write per hour per instance (`SCREEN_SERVED_THROTTLE_MS`, D150) and is outside the critical response path; the companion uses it only to stop the first-days playlist tip once a screen has been fetched. A missed telemetry write must not fail a valid screen response.
 
 ### `trmnlManagementHandoffs`
 
