@@ -5,7 +5,7 @@ import { ConvexError } from 'convex/values'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
-import { DESK_KEEPSAKES, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL, SAMPLE_KEEPSAKE_CODE } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { DESK_KEEPSAKES, EASTER_EGG_KEEPSAKE, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { errorMessage } from '../../../lib/intent'
 import { useOnline } from '../../../lib/network'
 import { Submission } from '../../../lib/submission'
@@ -34,7 +34,7 @@ function useKeepsakeClaim() {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const [earned, setEarned] = useState<(typeof DESK_KEEPSAKES)[number] | null>(null)
+  const [earned, setEarned] = useState<(typeof DESK_KEEPSAKES)[number] | typeof EASTER_EGG_KEEPSAKE | null>(null)
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60_000)
@@ -59,8 +59,12 @@ function useKeepsakeClaim() {
     try {
       await submission.current.run({ code: normalized }, async (input) => {
         const result = await mutate(input)
-        // The code from the home page's sample screen gets an easter egg, but only once the server has turned it down (D137).
-        if (result.outcome === 'invalid_code' && normalized === SAMPLE_KEEPSAKE_CODE.replace(/\s/g, '')) setMessage('That’s the code from the sample screen on our home page. Pip already took that keepsake home. Yours is in the title bar of your own TRMNL.')
+        // D140: the sample screen's code finds the hidden Easter Egg once; the server decides, so a real matching code still collects.
+        if (result.outcome === 'easter_egg' && result.changed) {
+          setEarned(EASTER_EGG_KEEPSAKE)
+          setMessage('Easter Egg collected. That was the code from the sample screen on our home page.')
+          setCode('')
+        } else if (result.outcome === 'easter_egg') setMessage('The Easter Egg is already on your shelf. This week’s code is in the title bar of your own TRMNL.')
         else if (result.outcome === 'invalid_code') setError('That code doesn’t match your TRMNL connection. Check the digits on your screen, or wait for its next refresh.')
         else if (result.outcome === 'already_claimed') setMessage('This week’s keepsake is already on your shelf. The next code arrives next week.')
         else {
@@ -155,6 +159,11 @@ export function DeskKeepsakes() {
           <span aria-hidden="true" className={`grid size-12 shrink-0 place-items-center border-[3px] bg-night ${item.count ? 'border-night text-gold-ink' : 'border-dashed border-faint text-raised'}`}><KeepsakeIcon pixels={item.pixels} /></span>
           <div className="min-w-0"><p className="text-sm font-semibold">{item.name}</p><p className="mt-0.5 text-sm tabular-nums">{item.count ? `${item.count.toLocaleString()} collected` : 'Not collected yet'}</p></div>
         </li>)}
+        {/* D140: the hidden keepsake joins the shelf only once found, outside the weekly set and its count. */}
+        {collection.easterEgg ? <li className="flex items-center gap-3">
+          <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center border-[3px] border-night bg-night text-gold-ink"><KeepsakeIcon pixels={EASTER_EGG_KEEPSAKE.pixels} /></span>
+          <div className="min-w-0"><p className="text-sm font-semibold">{EASTER_EGG_KEEPSAKE.name}</p><p className="mt-0.5 text-sm">{EASTER_EGG_KEEPSAKE.description}</p></div>
+        </li> : null}
       </ul>
       <p className="mt-5 max-w-prose text-sm text-muted">Keepsakes don’t change the game. Miss a week and you get the same design the week after. Once you have the full set, the designs repeat.</p>
     </>}

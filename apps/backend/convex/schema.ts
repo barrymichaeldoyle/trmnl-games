@@ -339,11 +339,14 @@ export default defineSchema({
     createdAt: v.number(),
   }).index('by_userId', ['userId']),
 
+  /** One per account. `lastClaimWeek` is -1 on a row made only for the Easter Egg, before any weekly claim (D140). */
   deskKeepsakes: defineTable({
     userId: v.id('users'),
     totalCollected: v.number(),
     lastClaimWeek: v.number(),
     lastClaimedAt: v.number(),
+    /** When the account found the hidden Easter Egg keepsake by entering the sample screen's code (D140). */
+    easterEggFoundAt: v.optional(v.number()),
   }).index('by_userId', ['userId']),
 
   /** One row per earned achievement, keyed by owner so unlocks outlive a hero's lifecycle (D65). Bounded by the catalog. */
@@ -531,7 +534,7 @@ export default defineSchema({
       hp: v.optional(v.number()),
       count: v.optional(v.number()),
       tick: v.optional(v.number()),
-      keepsakeOutcome: v.optional(v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code'))),
+      keepsakeOutcome: v.optional(v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code'), v.literal('easter_egg'))),
       recapChanged: v.optional(v.boolean()),
     }),
     createdAt: v.number(),

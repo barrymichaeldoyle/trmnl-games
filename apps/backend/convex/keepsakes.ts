@@ -4,7 +4,7 @@ import { currentHero, gameProfile } from './lib/gameProfile'
 import { currentUser, runIntent } from './lib/intent'
 import { appError } from './lib/errors'
 import { keepsakeCode, keepsakeGrant, letterKeepsakeCode, normalizedKeepsakeCode } from './lib/keepsakes'
-import { keepsakeWeek, keepsakeWeekStartsAt, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { keepsakeWeek, keepsakeWeekStartsAt, LETTER_CODES_UNTIL, SAMPLE_KEEPSAKE_CODE } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { achievementState, awardAchievements } from './lib/achievements'
 import { readWorld, worldContent } from './world'
 
@@ -14,26 +14,33 @@ export const KEEPSAKE_MISS_LIMIT = 10
 
 export const mine = query({
   args: {},
-  returns: v.union(v.null(), v.object({ totalCollected: v.number(), lastClaimWeek: v.union(v.number(), v.null()), nextAvailableAt: v.union(v.number(), v.null()), connected: v.boolean() })),
+  returns: v.union(v.null(), v.object({ totalCollected: v.number(), lastClaimWeek: v.union(v.number(), v.null()), nextAvailableAt: v.union(v.number(), v.null()), connected: v.boolean(), easterEgg: v.boolean() })),
   handler: async (ctx) => {
     const user = await currentUser(ctx)
     if (!user || user.state !== 'active' || (await gameProfile(ctx, user._id))?.state === 'deleting') return null
     const hero = await currentHero(ctx, user)
     if (!hero || hero.activationState !== 'active') return null
     const collection = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', user._id)).unique()
+    // A row made only for the Easter Egg (lastClaimWeek -1) reads as no weekly claim yet.
+    const claimed = collection !== null && collection.lastClaimWeek >= 0
     return {
       totalCollected: collection?.totalCollected ?? 0,
-      lastClaimWeek: collection?.lastClaimWeek ?? null,
-      nextAvailableAt: collection ? keepsakeWeekStartsAt(collection.lastClaimWeek + 1) : null,
+      lastClaimWeek: claimed ? collection.lastClaimWeek : null,
+      nextAvailableAt: claimed ? keepsakeWeekStartsAt(collection.lastClaimWeek + 1) : null,
       connected: (await keepsakeGrant(ctx, user._id)) !== null,
+      easterEgg: collection?.easterEggFoundAt !== undefined,
     }
   },
 })
 
-/** Optional cosmetic intent. Invalid guesses commit a receipt and count towards the normal intent limit. */
+/**
+ * Optional cosmetic intent. Invalid guesses commit a receipt and count towards the normal intent limit. The sample
+ * screen's code finds the hidden Easter Egg once (D140): it is checked as a real code first, never counts as a wrong
+ * guess, and leaves the week's claim and the collection count alone.
+ */
 export const claim = mutation({
   args: { operationId: v.string(), code: v.string() },
-  returns: v.object({ operationId: v.string(), changed: v.boolean(), outcome: v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code')), totalCollected: v.number() }),
+  returns: v.object({ operationId: v.string(), changed: v.boolean(), outcome: v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code'), v.literal('easter_egg')), totalCollected: v.number() }),
   handler: async (ctx, args) => {
     const code = normalizedKeepsakeCode(args.code.slice(0, 64))
     const result = await runIntent(ctx, args.operationId, 'keepsakes.claim', { code }, async (user) => {
@@ -43,16 +50,26 @@ export const claim = mutation({
       const week = keepsakeWeek(now)
       const collection = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', user._id)).unique()
       const totalCollected = collection?.totalCollected ?? 0
-      if (collection && collection.lastClaimWeek >= week) return { changed: false, count: totalCollected, keepsakeOutcome: 'already_claimed' as const }
+      const claimedThisWeek = collection !== null && collection.lastClaimWeek >= week
+      const sample = code === normalizedKeepsakeCode(SAMPLE_KEEPSAKE_CODE)
+      if (claimedThisWeek && !sample) return { changed: false, count: totalCollected, keepsakeOutcome: 'already_claimed' as const }
       const windowStart = Math.floor(now / MISS_WINDOW_MS) * MISS_WINDOW_MS
       const missKey = `keepsake:${user._id}`
       const misses = await ctx.db.query('rateLimitBuckets').withIndex('by_key_and_windowStart', (q) => q.eq('key', missKey).eq('windowStart', windowStart)).unique()
-      if (misses && misses.count >= KEEPSAKE_MISS_LIMIT) throw appError('RATE_LIMITED', 'Too many wrong keepsake codes today. Try again tomorrow.')
+      if (misses && misses.count >= KEEPSAKE_MISS_LIMIT && !sample) throw appError('RATE_LIMITED', 'Too many wrong keepsake codes today. Try again tomorrow.')
       const grant = await keepsakeGrant(ctx, user._id)
       // Accept last week's cached screen too, but award only once in the current week.
       const generate = /^\d{6}$/.test(code) ? keepsakeCode : /^[A-HJ-NP-Z2-9]{8}$/.test(code) && now < LETTER_CODES_UNTIL ? letterKeepsakeCode : null
       const valid = grant !== null && generate !== null && [week, week - 1]
         .some((period) => normalizedKeepsakeCode(generate(grant.tokenHash, user._id, period)) === code)
+      // D140: the sample code finds the Easter Egg unless it is this player's own unclaimed code, which collects below.
+      if (sample && !(valid && !claimedThisWeek)) {
+        if (collection?.easterEggFoundAt !== undefined) return { changed: false, count: totalCollected, keepsakeOutcome: 'easter_egg' as const }
+        if (collection) await ctx.db.patch(collection._id, { easterEggFoundAt: now })
+        else await ctx.db.insert('deskKeepsakes', { userId: user._id, totalCollected: 0, lastClaimWeek: -1, lastClaimedAt: 0, easterEggFoundAt: now })
+        return { changed: true, count: totalCollected, keepsakeOutcome: 'easter_egg' as const }
+      }
+      if (claimedThisWeek) return { changed: false, count: totalCollected, keepsakeOutcome: 'already_claimed' as const }
       if (!valid) {
         // Committed with the invalid outcome, so a failed guess cannot be rolled back.
         if (misses) await ctx.db.patch(misses._id, { count: misses.count + 1 })

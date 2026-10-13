@@ -15,10 +15,12 @@ export const DESK_KEEPSAKES = [
 ] as const
 
 /**
- * The keepsake code on the public sample screen and in previews; never a redeemable code (D137). The companion answers it
- * with an easter egg when the server turns it down, so a player whose real code happens to match still collects.
+ * The keepsake code on the public sample screen and in previews; never a weekly code (D137). Entered in the companion, it
+ * finds the hidden Easter Egg keepsake (D140) unless it happens to be the player's own code that week, which collects.
  */
 export const SAMPLE_KEEPSAKE_CODE = '482 917'
+/** The hidden keepsake for entering the sample code (D140): once per account, outside the weekly set and its counts. */
+export const EASTER_EGG_KEEPSAKE = { id: 'easter_egg', name: 'Easter Egg', description: 'Hatched from a code that was never meant to work.', pixels: ['...##...', '..####..', '.######.', '.#.##.#.', '#.#..#.#', '########', '.######.', '..####..'] } as const
 export const KEEPSAKE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 /** Monday 00:00 UTC; the client never chooses the award period. */
 const MONDAY_EPOCH = Date.UTC(1970, 0, 5)

@@ -96,6 +96,9 @@ export const claim = mutation({
       await awardAngler(ctx, angler, stateOf(angler, total), stateOf(angler, total + 1), content, now, world?.currentTick ?? 0)
       return { changed: true, count: values.totalCollected, keepsakeOutcome: 'claimed' as const }
     })
-    return { operationId: result.operationId, changed: result.changed, outcome: result.keepsakeOutcome!, totalCollected: result.count! }
+    // The receipt field is shared with Desk Crawler keepsakes; flies never produce its Easter Egg outcome (D140).
+    const outcome = result.keepsakeOutcome!
+    if (outcome === 'easter_egg') throw appError('SERVICE_PAUSED', 'Your fly box needs a service check.')
+    return { operationId: result.operationId, changed: result.changed, outcome, totalCollected: result.count! }
   },
 })

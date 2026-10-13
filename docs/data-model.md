@@ -8,7 +8,7 @@ Each table gets explicit argument/return validators. Status, item slot, rarity a
 
 ### `deskKeepsakes` (D46)
 
-One fixed-size row per player: `userId`, `totalCollected`, `lastClaimWeek`, `lastClaimedAt`; index `by_userId`. The ordered twelve-design shelf and repeated-copy counts derive from the safe-integer total. No unbounded array or claim-history table. Both account and game deletion deny reads/claims immediately and purge this row in their bounded jobs. `operationReceipts.result.keepsakeOutcome?` records claimed/already-claimed/invalid-code outcomes; invalid guesses commit their rate-limit charge. `trmnlInstances.by_userId_and_state` finds the active code grant without scanning historical tombstones. See the [authority contract](playlist-retention.md#authority-and-storage).
+One fixed-size row per player: `userId`, `totalCollected`, `lastClaimWeek`, `lastClaimedAt`, optional `easterEggFoundAt` (D140, the hidden Easter Egg keepsake); index `by_userId`. A row made only for the Easter Egg has `totalCollected: 0`, `lastClaimWeek: -1` and `lastClaimedAt: 0`, which `keepsakes.mine` reports as no weekly claim yet. The ordered twelve-design shelf and repeated-copy counts derive from the safe-integer total. No unbounded array or claim-history table. Both account and game deletion deny reads/claims immediately and purge this row in their bounded jobs. `operationReceipts.result.keepsakeOutcome?` records claimed/already-claimed/invalid-code outcomes; invalid guesses commit their rate-limit charge. `trmnlInstances.by_userId_and_state` finds the active code grant without scanning historical tombstones. See the [authority contract](playlist-retention.md#authority-and-storage).
 
 ### `heroAchievements` (D65)
 

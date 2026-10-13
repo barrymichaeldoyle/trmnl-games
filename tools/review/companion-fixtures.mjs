@@ -10,7 +10,7 @@
  *   potions=1 (D131, default: three strengths, a combine affordable)   potions=short (two minors, no Scrap)   potions=one (healing only)   potions=0 (no strengths)
  *   floor=server_room (D132: the hero on another floor)   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   occasion=1 (D139: Halloween today)   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
- *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   outcome=invalid_code|already_claimed (with ok=1: a keepsake claim's answer)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
+ *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   outcome=invalid_code|already_claimed|easter_egg (with ok=1: a keepsake claim's answer)   egg=1 (the hidden Easter Egg on the shelf)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
  *   career=1 (P35: the goal card, the Career page and the unlocks, plus career log lines)   career=new (level 1, everything locked)   career=done (the ladder finished)
  *   notes=1 (D133: /field-notes for a level-17 veteran with most notes open)   notes=new (a fresh hero, the Office's note only)
@@ -100,6 +100,7 @@ data.roster = rosterMode ? {
   classes: [{ ...warriorRule, recruited: true }, { ...rogueRule, recruited: two }],
   canPark: true, nextAt: two ? Date.now() + 36e5 * 21 : null, undoHeroId: rosterMode === 'undo' ? 'w1' : null, undoUntil: rosterMode === 'undo' ? Date.now() + 6e5 : null,
 } : { available: false, open: false, unlockLevel: null, warriorLevel: null, heroes: [], classes: [], canPark: true, nextAt: null, undoHeroId: null, undoUntil: null };
+data.keepsakes.easterEgg = params.get('egg') === '1'
 if (params.get('keepsake') === 'done') { data.keepsakes.lastClaimWeek = 9999; data.keepsakes.nextAvailableAt = Date.now() + 86400000 * 3 }
 // A veteran's shelves: most families started at varied tiers, one close to its next tier, and rarity over 41 heroes.
 if (flag('achievements')) {
@@ -300,7 +301,7 @@ export const api = path([]);
 export const convexQuery = (fn, args = {}) => ({ queryKey: ['convexQuery', String(fn), args] });
 export const keepPreviousData = (previous) => previous;
 export const useQuery = (options) => { const [, fn, args] = options.queryKey; const data = queries[fn] ? queries[fn](args) : undefined; return { data, isPending: false, isPlaceholderData: false, isError: false, refetch: async () => ({ data }) } };
-const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('ok') ? resolveIt({ outcome: params.get('outcome') ?? 'collected', totalCollected: 1 }) : reject(new Error('Synthetic QA: all server mutations are disabled'))), flag('ok') ? 800 : 1200));
+const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('ok') ? resolveIt({ changed: true, outcome: params.get('outcome') ?? 'collected', totalCollected: 1 }) : reject(new Error('Synthetic QA: all server mutations are disabled'))), flag('ok') ? 800 : 1200));
 // Optimistic updates are not simulated: the stubbed mutation ignores them, so only local drafts show early.
 export const useMutation = () => useCallback(Object.assign(async () => settle(), { withOptimisticUpdate() { return this } }), []);
 export const useAction = () => useCallback(async () => settle(), []);
