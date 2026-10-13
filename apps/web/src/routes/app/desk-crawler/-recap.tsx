@@ -160,9 +160,12 @@ export function ReturnNudge() {
   ].filter(([value]) => (value as number) > 0).map(([value, one, many]) => `+${(value as number).toLocaleString()} ${value === 1 ? one : many}`)
   if (parts.length === 0) return null
   return (
-    <Link to="/app/desk-crawler/log" className="flex min-h-11 items-center justify-between gap-3 border-[3px] border-gold px-3 py-2 text-sm">
-      <span className="min-w-0"><strong className="text-gold-ink">While you were away:</strong> {parts.join(', ')}</span>
-      <span className="flex shrink-0 items-center gap-1.5 font-semibold whitespace-nowrap text-gold-ink">See the log <Glyph name="play" size={8} /></span>
+    <Link to="/app/desk-crawler/log" className="block min-h-11 border-[3px] border-gold px-3 py-2 text-sm">
+      <span className="flex items-baseline justify-between gap-3">
+        <strong className="min-w-0 text-gold-ink">While you were away</strong>
+        <span className="flex shrink-0 items-center gap-1.5 font-semibold whitespace-nowrap text-gold-ink">See the log <Glyph name="play" size={8} /></span>
+      </span>
+      <span className="mt-1 block">{parts.join(', ')}</span>
     </Link>
   )
 }

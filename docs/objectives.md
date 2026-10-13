@@ -63,6 +63,8 @@ The ladder is an ordered list of rungs in the catalog, under a new `career` rule
 | 11 | Buy the Lunchbox | `potionCap ≥ 30` | Bag page | 30 | |
 | 12 | Buy from the merchant | `purchases ≥ 1` | Hero page | 40 | first merchant visit within 48 adventures of level 6 |
 | 13 | Beat an elite | `eliteWins ≥ 1` | no | 40 | first elite within 96 adventures of level 7, outside the Office |
+| 13a | Reach level 7 | `level ≥ 7` | no | 40 | Added in v17 (D135) |
+| 13b | Switch to Bold | stance played is Bold | Hero page | 20 | Added in v17 (D135); no gold for a hero that reached "Pick a stance" |
 | 14 | Take part in a raid | any of `raidsLaunched`, `raidsWon`, `raidsRepelled`, `raidsLost` ≥ 1 | no | 40 | |
 | 15 | Reach the Cafeteria Depths | `level ≥ 8` and `trips ≥ 2` | Hero page | 50 | |
 | 16 | Finish 25 to-do tasks | `tasksCompleted ≥ 25` | no | 50 | |
@@ -132,6 +134,8 @@ counters.careerRungs, counters.itemsEquipped                                    
 8. **The gold waits for a Claim button (D130).** Barry asked for a claim step with confetti. The pointer still moves on its own (a gate would stall device-only players at every rung); the rung's gold sits in `career.unclaimed` until `heroes.claimGoal` pays it, and the Goal card shows each waiting reward with Claim and a confetti burst before the next goal. All gold sinks are companion actions, so nothing is lost by a player who never claims.
 
 9. **Stances move to level 7 and "Pick a stance" is retired (D132, content v15).** At level 3 the hero is still in Office Cubicles, where Bold has no knockout risk, so the choice taught nothing. Rungs are never reordered, so the rung keeps its id and place, carries `retired`, and the ladder walks past it without pay or a line; the Career page hides it unless the hero reached it. The raid goal's blurb names the stance instead.
+
+10. **"Reach level 7" and "Switch to Bold" sit right before the raid goal (D135, content v17).** Raids open at level 7, but the raid goal followed "Beat an elite", so a hero below 7 waited on it with no progress shown and no reason given. The level goal shows the way there; the Bold goal follows because Bold launches twice as many raids as Balanced (20 against 10 per thousand exploring adventures). It is a new rung (`go_bold`, predicate kind `stance`, read from the stance the hero plays by, so a Bold choice stored below level 7 does not count), not the retired `pick_stance` brought back, because a retired id keeps its place and meaning for the heroes who reached it. Its `supersedes: 'pick_stance'` field means a hero paid for "Pick a stance" reaches it with no gold. Switching back after the goal is fine. The visible ladder grows from 23 to 25. Pointers are stored indices, so this is the first insertion mid-ladder: `world:setActiveContentVersion` now remaps every hero's pointer by rung id in the same transaction as the switch (`remapRung`). A hero before the insertion meets both goals in turn; a hero on or past the raid goal keeps its goal and skips both, unpaid, and the Career page shows them as done, like rungs that held when the ladder arrived. The switch back to v16 is the same remap in reverse: a hero on either new goal lands on the raid goal.
 
 ## Open points for Barry (settled 2026-10-12)
 

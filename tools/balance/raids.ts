@@ -146,7 +146,7 @@ export function simulateWorld(content: ContentCatalog, heroes: number, days: num
     for (const run of runs) {
       const offset = (run.index * 37) % TICKS_PER_DAY
       if (policy.everyDays > 0 && (tick - offset) % (policy.everyDays * TICKS_PER_DAY) === 0) {
-        ;({ hero: run.hero, inventory: run.inventory } = visit(run.hero, run.inventory, tick, content, policy))
+        ;({ hero: run.hero, inventory: run.inventory } = visit(run.hero, run.inventory, tick, content, policy, run.stance))
       }
       const seeds = streams(run.index, tick, raids)
       let raidTarget: RaidTarget | undefined

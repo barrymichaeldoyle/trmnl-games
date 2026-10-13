@@ -47,6 +47,8 @@ export function measureRung(predicate: CareerPredicate, hero: HeroState, content
       const ids = content.biomes.find((b) => b.id === predicate.biomeId)?.monsterIds ?? []
       return { value: ids.reduce((sum, id) => sum + (hero.counters.monsterWins[id] ?? 0), 0), target: 1 }
     }
+    case 'stance':
+      return { value: (effectiveStance(content, hero) ?? 'balanced') === predicate.stance ? 1 : 0, target: 1 }
   }
 }
 
@@ -66,6 +68,19 @@ export function liveRung(rules: CareerRule, from: number): number {
   let i = from
   while (rules.rungs[i]?.retired) i += 1
   return i
+}
+
+/**
+ * Where a stored pointer lands when the world switches ladders (D135): on the same rung by id, so inserting rungs
+ * mid-ladder moves nobody. A pointer on a rung the new ladder lacks moves on to the next old rung it has; one past
+ * the old ladder's end stays past the new one's.
+ */
+export function remapRung(from: CareerRule, to: CareerRule, rung: number): number {
+  for (let i = rung; i < from.rungs.length; i += 1) {
+    const index = to.rungs.findIndex((entry) => entry.id === from.rungs[i]!.id)
+    if (index >= 0) return index
+  }
+  return to.rungs.length
 }
 
 /** The feature a guaranteed event needs, if any. */
@@ -152,7 +167,7 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
     if (liveRung(rules, state.rung) !== state.rung) state = { rung: liveRung(rules, state.rung), startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
     const current = rules.rungs[state.rung]
     if (current !== undefined && rungSatisfied(current, hero, content)) {
-      const gold = current.gold
+      const gold = current.supersedes !== undefined && state.reached.some((entry) => entry.id === current.supersedes) ? 0 : current.gold
       hero = { ...hero, counters: { ...hero.counters, careerRungs: hero.counters.careerRungs + 1 } }
       metrics.careerRungs = 1
       const next = liveRung(rules, state.rung + 1)

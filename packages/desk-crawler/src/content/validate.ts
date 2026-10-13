@@ -185,6 +185,8 @@ export function validateCatalog(content: ContentCatalog): string[] {
       if ((p.kind === 'counter' && !counters.has(p.counter)) || (p.kind === 'anyCounter' && (p.counters.length === 0 || p.counters.some((counter) => !counters.has(counter))))) problems.push(`career rung ${rung.id} names an unknown counter`)
       if ('atLeast' in p && (!Number.isSafeInteger(p.atLeast) || p.atLeast < 1)) problems.push(`career rung ${rung.id} target must be a positive integer`)
       if (p.kind === 'biomeWin' && !content.biomes.some((biome) => biome.id === p.biomeId)) problems.push(`career rung ${rung.id} names an unknown biome`)
+      if (p.kind === 'stance' && content.stances?.[p.stance] === undefined) problems.push(`career rung ${rung.id} names an unknown stance`)
+      if (rung.supersedes !== undefined && !content.career.rungs.some((other) => other.id === rung.supersedes && other.retired)) problems.push(`career rung ${rung.id} supersedes a rung that is not retired`)
       if (p.kind === 'bag' && !content.bagLadder.tiers.some((tier) => tier.capacity === p.atLeast)) problems.push(`career rung ${rung.id} bag target is not a tier`)
       if (p.kind === 'pouch' && !(content.potionPouch?.tiers ?? []).some((tier) => tier.cap === p.atLeast)) problems.push(`career rung ${rung.id} pouch target is not a tier`)
       const g = rung.guarantee

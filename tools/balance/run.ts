@@ -167,7 +167,7 @@ function bestInSlot(content: ContentCatalog): { attack: number; defense: number 
  * the harness: it counts equips and sales, picks a stance once stances are unlocked, answers a pending decision with its
  * default, and buys the merchant's bag or pouch offer (else its potions) when it can afford it.
  */
-export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy): { hero: HeroState; inventory: ItemSnapshot[]; bought: number; salvaged: number; workbenchGold: number; steps: string[]; combined: number } {
+export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, content: ContentCatalog, policy: Policy, home?: StanceId): { hero: HeroState; inventory: ItemSnapshot[]; bought: number; salvaged: number; workbenchGold: number; steps: string[]; combined: number } {
   let bought = 0
   let salvaged = 0
   let workbenchGold = 0
@@ -227,6 +227,13 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   }
   // P35: the once-only companion deeds. The stance pick keeps the cohort's sustain (balanced unless --stance).
   if (content.stances !== undefined && unlocked(content, h.level, 'stances') && counters.stanceChanges === 0) counters.stanceChanges = 1
+  // D135: a stance goal is met by switching for an adventure or more; the next visit after it switches back to `home`.
+  const goal = currentRung(content, h)?.predicate
+  if (goal?.kind === 'stance' && unlocked(content, h.level, 'stances')) h.stance = goal.stance
+  else if (h.stance !== home) {
+    if (home === undefined) delete h.stance
+    else h.stance = home
+  }
   if (h.choice !== undefined && content.choices !== undefined) {
     const event = eventById(content, h.choice.eventId)
     const option = event === undefined ? undefined : optionOf(event, event.defaultOptionId)
@@ -417,7 +424,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         let workbenchGold: number
         let steps: string[]
         let combined: number
-        ;({ hero, inventory, bought, salvaged, workbenchGold, steps, combined } = visit(hero, inventory, tick, content, policy))
+        ;({ hero, inventory, bought, salvaged, workbenchGold, steps, combined } = visit(hero, inventory, tick, content, policy, stance))
         log.itemsSalvaged += salvaged
         log.workbenchGold += workbenchGold
         log.potionsCombined += combined

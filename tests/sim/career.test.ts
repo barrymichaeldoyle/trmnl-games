@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { applyItemChanges } from '@trmnl-games/desk-crawler/sim/core/apply'
-import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, remapRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { maxHp, xpToLeave } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -355,3 +355,72 @@ describe('stances with desk raids (D132, content v15)', () => {
   })
 })
 
+
+describe('level 7 and Bold before the raid goal (D135, content v17)', () => {
+  const v16 = catalogs.v16
+  const v17 = catalogs.v17
+  const index = (content: ContentCatalog, id: string) => content.career!.rungs.findIndex((r) => r.id === id)
+  const done = { combatWins: 1, itemsEquipped: 1, tasksCompleted: 3, itemsSold: 1, trips: 1, choicesMade: 1, merchantVisits: 1, eliteWins: 1 }
+  const reachedIds = (result: SimulationResult) => careerLines(result).flatMap((e) => (e.detail.outcome.variant === 'career' && e.detail.outcome.phase === 'reached' ? [[e.detail.outcome.id, e.detail.outcome.gold]] : []))
+
+  it('is valid and inserts the two goals right before the raid goal, keeping every other id in order', () => {
+    expect(validateCatalog(v17)).toEqual([])
+    const ids = v16.career!.rungs.map((r) => r.id)
+    const at = ids.indexOf('first_raid')
+    expect(v17.career!.rungs.map((r) => r.id)).toEqual([...ids.slice(0, at), 'level_7', 'go_bold', ...ids.slice(at)])
+    expect(v17.career!.rungs.filter((r) => !r.retired)).toHaveLength(25)
+    expect(v17.unlocks).toEqual(v16.unlocks)
+    v17.career!.rungs.forEach((rung, i) => {
+      const next = v17.career!.rungs[i + 1]
+      const { full } = careerLine({ variant: 'career', phase: 'reached', id: rung.id, title: rung.title, ...(next ? { next: next.title } : {}), gold: rung.gold })
+      expect([...full].length).toBeLessThanOrEqual(v17.constants.summaryMaxCodePoints)
+    })
+    const patch = (id: string, change: object) => ({ ...v17, career: { rungs: v17.career!.rungs.map((r) => (r.id === id ? { ...r, ...change } : r)) } })
+    expect(validateCatalog(patch('go_bold', { predicate: { kind: 'stance', stance: 'reckless' } }))).toContain('career rung go_bold names an unknown stance')
+    expect(validateCatalog(patch('go_bold', { supersedes: 'first_win' }))).toContain('career rung go_bold supersedes a rung that is not retired')
+  })
+
+  it('counts Bold only once stances are open', () => {
+    const goal = v17.career!.rungs[index(v17, 'go_bold')]!.predicate
+    expect(measureRung(goal, hero({ level: 6, stance: 'bold' }).hero, v17)).toEqual({ value: 0, target: 1 })
+    expect(measureRung(goal, hero({ level: 7, stance: 'cautious' }).hero, v17)).toEqual({ value: 0, target: 1 })
+    expect(measureRung(goal, hero({ level: 7, stance: 'bold' }).hero, v17)).toEqual({ value: 1, target: 1 })
+  })
+
+  it('names level 7 after the elite goal, then Bold, then the raid', () => {
+    const { hero: h, inventory } = hero({ level: 9, stance: 'bold', career: { rung: index(v17, 'first_elite'), startedTick: 0, reached: [] } }, done)
+    let items: readonly ItemSnapshot[] = inventory
+    const step = (prev: SimulationResult, tick: number) => {
+      items = applyItemChanges(prev.nextHero, items, prev.itemChanges, () => `i${500 + tick}`).inventory
+      return run(prev.nextHero, items, tick, tick, v17)
+    }
+    let result = run(h, items, 10, 1, v17)
+    expect(careerLines(result).map((e) => e.summary)).toContain('Goal reached: Beat an elite. Next: Reach level 7.')
+    result = step(result, 11)
+    expect(careerLines(result).map((e) => e.summary)).toContain('Goal reached: Reach level 7. Next: Switch to Bold.')
+    result = step(result, 12)
+    expect(reachedIds(result)).toEqual([['go_bold', 20]])
+    expect(result.nextHero.career!.rung).toBe(index(v17, 'first_raid'))
+    expect(result.nextHero.career!.unclaimed!.map((r) => [r.id, r.gold])).toEqual([['first_elite', 40], ['level_7', 40], ['go_bold', 20]])
+  })
+
+  it('pays nothing for Bold to a hero that was paid for the retired stance goal', () => {
+    const { hero: h, inventory } = hero({ level: 9, stance: 'bold', career: { rung: index(v17, 'go_bold'), startedTick: 0, reached: [{ id: 'pick_stance', tick: 5 }] } }, done)
+    const result = run(h, inventory, 10, 1, v17)
+    expect(reachedIds(result)).toEqual([['go_bold', 0]])
+    expect(result.nextHero.career!.unclaimed).toEqual([])
+    expect(result.nextHero.career!.rung).toBe(index(v17, 'first_raid'))
+  })
+
+  it('remaps stored pointers by rung id: before, on and after the raid goal, and back again', () => {
+    const from = v16.career!
+    const to = v17.career!
+    for (const id of ['first_win', 'pick_stance', 'first_elite', 'first_raid', 'cafeteria_win', 'garage_win']) expect(remapRung(from, to, index(v16, id))).toBe(index(v17, id))
+    expect(remapRung(from, to, from.rungs.length)).toBe(to.rungs.length)
+    // Rolling back drops the two new goals: a pointer on either lands on the raid goal.
+    expect(remapRung(to, from, index(v17, 'level_7'))).toBe(index(v16, 'first_raid'))
+    expect(remapRung(to, from, index(v17, 'go_bold'))).toBe(index(v16, 'first_raid'))
+    expect(remapRung(to, from, index(v17, 'first_raid'))).toBe(index(v16, 'first_raid'))
+    expect(remapRung(from, from, 7)).toBe(7)
+  })
+})

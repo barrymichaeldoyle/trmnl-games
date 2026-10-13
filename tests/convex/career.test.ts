@@ -168,4 +168,37 @@ describe('career ladder backend (P35)', () => {
     // The stance card's floor line reads which biome is safe.
     expect(view.biomes.map((biome) => [biome.id, biome.safe])).toEqual([['office_cubicles', true], ['server_room', false], ['cafeteria_depths', false]])
   })
+
+  it('moves every hero to the same rung by id when the world switches from v16 to v17, and back (D135)', { timeout: 30_000 }, async () => {
+    await seedWorld(t, { activeContentVersion: 'v16', currentTick: 10 })
+    // v16 indices: 12 is the elite goal, 13 the raid goal, 14 the Cafeteria goal; 24 is past the end.
+    const before = await seedHero(t, { level: 9 }, 'Bo')
+    const on = await seedHero(t, { level: 9 }, 'Cy')
+    const after = await seedHero(t, { level: 9 }, 'Ed')
+    const done = await seedHero(t, { level: 20 }, 'Fi')
+    await t.run(async (ctx) => {
+      await ctx.db.patch(before, { career: { rung: 12, startedTick: 0, reached: [], armedAt: 3, armedCount: 0 } })
+      await ctx.db.patch(on, { career: { rung: 13, startedTick: 0, reached: [{ id: 'first_elite', tick: 4 }], unclaimed: [{ id: 'first_elite', gold: 40, tick: 4 }] } })
+      await ctx.db.patch(after, { career: { rung: 14, startedTick: 0, reached: [], armedAt: 2, armedCount: 1 } })
+      await ctx.db.patch(done, { career: { rung: 24, startedTick: 0, reached: [] } })
+    })
+    expect(await t.mutation(internal.world.setActiveContentVersion, { contentVersion: 'v17' })).toEqual({ from: 'v16', to: 'v17', heroesMoved: 3 })
+    expect((await heroDoc(t, before)).career).toEqual({ rung: 12, startedTick: 0, reached: [], armedAt: 3, armedCount: 0 })
+    expect((await heroDoc(t, on)).career).toEqual({ rung: 15, startedTick: 0, reached: [{ id: 'first_elite', tick: 4 }], unclaimed: [{ id: 'first_elite', gold: 40, tick: 4 }] })
+    expect((await heroDoc(t, after)).career).toEqual({ rung: 16, startedTick: 0, reached: [], armedAt: 2, armedCount: 1 })
+    expect((await heroDoc(t, done)).career!.rung).toBe(26)
+    // On the raid goal: both new goals read as done, not current, and the page counts 25.
+    const view = (await as(t, 'Cy').query(api.heroes.mine, {}))!
+    expect(view.career).toMatchObject({ rung: 14, total: 25, current: { id: 'first_raid' } })
+    expect(view.career!.rungs.filter((rung) => ['level_7', 'go_bold'].includes(rung.id)).map((rung) => rung.state)).toEqual(['done', 'done'])
+    // Before it, level 7 follows the elite goal (the page lists 11 live rungs before the elite goal).
+    expect((await as(t, 'Bo').query(api.heroes.mine, {}))!.career!.rungs.slice(11, 13).map((rung) => rung.id)).toEqual(['first_elite', 'level_7'])
+    // Rolling back lands a hero on either new goal on the raid goal, with its guarantee state dropped.
+    await t.run(async (ctx) => await ctx.db.patch(before, { career: { rung: 14, startedTick: 0, reached: [], armedAt: 3, armedCount: 0 } }))
+    expect(await t.mutation(internal.world.setActiveContentVersion, { contentVersion: 'v16' })).toEqual({ from: 'v17', to: 'v16', heroesMoved: 4 })
+    expect((await heroDoc(t, before)).career).toEqual({ rung: 13, startedTick: 0, reached: [] })
+    expect((await heroDoc(t, on)).career!.rung).toBe(13)
+    expect((await heroDoc(t, after)).career!.rung).toBe(14)
+    expect((await heroDoc(t, done)).career!.rung).toBe(24)
+  })
 })

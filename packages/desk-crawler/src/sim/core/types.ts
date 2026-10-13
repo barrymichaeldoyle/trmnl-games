@@ -351,6 +351,8 @@ export type CareerPredicate =
   | { readonly kind: 'pouch'; readonly atLeast: number }
   /** At least one victory over a monster of this biome. */
   | { readonly kind: 'biomeWin'; readonly biomeId: string }
+  /** The stance the hero plays by right now (Balanced below the stance unlock). */
+  | { readonly kind: 'stance'; readonly stance: StanceId }
 
 /** P35: the lucky event a rung guarantees once the hero has explored `withinTicks` ticks on that rung without it. */
 export type GuaranteedEvent = 'combat' | 'gear' | 'choice' | 'merchant' | 'elite'
@@ -376,6 +378,8 @@ export interface CareerRung {
   readonly guarantee?: CareerGuarantee
   /** Retired by a later catalog: kept so stored ids stay valid, but the ladder walks past it without pay or a line. */
   readonly retired?: true
+  /** A retired rung this one replaces: a hero that reached that one reaches this one without its gold, so nothing pays twice. */
+  readonly supersedes?: string
 }
 
 /** P35: the career ladder. Every hero has one current rung; rungs are checked in order. */
