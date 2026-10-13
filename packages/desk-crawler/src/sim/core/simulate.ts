@@ -9,6 +9,7 @@ import { assertHeroInvariants, SimulationInvariantError } from './invariants'
 import { codePoints, composeSummary, fill, rarityLabel, variant, withArticle, type NarrativeVars } from './narrative'
 import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } from './raid'
 import { drawMeetingKind, drawMeetingPlan, meetingKind, meetingStream } from './meeting'
+import { graveyardDraws, spareItem, spareOf, spareSource } from './lostProperty'
 import { createRng, pickOne, pickWeighted, type Rng } from './rng'
 import { applyTodo } from './todo'
 import { applyCareer, currentRung, effectiveStance, guaranteeDue, unlocked } from './career'
@@ -34,6 +35,7 @@ import type {
   MonsterTemplate,
   NewItem,
   OutcomeDetail,
+  SpareDrop,
   SimulationInput,
   SimulationResult,
   TickMetrics,
@@ -74,6 +76,9 @@ const ZERO_METRICS: TickMetrics = {
   raidsApplied: 0,
   meetingsLaunched: 0,
   meetingsApplied: 0,
+  sparesDropped: 0,
+  sparesFound: 0,
+  sparesReturned: 0,
   tasksCompleted: 0,
   todoRefills: 0,
   careerRungs: 0,
@@ -113,6 +118,9 @@ class TickRun {
   private raidApplied = false
   private meetingLaunch: MeetingLaunch | undefined
   private meetingApplied = false
+  private spareDropped: SpareDrop | undefined
+  private spareFound: { ownerHeroId: string } | undefined
+  private foundApplied = false
   /** D139: the occasion live on the hero's local date, if any. */
   private readonly occasion: LiveOccasion | undefined
 
@@ -291,7 +299,7 @@ class TickRun {
 
   private restingTick(): SimulationResult {
     const { h, content } = this
-    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting()
+    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting() ?? this.applyIncomingFound()
     if (expired !== undefined) return expired
     const max = heroMaxHp(this.content, h)
     const healing = Math.min(max - h.hp, pctOf(max, content.constants.restingHealPct))
@@ -311,7 +319,7 @@ class TickRun {
 
   private explore(): SimulationResult {
     const { h, content, input } = this
-    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting()
+    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting() ?? this.applyIncomingFound()
     if (expired !== undefined) return expired
     const c = content.constants
     const sustain = this.sustain()
@@ -381,6 +389,7 @@ class TickRun {
     let goldGranted = 0
     let goldPenalty = 0
     let gear: NewItem | undefined
+    let spareOwner: { rivalHeroId: string; rivalName: string } | undefined
     let lethal = false
     let upgrade: BagUpgrade | undefined
     let pouchUpgrade: BagUpgrade | undefined
@@ -546,6 +555,14 @@ class TickRun {
         }
         if (found === 'gear') {
           gear = this.generateGear(gearTierOf(biome))
+          // D145: an ordinary find may be another player's spare instead; every fresh-item draw above is still taken.
+          if (forced === undefined && !gift) {
+            const spare = this.takeSpare()
+            if (spare !== undefined) {
+              gear = spare.item
+              spareOwner = spare.owner
+            }
+          }
           primary = ''
           compact = ''
         } else if (found === 'potion' && potionQty >= potionCap(content, h)) {
@@ -626,6 +643,7 @@ class TickRun {
         compact = fill('Knocked out for about {hours} hours.', { hours: Math.max(1, Math.round(ticks / 4)) })
         outcome = { ...outcome, outcome: 'death' } as OutcomeDetail
         if (goldPenalty > 0) consequences.push(`Lost ${goldPenalty} gold.`)
+        consequences.push(...this.spareLine())
       }
     } else if (goldPenalty > 0) {
       consequences.push(`Dropped ${goldPenalty} gold.`)
@@ -683,7 +701,7 @@ class TickRun {
       // A find that overflows the bag is held and the hero sleeps until the player makes room (D18/D19, D123).
       heldFind = isBagFull(h, input.inventory)
       const destination = heldFind ? 'held' : 'bag'
-      this.changes.push({ type: 'create', destination, item: gear })
+      this.changes.push({ type: 'create', destination, item: gear, ...(spareOwner === undefined ? {} : { spare: true as const }) })
       if (heldFind) {
         h.status = 'sleeping'
         this.metrics.heldFinds = 1
@@ -698,6 +716,12 @@ class TickRun {
         compact = 'Unwrapped a gift.'
         consequences.unshift(`Found ${withArticle(item)}.`)
         outcome = { ...outcome, templateId: gear.templateId, rarity: gear.rarity, destination }
+      } else if (outcome.variant === 'loot' && spareOwner !== undefined) {
+        const lines = content.lostProperty!.narrative
+        const spareVars = { rival: spareOwner.rivalName, item: gear.name }
+        primary = this.narrate(lines.found, spareVars)
+        compact = fill(lines.foundCompact, spareVars)
+        outcome = { ...outcome, templateId: gear.templateId, rarity: gear.rarity, destination, spare: spareOwner }
       } else if (outcome.variant === 'loot') {
         primary = this.narrate([...shared.lootGear, ...narrative.lootGear], { item })
         compact = `Found ${withArticle(item)}.`
@@ -736,7 +760,63 @@ class TickRun {
     delete h.arriveAtTick
     h.counters.deaths += 1
     this.metrics.deaths = 1
+    this.dropSpare()
     return goldPenalty
+  }
+
+  /**
+   * D145: a knockout leaves a spare of one equipped item on the floor, picked by the graveyard stream's first draw.
+   * Nothing drops while an earlier spare's found notice is still waiting, so the notice lands first.
+   */
+  private dropSpare(): void {
+    const { h, content, input } = this
+    const draws = graveyardDraws(input.streams, content)
+    if (draws === undefined || input.incomingFound !== undefined) return
+    const source = spareSource(h, input.inventory, draws.slot)
+    if (source === undefined) return
+    this.spareDropped = spareOf(source, h.biomeId, input.tick, draws.shard)
+    this.metrics.sparesDropped = 1
+  }
+
+  /** The knockout's spare line, when one dropped. */
+  private spareLine(): string[] {
+    const spare = this.spareDropped
+    return spare === undefined ? [] : [fill(this.content.lostProperty!.narrative.dropped, { item: spare.name })]
+  }
+
+  /**
+   * D145 finder side: the adapter's spare, when the graveyard stream's look hit, becomes this tick's gear find. A
+   * spare of the hero's own, or one the catalog cannot rebuild, leaves the fresh find standing.
+   */
+  private takeSpare(): { item: NewItem; owner: { rivalHeroId: string; rivalName: string } } | undefined {
+    const { h, content, input } = this
+    const spare = input.lostSpare
+    if (spare === undefined || spare.ownerHeroId === h.id || graveyardDraws(input.streams, content)?.plan === undefined) return undefined
+    const item = spareItem(content, spare)
+    if (item === undefined) return undefined
+    h.counters.lostPropertyFound += 1
+    this.metrics.sparesFound = 1
+    this.spareFound = { ownerHeroId: spare.ownerHeroId }
+    return { item, owner: { rivalHeroId: spare.ownerHeroId, rivalName: spare.ownerName } }
+  }
+
+  /**
+   * D145 owner side: someone found this hero's spare; the notice lands as this tick's whole event, after any incoming
+   * raid or meeting. Under a catalog without lost-property rules it stays pending.
+   */
+  private applyIncomingFound(): SimulationResult | undefined {
+    const { content, input } = this
+    const found = input.incomingFound
+    if (found === undefined || content.lostProperty === undefined) return undefined
+    const lines = content.lostProperty.narrative
+    const vars = { rival: found.finderName, item: found.name, destination: this.biome(found.biomeId).name }
+    this.foundApplied = true
+    this.metrics.sparesReturned = 1
+    return this.finish('advanced', {
+      kind: 'lost_property',
+      summary: composeSummary(this.narrate(lines.returned, vars), fill(lines.returnedCompact, vars), [], content.constants.summaryMaxCodePoints),
+      outcome: { variant: 'lost_property', rivalHeroId: found.finderHeroId, rivalName: found.finderName, rivalClass: found.finderClass, templateId: found.templateId, biomeId: found.biomeId, foundTick: found.foundTick },
+    })
   }
 
   /**
@@ -857,6 +937,7 @@ class TickRun {
         // Fixed and short, so the knockout survives the budget beside the longest name and purse.
         consequences.push(fill('Out cold for {hours} hours.', { hours: Math.max(1, Math.round(ticks / 4)) }))
         if (goldPenalty > 0) consequences.push(`Lost ${goldPenalty} gold.`)
+        consequences.push(...this.spareLine())
       }
     }
     return this.finish(
@@ -1013,7 +1094,7 @@ class TickRun {
   ): SimulationResult {
     const { h, input } = this
     const nextHero = toHeroState(h)
-    const base = { nextHero, itemChanges: this.changes, metrics: this.metrics, disposition, ...(this.raidLaunch === undefined ? {} : { raidLaunch: this.raidLaunch }), ...(this.raidApplied ? { raidApplied: true } : {}), ...(this.meetingLaunch === undefined ? {} : { meetingLaunch: this.meetingLaunch }), ...(this.meetingApplied ? { meetingApplied: true } : {}) }
+    const base = { nextHero, itemChanges: this.changes, metrics: this.metrics, disposition, ...(this.raidLaunch === undefined ? {} : { raidLaunch: this.raidLaunch }), ...(this.raidApplied ? { raidApplied: true } : {}), ...(this.meetingLaunch === undefined ? {} : { meetingLaunch: this.meetingLaunch }), ...(this.meetingApplied ? { meetingApplied: true } : {}), ...(this.spareDropped === undefined ? {} : { spareDropped: this.spareDropped }), ...(this.spareFound === undefined ? {} : { spareFound: this.spareFound }), ...(this.foundApplied ? { foundApplied: true } : {}) }
     if (event === undefined) return base
     const detail: LogDetail = {
       v: 1,
@@ -1076,6 +1157,9 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
   if (result.event && result.event.summary.trim() === '') fail('SUMMARY_EMPTY', 'event without summary')
   const meetingSides = (result.meetingLaunch === undefined ? 0 : 1) + (result.meetingApplied ? 1 : 0)
   if (meetingSides > 1 || out.counters.meetings - hero.counters.meetings !== meetingSides || (meetingSides === 1 && result.event?.detail.outcome.variant !== 'meeting')) fail('MEETING', 'one side of one meeting per tick, and the counter follows it')
+  const finds = result.spareFound === undefined ? 0 : 1
+  if (out.counters.lostPropertyFound - hero.counters.lostPropertyFound !== finds || (finds === 1 && (result.event?.detail.outcome.variant !== 'loot' || result.itemChanges.filter((change) => change.type === 'create' && change.spare === true).length !== 1))) fail('LOST_PROPERTY', 'a found spare is the tick\'s one labelled gear find, and the counter follows it')
+  if (result.foundApplied === true && result.event?.detail.outcome.variant !== 'lost_property') fail('LOST_PROPERTY', 'a found notice is the tick\'s event')
   for (const extra of result.extraEvents ?? []) {
     if ((extra.kind !== 'todo' && extra.kind !== 'career' && extra.kind !== 'occasion') || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0 || extra.deltas.gold < 0) fail('EXTRA_EVENT', 'to-do and career lines add gold only')
     if (extra.kind === 'occasion' && extra.deltas.gold !== 0) fail('OCCASION_LINE', 'an occasion line changes nothing itself')

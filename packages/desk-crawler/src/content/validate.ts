@@ -163,6 +163,30 @@ export function validateCatalog(content: ContentCatalog): string[] {
     }
   }
   if (content.unlocks?.meetings !== undefined && content.meetings === undefined) problems.push('meeting unlock without meeting rules')
+  // D145: lost property's lines name only what they may, and the short lines fit beside the longest name and item.
+  const lost = content.lostProperty
+  if (lost) {
+    if (!Number.isSafeInteger(lost.lookPermille) || lost.lookPermille < 1 || lost.lookPermille > 1000) problems.push('lost-property look chance must be 1–1000 permille')
+    const lines = lost.narrative
+    if (lines.found.length < 1 || lines.returned.length < 1) problems.push('lost property needs finder and owner lines')
+    const allowed: ReadonlyArray<[readonly string[], readonly string[]]> = [
+      [[lines.dropped], ['item']],
+      [[...lines.found, lines.foundCompact], ['rival', 'item']],
+      [[...lines.returned, lines.returnedCompact], ['rival', 'item', 'destination']],
+    ]
+    for (const [pool, names] of allowed) {
+      for (const line of pool) {
+        for (const [, name] of line.matchAll(/\{(\w+)\}/g)) if (!names.includes(name!)) problems.push(`lost-property line uses {${name}}: ${line}`)
+        if (names.includes('rival') && !line.includes('{rival}')) problems.push(`lost-property line needs {rival}: ${line}`)
+      }
+    }
+    const longestItem = content.gearTemplates.reduce((a, t) => ([...t.name].length > [...a].length ? t.name : a), '')
+    const vars = { rival: 'W'.repeat(20), item: longestItem }
+    for (const line of [lines.foundCompact, lines.returnedCompact]) {
+      const filled = line.replace(/\{(\w+)\}/g, (_, key: string) => vars[key as keyof typeof vars] ?? '')
+      if ([...filled].length > c.summaryMaxCodePoints) problems.push(`lost-property short line too long beside a 20-character name: ${line}`)
+    }
+  }
   const todo = content.todo
   if (todo) {
     // P31: one template per kind, enough kinds to fill three slots at level 1, a target for every tier a task can name.

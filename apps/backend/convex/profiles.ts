@@ -9,6 +9,7 @@ import { currentHero } from './lib/gameProfile'
 import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
 import { pagePublic } from './lib/publicPage'
+import { heldSpares } from './lib/lostProperty'
 import { readWorld, worldContent } from './world'
 
 /**
@@ -74,6 +75,9 @@ export const view = query({
     const rarity = stats ? { counts: Object.fromEntries(achievements.map((a) => [a.id, stats.counts[a.id] ?? 0])), totalPlayers: stats.totalPlayers, scoreAt: stats.scoreAt } : null
 
     const counters = withCounterDefaults(hero.counters)
+    // D145: other players' spares this hero is holding, from its bounded item rows; the only gear a public page names.
+    const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', hero._id)).take(40)
+    const lostProperty = await heldSpares(ctx, items)
     return {
       alias: user.publicAlias,
       heroName: hero.name,
@@ -90,6 +94,8 @@ export const view = query({
       achievements,
       rarity,
       achievementCount: rows.length,
+      lostProperty,
+      lostPropertyFound: counters.lostPropertyFound,
     }
   },
 })

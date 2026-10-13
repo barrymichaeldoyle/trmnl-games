@@ -233,6 +233,19 @@ export async function recentRaids(ctx: QueryCtx, heroId: Id<'heroes'>, limit: nu
   )
 }
 
+type StoredOutcome = Extract<Doc<'tickLogs'>['detail'], { outcome: unknown }>['outcome']
+
+/**
+ * The other player a stored log names, with the owner and name version the adapter annotated: a raid's or meeting's
+ * rival (D110, D141), a found spare's owner or a told owner's finder (D145).
+ */
+function loggedRival(outcome: StoredOutcome | undefined): { rivalUserId: string; rivalNameVersion?: number; rivalName: string } | undefined {
+  if (outcome === undefined) return undefined
+  if (outcome.variant === 'raid' || outcome.variant === 'meeting' || outcome.variant === 'lost_property') return outcome.rivalUserId === undefined ? undefined : { rivalUserId: outcome.rivalUserId, rivalName: outcome.rivalName, ...(outcome.rivalNameVersion === undefined ? {} : { rivalNameVersion: outcome.rivalNameVersion }) }
+  if (outcome.variant === 'loot' && outcome.spare?.rivalUserId !== undefined) return { rivalUserId: outcome.spare.rivalUserId, rivalName: outcome.spare.rivalName, ...(outcome.spare.rivalNameVersion === undefined ? {} : { rivalNameVersion: outcome.spare.rivalNameVersion }) }
+  return undefined
+}
+
 /**
  * Stored raid summaries name the rival. A log line read after that rival's owner is gone, suspended, under name
  * repair or renamed shows "A coworker" instead, the way rank rows mask copied names. One owner read per distinct
@@ -242,16 +255,15 @@ export async function maskRaidSummaries<L extends Pick<Doc<'tickLogs'>, 'summary
   const owners = new Map<string, Doc<'users'> | null>()
   const summaries: string[] = []
   for (const log of logs) {
-    const outcome = 'outcome' in log.detail ? log.detail.outcome : undefined
-    // D141: a meeting names the other hero the same way.
-    if ((outcome?.variant !== 'raid' && outcome?.variant !== 'meeting') || outcome.rivalUserId === undefined) {
+    const rival = loggedRival('outcome' in log.detail ? log.detail.outcome : undefined)
+    if (rival === undefined) {
       summaries.push(log.summary)
       continue
     }
-    if (!owners.has(outcome.rivalUserId)) owners.set(outcome.rivalUserId, await ctx.db.get(outcome.rivalUserId as Id<'users'>))
-    const owner = owners.get(outcome.rivalUserId) ?? null
-    const visible = owner !== null && owner.state === 'active' && !owner.nameRepairRequired && owner.publicNameVersion === outcome.rivalNameVersion
-    summaries.push(visible ? log.summary : log.summary.replaceAll(`[[${outcome.rivalName}]]`, `[[${HIDDEN_RIVAL}]]`))
+    if (!owners.has(rival.rivalUserId)) owners.set(rival.rivalUserId, await ctx.db.get(rival.rivalUserId as Id<'users'>))
+    const owner = owners.get(rival.rivalUserId) ?? null
+    const visible = owner !== null && owner.state === 'active' && !owner.nameRepairRequired && owner.publicNameVersion === rival.rivalNameVersion
+    summaries.push(visible ? log.summary : log.summary.replaceAll(`[[${rival.rivalName}]]`, `[[${HIDDEN_RIVAL}]]`))
   }
   return summaries
 }

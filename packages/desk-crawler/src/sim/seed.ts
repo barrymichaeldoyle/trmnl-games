@@ -3,7 +3,7 @@ import type { StreamName, StreamSeeds } from './core/types'
 
 export { SEED_VERSION }
 
-const STREAMS: readonly StreamName[] = ['encounter', 'combat', 'reward', 'narrative', 'raid', 'quest', 'meeting']
+const STREAMS: readonly StreamName[] = ['encounter', 'combat', 'reward', 'narrative', 'raid', 'quest', 'meeting', 'graveyard']
 
 /** Seed v1 (simulation.md), computed by the shared engine; the hash input is unchanged since launch. */
 export function deriveStreamSeed(worldSeed: string, heroId: string, tick: number, simulationVersion: number, stream: StreamName): number {
@@ -11,7 +11,7 @@ export function deriveStreamSeed(worldSeed: string, heroId: string, tick: number
 }
 
 export function deriveStreamSeeds(worldSeed: string, heroId: string, tick: number, simulationVersion: number): StreamSeeds {
-  // Each stream hashes on its own name, so adding the D110 `raid`, P31 `quest` and D141 `meeting` streams leaves the earlier seeds unchanged.
-  const [encounter, combat, reward, narrative, raid, quest, meeting] = STREAMS.map((stream) => deriveStreamSeed(worldSeed, heroId, tick, simulationVersion, stream)) as [number, number, number, number, number, number, number]
-  return { encounter, combat, reward, narrative, raid, quest, meeting }
+  // Each stream hashes on its own name, so adding the D110 `raid`, P31 `quest`, D141 `meeting` and D145 `graveyard` streams leaves the earlier seeds unchanged.
+  const [encounter, combat, reward, narrative, raid, quest, meeting, graveyard] = STREAMS.map((stream) => deriveStreamSeed(worldSeed, heroId, tick, simulationVersion, stream)) as [number, number, number, number, number, number, number, number]
+  return { encounter, combat, reward, narrative, raid, quest, meeting, graveyard }
 }

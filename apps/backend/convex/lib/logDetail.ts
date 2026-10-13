@@ -59,6 +59,8 @@ const outcome = v.union(
     goldGranted: v.number(),
     jackpot: v.boolean(),
     potionFullFallback: v.boolean(),
+    /** D145: the find was another player's spare; the adapter adds the owner's account and name version for masking. */
+    spare: v.optional(v.object({ rivalHeroId: v.string(), rivalName: v.string(), rivalUserId: v.optional(v.string()), rivalNameVersion: v.optional(v.number()) })),
   }),
   v.object({
     variant: v.literal('trap'),
@@ -120,6 +122,18 @@ const outcome = v.union(
     kindId: v.string(),
     meetingTick: v.number(),
     /** Adapter annotation: the other hero's owner and public-name version, so reads can mask a repaired name. */
+    rivalUserId: v.optional(v.string()),
+    rivalNameVersion: v.optional(v.number()),
+  }),
+  /** D145: the owner hears who found its spare. */
+  v.object({
+    variant: v.literal('lost_property'),
+    rivalHeroId: v.string(),
+    rivalName: v.string(),
+    rivalClass: v.union(v.literal('warrior'), v.literal('rogue')),
+    templateId: v.string(),
+    biomeId: v.string(),
+    foundTick: v.number(),
     rivalUserId: v.optional(v.string()),
     rivalNameVersion: v.optional(v.number()),
   }),

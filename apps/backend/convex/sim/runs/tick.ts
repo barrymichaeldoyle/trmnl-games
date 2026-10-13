@@ -2,7 +2,7 @@ import { currentHero } from '../../lib/gameProfile'
 import { v } from 'convex/values'
 import type { Doc } from '../../_generated/dataModel'
 import { internalMutation, type MutationCtx } from '../../_generated/server'
-import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog, IncomingFound } from '@trmnl-games/desk-crawler/sim/core/types'
 import { SimulationInvariantError } from '@trmnl-games/desk-crawler/sim/core/invariants'
 import { simulateHero } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { deriveStreamSeeds } from '@trmnl-games/desk-crawler/sim/seed'
@@ -11,6 +11,8 @@ import { joinRaidPool, nextIncomingRaid, pickRaidTarget, raidRival, settleRaids,
 import { planRaid, type RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
 import { meetingRival, nextIncomingMeeting, pickMeetingPartner, settleMeetings, syncPoolRow, type MeetingPick, type PendingMeeting } from '../../lib/meetings'
 import { planMeeting, type MeetingPlan } from '@trmnl-games/desk-crawler/sim/core/meeting'
+import { incomingFound, ownSpare, pickSpare, settleLostProperty, spareLabel, spareRival, type SparePick } from '../../lib/lostProperty'
+import { planFind } from '@trmnl-games/desk-crawler/sim/core/lostProperty'
 import { canMeet, canRaid, effectiveStance } from '@trmnl-games/desk-crawler/sim/core/career'
 import { occasionAt, raidLaunchPct } from '@trmnl-games/desk-crawler/sim/core/occasions'
 import { writeRankInput } from '../../leaderboard'
@@ -101,6 +103,16 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
     if (meetingPlan !== undefined) meetingPick = await pickMeetingPartner(ctx, hero, meetingPlan, run.tick, content)
     pendingMeeting = await nextIncomingMeeting(ctx, hero._id)
   }
+  // D145: the hero's own spare row (a found one is told this tick), and a lying spare on its floor when the look hits.
+  let own: Doc<'lostProperty'> | null = null
+  let found: IncomingFound | undefined
+  let sparePick: SparePick | undefined
+  if (content.lostProperty !== undefined) {
+    own = await ownSpare(ctx, hero._id)
+    found = await incomingFound(ctx, own)
+    const findPlan = hero.status === 'exploring' ? planFind(streams, content) : undefined
+    if (findPlan !== undefined) sparePick = await pickSpare(ctx, hero, owner._id, findPlan)
+  }
   let result
   const recentLogs = (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(4))
     // Achievements, P31 to-do lines and P35 career lines are not stories, so they never steer the next variant.
@@ -119,6 +131,8 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
       ...(pending === undefined ? {} : { incomingRaid: pending.incoming }),
       ...(meetingPick === undefined ? {} : { meetingPartner: meetingPick.partner }),
       ...(pendingMeeting === undefined ? {} : { incomingMeeting: pendingMeeting.incoming }),
+      ...(sparePick === undefined ? {} : { lostSpare: sparePick.spare }),
+      ...(found === undefined ? {} : { incomingFound: found }),
       // P31: the stand-up turns on the run's wall slot, never the clock, in the owner's last TRMNL offset.
       tickAt: run.wallSlot,
       ...(owner.trmnlUtcOffset === undefined ? {} : { utcOffsetSeconds: owner.trmnlUtcOffset }),
@@ -147,9 +161,10 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
     return
   }
 
-  await applyResult(ctx, hero, items, result, now)
+  await applyResult(ctx, hero, items, result, now, sparePick === undefined ? undefined : spareLabel(sparePick))
   if (content.raids !== undefined) await settleRaids(ctx, { hero, owner, result, plan, pick, pending, tick: run.tick })
   if (content.meetings !== undefined) await settleMeetings(ctx, { hero, owner, result, plan: meetingPlan, pick: meetingPick, pending: pendingMeeting, tick: run.tick })
+  if (content.lostProperty !== undefined) await settleLostProperty(ctx, { hero, owner, result, pick: sparePick, own, contentVersion: content.contentVersion, tick: run.tick })
   // P33: an outbox row for a nap or an affordable bag or pouch, only when the owner turned that alert on.
   if (owner.alerts !== undefined) await queueAlerts(ctx, { owner, hero, result, tick: run.tick, now })
   const progressed = !['waiting_dead', 'waiting_travel', 'paused', 'sleeping'].includes(result.disposition)
@@ -172,7 +187,7 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
       at: now,
       kind: result.event.kind,
       summary: result.event.summary,
-      detail: storedDetail(result.event.detail, result.itemChanges, raidRival(result, pick, pending) ?? meetingRival(result, meetingPick, pendingMeeting)),
+      detail: storedDetail(result.event.detail, result.itemChanges, raidRival(result, pick, pending) ?? meetingRival(result, meetingPick, pendingMeeting) ?? spareRival(result, sparePick, own)),
       deltas: result.event.deltas,
     })
   }

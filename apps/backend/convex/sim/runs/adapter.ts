@@ -70,6 +70,8 @@ export async function applyResult(
   items: readonly Doc<'items'>[],
   result: SimulationResult,
   now: number,
+  /** D145: the owner label for a created item that is a found spare. */
+  spareLabel?: Pick<Doc<'items'>, 'relicUserId' | 'relicName' | 'relicNameVersion'>,
 ): Promise<void> {
   const next = result.nextHero
   const patch: Partial<Doc<'heroes'>> = {
@@ -112,7 +114,7 @@ export async function applyResult(
       if (!row) throw new Error('potion row missing')
       await ctx.db.patch(row._id, { quantity: row.quantity + 1 })
     } else {
-      const id: Id<'items'> = await ctx.db.insert('items', { ...change.item, heroId: hero._id, createdAt: now })
+      const id: Id<'items'> = await ctx.db.insert('items', { ...change.item, heroId: hero._id, createdAt: now, ...(change.spare === true && spareLabel !== undefined ? spareLabel : {}) })
       if (change.destination === 'held') patch.heldItemId = id
     }
   }
@@ -129,7 +131,9 @@ export function storedDetail(detail: LogDetail, changes: readonly ItemChange[] =
   } : detail.outcome.variant === 'merchant' ? { ...detail.outcome, offers: detail.outcome.offers.map((offer) => ({ ...offer })) }
     // D110: the rival's owner and name version let reads mask a name repaired after the raid.
     // D141: a meeting names the other hero the same way.
-    : (detail.outcome.variant === 'raid' || detail.outcome.variant === 'meeting') && rival !== undefined ? { ...detail.outcome, rivalUserId: rival.userId, rivalNameVersion: rival.nameVersion }
+    : (detail.outcome.variant === 'raid' || detail.outcome.variant === 'meeting' || detail.outcome.variant === 'lost_property') && rival !== undefined ? { ...detail.outcome, rivalUserId: rival.userId, rivalNameVersion: rival.nameVersion }
+    // D145: a found spare names its owner inside the loot outcome.
+    : detail.outcome.variant === 'loot' && detail.outcome.spare !== undefined ? { ...detail.outcome, spare: { ...detail.outcome.spare, ...(rival === undefined ? {} : { rivalUserId: rival.userId, rivalNameVersion: rival.nameVersion }) } }
     : detail.outcome.variant === 'todo' ? { ...detail.outcome, tasks: detail.outcome.tasks.map((task) => ({ ...task })) }
     : detail.outcome
   return { ...detail, outcome }

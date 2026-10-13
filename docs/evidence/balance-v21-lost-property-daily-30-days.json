@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "reportVersion": 1,
+    "contentVersion": "v21",
+    "simulationVersion": 1,
+    "heroes": 300,
+    "days": 30,
+    "policy": "daily",
+    "lookPermille": 100,
+    "seconds": 138.343
+  },
+  "withSpares": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.005,
+        "droppedPerHeroDay": 0.005,
+        "foundPerHeroDay": 0.091,
+        "spareShareOfGearFindsPct": 2.93,
+        "level8MedianDays": 8,
+        "level12MedianDays": 13.7,
+        "finalLevelMedian": 23,
+        "finalGoldMedian": 6033
+      },
+      "balanced": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.032,
+        "droppedPerHeroDay": 0.032,
+        "foundPerHeroDay": 0.107,
+        "spareShareOfGearFindsPct": 3.28,
+        "level8MedianDays": 7.8,
+        "level12MedianDays": 13,
+        "finalLevelMedian": 24,
+        "finalGoldMedian": 6099
+      },
+      "bold": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.259,
+        "droppedPerHeroDay": 0.259,
+        "foundPerHeroDay": 0.08,
+        "spareShareOfGearFindsPct": 2.35,
+        "level8MedianDays": 7.8,
+        "level12MedianDays": 13.4,
+        "finalLevelMedian": 24,
+        "finalGoldMedian": 3818
+      }
+    },
+    "all": {
+      "dropped": 885,
+      "found": 833,
+      "told": 832,
+      "replacedUnfound": 51,
+      "lyingAtEnd": 1,
+      "lyingTicks": {
+        "median": 3,
+        "p90": 60,
+        "max": 307
+      },
+      "noticeWaitTicks": {
+        "median": 6,
+        "p90": 9,
+        "max": 11
+      },
+      "droppedPerFloor": {
+        "server_room": 4,
+        "cafeteria_depths": 346,
+        "archive": 222,
+        "parking_garage": 313
+      },
+      "foundPerFloor": {
+        "server_room": 4,
+        "cafeteria_depths": 296,
+        "archive": 221,
+        "parking_garage": 312
+      }
+    }
+  },
+  "baseline": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.006,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 8,
+        "level12MedianDays": 13.7,
+        "finalLevelMedian": 23,
+        "finalGoldMedian": 6293
+      },
+      "balanced": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.035,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 7.8,
+        "level12MedianDays": 12.9,
+        "finalLevelMedian": 24,
+        "finalGoldMedian": 6235
+      },
+      "bold": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.264,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 7.8,
+        "level12MedianDays": 13.4,
+        "finalLevelMedian": 24,
+        "finalGoldMedian": 3856
+      }
+    }
+  },
+  "control": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.006,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 8,
+        "level12MedianDays": 13.8,
+        "finalLevelMedian": 23,
+        "finalGoldMedian": 6758
+      },
+      "balanced": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.035,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 7.8,
+        "level12MedianDays": 12.8,
+        "finalLevelMedian": 24,
+        "finalGoldMedian": 5929
+      },
+      "bold": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.269,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 7.8,
+        "level12MedianDays": 13.4,
+        "finalLevelMedian": 24,
+        "finalGoldMedian": 3580
+      }
+    }
+  }
+}

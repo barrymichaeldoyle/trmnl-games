@@ -3,13 +3,14 @@
  * No Convex, auth, connection or wall-clock types belong here.
  */
 
-export type StreamName = 'encounter' | 'combat' | 'reward' | 'narrative' | 'raid' | 'quest' | 'meeting'
+export type StreamName = 'encounter' | 'combat' | 'reward' | 'narrative' | 'raid' | 'quest' | 'meeting' | 'graveyard'
 /**
  * The `raid` stream (D110) is drawn only under a catalog with raid rules; without its seed no raid can launch.
  * The `quest` stream (P31) is drawn only under a catalog with to-do rules, which require it.
  * The `meeting` stream (D141) is drawn only under a catalog with meeting rules.
+ * The `graveyard` stream (D145) is drawn only under a catalog with lost-property rules.
  */
-export type StreamSeeds = Readonly<Record<Exclude<StreamName, 'raid' | 'quest' | 'meeting'>, number> & { raid?: number; quest?: number; meeting?: number }>
+export type StreamSeeds = Readonly<Record<Exclude<StreamName, 'raid' | 'quest' | 'meeting' | 'graveyard'>, number> & { raid?: number; quest?: number; meeting?: number; graveyard?: number }>
 
 export type HeroStatus = 'exploring' | 'resting' | 'travelling' | 'dead' | 'paused' | 'sleeping'
 export type EncounterKind = 'combat' | 'loot' | 'trap' | 'rest'
@@ -36,6 +37,7 @@ export type LogKind =
   | 'choice'
   | 'raid'
   | 'meeting'
+  | 'lost_property'
   | 'todo'
   | 'career'
   | 'occasion'
@@ -548,6 +550,62 @@ export interface IncomingMeeting {
   readonly kindId: string
 }
 
+/**
+ * Lost property (D145): a knockout drops a named spare copy of one equipped item on that floor, and another player's
+ * hero may find it in place of an ordinary loot gear find. Nothing changes hands: the fallen hero keeps its gear.
+ */
+export interface LostPropertyRule {
+  /** Chance per exploring tick, in permille, that the adapter looks for a spare on the hero's floor. */
+  readonly lookPermille: number
+  readonly narrative: {
+    /** Knockout consequence. Placeholder {item}. */
+    readonly dropped: string
+    /** The finder's lines and short line. Placeholders {rival} (the owner) and {item}. */
+    readonly found: readonly string[]
+    readonly foundCompact: string
+    /** The owner's notice. Placeholders {rival} (the finder), {item} and {destination} (the floor). */
+    readonly returned: readonly string[]
+    readonly returnedCompact: string
+  }
+}
+
+/** What a knockout leaves on the floor: the item's identity, never its stats or workbench state. */
+export interface SpareDrop {
+  readonly templateId: string
+  readonly kind: GearKind
+  readonly rarity: Rarity
+  readonly affixId?: string
+  /** The template name, for the lines. */
+  readonly name: string
+  readonly biomeId: string
+  readonly tick: number
+  /** Where it lies among the floor's spares: the graveyard stream's third draw this tick. */
+  readonly shard: number
+}
+
+/** A lying spare the adapter picked on this hero's floor, when `planFind` asked to look. */
+export interface LostSpare {
+  readonly ownerHeroId: string
+  /** The owner's public name as it can be shown now. */
+  readonly ownerName: string
+  readonly templateId: string
+  readonly kind: GearKind
+  readonly rarity: Rarity
+  readonly affixId?: string
+}
+
+/** A spare of this hero's that someone found, waiting to be told (the owner side). */
+export interface IncomingFound {
+  readonly finderHeroId: string
+  readonly finderName: string
+  readonly finderClass: HeroClass
+  readonly templateId: string
+  /** The template name as dropped. */
+  readonly name: string
+  readonly biomeId: string
+  readonly foundTick: number
+}
+
 /** A ledger raid landing on this hero (the target side), oldest pending first. */
 export interface IncomingRaid {
   readonly raiderHeroId: string
@@ -702,6 +760,8 @@ export interface ContentCatalog {
   readonly raids?: RaidRule
   /** Absent before v20 (D141): no meetings, and no `meeting` draw. */
   readonly meetings?: MeetingRule
+  /** Absent before v21 (D145): no spares, and no `graveyard` draw. */
+  readonly lostProperty?: LostPropertyRule
   /** Absent before v9 (P31): without it a hero has no to-do list and draws nothing from the `quest` stream. */
   readonly todo?: TodoRule
   /** Absent before v12 (P35): every feature is on from level 1. */
@@ -782,6 +842,8 @@ export interface HeroCounters {
   readonly raidMishaps: number
   /** D141: meetings from either side, counted when each side applies its own. */
   readonly meetings: number
+  /** D145: other players' spares this hero found. */
+  readonly lostPropertyFound: number
   /** D133: arrivals per biome id, written by the simulator from content v16's deploy on; absent on heroes that have not travelled since. */
   readonly biomesVisited?: Readonly<Record<string, number>>
 }
@@ -911,7 +973,8 @@ export type NewItem = Omit<ItemSnapshot, 'id'>
 export type ItemChange =
   | { readonly type: 'potion_decrement'; readonly itemId: string; readonly deleteRow: boolean }
   | { readonly type: 'potion_increment'; readonly itemId: string }
-  | { readonly type: 'create'; readonly destination: 'bag' | 'held' | 'potion_stack'; readonly item: NewItem }
+  /** `spare` (D145): the item is another player's found spare; the adapter labels it with the owner's name. */
+  | { readonly type: 'create'; readonly destination: 'bag' | 'held' | 'potion_stack'; readonly item: NewItem; readonly spare?: true }
 
 // ---------------------------------------------------------------- input/output
 
@@ -933,6 +996,10 @@ export interface SimulationInput {
   readonly meetingPartner?: MeetingPartner
   /** D141: the oldest pending meeting with this hero; applied as the tick's event when the hero is exploring or resting and no raid lands. */
   readonly incomingMeeting?: IncomingMeeting
+  /** D145: a lying spare on this hero's floor, when `planFind` asked to look; used only if the tick's loot finds gear. */
+  readonly lostSpare?: LostSpare
+  /** D145: this hero's spare that someone found; told as the tick's event when the hero is exploring or resting and nothing else lands. Its presence also means no new spare drops. */
+  readonly incomingFound?: IncomingFound
   /** P31: the tick's wall slot in UTC milliseconds; absent means `tick` quarter-hours after the epoch. */
   readonly tickAt?: number
   /** P31: the owner's last TRMNL UTC offset in seconds; absent means UTC (D106). */
@@ -983,6 +1050,8 @@ export type OutcomeDetail =
       readonly goldGranted: number
       readonly jackpot: boolean
       readonly potionFullFallback: boolean
+      /** D145: the find was another player's spare; their hero and public name as shown at the find. */
+      readonly spare?: { readonly rivalHeroId: string; readonly rivalName: string }
     }
   | {
       readonly variant: 'trap'
@@ -1023,6 +1092,16 @@ export type OutcomeDetail =
       readonly kindId: string
       /** The tick the starter met the partner. */
       readonly meetingTick: number
+    }
+  | {
+      readonly variant: 'lost_property'
+      /** The hero that found this hero's spare. */
+      readonly rivalHeroId: string
+      readonly rivalName: string
+      readonly rivalClass: HeroClass
+      readonly templateId: string
+      readonly biomeId: string
+      readonly foundTick: number
     }
   | { readonly variant: 'occasion'; readonly occasionId: string; readonly key: string }
   | {
@@ -1100,6 +1179,9 @@ export interface TickMetrics {
   readonly raidsApplied: number
   readonly meetingsLaunched: number
   readonly meetingsApplied: number
+  readonly sparesDropped: number
+  readonly sparesFound: number
+  readonly sparesReturned: number
   readonly tasksCompleted: number
   readonly todoRefills: number
   /** P35: a career rung reached, features unlocked, and a guaranteed event forced this tick. */
@@ -1122,6 +1204,12 @@ export interface SimulationResult {
   readonly meetingLaunch?: MeetingLaunch
   /** D141: the incoming meeting was applied this tick; the adapter marks the ledger row applied. */
   readonly meetingApplied?: boolean
+  /** D145: this hero was knocked out and leaves this spare; the adapter writes its lost-property row. */
+  readonly spareDropped?: SpareDrop
+  /** D145: the tick's gear find is the adapter's `lostSpare`; the adapter marks it found and labels the created item. */
+  readonly spareFound?: { readonly ownerHeroId: string }
+  /** D145: the owner was told its spare was found; the adapter deletes the row. */
+  readonly foundApplied?: boolean
   /** P31/P35: lines logged after `event`, in order: tasks ticked off, the stand-up, features unlocked, a rung reached. Never the tick's only story unless nothing else happened. */
   readonly extraEvents?: readonly TickEvent[]
 }

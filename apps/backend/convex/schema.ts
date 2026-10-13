@@ -88,6 +88,8 @@ export const heroCounters = v.object({
   raidMishaps: v.optional(v.number()),
   /** D141: meetings from either side. */
   meetings: v.optional(v.number()),
+  /** D145: other players' spares this hero found. */
+  lostPropertyFound: v.optional(v.number()),
 })
 
 /** P35: the hero's place on the career ladder, written by the simulator. */
@@ -160,6 +162,7 @@ export const logKind = v.union(
   v.literal('choice'),
   v.literal('raid'),
   v.literal('meeting'),
+  v.literal('lost_property'),
   v.literal('todo'),
   v.literal('career'),
   v.literal('occasion'),
@@ -475,9 +478,14 @@ export default defineSchema({
     /** D129: the tier the workbench raised the item to and its reinforcement; absent on untouched gear. */
     tier: v.optional(v.number()),
     reinforced: v.optional(v.number()),
+    /** D145: a found spare carries its first owner's account, public name and name version; absent on every other item. */
+    relicUserId: v.optional(v.id('users')),
+    relicName: v.optional(v.string()),
+    relicNameVersion: v.optional(v.number()),
   })
     .index('by_heroId', ['heroId'])
-    .index('by_heroId_and_kind', ['heroId', 'kind']),
+    .index('by_heroId_and_kind', ['heroId', 'kind'])
+    .index('by_relicUserId', ['relicUserId']),
 
   /**
    * D110: one row per hero that can be raided, at a random shard. A raider takes the first row at or after its
@@ -495,6 +503,36 @@ export default defineSchema({
     .index('by_shard', ['shard'])
     .index('by_heroId', ['heroId'])
     .index('by_biomeId_and_shard', ['biomeId', 'shard']),
+
+  /**
+   * D145: lost property, at most one row per hero. A knockout writes the hero's spare (identity only, never stats) on
+   * that floor at a random shard; a finder on the same floor takes the first lying row at or after its plan's shard
+   * and marks it found; the owner's next evaluation tells it and deletes the row. A new knockout replaces a lying row.
+   */
+  lostProperty: defineTable({
+    ownerHeroId: v.id('heroes'),
+    ownerUserId: v.id('users'),
+    biomeId: v.string(),
+    shard: v.number(),
+    templateId: v.string(),
+    kind: v.union(v.literal('weapon'), v.literal('armor')),
+    rarity,
+    affixId: v.optional(v.string()),
+    /** The template name as dropped, for the lines and the card. */
+    name: v.string(),
+    contentVersion: v.string(),
+    droppedTick: v.number(),
+    state: v.union(v.literal('lying'), v.literal('found')),
+    finderHeroId: v.optional(v.id('heroes')),
+    finderUserId: v.optional(v.id('users')),
+    finderName: v.optional(v.string()),
+    finderNameVersion: v.optional(v.number()),
+    finderClass: v.optional(v.union(v.literal('warrior'), v.literal('rogue'))),
+    foundTick: v.optional(v.number()),
+  })
+    .index('by_ownerHeroId', ['ownerHeroId'])
+    .index('by_biomeId_and_state_and_shard', ['biomeId', 'state', 'shard'])
+    .index('by_finderHeroId', ['finderHeroId']),
 
   /**
    * D141: one row per meeting, inserted by the starter's tick (keyed by starter and tick) and applied once by the

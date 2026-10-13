@@ -97,6 +97,8 @@ export const engagement = internalQuery({
       occasions: { seen: sum((c) => c.occasionsSeen), heroes: reached((c) => c.occasionsSeen), mishaps: sum((c) => c.raidMishaps), heroesInAMishap: reached((c) => c.raidMishaps), lastSeen: tally(heroes.map((h) => h.occasion?.key ?? 'none')) },
       // D141: meetings from either side (each meeting counts once per hero), and how many heroes have met someone.
       meetings: { sides: sum((c) => c.meetings), heroes: reached((c) => c.meetings) },
+      // D145: other players' spares found, and how many heroes have found one.
+      lostProperty: { found: sum((c) => c.lostPropertyFound), heroes: reached((c) => c.lostPropertyFound) },
       analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
     }
   },

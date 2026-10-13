@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "reportVersion": 1,
+    "contentVersion": "v21",
+    "simulationVersion": 1,
+    "heroes": 300,
+    "days": 30,
+    "policy": "three-day",
+    "lookPermille": 100,
+    "seconds": 126.708
+  },
+  "withSpares": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.03,
+        "droppedPerHeroDay": 0.03,
+        "foundPerHeroDay": 0.069,
+        "spareShareOfGearFindsPct": 2.16,
+        "level8MedianDays": 9.9,
+        "level12MedianDays": 17.1,
+        "finalLevelMedian": 20,
+        "finalGoldMedian": 4331,
+        "goldEarnedMedian": 16959,
+        "workbenchGoldMedian": 8000
+      },
+      "balanced": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.043,
+        "droppedPerHeroDay": 0.043,
+        "foundPerHeroDay": 0.073,
+        "spareShareOfGearFindsPct": 2.22,
+        "level8MedianDays": 9.2,
+        "level12MedianDays": 16.3,
+        "finalLevelMedian": 22,
+        "finalGoldMedian": 4826,
+        "goldEarnedMedian": 17828,
+        "workbenchGoldMedian": 8000
+      },
+      "bold": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.13,
+        "droppedPerHeroDay": 0.13,
+        "foundPerHeroDay": 0.048,
+        "spareShareOfGearFindsPct": 1.38,
+        "level8MedianDays": 8.8,
+        "level12MedianDays": 17.6,
+        "finalLevelMedian": 19,
+        "finalGoldMedian": 3228,
+        "goldEarnedMedian": 13783,
+        "workbenchGoldMedian": 5000
+      }
+    },
+    "all": {
+      "dropped": 608,
+      "found": 569,
+      "told": 567,
+      "replacedUnfound": 35,
+      "lyingAtEnd": 4,
+      "lyingTicks": {
+        "median": 27,
+        "p90": 339,
+        "max": 632
+      },
+      "noticeWaitTicks": {
+        "median": 1,
+        "p90": 8,
+        "max": 32
+      },
+      "droppedPerFloor": {
+        "cafeteria_depths": 379,
+        "archive": 121,
+        "parking_garage": 108
+      },
+      "foundPerFloor": {
+        "cafeteria_depths": 344,
+        "archive": 117,
+        "parking_garage": 108
+      }
+    }
+  },
+  "baseline": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.031,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 9.9,
+        "level12MedianDays": 17.2,
+        "finalLevelMedian": 20,
+        "finalGoldMedian": 4645,
+        "goldEarnedMedian": 17037,
+        "workbenchGoldMedian": 8000
+      },
+      "balanced": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.045,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 9.2,
+        "level12MedianDays": 16.3,
+        "finalLevelMedian": 21,
+        "finalGoldMedian": 4763,
+        "goldEarnedMedian": 17614,
+        "workbenchGoldMedian": 8000
+      },
+      "bold": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.131,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 8.8,
+        "level12MedianDays": 17.7,
+        "finalLevelMedian": 19,
+        "finalGoldMedian": 3622,
+        "goldEarnedMedian": 14054,
+        "workbenchGoldMedian": 5000
+      }
+    }
+  },
+  "control": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.028,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 9.8,
+        "level12MedianDays": 17.2,
+        "finalLevelMedian": 20,
+        "finalGoldMedian": 4700,
+        "goldEarnedMedian": 17165,
+        "workbenchGoldMedian": 8000
+      },
+      "balanced": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.042,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 9.2,
+        "level12MedianDays": 16.3,
+        "finalLevelMedian": 21,
+        "finalGoldMedian": 4887,
+        "goldEarnedMedian": 17817,
+        "workbenchGoldMedian": 8000
+      },
+      "bold": {
+        "heroes": 100,
+        "deathsPerHeroDay": 0.13,
+        "droppedPerHeroDay": 0,
+        "foundPerHeroDay": 0,
+        "spareShareOfGearFindsPct": 0,
+        "level8MedianDays": 8.8,
+        "level12MedianDays": 17.4,
+        "finalLevelMedian": 19,
+        "finalGoldMedian": 3596,
+        "goldEarnedMedian": 14242,
+        "workbenchGoldMedian": 5000
+      }
+    }
+  }
+}

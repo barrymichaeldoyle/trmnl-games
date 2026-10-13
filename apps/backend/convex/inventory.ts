@@ -14,6 +14,7 @@ import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
 import type { ContentCatalog, HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 import { readWorld, worldContent } from './world'
 import { awardAfterIntent } from './lib/achievements'
+import { spareOwners } from './lib/lostProperty'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield, workbenchSuffix } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { bestFitPotion, combineBatches, healPctOf, potionItem, potionStrengths, potionWord, potionsHeld, strengthById, strengthOf } from '@trmnl-games/desk-crawler/sim/core/potions'
@@ -197,6 +198,8 @@ export const mine = query({
     const used = bagUsed(asBagHero(hero), asSnapshots(items))
     const held = heldMaterials(items.map(snapshotOf))
     const workbench = content.workbench
+    // D145: whose name is on each found spare.
+    const spares = await spareOwners(ctx, items)
     return {
       capacity,
       used,
@@ -238,6 +241,7 @@ export const mine = query({
           reinforced: item.reinforced ?? 0,
           nextStep: workbench === undefined ? null : stepView(content, hero, item, held),
           affixable: workbench !== undefined && (content.affixRarities ?? []).includes(item.rarity),
+          spareOf: spares.get(item._id) ?? null,
         }))
         .sort((a, b) => Number(b.held) - Number(a.held) || Number(b.equipped) - Number(a.equipped) || b.attack + b.defense - (a.attack + a.defense)),
     }
