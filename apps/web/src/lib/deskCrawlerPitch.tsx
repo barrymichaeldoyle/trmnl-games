@@ -18,19 +18,19 @@ export function DeviceSample({ caption, priority = false }: { caption: string; p
   return (
     <figure className="flex flex-col gap-3">
       <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)] shadow-[0_0_0_3px_var(--color-night),0_24px_48px_-24px_rgb(0_0_0/0.8)]">
-        <picture>
-          {/* 800px (sharp, WebP quality 85) for phones at 2x; 1200px (lossless) for 3x phones and the desktop column. */}
-          <source srcSet="/games/desk-crawler/screen-sample-800.webp 800w, /games/desk-crawler/screen-sample.webp 1200w" sizes="(min-width: 1024px) 600px, 100vw" type="image/webp" />
-          <img
-            src="/games/desk-crawler/screen-sample.png"
-            alt="Example Desk Crawler screen on a TRMNL X: Pip explores the Server Room, with health, XP, equipment, adventure stories and weekly rankings."
-            width={1200}
-            height={900}
-            fetchPriority={priority ? 'high' : undefined}
-            loading={priority ? undefined : 'lazy'}
-            className="block h-auto w-full rounded-md bg-white"
-          />
-        </picture>
+        {/* Rendered from the marketing preview (tools/trmnl/preview.ts --marketing --recap) on the X full layout. 16-colour
+            PNGs, the X's own 4-bit greys, beat WebP at both sizes: 800px for phones at 2x, 1200px for 3x phones and desktop. */}
+        <img
+          src="/games/desk-crawler/screen-sample.png"
+          srcSet="/games/desk-crawler/screen-sample-800.png 800w, /games/desk-crawler/screen-sample.png 1200w"
+          sizes="(min-width: 1024px) 600px, 100vw"
+          alt="Example Desk Crawler screen on a TRMNL X: Pip explores the Server Room, with health, XP, gear, adventure stories, today's to-do list, the current goal, the night recap and the weekly rankings."
+          width={1200}
+          height={900}
+          fetchPriority={priority ? 'high' : undefined}
+          loading={priority ? undefined : 'lazy'}
+          className="block h-auto w-full rounded-md bg-white"
+        />
       </div>
       <figcaption className="text-sm text-muted">{caption}</figcaption>
     </figure>

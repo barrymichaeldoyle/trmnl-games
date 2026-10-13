@@ -51,7 +51,8 @@ if (sourceIndex >= 0) {
   const source = JSON.parse(readFileSync(process.argv[sourceIndex + 1]!, 'utf8')) as { now: number; entries: Array<ActivityEntry & { kind: string; summary: string }> }
   recapStates.recordedHistory = { ...base, logs: source.entries.slice(0, 10).map(log => ({ ...log, deltas: displayLogDeltas(log), at: log.at - source.now + NOW })), activity: { entries: source.entries.map(entry => ({ ...entry, at: entry.at - source.now + NOW })), truncated: source.entries.length > MAX_RECAP_EVENTS } }
 }
-const previewStates = process.argv.includes('--recap') ? { ...states, ...recapStates } : process.argv.includes('--no-effect') ? groups.noEffect : process.argv.includes('--potion-finds') ? groups.potionFinds : process.argv.includes('--marketing') ? groups.marketing : states
+// --marketing wins, so `--marketing --recap` renders the public sample with its overnight recap.
+const previewStates = process.argv.includes('--marketing') ? groups.marketing : process.argv.includes('--recap') ? { ...states, ...recapStates } : process.argv.includes('--no-effect') ? groups.noEffect : process.argv.includes('--potion-finds') ? groups.potionFinds : states
 
 mkdirSync('.previews', { recursive: true })
 let written = 0
