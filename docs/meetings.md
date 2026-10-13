@@ -1,6 +1,6 @@
 # Meetings (P39)
 
-Proposed 2026-10-13 after Barry picked the roadmap's v1.2 "Meetings" row as the next feature. Not approved; [open points](#open-points) lists what needs Barry's answer. Nothing is built.
+Proposed 2026-10-13 after Barry picked the roadmap's v1.2 "Meetings" row as the next feature. Barry approved it the same day by handing over the open points, so every recommendation stands (D141); [settled points](#settled-points) records them. All five slices were built the same day as content v20 and achievement catalog version 10 ([evidence](evidence/meetings.md)); [changes while building](#changes-while-building) lists where they differ from this spec. Production runs v19 until the world is switched to v20.
 
 Companions: [raids](raids.md) (the ledger, pool and apply path this reuses), [the roadmap](roadmap.md) (the v1.2 row and its gate), [gameplay](gameplay.md) (effects, D80), [world events](world-events.md) (the scene layers), [achievements](achievements.md) (the planned "meetings completed" family) and [the source brief](source-brief.md), whose meetings row reads "shared stories/buffs/trade; start with stories only".
 
@@ -38,7 +38,7 @@ A partner is available when all of these hold at pick time. Otherwise the draw i
 - active, the owner's current hero (parked heroes are out), not the hero itself, not suspended, quarantined or deleting;
 - exploring or resting (dead, travelling, paused and sleeping heroes are out);
 - on the same floor;
-- at or above the meeting unlock (open point 1);
+- at or above the meeting unlock (level 2, [settled point 1](#settled-points));
 - not met in the last 48 ticks (twelve hours). The pool row stores `metAtTick`. Both rows are stamped when a meeting happens, so a hero doesn't start a second meeting right after being met.
 
 A floor with only one hero on it has nobody to meet, and the draw is spent. That's expected on the Parking Garage for a while, and it costs nothing.
@@ -87,7 +87,7 @@ The scene is where meetings should feel new, so the starter's and the partner's 
 - A new subject kind, `coworker`, carrying the other hero's class. It draws that class's idle sprite at the subject's position, mirrored to face ours. Both class sprites already exist, so no new figure art is needed; the mirror and any colour regions are the work.
 - The meeting kind's prop stands between them at the floor-prop anchor that occasions use (column 66): a coffee machine, a printer, a lunch table, a shredder, a whiteboard and a water cooler. Six small props.
 - On an occasion, the occasion's floor prop gives way to the meeting's prop for that scene; the garland, hats and window stay. Both heroes wear the occasion's hat.
-- Scene version 6 adds the `coworker` subject. Version 5 paths stay frozen.
+- The `coworker` subject is a new segment under scene version 5 (see [changes while building](#changes-while-building)).
 - The device template doesn't change. The scene comes in through the image URL, and the story is a log line with an existing glyph slot.
 
 ## Deliberate limits
@@ -113,9 +113,20 @@ Each slice ships on its own, keeps every earlier payload and template meaning, a
 
 M1 blocks the rest. M2 can start while M1's harness runs; the production switch waits for M1's gate. M3 and M4 are independent once M2's query exists. M5 is last so the family counts real meetings from the switch.
 
-## Open points
+## Changes while building
 
-My recommendation comes first in each.
+- **No scene version bump.** The coworker is a new subject segment (`coworker-<class>-<prop>`) under scene version 5. Every existing path draws exactly as before, so nothing cached changes and there's no version 6.
+- **The prop lives with the art.** The scene key reads the log outcome, not the catalog, so each kind's prop is in `MEETING_PROPS` (art/props.ts) keyed by kind id instead of a `prop` field on the catalog row. A test checks that every v20 kind has one, and a kind the art doesn't know draws the coworker alone.
+- **The coworker leaves its blade at its desk.** It's its class's idle pose without the blade's columns, mirrored to face ours, so the scene reads as a chat rather than a duel. The Warrior's cloak hangs off its back. On an occasion both heroes wear the hat, and the meeting's prop takes the occasion prop's place.
+- **The starter has a cooldown too.** The adapter reads the starter's own pool row, so a hero that was just met doesn't start another meeting within twelve hours; the row is stamped after a first evaluation has joined it to the pool.
+- **Previews use a scenario,** `meeting` in previewScenarios.ts (the longest line that fits, the Rogue at the whiteboard), rather than a `--meeting` flag.
+- **The device keeps its glyphs.** The mug glyph is companion-only. The device draws meeting lines with the system glyph, like occasion lines, so the template stays at v53 and needs no ZIP upload.
+- **The Coworkers card is on the Log tab,** after Raids, where the raid record moved in D124. The log's Raids filter became "Raids & meetings".
+- **Gold medians are noisy.** Levels held the "neither faster nor slower" gate. The day-30 gold medians move a few percent each way per cohort with no pattern, because each meeting changes which raids happen afterwards ([evidence](evidence/meetings.md#progress)).
+
+## Settled points
+
+Barry handed these over on 2026-10-13 (D141), so the recommendation, listed first in each, stands.
 
 1. **Unlock level.** (a) Level 2, the same as the to-do list: new players see other people within their first hour, and a meeting can't hurt. (b) Level 7 with raids, so all the multiplayer arrives at once. (c) Level 1. Recommend (a): a key in `unlocks`, with no new career rung, because rungs are append-only and a level-2 rung would need the v17 insert-and-remap.
 2. **What a meeting gives.** (a) The same small boon to both, as above. (b) Story only, as the source brief first suggested. Recommend (a): a story with no effect is easy to skim past, and the boon gives a reason to check who you met.

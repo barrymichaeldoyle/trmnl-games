@@ -1,5 +1,6 @@
 import { classPose, type BasePose, type HeroPose } from './hero'
 import { SCENE_VERSION, type SceneTime } from './sceneTime'
+import { MEETING_PROPS, type PropId } from './props'
 
 /**
  * Pure mapping from hero state + latest gameplay event to the scene shown on
@@ -7,7 +8,9 @@ import { SCENE_VERSION, type SceneTime } from './sceneTime'
  */
 export type SceneSubject =
   | { kind: 'monster'; id: string; elite: boolean }
-  | { kind: 'prop'; id: 'chest' | 'gold' | 'potion' | 'gear' | 'trap' | 'campfire' | 'level_up' | 'full_bag' | 'signpost' }
+  | { kind: 'prop'; id: PropId }
+  /** D141: the other hero of a meeting, in its class, with the meeting's prop between them. */
+  | { kind: 'coworker'; heroClass: 'warrior' | 'rogue'; prop?: PropId }
   | { kind: 'none' }
 
 export interface LatestEvent {
@@ -48,13 +51,19 @@ function baseScene(status: string, hasWake: boolean, latest: LatestEvent | null)
   if (outcome?.variant === 'rest') return { pose: 'rest', subject: { kind: 'prop', id: 'campfire' } }
   // D110: a raid this hero won shows the gold it came away with; a lost one leaves the desk empty.
   if (outcome?.variant === 'raid') return { pose: 'idle', subject: outcome.won === true ? { kind: 'prop', id: 'gold' } : { kind: 'none' } }
+  // D141: a meeting shows the other hero, facing ours across the meeting's prop.
+  if (outcome?.variant === 'meeting') {
+    const prop = MEETING_PROPS[String(outcome.kindId)]
+    return { pose: 'idle', subject: { kind: 'coworker', heroClass: outcome.rivalClass === 'rogue' ? 'rogue' : 'warrior', ...(prop === undefined ? {} : { prop }) } }
+  }
   return { pose: 'idle', subject: { kind: 'none' } }
 }
 
-/** URL path segment for a subject: `monster-<id>`, `elite-<id>`, `prop-<id>` or `none`. */
+/** URL path segment for a subject: `monster-<id>`, `elite-<id>`, `prop-<id>`, `coworker-<class>[-<prop>]` or `none`. */
 export function subjectSegment(subject: SceneSubject): string {
   if (subject.kind === 'monster') return `${subject.elite ? 'elite' : 'monster'}-${subject.id}`
   if (subject.kind === 'prop') return `prop-${subject.id}`
+  if (subject.kind === 'coworker') return `coworker-${subject.heroClass}${subject.prop === undefined ? '' : `-${subject.prop}`}`
   return 'none'
 }
 

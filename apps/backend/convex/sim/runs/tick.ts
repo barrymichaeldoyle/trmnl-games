@@ -9,7 +9,9 @@ import { deriveStreamSeeds } from '@trmnl-games/desk-crawler/sim/seed'
 import { applyResult, storedDetail, toHeroState, toInventory } from './adapter'
 import { joinRaidPool, nextIncomingRaid, pickRaidTarget, raidRival, settleRaids, type PendingRaid, type RaidPick } from '../../lib/raids'
 import { planRaid, type RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
-import { canRaid, effectiveStance } from '@trmnl-games/desk-crawler/sim/core/career'
+import { meetingRival, nextIncomingMeeting, pickMeetingPartner, settleMeetings, syncPoolRow, type MeetingPick, type PendingMeeting } from '../../lib/meetings'
+import { planMeeting, type MeetingPlan } from '@trmnl-games/desk-crawler/sim/core/meeting'
+import { canMeet, canRaid, effectiveStance } from '@trmnl-games/desk-crawler/sim/core/career'
 import { occasionAt, raidLaunchPct } from '@trmnl-games/desk-crawler/sim/core/occasions'
 import { writeRankInput } from '../../leaderboard'
 import { achievementState, awardAchievements, keepsakeTotal, tallyUnlocks } from '../../lib/achievements'
@@ -90,6 +92,15 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
     if (plan !== undefined) pick = await pickRaidTarget(ctx, hero, plan, run.tick, content)
     pending = await nextIncomingRaid(ctx, hero._id)
   }
+  // D141: when no raid target was picked, a meeting partner on the hero's floor when the meeting draw hits.
+  let meetingPlan: MeetingPlan | undefined
+  let meetingPick: MeetingPick | undefined
+  let pendingMeeting: PendingMeeting | undefined
+  if (content.meetings !== undefined) {
+    meetingPlan = pick === undefined && canMeet(content, hero.level) ? planMeeting(streams, content) : undefined
+    if (meetingPlan !== undefined) meetingPick = await pickMeetingPartner(ctx, hero, meetingPlan, run.tick, content)
+    pendingMeeting = await nextIncomingMeeting(ctx, hero._id)
+  }
   let result
   const recentLogs = (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(4))
     // Achievements, P31 to-do lines and P35 career lines are not stories, so they never steer the next variant.
@@ -106,6 +117,8 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
       recentSummaries: recentLogs.map((log) => log.summary),
       ...(pick === undefined ? {} : { raidTarget: pick.target }),
       ...(pending === undefined ? {} : { incomingRaid: pending.incoming }),
+      ...(meetingPick === undefined ? {} : { meetingPartner: meetingPick.partner }),
+      ...(pendingMeeting === undefined ? {} : { incomingMeeting: pendingMeeting.incoming }),
       // P31: the stand-up turns on the run's wall slot, never the clock, in the owner's last TRMNL offset.
       tickAt: run.wallSlot,
       ...(owner.trmnlUtcOffset === undefined ? {} : { utcOffsetSeconds: owner.trmnlUtcOffset }),
@@ -136,10 +149,13 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
 
   await applyResult(ctx, hero, items, result, now)
   if (content.raids !== undefined) await settleRaids(ctx, { hero, owner, result, plan, pick, pending, tick: run.tick })
+  if (content.meetings !== undefined) await settleMeetings(ctx, { hero, owner, result, plan: meetingPlan, pick: meetingPick, pending: pendingMeeting, tick: run.tick })
   // P33: an outbox row for a nap or an affordable bag or pouch, only when the owner turned that alert on.
   if (owner.alerts !== undefined) await queueAlerts(ctx, { owner, hero, result, tick: run.tick, now })
   const progressed = !['waiting_dead', 'waiting_travel', 'paused', 'sleeping'].includes(result.disposition)
   const markers: Partial<Doc<'heroes'>> = { lastTick: run.tick, ...(content.raids === undefined ? {} : await joinRaidPool(ctx, hero)) }
+  // D141: the pool row follows the hero's floor, so meetings pick from the right one, and carries its own cooldown.
+  if (content.meetings !== undefined) await syncPoolRow(ctx, markers.raidPoolId ?? hero.raidPoolId, result.nextHero.biomeId, result, run.tick)
   if (progressed) {
     markers.lastProgressTick = run.tick
     markers.lastAdvancedAt = now
@@ -156,7 +172,7 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
       at: now,
       kind: result.event.kind,
       summary: result.event.summary,
-      detail: storedDetail(result.event.detail, result.itemChanges, raidRival(result, pick, pending)),
+      detail: storedDetail(result.event.detail, result.itemChanges, raidRival(result, pick, pending) ?? meetingRival(result, meetingPick, pendingMeeting)),
       deltas: result.event.deltas,
     })
   }

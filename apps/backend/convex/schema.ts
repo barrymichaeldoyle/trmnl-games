@@ -86,6 +86,8 @@ export const heroCounters = v.object({
   /** D139: occasions announced to this hero, and Friday the 13th raid mishaps from either side. */
   occasionsSeen: v.optional(v.number()),
   raidMishaps: v.optional(v.number()),
+  /** D141: meetings from either side. */
+  meetings: v.optional(v.number()),
 })
 
 /** P35: the hero's place on the career ladder, written by the simulator. */
@@ -157,6 +159,7 @@ export const logKind = v.union(
   v.literal('merchant'),
   v.literal('choice'),
   v.literal('raid'),
+  v.literal('meeting'),
   v.literal('todo'),
   v.literal('career'),
   v.literal('occasion'),
@@ -477,9 +480,40 @@ export default defineSchema({
     heroId: v.id('heroes'),
     shard: v.number(),
     raidedAtTick: v.optional(v.number()),
+    /** D141: the hero's floor, patched by its own tick, so a meeting picks from the same floor. Absent until then. */
+    biomeId: v.optional(v.string()),
+    /** D141: the last tick this hero met or was met, for the meeting cooldown. */
+    metAtTick: v.optional(v.number()),
   })
     .index('by_shard', ['shard'])
-    .index('by_heroId', ['heroId']),
+    .index('by_heroId', ['heroId'])
+    .index('by_biomeId_and_shard', ['biomeId', 'shard']),
+
+  /**
+   * D141: one row per meeting, inserted by the starter's tick (keyed by starter and tick) and applied once by the
+   * partner's next exploring or resting evaluation.
+   */
+  meetings: defineTable({
+    starterHeroId: v.id('heroes'),
+    starterUserId: v.id('users'),
+    starterName: v.string(),
+    starterNameVersion: v.number(),
+    starterClass: v.union(v.literal('warrior'), v.literal('rogue')),
+    partnerHeroId: v.id('heroes'),
+    partnerUserId: v.id('users'),
+    partnerName: v.string(),
+    partnerNameVersion: v.number(),
+    partnerClass: v.union(v.literal('warrior'), v.literal('rogue')),
+    tick: v.number(),
+    kindId: v.string(),
+    biomeId: v.string(),
+    state: v.union(v.literal('pending'), v.literal('applied')),
+    appliedTick: v.optional(v.number()),
+  })
+    .index('by_starterHeroId_and_tick', ['starterHeroId', 'tick'])
+    .index('by_partnerHeroId_and_state_and_tick', ['partnerHeroId', 'state', 'tick'])
+    .index('by_partnerHeroId_and_tick', ['partnerHeroId', 'tick'])
+    .index('by_state_and_tick', ['state', 'tick']),
 
   /**
    * D110 raid ledger: the raider writes one row in its own tick; the target applies it once at its next exploring

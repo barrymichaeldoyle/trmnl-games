@@ -61,6 +61,7 @@ export function zeroCounters(): HeroCounters {
     potionsCombined: 0,
     occasionsSeen: 0,
     raidMishaps: 0,
+    meetings: 0,
   }
 }
 

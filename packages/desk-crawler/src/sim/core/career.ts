@@ -9,7 +9,7 @@ import type { CareerPredicate, CareerRule, CareerRung, CareerState, ContentCatal
  * announce them are written here, once, on the tick the hero crosses the level.
  */
 
-export const FEATURES: readonly UnlockableFeature[] = ['todo', 'stances', 'choices', 'merchant', 'raids', 'roster']
+export const FEATURES: readonly UnlockableFeature[] = ['todo', 'meetings', 'stances', 'choices', 'merchant', 'raids', 'roster']
 
 /** How each feature reads on the device and in the companion. */
 export const FEATURE_LABEL: Readonly<Record<UnlockableFeature, string>> = {
@@ -18,6 +18,7 @@ export const FEATURE_LABEL: Readonly<Record<UnlockableFeature, string>> = {
   choices: 'office decisions',
   merchant: 'the wandering merchant',
   raids: 'desk raids',
+  meetings: 'meetings with coworkers',
   roster: 'a second hero',
 }
 
@@ -285,3 +286,6 @@ export function careerProblems(state: CareerState, content: ContentCatalog): str
 
 /** For adapters that must agree with the core on whether a raid can happen at all this tick. */
 export const canRaid = (content: ContentCatalog, level: number): boolean => content.raids !== undefined && unlocked(content, level, 'raids')
+
+/** D141: whether a hero at `level` can start or be picked for a meeting. */
+export const canMeet = (content: ContentCatalog, level: number): boolean => content.meetings !== undefined && unlocked(content, level, 'meetings')

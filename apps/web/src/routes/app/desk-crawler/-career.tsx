@@ -19,7 +19,7 @@ export type CareerView = {
 }
 
 /** heroes.mine's `unlocks` (P35): each gated feature, its level and whether this hero has it. */
-export type UnlockView = Array<{ feature: 'todo' | 'stances' | 'choices' | 'merchant' | 'raids'; label: string; level: number; unlocked: boolean }>
+export type UnlockView = Array<{ feature: 'todo' | 'meetings' | 'stances' | 'choices' | 'merchant' | 'raids'; label: string; level: number; unlocked: boolean }>
 
 /** " The Server Room opens at level 4, the Cafeteria Depths at level 8, the Archive at level 12 and the Parking Garage at level 16." */
 function floorsLine(floors: ReadonlyArray<{ name: string; unlockLevel: number }>): string {

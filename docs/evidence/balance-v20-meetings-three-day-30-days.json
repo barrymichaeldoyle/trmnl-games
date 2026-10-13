@@ -1,0 +1,114 @@
+{
+  "meta": {
+    "reportVersion": 1,
+    "contentVersion": "v20",
+    "simulationVersion": 1,
+    "heroes": 300,
+    "days": 30,
+    "policy": "three-day",
+    "meetings": {
+      "launchPermille": 5,
+      "cooldownTicks": 48
+    },
+    "seconds": 91.67
+  },
+  "withMeetings": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "meetingsPerHeroDay": 0.462,
+        "startedPerHeroDay": 0.225,
+        "noPartnerSharePct": 44.3,
+        "heroDaysWithMeetingPct": 43.2,
+        "level8MedianDays": 9.9,
+        "level12MedianDays": 17.2,
+        "finalLevelMedian": 20,
+        "finalGoldMedian": 4645
+      },
+      "balanced": {
+        "heroes": 100,
+        "meetingsPerHeroDay": 0.441,
+        "startedPerHeroDay": 0.232,
+        "noPartnerSharePct": 44.4,
+        "heroDaysWithMeetingPct": 41.4,
+        "level8MedianDays": 9.2,
+        "level12MedianDays": 16.3,
+        "finalLevelMedian": 21,
+        "finalGoldMedian": 4763
+      },
+      "bold": {
+        "heroes": 100,
+        "meetingsPerHeroDay": 0.442,
+        "startedPerHeroDay": 0.216,
+        "noPartnerSharePct": 47.4,
+        "heroDaysWithMeetingPct": 41.2,
+        "level8MedianDays": 8.8,
+        "level12MedianDays": 17.7,
+        "finalLevelMedian": 19,
+        "finalGoldMedian": 3622
+      }
+    },
+    "all": {
+      "meetingsPerHeroDay": 0.448,
+      "meetingsPerFloor": {
+        "office_cubicles": 571,
+        "server_room": 436,
+        "cafeteria_depths": 373,
+        "archive": 332,
+        "parking_garage": 306
+      },
+      "partnerWaitTicks": {
+        "median": 0,
+        "p90": 1,
+        "max": 2
+      },
+      "kinds": {
+        "shortcut": 357,
+        "office_gossip": 334,
+        "shared_lunch": 328,
+        "war_stories": 346,
+        "coffee_run": 319,
+        "pep_talk": 334
+      },
+      "raidsPerHeroDay": 1.076,
+      "effectsAtCapTicks": 460
+    }
+  },
+  "baseline": {
+    "stances": {
+      "cautious": {
+        "heroes": 100,
+        "meetingsPerHeroDay": 0,
+        "startedPerHeroDay": 0,
+        "noPartnerSharePct": 0,
+        "heroDaysWithMeetingPct": 0,
+        "level8MedianDays": 9.7,
+        "level12MedianDays": 17.2,
+        "finalLevelMedian": 20,
+        "finalGoldMedian": 4522
+      },
+      "balanced": {
+        "heroes": 100,
+        "meetingsPerHeroDay": 0,
+        "startedPerHeroDay": 0,
+        "noPartnerSharePct": 0,
+        "heroDaysWithMeetingPct": 0,
+        "level8MedianDays": 9.1,
+        "level12MedianDays": 16.1,
+        "finalLevelMedian": 21,
+        "finalGoldMedian": 5154
+      },
+      "bold": {
+        "heroes": 100,
+        "meetingsPerHeroDay": 0,
+        "startedPerHeroDay": 0,
+        "noPartnerSharePct": 0,
+        "heroDaysWithMeetingPct": 0,
+        "level8MedianDays": 8.8,
+        "level12MedianDays": 17.4,
+        "finalLevelMedian": 19,
+        "finalGoldMedian": 3843
+      }
+    }
+  }
+}

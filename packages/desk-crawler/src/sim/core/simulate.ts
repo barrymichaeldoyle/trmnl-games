@@ -8,6 +8,7 @@ import { autoPotion, potionItem, potionRows, potionStrengths, potionWord, potion
 import { assertHeroInvariants, SimulationInvariantError } from './invariants'
 import { codePoints, composeSummary, fill, rarityLabel, variant, withArticle, type NarrativeVars } from './narrative'
 import { drawRaidPlan, raidGoldLoss, raidHpLoss, raidStream, raidWinChance } from './raid'
+import { drawMeetingKind, drawMeetingPlan, meetingKind, meetingStream } from './meeting'
 import { createRng, pickOne, pickWeighted, type Rng } from './rng'
 import { applyTodo } from './todo'
 import { applyCareer, currentRung, effectiveStance, guaranteeDue, unlocked } from './career'
@@ -22,11 +23,14 @@ import type {
   ContentCatalog,
   Disposition,
   EncounterKind,
+  HeroClass,
   HeroCounters,
   HeroState,
   ItemChange,
   LogDetail,
   LogKind,
+  MeetingKind,
+  MeetingLaunch,
   MonsterTemplate,
   NewItem,
   OutcomeDetail,
@@ -68,6 +72,8 @@ const ZERO_METRICS: TickMetrics = {
   effectsGained: 0,
   raidsLaunched: 0,
   raidsApplied: 0,
+  meetingsLaunched: 0,
+  meetingsApplied: 0,
   tasksCompleted: 0,
   todoRefills: 0,
   careerRungs: 0,
@@ -105,6 +111,8 @@ class TickRun {
   private metrics: Mutable<TickMetrics> = { ...ZERO_METRICS }
   private raidLaunch: RaidLaunch | undefined
   private raidApplied = false
+  private meetingLaunch: MeetingLaunch | undefined
+  private meetingApplied = false
   /** D139: the occasion live on the hero's local date, if any. */
   private readonly occasion: LiveOccasion | undefined
 
@@ -283,7 +291,7 @@ class TickRun {
 
   private restingTick(): SimulationResult {
     const { h, content } = this
-    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid()
+    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting()
     if (expired !== undefined) return expired
     const max = heroMaxHp(this.content, h)
     const healing = Math.min(max - h.hp, pctOf(max, content.constants.restingHealPct))
@@ -303,7 +311,7 @@ class TickRun {
 
   private explore(): SimulationResult {
     const { h, content, input } = this
-    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid()
+    const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting()
     if (expired !== undefined) return expired
     const c = content.constants
     const sustain = this.sustain()
@@ -344,6 +352,9 @@ class TickRun {
     // D110: after sustain and before the encounter roll, a raid can be the tick's whole event.
     const raid = this.launchRaid()
     if (raid !== undefined) return raid
+    // D141: when no raid is, a meeting can be; its draws come from its own stream.
+    const meeting = this.launchMeeting()
+    if (meeting !== undefined) return meeting
 
     const biome = this.biome(h.biomeId)
     // P35: a rung's guarantee replaces the rolled kind once its bound has passed; every draw is still taken in its place.
@@ -856,6 +867,55 @@ class TickRun {
   }
 
   /**
+   * D141 starter side: the launch draw, then the kind, as this tick's whole event. Without meeting rules, a meeting
+   * seed or a partner the tick goes on to its ordinary encounter (the draw is spent, nothing is logged).
+   */
+  private launchMeeting(): SimulationResult | undefined {
+    const { h, content, input } = this
+    const rng = meetingStream(input.streams, content)
+    // No launch draw before meetings unlock; the adapter checks the same level before it looks for a partner.
+    if (rng === undefined || !unlocked(content, h.level, 'meetings')) return undefined
+    if (drawMeetingPlan(rng, content) === undefined) return undefined
+    const partner = input.meetingPartner
+    if (partner === undefined || partner.heroId === h.id) return undefined
+    const kind = drawMeetingKind(rng, content)
+    h.counters.ticksExplored += 1
+    h.counters.meetings += 1
+    this.metrics.meetingsLaunched = 1
+    this.meetingLaunch = { partnerHeroId: partner.heroId, tick: input.tick, kindId: kind.id }
+    return this.finishMeeting('starter', partner.heroId, partner.name, partner.class, kind, input.tick)
+  }
+
+  /**
+   * D141 partner side: a ledger meeting lands as this tick's whole event, after any incoming raid. Under a catalog
+   * without meeting rules it stays pending; a kind the catalog no longer has lands as its first kind.
+   */
+  private applyIncomingMeeting(): SimulationResult | undefined {
+    const { h, content, input } = this
+    const meeting = input.incomingMeeting
+    if (meeting === undefined || content.meetings === undefined) return undefined
+    const kind = meetingKind(content, meeting.kindId) ?? content.meetings.kinds[0]!
+    h.counters.meetings += 1
+    this.meetingApplied = true
+    this.metrics.meetingsApplied = 1
+    return this.finishMeeting('partner', meeting.starterHeroId, meeting.starterName, meeting.starterClass, kind, meeting.tick)
+  }
+
+  /** One meeting log entry from this hero's side, with the kind's boon. */
+  private finishMeeting(role: 'starter' | 'partner', rivalHeroId: string, rivalName: string, rivalClass: HeroClass, kind: MeetingKind, meetingTick: number): SimulationResult {
+    const { content } = this
+    const vars = { rival: rivalName }
+    const primary = this.narrate(role === 'starter' ? kind.starter : kind.partner, vars)
+    const granted = this.grantEffect(kind.effectId)
+    const consequences = granted === undefined ? [] : [`${granted.name} for ${granted.durationTicks} adventures.`]
+    return this.finish(
+      'advanced',
+      { kind: 'meeting', summary: composeSummary(primary, fill(kind.compact, vars), consequences, content.constants.summaryMaxCodePoints), outcome: { variant: 'meeting', role, rivalHeroId, rivalName, rivalClass, kindId: kind.id, meetingTick } },
+      granted === undefined ? {} : { effectGained: granted.id },
+    )
+  }
+
+  /**
    * The merchant's offers (D78), drawn from the reward stream so a visit replays exactly: a potion bundle priced by
    * the biome tier, plus the next pouch and the next bag when the hero may take them early. Bounded: at most three.
    */
@@ -953,7 +1013,7 @@ class TickRun {
   ): SimulationResult {
     const { h, input } = this
     const nextHero = toHeroState(h)
-    const base = { nextHero, itemChanges: this.changes, metrics: this.metrics, disposition, ...(this.raidLaunch === undefined ? {} : { raidLaunch: this.raidLaunch }), ...(this.raidApplied ? { raidApplied: true } : {}) }
+    const base = { nextHero, itemChanges: this.changes, metrics: this.metrics, disposition, ...(this.raidLaunch === undefined ? {} : { raidLaunch: this.raidLaunch }), ...(this.raidApplied ? { raidApplied: true } : {}), ...(this.meetingLaunch === undefined ? {} : { meetingLaunch: this.meetingLaunch }), ...(this.meetingApplied ? { meetingApplied: true } : {}) }
     if (event === undefined) return base
     const detail: LogDetail = {
       v: 1,
@@ -1014,6 +1074,8 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
     fail('SUMMARY_LENGTH', result.event.summary)
   }
   if (result.event && result.event.summary.trim() === '') fail('SUMMARY_EMPTY', 'event without summary')
+  const meetingSides = (result.meetingLaunch === undefined ? 0 : 1) + (result.meetingApplied ? 1 : 0)
+  if (meetingSides > 1 || out.counters.meetings - hero.counters.meetings !== meetingSides || (meetingSides === 1 && result.event?.detail.outcome.variant !== 'meeting')) fail('MEETING', 'one side of one meeting per tick, and the counter follows it')
   for (const extra of result.extraEvents ?? []) {
     if ((extra.kind !== 'todo' && extra.kind !== 'career' && extra.kind !== 'occasion') || extra.deltas.xpEarned !== 0 || extra.deltas.hp !== 0 || extra.deltas.gold < 0) fail('EXTRA_EVENT', 'to-do and career lines add gold only')
     if (extra.kind === 'occasion' && extra.deltas.gold !== 0) fail('OCCASION_LINE', 'an occasion line changes nothing itself')

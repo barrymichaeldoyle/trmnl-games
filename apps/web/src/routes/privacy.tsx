@@ -36,7 +36,7 @@ export const Route = createFileRoute('/privacy')({
         happy to share and never include contact details in it.
       </p>
       <p>
-        In Desk Crawler, heroes raid each other's desks by chance. When your hero raids or is raided, your public name appears in the other player's adventure log, in the companion and on their TRMNL, as it already does on the leaderboards. If you change your name or delete your account, those stories show "Hidden player" instead.
+        In Desk Crawler, heroes raid each other's desks and meet each other by chance. When your hero raids, is raided or meets another hero, your public name appears in the other player's adventure log, in the companion and on their TRMNL, as it already does on the leaderboards. If you change your name or delete your account, those stories show "Hidden player" instead.
       </p>
       <p>
         If you turn on your Desk Crawler hero page in Settings, anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gear, gold, the adventure log and your account details stay private. The page is off until you turn it on, and turning it off hides it straight away.

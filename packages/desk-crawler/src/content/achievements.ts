@@ -8,7 +8,7 @@ import type { HeroClass, NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 9
+export const ACHIEVEMENTS_VERSION = 10
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -423,6 +423,14 @@ counter('office_calendar', 'Office calendar', 'Office calendar', 'occasionsSeen'
   ['Office Institution', 'Twelve occasions. Someone saves you cake now.'],
 ])
 family('thirteenth_floor', 'Thirteenth Floor', 'Raids', [['Thirteenth Floor', 'Caught in a Friday the 13th raid that went wrong for everyone.']], () => ({ kind: 'counter', counter: 'raidMishaps', atLeast: 1 }))
+
+// ---------------------------------------------------------------- D141 Meetings (catalog version 10; appended, never edited)
+
+counter('networking', 'Networking', 'Coworkers', 'meetings', [1, 10, 50], [
+  ['Water Cooler Moment', 'Met another hero on the floor.'],
+  ['Familiar Face', 'Ten meetings. People wave when you walk past.'],
+  ['Office Fixture', 'Fifty meetings. Nobody remembers the office before you.'],
+])
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

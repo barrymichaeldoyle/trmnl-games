@@ -4,6 +4,7 @@ import { slowCastProfile } from './slowCast/profile'
 import { purgeAngler } from './slowCast/purge'
 import { gameSlug as gameSlugValidator } from './schema'
 import { purgeRaidRows } from './lib/raids'
+import { purgeMeetingRows } from './lib/meetings'
 import { purgeAlertRows, purgeGameAlertRows } from './alerts'
 import { v } from 'convex/values'
 import { internal } from './_generated/api'
@@ -490,8 +491,8 @@ export const recordDeletionEmail = internalMutation({
 
 /** Bounded scrub of all known exact references; repeat until no account references remain. */
 /**
- * P37: deletes one of the account's heroes per call, current or parked: its items, logs, score windows and raid rows
- * first (D110: the other party keeps its own log line), then the hero. Returns how much it removed; 0 once none is left.
+ * P37: deletes one of the account's heroes per call, current or parked: its items, logs, score windows, raid rows and
+ * meeting rows first (D110, D141: the other party keeps its own log line), then the hero. Returns how much it removed; 0 once none is left.
  */
 async function purgeHeroes(ctx: MutationCtx, userId: Id<'users'>): Promise<number> {
   const hero = await ctx.db.query('heroes').withIndex('by_userId_and_isActive', (q) => q.eq('userId', userId)).first()
@@ -500,7 +501,7 @@ async function purgeHeroes(ctx: MutationCtx, userId: Id<'users'>): Promise<numbe
   const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
   const logs = await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).take(BATCH)
   const windows = await ctx.db.query('heroScoreWindows').withIndex('by_heroId', (q) => q.eq('heroId', heroId)).take(BATCH)
-  const removed = (await deleteBatch(ctx, items)) + (await deleteBatch(ctx, logs)) + (await deleteBatch(ctx, windows)) + (await purgeRaidRows(ctx, heroId, BATCH))
+  const removed = (await deleteBatch(ctx, items)) + (await deleteBatch(ctx, logs)) + (await deleteBatch(ctx, windows)) + (await purgeRaidRows(ctx, heroId, BATCH)) + (await purgeMeetingRows(ctx, heroId, BATCH))
   if (removed > 0) return removed
   await ctx.db.delete(heroId)
   return 1

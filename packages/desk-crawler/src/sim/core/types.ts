@@ -3,12 +3,13 @@
  * No Convex, auth, connection or wall-clock types belong here.
  */
 
-export type StreamName = 'encounter' | 'combat' | 'reward' | 'narrative' | 'raid' | 'quest'
+export type StreamName = 'encounter' | 'combat' | 'reward' | 'narrative' | 'raid' | 'quest' | 'meeting'
 /**
  * The `raid` stream (D110) is drawn only under a catalog with raid rules; without its seed no raid can launch.
  * The `quest` stream (P31) is drawn only under a catalog with to-do rules, which require it.
+ * The `meeting` stream (D141) is drawn only under a catalog with meeting rules.
  */
-export type StreamSeeds = Readonly<Record<Exclude<StreamName, 'raid' | 'quest'>, number> & { raid?: number; quest?: number }>
+export type StreamSeeds = Readonly<Record<Exclude<StreamName, 'raid' | 'quest' | 'meeting'>, number> & { raid?: number; quest?: number; meeting?: number }>
 
 export type HeroStatus = 'exploring' | 'resting' | 'travelling' | 'dead' | 'paused' | 'sleeping'
 export type EncounterKind = 'combat' | 'loot' | 'trap' | 'rest'
@@ -34,6 +35,7 @@ export type LogKind =
   | 'merchant'
   | 'choice'
   | 'raid'
+  | 'meeting'
   | 'todo'
   | 'career'
   | 'occasion'
@@ -359,9 +361,9 @@ export interface TodoRule {
 }
 
 /** P35: features that arrive at a level. Below it a hero behaves as under a catalog without that feature's rules. */
-export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids' | 'roster'
-/** P37: `roster` is optional, so catalogs before it simply never open the roster. */
-export type UnlockRule = Readonly<Record<Exclude<UnlockableFeature, 'roster'>, number>> & { readonly roster?: number }
+export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids' | 'meetings' | 'roster'
+/** P37: `roster` is optional, so catalogs before it simply never open the roster; D141: `meetings` likewise. */
+export type UnlockRule = Readonly<Record<Exclude<UnlockableFeature, 'roster' | 'meetings'>, number>> & { readonly roster?: number; readonly meetings?: number }
 
 /** P35: what a career rung asks for, over the same bounded state achievements read. */
 export type CareerPredicate =
@@ -496,6 +498,54 @@ export interface OccasionRule {
   readonly effect?: OccasionEffect
   /** The announcement, one per occurrence, the hero's first evaluation inside it. */
   readonly lines: readonly string[]
+}
+
+/**
+ * Meetings (D141): now and then an exploring hero meets another hero on its floor instead of an encounter. Both get
+ * the meeting kind's boon; nothing changes hands and nobody can lose. Stance, class, level and gear play no part.
+ */
+export interface MeetingRule {
+  /** Chance per exploring tick, in permille, that the hero starts a meeting; the same for every stance. */
+  readonly launchPermille: number
+  /** A hero met or meeting in the last this-many ticks cannot be picked (enforced by the adapter's pool). */
+  readonly cooldownTicks: number
+  /** Picked uniformly by the stream's fourth draw. Order is part of the content version. */
+  readonly kinds: readonly MeetingKind[]
+}
+
+export interface MeetingKind {
+  readonly id: string
+  readonly name: string
+  /** The boon both heroes get, an id in `effects`. */
+  readonly effectId: string
+  /** Placeholder {rival}. The starter's lines, the partner's lines and a short line for both sides. */
+  readonly starter: readonly string[]
+  readonly partner: readonly string[]
+  readonly compact: string
+}
+
+/** The hero a meeting is with, as the adapter found it live at pick time. */
+export interface MeetingPartner {
+  readonly heroId: string
+  /** Public name shown in the starter's log. */
+  readonly name: string
+  readonly class: HeroClass
+}
+
+/** A meeting this hero started, for the adapter's ledger; the partner applies it at its next evaluation. */
+export interface MeetingLaunch {
+  readonly partnerHeroId: string
+  readonly tick: number
+  readonly kindId: string
+}
+
+/** A ledger meeting landing on this hero (the partner side), oldest pending first. */
+export interface IncomingMeeting {
+  readonly starterHeroId: string
+  readonly starterName: string
+  readonly starterClass: HeroClass
+  readonly tick: number
+  readonly kindId: string
 }
 
 /** A ledger raid landing on this hero (the target side), oldest pending first. */
@@ -650,6 +700,8 @@ export interface ContentCatalog {
   readonly effectSources?: Readonly<{ trapHit?: string; eliteVictory?: string }>
   /** Absent before v7 (D110). */
   readonly raids?: RaidRule
+  /** Absent before v20 (D141): no meetings, and no `meeting` draw. */
+  readonly meetings?: MeetingRule
   /** Absent before v9 (P31): without it a hero has no to-do list and draws nothing from the `quest` stream. */
   readonly todo?: TodoRule
   /** Absent before v12 (P35): every feature is on from level 1. */
@@ -728,6 +780,8 @@ export interface HeroCounters {
   /** D139: occasions the hero was on duty for, and Friday the 13th raid mishaps from either side. */
   readonly occasionsSeen: number
   readonly raidMishaps: number
+  /** D141: meetings from either side, counted when each side applies its own. */
+  readonly meetings: number
   /** D133: arrivals per biome id, written by the simulator from content v16's deploy on; absent on heroes that have not travelled since. */
   readonly biomesVisited?: Readonly<Record<string, number>>
 }
@@ -875,6 +929,10 @@ export interface SimulationInput {
   readonly raidTarget?: RaidTarget
   /** D110: the oldest pending raid against this hero; applied as the tick's event when the hero is exploring or resting. */
   readonly incomingRaid?: IncomingRaid
+  /** D141: the hero the adapter picked for a meeting this tick, when no raid target was picked and `planMeeting` asked for one. */
+  readonly meetingPartner?: MeetingPartner
+  /** D141: the oldest pending meeting with this hero; applied as the tick's event when the hero is exploring or resting and no raid lands. */
+  readonly incomingMeeting?: IncomingMeeting
   /** P31: the tick's wall slot in UTC milliseconds; absent means `tick` quarter-hours after the epoch. */
   readonly tickAt?: number
   /** P31: the owner's last TRMNL UTC offset in seconds; absent means UTC (D106). */
@@ -954,6 +1012,18 @@ export type OutcomeDetail =
       /** D139: a Friday the 13th mishap; `won` is false for both sides. */
       readonly mishap?: true
     }
+  | {
+      readonly variant: 'meeting'
+      /** This hero's side of the meeting. */
+      readonly role: 'starter' | 'partner'
+      readonly rivalHeroId: string
+      readonly rivalName: string
+      /** The other hero's class, so the scene can draw it. */
+      readonly rivalClass: HeroClass
+      readonly kindId: string
+      /** The tick the starter met the partner. */
+      readonly meetingTick: number
+    }
   | { readonly variant: 'occasion'; readonly occasionId: string; readonly key: string }
   | {
       readonly variant: 'todo'
@@ -1028,6 +1098,8 @@ export interface TickMetrics {
   readonly effectsGained: number
   readonly raidsLaunched: number
   readonly raidsApplied: number
+  readonly meetingsLaunched: number
+  readonly meetingsApplied: number
   readonly tasksCompleted: number
   readonly todoRefills: number
   /** P35: a career rung reached, features unlocked, and a guaranteed event forced this tick. */
@@ -1046,6 +1118,10 @@ export interface SimulationResult {
   readonly raidLaunch?: RaidLaunch
   /** D110: the incoming raid was applied this tick; the adapter marks the ledger row applied. */
   readonly raidApplied?: boolean
+  /** D141: a meeting this hero started; the adapter inserts it in the ledger and stamps both pool rows. */
+  readonly meetingLaunch?: MeetingLaunch
+  /** D141: the incoming meeting was applied this tick; the adapter marks the ledger row applied. */
+  readonly meetingApplied?: boolean
   /** P31/P35: lines logged after `event`, in order: tasks ticked off, the stand-up, features unlocked, a rung reached. Never the tick's only story unless nothing else happened. */
   readonly extraEvents?: readonly TickEvent[]
 }

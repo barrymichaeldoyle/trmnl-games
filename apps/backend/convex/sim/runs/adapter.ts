@@ -128,7 +128,8 @@ export function storedDetail(detail: LogDetail, changes: readonly ItemChange[] =
     ...(detail.outcome.gearDropped && gear?.type === 'create' ? { gearRarity: gear.item.rarity } : {}),
   } : detail.outcome.variant === 'merchant' ? { ...detail.outcome, offers: detail.outcome.offers.map((offer) => ({ ...offer })) }
     // D110: the rival's owner and name version let reads mask a name repaired after the raid.
-    : detail.outcome.variant === 'raid' && rival !== undefined ? { ...detail.outcome, rivalUserId: rival.userId, rivalNameVersion: rival.nameVersion }
+    // D141: a meeting names the other hero the same way.
+    : (detail.outcome.variant === 'raid' || detail.outcome.variant === 'meeting') && rival !== undefined ? { ...detail.outcome, rivalUserId: rival.userId, rivalNameVersion: rival.nameVersion }
     : detail.outcome.variant === 'todo' ? { ...detail.outcome, tasks: detail.outcome.tasks.map((task) => ({ ...task })) }
     : detail.outcome
   return { ...detail, outcome }

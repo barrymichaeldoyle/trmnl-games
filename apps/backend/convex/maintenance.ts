@@ -21,8 +21,8 @@ export const RETENTION = {
   alertOutboxMs: 7 * DAY,
 } as const
 
-type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'alerts' | 'swTickLogs' | 'swFailures' | 'swRuns'
-const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'alerts', 'swTickLogs', 'swFailures', 'swRuns']
+type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'swTickLogs' | 'swFailures' | 'swRuns'
+const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'swTickLogs', 'swFailures', 'swRuns']
 
 export const cleanup = internalMutation({
   args: { job: v.optional(v.union(...ORDER.map((j) => v.literal(j)))) },
@@ -79,6 +79,15 @@ export const cleanup = internalMutation({
         const world = await ctx.db.query('worldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
         const before = (world?.currentTick ?? 0) - RETENTION.appliedRaidTicks
         const rows = await ctx.db.query('raids').withIndex('by_state_and_tick', (q) => q.eq('state', 'applied').lt('tick', before)).take(BATCH)
+        for (const row of rows) await ctx.db.delete(row._id)
+        deleted = rows.length
+        break
+      }
+      // D141: applied meetings keep the raid retention; pending ones stay until their partner applies them.
+      case 'meetings': {
+        const world = await ctx.db.query('worldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
+        const before = (world?.currentTick ?? 0) - RETENTION.appliedRaidTicks
+        const rows = await ctx.db.query('meetings').withIndex('by_state_and_tick', (q) => q.eq('state', 'applied').lt('tick', before)).take(BATCH)
         for (const row of rows) await ctx.db.delete(row._id)
         deleted = rows.length
         break

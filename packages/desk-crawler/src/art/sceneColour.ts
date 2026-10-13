@@ -1,5 +1,5 @@
 import { Canvas, inked, type Sprite } from './canvas'
-import { poseParts, type BasePose, type HeroPose } from './hero'
+import { classPose, poseParts, type BasePose, type HeroPose } from './hero'
 import type { monsterArt } from './monsters'
 import { encodePngIndexed } from './png'
 import type { PropId } from './props'
@@ -53,6 +53,13 @@ const PROP: Record<PropId, string> = {
   level_up: '#f2c14e',
   full_bag: '#b5793f',
   signpost: '#b5793f',
+  // D141: the meeting props.
+  coffee_machine: '#8a5a3c',
+  printer: '#c9d3e0',
+  lunch_table: '#d9a066',
+  shredder: '#a9b4c6',
+  whiteboard: '#e6eef5',
+  water_cooler: '#9fd8e0',
 }
 
 /** The hero's white cells are skin, except the blade, which each pose holds in a different place. */
@@ -88,6 +95,9 @@ function fillFor(placement: Placement, pose: HeroPose): (ch: string, x: number, 
   switch (placement.role) {
     case 'hero':
       return (ch, x, y) => (ch === 'w' ? (HERO_STEEL[poseParts(pose).base](x, y) ? HERO.steel : HERO.skin) : poseParts(pose).heroClass === 'rogue' ? ROGUE_TUNIC : HERO.cardigan)
+    // D141: the coworker carries no blade, so its white cells are all skin.
+    case 'coworker':
+      return (ch) => (ch === 'w' ? HERO.skin : placement.heroClass === 'rogue' ? ROGUE_TUNIC : HERO.cardigan)
     case 'cloak':
       return () => CLOAK
     case 'crown':
@@ -252,6 +262,12 @@ export const FOE: Record<string, Tones> = {
   'prop:level_up': { paper: '#ffd166' },
   'prop:full_bag': { paper: '#ffd166', shade: ['#8a5a2c', '#b5793f'] },
   'prop:signpost': { paper: '#d9a066' },
+  'prop:coffee_machine': { paper: '#e6eaef', shade: ['#5a3a24', '#8a5a3c'] },
+  'prop:printer': { paper: '#f4f7ff', shade: ['#6f7b8f', '#a9b4c6'] },
+  'prop:lunch_table': { paper: '#f4e7c4', shade: ['#8a5a2c', '#b5793f'] },
+  'prop:shredder': { paper: '#e6eaef', shade: ['#4f5466', '#6c7287'] },
+  'prop:whiteboard': { paper: '#ffffff' },
+  'prop:water_cooler': { paper: '#e6f4fa', shade: ['#3f8fb0', '#6fc0dd'] },
   cloak: { ink: '#2e2160', shade: ['#6750b8', '#7a5cc8'] },
   crown: { ink: '#8a5a00', paper: '#ffd166' },
 }
@@ -411,7 +427,9 @@ class PaintedCanvas extends Canvas {
 export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, time: SceneTime, occasion?: OccasionArt): Array<Array<string | null>> {
   const c = new PaintedCanvas()
   composeScene(biome, pose, subject, time, c, occasion)
-  const hero = scenePlacements(pose, subject, occasion).find((p) => p.role === 'hero')
+  const placements = scenePlacements(pose, subject, occasion)
+  const hero = placements.find((p) => p.role === 'hero')
+  const coworker = placements.find((p) => p.role === 'coworker')
   const backdrop = BACKDROP[biome][time]
   return Array.from({ length: STAGE_HEIGHT }, (_, y) =>
     Array.from({ length: STAGE_WIDTH }, (_, x) => {
@@ -419,6 +437,8 @@ export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, 
       const region = c.regions[y * STAGE_WIDTH + x]!
       if (!ch || region === 'halo') return null
       if (region === 'hero' && hero) return warriorTone(pose, ch, x - hero.left, y - hero.top, hero.sprite.height)
+      // D141: the coworker is its class's idle grid turned round, so read its part from the unmirrored column.
+      if (region === 'coworker' && coworker?.role === 'coworker') return warriorTone(classPose('idle', coworker.heroClass), ch, coworker.sprite.width - 1 - (x - coworker.left), y - coworker.top, coworker.sprite.height)
       const foe = FOE[region] ?? DECOR[region]
       const tones = foe ?? backdrop[region] ?? OCCASION_BACKDROP[region] ?? {}
       const fallbackInk = foe ? INK : '#5a4a3a'

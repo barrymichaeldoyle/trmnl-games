@@ -150,6 +150,126 @@ export const signpost = sprite(`
      #######
 `)
 
+/* D141: the meeting props, standing between the two heroes. */
+
+export const coffeeMachine = sprite(`
+##############
+#wwwwwwwwwwww#
+#w##w##w##www#
+#wwwwwwwwwwww#
+##############
+#::::::::::::#
+#::######::::#
+#::##ww##::::#
+#:::#ww#:::::#
+#::::##::::::#
+#::::::::::::#
+#:  w  w   ::#
+#: #####   ::#
+#: #www##  ::#
+#: #www#w  ::#
+#: #####   ::#
+##############
+#wwwwwwwwwwww#
+##############
+`)
+
+export const printer = sprite(`
+   ##########
+   #wwwwwwww#
+   #w######w#
+##################
+#wwwwwwwwwwwwwwww#
+#ww##ww#wwwwwwwww#
+#wwwwwwwwwww###ww#
+##################
+#::::::::::::::::#
+#:##############:#
+#:#wwwwwwwwwwww#:#
+##################
+ ##            ##
+ ##            ##
+ ##            ##
+ ##            ##
+`)
+
+export const lunchTable = sprite(`
+     ##          ###
+    #ww#        #ww##
+   #wwww#       #ww# #
+  #::::::#      #ww##
+  ########      ####
+######################
+#wwwwwwwwwwwwwwwwwwww#
+######################
+ ##                ##
+ ##                ##
+ ##                ##
+ ##                ##
+ ##                ##
+ ##                ##
+`)
+
+export const shredder = sprite(`
+   ######
+   #wwww#
+   #w##w#
+   #wwww#
+############
+#::::::::::#
+#:##::::w#:#
+############
+ #w#w#w#w#
+ #w#w#w#w#
+############
+#wwwwwwwwww#
+#w::::::::w#
+#w::::::::w#
+#w::::::::w#
+#wwwwwwwwww#
+############
+`)
+
+export const whiteboard = sprite(`
+####################
+#wwwwwwwwwwwwwwwwww#
+#w#w#wwwwwwwwwwwwww#
+#ww#wwwwww##wwwwwww#
+#w#w#wwww#ww#ww#www#
+#wwwwwwwwwwww###w#w#
+#wwwwww#####wwwww#w#
+#wwwwwwwwwwwwwwwwww#
+####################
+  #              #
+  #              #
+  #              #
+  #              #
+  #              #
+  #              #
+ ###            ###
+`)
+
+export const waterCooler = sprite(`
+   ####
+  #wwww#
+ #wwwwww#
+ #w:::::#
+ #w:::::#
+ #w:::::#
+ #wwwwww#
+  ######
+ ########
+ #wwwwww#
+ #w##www#
+ #wwwwww#
+ #ww##ww#
+ #wwwwww#
+ #wwwwww#
+ #wwwwww#
+ ########
+ ##    ##
+`)
+
 export const propArt = {
   chest: chestClosed,
   gold: chestGold,
@@ -160,6 +280,22 @@ export const propArt = {
   level_up: levelUp,
   full_bag: fullBag,
   signpost,
+  coffee_machine: coffeeMachine,
+  printer,
+  lunch_table: lunchTable,
+  shredder,
+  whiteboard,
+  water_cooler: waterCooler,
 } as const
+
+/** D141: the prop each meeting kind stands between the two heroes, by kind id; a kind without one leaves the floor bare. */
+export const MEETING_PROPS: Readonly<Record<string, PropId>> = {
+  coffee_run: 'coffee_machine',
+  war_stories: 'printer',
+  shared_lunch: 'lunch_table',
+  shortcut: 'shredder',
+  pep_talk: 'whiteboard',
+  office_gossip: 'water_cooler',
+}
 
 export type PropId = keyof typeof propArt

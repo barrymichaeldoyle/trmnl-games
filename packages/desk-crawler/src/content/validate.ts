@@ -139,6 +139,30 @@ export function validateCatalog(content: ContentCatalog): string[] {
       }
     }
   }
+  // D141: meetings are rare, their kinds distinct, each boon a known effect, and every line fits beside the longest name.
+  const meetings = content.meetings
+  if (meetings) {
+    if (!Number.isSafeInteger(meetings.launchPermille) || meetings.launchPermille < 1 || meetings.launchPermille > 50) problems.push('meeting launch chance must be 1–50 permille')
+    if (!(meetings.cooldownTicks >= 1 && meetings.cooldownTicks <= 192)) problems.push('meeting cooldown must be 1 to 192 ticks')
+    if (meetings.kinds.length < 1) problems.push('meetings need at least one kind')
+    const kindIds = new Set<string>()
+    const longest = 'W'.repeat(20)
+    for (const kind of meetings.kinds) {
+      if (kindIds.has(kind.id)) problems.push(`duplicate meeting kind ${kind.id}`)
+      kindIds.add(kind.id)
+      const effect = (content.effects ?? []).find((rule) => rule.id === kind.effectId)
+      if (effect === undefined) problems.push(`meeting ${kind.id} names unknown effect ${kind.effectId}`)
+      else if (effect.kind !== 'boon') problems.push(`meeting ${kind.id} must grant a boon`)
+      if (kind.starter.length < 1 || kind.partner.length < 1) problems.push(`meeting ${kind.id} needs lines for both sides`)
+      for (const line of [...kind.starter, ...kind.partner, kind.compact]) {
+        for (const [, name] of line.matchAll(/\{(\w+)\}/g)) if (name !== 'rival') problems.push(`meeting ${kind.id} uses {${name}}: ${line}`)
+        if (!line.includes('{rival}')) problems.push(`meeting ${kind.id} line needs {rival}: ${line}`)
+      }
+      const tail = effect === undefined ? '' : ` ${effect.name} for ${effect.durationTicks} adventures.`
+      if ([...kind.compact.replace('{rival}', longest) + tail].length > c.summaryMaxCodePoints) problems.push(`meeting ${kind.id} compact line too long beside a 20-character name`)
+    }
+  }
+  if (content.unlocks?.meetings !== undefined && content.meetings === undefined) problems.push('meeting unlock without meeting rules')
   const todo = content.todo
   if (todo) {
     // P31: one template per kind, enough kinds to fill three slots at level 1, a target for every tier a task can name.

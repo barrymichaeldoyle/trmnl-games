@@ -29,7 +29,7 @@ const ACHIEVEMENT_DAYS = [1, 7, 30] as const
 
 const TICKS_PER_DAY = 96
 /** P31: the harness's tick 0 is midnight UTC; each hero's own offset decides its stand-up. */
-const HARNESS_EPOCH = Date.UTC(2026, 9, 1)
+export const HARNESS_EPOCH = Date.UTC(2026, 9, 1)
 const SLOT_MS = 15 * 60 * 1000
 
 type Mutable<T> = { -readonly [K in keyof T]: T[K] }

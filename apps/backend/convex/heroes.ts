@@ -12,7 +12,7 @@ import { deriveStats } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
 import { effectById, effectiveStats, liveEffects, withEffect } from '@trmnl-games/desk-crawler/sim/core/modifiers'
-import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
 import { starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { awardAfterIntent } from './lib/achievements'
 import { readWorld } from './world'
@@ -104,6 +104,8 @@ export const mine = query({
       // D110: under a catalog with raids, each stance also says how often it raids and how often it wins against a balanced hero.
       stances: Object.values(content.stances ?? {}).map((rule) => ({ id: rule.id, name: rule.name, blurb: rule.blurb, potionBelowPct: rule.autoPotionBelowPct, restBelowPct: rule.restBelowPct, resumeAtPct: rule.resumeExploringAtPct, victoryXpPct: rule.victoryXpPct, ...(content.raids ? { raidsPerDay: Math.round(content.raids.launchPermille[rule.id] * 96) / 1000, raidWinPct: raidWinChance(content, rule.id, 'balanced') } : {}) })),
       raidsEnabled: content.raids !== undefined,
+      // D141: whether the catalog has meetings, so the Log tab shows the Coworkers card.
+      meetingsEnabled: content.meetings !== undefined,
       // P31: the to-do list once the world runs a catalog with to-do rules and the hero has one.
       todo: todoView(worldContent(world), hero, user.trmnlUtcOffset),
       // P35: the current goal and the ladder so far, and which features this hero's level has opened.
@@ -402,7 +404,8 @@ async function rosterSummary(ctx: QueryCtx, content: ContentCatalog, hero: Doc<'
 function unlocksView(content: ContentCatalog, level: number) {
   if (content.unlocks === undefined) return null
   // P37: the roster opens per account on the Warrior's level, so `heroes.roster` reports it, not this per-hero list.
-  return FEATURES.filter((feature) => feature !== 'roster').map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: unlockLevel(content, feature)!, unlocked: unlocked(content, level, feature) }))
+  // D141: a feature the pinned catalog never opens (meetings before v20) is left out.
+  return FEATURES.filter((feature): feature is Exclude<UnlockableFeature, 'roster'> => feature !== 'roster' && unlockLevel(content, feature) !== undefined).map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: unlockLevel(content, feature)!, unlocked: unlocked(content, level, feature) }))
 }
 
 /** v1.2: show or hide the hero's public profile page. Off until the owner turns it on. */

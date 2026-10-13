@@ -196,7 +196,8 @@ export async function maskRaidSummaries<L extends Pick<Doc<'tickLogs'>, 'summary
   const summaries: string[] = []
   for (const log of logs) {
     const outcome = 'outcome' in log.detail ? log.detail.outcome : undefined
-    if (outcome?.variant !== 'raid' || outcome.rivalUserId === undefined) {
+    // D141: a meeting names the other hero the same way.
+    if ((outcome?.variant !== 'raid' && outcome?.variant !== 'meeting') || outcome.rivalUserId === undefined) {
       summaries.push(log.summary)
       continue
     }

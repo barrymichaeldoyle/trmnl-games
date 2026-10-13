@@ -110,6 +110,19 @@ const outcome = v.union(
     /** D139: a Friday the 13th mishap; `won` is false for both sides. */
     mishap: v.optional(v.literal(true)),
   }),
+  /** D141: one side of a meeting. */
+  v.object({
+    variant: v.literal('meeting'),
+    role: v.union(v.literal('starter'), v.literal('partner')),
+    rivalHeroId: v.string(),
+    rivalName: v.string(),
+    rivalClass: v.union(v.literal('warrior'), v.literal('rogue')),
+    kindId: v.string(),
+    meetingTick: v.number(),
+    /** Adapter annotation: the other hero's owner and public-name version, so reads can mask a repaired name. */
+    rivalUserId: v.optional(v.string()),
+    rivalNameVersion: v.optional(v.number()),
+  }),
   /** D139: an occasion's announcement, once per occurrence. */
   v.object({ variant: v.literal('occasion'), occasionId: v.string(), key: v.string() }),
   /** P31: to-do tasks ticked off, or the tasks a stand-up wrote. */

@@ -16,6 +16,8 @@ export const GLYPHS: Record<string, readonly string[]> = {
   merchant: ['........', '.######.', '#.#..#.#', '########', '.#....#.', '.######.', '..#..#..', '.##..##.'],
   /** D110: a burglar's eye mask. */
   raid: ['........', '........', '.######.', '########', '#..##..#', '########', '.##..##.', '........'],
+  /** D141: a meeting with a coworker: a steaming mug. Companion only; the device draws meetings with the system glyph. */
+  meeting: ['..#..#..', '.#..#...', '........', '######..', '#....###', '#....#.#', '#....###', '.####...'],
   /** D112: a to-do task ticked off, and the stand-up's new tasks: a checkbox with its tick. */
   todo: ['########', '#......#', '#.....##', '#....#.#', '##..#..#', '#.##...#', '#......#', '########'],
   /** P35: a career rung reached or a feature unlocked: the ladder. */

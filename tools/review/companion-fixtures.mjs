@@ -10,7 +10,7 @@
  *   potions=1 (D131, default: three strengths, a combine affordable)   potions=short (two minors, no Scrap)   potions=one (healing only)   potions=0 (no strengths)
  *   floor=server_room (D132: the hero on another floor)   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   occasion=1 (D139: Halloween today)   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
- *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   outcome=invalid_code|already_claimed|easter_egg (with ok=1: a keepsake claim's answer)   egg=1 (the hidden Easter Egg on the shelf)   raids=1 (desk raids on, with a record and raid log lines)   public=1 (hero page public)
+ *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   outcome=invalid_code|already_claimed|easter_egg (with ok=1: a keepsake claim's answer)   egg=1 (the hidden Easter Egg on the shelf)   raids=1 (desk raids on, with a record and raid log lines)   meetings=1 (D141: meetings on, the Coworkers card and meeting log lines)   meetings=none (meetings on, nobody met yet)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
  *   career=1 (P35: the goal card, the Career page and the unlocks, plus career log lines)   career=new (level 1, everything locked)   career=done (the ladder finished)
  *   notes=1 (D133: /field-notes for a level-17 veteran with most notes open)   notes=new (a fresh hero, the Office's note only)
@@ -140,6 +140,20 @@ if (raidsOn) {
     { id: 'raid1', at: now - 6e5, tick: 906, kind: 'raid', summary: "Raided [[Quill]]'s desk while they were at lunch.", source: 'tick', deltas: { xpEarned: 0, gold: 14, hp: -9 } },
     { id: 'raid2', at: now - 9e5, tick: 905, kind: 'raid', summary: 'Came back to find [[Quillfeather_Longname]] had been through the drawers.', source: 'tick', deltas: { xpEarned: 0, gold: -1240, hp: -30 } },
     { id: 'raid3', at: now - 12e5, tick: 904, kind: 'death', summary: '[[Mo]] made off with the petty cash. Out cold for 2 hours. Lost 30 gold.', source: 'tick', deltas: { xpEarned: 0, gold: -52, hp: -18 } },
+  );
+}
+// D141: the Coworkers card and meeting lines; meetings=none is the card before the first meeting.
+data.meetings = { total: 0, meetings: [] };
+if (flag('meetings') || params.get('meetings') === 'none') hero.meetingsEnabled = true;
+if (flag('meetings')) {
+  const now = Date.now();
+  data.meetings = { total: 7, meetings: [
+    { tick: 907, at: now - 3e5, role: 'partner', rivalName: 'Quillfeather_Longname', rivalClass: 'rogue', kindId: 'coffee_run', biomeId: 'server_room', kindName: 'Coffee run', boon: 'Caffeinated', floor: 'Server Room', pending: false },
+    { tick: 850, at: now - 36e5 * 14, role: 'starter', rivalName: 'Bea', rivalClass: 'warrior', kindId: 'shortcut', biomeId: 'server_room', kindName: 'Shortcut', boon: 'Shown the ropes', floor: 'Server Room', pending: true },
+    { tick: 700, at: now - 36e5 * 50, role: 'starter', rivalName: 'Hidden player', rivalClass: 'warrior', kindId: 'office_gossip', biomeId: 'office_cubicles', kindName: 'Office gossip', boon: 'In the loop', floor: 'Office Cubicles', pending: false },
+  ] };
+  data.log.unshift(
+    { id: 'meet1', at: now - 3e5, tick: 907, kind: 'meeting', summary: '[[Quillfeather_Longname]] dragged you out for a coffee. Caffeinated for 8 adventures.', source: 'tick', deltas: { xpEarned: 0, gold: 0, hp: 0, effectGained: 'caffeinated' } },
   );
 }
 if (long) inventory.gear.filter((g) => !g.equipped).slice(0, 2).forEach((g) => { g.label = 'Rare Microwave-Slaying ' + g.name + ' of the Cafeteria Depths'; g.rarity = 'rare' });
@@ -291,6 +305,7 @@ const queries = {
   'heroes:recentLog': (args) => ({ page: data.log.slice(0, args.paginationOpts.numItems), isDone: true, continueCursor: '' }),
   'trmnlPayload:mine': () => undefined,
   'raids:recent': () => data.raids,
+  'meetings:recent': () => data.meetings,
   // The public hero page (D109) from the same fictional hero; raids=1 adds a raid record, private=1 reads as not found.
   'profiles:view': (args) => flag('private') ? null : { alias: args.alias, heroName: hero.name, heroClass: 'warrior', level: hero.level, status: hero.status, biome: 'Server Room', scenePath: hero.scenePath, adventuringSince: Date.now() - 86400000 * 12, rank: { rank: 3, totalPlayers: 41 }, lifetime: { combatWins: hero.counters.combatWins, itemsFound: hero.counters.itemsFound, trips: hero.counters.trips ?? 4, rescues: hero.counters.rescues, epicFinds: hero.counters.epicFinds ?? 1 }, raids: raidsOn ? { won: 5, failed: 4, repelled: 4, lost: 3 } : { won: 0, failed: 0, repelled: 0, lost: 0 }, achievements: data.achievements.families.filter((f) => f.earned).slice(0, 4).map((f) => ({ id: f.earned.id, tier: f.earned.tier, name: f.earned.name, blurb: f.earned.blurb, family: f.name })), rarity: null, achievementCount: data.achievements.unlocked.length },
 };

@@ -18,7 +18,7 @@ Implementation was authorized on 2026-10-03. This index includes the original pl
 | [Roadmap](roadmap.md) | Named releases: v1.0 submission scope, continuous iteration after submission, later versions, guardrails for future systems |
 | [Gameplay](gameplay.md) | State machine, simulation rules, initial balance and content |
 | [Raids](raids.md) | Desk raids: passive, unavoidable, chance-driven hero-versus-hero raids, stance-only odds, ledger application, work slices (D110) |
-| [Meetings](meetings.md) | Proposed (P39, 2026-10-13): friendly meetings with another hero on the same floor, the same small boon for both, the other hero drawn in the scene; reuses the raid pool and ledger; open points await Barry |
+| [Meetings](meetings.md) | Built (D141, content v20, achievement catalog version 10, 2026-10-13, [evidence](evidence/meetings.md)): friendly meetings with another hero on the same floor, the same small boon for both, the other hero drawn in the scene; reuses the raid pool and ledger |
 | [Quests](quests.md) | Approved (D112, content v9): daily quests as a passive, place-aware office to-do list paying gold only; refill and timezone rules |
 | [Objectives](objectives.md) | Built (D128, content v12, 2026-10-12): one current goal per hero on a nineteen-rung career ladder, feature unlocks by level, and once-per-rung guarantees for the opening's lucky events ([evidence](evidence/career.md)) |
 | [Salvage and the workbench](salvage.md) | Built and live (D129, content v13, 2026-10-12, [evidence](evidence/workbench.md)): the v2.0 design amendment for salvage (P26) and owned-gear upgrades (P27): three material rows outside the bag, tier upgrades, +1 to +3 reinforcement, chosen affixes; settles O13 |

@@ -95,6 +95,8 @@ export const engagement = internalQuery({
       career: { rungs: sum((c) => c.careerRungs), heroes: reached((c) => c.careerRungs), equips: sum((c) => c.itemsEquipped), standing: tally(heroes.map((h) => h.career?.rung ?? 'none')) },
       // D139: occasions announced to heroes, Friday the 13th mishaps, and the last occurrence each hero saw.
       occasions: { seen: sum((c) => c.occasionsSeen), heroes: reached((c) => c.occasionsSeen), mishaps: sum((c) => c.raidMishaps), heroesInAMishap: reached((c) => c.raidMishaps), lastSeen: tally(heroes.map((h) => h.occasion?.key ?? 'none')) },
+      // D141: meetings from either side (each meeting counts once per hero), and how many heroes have met someone.
+      meetings: { sides: sum((c) => c.meetings), heroes: reached((c) => c.meetings) },
       analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
     }
   },

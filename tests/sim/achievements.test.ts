@@ -19,9 +19,9 @@ const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<Achievement
 
 describe('achievement catalog (D65)', () => {
   it('holds the launch set with unique, catalog-backed ids', () => {
-    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1)
+    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3)
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2)
+    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1)
     for (const def of ACHIEVEMENTS) {
       expect(ACHIEVEMENT_FAMILIES.some((f) => f.id === def.family)).toBe(true)
       expect(def.name.length).toBeLessThanOrEqual(24)
@@ -167,5 +167,15 @@ describe('Office calendar (D139, catalog version 9)', () => {
     expect(earned({ occasionsSeen: 12 })).toEqual(['office_calendar_1', 'office_calendar_2', 'office_calendar_3'])
     expect(earned({ raidMishaps: 1 })).toEqual(['thirteenth_floor'])
     expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'thirteenth_floor')).toMatchObject({ category: 'Raids' })
+  })
+})
+
+describe('Networking (D141, catalog version 10)', () => {
+  it('counts meetings from either side at 1, 10 and 50', () => {
+    const earned = (overrides: Partial<HeroCounters>) => allSatisfied(state(overrides), content).filter((a) => a.family === 'networking').map((a) => a.id)
+    expect(earned({})).toEqual([])
+    expect(earned({ meetings: 1 })).toEqual(['networking_1'])
+    expect(earned({ meetings: 50 })).toEqual(['networking_1', 'networking_2', 'networking_3'])
+    expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'networking')).toMatchObject({ category: 'Coworkers' })
   })
 })

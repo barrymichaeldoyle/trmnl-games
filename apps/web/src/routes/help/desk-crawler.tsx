@@ -58,6 +58,13 @@ const UNLOCKS = catalogs[ACTIVE_CONTENT].unlocks
 /** P37: the classes and the level the roster opens at, read from the active catalog. */
 const CLASSES = catalogs[ACTIVE_CONTENT].classes
 const ROSTER_LEVEL = catalogs[ACTIVE_CONTENT].unlocks?.roster
+/** D141: meetings, their boons and the level they arrive at, read from the active catalog. */
+const MEETINGS = catalogs[ACTIVE_CONTENT].meetings
+const MEETING_LEVEL = catalogs[ACTIVE_CONTENT].unlocks?.meetings
+const EFFECTS = catalogs[ACTIVE_CONTENT].effects ?? []
+/** "+10% attack" or "traps hurt 30% less": a meeting boon's one modifier in words. */
+const boonLine = (m: { attackPct?: number; defensePct?: number; xpPct?: number; goldPct?: number; trapDamagePct?: number }) =>
+  [m.attackPct ? `${signed(m.attackPct)}% attack` : '', m.defensePct ? `${signed(m.defensePct)}% defense` : '', m.xpPct ? `${signed(m.xpPct)}% XP from wins` : '', m.goldPct ? `${signed(m.goldPct)}% gold` : '', m.trapDamagePct ? `traps hurt ${m.trapDamagePct}% less` : ''].filter(Boolean).join(', ')
 const signed = (value: number) => (value > 0 ? `+${value}` : `−${Math.abs(value)}`)
 const CAREER_GOLD = CAREER?.rungs.reduce((sum, rung) => sum + rung.gold, 0) ?? 0
 /** " It arrives at level 3." or nothing under a catalog without unlocks. */
@@ -104,6 +111,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ...(CLASSES !== undefined ? [['heroes-and-classes', 'Heroes and classes'] as const] : []),
   ['stances', 'Stances'],
   ['desk-raids', 'Desk raids'],
+  ...(MEETINGS !== undefined ? [['meetings', 'Meetings'] as const] : []),
   ...(TODO !== undefined ? [['to-do-list', 'To-do list'] as const] : []),
   ['potions', 'Potions'],
   ['the-wandering-merchant', 'The wandering merchant'],
@@ -161,7 +169,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <p>Your hero always has one goal, shown at the top of the Hero page: “Win your first fight”, “Equip a piece of gear you found”, “Reach the Server Room”, “Buy the Laptop Backpack”. Some are reached by adventuring; the rest are things you do here, on the Bag or Hero page. Reaching a goal shows “Goal reached” on your TRMNL and sets a little gold aside ({CAREER_GOLD.toLocaleString('en-US')} across the whole ladder); press Claim on the Hero page to collect it, whenever you like. Goals never give XP, never expire and never fail; the next one simply waits, and the ladder keeps moving whether or not you have claimed.</p>
           <ul>
             <li>The Career page under More lists the {CAREER.rungs.filter((rung) => !rung.retired).length} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
-            {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
+            {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, {MEETING_LEVEL !== undefined ? `meetings with coworkers at level ${MEETING_LEVEL}, ` : ''}the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
             <li>One goal asks you to switch your stance to Bold, which raids twice as often as Balanced. Once it counts you can switch back whenever you like.</li>
             <li>A few early goals come with a guarantee, so a new hero is never left waiting on luck: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is the ordinary roll.</li>
           </ul>
@@ -197,6 +205,20 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li>A raid can knock a hero out, exactly like a fight; in Office Cubicles your hero is rescued instead. Raids only find heroes who are exploring or resting, and a hero raided once is left alone for about six hours.</li>
         <li>If you'd rather lose fewer raids, pick Cautious: it raids least and wins most.</li>
       </ul>
+      {MEETINGS !== undefined ? (
+        <>
+          <h2 id="meetings">Meetings</h2>
+          <p>Now and then, instead of a fight, your hero runs into another player's hero on the same floor{MEETING_LEVEL === undefined ? '' : `, from level ${MEETING_LEVEL}`}. They grab a coffee, swap war stories or split a sandwich, and both heroes get the same small boon for {EFFECTS.find((effect) => effect.id === MEETINGS.kinds[0]?.effectId)?.durationTicks ?? 8} adventures. Both adventure logs tell the story with the other player's public name, and the Log tab lists your hero's last five meetings.</p>
+          <ul>
+            {MEETINGS.kinds.map((kind) => {
+              const effect = EFFECTS.find((rule) => rule.id === kind.effectId)
+              return <li key={kind.id}><strong>{kind.name}</strong>: {effect?.name ?? kind.effectId}, {effect === undefined ? '' : boonLine(effect.modifiers)}.</li>
+            })}
+            <li>Nothing changes hands and nobody can lose. A meeting takes the place of one adventure, and the boon about makes up for it.</li>
+            <li>It happens at the same rate whatever your stance or class, about every other day for a hero who is out exploring. Heroes only meet while exploring or resting, and a hero who has just had a meeting is left alone for about twelve hours.</li>
+          </ul>
+        </>
+      ) : null}
       {TODO !== undefined ? (
         <>
           <h2 id="to-do-list">To-do list</h2>
