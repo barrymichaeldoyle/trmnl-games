@@ -13,10 +13,31 @@
   font-weight: 400;
   font-display: swap;
 }
+/*
+ * Local stand-ins sized to the pixel faces (measured in Chrome, D137): while a face is still downloading, text set in
+ * its stand-in takes the same width and line height, so the swap does not reflow the page. Pixelify Sans is 6.15% wider
+ * than Arial with a 0.92em ascent and 0.28em descent; Press Start 2P is 1em per letter, 1.65 times Courier New.
+ */
+@font-face {
+  font-family: "Pixelify Sans Fallback";
+  src: local("Arial"), local("Helvetica"), local("Liberation Sans");
+  size-adjust: 106.15%;
+  ascent-override: 86.67%;
+  descent-override: 26.38%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Press Start 2P Fallback";
+  src: local("Courier New"), local("Menlo"), local("Liberation Mono");
+  size-adjust: 165.14%;
+  ascent-override: 60.55%;
+  descent-override: 0%;
+  line-gap-override: 0%;
+}
 
 @theme {
-  --font-display: "Pixelify Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-hud: "Press Start 2P", ui-monospace, monospace;
+  --font-display: "Pixelify Sans", "Pixelify Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-hud: "Press Start 2P", "Press Start 2P Fallback", ui-monospace, monospace;
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
   /* Press Start 2P for nav, buttons and counters; small labels use label-px instead. */

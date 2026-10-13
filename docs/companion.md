@@ -34,6 +34,8 @@ Main bundle (D137): route options (loaders, `head`, `validateSearch`) ship in th
 
 Clerk's UI on demand (D137): `ClerkProvider` gets `ui={{ ClerkUI: LazyClerkUI }}` (`lib/clerkUi.ts`). Clerk still loads on every page, so sessions, `<Show>` and the server-rendered state are unchanged, but its prebuilt UI (about 220 KB) downloads only when a page first needs it: a Sign in or Create account press (the buttons start the download on hover, focus or touch), an embedded `<SignIn>` (the TRMNL install and manage handoffs, account deletion), or the signed-in avatar. Clerk reaches its UI only through `ensureMounted()`; the stand-in remembers the provider's `updateProps` call that follows every load and ignores closes and unmounts until the real UI exists, and forwards everything else to it. `tests/web/clerk-ui.test.ts` checks the script URL against the installed SDK's own loader, so a Clerk upgrade that moves the UI fails the test rather than the sign-in.
 
+Font swap without reflow (D137): `styles.css` adds "Pixelify Sans Fallback" (local Arial or Helvetica, size-adjust 106.15%) and "Press Start 2P Fallback" (local Courier New or Menlo, 165.14%) with ascent and descent overrides measured in Chrome, next in each pixel face's stack. With the fonts held back 1.5 s, the home page's layout shift went from 0.049 on a 412px phone to 0. Remeasure if either font file changes.
+
 ## Routes and information hierarchy
 
 | Route | Audience | Main content |
