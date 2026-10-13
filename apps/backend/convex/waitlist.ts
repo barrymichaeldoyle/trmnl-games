@@ -192,6 +192,19 @@ export const requeue = internalMutation({
 const LAUNCH_INTRO = 'Desk Crawler is now free in the TRMNL marketplace. It is an idle office RPG that plays itself on your TRMNL. Every fifteen minutes your hero fights a Stapler Mimic or finds a Keyboard Mace, and your screen shows how it went. You check in every few days to sort the loot.'
 const LAUNCH_STEPS = 'Then sign in or create a TRMNL Games account, name your hero and click Save in TRMNL. Your first adventure follows shortly.'
 
+/** What the game holds, in the home page's words (apps/web/src/lib/deskCrawlerPitch.tsx FEATURES); keep the two in step. */
+const LAUNCH_FEATURES: ReadonlyArray<{ title: string; body: string }> = [
+  { title: 'Five floors', body: 'Start in the Office Cubicles and work down through the Server Room, the Cafeteria Depths and the Archive to the Parking Garage. Each floor opens as your hero levels up and has its own monsters, from Rogue Roombas in the cubicles to a Ghost Car in the garage.' },
+  { title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage spares, upgrade what you wear and save up for a bigger bag.' },
+  { title: 'Desk raids', body: 'From level 7, heroes raid each other’s desks for gold while they explore. Your stance tilts the coin toss; level and gear never count.' },
+  { title: 'Meetings', body: 'Now and then your hero runs into another player’s hero on the same floor. They split a sandwich or swap war stories, and both get a small boost for a while.' },
+  { title: 'Lost property', body: 'A knocked-out hero drops a spare of its weapon or armour with the owner’s name on it in marker. Another player’s hero might find it, and the owner hears who did.' },
+  { title: 'Office calendar', body: 'Boss’s Day, Halloween, Christmas and more dress up your hero’s scene for the day, and most bring a small bonus while they last.' },
+  { title: 'A career and a second hero', body: 'One goal at a time, a daily to-do list from the morning stand-up, and new features as your hero levels up. At level 6 your Warrior can recruit a Rogue, and you choose which one adventures.' },
+  { title: 'Rankings and rivals', body: 'Your screen shows the seven-day Top 5 for your level group. Follow other heroes from their public pages and pick one rival to keep an eye on.' },
+  { title: 'Weekly keepsakes', body: 'A six-digit code appears on your screen each week. Enter it in the companion to collect an office souvenir.' },
+]
+
 /** D148: the launch reset runs just before this email goes out. */
 export const LAUNCH_BETA_NOTE = 'If you played during the beta, your hero started again from level 1 today. It keeps its name, and your account and TRMNL setup are unchanged.'
 
@@ -211,6 +224,11 @@ export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUr
       '',
       LAUNCH_STEPS,
       '',
+      'What your hero gets up to',
+      '',
+      ...LAUNCH_FEATURES.flatMap((feature) => [`${feature.title}: ${feature.body}`, '']),
+      `Install Desk Crawler: ${args.installUrl}`,
+      '',
       LAUNCH_BETA_NOTE,
       '',
       'You are getting this one email because you joined the Desk Crawler launch list at trmnlgames.com. Your address has now been removed from that list, and no further emails will follow.',
@@ -229,6 +247,10 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
   const unsubscribe = escapeHtml(args.unsubscribe)
   const asset = (path: string) => escapeHtml(new URL(path, args.origin).toString())
   const font = "font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+  const button = `<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#ffd166;border:3px solid #0c0a1c">
+<a href="${install}" style="display:inline-block;padding:14px 28px;${font};color:#0c0a1c;font-size:17px;font-weight:700;text-decoration:none">Install Desk Crawler</a>
+</td></tr></table>`
+  const features = LAUNCH_FEATURES.map((feature) => `<tr><td style="padding:0 0 14px;${font};color:#0c0a1c;font-size:15px;line-height:1.5"><strong style="display:block;font-size:16px;margin-bottom:2px">${escapeHtml(feature.title)}</strong>${escapeHtml(feature.body)}</td></tr>`).join('\n')
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Desk Crawler is live on TRMNL</title></head>
 <body style="margin:0;padding:0;background:#f4f1ff;${font}">
@@ -246,12 +268,19 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
 </td></tr>
 <tr><td style="padding:0 24px"><img src="${asset('/games/desk-crawler/screen-sample.png')}" width="506" alt="Example Desk Crawler screen on a TRMNL X: Pip explores the Server Room, with health, XP, equipment, adventure stories and weekly rankings." style="display:block;width:100%;max-width:506px;height:auto;border:8px solid #3a3566;border-radius:12px;background:#ffffff"></td></tr>
 <tr><td align="center" style="padding:24px">
-<table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="background:#ffd166;border:3px solid #0c0a1c">
-<a href="${install}" style="display:inline-block;padding:14px 28px;${font};color:#0c0a1c;font-size:17px;font-weight:700;text-decoration:none">Install Desk Crawler</a>
-</td></tr></table>
+${button}
+</td></tr>
+<tr><td style="padding:0 24px 8px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
+<p style="margin:0">${LAUNCH_STEPS}</p>
+</td></tr>
+<tr><td style="padding:16px 24px 0"><div style="border-top:1px solid #ddd8f0;padding-top:20px;${font};color:#0c0a1c;font-size:20px;font-weight:700;line-height:1.3">What your hero gets up to</div></td></tr>
+<tr><td style="padding:12px 24px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+${features}
+</table></td></tr>
+<tr><td align="center" style="padding:24px">
+${button}
 </td></tr>
 <tr><td style="padding:0 24px 24px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
-<p style="margin:0 0 16px">${LAUNCH_STEPS}</p>
 <p style="margin:0">${LAUNCH_BETA_NOTE}</p>
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #ddd8f0;${font};color:#5b5677;font-size:13px;line-height:1.5">
