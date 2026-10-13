@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
 import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
 import { FAQ_JSON_LD } from '../lib/deskCrawlerFaq'
+import { Glyph } from '../lib/glyphs'
 import { SITE_FRAME } from '../lib/platformHeader'
 import { SiteShell } from '../lib/prose'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
@@ -67,7 +68,10 @@ function Home() {
           <FloorGrid headingId="floors-heading" />
           <div className="flex flex-col gap-8">
             <FeatureGrid headingId="features-heading" />
-            <p><Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">Read the full guide</Link></p>
+            <div className="flex flex-col items-start gap-4 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-prose text-muted">The guide covers every system in detail, from the first fight to the workbench.</p>
+              <Link to="/help/desk-crawler" className={`shrink-0 gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="quest" />Read the full guide</Link>
+            </div>
           </div>
           <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
             <Faq headingId="faq-heading" />
