@@ -125,7 +125,10 @@ function ShopPage() {
               <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
                 <div className="min-w-0">
                   <p className="font-semibold">{item.name}</p>
-                  <p className="text-sm text-muted">Lets you fish <WaterName id={item.water}>{water}</WaterName>{gate ? <>, which opens once {gate.species} <WaterName id={gate.waterId}>{gate.waterName}</WaterName> species are in your logbook ({gate.species - missing} so far)</> : ''}.</p>
+                  {/* Once the logbook has the species the water needs, say so instead of restating the requirement. */}
+                  <p className="text-sm text-muted">Lets you fish <WaterName id={item.water}>{water}</WaterName>{!gate ? '.' : missing > 0
+                    ? <> once {gate.species} <WaterName id={gate.waterId}>{gate.waterName}</WaterName> species are in your logbook ({gate.logged} so far).</>
+                    : <>. Your logbook has the {gate.species} <WaterName id={gate.waterId}>{gate.waterName}</WaterName> species it needs.</>}</p>
                 </div>
                 {item.owned ? <span className="text-sm font-semibold text-xp-ink">Owned</span> : (
                   <Button variant="secondary" disabled={gold < item.price || buying} onClick={() => setOffer({ title: `Buy the ${item.name}?`, price: item.price, rows: [['Opens', water[0]!.toUpperCase() + water.slice(1)], ['Fish there', gate && missing > 0 ? `After ${missing} more ${gate.waterName} species` : 'Straight away']], buy: () => access.run({ access: item.id }, `Bought the ${item.name}.`) })}>
