@@ -6,9 +6,9 @@ import { Glyph, type GlyphName } from './glyphs'
  * The gold menu choice: shared by Button and links styled as the primary action. A press sinks the key two pixels
  * into its lip, so a tap answers on the spot before the server does.
  */
-export const BUTTON_PRIMARY = 'hud text-hud-sm border-[3px] border-night bg-gold text-night shadow-[inset_0_-4px_0_var(--color-gold-lo)] hover:bg-gold-hi active:translate-y-0.5 active:shadow-[inset_0_-2px_0_var(--color-gold-lo)]'
+export const BUTTON_PRIMARY = 'hud uppercase text-hud-sm border-[3px] border-night bg-gold text-night shadow-[inset_0_-4px_0_var(--color-gold-lo)] hover:bg-gold-hi active:translate-y-0.5 active:shadow-[inset_0_-2px_0_var(--color-gold-lo)]'
 /** The cream-edged alternative, for links that act like a secondary button; a press inverts it. */
-export const BUTTON_SECONDARY = 'hud text-hud-sm border-[3px] border-edge text-ink hover:bg-ink hover:text-night active:bg-ink active:text-night'
+export const BUTTON_SECONDARY = 'hud uppercase text-hud-sm border-[3px] border-edge text-ink hover:bg-ink hover:text-night active:bg-ink active:text-night'
 /** Layout for a Link that wears a button style. */
 export const LINK_BUTTON = 'inline-flex min-h-11 items-center px-4 py-2 no-underline'
 
@@ -18,7 +18,7 @@ export function Button({ variant = 'primary', className = '', pending = false, b
     primary: BUTTON_PRIMARY,
     secondary: BUTTON_SECONDARY,
     quiet: 'font-semibold text-muted underline underline-offset-4 hover:text-ink active:text-ink',
-    danger: 'hud text-hud-sm border-[3px] border-hp text-hp-ink hover:bg-hp hover:text-night active:bg-hp active:text-night',
+    danger: 'hud uppercase text-hud-sm border-[3px] border-hp text-hp-ink hover:bg-hp hover:text-night active:bg-hp active:text-night',
   }[variant]
   // A busy button stays focusable (aria-disabled, clicks swallowed): disabling it would drop keyboard focus to the page.
   return <button type="button" {...props} aria-busy={pending || undefined} aria-disabled={pending || undefined} disabled={!pending && (disabled || (!online && !allowOffline))} onClick={(event) => { if (pending) { event.preventDefault(); return } onClick?.(event) }} className={`min-h-11 px-3 py-2 min-[375px]:px-4 ${icon ? 'inline-flex items-center justify-center gap-2.5' : ''} ${styles} disabled:cursor-not-allowed disabled:border-dashed disabled:border-faint disabled:bg-transparent disabled:text-muted disabled:shadow-none disabled:no-underline disabled:active:translate-y-0 aria-busy:cursor-wait aria-busy:active:translate-y-0 ${className}`}>{icon ? <Glyph name={icon} className={pending ? 'invisible' : ''} /> : null}{pending ? busyLabel : children}</button>

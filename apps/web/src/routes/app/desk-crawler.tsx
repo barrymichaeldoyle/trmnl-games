@@ -84,7 +84,7 @@ function SignedInApp() {
   }
   return (
     <>
-      <nav aria-label="Desk Crawler" className="hud sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
+      <nav aria-label="Desk Crawler" className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
         {/* One width on every tab: following the page width made the tabs resize and jump when switching. */}
         <ul className="mx-auto flex min-h-13 max-w-3xl items-stretch">
           <li className="hidden items-center pr-4 pl-2 sm:flex">

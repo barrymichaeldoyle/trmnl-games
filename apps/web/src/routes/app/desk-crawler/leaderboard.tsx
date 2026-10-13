@@ -50,7 +50,7 @@ function Leaderboard() {
               setBoard(tab.board)
               setCohortKey(undefined)
             }}
-            className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-1 py-2 label-px whitespace-nowrap not-last:border-r-2 min-[360px]:px-2 not-last:border-edge not-aria-pressed:before:hidden ${board === tab.board ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink'}`}
+            className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-1 py-2 label-px uppercase tracking-wide whitespace-nowrap not-last:border-r-2 min-[360px]:px-2 not-last:border-edge not-aria-pressed:before:hidden ${board === tab.board ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink'}`}
           >
             {tab.label}
           </button>

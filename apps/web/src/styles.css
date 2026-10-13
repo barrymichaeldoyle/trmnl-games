@@ -117,15 +117,14 @@
 /*
  * Small HUD labels and figures. Both pixel faces blur their figures below
  * 16px (Pixelify's 2 reads as 8), so small print uses the system sans in bold
- * tabular caps and the pixel faces keep to titles, nav, buttons and counters.
+ * tabular figures and the pixel faces keep to titles, nav, buttons and counters. Sentence case: only buttons and
+ * button-like controls are set in capitals (D137).
  */
 @utility label-px {
   font-family: var(--font-sans);
   font-size: 0.75rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   line-height: 1.4;
 }
 
@@ -139,10 +138,9 @@
   font-variation-settings: "wght" 400;
 }
 
-/* Arcade lettering for nav, buttons and counters: always uppercase. */
+/* Arcade lettering for nav, buttons and counters. Text keeps its own case; buttons, tabs and toggles add capitals (D137). */
 @utility hud {
   font-family: var(--font-hud);
-  text-transform: uppercase;
   letter-spacing: 0.02em;
   line-height: 1.6;
 }

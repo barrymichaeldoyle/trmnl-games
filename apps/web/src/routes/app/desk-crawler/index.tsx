@@ -208,7 +208,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
             {hero.stances.map((option) => {
               const chosen = option.id === hero.stance
               return (
-                <button key={option.id} type="button" aria-pressed={chosen} aria-disabled={stance.pending || undefined} disabled={!healthy} onClick={() => { if (chosen || stance.pending) return; setAsk({ kind: 'stance', id: option.id }) }} className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 py-2 label-px not-last:border-r-2 not-last:border-edge not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink disabled:text-muted'}`}>
+                <button key={option.id} type="button" aria-pressed={chosen} aria-disabled={stance.pending || undefined} disabled={!healthy} onClick={() => { if (chosen || stance.pending) return; setAsk({ kind: 'stance', id: option.id }) }} className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 py-2 label-px uppercase tracking-wide not-last:border-r-2 not-last:border-edge not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink disabled:text-muted'}`}>
                   {option.name}
                 </button>
               )

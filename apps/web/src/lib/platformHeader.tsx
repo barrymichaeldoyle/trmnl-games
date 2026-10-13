@@ -24,7 +24,7 @@ export function PlatformHeader() {
         <nav aria-label="Platform" className="flex shrink-0 items-center gap-4 text-sm">
           <Show when="signed-out">
             <Link to="/help/desk-crawler" className={NAV_LINK} activeProps={{ 'aria-current': 'page', className: 'underline' }}>Help</Link>
-            <SignInButton mode="modal"><button type="button" {...PRELOAD_CLERK_UI} className="hud text-hud-sm min-h-10 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">Sign in</button></SignInButton>
+            <SignInButton mode="modal"><button type="button" {...PRELOAD_CLERK_UI} className="hud uppercase text-hud-sm min-h-10 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">Sign in</button></SignInButton>
           </Show>
           <Show when="signed-in">
             <GamesLink />

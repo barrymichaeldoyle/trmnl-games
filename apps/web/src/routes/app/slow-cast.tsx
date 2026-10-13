@@ -67,7 +67,7 @@ function Shell() {
   const coolerUsed = dock.angler.cooler.used
   return (
     <>
-      <nav aria-label="Slow Cast" className="hud sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
+      <nav aria-label="Slow Cast" className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
         <ul className="mx-auto flex min-h-13 max-w-3xl items-stretch">
           <li className="hidden items-center pr-4 pl-2 sm:flex">
             <img src="/games/slow-cast/favicon.svg" alt="" width={24} height={24} className="[image-rendering:pixelated]" />
