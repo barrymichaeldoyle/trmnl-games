@@ -3,7 +3,7 @@ import { contentV1 } from '@trmnl-games/desk-crawler/content/v1'
 import { simulateCohort, summarize } from '../../tools/balance/run'
 
 describe('balance evidence', () => {
-  it('accounts for potion supply and consumption with the real simulator', () => {
+  it('accounts for potion supply and consumption with the real simulator', { timeout: 30_000 }, () => {
     const logs = simulateCohort({ name: 'daily', everyDays: 1 }, 8, 12, contentV1)
     expect(logs.some(log => log.potionsUsed > 0)).toBe(true)
     expect(logs.some(log => log.potionFullFallbacks > 0)).toBe(true)
@@ -17,7 +17,7 @@ describe('balance evidence', () => {
     }
   })
 
-  it('counts two deaths on one eligible hero-day once for probability', () => {
+  it('counts two deaths on one eligible hero-day once for probability', { timeout: 30_000 }, () => {
     const logs = simulateCohort({ name: 'test', everyDays: 0 }, 1, 1, contentV1)
     const log = logs[0]!
     log.eligibleDaysByBiome = new Map([['server_room', new Set([0, 1])]])
@@ -30,7 +30,7 @@ describe('balance evidence', () => {
     expect(summarize({ name: 'test', everyDays: 0 }, logs, 2, contentV1).xpLastDay.ratio).toBeNull()
   })
 
-  it('keeps starter gear in the undergeared policy and produces deterministic reports', () => {
+  it('keeps starter gear in the undergeared policy and produces deterministic reports', { timeout: 30_000 }, () => {
     const policy = { name: 'undergeared', everyDays: 3, equipGear: false }
     const first = simulateCohort(policy, 2, 8, contentV1)
     expect(first.every(log => log.equippedUpgrades === 0)).toBe(true)

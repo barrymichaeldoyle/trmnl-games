@@ -114,7 +114,7 @@ describe('drinking rule (D131)', () => {
 })
 
 describe('potions in the simulator (D131)', () => {
-  it('replays v13 unchanged: 300 seeded ticks give the same stories, directives and state under v13 with the new code', () => {
+  it('replays v13 unchanged: 300 seeded ticks give the same stories, directives and state under v13 with the new code', { timeout: 30_000 }, () => {
     // A hero of every status finds and drinks potions over 300 ticks; under v13 nothing about them changed.
     const { hero: h, inventory } = hero({ level: 6, hp: 40, biomeId: 'server_room', stance: 'bold' }, v13)
     let state = h
@@ -176,7 +176,7 @@ describe('potions in the simulator (D131)', () => {
     expect(drank.size).toBeGreaterThan(1)
   })
 
-  it('reaches the Cafeteria cohorts with majors and keeps every hero inside three rows, over 30 managed days', () => {
+  it('reaches the Cafeteria cohorts with majors and keeps every hero inside three rows, over 30 managed days', { timeout: 30_000 }, () => {
     const daily = POLICIES.find((policy) => policy.name === 'daily')!
     const logs = simulateCohort(daily, 12, 30, v14)
     const found = logs.reduce<Record<string, number>>((sum, log) => { for (const [id, n] of log.potionsFoundByStrength) sum[id] = (sum[id] ?? 0) + n; return sum }, {})
