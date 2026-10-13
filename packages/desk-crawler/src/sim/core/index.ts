@@ -1,5 +1,6 @@
 export { simulateHero, SIMULATION_VERSION } from './simulate'
-export { SimulationInvariantError, assertHeroInvariants, MAX_INVENTORY_ROWS } from './invariants'
+export { SimulationInvariantError, assertHeroInvariants } from './invariants'
+export { MAX_INVENTORY_ROWS, INVENTORY_READ } from './limits'
 export { applyItemChanges } from './apply'
 export { starterHero, starterKit, zeroCounters, withCounterDefaults, STARTER_POTIONS } from './starter'
 export * from './stats'

@@ -8,7 +8,7 @@ import type { HeroClass, NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 11
+export const ACHIEVEMENTS_VERSION = 12
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -439,6 +439,14 @@ counter('lost_and_found', 'Lost and found', 'Coworkers', 'lostPropertyFound', [1
   ['Label Reader', "Ten spares found. You know everyone's handwriting."],
   ['Head of Lost Property', 'Twenty-five spares found. People check with you first.'],
 ])
+
+// ---------------------------------------------------------------- D146 Bigger bags (catalog version 12; appended, never edited)
+
+family('big_bags', 'Bigger bags', 'Lifetime', [
+  ['Gym Duffel', 'Smells faintly of the gym. Holds 24.'],
+  ['Steamer Trunk', 'Covered in stickers from places you have never been.'],
+  ['Stationery Cupboard', 'You have the only key. Facilities have stopped asking.'],
+], (i) => ({ kind: 'bag', atLeast: [24, 28, 32][i]! }))
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

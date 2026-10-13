@@ -16,7 +16,7 @@ Beside **Sell**, every bag item gets **Salvage**: strip it for materials instead
 
 ## What a player sees
 
-- **Bag page, bag items:** the item sheet shows Sell (gold) and Salvage (the material and count it yields) side by side. The multi-select review that sells up to 30 items gains "Salvage selected" beside "Sell selected", with the total yield per material. A **Materials** strip sits under the potion row: three counts with their glyphs, "Scrap 14 · Parts 3 · Components 1", and a one-line "What are these?" that opens the help section.
+- **Bag page, bag items:** the item sheet shows Sell (gold) and Salvage (the material and count it yields) side by side. The multi-select review that sells up to 32 items (30 before D146) gains "Salvage selected" beside "Sell selected", with the total yield per material. A **Materials** strip sits under the potion row: three counts with their glyphs, "Scrap 14 · Parts 3 · Components 1", and a one-line "What are these?" that opens the help section.
 - **Bag page, equipped items:** each equipped item's sheet gains a Workbench card naming the next step, its price and its result: "Upgrade to Mk II: 6 Scrap + 150 gold. Attack 7 → 11." or "Reinforce to +2: 12 Scrap, 4 Parts, 1 Component + 3,000 gold. Defense 16 → 17." A short line under it says what the hero is short of ("Needs 2 more Parts") when the step is not yet affordable, and the button is disabled. Rare and epic gear add a second row, "Choose affix", listing the four affixes with the one it holds marked; picking another costs 2 Components + 1,500 gold. Common and uncommon gear show no affix row.
 - **Labels:** an upgraded item reads "Rare Letter Opener Mk II"; a reinforced one "Rare Letter Opener Mk III +2"; with an affix, "Vampiric Rare Letter Opener Mk III +2". The name never changes, so a player's first weapon can carry them to the end.
 - **Companion log:** one line per action, from the ordinary command log: "Salvaged 4 items for 6 Scrap and 1 Parts.", "Upgraded the Letter Opener to Mk II.", "Reinforced the Cardigan to +1.", "Fitted Lucky to the Keyboard Mace."
@@ -43,7 +43,7 @@ Materials are item rows with a new `itemKind` literal, `material`, keyed by temp
 
 ### Salvage
 
-`inventory.salvageMany(operationId, itemIds)` is `sellMany`'s twin: 1 to 30 player-selected bag items, each checked to be the hero's own gear that is neither equipped nor held, deleted in one transaction, the yield added to the material rows, one receipt, one command log line. The hero must be manageable (exploring, resting, travelling or sleeping): a sleeping hero can salvage to make room exactly as it can sell. Potions and materials cannot be salvaged. There is no single-item variant; the sheet calls the same mutation with one id.
+`inventory.salvageMany(operationId, itemIds)` is `sellMany`'s twin: 1 to 32 (D146; 30 before) player-selected bag items, each checked to be the hero's own gear that is neither equipped nor held, deleted in one transaction, the yield added to the material rows, one receipt, one command log line. The hero must be manageable (exploring, resting, travelling or sleeping): a sleeping hero can salvage to make room exactly as it can sell. Potions and materials cannot be salvaged. There is no single-item variant; the sheet calls the same mutation with one id.
 
 Salvage is explicit and only explicit. No automatic salvage, no "salvage everything below my gear" rule, no held-find salvage before claiming. The inventory sleep rules do not change.
 

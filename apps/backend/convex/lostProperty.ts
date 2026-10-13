@@ -6,6 +6,7 @@ import { heldSpares, ownSpare } from './lib/lostProperty'
 import { pagePublic } from './lib/publicPage'
 import { HIDDEN_RIVAL } from './lib/raids'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
+import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
 const spareView = v.object({
   name: v.string(),
@@ -50,7 +51,7 @@ export const mine = query({
         mySpare = { name: row.name, floor, found: false, finderName: null, finderProfile: false }
       }
     }
-    const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', hero._id)).take(40)
+    const items = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', hero._id)).take(INVENTORY_READ)
     return { enabled: content.lostProperty !== undefined, mySpare, held: await heldSpares(ctx, items), total: hero.counters.lostPropertyFound ?? 0 }
   },
 })

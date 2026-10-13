@@ -71,6 +71,8 @@ The ladder is an ordered list of rungs in the catalog, under a new `career` rule
 | 17 | Find a rare | `rareFinds ≥ 1` | no | 60 | none: luck stays luck |
 | 18 | Buy the Rolling Suitcase | `bagCapacity ≥ 20` | Bag page | 100 | |
 | 19 | Reach level 12 | `level ≥ 12` | no | 100 | |
+| 20–24 | Salvage, Upgrade, Reinforce to +3, Win in the Archive, Win in the Parking Garage | see v13 and v16 | Bag page / Hero page | 60–150 | Appended in v13 (D129) and v16 (D133) |
+| 25 | Buy the Gym Duffel | `bagCapacity ≥ 24` | Bag page | 150 | Appended in v22 (D146); rung 18's blurb no longer calls the Rolling Suitcase the biggest bag |
 
 Eight of nineteen rungs need the companion, and each is a thing the player would do anyway; none asks for a visit for its own sake. Companion rungs alternate with passive ones so a device-only player always has a visible goal and reaches it on their own about half the time, then sees the companion rung sit until they visit. That is the one soft nudge in the design, and it costs nothing: the hero keeps earning, unlocking and finishing tasks regardless.
 

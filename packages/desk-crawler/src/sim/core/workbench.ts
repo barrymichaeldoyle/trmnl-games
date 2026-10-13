@@ -1,3 +1,4 @@
+import { MAX_INVENTORY_ROWS } from './limits'
 import type { ContentCatalog, GearKind, ItemKind, ItemSnapshot, MaterialCount, NewItem, Rarity, WorkbenchRule, WorkbenchStep } from './types'
 
 /**
@@ -208,6 +209,6 @@ export function workbenchProblems(content: ContentCatalog): string[] {
   for (const step of rules.steps) {
     if (step.gold === 0 && Object.values(step.materials).every((n) => n === 0)) problems.push(`${step.kind === 'tier' ? `tier step to ${step.toTier}` : `reinforce step +${step.to}`} costs nothing`)
   }
-  if (inventoryRowsNeeded(content) > 32) problems.push('material rows exceed the 32-row inventory read')
+  if (inventoryRowsNeeded(content) > MAX_INVENTORY_ROWS) problems.push(`material rows exceed the ${MAX_INVENTORY_ROWS}-row inventory read`)
   return problems
 }

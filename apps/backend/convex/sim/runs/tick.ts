@@ -24,6 +24,7 @@ import { DESK_CRAWLER_RUNTIME } from '../../lib/engine/deskCrawler'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../../lib/engine/runner'
 import { accumulatorOf, addBucket, creditTick, foldScore } from '../../lib/engine/scores'
 import { shouldPublish as engineShouldPublish } from '@trmnl-games/engine/schedule'
+import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
 export { SLOT_MS, SLOT_OFFSET_MS, wallSlotFor }
 export { PAGE_SIZE, STALL_MS, MAX_RECOVERY_ATTEMPTS } from '../../lib/engine/runner'
@@ -80,7 +81,7 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
   const items = await ctx.db
     .query('items')
     .withIndex('by_heroId', (q) => q.eq('heroId', hero._id))
-    .take(40)
+    .take(INVENTORY_READ)
   // D110: under a catalog with raids, the oldest raid waiting to land, and a target when the launch draw hits.
   const streams = deriveStreamSeeds(world.worldSeed, hero._id, run.tick, run.simulationVersion)
   let plan: RaidPlan | undefined

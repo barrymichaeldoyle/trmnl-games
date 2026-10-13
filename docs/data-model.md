@@ -93,7 +93,7 @@ Fields: `heroId`, `templateId`, `contentVersion`, `kind: weapon | armor | potion
 
 Indexes: `by_hero[heroId]`, `by_hero_kind[heroId,kind]`.
 
-Gear quantity is exactly 1; potion quantity is 1 to the pouch cap across every potion row (D131: one row per strength, `minor_potion`, `healing_potion`, `major_potion`), and zero quantity removes the document. At most 32 rows (29 under v14: 20 bag + 2 equipped + 1 held + 3 potion + 3 material); gear count minus the authoritative held reference is bag usage. No independent location flag. `attack` and `defense` are zero when not applicable. Stats are copied from content on acquisition. There is no independent `equipped` boolean to drift from hero references.
+Gear quantity is exactly 1; potion quantity is 1 to the pouch cap across every potion row (D131: one row per strength, `minor_potion`, `healing_potion`, `major_potion`), and zero quantity removes the document. At most 48 rows (`MAX_INVENTORY_ROWS`, D146; 41 under v22: 32 bag + 2 equipped + 1 held + 3 potion + 3 material); gear count minus the authoritative held reference is bag usage. No independent location flag. `attack` and `defense` are zero when not applicable. Stats are copied from content on acquisition. There is no independent `equipped` boolean to drift from hero references.
 
 Item ownership must match equipment references. Sell/equip/consume always recheck ownership in the same transaction. Never accept a client-supplied sale value or derived stat.
 

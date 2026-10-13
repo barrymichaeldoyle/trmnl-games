@@ -980,7 +980,7 @@ export type ItemChange =
 
 export interface SimulationInput {
   readonly hero: HeroState
-  /** At most 32 rows, sorted lexically by ID. */
+  /** At most `MAX_INVENTORY_ROWS` rows, sorted lexically by ID. */
   readonly inventory: readonly ItemSnapshot[]
   readonly tick: number
   readonly content: ContentCatalog

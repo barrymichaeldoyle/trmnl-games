@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 import { retainSellableSelection, saleIsCurrent } from '../../apps/web/src/lib/bagSelection'
+import { BATCH_ITEMS } from '@trmnl-games/desk-crawler/sim/core/limits'
 
 const item = (id: string, overrides = {}) => ({ id, equipped: false, held: false, saleValue: 10, ...overrides })
 
@@ -33,7 +34,7 @@ it('refuses a changed price, sold item, equipped item or held item', () => {
 })
 
 it('refuses empty, duplicate or over-limit sale reviews', () => {
-  const gear = Array.from({ length: 31 }, (_, i) => item(String(i)))
+  const gear = Array.from({ length: BATCH_ITEMS + 1 }, (_, i) => item(String(i)))
   expect(saleIsCurrent([], gear)).toBe(false)
   expect(saleIsCurrent([gear[0]!, gear[0]!], gear)).toBe(false)
   expect(saleIsCurrent(gear, gear)).toBe(false)

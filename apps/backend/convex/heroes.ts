@@ -31,6 +31,7 @@ import { toHeroState } from './sim/runs/adapter'
 import { loreView } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
+import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
 const intentResult = v.object({
   operationId: v.string(),
@@ -54,7 +55,7 @@ export const mine = query({
     const items = await ctx.db
       .query('items')
       .withIndex('by_heroId', (q) => q.eq('heroId', hero._id))
-      .take(40)
+      .take(INVENTORY_READ)
     const world = await readWorld(ctx)
     // D80/D81: the stats the hero fights with, affixes and live effects included.
     // D139: the occasion on the owner's last TRMNL date counts too, as it does in the tick.
@@ -470,7 +471,7 @@ export const returnSummary = query({
     const items = await ctx.db
       .query('items')
       .withIndex('by_heroId', (q) => q.eq('heroId', hero._id))
-      .take(40)
+      .take(INVENTORY_READ)
     const unequipped = items.filter((item) => isGear(item.kind) && item._id !== hero.weaponId && item._id !== hero.armorId && item._id !== hero.heldItemId).length
     const baseline = hero.companionVisitBaseline ?? null
     return {

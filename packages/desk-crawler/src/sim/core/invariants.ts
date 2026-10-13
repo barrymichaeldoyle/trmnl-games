@@ -5,6 +5,7 @@ import { heroMaxHp, xpToLeave } from './stats'
 import { todoProblems } from './todo'
 import { careerProblems } from './career'
 import { isGear, itemProblems } from './workbench'
+import { MAX_INVENTORY_ROWS } from './limits'
 import type { ContentCatalog, HeroState, ItemSnapshot } from './types'
 
 /** A recognized pure-core failure. The adapter quarantines the hero; it never retries blindly. */
@@ -23,8 +24,6 @@ const fail = (code: string, message: string): never => {
 }
 
 const isCount = (value: number): boolean => Number.isSafeInteger(value) && value >= 0
-
-export const MAX_INVENTORY_ROWS = 32
 
 /** Cross-field hero/inventory invariants shared by input and output validation. */
 export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSnapshot[], content: ContentCatalog): void {

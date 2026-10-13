@@ -3,6 +3,7 @@ import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { bagUsed, isBagFull } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { assertHeroInvariants, SimulationInvariantError } from '@trmnl-games/desk-crawler/sim/core/invariants'
+import { MAX_INVENTORY_ROWS } from '@trmnl-games/desk-crawler/sim/core/limits'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { maxHp } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -52,9 +53,9 @@ describe('workbench catalog (D129)', () => {
     expect(broken({ steps: rules.steps.map((s) => (s.kind === 'tier' && s.toTier === 2 ? { ...s, gold: 0, materials: {} } : s)) })).toContain('tier step to 2 costs nothing')
     expect(broken({ affix: { gold: 0, materials: {} } })).toContain('an affix choice must cost something')
     expect(broken({ steps: rules.steps.map((s) => (s.kind === 'tier' && s.toTier === 2 ? { ...s, materials: { gravel: 1 } } : s)) })).toContain('tier step to 2 costs unknown material gravel')
-    // Four more material kinds would take the read past 32 rows with a 20-slot bag.
-    const many = Array.from({ length: 6 }, (_, i) => ({ id: `m${i}`, name: `M${i}`, rarities: [] as const, glyph: 'scrap' }))
-    expect(broken({ materials: [...rules.materials, ...many] })).toContain('material rows exceed the 32-row inventory read')
+    // Enough material kinds to take the read past MAX_INVENTORY_ROWS with a 20-slot bag.
+    const many = Array.from({ length: MAX_INVENTORY_ROWS - 20 }, (_, i) => ({ id: `m${i}`, name: `M${i}`, rarities: [] as const, glyph: 'scrap' }))
+    expect(broken({ materials: [...rules.materials, ...many] })).toContain(`material rows exceed the ${MAX_INVENTORY_ROWS}-row inventory read`)
   })
 })
 

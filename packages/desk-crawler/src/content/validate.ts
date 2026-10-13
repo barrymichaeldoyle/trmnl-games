@@ -1,6 +1,7 @@
 import type { ContentCatalog, Modifiers } from '../sim/core/types'
 import { zeroCounters } from '../sim/core/starter'
 import { potionProblems } from '../sim/core/potions'
+import { BATCH_ITEMS, MAX_INVENTORY_ROWS } from '../sim/core/limits'
 import { inventoryRowsNeeded, workbenchProblems } from '../sim/core/workbench'
 import { gearTierOf, loreProblems } from '../sim/core/biomes'
 import { occasionProblems } from '../sim/core/occasions'
@@ -334,7 +335,8 @@ export function validateCatalog(content: ContentCatalog): string[] {
     }
   })
   // Bounded reads (MAX_INVENTORY_ROWS): bag + two equipped + held + the stack rows (potion, and D129 materials).
-  if (inventoryRowsNeeded(content) > 32) problems.push('bag capacity exceeds the 32-row inventory read')
+  if (inventoryRowsNeeded(content) > MAX_INVENTORY_ROWS) problems.push(`bag capacity exceeds the ${MAX_INVENTORY_ROWS}-row inventory read`)
+  if (Math.max(...content.bagLadder.tiers.map((tier) => tier.capacity)) > BATCH_ITEMS) problems.push(`the top bag holds more than one ${BATCH_ITEMS}-item sale`)
   problems.push(...workbenchProblems(content))
   problems.push(...potionProblems(content))
   problems.push(...loreProblems(content))

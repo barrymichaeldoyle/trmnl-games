@@ -11,6 +11,7 @@ import { Glyph } from '../../../lib/glyphs'
 import { BUTTON_SECONDARY, Button, Card, ErrorNote, LINK_BUTTON, LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
 import { preload } from '../../../lib/preload'
 import { retainSellableSelection, saleIsCurrent } from '../../../lib/bagSelection'
+import { BATCH_ITEMS } from '@trmnl-games/desk-crawler/sim/core/limits'
 import { RARITY_TONE } from '../../../lib/palette'
 import { EmptySlot, Gem, PotionSlot, Sheet, SheetTitle, Slot, SlotPreview } from './-bagSlots'
 import { useNow } from './-pulse'
@@ -52,7 +53,7 @@ type Biome = { id: string; name: string; unlocked: boolean }
 type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
 type Combine = { from: { templateId: string; name: string; count: number; have: number }; materials: MaterialCount; to: { templateId: string; name: string }; shortfall: { potions: number; materials: MaterialCount }; batches: number }
 
-const SALE_LIMIT = 30
+const SALE_LIMIT = BATCH_ITEMS
 const statOf = (item: Gear) => item.kind === 'weapon' ? item.attack : item.defense
 const statLabel = (item: Gear) => item.kind === 'weapon' ? 'attack' : 'defense'
 const count = (n: number, noun: string) => `${n} ${n === 1 ? noun : `${noun}s`}`

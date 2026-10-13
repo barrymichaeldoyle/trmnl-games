@@ -46,6 +46,8 @@ export interface Policy {
   readonly timezoneAbuse?: boolean
   /** D129: once both ladders are bought, salvage spare gear instead of selling it and apply every affordable workbench step (default true for visiting cohorts under a catalog with a workbench). */
   readonly workbench?: boolean
+  /** D146: buy the bags above the Rolling Suitcase before the workbench, instead of once both equipped pieces are at their top reinforcement. */
+  readonly bagsFirst?: boolean
 }
 
 export const POLICIES: readonly Policy[] = [
@@ -59,6 +61,12 @@ export const POLICIES: readonly Policy[] = [
 
 /** P31: run beside the cohorts above only under a catalog with to-do rules. */
 export const TIMEZONE_ABUSE: Policy = { name: 'daily-timezone-abuse', everyDays: 1, timezoneAbuse: true }
+
+/** D146: run beside the cohorts above only under a catalog with bags past the MVP ceiling. */
+export const BAGS_FIRST: Policy = { name: 'seven-day-bags-first', everyDays: 7, bagsFirst: true }
+
+/** D61's MVP ceiling. D146 tiers above it are a late sink: a visiting cohort buys them after the workbench is done. */
+const CORE_BAG_TOP = 20
 
 /** A hero's UTC offset in seconds on a day: spread from -11 to +13 hours, or the abuser's daily jump. */
 export function harnessOffset(policy: Policy, heroIndex: number, day: number): number {
@@ -201,7 +209,9 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   let gold = h.gold
   let sold = 0
   // D129: a player sells while a bag or pouch is still to buy, then salvages. Yields pile into the material rows.
-  const workbench = policy.workbench !== false && content.workbench !== undefined && nextEarlyTier(content, h) === undefined && nextEarlyPouchTier(content, { level: h.level, ...(h.potionCap === undefined ? {} : { potionCap: h.potionCap }) }) === undefined
+  // D146: a bag past the Rolling Suitcase does not hold the workbench back unless the cohort buys bags first.
+  const bagsDone = nextEarlyTier(content, h) === undefined || (!policy.bagsFirst && h.bagCapacity >= CORE_BAG_TOP)
+  const workbench = policy.workbench !== false && content.workbench !== undefined && bagsDone && nextEarlyPouchTier(content, { level: h.level, ...(h.potionCap === undefined ? {} : { potionCap: h.potionCap }) }) === undefined
   let yielded: MaterialCount = {}
   let kept = inventory.filter((item) => {
     if (!isGear(item.kind) || item.id === h.weaponId || item.id === h.armorId) return true
@@ -263,13 +273,17 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   }
   // D61/D122: keep buying the next bag while it is allowed and affordable. Under milestone ladders the one-ahead rule
   // stops this after one; under a shop ladder a visit with the gold climbs several rungs, as a player would.
-  for (;;) {
-    const bag = policy.buyBags === false ? undefined : nextEarlyTier(content, h)
-    if (bag?.price === undefined || h.gold < bag.price) break
-    h.gold -= bag.price
-    h.bagCapacity = bag.capacity
-    bought += bag.price
+  const buyBags = (late: boolean) => {
+    for (;;) {
+      const bag = policy.buyBags === false ? undefined : nextEarlyTier(content, h)
+      if (bag?.price === undefined || h.gold < bag.price || (bag.capacity > CORE_BAG_TOP) !== late) break
+      h.gold -= bag.price
+      h.bagCapacity = bag.capacity
+      bought += bag.price
+    }
   }
+  buyBags(false)
+  if (policy.bagsFirst) buyBags(true)
   // P35: the Lunchbox is a rung, so a visiting player buys the next pouch too once the bag ladder stops taking its gold.
   for (;;) {
     const pouch = policy.buyBags === false ? undefined : nextEarlyPouchTier(content, h)
@@ -296,6 +310,10 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
       }
     }
   }
+  // D146: the late bags take what the workbench leaves, once both equipped pieces are at the top reinforcement.
+  const topReinforce = Math.max(0, ...(content.workbench?.steps ?? []).map((step) => (step.kind === 'reinforce' ? step.to : 0)))
+  const finished = (['weaponId', 'armorId'] as const).every((slot) => (kept.find((row) => row.id === h[slot])?.reinforced ?? 0) >= topReinforce)
+  if (!policy.bagsFirst && (!workbench || finished)) buyBags(true)
   // D131: combine every batch the pouch and the materials allow, as a player clearing minors would.
   const recipe = content.potions?.combine
   if (recipe !== undefined && policy.workbench !== false) {
@@ -789,7 +807,7 @@ function main() {
   const started = Date.now()
   const ticks = options.ticks ?? options.days * TICKS_PER_DAY
   const totalDays = ticks / TICKS_PER_DAY
-  const policies = content.todo === undefined ? POLICIES : [...POLICIES, TIMEZONE_ABUSE]
+  const policies = [...POLICIES, ...(content.todo === undefined ? [] : [TIMEZONE_ABUSE]), ...(content.bagLadder.tiers.some((tier) => tier.capacity > CORE_BAG_TOP) ? [BAGS_FIRST] : [])]
   const reports = policies.map((policy) => summarize(policy, simulateCohort(policy, options.heroes, totalDays, content, ticks, options.stance, options.heroClass), totalDays, content))
   const meta = { reportVersion: 3, contentVersion: content.contentVersion, stance: options.stance ?? null, simulationVersion: SIMULATION_VERSION, heroes: options.heroes, days: totalDays, ticks, seconds: (Date.now() - started) / 1000, cumulativeXpToLevel8: cumulativeXpToReach(8), deathDenominator: 'hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability', uncertainty: 'Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast' }
   if (options.json) writeFileSync(options.json, JSON.stringify({ meta, reports }, null, 2) + '\n')

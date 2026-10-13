@@ -19,9 +19,9 @@ const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<Achievement
 
 describe('achievement catalog (D65)', () => {
   it('holds the launch set with unique, catalog-backed ids', () => {
-    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3 + 3)
+    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3 + 3 + 3)
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1 + 1)
+    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1 + 1 + 1)
     for (const def of ACHIEVEMENTS) {
       expect(ACHIEVEMENT_FAMILIES.some((f) => f.id === def.family)).toBe(true)
       expect(def.name.length).toBeLessThanOrEqual(24)
@@ -187,5 +187,15 @@ describe('Lost and found (D145, catalog version 11)', () => {
     expect(earned({ lostPropertyFound: 1 })).toEqual(['lost_and_found_1'])
     expect(earned({ lostPropertyFound: 25 })).toEqual(['lost_and_found_1', 'lost_and_found_2', 'lost_and_found_3'])
     expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'lost_and_found')).toMatchObject({ category: 'Coworkers' })
+  })
+})
+
+describe('Bigger bags (D146, catalog version 12)', () => {
+  it('reads the bag capacity at 24, 28 and 32', () => {
+    const earned = (bagCapacity: number) => allSatisfied(state({}, { bagCapacity }), content).filter((a) => a.family === 'big_bags').map((a) => a.id)
+    expect(earned(20)).toEqual([])
+    expect(earned(24)).toEqual(['big_bags_1'])
+    expect(earned(32)).toEqual(['big_bags_1', 'big_bags_2', 'big_bags_3'])
+    expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'big_bags')).toMatchObject({ category: 'Lifetime' })
   })
 })

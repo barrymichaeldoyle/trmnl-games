@@ -19,6 +19,7 @@ import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, nextStep, salvageYield, workbenchSuffix } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { bestFitPotion, combineBatches, healPctOf, potionItem, potionStrengths, potionWord, potionsHeld, strengthById, strengthOf } from '@trmnl-games/desk-crawler/sim/core/potions'
 import type { ItemSnapshot, MaterialCount } from '@trmnl-games/desk-crawler/sim/core/types'
+import { BATCH_ITEMS, INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
 const currentTick = async (ctx: QueryCtx) => (await readWorld(ctx))?.currentTick ?? 0
 
@@ -42,7 +43,7 @@ async function heroItems(ctx: QueryCtx, heroId: Id<'heroes'>): Promise<Doc<'item
   return await ctx.db
     .query('items')
     .withIndex('by_heroId', (q) => q.eq('heroId', heroId))
-    .take(40)
+    .take(INVENTORY_READ)
 }
 
 const contentOf = async (ctx: QueryCtx): Promise<ContentCatalog> => worldContent(await readWorld(ctx))
@@ -409,13 +410,13 @@ export const sell = mutation({
     }),
 })
 
-/** D29: sell up to 30 player-selected bag items atomically under one receipt. */
+/** D29: sell up to `BATCH_ITEMS` (D146) player-selected bag items atomically under one receipt. */
 export const sellMany = mutation({
   args: { operationId: v.string(), itemIds: v.array(v.id('items')) },
   returns: intentResult,
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.sellMany', { itemIds: args.itemIds }, async (user) => {
-      if (args.itemIds.length < 1 || args.itemIds.length > 30) throw appError('INVALID_INPUT', 'Choose between 1 and 30 items.')
+      if (args.itemIds.length < 1 || args.itemIds.length > BATCH_ITEMS) throw appError('INVALID_INPUT', `Choose between 1 and ${BATCH_ITEMS} items.`)
       const hero = await requirePlayableHero(ctx, user)
       const { gold } = await sellItems(ctx, hero, args.itemIds)
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'sell_many', `Sold ${args.itemIds.length} items.`, { xpEarned: 0, gold, hp: 0 })
@@ -606,13 +607,13 @@ async function bagGear(ctx: MutationCtx, hero: Doc<'heroes'>, itemIds: Id<'items
   return items
 }
 
-/** D129: strip up to 30 player-selected bag items for materials, atomically under one receipt. Never automatic. */
+/** D129: strip up to `BATCH_ITEMS` player-selected bag items for materials, atomically under one receipt. Never automatic. */
 export const salvageMany = mutation({
   args: { operationId: v.string(), itemIds: v.array(v.id('items')) },
   returns: intentResult,
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.salvageMany', { itemIds: args.itemIds }, async (user) => {
-      if (args.itemIds.length < 1 || args.itemIds.length > 30) throw appError('INVALID_INPUT', 'Choose between 1 and 30 items.')
+      if (args.itemIds.length < 1 || args.itemIds.length > BATCH_ITEMS) throw appError('INVALID_INPUT', `Choose between 1 and ${BATCH_ITEMS} items.`)
       const hero = await requirePlayableHero(ctx, user)
       if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be salvaged while your hero is recovering or paused.")
       const content = await contentOf(ctx)

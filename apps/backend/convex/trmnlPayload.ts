@@ -19,6 +19,7 @@ import { careerLine, currentRung, measureRung } from '@trmnl-games/desk-crawler/
 import { taskLabel } from '@trmnl-games/desk-crawler/sim/core/todo'
 import { toHeroState } from './sim/runs/adapter'
 import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
+import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
 /**
  * Fixed-cost canonical payload for one authorized instance (trmnl.md "Query
@@ -96,7 +97,7 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     const items = await ctx.db
       .query('items')
       .withIndex('by_heroId', (q) => q.eq('heroId', hero._id))
-      .take(40)
+      .take(INVENTORY_READ)
     const named = (id: string | undefined) => items.find((item) => item._id === id)
     const label = (item: (typeof items)[number] | undefined) =>
       item ? `${affixById(content, item.affixId)?.name ?? ''} ${item.rarity === 'common' ? '' : item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)} ${item.name}`.replace(/\s+/g, ' ').trim() : null
