@@ -34,7 +34,7 @@ export function WaitlistForm({ source, instance = '' }: { source: 'notify' | 'pi
     try {
       await join({ email, source, ...(website ? { website } : {}) })
       try { window.sessionStorage.setItem(JOINED_KEY, '1') } catch { /* Linking later stays a one-click choice. */ }
-      captureAnalytics('waitlist joined', { source })
+      captureAnalytics('waitlist joined', { source, place: instance || 'top' })
       setJoined(email.trim())
     } catch (caught) {
       setError(errorMessage(caught))

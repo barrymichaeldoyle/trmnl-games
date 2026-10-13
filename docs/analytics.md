@@ -37,7 +37,7 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `potion combined` | Browser, after `inventory.combinePotions` commits (D131) | `batches` |
 | `sponsor link opened` | Browser, on a click of the GitHub Sponsors link (D134) | `place` (`more` or `footer`) |
 | `bag bought` | Browser, after `inventory.buyBag` commits (D61) | `tier` |
-| `waitlist joined` | Browser, after `waitlist.join` or `waitlist.joinWithAccount` succeeds (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); never the email |
+| `waitlist joined` | Browser, after `waitlist.join` or `waitlist.joinWithAccount` succeeds (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); `place` (`top`, or `footer` / `end` for the second form on the home and game pages, D137; absent for `account`); never the email |
 | `feedback sent` | Browser, after `feedback.send` succeeds (D107) | none; never the message |
 | `profile shared` | Browser, after Share completes or Copy link copies the public hero page link in Settings (D109); a cancelled share sheet sends nothing | `method` (`share` or `copy`); never the link or name |
 | `task swapped` | Browser, after `heroes.swapTask` commits on the Hero page's To-do card (D112) | `template_id` (the swapped task's kind, such as `avoid_traps`); never the slot, biome, monster or label |

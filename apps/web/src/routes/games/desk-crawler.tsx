@@ -1,4 +1,3 @@
-import { Show } from '@clerk/tanstack-react-start'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { DeviceSample, FloorGrid, HowItPlays, LaunchSignup } from '../../lib/deskCrawlerPitch'
@@ -6,7 +5,6 @@ import { UNLOCKS } from '../../lib/facts.gen'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { SITE_FRAME } from '../../lib/platformHeader'
 import { SiteShell } from '../../lib/prose'
-import { BUTTON_PRIMARY, LINK_BUTTON } from '../../lib/ui'
 import { DESK_CRAWLER_JSON_LD, DESK_CRAWLER_OG, seo } from '../../lib/seo'
 
 export const Route = createFileRoute('/games/desk-crawler')({ head: () => seo({ title: 'Desk Crawler', path: '/games/desk-crawler', description: 'Desk Crawler is a free office RPG that plays itself on your TRMNL e-ink display: your hero fights, loots and levels every 15 minutes across five floors, raids other desks and climbs the weekly rankings.', image: DESK_CRAWLER_OG, jsonLd: DESK_CRAWLER_JSON_LD }), component: Landing })
@@ -36,9 +34,6 @@ function Landing() {
                 your desk shows what happened. Every few days you open the companion to sort gear and pick the next floor.
               </p>
             </header>
-            <Show when="signed-in">
-              <Link to="/app/desk-crawler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open the companion</Link>
-            </Show>
             <LaunchSignup source="landing" />
           </div>
           <DeviceSample caption="Sample hero on a TRMNL X. Your own hero starts when you install the plugin and save it in TRMNL." priority />

@@ -6,7 +6,7 @@ import { notFound } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import type { GameSlug } from '@trmnl-games/platform'
 import { useConvexAuth } from 'convex/react'
-import { useRef } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 /** The games this viewer can see, with each one's lifecycle status (slow-cast.md "Architecture"). */
 export const gamesQuery = convexQuery(api.platform.list, {})
@@ -32,4 +32,15 @@ export function useGames() {
 export async function requireOpenGame(context: { queryClient: QueryClient }, slug: GameSlug): Promise<void> {
   const listing = await context.queryClient.ensureQueryData(gamesQuery)
   if (!listing.games.some((game) => game.slug === slug && game.canOpen)) throw notFound()
+}
+
+/**
+ * Renders a public page's game-listing section in the browser only. Asking for the listing during the server render
+ * holds the page's first byte for a Convex round trip (about a second from the Worker), for sections that only a
+ * listed game shows and nearly everyone never sees while it is hidden.
+ */
+export function AfterListing({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  return mounted ? children : null
 }

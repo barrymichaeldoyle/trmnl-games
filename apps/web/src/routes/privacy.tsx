@@ -1,11 +1,12 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { gamesQuery, useGames } from '../lib/gameAccess'
+import { AfterListing, useGames } from '../lib/gameAccess'
 import { PRIVACY_UPDATED, ProsePage, SUPPORT_EMAIL } from '../lib/prose'
 import { seo } from '../lib/seo'
 
 /**
  * Slow Cast's part of the policy (D115). It renders once the game is listed (preview or live), so a hidden game stays
- * unannounced; admins, the only players while it is hidden, see it too.
+ * unannounced; admins, the only players while it is hidden, see it too. It renders in the browser (AfterListing), so the
+ * rest of the policy is not held behind the listing.
  */
 function SlowCastPrivacy() {
   const data = useGames()
@@ -21,7 +22,6 @@ function SlowCastPrivacy() {
 }
 
 export const Route = createFileRoute('/privacy')({
-  loader: ({ context }) => context.queryClient.ensureQueryData(gamesQuery).then(() => undefined).catch(() => undefined),
   head: () => seo({ title: 'Privacy', path: '/privacy', description: 'What TRMNL Games stores, what is public on leaderboards and TRMNL screens, and how to delete your account.' }),
   component: () => (
     <ProsePage title="Privacy" updated={PRIVACY_UPDATED}>
@@ -131,7 +131,7 @@ export const Route = createFileRoute('/privacy')({
 
       <h2>Changes</h2>
       <p>When this policy changes we update this page and the date at the top.</p>
-      <SlowCastPrivacy />
+      <AfterListing><SlowCastPrivacy /></AfterListing>
     </ProsePage>
   ),
 })

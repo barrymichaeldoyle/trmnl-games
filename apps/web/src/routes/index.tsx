@@ -1,13 +1,11 @@
-import { Show } from '@clerk/tanstack-react-start'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
-import { useEffect, useState } from 'react'
 import { DeviceSample, FAQ_JSON_LD, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
 import { SITE_FRAME } from '../lib/platformHeader'
 import { SiteShell } from '../lib/prose'
-import { BUTTON_PRIMARY, BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
+import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
 import { DESK_CRAWLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
-import { useGames } from '../lib/gameAccess'
+import { AfterListing, useGames } from '../lib/gameAccess'
 
 export const Route = createFileRoute('/')({
   head: () => seo({
@@ -19,17 +17,7 @@ export const Route = createFileRoute('/')({
   component: Home,
 })
 
-/**
- * Slow Cast (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing.
- * Rendered in the browser only: asking for the listing during the server render held the home page's first byte for
- * a Convex round trip, for a section at the foot of the page that is hidden for nearly everyone.
- */
-function SlowCastTeaser() {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
-  return mounted ? <SlowCastSection /> : null
-}
-
+/** Slow Cast (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
 function SlowCastSection() {
   const data = useGames()
   const game = data?.games.find((g) => g.slug === 'slow-cast')
@@ -65,9 +53,6 @@ function Home() {
               <h1 id="home-title" className="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">An office RPG that plays itself on your desk</h1>
               <p className="max-w-prose text-lg leading-relaxed text-muted">Every 15 minutes your hero fights a Stapler Mimic, finds a Keyboard Mace or gets knocked out, and your TRMNL e-ink screen shows what happened. You check in every few days to sort the loot.</p>
             </div>
-            <Show when="signed-in">
-              <Link to="/app" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open My games</Link>
-            </Show>
             <LaunchSignup source="home" />
           </div>
           <DeviceSample caption="A real Desk Crawler screen on a TRMNL X, with a sample hero." priority />
@@ -93,7 +78,7 @@ function Home() {
               <LaunchSignup source="home" instance="footer" />
             </section>
           </div>
-          <SlowCastTeaser />
+          <AfterListing><SlowCastSection /></AfterListing>
         </div>
       </main>
     </SiteShell>

@@ -1,10 +1,10 @@
-import { SignInButton } from '@clerk/tanstack-react-start'
+import { Show, SignInButton } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { FLOORS, UNLOCKS } from './facts.gen'
 import { Glyph, type GlyphName } from './glyphs'
 import { BIOME_BANDS } from './palette'
 import { RELEASE_STATUS } from './prose'
-import { Button } from './ui'
+import { BUTTON_PRIMARY, Button, LINK_BUTTON } from './ui'
 import { useAnalyticsView } from './analyticsProvider'
 import { WaitlistForm } from './waitlist'
 
@@ -165,12 +165,20 @@ export const FAQ_JSON_LD = {
   mainEntity: FAQ.map((item) => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })),
 }
 
-/** Release status, the launch list and the TRMNL requirement: the block every pitch ends its first screen with. */
+/**
+ * Release status, the launch list and the TRMNL requirement: the block every pitch ends its first screen with. A
+ * signed-in visitor gets the companion instead of the form: it shows their hero, or offers the launch email on the
+ * account (WaitlistAccount) when they have none yet.
+ */
 export function LaunchSignup({ source, instance }: { source: 'pitch' | 'landing' | 'home'; instance?: string }) {
   return (
     <div className="flex flex-col gap-4">
       <p className="label-px self-start border-2 border-xp-ink/60 px-2 py-1 text-xp-ink">{RELEASE_STATUS}</p>
-      <WaitlistForm source={source} instance={instance} />
+      <Show when="signed-out"><WaitlistForm source={source} instance={instance} /></Show>
+      <Show when="signed-in">
+        <Link to="/app/desk-crawler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open Desk Crawler</Link>
+        <p className="text-sm text-muted">You’re signed in. The companion shows your hero, or a launch email for your account if you haven’t started one.</p>
+      </Show>
       <p className="text-sm text-muted">Needs a <a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">TRMNL e-ink display</a>. The game runs on our servers; the screen shows what happened.</p>
     </div>
   )
