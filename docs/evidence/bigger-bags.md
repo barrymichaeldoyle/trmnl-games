@@ -1,6 +1,6 @@
 # Bigger bags evidence (D146, content v22)
 
-Built 2026-10-13. [Spec](../inventory.md#cadence-and-capacity). Not yet live: production switches to v22 between runs after the deploy.
+Built 2026-10-13. [Spec](../inventory.md#cadence-and-capacity). Live since run 908 (17:45 UTC on 2026-10-13): Barry switched the world from v21 to v22 at about 17:33 UTC (no career pointers moved), and run 908, the first on v22, completed clean with nothing quarantined.
 
 ## Rules and bounds
 
