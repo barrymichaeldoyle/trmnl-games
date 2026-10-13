@@ -607,3 +607,47 @@ describe('HUD hearts and counters (D72)', () => {
     expect(portrait).toMatch(/data-story-changes="true"><div[^>]*><\/div><div class="grow w--min-0"><span class="label lg:title--small no-shrink" data-story-time="true">10:19<\/span> <span/)
   })
 })
+
+describe('to-do tasks and the goal on the X full landscape (D138)', () => {
+  const withTasks = (extra: Record<string, unknown> = {}) =>
+    buildPayload({
+      ...(payload() as never),
+      now: NOW,
+      world: { currentTick: 120, lastCompletedTick: 120, lastCompletedAt: NOW - 60_000, createdAt: NOW - 86_400_000, ticksPaused: false, maintenanceMode: false },
+      ownerAlias: 'barrymichaeldoyle',
+      timezone: 'UTC',
+      hero: { name: 'Baz', level: 5, xp: 210, hp: 118, gold: 640, status: 'exploring', biomeId: 'server_room', lastTick: 120, lastAdvancedAt: NOW - 60_000, quarantined: false },
+      weaponName: null, armorName: null, weaponAttack: 0, armorDefense: 0, potions: 1, bagUsed: 3, bagCapacity: 30, heldItemName: null,
+      logs: [{ at: NOW - 60_000, kind: 'combat', summary: 'Unplugged a Cable Serpent.' }],
+      instanceName: 'Desk Crawler', content: contentV1, spriteBaseUrl: null, artBaseUrl: null, latestEvent: null, ranking: null,
+      todoTasks: [{ label: 'Defeat 4 [[Cable Serpents]]', progress: 6, target: 4, done: true }, { label: 'Find a piece of gear', progress: 0, target: 1, done: false }],
+      goal: { title: 'Reach level 7', value: 5, target: 7, gold: 40 },
+      ...extra,
+    }) as unknown as Record<string, unknown>
+
+  it('carries the tasks with progress capped at the target, and the goal', () => {
+    const p = withTasks()
+    expect(p.todo_tasks).toEqual([{ t: 'Defeat 4 [[Cable Serpents]]', p: 4, n: 4, done: true }, { t: 'Find a piece of gear', p: 0, n: 1, done: false }])
+    expect(p.goal).toEqual({ t: 'Reach level 7', v: 5, n: 7, g: 40 })
+    expect((payload() as Record<string, unknown>).todo_tasks).toEqual([])
+    expect((payload() as Record<string, unknown>).goal).toBeNull()
+  })
+
+  it('draws the tasks, the fitted board and the goal on the X only, and the plain board without tasks', async () => {
+    const html = await render(withTasks())
+    expect(html).toContain('data-todo-column="x"')
+    expect(html).toContain('data-todo-task="done"')
+    expect(html).toContain('<span class="text--bold inline-block">Cable Serpents</span>')
+    expect(html).toMatch(/Done<\/span>/)
+    expect(html).toMatch(/0\/1<\/span>/)
+    expect(html).toContain("Today's to-do")
+    expect(html).toContain('data-fit-rows="true"')
+    expect(html).toMatch(/data-goal-line="x"[\s\S]*Reach level 7[\s\S]*5\/7 · 40 gold/)
+    expect(html).toMatch(/class="hidden lg:flex no-shrink flex--col flex--stretch-x gap--xsmall stretch-x" data-goal-line="x"/)
+    const plain = await render(payload())
+    expect(plain).not.toContain('data-todo-column')
+    expect(plain).not.toContain('data-goal-line')
+    // A one-step goal shows its gold without a count.
+    expect(await render(withTasks({ goal: { title: 'Beat an elite', value: 0, target: 1, gold: 40 } }))).toMatch(/Beat an elite<\/span>\s*<span class="title--small no-shrink">40 gold/)
+  })
+})

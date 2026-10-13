@@ -88,6 +88,10 @@ export interface PayloadInput {
   readonly newestEvent?: LatestEvent | null
   /** Seven-day own-group ranking from the published set; null before any publication. */
   readonly ranking: PayloadRanking | null
+  /** D138: today's to-do tasks (labels keep their [[bold marks]]); absent before the list arrives. */
+  readonly todoTasks?: ReadonlyArray<{ readonly label: string; readonly progress: number; readonly target: number; readonly done: boolean }>
+  /** D138: the hero's current career goal; absent off the ladder or past its end. */
+  readonly goal?: { readonly title: string; readonly value: number; readonly target: number; readonly gold: number } | null
 }
 
 export interface PayloadRanking {
@@ -308,6 +312,8 @@ export function buildPayload(input: PayloadInput) {
       held_item: '',
       wake_at_tick: null,
       log: [],
+      todo_tasks: [],
+      goal: null,
       celebration: null,
       attention: servicePaused ? 'Desk Crawler is down for maintenance.' : 'Sign in to the companion, then save this plugin in TRMNL.',
       notice: null,
@@ -437,6 +443,9 @@ export function buildPayload(input: PayloadInput) {
     held_item: input.heldItemName ?? '',
     wake_at_tick: hero.wakeAtTick ?? null,
     log: travelLine === null ? logs : [travelLine, ...logs].slice(0, MAX_LOGS),
+    // D138: the X full landscape's to-do column and goal line. `p`/`n` are progress and target, capped so "5/5" never reads "6/5".
+    todo_tasks: (input.todoTasks ?? []).map((task) => ({ t: task.label, p: Math.min(task.progress, task.target), n: task.target, done: task.done })),
+    goal: input.goal ? { t: input.goal.title, v: Math.min(input.goal.value, input.goal.target), n: input.goal.target, g: input.goal.gold } : null,
     // The badge sits above the newest story, so it waits while the travel line leads.
     celebration: attention === null && travelLine === null && logs.length > 0 ? celebrationFor(input.newestEvent === undefined ? input.latestEvent : input.newestEvent, hero.level) : null,
     attention,

@@ -1,5 +1,6 @@
 /**
- * Four self-contained TRMNL layouts. Template v51 removes the desk drawer (D123): the bag count is "20/20" again and the
+ * Four self-contained TRMNL layouts. Template v53 gives the X full landscape today's to-do tasks at the head of its
+ * board column, the board fitted to what is left, and the current goal pinned under the stories (D138). Template v51 removes the desk drawer (D123): the bag count is "20/20" again and the
  * drawer glyph is gone. Template v50 adds the to-do list (D112): a checkbox glyph for tasks ticked off and
  * the morning stand-up, a "2 tasks" recap fact, and a stand-up (or several tasks ticked off) that says its count where a
  * row is too narrow for the labels. Template v49 added the desk drawer (D111): the bag count gained "+N" while the drawer
@@ -40,7 +41,7 @@
 import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 
-export const TEMPLATE_VERSION = 52
+export const TEMPLATE_VERSION = 53
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -885,7 +886,32 @@ const halfVerticalBody = (withScene: boolean) => `
 const halfVerticalLandscape = halfVerticalBody(true)
 const halfHorizontalPortrait = halfVerticalBody(false)
 
-export const markupFull = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--xsmall lg:gap--small', `
+/**
+ * D138, X full landscape: today's three to-do tasks heading the board column, each behind a ticked or open box with
+ * its progress at the end, ruled like the board under them. Labels keep their bold names; a long one takes two lines.
+ */
+const todoCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label title--small no-shrink">Today's to-do</span>${ruleFill}</div>`
+const todoColumn = `<div class="no-shrink flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x" data-todo-column="x">
+        {% for task in todo_tasks %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}<div class="label title--small flex flex--row flex--center-y gap--small stretch-x" data-todo-task="{% if task.done %}done{% else %}open{% endif %}">
+          <img class="image no-shrink" src="{% if task.done %}{{ glyph16_todo }}{% else %}{{ glyph16_todoOpen }}{% endif %}" alt="">
+          <span class="grow w--min-0" data-clamp="2">${richSpan(rich('task.t'))}</span>
+          <span class="no-shrink">{% if task.done %}Done{% else %}{{ task.p }}/{{ task.n }}{% endif %}</span>
+        </div>{% endfor %}
+      </div>`
+/**
+ * D138, X full landscape: the current goal pinned under the stories behind the ladder glyph, its progress and gold at
+ * the end; the story fitter drops the oldest stories to make room. A one-step goal shows no count.
+ */
+const goalLine = `{% if goal %}<div class="hidden lg:flex no-shrink flex--col flex--stretch-x gap--xsmall stretch-x" data-goal-line="x">
+        <div class="border--h-30 stretch-x"></div>
+        <div class="flex flex--row flex--center-y gap--small stretch-x pt--1">
+          <img class="image no-shrink" src="{{ glyph24_career }}" alt="">
+          <span class="title grow w--min-0" data-clamp="1"><span class="text--regular">Goal: </span>{{ goal.t | escape }}</span>
+          <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} gold</span>
+        </div>
+      </div>{% endif %}`
+
+export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen = "${glyphUri('todoOpen', 16)}" %}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--xsmall lg:gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('full')}
   {% else %}
   <div class="relative no-shrink flex flex--row flex--top gap--medium stretch-x">
@@ -910,7 +936,7 @@ export const markupFull = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${oriented('la
     </div>
     <div class="grid stretch-x gap--none" data-rune-rule="true">
       <div class="col--span-12 lg:col--span-8 flex flex--row flex--center-y gap--none">${runeRule}</div>
-      <div class="hidden lg:flex col--span-4 flex--row flex--center-y">{% if qr_base == "" %}${rankCaption}{% else %}${ruleFill}{% endif %}</div>
+      <div class="hidden lg:flex col--span-4 flex--row flex--center-y">{% if qr_base == "" %}{% if todo_tasks.size > 0 %}${todoCaption}{% else %}${rankCaption}{% endif %}{% else %}${ruleFill}{% endif %}</div>
     </div>
   </div>
   {% if qr_base != "" %}${bagFullPanel(false)}
@@ -919,11 +945,13 @@ export const markupFull = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${oriented('la
     <div class="col--span-12 lg:col--span-8 flex flex--col flex--left flex--top gap--xsmall lg:gap--small h--full">
       ${attention('label lg:title--small', 2)}
       {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title lg:title', 24, 64, false, 'all', 74)}
+      ${goalLine}
     </div>
     <div class="hidden lg:block col--span-4"><div class="flex flex--row flex--stretch-y gap--medium h--full" data-board-column="true">
       ${columnRule}
-      <div class="grow w--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
-        ${rankPanel(false)}
+      <div class="grow w--min-0 h--full flex flex--col flex--left flex--top flex--stretch-x gap--small" data-fit-bound="true">
+        {% if todo_tasks.size > 0 %}${todoColumn}${xBoard(10, true)}
+        {% else %}<div class="flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x">${rankPanel(false)}</div>{% endif %}
       </div>
     </div></div>
   </div>

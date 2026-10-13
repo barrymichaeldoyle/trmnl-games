@@ -80,6 +80,13 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       { at: NOW - 82 * 60_000, kind: 'combat', summary: 'Unplugged a [[Cable Serpent]]. +9 XP, +3 gold.', deltas: { xpEarned: 9, gold: 3, hp: -15 } },
       ...olderLogs,
     ],
+    // D138: today's to-do tasks and the current goal, which the X full landscape shows beside the stories.
+    todoTasks: [
+      { label: 'Defeat 4 [[Cable Serpents]]', progress: 2, target: 4, done: false },
+      { label: 'Find a piece of gear', progress: 1, target: 1, done: true },
+      { label: 'Explore the [[Server Room]] 12 times', progress: 5, target: 12, done: false },
+    ],
+    goal: { title: 'Reach level 7', value: 5, target: 7, gold: 40 },
     instanceName: 'Desk Crawler',
     // The live catalog, so the screens show what devices show (its stances name the status line, D103).
     content: catalogs[ACTIVE_CONTENT],
@@ -142,6 +149,13 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       // Widest case for the unclamped rank rows: a 20-character public name with a five-digit score.
       ranking: { ...base.ranking!, rank: 1, score: 12840, top: [{ rank: 1, name: 'Maximilian_Wolfgangs', hero_name: 'Sir Staplington', level: 12, score: 12840 }, ...base.ranking!.top.slice(1)] },
       logs: [{ at: NOW - 7 * 60_000, kind: 'combat', summary: 'Sent an elite [[Microwave Wraith]] back to the kitchen. +188 XP, +57 gold. Reached level 12! Found a [[Rare Ladle of Ruin]].', deltas: { xpEarned: 188, gold: 57, hp: -48 } }, ...base.logs],
+      // The longest task labels and goal title, so the to-do column wraps and the goal clamps at their worst.
+      todoTasks: [
+        { label: 'Defeat 5 [[Microwave Wraiths]] in the [[Cafeteria Depths]]', progress: 3, target: 5, done: false },
+        { label: 'Avoid 3 traps in the [[Cafeteria Depths]]', progress: 3, target: 3, done: true },
+        { label: 'Beat an elite in the [[Cafeteria Depths]]', progress: 0, target: 1, done: false },
+      ],
+      goal: { title: 'Win a fight in the Parking Garage', value: 0, target: 1, gold: 150 },
     },
     // D123: the widest HUD (a full bag, five-digit gold, the longest name and the Cautious stance) and sleep on a full bag.
     hudWide: { ...base, bagUsed: 20, hero: hero({ name: 'Sir Staplington', biomeId: 'cafeteria_depths', stance: 'cautious', gold: 99_999 }), latestEvent: { kind: 'loot', outcome: { variant: 'loot', found: 'gear' } }, logs: [{ at: NOW - 7 * 60_000, kind: 'loot', summary: 'Found an [[Epic Ladle of Ruin]] under a stack of unread memos.' }, ...base.logs] },

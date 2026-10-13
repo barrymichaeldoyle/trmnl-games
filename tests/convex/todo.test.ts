@@ -115,6 +115,22 @@ describe('to-do list backend (D112 Q2)', () => {
     expect((await userDoc(t, heroId)).trmnlUtcOffset).toBe(-18000)
   })
 
+  it('sends the device today\u2019s tasks and the current goal (D138)', async () => {
+    vi.stubEnv('CONVEX_SITE_URL', 'https://example.test')
+    await seedWorld(t, { activeContentVersion: 'v18' })
+    const heroId = await seedHero(t, { level: 6, todo: finishedList(), career: { rung: 13, startedTick: 0, reached: [] } }, 'Ana')
+    const userId = (await heroDoc(t, heroId)).userId
+    await t.run(async (ctx) => {
+      const grantId = await ctx.db.insert('trmnlGrants', { userId, tokenHash: sha256Hex(TOKEN), state: 'active', createdAt: SLOT })
+      await ctx.db.insert('trmnlInstances', { userId, grantId, uuid: UUID, state: 'active', confirmedBy: 'success_callback', createdAt: SLOT })
+    })
+    const result = await t.query(internal.trmnlPayload.forInstance, { tokenHash: sha256Hex(TOKEN), uuid: UUID, now: SLOT, instanceName: null, utcOffset: 0 })
+    const payload = (result as { payload: { todo_tasks: Array<{ t: string; p: number; n: number; done: boolean }>; goal: unknown } }).payload
+    expect(payload.todo_tasks.map((task) => [task.p, task.n, task.done])).toEqual([[1, 1, true], [0, 2, false], [0, 30, false]])
+    expect(payload.todo_tasks[2]!.t).toContain('[[Office Cubicles]]')
+    expect(payload.goal).toEqual({ t: 'Reach level 7', v: 6, n: 7, g: 40 })
+  })
+
   it('swaps a task once per refill period; a duplicate receipt swaps nothing more', { timeout: 30_000 }, async () => {
     await seedWorld(t, { activeContentVersion: 'v9', currentTick: 10 })
     const heroId = await seedHero(t, { todo: finishedList() }, 'Ana')

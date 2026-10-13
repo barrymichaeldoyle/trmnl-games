@@ -15,7 +15,10 @@ import { keepsakeWeek } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { affixById } from '@trmnl-games/desk-crawler/sim/core/modifiers'
 import { todoCompactLine } from '@trmnl-games/desk-crawler/sim/core/todo'
-import { careerLine } from '@trmnl-games/desk-crawler/sim/core/career'
+import { careerLine, currentRung, measureRung } from '@trmnl-games/desk-crawler/sim/core/career'
+import { taskLabel } from '@trmnl-games/desk-crawler/sim/core/todo'
+import { toHeroState } from './sim/runs/adapter'
+import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 
 /**
  * Fixed-cost canonical payload for one authorized instance (trmnl.md "Query
@@ -193,6 +196,9 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     latestEvent,
     newestEvent,
     ranking: hero ? await readDeviceRanking(ctx, world, hero) : null,
+    // D138: the X full landscape shows today's tasks and the current goal beside the stories.
+    ...(hero?.todo && content.todo ? { todoTasks: hero.todo.tasks.map((task) => ({ label: taskLabel(task, content), progress: task.progress, target: task.target, done: task.doneTick !== undefined })) } : {}),
+    goal: hero ? deviceGoal(content, hero) : null,
   })
   return payload
 }
@@ -212,3 +218,12 @@ export const mine = query({
     return await payloadFor(ctx, user, now, null, utcOffset ?? null)
   },
 })
+
+/** D138: the hero's current goal with its progress, for the device; null off the ladder or past its end. */
+function deviceGoal(content: ContentCatalog, hero: Doc<'heroes'>) {
+  const state = toHeroState(hero)
+  const rung = currentRung(content, state)
+  if (rung === undefined) return null
+  const { value, target } = measureRung(rung.predicate, state, content)
+  return { title: rung.title, value, target, gold: rung.gold }
+}
