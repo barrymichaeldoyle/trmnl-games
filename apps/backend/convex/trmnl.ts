@@ -13,6 +13,7 @@ import { createHero } from './lib/heroCreate'
 import { appError } from './lib/errors'
 import { sha256Hex } from './lib/hash'
 import { ALIAS_RULE, HERO_NAME_RULE, normalizeAlias, validateName, validateTimezone } from './lib/names'
+import { aliasTaken } from './lib/aliases'
 import { getOrCreateWorld, worldContent } from './world'
 import { assertNotRevoked, identityHash } from './deletion'
 import { runIntent } from './lib/intent'
@@ -118,11 +119,7 @@ export const linkInstall = internalMutation({
       const alias = validateName(args.publicAlias ?? '', ALIAS_RULE)
       if (!alias.ok) throw appError('INVALID_INPUT', `Public name: ${alias.reason}`)
       const normalizedAlias = normalizeAlias(alias.value)
-      const taken = await ctx.db
-        .query('users')
-        .withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalizedAlias))
-        .first()
-      if (taken) throw appError('ALIAS_TAKEN', 'That public name is taken. Try another.')
+      if (await aliasTaken(ctx, normalizedAlias, now)) throw appError('ALIAS_TAKEN', 'That public name is taken. Try another.')
       const userId = await ctx.db.insert('users', {
         tokenIdentifier: args.tokenIdentifier,
         publicAlias: alias.value,
@@ -387,8 +384,7 @@ export const completeReconnection = mutation({
       if (!pending || pending.tokenIdentifier !== identity.tokenIdentifier || !pending.verifiedUuid || pending.expiresAt <= now || !pending.proofExpiresAt || pending.proofExpiresAt <= now) throw appError('INSTALL_INVALID', 'Verify this installation through Configure in TRMNL before connecting.')
       const alias = validateName(pending.publicAlias, ALIAS_RULE)
       if (!alias.ok) throw appError('INVALID_INPUT', `Public name: ${alias.reason}`)
-      const taken = await ctx.db.query('users').withIndex('by_normalizedAlias', q => q.eq('normalizedAlias', normalizeAlias(alias.value))).first()
-      if (taken) throw appError('ALIAS_TAKEN', 'That public name is taken. Start Install again and choose another name.')
+      if (await aliasTaken(ctx, normalizeAlias(alias.value), now)) throw appError('ALIAS_TAKEN', 'That public name is taken. Start Install again and choose another name.')
       const id = await ctx.db.insert('users', { tokenIdentifier: identity.tokenIdentifier, publicAlias: alias.value, normalizedAlias: normalizeAlias(alias.value), timezone: pending.timezone, state: 'active', createdAt: now, publicNameVersion: 1 })
       user = (await ctx.db.get(id))!
     }

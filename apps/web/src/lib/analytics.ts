@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'waitlist joined' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'public name changed'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {
@@ -173,6 +173,9 @@ const SPECIAL_EVENTS: Record<string, (args: Record<string, unknown>) => [Analyti
   'slowCast/anglers:sellCatches': (args) => ['fish sold', { count: String(Array.isArray(args.catchIds) ? args.catchIds.length : 0) }],
   'slowCast/anglers:buyNextRod': () => ['tackle bought', { item: 'rod' }],
   'slowCast/anglers:buyNextCooler': () => ['tackle bought', { item: 'cooler' }],
+  // D142: never the names themselves.
+  'inventory:buyNameTag': () => ['name tag bought', {}],
+  'users:changePublicName': () => ['public name changed', {}],
 }
 
 export function intentAnalytics(intent: string, args: Record<string, unknown>): [AnalyticsEvent, Record<string, string>] | null {

@@ -324,6 +324,10 @@ export default defineSchema({
     activeHeroId: v.optional(v.id('heroes')),
     deletionRequestedAt: v.optional(v.number()),
     nameRepairRequired: v.optional(v.boolean()),
+    /** D142: when the owner last changed their public name themselves; one change per `PUBLIC_NAME_GAP_MS`. */
+    publicNameChangedAt: v.optional(v.number()),
+    /** D142: the public name given up by the last change, kept off-limits to other players until `until`. */
+    heldAlias: v.optional(v.object({ normalized: v.string(), until: v.number() })),
     /** P31: the last UTC offset in seconds a TRMNL screen request sent, written only when it changes; the stand-up and the tick read it. */
     trmnlUtcOffset: v.optional(v.number()),
     /** P33: opt-in push alerts; absent means every kind off. Quiet hours are whole hours in `timezone`. */
@@ -331,6 +335,7 @@ export default defineSchema({
   })
     .index('by_tokenIdentifier', ['tokenIdentifier'])
     .index('by_normalizedAlias', ['normalizedAlias'])
+    .index('by_heldAlias_and_until', ['heldAlias.normalized', 'heldAlias.until'])
     .index('by_state', ['state']),
 
   deskCrawlerProfiles: defineTable({
@@ -339,6 +344,8 @@ export default defineSchema({
     activeHeroId: v.optional(v.id('heroes')),
     /** P37: the last roster switch, for the one-a-day limit and the ten-minute undo back to `fromHeroId`. */
     lastSwitch: v.optional(v.object({ at: v.number(), fromHeroId: v.optional(v.id('heroes')) })),
+    /** D142: the last name tag bought on the account; one is in stock a day. */
+    lastNameTagAt: v.optional(v.number()),
     createdAt: v.number(),
   }).index('by_userId', ['userId']),
 

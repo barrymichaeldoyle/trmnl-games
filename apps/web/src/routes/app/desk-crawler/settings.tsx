@@ -48,7 +48,7 @@ function Settings() {
       <MoreLinks />
       <header>
         <h2 className="font-display text-2xl font-bold">Settings</h2>
-        <p className="mt-2">Playing as <strong>{me.user.publicAlias}</strong>, the name other players see on leaderboards and TRMNL screens.</p>
+        <p className="mt-2">Playing as <strong>{me.user.publicAlias}</strong>, the name other players see on leaderboards and TRMNL screens. <Link to="/account" className="underline underline-offset-4">Change it from Account</Link>; rename your hero with a name tag from Bag.</p>
       </header>
       <Card title="Adventures" icon="travel"><div ref={adventures}>
         {hero.activationState !== 'active' ? (

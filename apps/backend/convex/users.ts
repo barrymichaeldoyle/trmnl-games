@@ -6,6 +6,10 @@ import { currentUser, runIntent } from './lib/intent'
 import { ALIAS_RULE, HERO_NAME_RULE, normalizeAlias, validateName, validateTimezone } from './lib/names'
 import { appError } from './lib/errors'
 import { identityHash } from './deletion'
+import { aliasTaken } from './lib/aliases'
+
+/** D142: a player can change their public name once every 30 days, and the old one is kept from others as long. */
+export const PUBLIC_NAME_GAP_MS = 30 * 24 * 60 * 60 * 1000
 
 /**
  * The signed-in owner's profile, or null when signed out. `signedIn` with a
@@ -21,7 +25,7 @@ export const me = query({
       hasActiveInstallation: v.boolean(),
       user: v.union(
         v.null(),
-        v.object({ publicAlias: v.string(), timezone: v.string(), state: v.string(), nameRepairRequired: v.boolean(), analyticsConsent: v.boolean() }),
+        v.object({ publicAlias: v.string(), timezone: v.string(), state: v.string(), nameRepairRequired: v.boolean(), analyticsConsent: v.boolean(), publicNameChangeAt: v.union(v.number(), v.null()) }),
       ),
       hero: v.union(
         v.null(),
@@ -43,7 +47,7 @@ export const me = query({
       signedIn: true as const,
       hasActiveInstallation: installation !== null,
       gameState: user ? (await gameProfile(ctx, user._id))?.state ?? (hero ? 'active' as const : null) : null,
-      user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false },
+      user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false, publicNameChangeAt: user.publicNameChangedAt === undefined ? null : user.publicNameChangedAt + PUBLIC_NAME_GAP_MS },
       hero: hero === null ? null : { name: hero.name, activationState: hero.activationState, status: hero.status },
     }
   },
@@ -87,11 +91,37 @@ export const replacePublicNames = mutation({
       const heroName = validateName(args.heroName, HERO_NAME_RULE)
       if (!heroName.ok) throw appError('INVALID_INPUT', `Hero name: ${heroName.reason}`)
       const normalizedAlias = normalizeAlias(alias.value)
-      const taken = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalizedAlias)).first()
-      if (taken && taken._id !== user._id) throw appError('ALIAS_TAKEN', 'That public name is taken. Try another.')
+      if (await aliasTaken(ctx, normalizedAlias, Date.now(), user._id)) throw appError('ALIAS_TAKEN', 'That public name is taken. Try another.')
       await ctx.db.patch(user._id, { publicAlias: alias.value, normalizedAlias, publicNameVersion: user.publicNameVersion + 1, nameRepairRequired: false })
       const hero = await currentHero(ctx, user)
       if (hero) await ctx.db.patch(hero._id, { name: heroName.value })
+      return { changed: true }
+    })
+    return { operationId: result.operationId, changed: result.changed }
+  },
+})
+
+/**
+ * D142: the owner changes their public name, the one name shared by every game, for free once every 30 days. The
+ * name version moves on, so other players' raid and meeting lines read "Hidden player" as for any rename, and the old
+ * name stays off-limits to other players for 30 days so a shared profile link cannot be picked up straight away.
+ */
+export const changePublicName = mutation({
+  args: { operationId: v.string(), publicAlias: v.string() },
+  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  handler: async (ctx, args) => {
+    const result = await runIntent(ctx, args.operationId, 'users.changePublicName', { publicAlias: args.publicAlias }, async (user) => {
+      if (user.nameRepairRequired) throw appError('INVALID_STATE', 'Choose new names from the name change notice first.')
+      const now = Date.now()
+      if (user.publicNameChangedAt !== undefined && now < user.publicNameChangedAt + PUBLIC_NAME_GAP_MS) throw appError('NAME_CHANGE_LIMIT', 'You can change your public name once every 30 days.')
+      const alias = validateName(args.publicAlias, ALIAS_RULE)
+      if (!alias.ok) throw appError('INVALID_INPUT', `Public name: ${alias.reason}`)
+      const normalizedAlias = normalizeAlias(alias.value)
+      if (alias.value === user.publicAlias) return { changed: false }
+      if (await aliasTaken(ctx, normalizedAlias, now, user._id)) throw appError('ALIAS_TAKEN', 'That public name is taken. Try another.')
+      // A change of letter case only keeps the same name, so nothing is held back for it.
+      const held = normalizedAlias === user.normalizedAlias ? user.heldAlias : { normalized: user.normalizedAlias, until: now + PUBLIC_NAME_GAP_MS }
+      await ctx.db.patch(user._id, { publicAlias: alias.value, normalizedAlias, publicNameVersion: user.publicNameVersion + 1, publicNameChangedAt: now, heldAlias: held })
       return { changed: true }
     })
     return { operationId: result.operationId, changed: result.changed }

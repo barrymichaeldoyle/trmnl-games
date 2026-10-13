@@ -1,8 +1,9 @@
-import { currentHero, gameProfile } from './lib/gameProfile'
+import { currentHero, gameProfile, setCurrentHero } from './lib/gameProfile'
 import { v } from 'convex/values'
 import type { Doc, Id } from './_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server'
 import { appError } from './lib/errors'
+import { HERO_NAME_RULE, validateName } from './lib/names'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
 import { heroMaxHp, pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { bagUsed, currentTier, guaranteedTierIndex, isBagFull, nextEarlyTier, nextTier } from '@trmnl-games/desk-crawler/sim/core/bag'
@@ -31,6 +32,10 @@ const intentResult = v.object({
 
 // Everything but recovering (dead) and paused. Travelling is included: it fights and finds nothing, so a sale or swap on the way cannot race the simulator.
 const MANAGEABLE = new Set(['exploring', 'resting', 'travelling', 'sleeping'])
+
+/** D142: a "Hi, my name is" name tag renames the current hero for 200 gold; one is in stock a day per account. */
+export const NAME_TAG_PRICE = 200
+export const NAME_TAG_GAP_MS = 24 * 60 * 60 * 1000
 
 async function heroItems(ctx: QueryCtx, heroId: Id<'heroes'>): Promise<Doc<'items'>[]> {
   return await ctx.db
@@ -201,6 +206,8 @@ export const mine = query({
       ladder: bagLadderView(content, hero),
       pouch: pouchView(content, hero),
       merchant: merchantView(hero, await currentTick(ctx)),
+      // D142: the client compares `inStockAt` with its own clock; null means one is in stock now.
+      nameTag: { price: NAME_TAG_PRICE, inStockAt: ((last) => (last === undefined ? null : last + NAME_TAG_GAP_MS))((await gameProfile(ctx, user._id))?.lastNameTagAt) },
       weaponId: hero.weaponId ?? null,
       armorId: hero.armorId ?? null,
       heldItemId: hero.heldItemId ?? null,
@@ -480,6 +487,29 @@ export const buyBag = mutation({
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'buy_bag', `Bought a [[${tier.name}]]. Bag holds ${tier.capacity}.`, { xpEarned: 0, gold: -tier.price, hp: 0 }, { bagSlots: tier.capacity - from })
       await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
       return { changed: true, gold: -tier.price, count: tier.capacity }
+    }),
+})
+
+/** D142: buy the day's name tag and give the current hero a new name. Hero names need not be unique. */
+export const buyNameTag = mutation({
+  args: { operationId: v.string(), name: v.string() },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.buyNameTag', { name: args.name }, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      const profile = await gameProfile(ctx, user._id)
+      const now = Date.now()
+      if (profile?.lastNameTagAt !== undefined && now < profile.lastNameTagAt + NAME_TAG_GAP_MS) throw appError('NAME_TAG_SOLD_OUT', "Today's name tag is sold. Another comes in tomorrow.")
+      const name = validateName(args.name, HERO_NAME_RULE)
+      if (!name.ok) throw appError('INVALID_INPUT', `Hero name: ${name.reason}`)
+      if (name.value === hero.name) throw appError('INVALID_INPUT', `Your hero is already called ${hero.name}.`)
+      if (hero.gold < NAME_TAG_PRICE) throw appError('NOT_ENOUGH_GOLD', `A name tag costs ${NAME_TAG_PRICE} gold.`)
+      // An account still on the legacy hero pointer gets its profile row first.
+      if (profile === null) await setCurrentHero(ctx, user, hero._id)
+      await ctx.db.patch((profile ?? (await gameProfile(ctx, user._id)))!._id, { lastNameTagAt: now })
+      await ctx.db.patch(hero._id, { gold: hero.gold - NAME_TAG_PRICE, name: name.value })
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'name_tag', `Pinned on a new name tag: "Hi, my name is [[${name.value}]]."`, { xpEarned: 0, gold: -NAME_TAG_PRICE, hp: 0 })
+      return { changed: true, gold: -NAME_TAG_PRICE }
     }),
 })
 

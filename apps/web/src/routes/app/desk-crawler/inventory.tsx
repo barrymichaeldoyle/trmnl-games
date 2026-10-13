@@ -97,6 +97,7 @@ function Inventory() {
   const buyBag = useIntent(api.inventory.buyBag, { onFeedback: notify })
   const buyPouch = useIntent(api.inventory.buyPouch, { onFeedback: notify })
   const buyOffer = useIntent(api.inventory.buyOffer, { onFeedback: notify })
+  const buyNameTag = useIntent(api.inventory.buyNameTag, { onFeedback: notify })
   useEffect(() => {
     if (bag) setSelected((current) => retainSellableSelection(current, bag.gear as Gear[]))
   }, [bag])
@@ -117,7 +118,7 @@ function Inventory() {
   const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
   const deltaOf = (item: Gear) => { const current = equippedOf(item.kind); return statOf(item) - (current ? statOf(current) : 0) }
-  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending
+  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending || buyNameTag.pending
   // D131: the strengths in the pouch and the combine recipe; one row and no recipe under a catalog without strengths.
   const potionRows = bag.potionRows as PotionRow[]
   const potionCombine = bag.potionCombine as Combine | null
@@ -241,6 +242,7 @@ function Inventory() {
       <div className="grid gap-8 sm:grid-cols-2">
         <BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} />
         <PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} />
+        {bag.nameTag ? <NameTag tag={bag.nameTag} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyNameTag} /> : null}
       </div>
 
       {mode !== 'browse' ? <div className="window sticky bottom-0 z-20 -mx-3 px-3 pt-3 min-[375px]:-mx-4 min-[375px]:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0">
@@ -457,6 +459,30 @@ function BuySheet({ open, title, price, gold, pending, onConfirm, onClose, child
       </Consequences>
     </ConfirmSheet>
   )
+}
+
+/** D142: one "Hi, my name is" name tag in stock a day; buying it renames the current hero. */
+function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { price: number; inStockAt: number | null }; heroName: string; gold: number; disabled: boolean; intent: PurchaseIntent<{ name: string }> }) {
+  const [name, setName] = useState('')
+  const [asking, setAsking] = useState(false)
+  const inStock = tag.inStockAt === null || tag.inStockAt <= Date.now()
+  const affordable = gold >= tag.price
+  const valid = name.trim().length >= 2 && name.trim() !== heroName
+  return <Card title="Name tag" icon="tag">
+    <p>A fresh “Hi, my name is” sticker. Your hero goes by the name you write on it, on your TRMNL, the leaderboard and your hero page.</p>
+    {inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-semibold">New name for {heroName}</span>
+        <input value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={16} required autoComplete="off" disabled={intent.pending} className="min-h-11 min-w-0 border-2 border-edge bg-ground px-3 text-base" />
+      </label>
+      <Button type="submit" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !valid || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {tag.price} gold</Button>
+      <p className="text-sm text-muted">One in stock a day.{!affordable ? <> You have <span className="text-gold-ink tabular-nums">{gold} gold</span>.</> : null}</p>
+    </form> : <p className="mt-3 text-sm text-muted">Today's tag is sold. The next one is in stock {new Date(tag.inStockAt!).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}.</p>}
+    <BuySheet open={asking} title={`Rename ${heroName} to ${name.trim()}?`} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, `Hi, my name is ${name.trim()}.`); if (done) setName(''); return done }}>
+      <li>{heroName} goes by {name.trim()} from now on. Level, gear and rank stay the same.</li>
+      <li>The next name tag is in stock tomorrow.</li>
+    </BuySheet>
+  </Card>
 }
 
 /** D61/D122: the current bag, the next one and how to get it. */

@@ -47,6 +47,9 @@ export type ErrorCode =
   /** D131: combining needs more of the source potion, or the catalog has no potion strengths. */
   | 'NOT_ENOUGH_POTIONS'
   | 'POTIONS_UNAVAILABLE'
+  /** D142: the public name changed within the last 30 days, or today's name tag is sold. */
+  | 'NAME_CHANGE_LIMIT'
+  | 'NAME_TAG_SOLD_OUT'
   | 'RECAP_CHANGED'
   | 'DELETION_CONFIRMATION_REQUIRED'
   | 'DELETION_LINK_EXPIRED'

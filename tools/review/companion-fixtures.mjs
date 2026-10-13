@@ -157,6 +157,8 @@ if (flag('meetings')) {
   );
 }
 if (long) inventory.gear.filter((g) => !g.equipped).slice(0, 2).forEach((g) => { g.label = 'Rare Microwave-Slaying ' + g.name + ' of the Cafeteria Depths'; g.rarity = 'rare' });
+// D142: the day's name tag; nametag=sold shows it sold until tomorrow.
+inventory.nameTag = { price: 200, inStockAt: params.get('nametag') === 'sold' ? Date.now() + 20 * 60 * 60 * 1000 : null };
 // D129: the workbench. Every piece gets its salvage yield and next step; workbench=rich holds the materials and gold for every job,
 // workbench=done shows a fully reinforced weapon, workbench=0 hides it (a catalog without one).
 const wb = params.get('workbench') ?? '1';
