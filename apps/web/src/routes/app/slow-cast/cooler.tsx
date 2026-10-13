@@ -68,7 +68,7 @@ function CoolerPage() {
             </Button>
             <Button variant="secondary" disabled={sell.pending} onClick={() => setAskingAll(true)}>Sell all for {total(catches)} coins</Button>
           </div>
-          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to double'], ['Cooler full', 'New catches are released. They still give XP, but no coins']]} />
+          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to double'], ['Cooler full', 'New catches are released. They still count for the logbook, achievements and boards, but earn no coins']]} />
         </Card>
       )}
       <ConfirmSheet
