@@ -192,6 +192,9 @@ export const requeue = internalMutation({
 const LAUNCH_INTRO = 'Desk Crawler is out on the TRMNL marketplace, and it’s free. It’s an idle office RPG that plays itself on your TRMNL. Every fifteen minutes your hero fights a Stapler Mimic or finds gold behind the fax machine, and the screen shows how it went. Every few days you open the companion on your phone to sort the loot and pick the next floor.'
 const LAUNCH_STEPS = 'After installing, sign in or make a TRMNL Games account, name your hero and click Save in TRMNL. Your hero sets off on the next quarter hour.'
 
+/** Barry's sign-off: replies go to him (reply_to), so the note says so in his voice. */
+const LAUNCH_SIGNOFF = 'Thanks for joining the list early. Replies to this email come straight to me, so if something breaks or doesn’t make sense, tell me and I’ll fix it.'
+
 /** What the game holds, in the home page's words (apps/web/src/lib/deskCrawlerPitch.tsx FEATURES); keep the two in step. */
 const LAUNCH_FEATURES: ReadonlyArray<{ title: string; body: string }> = [
   { title: 'Five floors', body: 'You start in the Office Cubicles. As your hero levels up, the Server Room, Cafeteria Depths, Archive and Parking Garage open, each with its own monsters. The garage has a Ghost Car.' },
@@ -226,9 +229,14 @@ export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUr
       ...LAUNCH_FEATURES.flatMap((feature) => [`${feature.title}: ${feature.body}`, '']),
       `Install Desk Crawler: ${args.installUrl}`,
       '',
+      LAUNCH_SIGNOFF,
+      '',
+      'Barry',
+      'TRMNL Games',
+      '',
       'You’re getting this because you joined the Desk Crawler launch list at trmnlgames.com. Your address is now off the list, so this is the only email you’ll get from it.',
       '',
-      `Questions or problems: reply to barry@barrymichaeldoyle.com. Unsubscribe: ${unsubscribe.toString()}`,
+      `Unsubscribe: ${unsubscribe.toString()}`,
     ].join('\n'),
     html: launchEmailHtml({ installUrl: args.installUrl, origin: args.origin, unsubscribe: unsubscribe.toString() }),
   }
@@ -275,9 +283,13 @@ ${features}
 <tr><td align="center" style="padding:24px">
 ${button}
 </td></tr>
+<tr><td style="padding:0 24px 24px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
+<p style="margin:0 0 16px">${LAUNCH_SIGNOFF}</p>
+<p style="margin:0">Barry<br><span style="color:#5b5677;font-size:14px">TRMNL Games</span></p>
+</td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #ddd8f0;${font};color:#5b5677;font-size:13px;line-height:1.5">
 <p style="margin:0 0 8px">You’re getting this because you joined the Desk Crawler launch list at trmnlgames.com. Your address is now off the list, so this is the only email you’ll get from it.</p>
-<p style="margin:0">Questions or problems? Reply to this email. <a href="${unsubscribe}" style="color:#5b5677">Unsubscribe</a></p>
+<p style="margin:0"><a href="${unsubscribe}" style="color:#5b5677">Unsubscribe</a></p>
 </td></tr>
 </table>
 </td></tr></table>
