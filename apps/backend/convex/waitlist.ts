@@ -189,22 +189,21 @@ export const requeue = internalMutation({
   },
 })
 
-const LAUNCH_INTRO = 'Desk Crawler is now free in the TRMNL marketplace. It is an idle office RPG that plays itself on your TRMNL. Every fifteen minutes your hero fights a Stapler Mimic or finds a Keyboard Mace, and your screen shows how it went. You check in every few days to sort the loot.'
-const LAUNCH_STEPS = 'Then sign in or create a TRMNL Games account, name your hero and click Save in TRMNL. Your first adventure follows shortly.'
+const LAUNCH_INTRO = 'Desk Crawler is out on the TRMNL marketplace, and it’s free. It’s an idle office RPG that plays itself on your TRMNL. Every fifteen minutes your hero fights a Stapler Mimic or finds gold behind the fax machine, and the screen shows how it went. Every few days you open the companion on your phone to sort the loot and pick the next floor.'
+const LAUNCH_STEPS = 'After installing, sign in or make a TRMNL Games account, name your hero and click Save in TRMNL. Your hero sets off on the next quarter hour.'
 
 /** What the game holds, in the home page's words (apps/web/src/lib/deskCrawlerPitch.tsx FEATURES); keep the two in step. */
 const LAUNCH_FEATURES: ReadonlyArray<{ title: string; body: string }> = [
-  { title: 'Five floors', body: 'Start in the Office Cubicles and work down through the Server Room, the Cafeteria Depths and the Archive to the Parking Garage. Each floor opens as your hero levels up and has its own monsters, from Rogue Roombas in the cubicles to a Ghost Car in the garage.' },
-  { title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage spares, upgrade what you wear and save up for a bigger bag.' },
-  { title: 'Desk raids', body: 'From level 7, heroes raid each other’s desks for gold while they explore. Your stance tilts the coin toss; level and gear never count.' },
-  { title: 'Meetings', body: 'Now and then your hero runs into another player’s hero on the same floor. They split a sandwich or swap war stories, and both get a small boost for a while.' },
-  { title: 'Lost property', body: 'A knocked-out hero drops a spare of its weapon or armour with the owner’s name on it in marker. Another player’s hero might find it, and the owner hears who did.' },
-  { title: 'Office calendar', body: 'Boss’s Day, Halloween, Christmas and more dress up your hero’s scene for the day, and most bring a small bonus while they last.' },
-  { title: 'A career and a second hero', body: 'One goal at a time, a daily to-do list from the morning stand-up, and new features as your hero levels up. At level 6 your Warrior can recruit a Rogue, and you choose which one adventures.' },
-  { title: 'Rankings and rivals', body: 'Your screen shows the seven-day Top 5 for your level group. Follow other heroes from their public pages and pick one rival to keep an eye on.' },
-  { title: 'Weekly keepsakes', body: 'A six-digit code appears on your screen each week. Enter it in the companion to collect an office souvenir.' },
+  { title: 'Five floors', body: 'You start in the Office Cubicles. As your hero levels up, the Server Room, Cafeteria Depths, Archive and Parking Garage open, each with its own monsters. The garage has a Ghost Car.' },
+  { title: 'Loot and the workbench', body: 'Gear comes in four rarities, and the best pieces carry traits like Vampiric or Lucky. Salvage the spares to upgrade what you wear. Gold buys bigger bags.' },
+  { title: 'Desk raids', body: 'From level 7, heroes raid each other’s desks for gold while they explore. Nobody picks a target, and your stance tilts the odds.' },
+  { title: 'Meetings', body: 'Sometimes your hero bumps into another player’s hero on the same floor. They might split a sandwich or swap war stories, and both get a small boost for the next couple of hours.' },
+  { title: 'Lost property', body: 'When a hero is knocked out, it drops a spare of its weapon or armour with the owner’s name on it in marker. If another player’s hero picks it up, the owner finds out who.' },
+  { title: 'Office calendar', body: 'Halloween puts decorations in your hero’s scene, and so do seventeen other office occasions through the year. Most bring a small bonus for the day.' },
+  { title: 'A career and a second hero', body: 'Your hero always has one goal to work toward, and the morning stand-up hands out small tasks for gold. At level 6 your Warrior can recruit a Rogue, and you pick which one goes out.' },
+  { title: 'Rankings and rivals', body: 'Your screen shows this week’s Top 5 for your level group. You can follow other heroes from their public pages and mark one as your rival.' },
+  { title: 'Weekly keepsakes', body: 'Each week a six-digit code appears on your screen. Type it into the companion to add an office souvenir to your shelf.' },
 ]
-
 
 export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUrl: string; origin: string; from: string; key: string }) {
   const unsubscribe = new URL('/desk-crawler/unsubscribe', args.origin)
@@ -222,12 +221,12 @@ export function launchEmail(args: { id: Id<'waitlist'>; email: string; installUr
       '',
       LAUNCH_STEPS,
       '',
-      'What your hero gets up to',
+      'What’s in the game',
       '',
       ...LAUNCH_FEATURES.flatMap((feature) => [`${feature.title}: ${feature.body}`, '']),
       `Install Desk Crawler: ${args.installUrl}`,
       '',
-      'You are getting this one email because you joined the Desk Crawler launch list at trmnlgames.com. Your address has now been removed from that list, and no further emails will follow.',
+      'You’re getting this because you joined the Desk Crawler launch list at trmnlgames.com. Your address is now off the list, so this is the only email you’ll get from it.',
       '',
       `Questions or problems: reply to barry@barrymichaeldoyle.com. Unsubscribe: ${unsubscribe.toString()}`,
     ].join('\n'),
@@ -250,7 +249,7 @@ function launchEmailHtml(args: { installUrl: string; origin: string; unsubscribe
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Desk Crawler is live on TRMNL</title></head>
 <body style="margin:0;padding:0;background:#f4f1ff;${font}">
-<div style="display:none;max-height:0;overflow:hidden">An idle office RPG for the e-ink display on your desk, free to install.</div>
+<div style="display:none;max-height:0;overflow:hidden">A free idle office RPG for your TRMNL.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1ff"><tr><td align="center" style="padding:24px 12px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:3px solid #0c0a1c">
 <tr><td style="background:#0c0a1c;padding:20px 24px">
@@ -269,7 +268,7 @@ ${button}
 <tr><td style="padding:0 24px 8px;${font};color:#0c0a1c;font-size:16px;line-height:1.55">
 <p style="margin:0">${LAUNCH_STEPS}</p>
 </td></tr>
-<tr><td style="padding:16px 24px 0"><div style="border-top:1px solid #ddd8f0;padding-top:20px;${font};color:#0c0a1c;font-size:20px;font-weight:700;line-height:1.3">What your hero gets up to</div></td></tr>
+<tr><td style="padding:16px 24px 0"><div style="border-top:1px solid #ddd8f0;padding-top:20px;${font};color:#0c0a1c;font-size:20px;font-weight:700;line-height:1.3">What’s in the game</div></td></tr>
 <tr><td style="padding:12px 24px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 ${features}
 </table></td></tr>
@@ -277,7 +276,7 @@ ${features}
 ${button}
 </td></tr>
 <tr><td style="padding:16px 24px;border-top:1px solid #ddd8f0;${font};color:#5b5677;font-size:13px;line-height:1.5">
-<p style="margin:0 0 8px">You are getting this one email because you joined the Desk Crawler launch list at trmnlgames.com. Your address has now been removed from that list, and no further emails will follow.</p>
+<p style="margin:0 0 8px">You’re getting this because you joined the Desk Crawler launch list at trmnlgames.com. Your address is now off the list, so this is the only email you’ll get from it.</p>
 <p style="margin:0">Questions or problems? Reply to this email. <a href="${unsubscribe}" style="color:#5b5677">Unsubscribe</a></p>
 </td></tr>
 </table>

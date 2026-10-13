@@ -106,13 +106,13 @@ export function HowItPlays({ headingId }: { headingId: string }) {
 
 const FEATURES: ReadonlyArray<{ glyph: GlyphName; tone: string; title: string; body: string }> = [
   { glyph: 'sword', tone: 'text-hp-ink', title: 'Desk raids', body: 'Heroes raid each other’s desks for gold while they explore. Your stance tilts the coin toss; level and gear never count.' },
-  { glyph: 'trophy', tone: 'text-gold-ink', title: 'Rankings and rivals', body: 'Your screen shows the seven-day XP Top 5 for your level group. Follow other heroes from their public pages and pick one rival to keep an eye on.' },
+  { glyph: 'trophy', tone: 'text-gold-ink', title: 'Rankings and rivals', body: 'Your screen shows the seven-day XP Top 5 for your level group. You can follow other heroes from their public pages and mark one as your rival.' },
   { glyph: 'shield', tone: 'text-sky-ink', title: 'Stances', body: 'Choose how careful your hero is. Bolder heroes earn more and get knocked out more often; how much more is something you find out on the screen.' },
   { glyph: 'coin', tone: 'text-gold-ink', title: 'Decisions and a merchant', body: 'Chip in for the cake or stay late. A wandering merchant sometimes sells items at a discount.' },
-  { glyph: 'cog', tone: 'text-rare-ink', title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage spares, upgrade what you wear and save up for a bigger bag.' },
-  { glyph: 'heart', tone: 'text-hp-ink', title: 'Meetings', body: 'Now and then your hero runs into another player’s hero on the same floor. They split a sandwich or swap war stories, and both get a small boost for a while.' },
-  { glyph: 'tag', tone: 'text-gold-ink', title: 'Lost property', body: 'A knocked-out hero drops a spare of its weapon or armour with the owner’s name on it in marker. Another player’s hero might find it, and the owner hears who did.' },
-  { glyph: 'flag', tone: 'text-xp-ink', title: 'Office calendar', body: 'Boss’s Day, Halloween, Christmas and more dress up your hero’s scene for the day, and most bring a small bonus while they last.' },
+  { glyph: 'cog', tone: 'text-rare-ink', title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage the spares to upgrade what you wear. Gold buys bigger bags.' },
+  { glyph: 'heart', tone: 'text-hp-ink', title: 'Meetings', body: 'Sometimes your hero bumps into another player’s hero on the same floor. They might split a sandwich or swap war stories, and both get a small boost for the next couple of hours.' },
+  { glyph: 'tag', tone: 'text-gold-ink', title: 'Lost property', body: 'When a hero is knocked out, it drops a spare of its weapon or armour with the owner’s name on it in marker. If another player’s hero picks it up, the owner finds out who.' },
+  { glyph: 'flag', tone: 'text-xp-ink', title: 'Office calendar', body: 'Halloween puts decorations in your hero’s scene, and so do seventeen other office occasions through the year. Most bring a small bonus for the day.' },
   { glyph: 'quest', tone: 'text-xp-ink', title: 'A career to climb', body: 'One goal at a time, a daily to-do list from the morning stand-up, and new features as your hero levels up.' },
   { glyph: 'hero', tone: 'text-sky-ink', title: 'A second hero', body: `Everyone starts as a Warrior. At level ${UNLOCKS.roster} you can recruit a Rogue, who earns more gold and has an edge in desk raids.` },
   { glyph: 'keepsake', tone: 'text-rare-ink', title: 'Weekly keepsakes', body: 'A six-digit code appears on your screen each week. Enter it in the companion to collect an office souvenir.' },
