@@ -160,7 +160,7 @@ export const heroCloak = sprite(`
   ####
 `)
 
-export const CLOAKED_POSES = new Set(['idle', 'fight', 'walk'])
+export const CLOAKED_POSES = new Set(['idle', 'fight', 'walk', 'female_idle', 'female_fight', 'female_walk'])
 
 /*
  * The Rogue (P37): the Warrior's body under a pointed hood, with a scarf over the lower face. The head rows replace
@@ -183,7 +183,25 @@ function hooded(s: Sprite, top: number): Sprite {
   return { ...s, rows: s.rows.map((row, y) => (y < top || y >= top + ROGUE_HEAD.length ? row : ROGUE_HEAD[y - top]!.padEnd(17) + row.slice(17))) }
 }
 
-export const heroPoses = {
+/*
+ * The female look (D149): hair down the back of the head to the shoulders on the Warrior, a braid out of the Rogue's
+ * hood, and hair spread on the pillow lying down. Purely cosmetic; the cells are added to the male grids so every
+ * face, eye and blade stays as drawn. Cells are [row, column] from the head's top row.
+ */
+const LONG_HAIR: ReadonlyArray<readonly [number, number]> = [[3, 5], [4, 5], [5, 5], [6, 5], [7, 5], [7, 6], [8, 5], [8, 6], [8, 7], [9, 5], [9, 6], [10, 5]]
+const BRAID: ReadonlyArray<readonly [number, number]> = [[6, 4], [7, 3], [7, 4], [8, 3], [8, 4], [9, 3], [9, 4], [10, 4]]
+
+function withCells(s: Sprite, top: number, cells: ReadonlyArray<readonly [number, number]>): Sprite {
+  const rows = s.rows.map((row) => [...row.padEnd(s.width)])
+  for (const [dy, x] of cells) rows[top + dy]![x] = '#'
+  return { ...s, rows: rows.map((row) => row.join('')) }
+}
+
+/** Lying down: hair spread on the pillow above the head, two columns wide, from below the hair row to the chin. */
+const PILLOW_HAIR: ReadonlyArray<readonly [number, number]> = [[1, 1], [1, 2], [2, 0], [2, 1], [3, 0], [3, 1], [4, 0], [4, 1], [5, 1], [5, 2]]
+const hairOnPillow = (s: Sprite, hairRow: number): Sprite => withCells(s, hairRow, PILLOW_HAIR)
+
+const warriorPoses = {
   idle: heroIdle,
   fight: heroFight,
   walk: heroWalk,
@@ -198,14 +216,39 @@ export const heroPoses = {
   rogue_knocked_out: heroKnockedOut,
 } as const
 
+export const heroPoses = {
+  ...warriorPoses,
+  female_idle: withCells(heroIdle, 0, LONG_HAIR),
+  female_fight: withCells(heroFight, 0, LONG_HAIR),
+  female_walk: withCells(heroWalk, 0, LONG_HAIR),
+  female_rest: withCells(heroRest, 4, LONG_HAIR),
+  female_sleep: hairOnPillow(heroSleep, 8),
+  female_knocked_out: hairOnPillow(heroKnockedOut, 6),
+  female_rogue_idle: withCells(warriorPoses.rogue_idle, 0, BRAID),
+  female_rogue_fight: withCells(warriorPoses.rogue_fight, 0, BRAID),
+  female_rogue_walk: withCells(warriorPoses.rogue_walk, 0, BRAID),
+  female_rogue_rest: withCells(warriorPoses.rogue_rest, 4, BRAID),
+  female_rogue_sleep: hairOnPillow(heroSleep, 8),
+  female_rogue_knocked_out: hairOnPillow(heroKnockedOut, 6),
+} as const
+
 export type HeroPose = keyof typeof heroPoses
 /** The six poses every class draws. */
 export type BasePose = 'idle' | 'fight' | 'walk' | 'rest' | 'sleep' | 'knocked_out'
 
-/** P37: the pose a class draws for a base pose; the Warrior keeps the original names, so its image URLs never change. */
-export const classPose = (pose: BasePose, heroClass: 'warrior' | 'rogue' = 'warrior'): HeroPose => (heroClass === 'warrior' ? pose : (`${heroClass}_${pose}` as HeroPose))
+/** D149: a hero's look; absent on a stored hero means male, the original art. */
+export type HeroGender = 'male' | 'female'
 
-/** The base pose and class a pose draws. */
-export function poseParts(pose: HeroPose): { base: BasePose; heroClass: 'warrior' | 'rogue' } {
-  return pose.startsWith('rogue_') ? { base: pose.slice(6) as BasePose, heroClass: 'rogue' } : { base: pose as BasePose, heroClass: 'warrior' }
+/**
+ * P37: the pose a class draws for a base pose; the Warrior keeps the original names, so its image URLs never change.
+ * D149: the female look prefixes `female_`, so the male paths never change either.
+ */
+export const classPose = (pose: BasePose, heroClass: 'warrior' | 'rogue' = 'warrior', gender: HeroGender = 'male'): HeroPose =>
+  `${gender === 'female' ? 'female_' : ''}${heroClass === 'warrior' ? '' : `${heroClass}_`}${pose}` as HeroPose
+
+/** The base pose, class and look a pose draws. */
+export function poseParts(pose: HeroPose): { base: BasePose; heroClass: 'warrior' | 'rogue'; gender: HeroGender } {
+  const gender: HeroGender = pose.startsWith('female_') ? 'female' : 'male'
+  const rest = gender === 'female' ? pose.slice(7) : pose
+  return rest.startsWith('rogue_') ? { base: rest.slice(6) as BasePose, heroClass: 'rogue', gender } : { base: rest as BasePose, heroClass: 'warrior', gender }
 }

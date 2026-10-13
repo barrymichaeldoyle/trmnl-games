@@ -20,6 +20,7 @@ import { readWorld } from './world'
 import { FULL_SCALE } from '@trmnl-games/desk-crawler/art/scene'
 import { sceneFor, scenePath } from '@trmnl-games/desk-crawler/art/sceneKey'
 import { sceneOccasion } from '@trmnl-games/desk-crawler/payload'
+import { sceneEvent } from './lib/heroScene'
 import { localDay, occasionAt, occasionCalendar, occasionModifiers } from '@trmnl-games/desk-crawler/sim/core/occasions'
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { raidWinChance } from '@trmnl-games/desk-crawler/sim/core/raid'
@@ -68,7 +69,7 @@ export const mine = query({
       .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
       .order('desc')
       .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
-    const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null, hero.class)
+    const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, await sceneEvent(ctx, newest), hero.class, hero.gender)
     return {
       id: hero._id,
       // D139: dressed for the occasion on the owner's last TRMNL date; the companion sets the sky from the browser's clock.

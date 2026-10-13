@@ -2,6 +2,7 @@ import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx } from '../_generated/server'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import type { HeroClass } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { HeroGender } from '@trmnl-games/desk-crawler/art/hero'
 import { setCurrentHero } from './gameProfile'
 import { getOrCreateWorld, worldContent } from '../world'
 
@@ -11,7 +12,7 @@ import { getOrCreateWorld, worldContent } from '../world'
  * `active: false` is first setup, waiting for the TRMNL save (no rank or simulation until activation); `active: true`
  * is a roster recruit (P37), whose account already has its TRMNL, so it adventures from the next tick.
  */
-export async function createHero(ctx: MutationCtx, user: Doc<'users'>, args: { name: string; heroClass: HeroClass; now: number; active: boolean }): Promise<Id<'heroes'>> {
+export async function createHero(ctx: MutationCtx, user: Doc<'users'>, args: { name: string; heroClass: HeroClass; gender?: HeroGender; now: number; active: boolean }): Promise<Id<'heroes'>> {
   const world = await getOrCreateWorld(ctx)
   const content = worldContent(world)
   const base = starterHero('pending', content, world.currentTick, args.heroClass)
@@ -19,6 +20,8 @@ export async function createHero(ctx: MutationCtx, user: Doc<'users'>, args: { n
     userId: user._id,
     name: args.name,
     class: args.heroClass,
+    // D149: only the female look is stored; absent is the original art.
+    ...(args.gender === 'female' ? { gender: 'female' as const } : {}),
     createdAt: args.now,
     isActive: true,
     schemaVersion: 1,

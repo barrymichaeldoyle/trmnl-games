@@ -173,6 +173,9 @@ export const logKind = v.union(
 export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('slow-cast'))
 export const gameStatus = v.union(v.literal('hidden'), v.literal('preview'), v.literal('live'))
 
+/** D149: a hero's look; chosen free at creation, changed later with a makeover. */
+export const heroGender = v.union(v.literal('male'), v.literal('female'))
+
 export default defineSchema({
   /**
    * Platform achievement rarity (D115): `current` is the last finished daily tally, `building` the one in progress.
@@ -390,6 +393,8 @@ export default defineSchema({
     name: v.string(),
     /** P37: one hero per class per account (`by_userId_and_class`). */
     class: v.union(v.literal('warrior'), v.literal('rogue')),
+    /** D149: the hero's look, purely cosmetic; absent means male, the original art. */
+    gender: v.optional(heroGender),
     createdAt: v.number(),
     /** The account's current hero; since P37 a parked roster hero is false and carries `parkedAtTick`. */
     isActive: v.boolean(),

@@ -10,6 +10,7 @@ import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
 import { pagePublic } from './lib/publicPage'
 import { heldSpares } from './lib/lostProperty'
+import { sceneEvent } from './lib/heroScene'
 import { readWorld, worldContent } from './world'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
@@ -30,7 +31,7 @@ async function publicHero(ctx: QueryCtx, alias: string) {
   if (hero === null || hero.activationState !== 'active' || !pagePublic(hero)) return null
   const world = await readWorld(ctx)
   const newest = (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
-  const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null, hero.class)
+  const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, await sceneEvent(ctx, newest), hero.class, hero.gender)
   const publication = world?.publishedPublicationId ? await ctx.db.get(world.publishedPublicationId) : null
   const published = publication !== null && publication.state === 'published' ? publication : null
   const rank = published

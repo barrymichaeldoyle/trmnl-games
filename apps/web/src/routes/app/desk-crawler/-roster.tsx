@@ -3,6 +3,7 @@ import { api } from '@trmnl-games/backend/api'
 import { HERO_NAME_RULE } from '@trmnl-games/platform'
 import { useIntent } from '../../../lib/intent'
 import { NameField, nameProblem } from '../../../lib/nameField'
+import { GenderPicker, type HeroGender } from '../../../lib/genderPicker'
 import { Button, Card } from '../../../lib/ui'
 import { Glyph } from '../../../lib/glyphs'
 import { ConfirmSheet, Consequences } from './-confirm'
@@ -138,6 +139,7 @@ function ParkedHero({ hero, current, roster, notify }: { hero: RosterView['heroe
 
 function RecruitCard({ rule, current, roster, notify }: { rule: RosterView['classes'][number]; current: RosterView['heroes'][number] | undefined; roster: RosterView; notify: Notify }) {
   const [name, setName] = useState('')
+  const [gender, setGender] = useState<HeroGender>('male')
   const [asking, setAsking] = useState(false)
   const recruit = useIntent(api.roster.recruit, { onFeedback: notify })
   const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null
@@ -150,11 +152,12 @@ function RecruitCard({ rule, current, roster, notify }: { rule: RosterView['clas
       <p className="mt-1 text-sm text-muted">{classNumbers(rule)}</p>
       <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && !blocked) setAsking(true) }}>
         <NameField label={`Name your ${rule.name}`} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={recruit.pending} />
+        <GenderPicker small value={gender} onChange={setGender} disabled={recruit.pending} />
         <Button type="submit" disabled={!valid || blocked}>Recruit a {rule.name}</Button>
         {roster.nextAt !== null ? <p className="text-sm text-muted">Recruiting counts as the day's switch. It opens {clock(roster.nextAt)}.</p> : null}
         {roster.nextAt === null && !roster.canPark && current ? <p className="text-sm text-muted">{current.name} can hand over once back on their feet or arrived.</p> : null}
       </form>
-      <ConfirmSheet open={asking} title={`Recruit ${name.trim()} the ${rule.name}?`} confirmLabel={`Recruit ${name.trim()}`} busyLabel="Recruiting…" cancelLabel="Not yet" pending={recruit.pending} onClose={() => setAsking(false)} onConfirm={() => { setAsking(false); void recruit.run({ heroClass: rule.id, name: name.trim() }, `${name.trim()} the ${rule.name} starts in the Office Cubicles from the next adventure.`).then((done) => { if (done) setName('') }) }}>
+      <ConfirmSheet open={asking} title={`Recruit ${name.trim()} the ${rule.name}?`} confirmLabel={`Recruit ${name.trim()}`} busyLabel="Recruiting…" cancelLabel="Not yet" pending={recruit.pending} onClose={() => setAsking(false)} onConfirm={() => { setAsking(false); void recruit.run({ heroClass: rule.id, name: name.trim(), gender }, `${name.trim()} the ${rule.name} starts in the Office Cubicles from the next adventure.`).then((done) => { if (done) setName('') }) }}>
         <Consequences>
           <li>{name.trim()} starts at level 1 in the Office Cubicles with starter gear and the full ladder of goals.</li>
           <li>{current?.name ?? 'Your hero'} stops adventuring and waits exactly where they are, until you switch back.</li>

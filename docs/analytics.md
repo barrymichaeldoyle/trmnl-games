@@ -37,6 +37,7 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `potion combined` | Browser, after `inventory.combinePotions` commits (D131) | `batches` |
 | `sponsor link opened` | Browser, on a click of the GitHub Sponsors link (D134) | `place` (`more` or `footer`) |
 | `name tag bought` | Browser, after `inventory.buyNameTag` commits (D142) | none; never the name |
+| `makeover bought` | Browser, after `inventory.buyMakeover` commits (D149) | none; never the gender |
 | `public name changed` | Browser, after `users.changePublicName` commits (D142) | none; never the name |
 | `hero followed` | Browser, after `follows.follow` commits from a public hero page (D143) | none; never who |
 | `hero unfollowed` | Browser, after `follows.unfollow` commits (D143) | none; never who |

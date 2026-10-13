@@ -300,6 +300,10 @@
     "price": 300
    }
   },
+  "makeover": {
+   "gender": "male",
+   "price": 200
+  },
   "merchant": null,
   "potions": 3,
   "pouch": {

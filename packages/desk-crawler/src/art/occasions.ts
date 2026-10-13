@@ -502,7 +502,9 @@ const HAT_ANCHOR: Record<string, { readonly centre: number; readonly bottom: num
 }
 
 export function heroHatAnchor(pose: HeroPose): { readonly centre: number; readonly bottom: number } {
-  return HAT_ANCHOR[pose] ?? HAT_ANCHOR[poseParts(pose).base]!
+  // D149: long hair and the braid hang behind the head, so a look wears its class's hat in the same place.
+  const { base, heroClass } = poseParts(pose)
+  return HAT_ANCHOR[heroClass === 'warrior' ? base : `${heroClass}_${base}`] ?? HAT_ANCHOR[base]!
 }
 
 /** The column a monster's hat centres on: the middle of its topmost inked row, so a lopsided monster wears it on its head. */

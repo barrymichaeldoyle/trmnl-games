@@ -55,7 +55,7 @@ export type FinishInstallResult = { ok: true; callbackUrl: string; reconnectionR
 
 /** Exchange and link through the Clerk-authenticated Convex action, then hand back the validated TRMNL callback. */
 export const finishInstall = createServerFn({ method: 'POST' })
-  .inputValidator((input: { gameSlug: GameSlug; publicAlias?: string; heroName?: string; analyticsConsent?: boolean }) => input)
+  .inputValidator((input: { gameSlug: GameSlug; publicAlias?: string; heroName?: string; heroGender?: 'male' | 'female'; analyticsConsent?: boolean }) => input)
   .handler(async ({ data }): Promise<FinishInstallResult> => {
     const pending = isGameSlug(data.gameSlug) ? await openPendingInstall(getCookie(installCookie(data.gameSlug)), flowSecret(), Date.now(), data.gameSlug) : null
     if (!pending) return { ok: false, code: 'INSTALL_EXPIRED', message: 'This installation expired. Start again from TRMNL.' }
@@ -76,6 +76,7 @@ export const finishInstall = createServerFn({ method: 'POST' })
         timezone: 'UTC',
         ...(data.publicAlias ? { publicAlias: data.publicAlias } : {}),
         ...(data.heroName ? { heroName: data.heroName } : {}),
+        ...(data.heroGender === 'female' ? { heroGender: 'female' as const } : {}),
       })
       reconnectionRequired = result.reconnectionRequired
     } catch (error) {

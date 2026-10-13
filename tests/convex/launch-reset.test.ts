@@ -20,7 +20,7 @@ describe('public-launch reset (D148)', () => {
   afterEach(() => vi.useRealTimers())
 
   it('restarts every account at level 1 under its Warrior name and wipes what the beta earned', { timeout: 30_000 }, async () => {
-    const anaWarrior = await seedHero(t, { name: 'Ana', level: 6, xp: 40, lifetimeXp: 2400, gold: 900, isActive: false, publicProfile: true }, 'ana')
+    const anaWarrior = await seedHero(t, { name: 'Ana', gender: 'female', level: 6, xp: 40, lifetimeXp: 2400, gold: 900, isActive: false, publicProfile: true }, 'ana')
     const { anaUser, rogue } = await t.run(async (ctx) => {
       const warrior = (await ctx.db.get(anaWarrior))!
       const rogue = await ctx.db.insert('heroes', { ...(({ _id, _creationTime, ...rest }) => rest)(warrior), name: 'Vex', class: 'rogue', isActive: true })
@@ -53,8 +53,9 @@ describe('public-launch reset (D148)', () => {
     }))
     expect(after.heroes).toHaveLength(2)
     const ana = after.heroes.find((hero) => hero.userId === anaUser)!
-    expect(ana).toMatchObject({ name: 'Ana', class: 'warrior', level: 1, xp: 0, lifetimeXp: 0, isActive: true, activationState: 'active', publicProfile: true, logSequence: 2 })
+    expect(ana).toMatchObject({ name: 'Ana', gender: 'female', class: 'warrior', level: 1, xp: 0, lifetimeXp: 0, isActive: true, activationState: 'active', publicProfile: true, logSequence: 2 })
     expect(after.heroes.find((hero) => hero.userId === boUser)).toMatchObject({ name: 'Bo', class: 'warrior', level: 1, activationState: 'pending_trmnl' })
+    expect(after.heroes.find((hero) => hero.userId === boUser)!.gender).toBeUndefined()
     for (const id of [anaWarrior, rogue, bo]) expect(after.heroes.some((hero) => hero._id === id)).toBe(false)
     expect(after.keepsakes).toEqual([])
     expect(after.unlocks).toEqual([])

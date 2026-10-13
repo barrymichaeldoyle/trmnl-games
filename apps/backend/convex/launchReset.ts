@@ -4,11 +4,12 @@ import type { Doc, Id, TableNames } from './_generated/dataModel'
 import { internalMutation } from './_generated/server'
 import { createHero } from './lib/heroCreate'
 import { gameProfile } from './lib/gameProfile'
+import { heroGender } from './schema'
 
 /**
- * One-off public-launch reset (D148). Every account keeps its Warrior's name, its public-page choice, its follows and
- * its TRMNL connections, and gets that Warrior back at level 1 with the starter kit. Everything earned in the beta
- * goes: heroes and second-class heroes, items, logs, scores and ranks, raids, meetings, lost property, achievements
+ * One-off public-launch reset (D148). Every account keeps its Warrior's name and look (D149), its public-page choice,
+ * its follows and its TRMNL connections, and gets that Warrior back at level 1 with the starter kit. Everything earned
+ * in the beta goes: heroes and second-class heroes, items, logs, scores and ranks, raids, meetings, lost property, achievements
  * and Desk keepsakes. Slow Cast, accounts, alerts settings and the audit log are untouched.
  *
  * Ticks pause while it runs and resume as they were. Run it once, when the launch email goes out; delete this module
@@ -43,8 +44,8 @@ const RESTARTS_PER_STEP = 25
 /** Far above the beta's player count; the snapshot travels in the scheduled step's arguments. */
 const MAX_HEROES = 4000
 
-const restart = v.object({ userId: v.id('users'), name: v.string(), active: v.boolean(), publicProfile: v.optional(v.boolean()) })
-type Restart = { userId: Id<'users'>; name: string; active: boolean; publicProfile?: boolean }
+const restart = v.object({ userId: v.id('users'), name: v.string(), active: v.boolean(), publicProfile: v.optional(v.boolean()), gender: v.optional(heroGender) })
+type Restart = { userId: Id<'users'>; name: string; active: boolean; publicProfile?: boolean; gender?: 'male' | 'female' }
 
 /** One restart per account: its Warrior's name and page choice (the first hero if it has no Warrior), active if any hero was. */
 export function restartsFor(heroes: Doc<'heroes'>[]): Restart[] {
@@ -57,6 +58,8 @@ export function restartsFor(heroes: Doc<'heroes'>[]): Restart[] {
       name: kept.name,
       active: roster.some((hero) => hero.activationState === 'active'),
       ...(kept.publicProfile === undefined ? {} : { publicProfile: kept.publicProfile }),
+      // D149: the look comes through the reset with the name.
+      ...(kept.gender === undefined ? {} : { gender: kept.gender }),
     }
   })
 }
@@ -148,7 +151,7 @@ async function restartHero(ctx: Parameters<typeof createHero>[0], entry: Restart
   if ((await gameProfile(ctx, user._id))?.state === 'deleting') return
   // A hero made since the clear (a first install finishing mid-reset) is already a fresh start.
   if (await ctx.db.query('heroes').withIndex('by_userId_and_isActive', (q) => q.eq('userId', user._id)).first()) return
-  const heroId = await createHero(ctx, user, { name: entry.name, heroClass: 'warrior', now, active: entry.active })
+  const heroId = await createHero(ctx, user, { name: entry.name, heroClass: 'warrior', ...(entry.gender === undefined ? {} : { gender: entry.gender }), now, active: entry.active })
   await ctx.db.patch(heroId, { logSequence: 2, ...(entry.publicProfile === undefined ? {} : { publicProfile: entry.publicProfile }) })
   await ctx.db.insert('tickLogs', {
     heroId,

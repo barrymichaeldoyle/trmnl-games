@@ -10,6 +10,7 @@ import { currentHero, gameProfile, setCurrentHero } from './lib/gameProfile'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
 import { HERO_NAME_RULE, validateName } from './lib/names'
 import { readWorld, worldContent } from './world'
+import { heroGender } from './schema'
 
 /**
  * The hero roster (P37, D136): one hero per class per account, one current hero at a time. The others are parked:
@@ -115,10 +116,10 @@ export const mine = query({
 
 /** P37: recruit a hero of a class not yet on the roster; it starts at level 1 and becomes the current hero. */
 export const recruit = mutation({
-  args: { operationId: v.string(), heroClass: v.union(v.literal('warrior'), v.literal('rogue')), name: v.string() },
+  args: { operationId: v.string(), heroClass: v.union(v.literal('warrior'), v.literal('rogue')), name: v.string(), gender: v.optional(heroGender) },
   returns: intentResult,
   handler: async (ctx, args) =>
-    await runIntent(ctx, args.operationId, 'roster.recruit', { heroClass: args.heroClass, name: args.name }, async (user) => {
+    await runIntent(ctx, args.operationId, 'roster.recruit', { heroClass: args.heroClass, name: args.name, ...(args.gender === undefined ? {} : { gender: args.gender }) }, async (user) => {
       const current = await requirePlayableHero(ctx, user)
       const world = await readWorld(ctx)
       const content = worldContent(world)
@@ -134,7 +135,7 @@ export const recruit = mutation({
       // Recruiting is the day's switch, so hopping cannot be had by recruiting; the undo returns to the hero left.
       if (switchState(profile, now).nextAt !== null) throw appError('RATE_LIMITED', 'You switched heroes in the last day. Recruit once the day is up.')
       await park(ctx, current, world?.currentTick ?? 0, name.value)
-      await createHero(ctx, user, { name: name.value, heroClass: args.heroClass, now, active: true })
+      await createHero(ctx, user, { name: name.value, heroClass: args.heroClass, ...(args.gender === undefined ? {} : { gender: args.gender }), now, active: true })
       await ctx.db.patch((await gameProfile(ctx, user._id))!._id, { lastSwitch: { at: now, fromHeroId: current._id } })
       return { changed: true }
     }),

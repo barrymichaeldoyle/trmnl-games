@@ -1,5 +1,6 @@
 import { currentHero, gameProfile, isDeskCrawler } from './lib/gameProfile'
 import { maskRaidSummaries } from './lib/raids'
+import { sceneEvent } from './lib/heroScene'
 import { v } from 'convex/values'
 import { internalQuery, query, type QueryCtx } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
@@ -136,7 +137,7 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     // P35: a career line (a goal reached, a feature unlocked) is a celebration, never a scene.
     // D139: an occasion line follows its tick's story like a to-do line; the dressed scene announces the occasion.
     const gameplay = recent.find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
-    if (gameplay) latestEvent = { kind: gameplay.kind, ...('outcome' in gameplay.detail ? { outcome: gameplay.detail.outcome } : {}) }
+    if (gameplay) latestEvent = await sceneEvent(ctx, gameplay)
     const newest = recent.find((log) => log.kind !== 'todo' && log.kind !== 'occasion')
     if (newest) {
       const title = 'achievementId' in newest.detail ? newest.detail.name : 'outcome' in newest.detail && newest.detail.outcome.variant === 'career' ? careerLine(newest.detail.outcome).compact.replace(/\.$/, '') : undefined
@@ -178,6 +179,7 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
           ...(hero.choice === undefined ? {} : { choiceExpiresAtTick: hero.choice.expiresAtTick }),
           ...(hero.stance === undefined ? {} : { stance: hero.stance }),
           class: hero.class,
+          ...(hero.gender === undefined ? {} : { gender: hero.gender }),
         }
       : null,
     weaponName,

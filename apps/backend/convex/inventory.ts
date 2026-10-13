@@ -5,6 +5,7 @@ import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/s
 import { appError } from './lib/errors'
 import { HERO_NAME_RULE, validateName } from './lib/names'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
+import { heroGender } from './schema'
 import { heroMaxHp, pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { bagUsed, currentTier, guaranteedTierIndex, isBagFull, nextEarlyTier, nextTier } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { currentPouchTier, guaranteedPouchIndex, nextEarlyPouchTier, nextPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
@@ -38,6 +39,8 @@ const MANAGEABLE = new Set(['exploring', 'resting', 'travelling', 'sleeping'])
 /** D142: a "Hi, my name is" name tag renames the current hero for 200 gold; one is in stock a day per account. */
 export const NAME_TAG_PRICE = 200
 export const NAME_TAG_GAP_MS = 24 * 60 * 60 * 1000
+/** D149: a makeover changes the current hero's look for 200 gold, the name tag's price; any time, no daily stock. */
+export const MAKEOVER_PRICE = 200
 
 async function heroItems(ctx: QueryCtx, heroId: Id<'heroes'>): Promise<Doc<'items'>[]> {
   return await ctx.db
@@ -211,6 +214,7 @@ export const mine = query({
       pouch: pouchView(content, hero),
       merchant: merchantView(hero, await currentTick(ctx)),
       // D142: the client compares `inStockAt` with its own clock; null means one is in stock now.
+      makeover: { price: MAKEOVER_PRICE, gender: hero.gender ?? 'male' },
       nameTag: { price: NAME_TAG_PRICE, inStockAt: ((last) => (last === undefined ? null : last + NAME_TAG_GAP_MS))((await gameProfile(ctx, user._id))?.lastNameTagAt) },
       weaponId: hero.weaponId ?? null,
       armorId: hero.armorId ?? null,
@@ -515,6 +519,21 @@ export const buyNameTag = mutation({
       await ctx.db.patch(hero._id, { gold: hero.gold - NAME_TAG_PRICE, name: name.value })
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'name_tag', `Pinned on a new name tag: "Hi, my name is [[${name.value}]]."`, { xpEarned: 0, gold: -NAME_TAG_PRICE, hp: 0 })
       return { changed: true, gold: -NAME_TAG_PRICE }
+    }),
+})
+
+/** D149: a makeover: the current hero takes the other look. Purely cosmetic; nothing else about the hero changes. */
+export const buyMakeover = mutation({
+  args: { operationId: v.string(), gender: heroGender },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.buyMakeover', { gender: args.gender }, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      if ((hero.gender ?? 'male') === args.gender) throw appError('INVALID_INPUT', `${hero.name} already has that look.`)
+      if (hero.gold < MAKEOVER_PRICE) throw appError('NOT_ENOUGH_GOLD', `A makeover costs ${MAKEOVER_PRICE} gold.`)
+      await ctx.db.patch(hero._id, { gold: hero.gold - MAKEOVER_PRICE, gender: args.gender === 'female' ? 'female' : undefined })
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'makeover', `Booked a makeover. [[${hero.name}]] is back at the desk with a new look.`, { xpEarned: 0, gold: -MAKEOVER_PRICE, hp: 0 })
+      return { changed: true, gold: -MAKEOVER_PRICE }
     }),
 })
 

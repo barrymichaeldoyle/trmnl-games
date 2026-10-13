@@ -8,6 +8,7 @@ import { HERO_NAME_RULE } from '@trmnl-games/platform'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { useIntent } from '../../../lib/intent'
 import { NameField, nameProblem } from '../../../lib/nameField'
+import { GENDERS, GenderPicker, type HeroGender } from '../../../lib/genderPicker'
 import { seo } from '../../../lib/seo'
 import { Glyph } from '../../../lib/glyphs'
 import { BUTTON_SECONDARY, Button, Card, ErrorNote, LINK_BUTTON, LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
@@ -104,6 +105,7 @@ function Inventory() {
   const buyPouch = useIntent(api.inventory.buyPouch, { onFeedback: notify })
   const buyOffer = useIntent(api.inventory.buyOffer, { onFeedback: notify })
   const buyNameTag = useIntent(api.inventory.buyNameTag, { onFeedback: notify })
+  const buyMakeover = useIntent(api.inventory.buyMakeover, { onFeedback: notify })
   useEffect(() => {
     if (bag) setSelected((current) => retainSellableSelection(current, bag.gear as Gear[]))
   }, [bag])
@@ -124,7 +126,7 @@ function Inventory() {
   const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
   const deltaOf = (item: Gear) => { const current = equippedOf(item.kind); return statOf(item) - (current ? statOf(current) : 0) }
-  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending || buyNameTag.pending
+  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending || buyNameTag.pending || buyMakeover.pending
   // D131: the strengths in the pouch and the combine recipe; one row and no recipe under a catalog without strengths.
   const potionRows = bag.potionRows as PotionRow[]
   const potionCombine = bag.potionCombine as Combine | null
@@ -249,6 +251,7 @@ function Inventory() {
         <BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} />
         <PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} />
         {bag.nameTag ? <NameTag tag={bag.nameTag} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyNameTag} /> : null}
+        {bag.makeover ? <Makeover makeover={bag.makeover} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyMakeover} /> : null}
       </div>
 
       {mode !== 'browse' ? <div className="window sticky bottom-0 z-20 -mx-3 px-3 pt-3 min-[375px]:-mx-4 min-[375px]:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0">
@@ -485,6 +488,28 @@ function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { price: numb
     <BuySheet open={asking} title={`Rename ${heroName} to ${name.trim()}?`} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, `Hi, my name is ${name.trim()}.`); if (done) setName(''); return done }}>
       <li>{heroName} goes by {name.trim()} from now on. Level, gear and rank stay the same.</li>
       <li>The next name tag is in stock tomorrow.</li>
+    </BuySheet>
+  </Card>
+}
+
+/** D149: a makeover switches the current hero's gender for gold, any time. Purely cosmetic. */
+function Makeover({ makeover, heroName, gold, disabled, intent }: { makeover: { price: number; gender: HeroGender }; heroName: string; gold: number; disabled: boolean; intent: PurchaseIntent<{ gender: HeroGender }> }) {
+  const [gender, setGender] = useState<HeroGender>(makeover.gender)
+  const [asking, setAsking] = useState(false)
+  useEffect(() => setGender(makeover.gender), [makeover.gender])
+  const affordable = gold >= makeover.price
+  const changed = gender !== makeover.gender
+  const label = GENDERS.find((option) => option.id === gender)!.label.toLowerCase()
+  return <Card title="Makeover" icon="hero">
+    <p>A new look for {heroName}, on your TRMNL, your hero page and other players' meetings.</p>
+    <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (changed && affordable) setAsking(true) }}>
+      <GenderPicker small value={gender} onChange={setGender} disabled={intent.pending} />
+      <Button type="submit" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !changed || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {makeover.price} gold</Button>
+      {!affordable ? <p className="text-sm text-muted">You have <span className="text-gold-ink tabular-nums">{gold} gold</span>.</p> : null}
+    </form>
+    <BuySheet open={asking} title={`Make ${heroName} ${label}?`} price={makeover.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => await intent.run({ gender }, `${heroName} is back with a new look.`)}>
+      <li>Only the look changes. Level, gear, stats and rank stay the same.</li>
+      <li>You can change it back any time for another {makeover.price} gold.</li>
     </BuySheet>
   </Card>
 }

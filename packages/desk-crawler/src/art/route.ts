@@ -33,11 +33,13 @@ export function parseScenePath(path: string): { biome: BiomeArt; pose: HeroPose;
     if (!(id in monsterArt)) return null
     subject = { kind: 'monster', id: id as keyof typeof monsterArt, elite: segment.startsWith('elite-') }
   } else if (segment.startsWith('coworker-')) {
-    // D141: `coworker-<class>` or `coworker-<class>-<prop>`.
-    const [heroClass, ...rest] = segment.slice(9).split('-')
+    // D141: `coworker-<class>` or `coworker-<class>-<prop>`; D149: the class is `female_<class>` for the female look.
+    const [who = '', ...rest] = segment.slice(9).split('-')
+    const female = who.startsWith('female_')
+    const heroClass = female ? who.slice(7) : who
     const prop = rest.join('-')
     if ((heroClass !== 'warrior' && heroClass !== 'rogue') || (prop !== '' && !(prop in propArt))) return null
-    subject = { kind: 'coworker', heroClass, ...(prop === '' ? {} : { prop: prop as PropId }) }
+    subject = { kind: 'coworker', heroClass, ...(female ? { gender: 'female' as const } : {}), ...(prop === '' ? {} : { prop: prop as PropId }) }
   } else if (segment.startsWith('prop-')) {
     const id = segment.slice(5)
     if (!(id in propArt)) return null

@@ -1,6 +1,7 @@
 import { currentHero, gameProfile, setCurrentHero, DESK_CRAWLER } from './lib/gameProfile'
 import { deskCrawlerDeleting, isGame, SLOW_CAST_HOOKS } from './lib/gameHooks'
-import { gameSlug as gameSlugValidator } from './schema'
+import { gameSlug as gameSlugValidator, heroGender } from './schema'
+import type { HeroGender } from '@trmnl-games/desk-crawler/art/hero'
 import type { GameSlug } from '@trmnl-games/platform'
 import { isAdminIdentity } from './lib/adminAccess'
 import { gameStatusOf } from './platform'
@@ -47,6 +48,8 @@ export const completeInstall = action({
     code: v.string(),
     publicAlias: v.optional(v.string()),
     heroName: v.optional(v.string()),
+    /** D149: the new hero's look, chosen on the setup form; absent means male. */
+    heroGender: v.optional(heroGender),
     timezone: v.string(),
     analyticsConsent: v.optional(v.boolean()),
   },
@@ -80,6 +83,7 @@ export const completeInstall = action({
       allowReconnection: true,
       ...(args.publicAlias === undefined ? {} : { publicAlias: args.publicAlias }),
       ...(args.heroName === undefined ? {} : { heroName: args.heroName }),
+      ...(args.heroGender === undefined ? {} : { heroGender: args.heroGender }),
       timezone: args.timezone,
       ...(args.analyticsConsent === undefined ? {} : { analyticsConsent: args.analyticsConsent }),
     })
@@ -93,6 +97,8 @@ export const linkInstall = internalMutation({
     tokenHash: v.string(),
     publicAlias: v.optional(v.string()),
     heroName: v.optional(v.string()),
+    /** D149: the new hero's look, chosen on the setup form; absent means male. */
+    heroGender: v.optional(heroGender),
     timezone: v.string(),
     analyticsConsent: v.optional(v.boolean()),
     allowReconnection: v.optional(v.boolean()),
@@ -167,14 +173,14 @@ export const linkInstall = internalMutation({
 
     const heroName = validateName(args.heroName ?? '', HERO_NAME_RULE)
     if (!heroName.ok) throw appError('INVALID_INPUT', `Hero name: ${heroName.reason}`)
-    await prepareHero(ctx, user, heroName.value, now)
+    await prepareHero(ctx, user, heroName.value, args.heroGender ?? 'male', now)
     return { activationState: 'pending_trmnl' as const, heroCreated: true }
   },
 })
 
 /** Pending Warrior + starter kit + welcome log. Initialization, not an earned reward; no rank or simulation until activation. */
-async function prepareHero(ctx: MutationCtx, user: Doc<'users'>, name: string, now: number): Promise<Id<'heroes'>> {
-  return await createHero(ctx, user, { name, heroClass: 'warrior', now, active: false })
+async function prepareHero(ctx: MutationCtx, user: Doc<'users'>, name: string, gender: HeroGender, now: number): Promise<Id<'heroes'>> {
+  return await createHero(ctx, user, { name, heroClass: 'warrior', gender, now, active: false })
 }
 
 const confirmResult = v.object({
@@ -404,7 +410,7 @@ export const completeReconnection = mutation({
         await ctx.db.insert('trmnlInstances', { gameSlug: DESK_CRAWLER, grantId, userId: owner._id, uuid: attempt.verifiedUuid, state: 'active', confirmedBy: 'management_confirmation', createdAt: now })
       }
       if (attempt.analyticsConsent !== undefined) await ctx.db.patch(owner._id, { analyticsConsent: attempt.analyticsConsent })
-      if (!await currentHero(ctx, owner)) await prepareHero(ctx, owner, attempt.heroName, now)
+      if (!await currentHero(ctx, owner)) await prepareHero(ctx, owner, attempt.heroName, 'male', now)
       await activateForConfirmedInstallation(ctx, owner._id, now)
       if (attempt.analyticsConsent === true || (attempt.analyticsConsent === undefined && owner.analyticsConsent === true)) await ctx.scheduler.runAfter(0, internal.analytics.captureActivation, { userId: owner._id, event: 'installation connected' })
       await ctx.db.delete(attempt._id)

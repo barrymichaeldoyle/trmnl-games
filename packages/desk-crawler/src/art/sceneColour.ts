@@ -374,7 +374,7 @@ const SITTING_DROP: Partial<Record<BasePose, number>> = { idle: 0, fight: 0, wal
 /** The warrior's parts, by where they sit in each pose's grid (hero.ts): the art draws them all in the same few inks. */
 function warriorTone(heroPose: HeroPose, ch: string, x: number, y: number, height: number): string {
   // P37: a Rogue pose is the Warrior's grid with a hood, so the same rules pick the part and the class picks the ink.
-  const { base: pose, heroClass } = poseParts(heroPose)
+  const { base: pose, heroClass, gender } = poseParts(heroPose)
   const WARRIOR = (heroClass === 'rogue' ? ROGUE : WARRIOR_TONES) as typeof WARRIOR_TONES
   const drop = SITTING_DROP[pose]
   const shade = ch === ':' || ch === '.' || ch === '='
@@ -382,6 +382,8 @@ function warriorTone(heroPose: HeroPose, ch: string, x: number, y: number, heigh
     // Lying down: the head is on the left, the body or blanket to its right and, knocked out, the blade below.
     const hairRow = pose === 'sleep' ? 8 : 6
     if (shade) return (pose === 'sleep' ? WARRIOR.blanket : WARRIOR.cardigan)[inked(ch, x, y) ? 0 : 1]
+    // D149: the female look's hair on the pillow, the two columns left of the face (the Rogue's out of its hood).
+    if (ch === '#' && gender === 'female' && x <= 1 && y > hairRow && y <= hairRow + 5) return WARRIOR_TONES.hair
     if (ch === '#') return y === hairRow ? WARRIOR.hair : INK
     if (pose === 'knocked_out' && y >= 13) return WARRIOR.steel
     return x >= 9 ? WARRIOR.shirt : WARRIOR.skin
@@ -389,6 +391,9 @@ function warriorTone(heroPose: HeroPose, ch: string, x: number, y: number, heigh
   const row = y - drop
   if (shade) return WARRIOR.cardigan[inked(ch, x, y) ? 0 : 1]
   if (ch === '#') {
+    // D149: the Warrior's long hair down the back of the head; the Rogue's braid out of the hood, in the hair's brown.
+    if (gender === 'female' && heroClass === 'warrior' && row >= 3 && row <= 10 && x <= 7 && (row <= 8 || x <= 6) && (row <= 9 || x <= 5)) return WARRIOR.hair
+    if (gender === 'female' && heroClass === 'rogue' && row >= 6 && row <= 10 && x <= 4) return WARRIOR_TONES.hair
     if (x < 17 && (row <= 2 || (row <= 4 && x <= 8) || (row === 3 && x >= 14))) return WARRIOR.hair
     if (pose === 'rest' && y >= height - 3) return WARRIOR.bench
     if (pose !== 'rest' && row >= 18 && y < height - 2 && x < 17) return WARRIOR.trousers
@@ -441,7 +446,7 @@ export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, 
       if (!ch || region === 'halo') return null
       if (region === 'hero' && hero) return warriorTone(pose, ch, x - hero.left, y - hero.top, hero.sprite.height)
       // D141: the coworker is its class's idle grid turned round, so read its part from the unmirrored column.
-      if (region === 'coworker' && coworker?.role === 'coworker') return warriorTone(classPose('idle', coworker.heroClass), ch, coworker.sprite.width - 1 - (x - coworker.left), y - coworker.top, coworker.sprite.height)
+      if (region === 'coworker' && coworker?.role === 'coworker') return warriorTone(classPose('idle', coworker.heroClass, coworker.gender), ch, coworker.sprite.width - 1 - (x - coworker.left), y - coworker.top, coworker.sprite.height)
       const foe = FOE[region] ?? DECOR[region]
       const tones = foe ?? backdrop[region] ?? OCCASION_BACKDROP[region] ?? {}
       const fallbackInk = foe ? INK : '#5a4a3a'

@@ -131,6 +131,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
   ['sharing-your-hero', 'Sharing your hero'],
   ['following-and-rivals', 'Following and rivals'],
   ['names', 'Names'],
+  ['gender', 'Gender'],
   ['alerts', 'Alerts'],
   ['if-the-screen-looks-old', 'If the screen looks old'],
   ['disconnecting-and-removing', 'Disconnecting and removing'],
@@ -311,6 +312,8 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>Signed in, you can follow another player from their public hero page, up to 20 players. Everyone you follow is listed under Rankings, with their hero's level, rank and where they are, and links to their pages. Mark one of them as your rival to keep them at the top of the list with a line saying who is ahead. Your rival also gets raided more: half your hero's raids go after their desk when they can be raided. Your rival is told who named them and can name you back. Following anyone else changes nothing in play, and nobody is told when you follow them. If a player hides their page, you see only their name until they show it again. If they change their public name, they drop off your list.</p>
       <h2 id="names">Names</h2>
       <p>You have two names. Your hero's name is on your TRMNL, the rankings and your hero page; to change it, buy a “Hi, my name is” name tag on the Bag page for 200 gold. One is in stock a day. Your public name is you, across every TRMNL game: it shows beside your hero in the rankings, in other players' raids and meetings, and in your page's link. You can change it for free once every 7 days from Account. Links to your old page stop working, and nobody else can take your old name for 7 days.</p>
+      <h2 id="gender">Gender</h2>
+      <p>You pick your hero's gender, male or female, when you create it. It only changes how your hero looks, on your TRMNL, your hero page and in other players' meetings; neither one plays any differently. To change it later, buy a makeover on the Bag page for 200 gold, any time.</p>
       <h2 id="alerts">Alerts</h2>
       <p>Your TRMNL is the main way to keep up with your hero, but Settings can also send a phone notification in two cases, each off until you turn it on:</p>
       <ul>

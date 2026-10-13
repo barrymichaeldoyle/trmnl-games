@@ -1,5 +1,5 @@
 import { Canvas, mirror, sprite, type Sprite } from './canvas'
-import { classPose, CLOAKED_POSES, heroCloak, heroPoses, type HeroPose } from './hero'
+import { classPose, CLOAKED_POSES, heroCloak, heroPoses, type HeroGender, type HeroPose } from './hero'
 import { monsterArt } from './monsters'
 import { eliteCrown, propArt, type PropId } from './props'
 import { dressingFor, heroHatAnchor, monsterHatCentre, type Dressing, type OccasionArt } from './occasions'
@@ -31,16 +31,16 @@ export type BiomeArt = 'office_cubicles' | 'server_room' | 'cafeteria_depths' | 
 export type Subject =
   | { kind: 'monster'; id: keyof typeof monsterArt; elite: boolean }
   | { kind: 'prop'; id: PropId }
-  /** D141: the other hero of a meeting, with the meeting's prop between the two. */
-  | { kind: 'coworker'; heroClass: 'warrior' | 'rogue'; prop?: PropId }
+  /** D141: the other hero of a meeting, with the meeting's prop between the two; D149: in its look. */
+  | { kind: 'coworker'; heroClass: 'warrior' | 'rogue'; gender?: HeroGender; prop?: PropId }
   | { kind: 'none' }
 
 /** The blade's columns in the standing poses (hero.ts): a coworker comes to a meeting without one. */
 const BLADE_FROM = 17
 
 /** D141: the coworker's sprite: its class's idle pose, the blade left at its desk, turned to face our hero. */
-export function coworkerSprite(heroClass: 'warrior' | 'rogue'): Sprite {
-  const idle = heroPoses[classPose('idle', heroClass)]
+export function coworkerSprite(heroClass: 'warrior' | 'rogue', gender: HeroGender = 'male'): Sprite {
+  const idle = heroPoses[classPose('idle', heroClass, gender)]
   return mirror({ width: BLADE_FROM, height: idle.height, rows: idle.rows.map((row) => row.slice(0, BLADE_FROM).padEnd(BLADE_FROM)) })
 }
 
@@ -357,7 +357,7 @@ export type Placement =
   | { readonly role: 'monster'; readonly id: keyof typeof monsterArt; readonly sprite: Sprite; readonly left: number; readonly top: number }
   | { readonly role: 'prop'; readonly id: PropId; readonly sprite: Sprite; readonly left: number; readonly top: number }
   /** D141: the other hero of a meeting, drawn mirrored; its cloak is a `cloak` placement like ours. */
-  | { readonly role: 'coworker'; readonly heroClass: 'warrior' | 'rogue'; readonly sprite: Sprite; readonly left: number; readonly top: number }
+  | { readonly role: 'coworker'; readonly heroClass: 'warrior' | 'rogue'; readonly gender: HeroGender; readonly sprite: Sprite; readonly left: number; readonly top: number }
 
 export function scenePlacements(pose: HeroPose, subject: Subject, occasion?: OccasionArt): Placement[] {
   const hero = heroPoses[pose]
@@ -395,14 +395,15 @@ export function scenePlacements(pose: HeroPose, subject: Subject, occasion?: Occ
       const art = propArt[subject.prop]
       placements.push({ role: 'prop', id: subject.prop, sprite: art, left: DECOR_X + 10 - Math.floor(art.width / 2), top: GROUND - art.height })
     }
-    const body = coworkerSprite(subject.heroClass)
+    const gender = subject.gender ?? 'male'
+    const body = coworkerSprite(subject.heroClass, gender)
     const top = GROUND - body.height
     const left = SUBJECT_X + 2
     // Mirrored, so the cloak (5 columns behind our hero's back) hangs off its right.
-    if (CLOAKED_POSES.has(classPose('idle', subject.heroClass))) placements.push({ role: 'cloak', sprite: mirror(heroCloak), left: left + body.width + 5 - heroCloak.width, top: top + 8 })
-    placements.push({ role: 'coworker', heroClass: subject.heroClass, sprite: body, left, top })
+    if (CLOAKED_POSES.has(classPose('idle', subject.heroClass, gender))) placements.push({ role: 'cloak', sprite: mirror(heroCloak), left: left + body.width + 5 - heroCloak.width, top: top + 8 })
+    placements.push({ role: 'coworker', heroClass: subject.heroClass, gender, sprite: body, left, top })
     if (dressing?.heroHat !== undefined) {
-      const anchor = heroHatAnchor(classPose('idle', subject.heroClass))
+      const anchor = heroHatAnchor(classPose('idle', subject.heroClass, gender))
       const hat = mirror(dressing.heroHat)
       placements.push({ role: 'decor', id: `${occasion!}:hat`, sprite: hat, left: left + (body.width - 1 - anchor.centre) - Math.floor(hat.width / 2), top: top + anchor.bottom - hat.height + 1 })
     }

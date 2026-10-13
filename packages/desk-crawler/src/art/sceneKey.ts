@@ -1,4 +1,4 @@
-import { classPose, type BasePose, type HeroPose } from './hero'
+import { classPose, type BasePose, type HeroGender, type HeroPose } from './hero'
 import { SCENE_VERSION, type SceneTime } from './sceneTime'
 import { MEETING_PROPS, type PropId } from './props'
 
@@ -9,8 +9,8 @@ import { MEETING_PROPS, type PropId } from './props'
 export type SceneSubject =
   | { kind: 'monster'; id: string; elite: boolean }
   | { kind: 'prop'; id: PropId }
-  /** D141: the other hero of a meeting, in its class, with the meeting's prop between them. */
-  | { kind: 'coworker'; heroClass: 'warrior' | 'rogue'; prop?: PropId }
+  /** D141: the other hero of a meeting, in its class, with the meeting's prop between them; D149: in its look. */
+  | { kind: 'coworker'; heroClass: 'warrior' | 'rogue'; gender?: HeroGender; prop?: PropId }
   | { kind: 'none' }
 
 export interface LatestEvent {
@@ -20,11 +20,18 @@ export interface LatestEvent {
   readonly title?: string
 }
 
-/** P37: the scene in the hero's class's poses; the Warrior's paths are the ones every earlier screen used. */
-export function sceneFor(status: string, hasWake: boolean, latest: LatestEvent | null, heroClass: 'warrior' | 'rogue' = 'warrior'): { pose: HeroPose; subject: SceneSubject } {
+/**
+ * P37: the scene in the hero's class's poses; the Warrior's paths are the ones every earlier screen used.
+ * D149: and in the hero's look. A meeting or lost-property outcome carries the other hero's look as `rivalGender`,
+ * added by the backend when it reads the log (the simulator never sees looks).
+ */
+export function sceneFor(status: string, hasWake: boolean, latest: LatestEvent | null, heroClass: 'warrior' | 'rogue' = 'warrior', gender: HeroGender = 'male'): { pose: HeroPose; subject: SceneSubject } {
   const scene = baseScene(status, hasWake, latest)
-  return { pose: classPose(scene.pose, heroClass), subject: scene.subject }
+  return { pose: classPose(scene.pose, heroClass, gender), subject: scene.subject }
 }
+
+/** D149: the coworker's class and look from a meeting or lost-property outcome. */
+const coworkerOf = (outcome: NonNullable<LatestEvent['outcome']>) => ({ heroClass: outcome.rivalClass === 'rogue' ? ('rogue' as const) : ('warrior' as const), ...(outcome.rivalGender === 'female' ? { gender: 'female' as const } : {}) })
 
 function baseScene(status: string, hasWake: boolean, latest: LatestEvent | null): { pose: BasePose; subject: SceneSubject } {
   const outcome = latest?.outcome
@@ -55,18 +62,18 @@ function baseScene(status: string, hasWake: boolean, latest: LatestEvent | null)
   // D141: a meeting shows the other hero, facing ours across the meeting's prop.
   if (outcome?.variant === 'meeting') {
     const prop = MEETING_PROPS[String(outcome.kindId)]
-    return { pose: 'idle', subject: { kind: 'coworker', heroClass: outcome.rivalClass === 'rogue' ? 'rogue' : 'warrior', ...(prop === undefined ? {} : { prop }) } }
+    return { pose: 'idle', subject: { kind: 'coworker', ...coworkerOf(outcome), ...(prop === undefined ? {} : { prop }) } }
   }
   // D145: the owner is told who found its spare: the finder, beside the lost-property box.
-  if (outcome?.variant === 'lost_property') return { pose: 'idle', subject: { kind: 'coworker', heroClass: outcome.rivalClass === 'rogue' ? 'rogue' : 'warrior', prop: 'lost_property' } }
+  if (outcome?.variant === 'lost_property') return { pose: 'idle', subject: { kind: 'coworker', ...coworkerOf(outcome), prop: 'lost_property' } }
   return { pose: 'idle', subject: { kind: 'none' } }
 }
 
-/** URL path segment for a subject: `monster-<id>`, `elite-<id>`, `prop-<id>`, `coworker-<class>[-<prop>]` or `none`. */
+/** URL path segment for a subject: `monster-<id>`, `elite-<id>`, `prop-<id>`, `coworker-[female_]<class>[-<prop>]` or `none`. */
 export function subjectSegment(subject: SceneSubject): string {
   if (subject.kind === 'monster') return `${subject.elite ? 'elite' : 'monster'}-${subject.id}`
   if (subject.kind === 'prop') return `prop-${subject.id}`
-  if (subject.kind === 'coworker') return `coworker-${subject.heroClass}${subject.prop === undefined ? '' : `-${subject.prop}`}`
+  if (subject.kind === 'coworker') return `coworker-${subject.gender === 'female' ? 'female_' : ''}${subject.heroClass}${subject.prop === undefined ? '' : `-${subject.prop}`}`
   return 'none'
 }
 

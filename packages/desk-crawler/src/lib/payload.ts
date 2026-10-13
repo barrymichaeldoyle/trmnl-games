@@ -8,6 +8,7 @@ import { scaled } from '../sim/core/modifiers'
 import { FULL_SCALE, LARGE_SCALE, MEDIUM_SCALE, SMALL_SCALE } from '../art/scene'
 import { QR_LARGE_SCALE, QR_SCALE, qrBasePath, qrPath, type QrTarget } from '../art/qr'
 import { sceneFor, scenePath, type LatestEvent } from '../art/sceneKey'
+import type { HeroGender } from '../art/hero'
 import { isOccasionArt, type OccasionArt } from '../art/occasions'
 import { occasionAt } from '../sim/core/occasions'
 import { nextSlotAfter, slotEta, SLOT_MS } from '../sim/schedule'
@@ -56,6 +57,8 @@ export interface PayloadHero {
   readonly stance?: StanceId
   /** P37: absent means warrior. */
   readonly class?: HeroClass
+  /** D149: absent means male. */
+  readonly gender?: HeroGender
 }
 
 export interface PayloadInput {
@@ -407,7 +410,7 @@ export function buildPayload(input: PayloadInput) {
     home_qr_base: input.artBaseUrl ? `${input.artBaseUrl}${qrBasePath('home')}` : '',
     corner_qr_base: input.artBaseUrl ? `${input.artBaseUrl}${qrBasePath('corner')}` : '',
     first_run: firstRun,
-    ...sceneUrls(hero.biomeId, sceneFor(hero.status, hero.wakeAtTick !== undefined, input.latestEvent, hero.class)),
+    ...sceneUrls(hero.biomeId, sceneFor(hero.status, hero.wakeAtTick !== undefined, input.latestEvent, hero.class, hero.gender)),
     hero_tick: hero.lastTick,
     hero_updated_at: hero.lastAdvancedAt === undefined ? null : iso(hero.lastAdvancedAt),
     data_state: hero.quarantined || servicePaused ? ('service_paused' as const) : ('ready' as const),

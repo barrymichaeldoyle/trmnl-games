@@ -12,6 +12,7 @@ import { BUTTON_PRIMARY, LINK_BUTTON, Button, LoadingState } from '../../../../l
 import { captureAnalytics, readAnalyticsConsent } from '../../../../lib/analytics'
 import { reportError } from '../../../../lib/errorReporting'
 import { NameField } from '../../../../lib/nameField'
+import { GenderPicker, type HeroGender } from '../../../../lib/genderPicker'
 import { useAnalyticsView } from '../../../../lib/analyticsProvider'
 
 type Search = { code?: string; installation_callback_url?: string; invalid?: boolean }
@@ -73,6 +74,7 @@ function ConnectForm() {
   const [reconnectCallback, setReconnectCallback] = useState<string | null>(null)
   const [alias, setAlias] = useState('')
   const [heroName, setHeroName] = useState('Steve')
+  const [heroGender, setHeroGender] = useState<HeroGender>('male')
   const inFlight = useRef(false)
   if (me === undefined) return <LoadingState label="Loading your account…" />
   const needsProfile = !me?.user
@@ -93,7 +95,7 @@ function ConnectForm() {
         gameSlug: 'desk-crawler',
         analyticsConsent: readAnalyticsConsent() === 'allowed',
         ...(needsProfile ? { publicAlias: String(form.get('publicAlias') ?? '') } : {}),
-        ...(needsHero ? { heroName: String(form.get('heroName') ?? '') } : {}),
+        ...(needsHero ? { heroName: String(form.get('heroName') ?? ''), heroGender } : {}),
       },
       })
       if (result.ok) {
@@ -130,7 +132,10 @@ function ConnectForm() {
         </p>
       )}
       {needsHero ? (
-        <NameField label="Hero name" note="Also public." rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} disabled={submitting} />
+        <>
+          <NameField label="Hero name" note="Also public." rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} disabled={submitting} />
+          <GenderPicker value={heroGender} onChange={setHeroGender} note="Changes how your hero looks, nothing else." disabled={submitting} />
+        </>
       ) : (
         <p>
           Your hero <strong>{me?.hero?.name}</strong> will appear on this TRMNL.
