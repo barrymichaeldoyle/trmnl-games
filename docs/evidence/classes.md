@@ -37,4 +37,4 @@ Shipped numbers over 90 days ([warrior](balance-v18-warrior-90-days.json), [rogu
 
 ## Switch
 
-Not yet switched. After the deploy: `npx convex run world:setActiveContentVersion '{"contentVersion":"v18"}' --prod` between runs. The switch moves no career pointers (v18's ladder is v17's). Every hero's achievements get one full pass under catalog version 8 on its next tick, with nothing to award until someone recruits a Rogue.
+Deployed with dd4155f (Workers build passed). Barry switched production from v17 to v18 on 2026-10-13 (`heroesMoved: 0`, since v18's ladder is v17's); run 867, the first on v18, completed clean: one eligible hero, one processed, nothing quarantined, no simulation failures, and the hero's `achievementsVersion` moved to 8. That hero is a level-6 Warrior, so its roster is already open.

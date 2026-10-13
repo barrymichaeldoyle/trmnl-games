@@ -456,4 +456,4 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-13, D135 switch: production on v17 since about 06:00 UTC; run 861 clean; the one hero on the ladder sits on "Reach level 7".
 
-2026-10-13, D136: Barry approved the roster and classes plan (P37) with every recommendation; built as content v18 with achievement catalog version 8. Production switch pending.
+2026-10-13, D136: Barry approved the roster and classes plan (P37) with every recommendation; built as content v18 with achievement catalog version 8 (dd4155f). Barry switched production from v17 to v18 the same morning; run 867, the first on v18, completed clean.
