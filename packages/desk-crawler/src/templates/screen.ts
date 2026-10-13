@@ -698,7 +698,7 @@ const fullPortrait = `
   {% else %}
   <div class="grow h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall lg:gap--small stretch-x">
     ${attention('label lg:title--small', 3)}
-    {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title lg:title', 24, 40, false, 'lg')}
+    {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 40, false, 'lg')}
   </div>
   <div class="no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall lg:gap--small stretch-x pt--1 lg:pt--2" data-rank-panel="true">${rankPanel(true)}</div>
   {% endif %}
@@ -836,7 +836,7 @@ const halfVerticalPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('halfVertical')}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
-    <span class="title title--small lg:title" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
+    <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
     ${statusLine(2, 24)}${hearts(false)}${xpTicks()}${counters()}
   </div>
   <div class="lg:hidden no-shrink stretch-x">${divider}</div>
@@ -880,7 +880,7 @@ const halfVerticalBody = (withScene: boolean) => `
   <div class="lg:hidden no-shrink stretch-x">${divider}</div>
   <div class="lg:hidden grow h--full h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--small pt--2">
     {% if attention %}${attention('label lg:title--small', 3)}{% else %}${attention('label lg:title--small', 3)}${recapBlock()}{% endif %}
-    {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title title--small lg:title', 24, 50)}
+    {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title title--small', 24, 50)}
   </div>
   ${withScene ? xSide(false) : xHalfTall}
   {% endif %}
@@ -947,7 +947,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   <div class="grid grow h--full h--min-0 stretch-x gap--small lg:gap--large pt--1 lg:pt--2" data-story-columns="true">
     <div class="col--span-12 lg:col--span-8 flex flex--col flex--left flex--top gap--xsmall lg:gap--small h--full">
       ${attention('label lg:title--small', 2)}
-      {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title lg:title', 24, 64, false, 'all', 74)}
+      {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 64, false, 'all', 74)}
       ${goalLine}
     </div>
     <div class="hidden lg:block col--span-4"><div class="flex flex--row flex--stretch-y gap--medium h--full" data-board-column="true">
