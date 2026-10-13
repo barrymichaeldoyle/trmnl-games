@@ -102,9 +102,15 @@ for (const file of files.sort()) {
     const ribbon = Array.from(layoutEl.querySelectorAll('[data-recap-ribbon]')).find(visible)
     const ribbonTop = ribbon ? ribbon.getBoundingClientRect().top : null
     const underRibbon = ribbon ? Array.from(layoutEl.querySelectorAll('span,img')).filter(visible).filter((e) => !ribbon.contains(e) && e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().bottom > ribbonTop + 1).map((e) => ({ tag: e.tagName, text: (e.innerText || '').slice(0, 40), bottom: e.getBoundingClientRect().bottom, ribbonTop })) : []
-    return { bound, overflow, broken, textOverflow, titleOverflow, underRibbon, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
+    // No text may sit under a scannable code: a no-shrink row once ran a Slow Cast XP count under the X's QR.
+    const codes = Array.from(layoutEl.querySelectorAll('[data-companion-qr] img, [data-home-qr] img')).filter(visible).map((e) => e.getBoundingClientRect())
+    const underCode = Array.from(layoutEl.querySelectorAll('span')).filter(visible).filter((e) => !e.querySelector('span') && e.innerText.trim()).filter((e) => {
+      const r = e.getBoundingClientRect()
+      return codes.some((c) => r.left < c.right - 1 && r.right > c.left + 1 && r.top < c.bottom - 1 && r.bottom > c.top + 1)
+    }).map((e) => ({ text: e.innerText.slice(0, 40), right: e.getBoundingClientRect().right }))
+    return { bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
   })
-  const ok = !result.error && result.overflow.length === 0 && result.titleOverflow.length === 0 && result.underRibbon.length === 0 && result.broken.length === 0 && result.textOverflow.length === 0 && result.lists.every((l) => l.fit === 'complete') && result.recaps.every((r) => r.fit === 'complete') && result.hearts.every((h) => h.images === 10 && h.wrappedRows === 1 && h.rows === 1) && result.ticks.every((t) => t.images === 10 && t.tickRows === 1)
+  const ok = !result.error && result.overflow.length === 0 && result.titleOverflow.length === 0 && result.underRibbon.length === 0 && result.underCode.length === 0 && result.broken.length === 0 && result.textOverflow.length === 0 && result.lists.every((l) => l.fit === 'complete') && result.recaps.every((r) => r.fit === 'complete') && result.hearts.every((h) => h.images === 10 && h.wrappedRows === 1 && h.rows === 1) && result.ticks.every((t) => t.images === 10 && t.tickRows === 1)
   if (!ok) failures++
   results.push({ file, state, device, portrait, layout, ok, ...result })
   // The plugin's own view: in portrait the mashup slots are not the landscape box turned on its side.

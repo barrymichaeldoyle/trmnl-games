@@ -13,10 +13,12 @@
  * The OG's full landscape shows five stories where three left the foot empty; the X's sets its stories beside the board.
  * Template v4 (D125) asks for the stage width that fills each scene slot at its whole-number scale (scene v3), so
  * the water reaches the slot's edges instead of floating in it, and lifts the OG's landscape half to 3x.
+ * Template v5 (2026-10-13) lets the title ticks shrink to their column, so in the X's landscape half the count wraps
+ * under the ticks instead of running under the QR code.
  */
 import { markUri, STORY_GLYPHS, type ScMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 4
+export const TEMPLATE_VERSION = 5
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -70,7 +72,7 @@ const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
  * and rounding, so both Liquids agree; at the last title there is nothing left to fill and the bar is left off.
  */
 const xpTicks = (count = true) =>
-  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small no-shrink" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
+  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
 
 /**
  * The title bar with the weekly fly code. A narrow portrait column (side, quarter) cannot fit the name beside the

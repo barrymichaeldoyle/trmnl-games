@@ -1,2 +1,7 @@
 # Run every official rule. Any future exception must explain its reason here.
-ignored_lint_rules: []
+ignored_lint_rules:
+  # Both games are third-party OAuth plugins: TRMNL fetches the markup from our screen endpoint on every refresh, so
+  # no .liquid file is ever imported and the 100 KB import limit does not apply (Desk Crawler's inline glyphs pass it).
+  - files_under_upload_limit
+  # Third-party plugins have no recipe form, so there is no author_bio field; contact details live on the listing.
+  - author_contact_method
