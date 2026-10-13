@@ -65,7 +65,7 @@ describe('name tags and public names (D142)', () => {
     expect((await bo.query(api.inventory.mine, {})).nameTag.inStockAt).toBeNull()
   })
 
-  it('changes the public name free once every 30 days and holds the old name from other players', async () => {
+  it('changes the public name free once every 7 days and holds the old name from other players', async () => {
     const heroId = await seedHero(t, {}, 'Cy')
     await seedHero(t, {}, 'Taken')
     const other = await seedHero(t, {}, 'Dee')
@@ -73,15 +73,15 @@ describe('name tags and public names (D142)', () => {
     expect(await errorCode(cy.mutation(api.users.changePublicName, { operationId: opId(), publicAlias: 'taken' }))).toBe('ALIAS_TAKEN')
 
     await cy.mutation(api.users.changePublicName, { operationId: opId(), publicAlias: 'Cyrus' })
-    expect(await userOf(t, heroId)).toMatchObject({ publicAlias: 'Cyrus', normalizedAlias: 'cyrus', publicNameVersion: 2, publicNameChangedAt: SLOT, heldAlias: { normalized: 'cy', until: SLOT + 30 * DAY } })
+    expect(await userOf(t, heroId)).toMatchObject({ publicAlias: 'Cyrus', normalizedAlias: 'cyrus', publicNameVersion: 2, publicNameChangedAt: SLOT, heldAlias: { normalized: 'cy', until: SLOT + 7 * DAY } })
     expect(await heroDoc(t, heroId)).toMatchObject({ name: 'Baz' })
-    expect((await cy.query(api.users.me, {}))?.user?.publicNameChangeAt).toBe(SLOT + 30 * DAY)
+    expect((await cy.query(api.users.me, {}))?.user?.publicNameChangeAt).toBe(SLOT + 7 * DAY)
     expect(await errorCode(cy.mutation(api.users.changePublicName, { operationId: opId(), publicAlias: 'Cyrano' }))).toBe('NAME_CHANGE_LIMIT')
 
     // Another player cannot take the name Cy gave up until the hold ends.
     const dee = as(t, 'Dee')
     expect(await errorCode(dee.mutation(api.users.changePublicName, { operationId: opId(), publicAlias: 'CY' }))).toBe('ALIAS_TAKEN')
-    vi.setSystemTime(SLOT + 30 * DAY)
+    vi.setSystemTime(SLOT + 7 * DAY)
     await dee.mutation(api.users.changePublicName, { operationId: opId(), publicAlias: 'CY' })
     expect(await userOf(t, other)).toMatchObject({ publicAlias: 'CY', heldAlias: { normalized: 'dee' } })
     await cy.mutation(api.users.changePublicName, { operationId: opId(), publicAlias: 'Cyrano' })

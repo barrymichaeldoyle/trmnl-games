@@ -69,7 +69,7 @@ function Account() {
 const longDate = (at: number) => new Date(at).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })
 
 /**
- * D142: change the public name shared by every game, free once every 30 days. Hero names are separate and change with
+ * D142: change the public name shared by every game, free once every 7 days. Hero names are separate and change with
  * a name tag in each game.
  */
 function PublicNameForm({ current, changeAt }: { current: string; changeAt: number | null }) {
@@ -89,8 +89,8 @@ function PublicNameForm({ current, changeAt }: { current: string; changeAt: numb
             <input value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={20} required autoComplete="off" disabled={change.pending} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" />
           </label>
           <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
-            <li>Free, once every 30 days.</li>
-            <li>Links to your old public pages stop working, and nobody else can take {current} for 30 days.</li>
+            <li>Free, once every 7 days.</li>
+            <li>Links to your old public pages stop working, and nobody else can take {current} for 7 days.</li>
             <li>Other players' logs show "Hidden player" where they met your old name.</li>
           </ul>
           <Button type="submit" className="self-start" pending={change.pending} busyLabel="Changing…" disabled={!valid}>Change to {name.trim() || 'new name'}</Button>

@@ -8,8 +8,8 @@ import { appError } from './lib/errors'
 import { identityHash } from './deletion'
 import { aliasTaken } from './lib/aliases'
 
-/** D142: a player can change their public name once every 30 days, and the old one is kept from others as long. */
-export const PUBLIC_NAME_GAP_MS = 30 * 24 * 60 * 60 * 1000
+/** D142: a player can change their public name once every 7 days, and the old one is kept from others as long. */
+export const PUBLIC_NAME_GAP_MS = 7 * 24 * 60 * 60 * 1000
 
 /**
  * The signed-in owner's profile, or null when signed out. `signedIn` with a
@@ -102,9 +102,9 @@ export const replacePublicNames = mutation({
 })
 
 /**
- * D142: the owner changes their public name, the one name shared by every game, for free once every 30 days. The
+ * D142: the owner changes their public name, the one name shared by every game, for free once every 7 days. The
  * name version moves on, so other players' raid and meeting lines read "Hidden player" as for any rename, and the old
- * name stays off-limits to other players for 30 days so a shared profile link cannot be picked up straight away.
+ * name stays off-limits to other players for 7 days so a shared profile link cannot be picked up straight away.
  */
 export const changePublicName = mutation({
   args: { operationId: v.string(), publicAlias: v.string() },
@@ -113,7 +113,7 @@ export const changePublicName = mutation({
     const result = await runIntent(ctx, args.operationId, 'users.changePublicName', { publicAlias: args.publicAlias }, async (user) => {
       if (user.nameRepairRequired) throw appError('INVALID_STATE', 'Choose new names from the name change notice first.')
       const now = Date.now()
-      if (user.publicNameChangedAt !== undefined && now < user.publicNameChangedAt + PUBLIC_NAME_GAP_MS) throw appError('NAME_CHANGE_LIMIT', 'You can change your public name once every 30 days.')
+      if (user.publicNameChangedAt !== undefined && now < user.publicNameChangedAt + PUBLIC_NAME_GAP_MS) throw appError('NAME_CHANGE_LIMIT', 'You can change your public name once every 7 days.')
       const alias = validateName(args.publicAlias, ALIAS_RULE)
       if (!alias.ok) throw appError('INVALID_INPUT', `Public name: ${alias.reason}`)
       const normalizedAlias = normalizeAlias(alias.value)
