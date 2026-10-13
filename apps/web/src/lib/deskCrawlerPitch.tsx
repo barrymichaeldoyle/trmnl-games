@@ -74,26 +74,29 @@ export function FloorGrid({ headingId, headingLevel: Heading = 'h2' }: { heading
   )
 }
 
-const STEPS: ReadonlyArray<{ glyph: GlyphName; title: string; body: string }> = [
-  { glyph: 'plug', title: 'Install it on your TRMNL', body: 'Add Desk Crawler from the TRMNL marketplace, name your hero in the companion and press Save.' },
-  { glyph: 'clock', title: 'Your hero plays every 15 minutes', body: 'Fights, finds, traps and the odd knockout, day and night, whether or not your screen is awake.' },
-  { glyph: 'bag', title: 'Check in every few days', body: 'Open the companion on your phone to sort the bag and pick the next floor.' },
+/** The loop by how often each part happens, which also gives the order; the adventure lines are from the sample screen. */
+const STEPS: ReadonlyArray<{ when: string; title: string; body: string; lines?: readonly string[] }> = [
+  { when: 'Once', title: 'Install it on your TRMNL', body: 'Add Desk Crawler from the TRMNL marketplace, name your hero in the companion and press Save.' },
+  { when: 'Every 15 minutes', title: 'Your hero adventures', body: 'Fights, finds, traps and the odd knockout, day and night, whether or not your screen is awake.', lines: ['Untangled a Cable Serpent and zip-tied it.', 'Found gold under a raised floor tile.'] },
+  { when: 'Every few days', title: 'You check in', body: 'Open the companion on your phone to sort the bag and pick the next floor.' },
 ]
 
-/** The loop in three steps, for a visitor who has never seen an idle game on e-ink. */
+/** The loop for a visitor who has never seen an idle game on e-ink. */
 export function HowItPlays({ headingId }: { headingId: string }) {
   return (
-    <section aria-labelledby={headingId} className="flex flex-col gap-6">
+    <section aria-labelledby={headingId} className="flex flex-col gap-8">
       <h2 id={headingId} className="font-display text-3xl font-bold text-gold-ink">How it plays</h2>
-      <ol className="grid gap-4 md:grid-cols-3">
-        {STEPS.map((step, i) => (
-          <li key={step.title} className="window flex flex-col gap-3 p-5">
-            <div className="flex items-center gap-3">
-              <span className="hud flex size-9 shrink-0 items-center justify-center border-[3px] border-night bg-gold text-hud-sm text-night" aria-hidden="true">{i + 1}</span>
-              <Glyph name={step.glyph} size={20} className="text-gold-ink" />
-            </div>
-            <h3 className="font-display text-xl font-bold">{step.title}</h3>
+      <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
+        {STEPS.map((step) => (
+          <li key={step.when} className="flex flex-col gap-2 border-t-2 border-rule pt-5">
+            <p className="text-sm font-semibold text-gold-ink">{step.when}</p>
+            <h3 className="font-display text-2xl font-bold">{step.title}</h3>
             <p className="leading-relaxed text-muted">{step.body}</p>
+            {step.lines ? (
+              <ul aria-label="From a sample screen" className="mt-2 flex flex-col gap-1 border-l-2 border-gold/60 pl-3 text-sm">
+                {step.lines.map((line) => <li key={line}>{line}</li>)}
+              </ul>
+            ) : null}
           </li>
         ))}
       </ol>
