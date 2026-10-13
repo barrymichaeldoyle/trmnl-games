@@ -19,7 +19,7 @@ Rule status: one Warrior/three biomes, death/revival, public pseudonyms and paus
 
 The hero's first encounter occurs in the next eligible scheduled run after verified TRMNL activation. Pending setup earns no encounters/rewards/rank. Account creation and Save grant no extra simulation ticks; after activation, display refresh/connectivity never determines progression.
 
-Public aliases are 2–20 supported display characters; hero names 2–16. Trim whitespace, normalize Unicode, reject controls, HTML/Liquid delimiters and unsupported emoji, and escape text at render time. Use an allowlist suitable for MVP device fonts; broaden localized names after font verification. Alias uniqueness is case-insensitive. No global uniqueness requirement for hero names.
+Public aliases are 2–20 supported display characters; hero names 2–16. Trim whitespace, normalize Unicode, reject controls, HTML/Liquid delimiters and unsupported emoji, and escape text at render time. Use an allowlist suitable for MVP device fonts; broaden localized names after font verification. Alias uniqueness is case-insensitive. No global uniqueness requirement for hero names. The rule lives in `@trmnl-games/platform`, so every name field in the companion and install pages checks it as the player types and names the refused characters, with an accent-free suggestion; the server check stays authoritative.
 
 ## Stats and progression
 

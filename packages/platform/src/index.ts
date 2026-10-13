@@ -88,3 +88,5 @@ export const PLATFORM_ACHIEVEMENTS: readonly PlatformAchievement[] = [
 export function platformAchievements(stats: { games: number; collected: number }): PlatformAchievement[] {
   return PLATFORM_ACHIEVEMENTS.filter((a) => (a.kind === 'games' ? stats.games : stats.collected) >= a.atLeast)
 }
+
+export * from './names'

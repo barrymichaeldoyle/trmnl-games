@@ -4,8 +4,10 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { nextSlotAfter } from '@trmnl-games/desk-crawler/sim/schedule'
 import { api } from '@trmnl-games/backend/api'
+import { HERO_NAME_RULE } from '@trmnl-games/platform'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { useIntent } from '../../../lib/intent'
+import { NameField, nameProblem } from '../../../lib/nameField'
 import { seo } from '../../../lib/seo'
 import { Glyph } from '../../../lib/glyphs'
 import { BUTTON_SECONDARY, Button, Card, ErrorNote, LINK_BUTTON, LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
@@ -472,14 +474,11 @@ function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { price: numb
   const [asking, setAsking] = useState(false)
   const inStock = tag.inStockAt === null || tag.inStockAt <= Date.now()
   const affordable = gold >= tag.price
-  const valid = name.trim().length >= 2 && name.trim() !== heroName
+  const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null && name.trim() !== heroName
   return <Card title="Name tag" icon="tag">
     <p>A fresh “Hi, my name is” sticker. Your hero goes by the name you write on it, on your TRMNL, the leaderboard and your hero page.</p>
     {inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
-      <label className="flex flex-col gap-1">
-        <span className="text-sm font-semibold">New name for {heroName}</span>
-        <input value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={16} required autoComplete="off" disabled={intent.pending} className="min-h-11 min-w-0 border-2 border-edge bg-ground px-3 text-base" />
-      </label>
+      <NameField label={`New name for ${heroName}`} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={intent.pending} />
       <Button type="submit" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !valid || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {tag.price} gold</Button>
       <p className="text-sm text-muted">One in stock a day.{!affordable ? <> You have <span className="text-gold-ink tabular-nums">{gold} gold</span>.</> : null}</p>
     </form> : <p className="mt-3 text-sm text-muted">Today's tag is sold. The next one is in stock {new Date(tag.inStockAt!).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}.</p>}

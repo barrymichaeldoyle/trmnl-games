@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
+import { HERO_NAME_RULE } from '@trmnl-games/platform'
 import { useIntent } from '../../../lib/intent'
+import { NameField, nameProblem } from '../../../lib/nameField'
 import { Button, Card } from '../../../lib/ui'
 import { Glyph } from '../../../lib/glyphs'
 import { ConfirmSheet, Consequences } from './-confirm'
@@ -138,7 +140,7 @@ function RecruitCard({ rule, current, roster, notify }: { rule: RosterView['clas
   const [name, setName] = useState('')
   const [asking, setAsking] = useState(false)
   const recruit = useIntent(api.roster.recruit, { onFeedback: notify })
-  const valid = name.trim().length >= 2
+  const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null
   const blocked = roster.nextAt !== null || !roster.canPark
   return (
     <Card>
@@ -147,10 +149,7 @@ function RecruitCard({ rule, current, roster, notify }: { rule: RosterView['clas
       <p className="mt-1 text-sm"><strong>{rule.passive.name}:</strong> {rule.passive.blurb}</p>
       <p className="mt-1 text-sm text-muted">{classNumbers(rule)}</p>
       <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && !blocked) setAsking(true) }}>
-        <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold">Name your {rule.name}</span>
-          <input value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={16} required autoComplete="off" disabled={recruit.pending} className="min-h-11 min-w-0 border-2 border-edge bg-ground px-3 text-base" />
-        </label>
+        <NameField label={`Name your ${rule.name}`} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={recruit.pending} />
         <Button type="submit" disabled={!valid || blocked}>Recruit a {rule.name}</Button>
         {roster.nextAt !== null ? <p className="text-sm text-muted">Recruiting counts as the day's switch. It opens {clock(roster.nextAt)}.</p> : null}
         {roster.nextAt === null && !roster.canPark && current ? <p className="text-sm text-muted">{current.name} can hand over once back on their feet or arrived.</p> : null}

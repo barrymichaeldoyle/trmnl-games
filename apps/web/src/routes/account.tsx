@@ -4,8 +4,10 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { useAction } from 'convex/react'
 import { api } from '@trmnl-games/backend/api'
+import { ALIAS_RULE } from '@trmnl-games/platform'
 import { AuthShell } from '../lib/platformShell'
 import { errorMessage, useIntent } from '../lib/intent'
+import { NameField, nameProblem } from '../lib/nameField'
 import { Button, ErrorNote } from '../lib/ui'
 import { seo } from '../lib/seo'
 import { preload } from '../lib/preload'
@@ -77,17 +79,14 @@ function PublicNameForm({ current, changeAt }: { current: string; changeAt: numb
   const [now] = useState(Date.now)
   const change = useIntent(api.users.changePublicName)
   const open = changeAt === null || changeAt <= now
-  const valid = name.trim().length >= 2 && name.trim() !== current
+  const valid = nameProblem(name, ALIAS_RULE, 'public name') === null && name.trim() !== current
   return (
     <details className="border-t-2 border-faint pt-4">
       <summary className="min-h-11 cursor-pointer font-semibold">Change public name…</summary>
       <p>Your public name is how other players see you in every game: on leaderboards, raids, meetings and your public pages. Your heroes keep their own names.</p>
       {open ? (
         <form className="mt-3 flex flex-col gap-2" onSubmit={async (event) => { event.preventDefault(); if (valid && await change.run({ publicAlias: name.trim() }, `You are now ${name.trim()}.`)) setName('') }}>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="font-semibold">New public name</span>
-            <input value={name} onChange={(event) => setName(event.target.value)} minLength={2} maxLength={20} required autoComplete="off" disabled={change.pending} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" />
-          </label>
+          <NameField label="New public name" small rule={ALIAS_RULE} noun="public name" value={name} onChange={setName} disabled={change.pending} />
           <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
             <li>Free, once every 7 days.</li>
             <li>Links to your old public pages stop working, and nobody else can take {current} for 7 days.</li>

@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
+import { ALIAS_RULE, HERO_NAME_RULE } from '@trmnl-games/platform'
 import { useIntent } from '../../../lib/intent'
+import { NameField } from '../../../lib/nameField'
 import { Button, Card, ErrorNote } from '../../../lib/ui'
 
 /** Shown only when an admin has masked this player's names (D23). Progress is untouched. */
@@ -16,14 +18,8 @@ export function NameRepair() {
     <Card title="Choose new names">
       <p>Your public names were hidden after a report. Pick new ones that follow the name rules; your hero's progress and gear are unchanged.</p>
       <form onSubmit={onSubmit} className="mt-3 flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">New public name</span>
-          <input value={alias} onChange={(e) => setAlias(e.target.value)} minLength={2} maxLength={20} required autoComplete="off" disabled={replace.pending} className="min-h-11 min-w-0 border-2 border-edge bg-ground px-3 text-base" />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">New hero name</span>
-          <input value={hero} onChange={(e) => setHero(e.target.value)} minLength={2} maxLength={16} required autoComplete="off" disabled={replace.pending} className="min-h-11 min-w-0 border-2 border-edge bg-ground px-3 text-base" />
-        </label>
+        <NameField label="New public name" rule={ALIAS_RULE} noun="public name" value={alias} onChange={setAlias} disabled={replace.pending} />
+        <NameField label="New hero name" rule={HERO_NAME_RULE} noun="hero name" value={hero} onChange={setHero} disabled={replace.pending} />
         <Button type="submit" pending={replace.pending} busyLabel="Saving names…">
           Save names
         </Button>

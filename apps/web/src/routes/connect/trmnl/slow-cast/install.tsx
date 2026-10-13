@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
+import { ALIAS_RULE } from '@trmnl-games/platform'
 import { requireOpenGame } from '../../../../lib/gameAccess'
 import { seo } from '../../../../lib/seo'
 import { SwitchAccount } from '../../../../lib/switchAccount'
@@ -11,6 +12,7 @@ import { captureInstall, finishInstall, getPendingInstall } from '../../../../se
 import { Button, LoadingState } from '../../../../lib/ui'
 import { captureAnalytics, readAnalyticsConsent } from '../../../../lib/analytics'
 import { reportError } from '../../../../lib/errorReporting'
+import { NameField } from '../../../../lib/nameField'
 
 type Search = { code?: string; installation_callback_url?: string; invalid?: boolean }
 
@@ -72,6 +74,7 @@ function ConnectForm() {
   const { data: me } = useQuery(convexQuery(api.users.me, {}))
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [alias, setAlias] = useState('')
   const inFlight = useRef(false)
   if (me === undefined) return <LoadingState label="Loading your account…" />
   const needsProfile = !me?.user
@@ -102,11 +105,7 @@ function ConnectForm() {
       {needsProfile ? (
         <>
           <p className="border-y border-edge py-3 text-sm">This sign-in has no TRMNL Games account yet, so connecting creates one. If you already play another game, switch account and sign in the way you did before.</p>
-          <label className="flex flex-col gap-1">
-            <span className="font-semibold">Public name</span>
-            <span className="text-sm text-muted">Your angler's name on leaderboards and TRMNL screens. No contact details.</span>
-            <input name="publicAlias" required minLength={2} maxLength={20} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" autoComplete="off" disabled={submitting} />
-          </label>
+          <NameField label="Public name" note="Your angler's name on leaderboards and TRMNL screens. No contact details." rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
         </>
       ) : (
         <p>Signed in as <strong>{me?.user?.publicAlias}</strong>. Your angler fishes under this name.</p>

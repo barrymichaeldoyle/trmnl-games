@@ -4,12 +4,14 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
+import { ALIAS_RULE, HERO_NAME_RULE } from '@trmnl-games/platform'
 import { seo } from '../../../../lib/seo'
 import { SwitchAccount } from '../../../../lib/switchAccount'
 import { captureInstall, finishInstall, getPendingInstall } from '../../../../server/installFns'
 import { BUTTON_PRIMARY, LINK_BUTTON, Button, LoadingState } from '../../../../lib/ui'
 import { captureAnalytics, readAnalyticsConsent } from '../../../../lib/analytics'
 import { reportError } from '../../../../lib/errorReporting'
+import { NameField } from '../../../../lib/nameField'
 import { useAnalyticsView } from '../../../../lib/analyticsProvider'
 
 type Search = { code?: string; installation_callback_url?: string; invalid?: boolean }
@@ -69,6 +71,8 @@ function ConnectForm() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [reconnectCallback, setReconnectCallback] = useState<string | null>(null)
+  const [alias, setAlias] = useState('')
+  const [heroName, setHeroName] = useState('Steve')
   const inFlight = useRef(false)
   if (me === undefined) return <LoadingState label="Loading your account…" />
   const needsProfile = !me?.user
@@ -119,22 +123,14 @@ function ConnectForm() {
         </p>
       ) : null}
       {needsProfile ? (
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Public name</span>
-          <span className="text-sm text-muted">Shown to other players on leaderboards and TRMNL screens. No contact details.</span>
-          <input name="publicAlias" required minLength={2} maxLength={20} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" autoComplete="off" disabled={submitting} />
-        </label>
+        <NameField label="Public name" note="Shown to other players on leaderboards and TRMNL screens. No contact details." rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
       ) : (
         <p>
           Signed in as <strong>{me?.user?.publicAlias}</strong>.
         </p>
       )}
       {needsHero ? (
-        <label className="flex flex-col gap-1">
-          <span className="font-semibold">Hero name</span>
-          <span className="text-sm text-muted">Also public. 2 to 16 characters.</span>
-          <input name="heroName" required minLength={2} maxLength={16} defaultValue="Steve" className="min-h-11 border-2 border-edge bg-ground px-3 text-base" autoComplete="off" disabled={submitting} />
-        </label>
+        <NameField label="Hero name" note="Also public." rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} disabled={submitting} />
       ) : (
         <p>
           Your hero <strong>{me?.hero?.name}</strong> will appear on this TRMNL.
