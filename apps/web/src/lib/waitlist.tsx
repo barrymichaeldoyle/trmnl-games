@@ -11,7 +11,7 @@ import { PRELOAD_CLERK_UI } from './clerkUi'
 
 /** Set after a signup so the account the visitor creates next attaches to that entry without asking again. */
 const JOINED_KEY = 'tg_waitlist_joined_v1'
-const INPUT = 'min-h-11 min-w-0 flex-1 border-2 border-edge bg-ground px-3 text-base'
+const INPUT = 'min-h-11 min-w-0 flex-1 basis-56 border-2 border-edge bg-ground px-3 text-base'
 
 /** Launch-list signup (D105). Email only; an account is offered afterwards and stays optional. */
 /** `instance` tells two forms on one page apart, so each label still points at its own field. */
@@ -63,7 +63,7 @@ export function WaitlistForm({ source, instance = '' }: { source: 'notify' | 'pi
         <input id={inputId} type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={254} autoComplete="email" placeholder="you@example.com" readOnly={pending} aria-invalid={error ? true : undefined} aria-describedby={error ? `${inputId}-hint ${inputId}-error` : `${inputId}-hint`} className={INPUT} />
         {/* Hidden from people and assistive tech; bots that fill every field are dropped quietly. */}
         <input type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
-        <Button type="submit" pending={pending} busyLabel="Adding…">Notify me</Button>
+        <Button type="submit" pending={pending} busyLabel="Adding…" className="grow sm:grow-0">Notify me</Button>
       </div>
       <p id={`${inputId}-hint`} className="text-sm text-muted">No newsletter. One launch email, then your address is deleted.</p>
       <ErrorNote id={`${inputId}-error`} message={error} />
