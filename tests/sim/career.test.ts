@@ -422,5 +422,11 @@ describe('level 7 and Bold before the raid goal (D135, content v17)', () => {
     expect(remapRung(to, from, index(v17, 'go_bold'))).toBe(index(v16, 'first_raid'))
     expect(remapRung(to, from, index(v17, 'first_raid'))).toBe(index(v16, 'first_raid'))
     expect(remapRung(from, from, 7)).toBe(7)
+    // With the hero's state: unmet inserted rungs right before the pointer's rung come first; nothing else changes.
+    const unmet = (ids: string[]) => (rung: { id: string }) => ids.includes(rung.id)
+    expect(remapRung(from, to, index(v16, 'first_raid'), unmet(['level_7', 'go_bold', 'first_raid']))).toBe(index(v17, 'level_7'))
+    expect(remapRung(from, to, index(v16, 'first_raid'), unmet(['go_bold', 'first_raid']))).toBe(index(v17, 'go_bold'))
+    expect(remapRung(from, to, index(v16, 'first_raid'), unmet(['first_raid']))).toBe(index(v17, 'first_raid'))
+    expect(remapRung(from, to, index(v16, 'cafeteria_win'), unmet(['level_7', 'go_bold', 'cafeteria_win']))).toBe(index(v17, 'cafeteria_win'))
   })
 })

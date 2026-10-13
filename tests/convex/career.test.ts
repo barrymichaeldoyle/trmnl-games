@@ -173,31 +173,38 @@ describe('career ladder backend (P35)', () => {
     await seedWorld(t, { activeContentVersion: 'v16', currentTick: 10 })
     // v16 indices: 12 is the elite goal, 13 the raid goal, 14 the Cafeteria goal; 24 is past the end.
     const before = await seedHero(t, { level: 9 }, 'Bo')
-    const on = await seedHero(t, { level: 9 }, 'Cy')
-    const after = await seedHero(t, { level: 9 }, 'Ed')
-    const done = await seedHero(t, { level: 20 }, 'Fi')
+    const low = await seedHero(t, { level: 6 }, 'Cy')
+    const balanced = await seedHero(t, { level: 9 }, 'Di')
+    const bold = await seedHero(t, { level: 9, stance: 'bold' }, 'Ed')
+    const after = await seedHero(t, { level: 9 }, 'Fi')
+    const done = await seedHero(t, { level: 20 }, 'Gu')
+    const onRaid = { rung: 13, startedTick: 0, reached: [{ id: 'first_elite', tick: 4 }], unclaimed: [{ id: 'first_elite', gold: 40, tick: 4 }] }
     await t.run(async (ctx) => {
       await ctx.db.patch(before, { career: { rung: 12, startedTick: 0, reached: [], armedAt: 3, armedCount: 0 } })
-      await ctx.db.patch(on, { career: { rung: 13, startedTick: 0, reached: [{ id: 'first_elite', tick: 4 }], unclaimed: [{ id: 'first_elite', gold: 40, tick: 4 }] } })
+      for (const id of [balanced, bold]) await ctx.db.patch(id, { career: onRaid })
+      // Same index, different rung after the switch: the raid goal's armed state cannot carry over to level 7.
+      await ctx.db.patch(low, { career: { ...onRaid, armedAt: 5, armedCount: 0 } })
       await ctx.db.patch(after, { career: { rung: 14, startedTick: 0, reached: [], armedAt: 2, armedCount: 1 } })
       await ctx.db.patch(done, { career: { rung: 24, startedTick: 0, reached: [] } })
     })
-    expect(await t.mutation(internal.world.setActiveContentVersion, { contentVersion: 'v17' })).toEqual({ from: 'v16', to: 'v17', heroesMoved: 3 })
+    expect(await t.mutation(internal.world.setActiveContentVersion, { contentVersion: 'v17' })).toEqual({ from: 'v16', to: 'v17', heroesMoved: 5 })
     expect((await heroDoc(t, before)).career).toEqual({ rung: 12, startedTick: 0, reached: [], armedAt: 3, armedCount: 0 })
-    expect((await heroDoc(t, on)).career).toEqual({ rung: 15, startedTick: 0, reached: [{ id: 'first_elite', tick: 4 }], unclaimed: [{ id: 'first_elite', gold: 40, tick: 4 }] })
+    // On the raid goal: the first new goal the hero has not met becomes current, reached rewards untouched.
+    expect((await heroDoc(t, low)).career).toEqual({ ...onRaid, rung: 13 })
+    expect((await heroDoc(t, balanced)).career).toEqual({ ...onRaid, rung: 14 })
+    expect((await heroDoc(t, bold)).career).toEqual({ ...onRaid, rung: 15 })
     expect((await heroDoc(t, after)).career).toEqual({ rung: 16, startedTick: 0, reached: [], armedAt: 2, armedCount: 1 })
     expect((await heroDoc(t, done)).career!.rung).toBe(26)
-    // On the raid goal: both new goals read as done, not current, and the page counts 25.
+    // The level-6 hero sees "Reach level 7" as its goal with progress, and the page counts 25.
     const view = (await as(t, 'Cy').query(api.heroes.mine, {}))!
-    expect(view.career).toMatchObject({ rung: 14, total: 25, current: { id: 'first_raid' } })
-    expect(view.career!.rungs.filter((rung) => ['level_7', 'go_bold'].includes(rung.id)).map((rung) => rung.state)).toEqual(['done', 'done'])
-    // Before it, level 7 follows the elite goal (the page lists 11 live rungs before the elite goal).
-    expect((await as(t, 'Bo').query(api.heroes.mine, {}))!.career!.rungs.slice(11, 13).map((rung) => rung.id)).toEqual(['first_elite', 'level_7'])
-    // Rolling back lands a hero on either new goal on the raid goal, with its guarantee state dropped.
-    await t.run(async (ctx) => await ctx.db.patch(before, { career: { rung: 14, startedTick: 0, reached: [], armedAt: 3, armedCount: 0 } }))
+    expect(view.career).toMatchObject({ rung: 12, total: 25, current: { id: 'level_7', value: 6, target: 7 } })
+    // Already level 7 and Bold: both new goals read as done, the raid goal stays current.
+    const boldView = (await as(t, 'Ed').query(api.heroes.mine, {}))!
+    expect(boldView.career).toMatchObject({ rung: 14, current: { id: 'first_raid' } })
+    expect(boldView.career!.rungs.filter((rung) => ['level_7', 'go_bold'].includes(rung.id)).map((rung) => rung.state)).toEqual(['done', 'done'])
+    // Rolling back lands a hero on either new goal on the raid goal.
     expect(await t.mutation(internal.world.setActiveContentVersion, { contentVersion: 'v16' })).toEqual({ from: 'v17', to: 'v16', heroesMoved: 4 })
-    expect((await heroDoc(t, before)).career).toEqual({ rung: 13, startedTick: 0, reached: [] })
-    expect((await heroDoc(t, on)).career!.rung).toBe(13)
+    for (const id of [low, balanced, bold]) expect((await heroDoc(t, id)).career).toEqual(onRaid)
     expect((await heroDoc(t, after)).career!.rung).toBe(14)
     expect((await heroDoc(t, done)).career!.rung).toBe(24)
   })

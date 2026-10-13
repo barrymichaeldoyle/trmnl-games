@@ -1,10 +1,11 @@
 import { ACTIVE_CONTENT, catalogs, type CatalogId } from '@trmnl-games/desk-crawler/content'
-import { remapRung } from '@trmnl-games/desk-crawler/sim/core/career'
+import { remapRung, rungSatisfied } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 import { v } from 'convex/values'
 import type { Doc } from './_generated/dataModel'
 import { internalMutation, type MutationCtx, type QueryCtx } from './_generated/server'
 import { DESK_CRAWLER_RUNTIME } from './lib/engine/deskCrawler'
+import { toHeroState } from './sim/runs/adapter'
 import { getOrCreateEngineWorld, readEngineWorld, setEngineContentVersion } from './lib/engine/world'
 
 export async function readWorld(ctx: QueryCtx): Promise<Doc<'worldState'> | null> {
@@ -35,17 +36,19 @@ export const setActiveContentVersion = internalMutation({
   handler: async (ctx, { contentVersion }) => {
     const switched = await setEngineContentVersion(ctx, DESK_CRAWLER_RUNTIME, contentVersion)
     const from = catalogs[switched.from as CatalogId]?.career
-    const to = catalogs[switched.to as CatalogId]?.career
+    const content = catalogs[switched.to as CatalogId]
+    const to = content?.career
     let heroesMoved = 0
     if (from !== undefined && to !== undefined && from !== to) {
       // A release operation, once per catalog switch: one pass over every hero, writing only those that move.
       for await (const hero of ctx.db.query('heroes')) {
         const career = hero.career
         if (career === undefined) continue
-        const rung = remapRung(from, to, career.rung)
-        if (rung === career.rung) continue
-        // The rung under the pointer is the same one unless the new ladder dropped it; a guarantee belongs to its rung.
+        const heroState = toHeroState(hero)
+        const rung = remapRung(from, to, career.rung, (entry) => !rungSatisfied(entry, heroState, content!))
+        // A guarantee belongs to its rung, so it goes when the rung under the pointer changes, even at the same index.
         const same = from.rungs[career.rung]?.id === to.rungs[rung]?.id
+        if (rung === career.rung && (same || career.armedAt === undefined)) continue
         const { armedAt: _a, armedCount: _c, fired: _f, ...rest } = career
         await ctx.db.patch(hero._id, { career: same ? { ...career, rung } : { ...rest, rung } })
         heroesMoved += 1

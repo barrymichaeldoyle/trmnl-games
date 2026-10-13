@@ -72,13 +72,20 @@ export function liveRung(rules: CareerRule, from: number): number {
 
 /**
  * Where a stored pointer lands when the world switches ladders (D135): on the same rung by id, so inserting rungs
- * mid-ladder moves nobody. A pointer on a rung the new ladder lacks moves on to the next old rung it has; one past
- * the old ladder's end stays past the new one's.
+ * mid-ladder moves nobody past what it has done. A pointer on a rung the new ladder lacks moves on to the next old
+ * rung it has; one past the old ladder's end stays past the new one's. With `open` (the hero has not met this rung),
+ * rungs the new ladder inserts right before the pointer's rung come first when the hero has not met them: a level-6
+ * hero waiting on the raid goal meets "Reach level 7" first, while one already level 7 and Bold keeps the raid goal.
  */
-export function remapRung(from: CareerRule, to: CareerRule, rung: number): number {
+export function remapRung(from: CareerRule, to: CareerRule, rung: number, open?: (rung: CareerRung) => boolean): number {
   for (let i = rung; i < from.rungs.length; i += 1) {
     const index = to.rungs.findIndex((entry) => entry.id === from.rungs[i]!.id)
-    if (index >= 0) return index
+    if (index < 0) continue
+    if (open === undefined || i !== rung) return index
+    let start = index
+    while (start > 0 && !from.rungs.some((entry) => entry.id === to.rungs[start - 1]!.id)) start -= 1
+    for (let j = start; j < index; j += 1) if (!to.rungs[j]!.retired && open(to.rungs[j]!)) return j
+    return index
   }
   return to.rungs.length
 }
