@@ -17,7 +17,7 @@ export const PREVIEW_PERIOD_END = Date.UTC(2026, 9, 4, 5, 0)
 /** Preview-only sample of the verified device-envelope field; never an actual redeemable code. */
 export const PREVIEW_KEEPSAKE_CODE = '482 917'
 /** Screens that never show a keepsake code. */
-export const KEEPSAKE_FREE_SCENARIOS: ReadonlySet<string> = new Set(['unlinked', 'unlinkedPaused', 'sample'])
+export const KEEPSAKE_FREE_SCENARIOS: ReadonlySet<string> = new Set(['unlinked', 'unlinkedPaused'])
 /** Scenarios that render without the owner's UTC offset, to prove the fallback. */
 export const NO_OFFSET_SCENARIOS: ReadonlySet<string> = new Set(['noMetadata'])
 
@@ -246,7 +246,16 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
   })
 
   const marketing: Record<string, PayloadInput> = {
-    sample: { ...base, ownerAlias: 'Steve', hero: hero({ name: 'Pip' }), ranking: { ...base.ranking!, top: base.ranking!.top.map(row => row.rank === 3 ? { ...row, name: 'Steve', hero_name: 'Pip' } : row) } },
+    // The public pages' sample (D137): a level-7 hero on Bold, so its log can show a desk raid on Bo from the board, and
+    // the goal after the first raid. With --keepsakes it shows the preview-only keepsake code too.
+    sample: {
+      ...base,
+      ownerAlias: 'Steve',
+      hero: hero({ name: 'Pip', level: 7, xp: 412, hp: 141, stance: 'bold' }),
+      logs: base.logs.map((log, i) => i === 2 ? { at: log.at, kind: 'raid', summary: "Raided [[Bo]]'s desk while they were at lunch.", deltas: { xpEarned: 0, gold: 31, hp: -17 } } : log),
+      goal: { title: 'Win a fight in the Cafeteria Depths', value: 0, target: 1, gold: 50 },
+      ranking: { ...base.ranking!, top: base.ranking!.top.map(row => row.rank === 3 ? { ...row, name: 'Steve', hero_name: 'Pip' } : row) },
+    },
   }
   return { groups: { states, recap: recapStates, potionFinds: potionStates, noEffect: noEffectStates, marketing }, overnightEntries, base }
 }
