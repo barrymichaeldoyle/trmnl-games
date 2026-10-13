@@ -1,6 +1,6 @@
 # Release roadmap
 
-Updated 2026-10-09 (D64, D70, D101, D109, D110). Work is planned as named releases rather than calendar months. Every passing change may still ship continuously; a release groups a coherent block of work, its release note and its gate. The earlier "Month 1–6" themes map onto the versions below and keep their feature boundaries and gates; nothing from them was dropped.
+Updated 2026-10-13 (D64, D70, D101, D109, D110, D136, D139, D141, D143, D144). Work is planned as named releases rather than calendar months. Every passing change may still ship continuously; a release groups a coherent block of work, its release note and its gate. The earlier "Month 1–6" themes map onto the versions below and keep their feature boundaries and gates; nothing from them was dropped.
 
 Version meaning:
 
@@ -10,7 +10,7 @@ Version meaning:
 
 Release order is a commitment; the dates are not. A release ends when its gate passes. Work never pauses for a gate or a review (D70): while one release waits on an external check, the next one is designed, built and, when it preserves progress and payload meaning, deployed.
 
-## Where we are (2026-10-09)
+## Where we are (2026-10-13)
 
 - **v1.0** is deployed and submitted: plugin 564 went to TRMNL review on 2026-10-07 and the review email is sent. Marketplace approval is the one open gate.
 - **v1.0.x** live polish continues while review runs: device templates are at v50, and companion and layout polish ships through main.
@@ -19,7 +19,8 @@ Release order is a commitment; the dates are not. A release ends when its gate p
 - **Next task:** watch the ladder on production (v12 live since run 804 on 2026-10-12); watch the first real alerts (D114) and the to-do list (D112) on production.
 - **Next task:** watch the first salvages and workbench jobs on production (D129, switched on 2026-10-12 at 16:27 UTC; run 807 clean); then the items below.
 - **Potion strengths (D131, 2026-10-12):** built as content v14 ([spec](potions.md), [evidence](evidence/potions.md)) and switched on in production at about 17:52 UTC the same day (run 813 clean). Barry's order for what follows, chosen with the review still open and no public players: content early players see first. Then the Archive and the Parking Garage (D133, 2026-10-12) as content v16 ([spec](biomes.md), [evidence](evidence/biomes.md)) with field notes for all five floors and twenty monsters, live in production since 19:10 UTC the same day (run 818 clean). Bigger bags wait until heroes sit at +3 in both slots.
-- **Next release:** v2.0 Depth's first two slices, salvage and the workbench (D129, [spec](salvage.md), built 2026-10-12 as content v13 with achievement catalog version 5), pulled ahead of the rest of v1.2 on 2026-10-12 because gold has no sink after week two (the roadmap's stated reason to pull v2.0 forward); the remaining v1.2 rows follow. Before this: v1.2 Other people, unless the v1.0.x reorder trigger pulls v2.0 Depth ahead once live retention data exists. Two of its rows are done: desk raids (D110, [design](raids.md)) switched on with content v7 at 22:15 UTC on 2026-10-08 after all five slices, and public profiles (D109) finished on 2026-10-09. Meetings, friends/rivals, world events and additional classes remain.
+- **v1.2 Other people** is complete as of 2026-10-13. Every core row is live: desk raids (D110, content v7), public hero pages (D109, public by default since D144), the hero roster and the Rogue (D136, v18), world events as an office calendar (D139, v19 and scene version 5), meetings (D141, v20) and friends and rivals with rival raids (D143). Two items stay open without blocking the release: a third class waits for live data on the Rogue, and graveyard items stay a stretch until their transfer and death rules are designed.
+- **Next release:** the rest of v2.0 Depth. Salvage, the workbench (D129, v13), potion strengths (D131, v14) and the Archive and Parking Garage (D133, v16) were pulled ahead of v1.2 on 2026-10-12 and are live. Bigger bags, persistent elite encounters and the later slices remain; bigger bags wait until heroes sit at +3 in both slots.
 
 ## Slow Cast, the second game (D115)
 
@@ -88,7 +89,7 @@ Achievements are additive and independent of the choice systems, so they can shi
 
 Gate: no manual intervention required to resolve expiry; choose/default cannot both award; attention remains one unobtrusive message; more app engagement is a hypothesis, not a login target. The help page covers every v1.1 system (2026-10-08), and the companion reports `stance changed`, `decision made`, `merchant purchase`, `pouch bought` and `bag bought` to consenting analytics so the hypothesis can be measured ([analytics](analytics.md)).
 
-## v1.2 — Other people exist (was Month 3; next)
+## v1.2 — Other people exist (was Month 3; complete 2026-10-13)
 
 Goal: charming asynchronous social evidence.
 
@@ -101,12 +102,12 @@ Core batch: player meetings, friends/rivals, world-event banner, shareable publi
 | Friends/rivals | Built 2026-10-13 as D143 ([design](friends.md)): one-way, silent follows of public hero pages (up to 20), one rival shown first with a head-to-head line, a Follow button on hero pages and a Following card on Rankings. Companion only; no follower lists, so nothing new to moderate. Original row: public-profile privacy and moderation; no friend requirement to progress |
 | World events | Approved 2026-10-13 as an office calendar (D139, [design](world-events.md)): eighteen fixed holiday occasions on the player's local dates instead of admin-run events, drawn into the scene, each with a story line and at most one small effect, and Friday the 13th raids as mishaps for both sides. Halloween ships first, before 31 October. W1 (rules, effects, lines, gift, mishaps) built 2026-10-13 as content v19 and live since run 880; the scene dressing for all eighteen occasions (W2, W4) built the same day as scene version 5, and the companion calendar, help section and achievement catalog version 9 (W3, W5) the same day. Complete. Occasion rules are versioned catalog rows resolved per evaluation from the stored offset; rollback is a content switch |
 | Profiles | Done 2026-10-09 (D109): a page per hero, opt-in until D144 made it public by default with a Hide switch (2026-10-13), at `/desk-crawler/heroes/<public name>` (live 2026-10-08) with a public-safe projection and the same not-found for private and missing names; page loads limited to 60 a minute per IP (Workers rate-limiting binding); the raid record as counts (D110); a social card per hero, Share and Copy link in Settings and leaderboard links to public pages (2026-10-09). Public-safe projection, alias controls, rate limits; no equipment/private-log leakage |
-| Additional classes | Started 2026-10-13 (D136, [design](classes.md)): a roster of one hero per class, one current at a time, and the Rogue as the second class from Warrior level 6 (content v18). Further classes follow live data on the Rogue; MP/spells only if their economy/state design is ready |
-| Graveyard items | Stretch; only after item-transfer ownership and death-rule changes are designed |
+| Additional classes | Started 2026-10-13 (D136, [design](classes.md)): a roster of one hero per class, one current at a time, and the Rogue as the second class from Warrior level 6 (content v18). Done for v1.2 with the Rogue, live since run 867. Further classes follow live data on the Rogue; MP/spells only if their economy/state design is ready |
+| Graveyard items | Stretch, not started and not part of the v1.2 gate; only after item-transfer ownership and death-rule changes are designed |
 
 Gate: meeting side effects commit at most once for both parties; social data does not add unbounded per-hero simulation reads; public-profile exposure is intentional. Measure follow adoption without imposing it as a launch blocker.
 
-## v2.0 — Depth (was Month 4)
+## v2.0 — Depth (was Month 4; next, four slices live)
 
 Goal: sustained progression for older heroes. Major because it raises ceilings.
 

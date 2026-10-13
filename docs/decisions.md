@@ -494,3 +494,5 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 2026-10-13, D143 amendment: rival raids (half of launches target the rival when raidable), rivals told on their Following card with Rival back, a rival tag on the Raids card. Raid and Coworkers names now link to public hero pages, as D110 and D141 specified; `docs/classes.md` corrected on parked heroes' pages.
 
 2026-10-13, D144: hero pages and Slow Cast profile entries public by default; Hide in Settings. Existing heroes became public with the deploy.
+
+2026-10-13: v1.2 Other people marked complete in the roadmap and status at Barry's request. Every core row is live; a third class (after live Rogue data) and graveyard items (stretch) stay open outside the gate. The rest of v2.0 Depth is the next release.
