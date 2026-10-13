@@ -85,7 +85,9 @@ export const Route = createFileRoute('/dev/desk-crawler')({
   head: () => seo({ title: 'Desk Crawler previews', index: false }),
   validateSearch: (search: Record<string, unknown>): PreviewSearch => ({
     view: pick(search.view, Object.keys(VIEWS) as View[], 'layouts'),
-    scenario: pick(search.scenario, SCENARIO_NAMES, 'normal'),
+    // Any string here, resolved against the scenario list in the gallery: naming the list in the route options would put
+    // the scenarios, payload builder and every content catalog into the site's main bundle.
+    scenario: typeof search.scenario === 'string' ? search.scenario : 'normal',
     device: pick(search.device, [...DEVICES, 'all'] as const, 'all'),
     layout: pick(search.layout, LAYOUTS, 'markup'),
     orientation: pick(search.orientation, [...ORIENTATIONS, 'both'] as const, 'landscape'),
@@ -141,7 +143,8 @@ function shotsFor(search: PreviewSearch): Shot[] {
 }
 
 function PreviewGallery() {
-  const search = Route.useSearch()
+  const raw = Route.useSearch()
+  const search = { ...raw, scenario: SCENARIO_NAMES.includes(raw.scenario) ? raw.scenario : 'normal' }
   const navigate = useNavigate({ from: Route.fullPath })
   const set = (patch: Partial<PreviewSearch>) => void navigate({ search: (previous) => ({ ...previous, ...patch }), replace: true })
   const shots = shotsFor(search)

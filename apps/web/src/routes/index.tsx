@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
-import { DeviceSample, FAQ_JSON_LD, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
+import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
+import { FAQ_JSON_LD } from '../lib/deskCrawlerFaq'
 import { SITE_FRAME } from '../lib/platformHeader'
 import { SiteShell } from '../lib/prose'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'

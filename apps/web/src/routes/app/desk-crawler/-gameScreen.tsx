@@ -1,7 +1,5 @@
-import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
-import { api } from '@trmnl-games/backend/api'
 import { paintedSceneUri } from '@trmnl-games/desk-crawler/art/sceneColour'
 import { keepUnitsTogether } from '@trmnl-games/desk-crawler/payload'
 import { markedRuns } from '@trmnl-games/desk-crawler/sim/core/narrative'
@@ -14,12 +12,11 @@ import { BIOME_BANDS } from '../../../lib/palette'
 import { useGains } from '../../../lib/ui'
 import { PixelIcon } from './-pixelIcon'
 import { usePulse, type PulseHero } from './-pulse'
+import { latestLogQuery } from './-queries'
 
 /** Gain chips: the stat's colour as a fill, night text on top. */
 const CHIP_FILL: Record<string, string> = { 'text-xp-ink': 'bg-xp', 'text-hp-ink': 'bg-hp-ink', 'text-gold-ink': 'bg-gold', 'text-rare-ink': 'bg-rare-ink', 'text-muted': 'bg-muted' }
 
-/** The newest log entry, as one bounded page. Preloaded by the hero route so the dialogue strip is complete in the server render. */
-export const latestLogQuery = () => convexQuery(api.heroes.recentLog, { paginationOpts: { numItems: 1, cursor: null } })
 
 const HEARTS = 10
 const FALLBACK_BANDS = BIOME_BANDS.office_cubicles!

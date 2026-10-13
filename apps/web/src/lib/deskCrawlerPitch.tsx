@@ -1,5 +1,6 @@
 import { Show, SignInButton } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
+import { FAQ } from './deskCrawlerFaq'
 import { FLOORS, UNLOCKS } from './facts.gen'
 import { Glyph, type GlyphName } from './glyphs'
 import { BIOME_BANDS } from './palette'
@@ -17,7 +18,8 @@ export function DeviceSample({ caption, priority = false }: { caption: string; p
     <figure className="flex flex-col gap-3">
       <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)] shadow-[0_0_0_3px_var(--color-night),0_24px_48px_-24px_rgb(0_0_0/0.8)]">
         <picture>
-          <source srcSet="/games/desk-crawler/screen-sample.webp" type="image/webp" />
+          {/* 800px (sharp, WebP quality 85) for phones at 2x; 1200px (lossless) for 3x phones and the desktop column. */}
+          <source srcSet="/games/desk-crawler/screen-sample-800.webp 800w, /games/desk-crawler/screen-sample.webp 1200w" sizes="(min-width: 1024px) 600px, 100vw" type="image/webp" />
           <img
             src="/games/desk-crawler/screen-sample.png"
             alt="Example Desk Crawler screen on a TRMNL X: Pip explores the Server Room, with health, XP, equipment, adventure stories and weekly rankings."
@@ -130,16 +132,6 @@ export function FeatureGrid({ headingId }: { headingId: string }) {
   )
 }
 
-/** The questions a visitor asks before joining the list, shared by the page and its FAQPage structured data. */
-export const FAQ: ReadonlyArray<{ q: string; a: string }> = [
-  { q: 'Do I need a TRMNL?', a: 'Yes. Desk Crawler draws its screen on a TRMNL e-ink display. The companion website manages your hero; it does not replace the screen.' },
-  { q: 'Is it free?', a: 'Yes, with nothing to buy in the game. You can sponsor the project on GitHub if you like, and that changes nothing in play.' },
-  { q: 'When can I play?', a: 'Desk Crawler is waiting on TRMNL marketplace review. Join the launch list and we’ll send one email when it’s live, then delete your address.' },
-  { q: 'Does my screen need to be on?', a: 'No. The game world moves every 15 minutes on our servers. Sleep Mode, slow refresh rates and other playlist items never cost your hero any progress.' },
-  { q: 'Which layouts does it support?', a: 'Full screen and every mashup size, in landscape or portrait.' },
-  { q: 'How often do I need to open the companion?', a: 'Every few days is plenty. Your hero keeps going until its bag fills up, so most visits are about sorting gear and choosing where to go next.' },
-]
-
 /** The FAQ as native disclosure rows: keyboard and screen-reader ready with no script. */
 export function Faq({ headingId }: { headingId: string }) {
   return (
@@ -156,13 +148,6 @@ export function Faq({ headingId }: { headingId: string }) {
       </div>
     </section>
   )
-}
-
-/** schema.org FAQPage for the questions above. */
-export const FAQ_JSON_LD = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: FAQ.map((item) => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })),
 }
 
 /**

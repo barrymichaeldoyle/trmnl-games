@@ -22,6 +22,18 @@ const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   return { userId, token }
 })
 
+/**
+ * Clerk's frontend origin, read from the publishable key (pk_live_ or pk_test_ plus the base64 host and a trailing $), so
+ * the browser can open its connections while the page parses: Clerk's scripts load without credentials and its API
+ * calls with them, which need separate connections.
+ */
+const CLERK_ORIGIN = (() => {
+  try {
+    const host = atob(String(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ?? '').split('_')[2] ?? '').replace(/\$$/, '')
+    return /^[a-z0-9.-]+$/i.test(host) ? `https://${host}` : null
+  } catch { return null }
+})()
+
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
   convexClient: ConvexReactClient
@@ -45,6 +57,7 @@ export const Route = createRootRouteWithContext<{
       // Both pixel faces are small latin subsets; preloading them keeps HUD text from reflowing when they swap in.
       { rel: 'preload', href: '/fonts/press-start-2p-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
       { rel: 'preload', href: '/fonts/pixelify-sans-latin.woff2', as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' },
+      ...(CLERK_ORIGIN ? [{ rel: 'preconnect', href: CLERK_ORIGIN }, { rel: 'preconnect', href: CLERK_ORIGIN, crossOrigin: 'anonymous' as const }] : []),
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.ico', sizes: '16x16 32x32' },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },

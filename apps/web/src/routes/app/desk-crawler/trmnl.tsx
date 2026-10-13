@@ -7,7 +7,7 @@ import { seo } from '../../../lib/seo'
 import { artUrl } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import { LoadingState } from '../../../lib/ui'
-import { latestLogQuery } from './-gameScreen'
+import { latestLogQuery } from './-queries'
 
 const DevicePreview = lazy(() => import('./-devicePreview').then((module) => ({ default: module.DevicePreview })))
 
