@@ -7,7 +7,7 @@ import { createServerFn } from '@tanstack/react-start'
 import type { ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
 import { useEffect, type ReactNode } from 'react'
-import { SiteLinks } from '../lib/prose'
+import { SiteShell } from '../lib/prose'
 import { OG_VERSION, SITE_NAME, SITE_ORIGIN, seo } from '../lib/seo'
 import appCss from '../styles.css?url'
 import { NetworkProvider } from '../lib/network'
@@ -68,16 +68,17 @@ export const Route = createRootRouteWithContext<{
 
 function NotFound() {
   return (
-    <main id="main" className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-16">
-      <h1 className="font-display text-3xl font-bold">Page not found</h1>
-      <p>There's no page at this address. It may have moved, or the link may be mistyped.</p>
-      <p>
-        <Link to="/" className="underline underline-offset-4">
-          Back to the home page
-        </Link>
-      </p>
-      <SiteLinks className="mt-4" />
-    </main>
+    <SiteShell>
+      <main id="main" className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-16">
+        <h1 className="font-display text-3xl font-bold">Page not found</h1>
+        <p>There's no page at this address. It may have moved, or the link may be mistyped.</p>
+        <p>
+          <Link to="/" className="underline underline-offset-4">
+            Back to the home page
+          </Link>
+        </p>
+      </main>
+    </SiteShell>
   )
 }
 

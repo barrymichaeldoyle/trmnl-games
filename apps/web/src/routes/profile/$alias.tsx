@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { games } from '@trmnl-games/platform'
-import { PlatformHeader } from '../../lib/platformHeader'
-import { SiteLinks } from '../../lib/prose'
+import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
 
@@ -30,9 +29,8 @@ function ProfilePage() {
   const { data } = useQuery(profileQuery(alias))
   const profile = data as Profile | undefined
   return (
-    <>
-      <PlatformHeader />
-      <main id="main" className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
+    <SiteShell>
+      <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-6 px-4 py-10">
         {profile === undefined ? null : profile === null ? (
           <>
             <h1 className="font-display text-3xl font-bold">No public profile</h1>
@@ -63,8 +61,7 @@ function ProfilePage() {
             ) : null}
           </>
         )}
-        <SiteLinks />
       </main>
-    </>
+    </SiteShell>
   )
 }

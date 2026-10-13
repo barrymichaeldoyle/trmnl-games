@@ -1,8 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
 import { requireOpenGame } from '../../lib/gameAccess'
-import { PlatformHeader } from '../../lib/platformHeader'
-import { SiteLinks } from '../../lib/prose'
+import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../../lib/ui'
 
@@ -11,9 +10,8 @@ export const Route = createFileRoute('/games/slow-cast')({
   loader: ({ context }) => requireOpenGame(context, 'slow-cast'),
   head: () => seo({ title: 'Slow Cast', path: '/games/slow-cast', description: 'Slow Cast is a fishing game that plays itself on your TRMNL: your angler casts every fifteen minutes and the screen shows the catch.', index: false }),
   component: () => (
-    <>
-      <PlatformHeader />
-      <main id="main" className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10">
+    <SiteShell>
+      <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-8 px-4 py-10">
         <header className="flex flex-col gap-3">
           <h1 className="flex items-center gap-4 font-display text-4xl font-bold leading-tight sm:text-5xl"><img src="/games/slow-cast/icon-192.png" alt="" width={64} height={64} className="size-14 [image-rendering:pixelated] sm:size-16" />{games['slow-cast'].name}</h1>
           <p className="text-lg text-muted">
@@ -34,8 +32,7 @@ export const Route = createFileRoute('/games/slow-cast')({
           <Link to="/help/slow-cast" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
           <Link to="/app/slow-cast" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
         </div>
-        <SiteLinks />
       </main>
-    </>
+    </SiteShell>
   ),
 })

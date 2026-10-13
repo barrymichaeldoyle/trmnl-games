@@ -56,18 +56,21 @@ export function AnalyticsProvider() {
     if (allowed === me.user.analyticsConsent) return
     void updateConsent({ allowed }).catch(() => {})
   }, [consent, me, ready, updateConsent])
-  // The standing "Analytics preferences" link lives in the site footer (SiteLinks); this only shows the consent panel.
+  // The standing "Analytics preferences" link lives in the site footer (SiteFooter); this only shows the consent panel.
   if (!ready || !analyticsConfigured() || (consent !== null && !preferencesOpen)) return null
   const choose = (value: 'allowed' | 'declined') => { setAnalyticsConsent(value); setPreferencesOpen(false) }
-  // Pinned to the foot of the screen, so it is seen on arrival and when reopened from the footer, not after the page.
-  return <aside aria-label="Analytics preferences" className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-    <div className="border-2 border-edge bg-panel p-3 sm:p-4 shadow-[0_0_0_4px_var(--color-night)]">
-      <p className="font-semibold">Help us find problems</p>
-      <p className="mt-2 text-sm">Allow usage analytics, error reports and masked session recordings? When signed in, these link to your account and email so we can help with support. Saying no does not affect the game. <Link to="/privacy" className="underline underline-offset-4">Privacy details</Link></p>
-      {/* One row of two equal answers: stacked, the panel covered about a third of a phone screen. */}
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3"><Button variant="secondary" className="px-2 sm:px-4" onClick={() => choose('allowed')}>Allow analytics</Button><Button variant="secondary" className="px-2 sm:px-4" onClick={() => choose('declined')}>No thanks</Button></div>
-    </div>
-  </aside>
+  // Pinned to the foot of the screen, so it is seen on arrival and when reopened from the footer, not after the page. From
+  // tablet width it is one low row, so it never sits over a page's first form; the spacer lets the page scroll clear of it.
+  return <>
+    <div aria-hidden="true" className="h-56 sm:h-28" />
+    <aside aria-label="Analytics preferences" className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-5xl px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="border-2 border-edge bg-panel p-3 shadow-[0_0_0_4px_var(--color-night)] sm:flex sm:items-center sm:gap-6 sm:px-4">
+        <p className="text-sm sm:flex-1"><strong className="font-semibold">Help us find problems.</strong> Allow usage analytics, error reports and masked session recordings? When signed in, these link to your account and email so we can help with support. Saying no does not affect the game. <Link to="/privacy" className="underline underline-offset-4">Privacy details</Link></p>
+        {/* One row of two equal answers: stacked, the panel covered about a third of a phone screen. */}
+        <div className="mt-3 grid shrink-0 grid-cols-2 gap-2 sm:mt-0 sm:flex sm:gap-3"><Button variant="secondary" className="px-2 sm:px-4" onClick={() => choose('allowed')}>Allow analytics</Button><Button variant="secondary" className="px-2 sm:px-4" onClick={() => choose('declined')}>No thanks</Button></div>
+      </div>
+    </aside>
+  </>
 }
 
 export function useAnalyticsView(event: Parameters<typeof captureAnalytics>[0], properties: Parameters<typeof captureAnalytics>[1], enabled = true) {

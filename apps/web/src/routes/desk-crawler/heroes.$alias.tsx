@@ -1,10 +1,9 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { PlatformHeader } from '../../lib/platformHeader'
 import { api } from '@trmnl-games/backend/api'
 import { tierLabel } from '@trmnl-games/desk-crawler/content/achievements'
-import { SiteLinks } from '../../lib/prose'
+import { SiteShell } from '../../lib/prose'
 import { artUrl } from '../../lib/intent'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
@@ -60,9 +59,8 @@ function HeroProfile() {
   const { data } = useQuery(profileQuery(alias))
   const profile = data as Profile | null | undefined
   return (
-    <>
-      <PlatformHeader />
-      <main id="main" className="mx-auto flex max-w-2xl flex-col gap-8 px-4 py-10">
+    <SiteShell>
+      <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-8 px-4 py-10">
         {profile ? <Found profile={profile} /> : (
           <header className="flex flex-col gap-3">
             <h1 className="font-display text-3xl font-bold">No hero here</h1>
@@ -73,9 +71,8 @@ function HeroProfile() {
           {profile ? <Link to="/profile/$alias" params={{ alias: profile.alias }} className="inline-flex min-h-11 items-center underline underline-offset-4">{profile.alias}'s profile</Link> : null}
           <Link to="/games/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">What is Desk Crawler?</Link>
         </div>
-        <SiteLinks />
       </main>
-    </>
+    </SiteShell>
   )
 }
 

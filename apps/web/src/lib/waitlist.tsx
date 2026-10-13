@@ -13,7 +13,8 @@ const JOINED_KEY = 'tg_waitlist_joined_v1'
 const INPUT = 'min-h-11 min-w-0 flex-1 border-2 border-edge bg-ground px-3 text-base'
 
 /** Launch-list signup (D105). Email only; an account is offered afterwards and stays optional. */
-export function WaitlistForm({ source }: { source: 'notify' | 'pitch' | 'landing' | 'home' }) {
+/** `instance` tells two forms on one page apart, so each label still points at its own field. */
+export function WaitlistForm({ source, instance = '' }: { source: 'notify' | 'pitch' | 'landing' | 'home'; instance?: string }) {
   const join = useMutation(api.waitlist.join)
   const [email, setEmail] = useState('')
   const [website, setWebsite] = useState('')
@@ -23,7 +24,7 @@ export function WaitlistForm({ source }: { source: 'notify' | 'pitch' | 'landing
   // The form (and the focused button) leaves the page on success: focus moves to the confirmation so it is announced.
   const confirmation = useRef<HTMLDivElement>(null)
   useEffect(() => { if (joined) confirmation.current?.focus() }, [joined])
-  const inputId = `waitlist-${source}`
+  const inputId = `waitlist-${source}${instance ? `-${instance}` : ''}`
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault()

@@ -10,7 +10,7 @@ const SAMPLE_SCENE = paintedSceneUri(scenePath('server_room', 'fight', { kind: '
  * The public sample of a game screen: the device's fight scene painted in colour under
  * a small HUD, in the companion's style. A fictional hero; it never creates one.
  */
-export function SampleScreen({ className = '' }: { className?: string }) {
+export function PaintedSample({ className = '' }: { className?: string }) {
   const bands = BIOME_BANDS.server_room!
   return (
     <div className={`relative overflow-hidden border-4 border-night ${className}`}>

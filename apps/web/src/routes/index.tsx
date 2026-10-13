@@ -1,17 +1,20 @@
+import { Show } from '@clerk/tanstack-react-start'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
-import { PlatformHeader } from '../lib/platformShell'
-import { RELEASE_STATUS, SiteLinks } from '../lib/prose'
-import { SampleScreen } from '../lib/sampleScreen'
-import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
-import { SITE_JSON_LD, seo } from '../lib/seo'
-import { WaitlistForm } from '../lib/waitlist'
-import { gamesQuery, useGames } from '../lib/gameAccess'
+import { DeviceSample, FAQ_JSON_LD, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
+import { SITE_FRAME } from '../lib/platformHeader'
+import { SiteShell } from '../lib/prose'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
+import { DESK_CRAWLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
+import { useGames } from '../lib/gameAccess'
 
 export const Route = createFileRoute('/')({
-  head: () => seo({ path: '/', jsonLd: SITE_JSON_LD }),
-  // The listing decides whether Slow Cast appears; a failure only hides it.
-  loader: ({ context }) => context.queryClient.ensureQueryData(gamesQuery).then(() => undefined).catch(() => undefined),
+  head: () => seo({
+    path: '/',
+    description: 'Games that play themselves on your TRMNL e-ink display. Desk Crawler is a free office RPG: every 15 minutes your hero fights, loots and levels up on the screen on your desk.',
+    jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, FAQ_JSON_LD].map(({ '@context': _, ...node }) => node) },
+  }),
+  // No loader: the page is static, and the games listing (only for the Slow Cast teaser) loads after it.
   component: Home,
 })
 
@@ -22,47 +25,66 @@ function SlowCastSection() {
   if (!game || (game.status === 'hidden' && !data?.admin)) return null
   const live = game.status === 'live'
   return (
-    <section aria-labelledby="slow-cast-heading" className="flex flex-col gap-5">
-      <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen: an angler holding a barbel at River Bend at dusk" width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
-      <div className="flex flex-col gap-2">
+    <section aria-labelledby="slow-cast-heading" className="grid gap-6 md:grid-cols-2 md:items-center">
+      <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen: an angler holding a barbel at River Bend at dusk" width={780} height={460} loading="lazy" className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
+      <div className="flex flex-col gap-3">
+        {live ? null : <p className="label-px text-muted">Coming next</p>}
         <h2 id="slow-cast-heading" className="font-display text-3xl font-bold text-gold-ink">{games['slow-cast'].name}</h2>
         <p className="max-w-prose leading-relaxed">{games['slow-cast'].description} Every fifteen minutes your angler casts, and the screen on your desk shows what bit.</p>
-        {live ? null : <p className="label-px text-muted">Coming soon</p>}
+        {game.canOpen ? (
+          <div className="flex flex-wrap gap-3">
+            <Link to="/games/slow-cast" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
+            <Link to="/app/slow-cast" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
+          </div>
+        ) : null}
       </div>
-      {game.canOpen ? (
-        <div className="flex flex-wrap gap-3">
-          <Link to="/games/slow-cast" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
-          <Link to="/app/slow-cast" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
-        </div>
-      ) : null}
     </section>
   )
 }
 
-/** The platform front page: each game leads with its own screen. */
+/** The platform front page: Desk Crawler's screen and launch list first, then what the game holds. */
 function Home() {
-  const game = games['desk-crawler']
   return (
-    <div className="mx-auto max-w-3xl">
-      <PlatformHeader />
-      <main id="main" className="flex flex-col gap-10 px-4 py-12 sm:py-16">
-        <h1 className="font-display text-4xl font-bold leading-tight sm:text-5xl">Games for your TRMNL</h1>
-        <section aria-labelledby="desk-crawler-heading" className="flex flex-col gap-5">
-          <SampleScreen />
-          <div className="flex flex-col gap-2">
-            <h2 id="desk-crawler-heading" className="font-display text-3xl font-bold text-gold-ink">{game.name}</h2>
-            <p className="max-w-prose leading-relaxed">{game.description} Every fifteen minutes your hero fights, finds loot or gets knocked out, and the screen on your desk shows what happened.</p>
-            <p className="text-sm text-muted">{RELEASE_STATUS}</p>
+    <SiteShell>
+      <main id="main" className="flex flex-col">
+        <section aria-labelledby="home-title" className={`grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14 ${SITE_FRAME}`}>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <p className="flex items-center gap-2 label-px text-gold-ink"><img src="/games/desk-crawler/favicon.svg" alt="" width={16} height={16} className="[image-rendering:pixelated]" />Desk Crawler for TRMNL</p>
+              <h1 id="home-title" className="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">An office RPG that plays itself on your desk</h1>
+              <p className="max-w-prose text-lg leading-relaxed text-muted">Every 15 minutes your hero fights a Stapler Mimic, finds a Keyboard Mace or gets knocked out, and your TRMNL e-ink screen shows what happened. You check in every few days to sort the loot.</p>
+            </div>
+            <Show when="signed-in">
+              <Link to="/app" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Open My games</Link>
+            </Show>
+            <LaunchSignup source="home" />
           </div>
-          <WaitlistForm source="home" />
-          <div className="flex flex-wrap gap-3">
-            <Link to="/games/desk-crawler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
-            <Link to="/app/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
-          </div>
+          <DeviceSample caption="A real Desk Crawler screen on a TRMNL X, with a sample hero." priority />
         </section>
-        <SlowCastSection />
-        <SiteLinks />
+
+        <div className="border-y border-rule bg-night/40 py-14 sm:py-20">
+          <div className={SITE_FRAME}><HowItPlays headingId="how-heading" /></div>
+        </div>
+
+        <div className={`flex flex-col gap-20 py-14 sm:gap-24 sm:py-20 ${SITE_FRAME}`}>
+          <FloorGrid headingId="floors-heading" />
+          <div className="flex flex-col gap-8">
+            <FeatureGrid headingId="features-heading" />
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <Link to="/games/desk-crawler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>More about Desk Crawler</Link>
+              <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">Read the full guide</Link>
+            </div>
+          </div>
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
+            <Faq headingId="faq-heading" />
+            <section aria-labelledby="launch-heading" className="window flex flex-col gap-4 self-start p-5 sm:p-6">
+              <h2 id="launch-heading" className="font-display text-2xl font-bold text-gold-ink">Get Desk Crawler at launch</h2>
+              <LaunchSignup source="home" instance="footer" />
+            </section>
+          </div>
+          <SlowCastSection />
+        </div>
       </main>
-    </div>
+    </SiteShell>
   )
 }

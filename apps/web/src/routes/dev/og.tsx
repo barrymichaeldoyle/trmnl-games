@@ -1,5 +1,5 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { SampleScreen } from '../../lib/sampleScreen'
+import { PaintedSample } from '../../lib/sampleScreen'
 
 const CARDS = {
   platform: { mark: '/favicon.svg', title: 'TRMNL Games', tagline: 'Games for your TRMNL e-ink display. Starting with Desk Crawler.' },
@@ -32,7 +32,7 @@ function OgCard() {
         </div>
       </div>
       {/* 152px stage at exactly 7x plus the 4px frame, so every art pixel stays square. */}
-      <SampleScreen className="w-[1072px]" />
+      <PaintedSample className="w-[1072px]" />
     </div>
   )
 }
