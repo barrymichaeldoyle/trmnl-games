@@ -1,6 +1,7 @@
 import { Show } from '@clerk/tanstack-react-start'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
+import { useEffect, useState } from 'react'
 import { DeviceSample, FAQ_JSON_LD, Faq, FeatureGrid, FloorGrid, HowItPlays, LaunchSignup } from '../lib/deskCrawlerPitch'
 import { SITE_FRAME } from '../lib/platformHeader'
 import { SiteShell } from '../lib/prose'
@@ -14,11 +15,21 @@ export const Route = createFileRoute('/')({
     description: 'Games that play themselves on your TRMNL e-ink display. Desk Crawler is a free office RPG: every 15 minutes your hero fights, loots and levels up on the screen on your desk.',
     jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, FAQ_JSON_LD].map(({ '@context': _, ...node }) => node) },
   }),
-  // No loader: the page is static, and the games listing (only for the Slow Cast teaser) loads after it.
+  // No loader: the page is static, and the games listing (only for the Slow Cast teaser) loads in the browser after it.
   component: Home,
 })
 
-/** Slow Cast (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
+/**
+ * Slow Cast (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing.
+ * Rendered in the browser only: asking for the listing during the server render held the home page's first byte for
+ * a Convex round trip, for a section at the foot of the page that is hidden for nearly everyone.
+ */
+function SlowCastTeaser() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  return mounted ? <SlowCastSection /> : null
+}
+
 function SlowCastSection() {
   const data = useGames()
   const game = data?.games.find((g) => g.slug === 'slow-cast')
@@ -82,7 +93,7 @@ function Home() {
               <LaunchSignup source="home" instance="footer" />
             </section>
           </div>
-          <SlowCastSection />
+          <SlowCastTeaser />
         </div>
       </main>
     </SiteShell>
