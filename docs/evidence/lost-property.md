@@ -1,6 +1,6 @@
 # Lost property evidence (D145, content v21)
 
-Built 2026-10-13. [Spec](../lost-property.md). Production stays on v20 until the world is switched.
+Built 2026-10-13. [Spec](../lost-property.md). Live since run 902 (16:15 UTC on 2026-10-13), the first on v21, which completed clean with nothing quarantined.
 
 ## Replay and rules
 
