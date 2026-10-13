@@ -28,7 +28,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
             <h2 id="new-here" className="font-display text-xl font-semibold">New here?</h2>
             <p className="text-muted">TRMNL Games makes games for the TRMNL e-ink display. The first, Desk Crawler, is an office RPG that plays itself on your desk.</p>
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-              <Link to="/games/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>
+              <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>
               <Link to="/desk-crawler/waiting-list" className="inline-flex min-h-11 items-center underline underline-offset-4">Get one email at launch</Link>
             </div>
           </section>

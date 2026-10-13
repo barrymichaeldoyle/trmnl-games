@@ -21,7 +21,7 @@ function Notify() {
         <WaitlistForm source="notify" />
         <DeviceSample caption="Sample hero on a TRMNL X. Every fifteen minutes your hero fights, loots or gets knocked out, and the screen shows what happened." />
         <div className="flex flex-wrap items-center gap-4">
-          <Link to="/games/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">More about Desk Crawler</Link>
+          <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">More about Desk Crawler</Link>
           <a href="https://trmnl.com" className="inline-flex min-h-11 items-center underline underline-offset-4">What's a TRMNL?</a>
         </div>
       </main>

@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { DeviceSample, FloorGrid, HowItPlays, LaunchSignup } from '../../lib/deskCrawlerPitch'
 import { UNLOCKS } from '../../lib/facts.gen'
@@ -7,7 +7,12 @@ import { SITE_FRAME } from '../../lib/platformHeader'
 import { SiteShell } from '../../lib/prose'
 import { DESK_CRAWLER_JSON_LD, DESK_CRAWLER_OG, seo } from '../../lib/seo'
 
-export const Route = createFileRoute('/games/desk-crawler')({ head: () => seo({ title: 'Desk Crawler', path: '/games/desk-crawler', description: 'Desk Crawler is a free office RPG that plays itself on your TRMNL e-ink display: your hero fights, loots and levels every 15 minutes across five floors, raids other desks and climbs the weekly rankings.', image: DESK_CRAWLER_OG, jsonLd: DESK_CRAWLER_JSON_LD }), component: Landing })
+/**
+ * While Desk Crawler is the only game, the home page is its page: this one repeated it, so it redirects there (D137).
+ * The redirect is temporary (302) and the page below is kept: at the Slow Cast launch home becomes a two-game front page
+ * and this becomes Desk Crawler's own page again, so remove the redirect then.
+ */
+export const Route = createFileRoute('/games/desk-crawler')({ beforeLoad: () => { throw redirect({ to: '/', statusCode: 302 }) }, head: () => seo({ title: 'Desk Crawler', path: '/games/desk-crawler', description: 'Desk Crawler is a free office RPG that plays itself on your TRMNL e-ink display: your hero fights, loots and levels every 15 minutes across five floors, raids other desks and climbs the weekly rankings.', image: DESK_CRAWLER_OG, jsonLd: DESK_CRAWLER_JSON_LD }), component: Landing })
 
 /** One topic of the game: a heading with its glyph, a few paragraphs, and a link into the matching help section. */
 function Topic({ id, glyph, tone, title, help, children }: { id: string; glyph: GlyphName; tone: string; title: string; help: string; children: ReactNode }) {

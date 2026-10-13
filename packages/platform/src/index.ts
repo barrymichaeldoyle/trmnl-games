@@ -34,7 +34,8 @@ export const games = {
     name: 'Desk Crawler',
     description: 'An office RPG that plays itself on your TRMNL.',
     defaultStatus: 'live',
-    publicPath: '/games/desk-crawler',
+    // Home is Desk Crawler's page until Slow Cast launches; /games/desk-crawler redirects there meanwhile (D137).
+    publicPath: '/',
     companionPath: '/app/desk-crawler',
     helpPath: '/help/desk-crawler',
     installPath: '/connect/trmnl/desk-crawler/install',

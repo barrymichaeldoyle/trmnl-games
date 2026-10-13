@@ -37,7 +37,7 @@ function Library() {
               )}
             </div>
           </div>
-          <Link to={me?.hero || me?.gameState === 'deleting' ? '/app/desk-crawler' : '/games/desk-crawler'} className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{me?.hero ? 'Open Desk Crawler' : 'About Desk Crawler'}</Link>
+          <Link to={me?.hero || me?.gameState === 'deleting' ? '/app/desk-crawler' : '/'} className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{me?.hero ? 'Open Desk Crawler' : 'About Desk Crawler'}</Link>
         </section>
       )}
       <UpcomingGames />

@@ -8,7 +8,7 @@ export const SITE_FRAME = 'mx-auto w-full max-w-6xl px-3 min-[375px]:px-4 sm:px-
 const NAV_LINK = 'inline-flex min-h-11 items-center underline-offset-4 hover:underline'
 
 /**
- * The site header on every page. Signed out it offers what a visitor can use: the game, its help and Sign in. Signed in
+ * The site header on every page. Signed out it offers Help and Sign in (the home page is the game's page, D137). Signed in
  * it carries My games (the game switcher inside a companion, D124), Account and the avatar. Clerk's server-side state
  * renders the right set in the first HTML, so neither set flashes.
  */
@@ -23,7 +23,6 @@ export function PlatformHeader() {
         <Link to="/" className="flex min-h-11 min-w-0 items-center gap-2 font-display text-lg font-semibold"><img src="/favicon.svg" alt="" width={24} height={24} className="shrink-0 [image-rendering:pixelated]" /><span className={`truncate ${inGame ? 'max-sm:sr-only' : 'max-[359px]:sr-only'}`}>TRMNL Games</span></Link>
         <nav aria-label="Platform" className="flex shrink-0 items-center gap-4 text-sm">
           <Show when="signed-out">
-            <Link to="/games/desk-crawler" className={`${NAV_LINK} max-sm:hidden`} activeProps={{ 'aria-current': 'page', className: 'underline' }}>Desk Crawler</Link>
             <Link to="/help/desk-crawler" className={NAV_LINK} activeProps={{ 'aria-current': 'page', className: 'underline' }}>Help</Link>
             <SignInButton mode="modal"><button type="button" {...PRELOAD_CLERK_UI} className="hud text-hud-sm min-h-10 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">Sign in</button></SignInButton>
           </Show>

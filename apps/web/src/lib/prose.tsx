@@ -137,7 +137,7 @@ export function SiteFooter() {
           </div>
           <nav aria-label="Site" className="col-span-2 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 md:col-span-4">
             <FooterGroup title="Games">
-              <li><Link to="/games/desk-crawler" className={FOOTER_LINK}>Desk Crawler</Link></li>
+              <li><Link to="/" className={FOOTER_LINK}>Desk Crawler</Link></li>
               <li><Link to="/desk-crawler/waiting-list" className={FOOTER_LINK}>Launch list</Link></li>
               <Show when="signed-in"><li><Link to="/app" className={FOOTER_LINK}>My games</Link></li></Show>
             </FooterGroup>

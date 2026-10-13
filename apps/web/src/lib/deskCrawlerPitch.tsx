@@ -193,7 +193,7 @@ export function DeskCrawlerSignedOut() {
         <p className="text-sm text-muted">{RELEASE_STATUS}</p>
         <WaitlistForm source="pitch" />
         <div className="flex flex-wrap items-center gap-4">
-          <Link to="/games/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>
+          <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">About Desk Crawler</Link>
           <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">Setup and TRMNL help</Link>
         </div>
       </section>
