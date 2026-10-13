@@ -28,6 +28,12 @@ const MONDAY_EPOCH = Date.UTC(1970, 0, 5)
 export const LETTER_CODES_UNTIL = Date.UTC(2026, 9, 19)
 export const keepsakeWeek = (now: number) => Math.floor((now - MONDAY_EPOCH) / KEEPSAKE_WEEK_MS)
 export const keepsakeWeekStartsAt = (week: number) => MONDAY_EPOCH + week * KEEPSAKE_WEEK_MS
+/**
+ * D148: weekly keepsakes open on the Monday after the public-launch reset, so the first code is an unlock of its own.
+ * Before it no code is shown or accepted; the Easter Egg still hatches from the sample code.
+ */
+export const KEEPSAKES_OPEN_AT = Date.UTC(2026, 9, 19)
+export const keepsakesOpen = (now: number) => now >= KEEPSAKES_OPEN_AT
 
 /** A fixed-size shelf derived from one lifetime count: no growing document or history scan. */
 export const keepsakeShelf = (totalCollected: number) => DESK_KEEPSAKES.map((item, index) => ({

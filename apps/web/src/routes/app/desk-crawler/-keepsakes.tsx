@@ -5,7 +5,7 @@ import { ConvexError } from 'convex/values'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
-import { DESK_KEEPSAKES, EASTER_EGG_KEEPSAKE, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { DESK_KEEPSAKES, EASTER_EGG_KEEPSAKE, KEEPSAKES_OPEN_AT, keepsakesOpen, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { errorMessage } from '../../../lib/intent'
 import { useOnline } from '../../../lib/network'
 import { Submission } from '../../../lib/submission'
@@ -14,6 +14,7 @@ import { Glyph } from '../../../lib/glyphs'
 import { LocalTime } from '../../../lib/localTime'
 
 const arrivesAt = (date: Date) => date.toLocaleString(undefined, { weekday: 'long', hour: 'numeric', minute: '2-digit' })
+const opensOn = (date: Date) => date.toLocaleString(undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' })
 
 function KeepsakeIcon({ pixels }: { pixels: readonly string[] }) {
   const path = pixels.flatMap((row, y) => [...row.matchAll(/#+/g)].map((run) => `M${run.index} ${y}h${run[0].length}v1h-${run[0].length}z`)).join('')
@@ -42,6 +43,7 @@ function useKeepsakeClaim() {
   }, [])
   const collectedThisWeek = collection?.lastClaimWeek != null && collection.lastClaimWeek >= keepsakeWeek(now)
   const next = DESK_KEEPSAKES[(collection?.totalCollected ?? 0) % DESK_KEEPSAKES.length]!
+  const open = keepsakesOpen(now)
 
   function edit(value: string) { setCode(value); setError(null); setMessage(null) }
 
@@ -78,7 +80,7 @@ function useKeepsakeClaim() {
     finally { inFlight.current = false; setPending(false) }
   }
 
-  return { collection, collectedThisWeek, next, code, edit, claim, pending, error, message, earned }
+  return { collection, collectedThisWeek, open, next, code, edit, claim, pending, error, message, earned }
 }
 
 type KeepsakeClaim = ReturnType<typeof useKeepsakeClaim>
@@ -106,7 +108,7 @@ export function KeepsakeCallout() {
   const { collection, next, earned } = form
   // Closed by default on every screen: the game screen stays in the first viewport and the code is two taps away.
   const [open, setOpen] = useState(false)
-  if (!collection?.connected) return null
+  if (!collection?.connected || !form.open) return null
   if (form.collectedThisWeek && !earned) return null
   const shown = earned ?? next
   return <section aria-labelledby="keepsake-callout-title" className="flex min-w-0 flex-col border-[3px] border-night bg-panel outline-4 outline-gold">
@@ -137,7 +139,7 @@ export function KeepsakeCallout() {
 /** The keepsakes page's content (D46): the next design, the code form and the shelf. Its heading is the page's h1. */
 export function DeskKeepsakes() {
   const form = useKeepsakeClaim()
-  const { collection, collectedThisWeek, next, error, message } = form
+  const { collection, collectedThisWeek, open, next, error, message } = form
 
   return <section id="desk-keepsakes" aria-labelledby="keepsakes-title" className="window min-w-0 scroll-mt-20 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
     <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -150,7 +152,7 @@ export function DeskKeepsakes() {
         <KeepsakeIcon pixels={next.pixels} />
         <div><p className="font-semibold">{collectedThisWeek ? 'Coming next: ' : 'Next keepsake: '}{next.name}</p><p className="mt-1 text-sm text-muted">{next.description}</p></div>
       </div>
-      {collectedThisWeek ? <p className="text-sm font-semibold">Collected this week. {collection.nextAvailableAt ? <>The next code arrives <LocalTime at={collection.nextAvailableAt} format={arrivesAt} />.</> : 'The next code arrives next week.'}</p> : <KeepsakeCodeForm form={form} inputId="keepsake-code" />}
+      {!open ? <p className="text-sm font-semibold">Weekly keepsakes start <LocalTime at={KEEPSAKES_OPEN_AT} format={opensOn} />. Your first code appears beside “Keepsake” on your TRMNL then.</p> : collectedThisWeek ? <p className="text-sm font-semibold">Collected this week. {collection.nextAvailableAt ? <>The next code arrives <LocalTime at={collection.nextAvailableAt} format={arrivesAt} />.</> : 'The next code arrives next week.'}</p> : <KeepsakeCodeForm form={form} inputId="keepsake-code" />}
       <p id="keepsake-code-help" className="mt-3 max-w-prose text-sm text-muted">{collection.connected ? 'The code sits beside “Keepsake” on your TRMNL screen. The preview on this site leaves it out.' : 'Reconnect the Desk Crawler plugin in TRMNL to receive keepsake codes.'}</p>
       <ActionFeedback error={error} message={message} />
       <ul aria-label="Your keepsake shelf" className="mt-5 grid grid-cols-1 gap-x-6 gap-y-4 min-[480px]:grid-cols-2 sm:grid-cols-3 sm:gap-y-5">

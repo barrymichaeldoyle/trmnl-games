@@ -5,13 +5,13 @@ import { api, internal } from '@trmnl-games/backend/api'
 import type { Id } from '@trmnl-games/backend/data-model'
 import schema from '../../apps/backend/convex/schema'
 import { sha256Hex } from '../../apps/backend/convex/lib/hash'
-import { keepsakeCode, letterKeepsakeCode } from '../../apps/backend/convex/lib/keepsakes'
+import { keepsakeCode } from '../../apps/backend/convex/lib/keepsakes'
 import { KEEPSAKE_MISS_LIMIT } from '../../apps/backend/convex/keepsakes'
-import { DESK_KEEPSAKES, KEEPSAKE_WEEK_MS, keepsakeShelf, keepsakeWeek, keepsakeWeekStartsAt, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { DESK_KEEPSAKES, KEEPSAKE_WEEK_MS, KEEPSAKES_OPEN_AT, keepsakeShelf, keepsakeWeek, keepsakeWeekStartsAt } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { seedDeletionConfirmation, seedHero, seedWorld, type T } from './helpers'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
-const NOW = Date.UTC(2026, 9, 5, 12)
+const NOW = Date.UTC(2026, 9, 28, 12)
 const UUID = 'aaaaaaaa-1111-4aed-8464-bad68368e97c'
 const TOKEN = 'trmnl-ana-token'
 
@@ -123,13 +123,17 @@ describe('weekly TRMNL keepsakes', () => {
     expect(await owner().mutation(api.keepsakes.claim, { operationId: 'valid-next-day', code: valid.replace(' ', '') })).toMatchObject({ outcome: 'claimed' })
   })
 
-  it('accepts letter codes from screens rendered before the six-digit switch until the cutoff', async () => {
+  it('shows and accepts no weekly code before keepsakes open (D148), then collects from the opening Monday', async () => {
+    vi.setSystemTime(KEEPSAKES_OPEN_AT - 60_000)
+    expect((await envelope(t)).merge_variables.desk_keepsake_code ?? null).toBeNull()
     const { userId } = await t.run(async (ctx) => (await ctx.db.get(heroId))!)
-    const letters = (now: number) => letterKeepsakeCode(sha256Hex(TOKEN), userId, keepsakeWeek(now))
-    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'letters-0001', code: letters(NOW).toLowerCase() })).toMatchObject({ outcome: 'claimed', totalCollected: 1 })
-    vi.setSystemTime(LETTER_CODES_UNTIL)
-    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'letters-0002', code: letters(LETTER_CODES_UNTIL) })).toMatchObject({ outcome: 'invalid_code', totalCollected: 1 })
-    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'digits-0002', code: (await envelope(t)).merge_variables.desk_keepsake_code! })).toMatchObject({ outcome: 'claimed', totalCollected: 2 })
+    const early = keepsakeCode(sha256Hex(TOKEN), userId, keepsakeWeek(KEEPSAKES_OPEN_AT - 60_000))
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'early-0001', code: early })).toMatchObject({ outcome: 'invalid_code', totalCollected: 0 })
+    expect((await t.run(async (ctx) => await ctx.db.query('rateLimitBuckets').collect())).filter((bucket) => bucket.key.startsWith('keepsake:'))).toEqual([])
+    vi.setSystemTime(KEEPSAKES_OPEN_AT)
+    // The closed week's code stays refused; the opening week's code collects.
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'early-0002', code: early })).toMatchObject({ outcome: 'invalid_code', totalCollected: 0 })
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'open-0001', code: (await envelope(t)).merge_variables.desk_keepsake_code! })).toMatchObject({ outcome: 'claimed', totalCollected: 1 })
   })
 
   it('preserves the next design across missed weeks and keeps repeat collections bounded', async () => {

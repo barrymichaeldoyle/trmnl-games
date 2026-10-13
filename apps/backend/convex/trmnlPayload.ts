@@ -11,7 +11,7 @@ import { buildPayload, MAX_LOGS, MAX_RECAP_EVENTS, recapPeriod, type PayloadInpu
 import { readWorld, worldContent } from './world'
 import { readDeviceRanking } from './lib/rankingRead'
 import { keepsakeCode, keepsakeGrant } from './lib/keepsakes'
-import { keepsakeWeek } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { keepsakesOpen, keepsakeWeek } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { affixById } from '@trmnl-games/desk-crawler/sim/core/modifiers'
 import { todoCompactLine } from '@trmnl-games/desk-crawler/sim/core/todo'
@@ -53,7 +53,7 @@ export const forInstance = internalQuery({
     // Device envelope only: canonical/owner-preview payload never contains a claim code.
     const week = keepsakeWeek(args.now)
     const collection = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', user._id)).unique()
-    const codeGrant = payload.status !== 'unlinked' && (!collection || collection.lastClaimWeek < week) ? await keepsakeGrant(ctx, user._id) : null
+    const codeGrant = payload.status !== 'unlinked' && keepsakesOpen(args.now) && (!collection || collection.lastClaimWeek < week) ? await keepsakeGrant(ctx, user._id) : null
     // P31: the route stores the owner's offset only when it differs from the stored one, so most requests write nothing.
     const offsetChanged = args.utcOffset !== undefined && args.utcOffset !== null && args.utcOffset !== user.trmnlUtcOffset
     return { outcome: 'payload' as const, payload, keepsakeCode: codeGrant ? keepsakeCode(codeGrant.tokenHash, user._id, week) : null, ...(offsetChanged ? { recordOffsetFor: user._id } : {}) }

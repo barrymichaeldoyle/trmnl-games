@@ -4,7 +4,7 @@ import { currentHero, gameProfile } from './lib/gameProfile'
 import { currentUser, runIntent } from './lib/intent'
 import { appError } from './lib/errors'
 import { keepsakeCode, keepsakeGrant, letterKeepsakeCode, normalizedKeepsakeCode } from './lib/keepsakes'
-import { keepsakeWeek, keepsakeWeekStartsAt, LETTER_CODES_UNTIL, SAMPLE_KEEPSAKE_CODE } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { KEEPSAKES_OPEN_AT, keepsakesOpen, keepsakeWeek, keepsakeWeekStartsAt, LETTER_CODES_UNTIL, SAMPLE_KEEPSAKE_CODE } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { achievementState, awardAchievements } from './lib/achievements'
 import { readWorld, worldContent } from './world'
 
@@ -53,6 +53,8 @@ export const claim = mutation({
       const claimedThisWeek = collection !== null && collection.lastClaimWeek >= week
       const sample = code === normalizedKeepsakeCode(SAMPLE_KEEPSAKE_CODE)
       if (claimedThisWeek && !sample) return { changed: false, count: totalCollected, keepsakeOutcome: 'already_claimed' as const }
+      // D148: no weekly code exists before keepsakes open, so nothing to match and no guess to count.
+      if (!keepsakesOpen(now) && !sample) return { changed: false, count: totalCollected, keepsakeOutcome: 'invalid_code' as const }
       const windowStart = Math.floor(now / MISS_WINDOW_MS) * MISS_WINDOW_MS
       const missKey = `keepsake:${user._id}`
       const misses = await ctx.db.query('rateLimitBuckets').withIndex('by_key_and_windowStart', (q) => q.eq('key', missKey).eq('windowStart', windowStart)).unique()
@@ -61,6 +63,7 @@ export const claim = mutation({
       // Accept last week's cached screen too, but award only once in the current week.
       const generate = /^\d{6}$/.test(code) ? keepsakeCode : /^[A-HJ-NP-Z2-9]{8}$/.test(code) && now < LETTER_CODES_UNTIL ? letterKeepsakeCode : null
       const valid = grant !== null && generate !== null && [week, week - 1]
+        .filter((period) => keepsakeWeekStartsAt(period) >= KEEPSAKES_OPEN_AT)
         .some((period) => normalizedKeepsakeCode(generate(grant.tokenHash, user._id, period)) === code)
       // D140: the sample code finds the Easter Egg unless it is this player's own unclaimed code, which collects below.
       if (sample && !(valid && !claimedThisWeek)) {

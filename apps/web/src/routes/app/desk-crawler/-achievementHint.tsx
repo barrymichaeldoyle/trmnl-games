@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { tierLabel } from '@trmnl-games/desk-crawler/content/achievements'
-import { keepsakeWeek } from '@trmnl-games/desk-crawler/content/keepsakes'
+import { keepsakesOpen, keepsakeWeek } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { Glyph } from '../../../lib/glyphs'
 import { useHydrated } from '../../../lib/localTime'
 
@@ -28,7 +28,7 @@ function pickHint(families: HintFamily[], hero: HeroView, bag: BagView, keepsake
   const candidates: Array<Omit<Hint, 'family'> & { family: HintFamily | undefined }> = []
   if (bag.merchant) candidates.push({ family: byId.get('purchases'), text: 'Buy something from the merchant visiting your hero.', to: '/app/desk-crawler/inventory', link: 'Open Bag' })
   if (hero.choice) candidates.push({ family: byId.get('choices'), text: 'Answer the decision waiting for your hero.', to: '/app/desk-crawler', link: 'Open Hero' })
-  if (keepsakes?.connected && !(keepsakes.lastClaimWeek != null && keepsakes.lastClaimWeek >= keepsakeWeek(now))) candidates.push({ family: byId.get('keepsakes'), text: "Enter this week's keepsake code from your TRMNL.", to: '/app/desk-crawler/keepsakes', link: 'Open Desk keepsakes' })
+  if (keepsakes?.connected && keepsakesOpen(now) && !(keepsakes.lastClaimWeek != null && keepsakes.lastClaimWeek >= keepsakeWeek(now))) candidates.push({ family: byId.get('keepsakes'), text: "Enter this week's keepsake code from your TRMNL.", to: '/app/desk-crawler/keepsakes', link: 'Open Desk keepsakes' })
   if (bag.gear.some((item) => !item.equipped && !item.held)) candidates.push({ family: byId.get('sales'), text: 'Sell a piece of spare gear from your bag.', to: '/app/desk-crawler/inventory', link: 'Open Bag' })
   const nextBag = bag.ladder.next
   if (nextBag?.buyable && hero.gold >= nextBag.price) candidates.push({ family: byId.get('bags'), text: `Buy the ${nextBag.name} for ${nextBag.price.toLocaleString()} gold.`, to: '/app/desk-crawler/inventory', link: 'Open Bag' })

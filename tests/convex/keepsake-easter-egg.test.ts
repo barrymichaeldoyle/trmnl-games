@@ -18,7 +18,7 @@ vi.mock('../../apps/backend/convex/lib/keepsakes', async (original) => {
 })
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
-const NOW = Date.UTC(2026, 9, 5, 12)
+const NOW = Date.UTC(2026, 9, 28, 12)
 const TOKEN = 'trmnl-ana-token'
 const SAMPLE = SAMPLE_KEEPSAKE_CODE
 
