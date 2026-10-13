@@ -40,7 +40,7 @@ Each floor has the D26 floor: eight victory lines, six loot-gold lines, eighteen
 
 ### Art
 
-Two backdrops (rolling shelves and a hanging light; pillars, a ramp, a strip light and a level sign) and eight sprites, each 24 to 34 pixels wide, served on the same scene paths (`/art/scene/v4/archive/...`, `/art/scene/v4/parking_garage/...`) and painted on the companion with their own tones. The hero card and the companion's biome bands take old-paper buff and concrete grey. No template change: the device names the floor from the payload as it always has.
+Two backdrops (rolling shelves and a hanging light; pillars, a ramp, a strip light and a level sign) and eight sprites, each 24 to 34 pixels wide, served on the same scene paths (`/art/scene/v5/archive/...` and `/art/scene/v5/parking_garage/...` since D139, `v4` before) and painted on the companion with their own tones. The hero card and the companion's biome bands take old-paper buff and concrete grey. No template change: the device names the floor from the payload as it always has.
 
 ## Field notes
 

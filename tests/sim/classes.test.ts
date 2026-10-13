@@ -140,6 +140,6 @@ describe('Rogue art (P37)', () => {
     // The hood changes the standing poses' ink; lying down, only the companion's colours differ.
     expect(heroPoses.rogue_idle.rows).not.toEqual(heroPoses.idle.rows)
     expect(heroPoses.rogue_rest.rows).not.toEqual(heroPoses.rest.rows)
-    expect(scenePath('office_cubicles', 'idle', { kind: 'none' }, 5)).toBe('/art/scene/v4/office_cubicles/day/idle/none/5.png')
+    expect(scenePath('office_cubicles', 'idle', { kind: 'none' }, 5)).toBe('/art/scene/v5/office_cubicles/day/plain/idle/none/5.png')
   })
 })

@@ -58,5 +58,6 @@ export function subjectSegment(subject: SceneSubject): string {
   return 'none'
 }
 
-export const scenePath = (biomeId: string, pose: HeroPose, subject: SceneSubject, scale: number, time: SceneTime = 'day') =>
-  `/art/scene/v${SCENE_VERSION}/${biomeId}/${time}/${pose}/${subjectSegment(subject)}/${scale}.png`
+/** D139 (scene v5): the occasion segment follows the time; `plain` on an ordinary day. */
+export const scenePath = (biomeId: string, pose: HeroPose, subject: SceneSubject, scale: number, time: SceneTime = 'day', occasion?: string) =>
+  `/art/scene/v${SCENE_VERSION}/${biomeId}/${time}/${occasion ?? 'plain'}/${pose}/${subjectSegment(subject)}/${scale}.png`

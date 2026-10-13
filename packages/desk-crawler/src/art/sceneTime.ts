@@ -1,7 +1,7 @@
 import { DAY_START_HOUR, NIGHT_START_HOUR } from '../lib/activityRecap'
 
 /** Bump whenever scene art changes: each image URL is immutable. */
-export const SCENE_VERSION = 4
+export const SCENE_VERSION = 5
 export type SceneTime = 'day' | 'night'
 
 /**

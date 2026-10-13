@@ -8,6 +8,8 @@ import { scaled } from '../sim/core/modifiers'
 import { FULL_SCALE, LARGE_SCALE, MEDIUM_SCALE, SMALL_SCALE } from '../art/scene'
 import { QR_LARGE_SCALE, QR_SCALE, qrBasePath, qrPath, type QrTarget } from '../art/qr'
 import { sceneFor, scenePath, type LatestEvent } from '../art/sceneKey'
+import { isOccasionArt, type OccasionArt } from '../art/occasions'
+import { occasionAt } from '../sim/core/occasions'
 import { nextSlotAfter, slotEta, SLOT_MS } from '../sim/schedule'
 import { bold } from '../sim/core/narrative'
 import { logPresentation, type LogDeltas } from './logPresentation'
@@ -246,13 +248,15 @@ export function buildPayload(input: PayloadInput) {
     ...rankingFields(input.ranking, hero === null, input.timezone),
   }
 
+  // D139: the scene dresses for the occasion on the device's local date.
+  const occasion = sceneOccasion(content, now, input.utcOffset ?? undefined)
   const sceneUrls = (biomeId: string, scene: ReturnType<typeof sceneFor>) =>
     input.artBaseUrl
       ? {
-          scene_url: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, FULL_SCALE)}`,
-          scene_url_small: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, SMALL_SCALE)}`,
-          scene_url_large: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, LARGE_SCALE)}`,
-          scene_url_medium: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, MEDIUM_SCALE)}`,
+          scene_url: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', occasion)}`,
+          scene_url_small: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, SMALL_SCALE, 'day', occasion)}`,
+          scene_url_large: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, LARGE_SCALE, 'day', occasion)}`,
+          scene_url_medium: `${input.artBaseUrl}${scenePath(biomeId, scene.pose, scene.subject, MEDIUM_SCALE, 'day', occasion)}`,
         }
       : { scene_url: '', scene_url_small: '', scene_url_large: '', scene_url_medium: '' }
 
@@ -454,3 +458,9 @@ export function buildPayload(input: PayloadInput) {
 }
 
 export type CanonicalPayload = ReturnType<typeof buildPayload>
+
+/** D139: the occasion a scene dresses for at `now` in an offset, when the catalog has one live and there is art for it. */
+export function sceneOccasion(content: ContentCatalog, now: number, utcOffsetSeconds: number | undefined): OccasionArt | undefined {
+  const id = occasionAt(content, now, utcOffsetSeconds)?.rule.id
+  return id !== undefined && isOccasionArt(id) ? id : undefined
+}

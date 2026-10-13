@@ -64,7 +64,7 @@ export function renderHeroCardPng(card: HeroCard): Uint8Array | null {
   const top = 7
   for (let x = left - 1; x <= left + STAGE_WIDTH; x += 1) for (const y of [top - 1, top + STAGE_HEIGHT]) put(x, y, PANEL)
   for (let y = top - 1; y <= top + STAGE_HEIGHT; y += 1) for (const x of [left - 1, left + STAGE_WIDTH]) put(x, y, PANEL)
-  const painted = paintedScene(scene.biome, scene.pose, scene.subject, scene.time)
+  const painted = paintedScene(scene.biome, scene.pose, scene.subject, scene.time, scene.occasion)
   const bands = BANDS[scene.biome]
   painted.forEach((row, y) => row.forEach((colour, x) => put(left + x, top + y, colour ?? bands[band(y)])))
 

@@ -34,7 +34,7 @@ describe('scene art', () => {
 
   it('serves allowlisted day/night paths and preserves v3 night URLs', () => {
     const good = scenePath('server_room', 'fight', { kind: 'monster', id: 'cable_serpent', elite: true }, FULL_SCALE)
-    expect(good).toBe(`/art/scene/v${SCENE_VERSION}/server_room/day/fight/elite-cable_serpent/${FULL_SCALE}.png`)
+    expect(good).toBe(`/art/scene/v${SCENE_VERSION}/server_room/day/plain/fight/elite-cable_serpent/${FULL_SCALE}.png`)
     expect(parseScenePath(good)).not.toBeNull()
     for (const bad of [
       good.replace(`v${SCENE_VERSION}`, 'v0'),
@@ -44,6 +44,8 @@ describe('scene art', () => {
       good.replace('fight', '../etc'),
       good.replace('/day/', '/dusk/'),
       good.replace('/day/', '/'),
+      good.replace('/plain/', '/birthday/'),
+      good.replace('/plain/', '/'),
       good.replace(`v${SCENE_VERSION}`, 'v1'),
     ]) {
       expect(parseScenePath(bad)).toBeNull()
@@ -53,6 +55,12 @@ describe('scene art', () => {
     const legacy = '/art/scene/v3/office_cubicles/idle/none/5.png'
     expect(parseScenePath(legacy)?.time).toBe('night')
     expect(renderScenePng(legacy)).toEqual(renderScenePng(night))
+    // D139: v4 day/night paths stay valid and draw exactly the plain v5 scene.
+    const v4 = '/art/scene/v4/server_room/day/fight/elite-cable_serpent/5.png'
+    expect(parseScenePath(v4)).not.toBeNull()
+    expect(renderScenePng(v4)).toEqual(renderScenePng(good))
+    expect(renderScenePng('/art/scene/v4/office_cubicles/night/idle/none/5-bwry.png')).toEqual(renderScenePng(night.replace('/5.png', '/5-bwry.png')))
+    expect(parseScenePath('/art/scene/v4/office_cubicles/day/halloween/idle/none/5.png')).toBeNull()
   })
 
   it('changes only the office window pixels between day and night', () => {

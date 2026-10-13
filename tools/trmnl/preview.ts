@@ -7,6 +7,7 @@
  * interactive gallery run `pnpm dev` and open /dev/desk-crawler.  Usage: pnpm tsx tools/trmnl/preview.ts [artBaseUrl] [--recap] [--portrait]
  * `--dump-contexts <file>` also writes each Liquid render context, for tools/trmnl/crosscheck.ts.
  * `--inline-art` draws scenes and codes locally and inlines them, so art changes preview before any deployment serves them.
+ * `--occasion <id>` (D139) dresses every scene for one occasion, e.g. `--occasion halloween`.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { Liquid } from 'liquidjs'
@@ -42,6 +43,8 @@ const liquid = new Liquid({ timezoneOffset: 0 })
 /** The screen route adds `utc_offset` from TRMNL's request; markup gets no `trmnl` object, so the preview passes none. */
 const utcOffset = PREVIEW_UTC_OFFSET
 const deskKeepsakeCode = process.argv.includes('--keepsakes') ? PREVIEW_KEEPSAKE_CODE : null
+const occasionIndex = process.argv.indexOf('--occasion')
+const occasion = occasionIndex >= 0 ? process.argv[occasionIndex + 1]! : null
 
 const { groups, overnightEntries, base } = previewScenarios(artBaseUrl)
 const states = groups.states
@@ -60,7 +63,9 @@ const contextsIndex = process.argv.indexOf('--dump-contexts')
 const contexts: Array<{ name: string; layout: PreviewLayout; context: Record<string, unknown> }> = []
 for (const [name, input] of Object.entries(previewStates)) {
   const withRecap = process.argv.includes('--recap') ? withOvernightRecap(input, overnightEntries) : input
-  const payload = sceneUrlsAt(buildPayload(withRecap), input.now, utcOffset)
+  const built = sceneUrlsAt(buildPayload(withRecap), input.now, utcOffset)
+  // D139: `--occasion <id>` dresses every scene for that occasion, whatever date the scenario uses.
+  const payload = occasion === null ? built : { ...built, ...Object.fromEntries((['scene_url', 'scene_url_small', 'scene_url_large', 'scene_url_medium'] as const).map((key) => [key, built[key].replace(/\/(?:plain|[a-z0-9_]+)\/(?=[a-z_]+\/(?:none|monster-|elite-|prop-))/, `/${occasion}/`)])) }
   if (process.argv.includes('--recap')) writeFileSync(`.previews/${name}--payload.json`, JSON.stringify(payload, null, 2))
   for (const layout of Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]) {
     const context = { ...payload, desk_keepsake_code: KEEPSAKE_FREE_SCENARIOS.has(name) ? null : deskKeepsakeCode, utc_offset: NO_OFFSET_SCENARIOS.has(name) ? null : utcOffset }

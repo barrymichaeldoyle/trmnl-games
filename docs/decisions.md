@@ -469,3 +469,5 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 2026-10-13, D139 W1: the calendar, effects, announcement lines, Christmas gift and Friday the 13th mishaps built as content v19 ([evidence](evidence/world-events.md)): an ordinary day replays v18 exactly; a year's occasions leave level medians unchanged and move day-90 gold under 1.2% (safe farming +5%); mishaps leave knockouts unchanged. Mishaps count apart from launches so the raid record stays exact. Production stays on v18 until Barry runs `npx convex run world:setActiveContentVersion '{"contentVersion":"v19"}' --prod`.
 
 2026-10-13, D139 switch: production on v19 since about 10:31 UTC; run 880 clean, nothing quarantined.
+
+2026-10-13, D139 W2 and W4: scene version 5 dresses every scene for the occasion on the device's local date, with art for all eighteen occasions: garlands (some spelling SALE, BOSS and the digits of pi), cobwebs, floor props, hero hats on both classes, monster hats and office window views. v4 and v3 scene paths stay served; no template change.

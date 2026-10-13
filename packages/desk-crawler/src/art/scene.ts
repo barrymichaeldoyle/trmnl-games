@@ -2,13 +2,14 @@ import { Canvas, sprite, type Sprite } from './canvas'
 import { CLOAKED_POSES, heroCloak, heroPoses, type HeroPose } from './hero'
 import { monsterArt } from './monsters'
 import { eliteCrown, propArt, type PropId } from './props'
+import { dressingFor, heroHatAnchor, monsterHatCentre, type Dressing, type OccasionArt } from './occasions'
 import type { SceneTime } from './sceneTime'
 export { SCENE_VERSION } from './sceneTime'
 
 /**
- * Scene window composition (revision 12): biome backdrop + hero pose + the
- * latest encounter's subject and local sky, on a 152x40 pixel stage. Deterministic for a
- * given key, so the image URL is cacheable.
+ * Scene window composition (revision 13): biome backdrop + hero pose + the
+ * latest encounter's subject and local sky, on a 152x40 pixel stage, dressed for
+ * the live occasion (D139). Deterministic for a given key, so the image URL is cacheable.
  */
 export const STAGE_WIDTH = 152
 export const STAGE_HEIGHT = 40
@@ -23,6 +24,8 @@ export const MEDIUM_SCALE = 3
 const GROUND = 37
 const HERO_X = 24
 const SUBJECT_X = 92
+/** D139: an occasion's floor prop stands here, in the clear band between the hero and its foe. */
+const DECOR_X = 66
 
 export type BiomeArt = 'office_cubicles' | 'server_room' | 'cafeteria_depths' | 'archive' | 'parking_garage'
 export type Subject = { kind: 'monster'; id: keyof typeof monsterArt; elite: boolean } | { kind: 'prop'; id: PropId } | { kind: 'none' }
@@ -102,13 +105,14 @@ const pot = sprite(`
 
 // ---------------------------------------------------------------- backdrops
 
-function office(c: Canvas, time: SceneTime): void {
+function office(c: Canvas, time: SceneTime, view?: Dressing['window']): void {
   // The window follows local day/night; the indoor stage stays the same.
   c.region = 'frame'
   c.rect(4, 2, 36, 18, '#')
   c.region = 'sky'
   c.rect(6, 4, 32, 14, 'w')
-  if (time === 'night') {
+  if (view !== undefined) windowView(c, view)
+  else if (time === 'night') {
     c.region = 'star'
     for (const [x, y] of [[8, 6], [16, 11], [24, 5], [9, 13]] as const) c.draw(star, x, y)
     c.region = 'moon'
@@ -274,7 +278,49 @@ function parkingGarage(c: Canvas): void {
   c.rect(118, 35, 14, 2, ':')
 }
 
-const BACKDROPS: Record<BiomeArt, (c: Canvas, time: SceneTime) => void> = { office_cubicles: office, server_room: serverRoom, cafeteria_depths: cafeteria, archive, parking_garage: parkingGarage }
+const burst = sprite(`
+   #
+ # # #
+  ###
+### ###
+  ###
+ # # #
+   #
+`)
+const flake = sprite(`
+ #
+###
+ #
+`)
+const windowHeart = sprite(`
+ # #
+#####
+ ###
+  #
+`)
+
+/** D139: the office window's occasion view, drawn over the sky in place of the sun, clouds, moon and stars. */
+function windowView(c: Canvas, view: NonNullable<Dressing['window']>): void {
+  if (view === 'snow') {
+    c.region = 'snow'
+    for (const [x, y] of [[8, 5], [14, 8], [19, 5], [26, 6], [32, 9], [10, 12], [29, 13], [17, 14], [35, 5]] as const) c.draw(flake, x - 1, y - 1)
+    // A drift on the sill.
+    c.region = 'drift'
+    c.rect(6, 16, 32, 2, 'w')
+    c.hline(6, 37, 15)
+    return
+  }
+  if (view === 'fireworks') {
+    c.region = 'firework'
+    for (const [x, y] of [[8, 5], [25, 4], [15, 10], [31, 11]] as const) c.draw(burst, x, y)
+    return
+  }
+  c.region = 'heart'
+  for (const [x, y] of [[8, 5], [16, 11], [27, 5], [32, 12], [10, 13]] as const) c.draw(windowHeart, x, y)
+}
+
+
+const BACKDROPS: Record<BiomeArt, (c: Canvas, time: SceneTime, view?: Dressing['window']) => void> = { office_cubicles: office, server_room: serverRoom, cafeteria_depths: cafeteria, archive, parking_garage: parkingGarage }
 
 /** Draw a sprite with a 1px white halo so it stays legible over busy backdrops. */
 function drawWithHalo(c: Canvas, s: Sprite, left: number, top: number, region: string): void {
@@ -292,18 +338,38 @@ function drawWithHalo(c: Canvas, s: Sprite, left: number, top: number, region: s
 /** A sprite on the stage, back to front, with what it is so the companion can colour it (sceneColour.ts). */
 export type Placement =
   | { readonly role: 'cloak' | 'hero' | 'crown'; readonly sprite: Sprite; readonly left: number; readonly top: number }
+  /** D139: an occasion's floor prop, hero hat or monster hat; `id` is `<occasion>:<part>`. */
+  | { readonly role: 'decor'; readonly id: `${OccasionArt}:${'prop' | 'hat' | 'monsterHat'}`; readonly sprite: Sprite; readonly left: number; readonly top: number }
   | { readonly role: 'monster'; readonly id: keyof typeof monsterArt; readonly sprite: Sprite; readonly left: number; readonly top: number }
   | { readonly role: 'prop'; readonly id: PropId; readonly sprite: Sprite; readonly left: number; readonly top: number }
 
-export function scenePlacements(pose: HeroPose, subject: Subject): Placement[] {
+export function scenePlacements(pose: HeroPose, subject: Subject, occasion?: OccasionArt): Placement[] {
   const hero = heroPoses[pose]
+  const dressing = dressingFor(occasion)
   const placements: Placement[] = []
+  // D139: the floor prop stands behind everything, between the hero and its foe, or in the foe's place on an empty stage.
+  if (dressing !== undefined) {
+    const left = subject.kind === 'none' ? SUBJECT_X : DECOR_X
+    placements.push({ role: 'decor', id: `${occasion!}:prop`, sprite: dressing.prop, left, top: GROUND - dressing.prop.height })
+  }
   if (CLOAKED_POSES.has(pose)) placements.push({ role: 'cloak', sprite: heroCloak, left: HERO_X - 5, top: GROUND - hero.height + 8 })
-  placements.push({ role: 'hero', sprite: hero, left: HERO_X, top: GROUND - hero.height })
+  const heroTop = GROUND - hero.height
+  placements.push({ role: 'hero', sprite: hero, left: HERO_X, top: heroTop })
+  if (dressing?.heroHat !== undefined) {
+    const anchor = heroHatAnchor(pose)
+    const hat = dressing.heroHat
+    placements.push({ role: 'decor', id: `${occasion!}:hat`, sprite: hat, left: HERO_X + anchor.centre - Math.floor(hat.width / 2), top: heroTop + anchor.bottom - hat.height + 1 })
+  }
   if (subject.kind === 'monster') {
     const art = monsterArt[subject.id]
     placements.push({ role: 'monster', id: subject.id, sprite: art, left: SUBJECT_X, top: GROUND - art.height })
     if (subject.elite) placements.push({ role: 'crown', sprite: eliteCrown, left: SUBJECT_X + Math.floor((art.width - eliteCrown.width) / 2), top: GROUND - art.height - eliteCrown.height - 2 })
+    // An elite keeps its crown; an ordinary monster dresses for the occasion, the hat's brim on its top row.
+    else if (dressing?.monsterHat !== undefined) {
+      const hat = dressing.monsterHat
+      const firstRow = art.rows.findIndex((row) => row.trim() !== '')
+      placements.push({ role: 'decor', id: `${occasion!}:monsterHat`, sprite: hat, left: SUBJECT_X + monsterHatCentre(art) - Math.floor(hat.width / 2), top: GROUND - art.height + firstRow - hat.height + 1 })
+    }
   } else if (subject.kind === 'prop') {
     const art = propArt[subject.id]
     placements.push({ role: 'prop', id: subject.id, sprite: art, left: SUBJECT_X, top: GROUND - art.height })
@@ -311,16 +377,49 @@ export function scenePlacements(pose: HeroPose, subject: Subject): Placement[] {
   return placements
 }
 
+/** D139: the ceiling layer: a garland sagging across the stage with motifs hung from it, or cobwebs in both corners. */
+function ceilingStrip(c: Canvas, strip: NonNullable<Dressing['strip']>, occasion: OccasionArt): void {
+  const motif = `motif:${occasion}`
+  if (strip.kind === 'cobwebs') {
+    c.region = 'web'
+    for (const mirrored of [false, true]) {
+      const x = (dx: number) => (mirrored ? STAGE_WIDTH - 1 - dx : dx)
+      // Radial threads from the corner and three sagging rings.
+      for (let i = 0; i <= 12; i += 1) (c.paint(x(i), 0, '#'), c.paint(x(0), i, i < 10 ? '#' : ' '), c.paint(x(i), i, '#'))
+      for (let i = 0; i <= 7; i += 1) c.paint(x(Math.round(i * 1.8)), Math.round(i * 0.6) + 0, '#')
+      for (const ring of [4, 8, 12]) for (let t = 0; t <= ring; t += 1) c.paint(x(t), ring - t + Math.round((t * (ring - t)) / (ring * 1.5)), '#')
+    }
+    const motifs = Array.isArray(strip.motif) ? strip.motif : [strip.motif as Sprite]
+    ;([[40, 3], [72, 6], [112, 2]] as const).forEach(([x, y], i) => drawWithHalo(c, motifs[i % motifs.length]!, x, y, motif))
+    return
+  }
+  // Two swags, each hanging from the corners and the middle, sagging four rows; a motif every 12 columns.
+  const sag = (x: number) => {
+    const t = (x % 76) / 75
+    return 1 + Math.round(4 * Math.sin(Math.PI * t))
+  }
+  c.region = 'garland'
+  for (let x = 0; x < STAGE_WIDTH; x += 1) c.paint(x, sag(x), '#')
+  // A list of motifs (letter cards) repeats in order along the line.
+  const motifs = Array.isArray(strip.motif) ? strip.motif : [strip.motif as Sprite]
+  for (let x = 6, i = 0; x < STAGE_WIDTH - 4; x += 12, i += 1) {
+    const art = motifs[i % motifs.length]!
+    drawWithHalo(c, art, x - Math.floor(art.width / 2), sag(x) + 1, motif)
+  }
+}
+
 /** The region a placement draws under: its role, or the monster or prop it is. */
-export const placementRegion = (placement: Placement): string => (placement.role === 'monster' || placement.role === 'prop' ? `${placement.role}:${placement.id}` : placement.role)
+export const placementRegion = (placement: Placement): string => (placement.role === 'monster' || placement.role === 'prop' || placement.role === 'decor' ? `${placement.role}:${placement.id}` : placement.role)
 
 /** The stage, drawn onto `c` (a fresh 1-bit canvas unless the companion passes its colour-tracking one). */
-export function composeScene(biome: BiomeArt, pose: HeroPose, subject: Subject, time: SceneTime = 'day', c = new Canvas(STAGE_WIDTH, STAGE_HEIGHT)): Canvas {
-  BACKDROPS[biome](c, time)
+export function composeScene(biome: BiomeArt, pose: HeroPose, subject: Subject, time: SceneTime = 'day', c = new Canvas(STAGE_WIDTH, STAGE_HEIGHT), occasion?: OccasionArt): Canvas {
+  const dressing = dressingFor(occasion)
+  BACKDROPS[biome](c, time, dressing?.window)
+  if (dressing?.strip !== undefined) ceilingStrip(c, dressing.strip, occasion!)
   // Ground and a clear floor band.
   c.region = 'ground'
   c.rect(0, GROUND, STAGE_WIDTH, 1, '#')
   c.rect(0, GROUND - 22, STAGE_WIDTH, 0, 'w')
-  for (const placement of scenePlacements(pose, subject)) drawWithHalo(c, placement.sprite, placement.left, placement.top, placementRegion(placement))
+  for (const placement of scenePlacements(pose, subject, occasion)) drawWithHalo(c, placement.sprite, placement.left, placement.top, placementRegion(placement))
   return c
 }

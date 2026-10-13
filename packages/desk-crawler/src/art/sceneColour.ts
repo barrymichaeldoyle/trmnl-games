@@ -5,6 +5,7 @@ import { encodePngIndexed } from './png'
 import type { PropId } from './props'
 import { parseScenePath } from './route'
 import { composeScene, scenePlacements, STAGE_HEIGHT, STAGE_WIDTH, type BiomeArt, type Placement, type Subject } from './scene'
+import type { OccasionArt } from './occasions'
 import type { SceneTime } from './sceneTime'
 
 /**
@@ -96,6 +97,8 @@ function fillFor(placement: Placement, pose: HeroPose): (ch: string, x: number, 
       return () => MONSTER[placement.id]
     case 'prop':
       return () => PROP[placement.id]
+    case 'decor':
+      return () => decorFill(placement.id)
   }
 }
 
@@ -253,6 +256,78 @@ export const FOE: Record<string, Tones> = {
   crown: { ink: '#8a5a00', paper: '#ffd166' },
 }
 
+/**
+ * D139: occasion dressing. Hats and props paint like foes (one tone set per part, keyed `decor:<occasion>:<part>`);
+ * garland motifs, cobwebs and the window views paint like the backdrop, over whichever floor they hang in.
+ */
+const tone = (paper: string, shade?: readonly [string, string], ink?: string): Tones => ({ paper, ...(shade ? { shade } : {}), ...(ink ? { ink } : {}) })
+const RED = tone('#ffffff', ['#b8282a', '#e04040'])
+const DECOR: Record<string, Tones> = {
+  'decor:christmas:prop': tone('#f2c14e', ['#1f6b3a', '#3fa35a']),
+  'decor:christmas:hat': RED,
+  'decor:christmas:monsterHat': RED,
+  'decor:new_year:prop': tone('#ffe08f', ['#c9a63a', '#f2d36e']),
+  'decor:new_year:hat': tone('#f2c14e', ['#7a5cc8', '#9f86e0']),
+  'decor:new_year:monsterHat': tone('#f2c14e', ['#7a5cc8', '#9f86e0']),
+  'decor:halloween:prop': tone('#ffd166', ['#d9601f', '#f2a03a']),
+  'decor:halloween:hat': tone('#7a5cc8', ['#2e2160', '#4a3a8a']),
+  'decor:halloween:monsterHat': tone('#7a5cc8', ['#2e2160', '#4a3a8a']),
+  'decor:friday_13th:prop': tone('#f2c14e', ['#1b1530', '#2b2540']),
+  'decor:thanksgiving:prop': tone('#d99a5a', ['#8a4a1f', '#b8702f']),
+  'decor:black_friday:prop': tone('#ffffff', ['#c0392b', '#e0505a']),
+  'decor:diwali:prop': tone('#ffd166', ['#c0392b', '#e8743b']),
+  'decor:lunar_new_year:prop': tone('#f2c14e', ['#b8282a', '#e04040']),
+  'decor:valentines:prop': tone('#ffb3c1', ['#c0304a', '#e0506a']),
+  'decor:pi_day:prop': tone('#f4d9a0', ['#8a3a2a', '#b8503a']),
+  'decor:st_patricks:prop': tone('#f2c14e', ['#1b1530', '#3b3f4a']),
+  'decor:st_patricks:hat': tone('#f2c14e', ['#1f6b3a', '#3fa35a']),
+  'decor:easter:prop': tone('#ffe08f', ['#b5793f', '#d9a066']),
+  'decor:easter:hat': tone('#ffffff', ['#f2a0b8', '#ffc4d4']),
+  'decor:april_fools:prop': tone('#e0506a'),
+  'decor:april_fools:hat': tone('#f2c14e', ['#c0392b', '#e0505a']),
+  'decor:dog_day:prop': tone('#d9a066', ['#8a5a2c', '#b5793f']),
+  'decor:pirate_day:prop': tone('#f2c14e', ['#2f8a4a', '#e04040']),
+  'decor:pirate_day:hat': tone('#ffffff', ['#1b1530', '#2b2540']),
+  'decor:coffee_day:prop': tone('#ffffff', ['#5a3a24', '#8a5a3c']),
+  'decor:bosses_day:prop': tone('#ffffff', ['#c0392b', '#e0505a']),
+  'decor:leap_day:prop': tone('#7fd17a', ['#2f6b3a', '#5fb35a']),
+}
+const MOTIF: Record<OccasionArt, Tones> = {
+  christmas: tone('#ffffff', ['#c0392b', '#f2c14e'], '#2f6b3a'),
+  new_year: tone('#ffffff', ['#7a5cc8', '#f2c14e']),
+  halloween: tone('#1b1530', undefined, '#1b1530'),
+  friday_13th: tone('#ffffff'),
+  thanksgiving: tone('#ffffff', ['#c0392b', '#e8743b'], '#8a4a1f'),
+  black_friday: tone('#ffffff', undefined, '#c0392b'),
+  diwali: tone('#ffd166', ['#c0392b', '#e8743b']),
+  lunar_new_year: tone('#f2c14e', undefined, '#b8282a'),
+  valentines: tone('#ff8fa8', undefined, '#c0304a'),
+  pi_day: tone('#ffffff', undefined, '#8a3a2a'),
+  st_patricks: tone('#5fb35a', undefined, '#1f6b3a'),
+  easter: tone('#ffe08f', ['#f2a0b8', '#9fd8e0']),
+  april_fools: tone('#ffffff'),
+  dog_day: tone('#ffffff', undefined, '#8a5a2c'),
+  pirate_day: tone('#ffffff', undefined, '#1b1530'),
+  coffee_day: tone('#8a5a3c', undefined, '#5a3a24'),
+  bosses_day: tone('#f2c14e', undefined, '#8a5a00'),
+  leap_day: tone('#ffffff'),
+}
+const OCCASION_BACKDROP: Record<string, Tones> = {
+  garland: { ink: '#6b5a48' },
+  web: { ink: '#c9d3e0' },
+  snow: { ink: '#ffffff', paper: '#ffffff' },
+  drift: { ink: '#c9d3e0', paper: '#ffffff' },
+  firework: { ink: '#f2c14e' },
+  heart: { ink: '#e0506a', paper: '#ff8fa8' },
+  ...Object.fromEntries(Object.entries(MOTIF).map(([id, tones]) => [`motif:${id}`, tones])),
+}
+
+/** The one fill a decor part takes on a four-ink panel: its paper, or its shade's light tone when the shade carries it. */
+function decorFill(id: string): string {
+  const tones = DECOR[`decor:${id}`]
+  return tones?.shade?.[1] ?? tones?.paper ?? '#ffffff'
+}
+
 const WARRIOR_TONES = {
   hair: '#5a3a24',
   skin: '#f2c39b',
@@ -333,10 +408,10 @@ class PaintedCanvas extends Canvas {
 }
 
 /** The stage in full colour as rows of colours (null for clear), painted from the same composition as the device image. */
-export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, time: SceneTime): Array<Array<string | null>> {
+export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, time: SceneTime, occasion?: OccasionArt): Array<Array<string | null>> {
   const c = new PaintedCanvas()
-  composeScene(biome, pose, subject, time, c)
-  const hero = scenePlacements(pose, subject).find((p) => p.role === 'hero')
+  composeScene(biome, pose, subject, time, c, occasion)
+  const hero = scenePlacements(pose, subject, occasion).find((p) => p.role === 'hero')
   const backdrop = BACKDROP[biome][time]
   return Array.from({ length: STAGE_HEIGHT }, (_, y) =>
     Array.from({ length: STAGE_WIDTH }, (_, x) => {
@@ -344,8 +419,8 @@ export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, 
       const region = c.regions[y * STAGE_WIDTH + x]!
       if (!ch || region === 'halo') return null
       if (region === 'hero' && hero) return warriorTone(pose, ch, x - hero.left, y - hero.top, hero.sprite.height)
-      const foe = FOE[region]
-      const tones = foe ?? backdrop[region] ?? {}
+      const foe = FOE[region] ?? DECOR[region]
+      const tones = foe ?? backdrop[region] ?? OCCASION_BACKDROP[region] ?? {}
       const fallbackInk = foe ? INK : '#5a4a3a'
       if (ch === '#') return tones.ink ?? fallbackInk
       if (ch === 'w') return tones.paper ?? null
@@ -360,7 +435,7 @@ export function paintedScene(biome: BiomeArt, pose: HeroPose, subject: Subject, 
 export function paintedSceneUri(path: string): string | null {
   const parsed = parseScenePath(path.replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, ''))
   if (!parsed) return null
-  const grid = paintedScene(parsed.biome, parsed.pose, parsed.subject, parsed.time)
+  const grid = paintedScene(parsed.biome, parsed.pose, parsed.subject, parsed.time, parsed.occasion)
   const colours = new Map<string, number>([['', 0]])
   const index = new Uint8Array(STAGE_WIDTH * STAGE_HEIGHT)
   grid.forEach((row, y) =>

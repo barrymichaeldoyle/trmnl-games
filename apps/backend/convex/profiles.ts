@@ -4,6 +4,7 @@ import { ACHIEVEMENT_BY_ID, ACHIEVEMENT_FAMILIES } from '@trmnl-games/desk-crawl
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { FULL_SCALE } from '@trmnl-games/desk-crawler/art/scene'
 import { sceneFor, scenePath } from '@trmnl-games/desk-crawler/art/sceneKey'
+import { sceneOccasion } from '@trmnl-games/desk-crawler/payload'
 import { currentHero } from './lib/gameProfile'
 import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
@@ -43,7 +44,7 @@ export const card = internalQuery({
     const found = await publicHero(ctx, alias)
     if (found === null) return null
     const { user, hero, scene, rank } = found
-    return { heroName: hero.name, alias: user.publicAlias, level: hero.level, rank, scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE) }
+    return { heroName: hero.name, alias: user.publicAlias, level: hero.level, rank, scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', sceneOccasion(worldContent(found.world), Date.now(), user.trmnlUtcOffset)) }
   },
 })
 
@@ -79,7 +80,7 @@ export const view = query({
       level: hero.level,
       status: hero.status,
       biome: content.biomes.find((biome) => biome.id === hero.biomeId)?.name ?? null,
-      scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE),
+      scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', sceneOccasion(content, Date.now(), user.trmnlUtcOffset)),
       adventuringSince: hero.activatedAt ?? hero.createdAt,
       rank: found.rank,
       lifetime: { combatWins: counters.combatWins, itemsFound: counters.itemsFound, trips: counters.trips, rescues: counters.rescues, epicFinds: counters.epicFinds },

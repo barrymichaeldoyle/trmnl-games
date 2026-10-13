@@ -18,6 +18,7 @@ import { awardAfterIntent } from './lib/achievements'
 import { readWorld } from './world'
 import { FULL_SCALE } from '@trmnl-games/desk-crawler/art/scene'
 import { sceneFor, scenePath } from '@trmnl-games/desk-crawler/art/sceneKey'
+import { sceneOccasion } from '@trmnl-games/desk-crawler/payload'
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { raidWinChance } from '@trmnl-games/desk-crawler/sim/core/raid'
 import { maskRaidSummaries } from './lib/raids'
@@ -64,7 +65,8 @@ export const mine = query({
     const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null, hero.class)
     return {
       id: hero._id,
-      scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE),
+      // D139: dressed for the occasion on the owner's last TRMNL date; the companion sets the sky from the browser's clock.
+      scenePath: scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', sceneOccasion(content, Date.now(), user.trmnlUtcOffset)),
       name: hero.name,
       alias: user.publicAlias,
       activationState: hero.activationState,
