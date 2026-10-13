@@ -158,3 +158,8 @@ export function ErrorNote({ message, id }: { message: string | null; id?: string
     </p>
   )
 }
+
+/** A small count on a tab, drawn as a notification badge: night digits on a gold square, hidden from screen readers. */
+export function CountBadge({ count, className = '' }: { count: number; className?: string }) {
+  return <span aria-hidden="true" className={`h-4 min-w-4 items-center justify-center bg-gold px-1 label-px leading-none tabular-nums text-night shadow-[0_0_0_2px_var(--color-night)] ${className}`}>{count}</span>
+}

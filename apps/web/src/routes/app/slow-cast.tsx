@@ -7,7 +7,7 @@ import { requireOpenGame, useGames } from '../../lib/gameAccess'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { preload } from '../../lib/preload'
 import { seo } from '../../lib/seo'
-import { Card, LoadingState } from '../../lib/ui'
+import { Card, CountBadge, LoadingState } from '../../lib/ui'
 import type { Dock } from '../../lib/slowCast'
 import { useAlertOpened } from './desk-crawler/-alerts'
 
@@ -64,6 +64,7 @@ function Shell() {
       </main></>
     )
   }
+  const coolerUsed = dock.angler.cooler.used
   return (
     <>
       <nav aria-label="Slow Cast" className="hud sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
@@ -72,18 +73,29 @@ function Shell() {
             <img src="/games/slow-cast/favicon.svg" alt="" width={24} height={24} className="[image-rendering:pixelated]" />
             <span className="ml-3 text-xs whitespace-nowrap text-gold-ink">Slow Cast</span>
           </li>
-          {NAV.map((item) => (
-            <li key={item.to} className="flex-1">
-              <Link
-                to={item.to}
-                activeOptions={{ exact: true }}
-                className="menu-cursor flex min-h-13 flex-col items-center justify-center gap-1 text-[0.625rem] text-muted hover:text-ink aria-[current=page]:text-gold-ink aria-[current=page]:shadow-[inset_0_-4px_0_var(--color-gold)] max-sm:before:hidden sm:flex-row sm:gap-2 sm:text-hud-sm"
-              >
-                <Glyph name={item.glyph} className="sm:hidden lg:block" />
-                {item.label}
-              </Link>
-            </li>
-          ))}
+          {NAV.map((item) => {
+            // The Cooler tab carries how many fish are in it as a badge, like Desk Crawler's Bag tab.
+            const count = item.to === '/app/slow-cast/cooler' ? coolerUsed : undefined
+            return (
+              <li key={item.to} className="flex-1">
+                <Link
+                  to={item.to}
+                  activeOptions={{ exact: true }}
+                  className="menu-cursor flex min-h-13 flex-col items-center justify-center gap-1 text-[0.625rem] text-muted hover:text-ink aria-[current=page]:text-gold-ink aria-[current=page]:shadow-[inset_0_-4px_0_var(--color-gold)] max-sm:before:hidden sm:flex-row sm:gap-2 sm:text-hud-sm"
+                >
+                  {/* On phones the badge sits on the glyph's corner; from 640px it follows the label. */}
+                  <span className="relative sm:hidden lg:block">
+                    <Glyph name={item.glyph} />
+                    {count !== undefined ? <CountBadge count={count} className="absolute -top-2 left-3.5 flex sm:hidden" /> : null}
+                  </span>
+                  <span className="flex items-center">
+                    {item.label}
+                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">, {count} fish</span></> : null}
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       </nav>
       {banner}

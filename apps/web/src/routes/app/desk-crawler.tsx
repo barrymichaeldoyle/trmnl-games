@@ -2,7 +2,7 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
-import { Card, LoadingState } from '../../lib/ui'
+import { Card, CountBadge, LoadingState } from '../../lib/ui'
 import { RELEASE_STATUS } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { NameRepair } from './desk-crawler/-nameRepair'
@@ -123,9 +123,4 @@ function SignedInApp() {
       </main>
     </>
   )
-}
-
-/** A small count on a tab, drawn as a notification badge: night digits on a gold square, hidden from screen readers. */
-function CountBadge({ count, className = '' }: { count: number; className?: string }) {
-  return <span aria-hidden="true" className={`h-4 min-w-4 items-center justify-center bg-gold px-1 label-px leading-none tabular-nums text-night shadow-[0_0_0_2px_var(--color-night)] ${className}`}>{count}</span>
 }
