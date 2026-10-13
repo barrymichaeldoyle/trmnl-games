@@ -2,6 +2,7 @@ import type { WaterId } from '@trmnl-games/slow-cast/sim'
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { currentAngler } from './profile'
+import { pagePublic } from '../lib/publicPage'
 
 /**
  * Slow Cast boards (2026-10-10): the heaviest fish each angler has landed at each water, this week and of all time.
@@ -63,7 +64,7 @@ export async function readBoard(ctx: QueryCtx, waterId: WaterId, period: string,
   const entries: BoardRow[] = shown.map((row, index) => {
     const owner = owners[index]
     const visible = owner !== null && owner !== undefined && owner.state === 'active' && anglers[index]?._id === row.anglerId
-    return { rank: index + 1, name: visible ? owner.publicAlias : 'Hidden player', speciesId: row.speciesId, grams: row.grams, own: row.anglerId === viewer, profile: visible && anglers[index]?.publicProfile === true }
+    return { rank: index + 1, name: visible ? owner.publicAlias : 'Hidden player', speciesId: row.speciesId, grams: row.grams, own: row.anglerId === viewer, profile: visible && pagePublic(anglers[index]) }
   })
   const ownIndex = viewer === null ? -1 : rows.findIndex((row) => row.anglerId === viewer)
   const ownRow = viewer === null ? null : ownIndex >= 0 ? rows[ownIndex]! : await ctx.db.query('swCatchRecords').withIndex('by_anglerId_and_waterId_and_period', (q) => q.eq('anglerId', viewer).eq('waterId', waterId).eq('period', period)).unique()

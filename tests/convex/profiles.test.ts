@@ -22,14 +22,15 @@ describe('public hero profiles (v1.2)', () => {
 
   const owner = (alias: string) => t.withIdentity({ issuer: 'issuer', subject: alias })
 
-  it('stays private until the owner opts in, and hides again when they opt out', async () => {
+  it('is public until the owner hides it, and public again when they show it (D144)', async () => {
     await seedHero(t, {}, 'Wren')
-    expect(await t.query(api.profiles.view, { alias: 'Wren' })).toBeNull()
-    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-0001', visible: true })
     expect(await t.query(api.profiles.view, { alias: '  wren ' })).toMatchObject({ alias: 'Wren', heroName: 'Baz', level: 1 })
     expect((await owner('Wren').query(api.heroes.mine, {}))?.publicProfile).toBe(true)
-    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-0002', visible: false })
+    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-0001', visible: false })
     expect(await t.query(api.profiles.view, { alias: 'Wren' })).toBeNull()
+    expect((await owner('Wren').query(api.heroes.mine, {}))?.publicProfile).toBe(false)
+    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-0002', visible: true })
+    expect(await t.query(api.profiles.view, { alias: 'Wren' })).not.toBeNull()
   })
 
   it('shows rank, earned achievements with rarity and lifetime counts, never gear, gold or account data', async () => {
@@ -51,11 +52,11 @@ describe('public hero profiles (v1.2)', () => {
     expect(text).not.toContain('999')
   })
 
-  it('links a public hero from the companion leaderboard, and only that hero', async () => {
+  it('links a public hero from the companion leaderboard, and not a hidden one', async () => {
     await seedHero(t, { level: 4, counters: { ...zeroCounters(), combatWins: 2 } }, 'Moss')
     await seedHero(t, {}, 'Fern')
     await runTick(t)
-    await owner('Moss').mutation(api.heroes.setPublicProfile, { operationId: 'profile-board', visible: true })
+    await owner('Fern').mutation(api.heroes.setPublicProfile, { operationId: 'profile-board', visible: false })
     const board = await owner('Fern').query(api.leaderboard.view, { board: 'overall', cohortKey: 'all' })
     const rows = board.entries as Array<{ name: string; profile?: boolean }>
     expect(rows.find((row) => row.name === 'Moss')?.profile).toBe(true)
@@ -65,8 +66,9 @@ describe('public hero profiles (v1.2)', () => {
   it('serves the social card only while the page is public, as a 1200x630 PNG', async () => {
     await seedHero(t, { level: 7 }, 'Wren')
     const card = (alias: string) => t.fetch(`/art/card/hero/${encodeURIComponent(alias)}.png`)
+    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-card', visible: false })
     expect((await card('Wren')).status).toBe(404)
-    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-card', visible: true })
+    await owner('Wren').mutation(api.heroes.setPublicProfile, { operationId: 'profile-card-2', visible: true })
     const response = await card('wren')
     expect(response.status).toBe(200)
     expect(response.headers.get('Content-Type')).toBe('image/png')

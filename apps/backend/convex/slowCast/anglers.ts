@@ -7,6 +7,7 @@ import { forecastFor } from '@trmnl-games/slow-cast/sim/seed'
 import type { Doc } from '../_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from '../_generated/server'
 import { appError } from '../lib/errors'
+import { pagePublic } from '../lib/publicPage'
 import { currentUser, runIntent, type IntentResult } from '../lib/intent'
 import { readEngineWorld } from '../lib/engine/world'
 import { fromAnglerState, toAnglerState } from './adapter'
@@ -186,7 +187,7 @@ export const setPublicProfile = mutation({
     strip(
       await runIntent(ctx, operationId, 'slowCast.setPublicProfile', { visible }, async (user) => {
         const angler = await playableAngler(ctx, user)
-        if ((angler.publicProfile ?? false) === visible) return { changed: false }
+        if (pagePublic(angler) === visible) return { changed: false }
         await ctx.db.patch(angler._id, { publicProfile: visible })
         return { changed: true }
       }),
@@ -258,7 +259,7 @@ export const dock = query({
         bait: content.baits.map((b) => ({ class: b.class, name: b.name, units: angler.bait[b.class] ?? 0, tubSize: b.castsPerTub, price: b.price, tubsThatFit: tubsThatFit(content, state, b.class) })),
         access: angler.access,
         counters: angler.counters,
-        publicProfile: angler.publicProfile ?? false,
+        publicProfile: pagePublic(angler),
         speciesLogged: logged,
         speciesTotal: content.species.length,
       },

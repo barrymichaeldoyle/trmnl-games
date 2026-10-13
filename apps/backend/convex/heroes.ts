@@ -7,6 +7,7 @@ import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
 import { isGear } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
 import { appError } from './lib/errors'
+import { pagePublic } from './lib/publicPage'
 import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
 import { deriveStats } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
@@ -100,7 +101,7 @@ export const mine = query({
       // D79: the pending choice with its options and what each one would do to this hero right now.
       choice: choiceView(content, hero, potionsHeld(items), world?.currentTick ?? 0),
       stance: hero.stance ?? 'balanced',
-      publicProfile: hero.publicProfile ?? false,
+      publicProfile: pagePublic(hero),
       // D110: under a catalog with raids, each stance also says how often it raids and how often it wins against a balanced hero.
       stances: Object.values(content.stances ?? {}).map((rule) => ({ id: rule.id, name: rule.name, blurb: rule.blurb, potionBelowPct: rule.autoPotionBelowPct, restBelowPct: rule.restBelowPct, resumeAtPct: rule.resumeExploringAtPct, victoryXpPct: rule.victoryXpPct, ...(content.raids ? { raidsPerDay: Math.round(content.raids.launchPermille[rule.id] * 96) / 1000, raidWinPct: raidWinChance(content, rule.id, 'balanced') } : {}) })),
       raidsEnabled: content.raids !== undefined,
@@ -408,7 +409,7 @@ function unlocksView(content: ContentCatalog, level: number) {
   return FEATURES.filter((feature): feature is Exclude<UnlockableFeature, 'roster'> => feature !== 'roster' && unlockLevel(content, feature) !== undefined).map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: unlockLevel(content, feature)!, unlocked: unlocked(content, level, feature) }))
 }
 
-/** v1.2: show or hide the hero's public profile page. Off until the owner turns it on. */
+/** v1.2: show or hide the hero's public profile page. Public until the owner hides it (D144). */
 export const setPublicProfile = mutation({
   args: { operationId: v.string(), visible: v.boolean() },
   returns: intentResult,
@@ -417,7 +418,7 @@ export const setPublicProfile = mutation({
       const hero = await currentHero(ctx, user)
       if (hero === null) throw appError('HERO_NOT_FOUND', 'No hero yet.')
       if (hero.activationState !== 'active') throw appError('TRMNL_REQUIRED', 'Save Desk Crawler in TRMNL to start adventures.')
-      if ((hero.publicProfile ?? false) === args.visible) return { changed: false }
+      if (pagePublic(hero) === args.visible) return { changed: false }
       await ctx.db.patch(hero._id, { publicProfile: args.visible })
       return { changed: true }
     }),

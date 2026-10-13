@@ -1,4 +1,5 @@
 import { currentHero } from './gameProfile'
+import { pagePublic } from './publicPage'
 import type { Doc } from '../_generated/dataModel'
 import type { QueryCtx } from '../_generated/server'
 import { HOUR_MS, hourStart, WINDOW_7D_HOURS } from '@trmnl-games/desk-crawler/sim/score'
@@ -31,7 +32,7 @@ export async function maskedEntries(ctx: QueryCtx, entries: Doc<'leaderboardGene
       level: row.level,
       score: row.score ?? 0,
       // D109: the companion's board links a visible row to its public page; the device payload never carries it.
-      ...(options.profiles ? { profile: visible && heroes[index]?.publicProfile === true } : {}),
+      ...(options.profiles ? { profile: visible && pagePublic(heroes[index]) } : {}),
     }
   })
 }

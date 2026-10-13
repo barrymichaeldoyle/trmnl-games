@@ -13,13 +13,13 @@ Raids and meetings show that other people are playing, but the names drift past 
 - On a public hero page, signed in: a **Follow** button. After following, it changes to **Following** with **Unfollow** and **Make rival** beside it.
 - On Rankings, above the lifetime records, a **Following** card. Each followed hero shows their public name, hero name, class, level, what they're doing and where, and their all-time rank, and links to their page. Each row has **Make rival** and **Unfollow**.
 - The rival row comes first and has a short head-to-head line: "You're 2 levels ahead" or "Quill is 3 places ahead of you".
-- A followed hero who has made their page private again shows as "Page is private" with only their public name. If the player renamed themselves, was suspended or deleted their progress, the row shows "No longer here" with Unfollow.
+- A followed hero whose owner hid their page (D144) shows as "Page is private" with only their public name. If the player renamed themselves, was suspended or deleted their progress, the row shows "No longer here" with Unfollow.
 - A player who has been named someone's rival sees a "Named you their rival" box at the top of their own Following card, with each name linking to that player's page and a **Rival back** button. Raids between rivals carry a "Your rival" or "You're their rival" tag on the Raids card, and the rival row counts your raids on them.
 - Nothing appears on the device or in push alerts. A plain follow is never shown to the followed player, who sees no list or count of followers.
 
 ## Rules
 
-- **Who can be followed.** Only a hero whose public page is on (D109), so following reveals nothing a stranger can't already see on that page. The follow button lives on the public page, which leaderboards, raids and meetings already link to.
+- **Who can be followed.** Only a hero whose public page is on (D109; on by default since D144), so following reveals nothing a stranger can't already see on that page. The follow button lives on the public page, which leaderboards, raids and meetings already link to.
 - **Follows are per account, not per hero.** They follow the player's current hero, the way the public page does. A roster switch (D136) shows the new current hero, or "Page is private" until that hero opts in.
 - **Limits.** Up to 20 follows per account. One rival at a time, chosen from your follows. Unfollowing your rival clears the rival.
 - **Renames break follows.** Each follow stores the followed player's public-name version (D142). If they change their public name, the follow shows "No longer here" instead of following them to the new name. This is the same rule that masks renamed names on leaderboards and in raid logs. It also gives anyone who wants to shake off followers an easy way out without a block list.

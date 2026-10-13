@@ -14,7 +14,7 @@ function SlowCastPrivacy() {
   return (
     <>
       <h2>Slow Cast</h2>
-      <p>Slow Cast stores your angler: gold, the water and bait, your cooler, your logbook of species and best weights, your fishing history, your heaviest fish at each water, achievements and fly box. Your heaviest fish appear under your public name on Slow Cast's leaderboards and on other players' TRMNL screens. If you show Slow Cast on your public profile, anyone with the link sees your title, start date, achievement count and species logged.</p>
+      <p>Slow Cast stores your angler: gold, the water and bait, your cooler, your logbook of species and best weights, your fishing history, your heaviest fish at each water, achievements and fly box. Your heaviest fish appear under your public name on Slow Cast's leaderboards and on other players' TRMNL screens. Unless you hide Slow Cast from your public profile in Slow Cast settings, anyone with the link sees your title, start date, achievement count and species logged.</p>
       <p>If you turn on Slow Cast alerts, they use the same devices and quiet hours as your other games' alerts. The weekly fly code on your TRMNL is keyed to your installation and never shown in the companion.</p>
       <p>In <Link to="/app/slow-cast/settings">Slow Cast settings</Link>, Delete Slow Cast progress removes your angler, cooler, logbook, leaderboard records, fly box, achievements, Slow Cast connections and Slow Cast alert settings. Your account and other games stay. Deleting your TRMNL Games account removes Slow Cast with everything else.</p>
     </>
@@ -39,7 +39,7 @@ export const Route = createFileRoute('/privacy')({
         In Desk Crawler, heroes raid each other's desks and meet each other by chance. When your hero raids, is raided or meets another hero, your public name appears in the other player's adventure log, in the companion and on their TRMNL, as it already does on the leaderboards. If you change your name or delete your account, those stories show "Hidden player" instead.
       </p>
       <p>
-        If you turn on your Desk Crawler hero page in Settings, anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gear, gold, the adventure log and your account details stay private. The page is off until you turn it on, and turning it off hides it straight away.
+        Your Desk Crawler hero has a public page: anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gear, gold, the adventure log and your account details stay private. The page is on by default. Hide my hero page in Settings hides it straight away, and you can show it again at any time.
       </p>
       <p>
         Signed-in players can follow a public hero page. We store who follows whom so their companion can list the players they follow. Nobody is told they were followed, and no page shows who follows a player, except that a player named as someone's rival sees who named them. If you change your public name, hide your page or delete your progress, other players stop seeing your hero in their list, and deleting removes those records.

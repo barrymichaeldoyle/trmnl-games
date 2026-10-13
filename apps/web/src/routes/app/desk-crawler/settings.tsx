@@ -81,17 +81,18 @@ function Settings() {
           <p>Your hero can have a public page once adventures start.</p>
         ) : hero.publicProfile ? (
           <>
-            <p>Anyone with the link can see your hero's name, level, rank, current floor, lifetime counts and achievements. Gear, gold, the adventure log and your account stay private.</p>
+            <p>Your hero has a public page. Other players can find it from the rankings, raids and meetings, follow it and name you their rival. It shows your hero's name, level, rank, current floor, lifetime counts and achievements. Gear, gold, the adventure log and your account stay private.</p>
             <p className="mt-2 break-all"><Link to="/desk-crawler/heroes/$alias" params={{ alias: me.user.publicAlias }} className="underline underline-offset-4">trmnlgames.com/desk-crawler/heroes/{encodeURIComponent(me.user.publicAlias)}</Link></p>
             <div className="mt-3 flex flex-wrap gap-2">
               <ShareHeroLink alias={me.user.publicAlias} heroName={hero.name} notify={notify} />
-              <Button variant="secondary" pending={profile.pending} busyLabel="Hiding…" onClick={() => profile.run({ visible: false }, 'Your hero page is private again.')}>Make private</Button>
             </div>
+            {/* D144: public by default; hiding stays available but quiet. */}
+            <Button className="mt-3 -ml-3 min-[375px]:-ml-4" variant="quiet" pending={profile.pending} busyLabel="Hiding…" onClick={() => profile.run({ visible: false }, 'Your hero page is hidden.')}>Hide my hero page</Button>
           </>
         ) : (
           <>
-            <p>Share a page showing your hero's name, level, rank, current floor, lifetime counts and achievements. Gear, gold, the adventure log and your account stay private. Off until you turn it on.</p>
-            <Button className="mt-3" variant="secondary" pending={profile.pending} busyLabel="Publishing…" onClick={() => profile.run({ visible: true }, 'Your hero page is public.')}>Make my hero page public</Button>
+            <p>Your hero page is hidden. Nobody can open it, follow you or name you their rival, and your name in the rankings doesn't link anywhere.</p>
+            <Button className="mt-3" variant="secondary" pending={profile.pending} busyLabel="Showing…" onClick={() => profile.run({ visible: true }, 'Your hero page is public.')}>Show my hero page</Button>
           </>
         )}
       </div></Card>

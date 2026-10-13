@@ -19,8 +19,8 @@ describe('shared public profile (D115, S5)', () => {
   })
   afterEach(() => vi.useRealTimers())
 
-  it('reads the same not-found for private and missing names', async () => {
-    await seedHero(t, {}, 'Quiet')
+  it('reads the same not-found for hidden and missing names', async () => {
+    await seedHero(t, { publicProfile: false }, 'Quiet')
     expect(await t.query(api.platformProfile.view, { alias: 'Quiet' })).toBeNull()
     expect(await t.query(api.platformProfile.view, { alias: 'Nobody' })).toBeNull()
   })

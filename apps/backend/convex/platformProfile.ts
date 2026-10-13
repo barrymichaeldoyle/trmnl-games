@@ -11,6 +11,7 @@ import { currentHero } from './lib/gameProfile'
 import { readEngineWorld } from './lib/engine/world'
 import { DESK_CRAWLER_RUNTIME } from './lib/engine/deskCrawler'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
+import { pagePublic } from './lib/publicPage'
 import { adminRef } from './lib/adminAccess'
 import { gameStatusOf } from './platform'
 import { MAX_SW_UNLOCKS } from './slowCast/achievements'
@@ -19,7 +20,7 @@ import type { EngineRuntime } from './lib/engine/runtime'
 
 /**
  * The shared public profile (slow-cast.md "Platform profile and achievements", D115): one page per public name
- * listing each game the player opted in, with its level, start date and all-time rank, plus platform achievements.
+ * listing each game whose page the player has not hidden (D144), with its level, start date and all-time rank, plus platform achievements.
  * Missing, private, suspended and name-repair profiles all read as the same null, as D109. A game that is not live
  * appears only to admins.
  */
@@ -55,8 +56,8 @@ export const view = query({
     if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
     const { hero, angler, dcUnlocks, scUnlocks, games, collected } = await crossGame(ctx, user)
     const admin = (await adminRef(ctx)) !== null
-    const showSlowCast = angler !== null && angler.activationState === 'active' && angler.publicProfile === true && ((await gameStatusOf(ctx, 'slow-cast')) === 'live' || admin)
-    const showDesk = hero !== null && hero.activationState === 'active' && hero.publicProfile === true
+    const showSlowCast = angler !== null && angler.activationState === 'active' && pagePublic(angler) && ((await gameStatusOf(ctx, 'slow-cast')) === 'live' || admin)
+    const showDesk = hero !== null && hero.activationState === 'active' && pagePublic(hero)
     if (!showDesk && !showSlowCast) return null
     const current = await ctx.db.query('platformStats').withIndex('by_key', (q) => q.eq('key', 'current')).unique()
     return {

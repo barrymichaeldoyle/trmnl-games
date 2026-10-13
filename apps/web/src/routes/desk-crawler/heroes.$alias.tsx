@@ -54,7 +54,7 @@ const STATUS: Record<Profile['status'], (biome: string) => string> = {
   sleeping: () => 'Stopped with a full bag',
 }
 
-/** Public, opt-in hero page (v1.2). Private, missing and hidden heroes all read the same. */
+/** Public hero page (v1.2), on unless the owner hid it (D144). Hidden and missing heroes read the same. */
 function HeroProfile() {
   const { alias } = Route.useParams()
   const { data } = useQuery(profileQuery(alias))
@@ -65,7 +65,7 @@ function HeroProfile() {
         {profile ? <Found profile={profile} /> : (
           <header className="flex flex-col gap-3">
             <h1 className="font-display text-3xl font-bold">No hero here</h1>
-            <p>This hero's page is private, or there is no player by that name.</p>
+            <p>This hero's page is hidden, or there is no player by that name.</p>
           </header>
         )}
         <div className="flex flex-wrap items-center gap-4">

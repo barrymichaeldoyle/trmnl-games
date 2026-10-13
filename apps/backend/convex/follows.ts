@@ -5,6 +5,7 @@ import { currentHero } from './lib/gameProfile'
 import { appError } from './lib/errors'
 import { currentUser, runIntent } from './lib/intent'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
+import { pagePublic } from './lib/publicPage'
 import { readWorld, worldContent } from './world'
 
 /**
@@ -45,7 +46,7 @@ async function followable(ctx: QueryCtx, alias: string) {
   const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalized)).first()
   if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
   const hero = await currentHero(ctx, user)
-  if (hero === null || hero.activationState !== 'active' || hero.publicProfile !== true) return null
+  if (hero === null || hero.activationState !== 'active' || !pagePublic(hero)) return null
   return user
 }
 
@@ -62,7 +63,7 @@ export const follow = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'follows.follow', { alias: normalizeAlias(args.alias), rival: args.rival === true }, async (user) => {
       const target = await followable(ctx, args.alias)
-      if (target === null || target._id === user._id) throw appError('PLAYER_NOT_FOUND', 'That hero page is private, or there is no player by that name.')
+      if (target === null || target._id === user._id) throw appError('PLAYER_NOT_FOUND', 'That hero page is hidden, or there is no player by that name.')
       const all = await followsOf(ctx, user)
       let row = all.find((follow) => follow.followedUserId === target._id) ?? null
       let changed = false
@@ -152,7 +153,7 @@ export const list = query({
         const hero = named ? await currentHero(ctx, owner) : null
         const base = { id: row._id, rival: row.rival === true, raids: { won: row.raidsWon ?? 0, lost: row.raidsLost ?? 0 } }
         if (!named || hero === null || hero.activationState !== 'active') return { ...base, state: 'gone' as const, name: HIDDEN, hero: null }
-        if (hero.publicProfile !== true) return { ...base, state: 'private' as const, name: owner.publicAlias, hero: null }
+        if (!pagePublic(hero)) return { ...base, state: 'private' as const, name: owner.publicAlias, hero: null }
         return {
           ...base,
           state: 'public' as const,
@@ -170,7 +171,7 @@ export const list = query({
           const owner = await ctx.db.get(row.userId)
           if (owner === null || owner.state !== 'active' || owner.nameRepairRequired) return null
           const hero = await currentHero(ctx, owner)
-          return { name: owner.publicAlias, public: hero !== null && hero.activationState === 'active' && hero.publicProfile === true, followed: followedIds.has(owner._id) }
+          return { name: owner.publicAlias, public: hero !== null && hero.activationState === 'active' && pagePublic(hero), followed: followedIds.has(owner._id) }
         }),
       )
     ).filter((row) => row !== null)

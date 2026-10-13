@@ -1,6 +1,7 @@
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { currentHero } from './gameProfile'
+import { pagePublic } from './publicPage'
 import { HIDDEN_RIVAL } from './raids'
 import { canMeet } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { MeetingPlan } from '@trmnl-games/desk-crawler/sim/core/meeting'
@@ -154,7 +155,7 @@ export async function recentMeetings(ctx: QueryCtx, heroId: Id<'heroes'>, limit:
         role,
         rivalName: visible ? storedName : HIDDEN_RIVAL,
         // D109/D141: the name links to the other player's page while it's public.
-        profile: visible && (await currentHero(ctx, other))?.publicProfile === true,
+        profile: visible && pagePublic(await currentHero(ctx, other)),
         rivalClass: role === 'starter' ? row.partnerClass : row.starterClass,
         kindId: row.kindId,
         biomeId: row.biomeId,

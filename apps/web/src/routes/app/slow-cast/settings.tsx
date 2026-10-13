@@ -69,10 +69,11 @@ function SettingsPage() {
       ) : null}
       {active ? (
         <Card title="Public profile">
-          <p>{angler.publicProfile ? 'Your Slow Cast title, achievements and logbook count show on your public profile.' : 'Your Slow Cast progress is private.'} Leaderboards always show your public name.</p>
+          <p>{angler.publicProfile ? 'Your Slow Cast title, achievements and logbook count show on your public profile.' : 'Slow Cast is hidden from your public profile.'} Leaderboards always show your public name.</p>
           <div className="mt-3">
-            <Button variant="secondary" pending={profile.pending} onClick={() => void profile.run({ visible: !angler.publicProfile }, angler.publicProfile ? 'Slow Cast is now private on your profile.' : 'Slow Cast now shows on your profile.')}>
-              {angler.publicProfile ? 'Make private' : 'Show on my profile'}
+            {/* D144: shown by default; hiding stays available but quiet. */}
+            <Button variant={angler.publicProfile ? 'quiet' : 'secondary'} pending={profile.pending} onClick={() => void profile.run({ visible: !angler.publicProfile }, angler.publicProfile ? 'Slow Cast is hidden from your profile.' : 'Slow Cast now shows on your profile.')}>
+              {angler.publicProfile ? 'Hide from my profile' : 'Show on my profile'}
             </Button>
           </div>
           {angler.publicProfile ? <p className="mt-3 text-sm"><Link to="/profile/$alias" params={{ alias: angler.alias }} className="underline underline-offset-4">Open your public profile</Link></p> : null}

@@ -8,23 +8,24 @@ import { sceneOccasion } from '@trmnl-games/desk-crawler/payload'
 import { currentHero } from './lib/gameProfile'
 import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
+import { pagePublic } from './lib/publicPage'
 import { readWorld, worldContent } from './world'
 
 /**
- * Public hero profile (v1.2). Opt-in per hero: a private, missing, suspended,
+ * Public hero profile (v1.2). Public unless the owner hid it (D144): a hidden, missing, suspended,
  * renamed-for-repair or inactive hero all return the same null, so the page
  * cannot be used to test whether an alias exists. Returns a public-safe
  * projection only: no equipment, bag, gold, log text, timezone or account data.
  * Fixed indexed reads; nothing here scans other heroes.
  */
-/** The opted-in hero behind a public name, or null for every way it can be missing or private (one shape for all). */
+/** The shown hero behind a public name, or null for every way it can be missing or hidden (one shape for all). */
 async function publicHero(ctx: QueryCtx, alias: string) {
   const normalized = normalizeAlias(alias)
   if (normalized.length < ALIAS_RULE.min || normalized.length > ALIAS_RULE.max) return null
   const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalized)).first()
   if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
   const hero = await currentHero(ctx, user)
-  if (hero === null || hero.activationState !== 'active' || hero.publicProfile !== true) return null
+  if (hero === null || hero.activationState !== 'active' || !pagePublic(hero)) return null
   const world = await readWorld(ctx)
   const newest = (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
   const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, newest ? { kind: newest.kind, ...('outcome' in newest.detail ? { outcome: newest.detail.outcome } : {}) } : null, hero.class)

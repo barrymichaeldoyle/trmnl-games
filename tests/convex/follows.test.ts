@@ -31,13 +31,13 @@ describe('friends and rivals (D143)', () => {
   const follow = (who: string, alias: string) => as(who).mutation(api.follows.follow, { operationId: next(), alias })
   const list = async (who: string) => (await as(who).query(api.follows.list, {}))!
 
-  it('follows only public pages, never yourself, and fails the same way for private and missing names', async () => {
+  it('follows only public pages, never yourself, and fails the same way for hidden and missing names', async () => {
     await seedHero(t, {}, 'Wren')
-    await seedHero(t, {}, 'Moss')
-    await expect(follow('Wren', 'Moss')).rejects.toThrow(/private, or there is no player/)
-    await expect(follow('Wren', 'Nobody')).rejects.toThrow(/private, or there is no player/)
+    await seedHero(t, { publicProfile: false }, 'Moss')
+    await expect(follow('Wren', 'Moss')).rejects.toThrow(/hidden, or there is no player/)
+    await expect(follow('Wren', 'Nobody')).rejects.toThrow(/hidden, or there is no player/)
     await publish('Wren')
-    await expect(follow('Wren', 'Wren')).rejects.toThrow(/private, or there is no player/)
+    await expect(follow('Wren', 'Wren')).rejects.toThrow(/hidden, or there is no player/)
     await publish('Moss')
     expect(await follow('Wren', ' moss ')).toMatchObject({ changed: true })
     expect(await follow('Wren', 'Moss')).toMatchObject({ changed: false })

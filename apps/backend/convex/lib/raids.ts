@@ -7,6 +7,7 @@ import type { RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
 import type { ContentCatalog, IncomingRaid, RaidTarget, SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
 import { effectiveStance, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
 import { MAX_FOLLOWS } from '../follows'
+import { pagePublic } from './publicPage'
 
 /**
  * Desk raids adapter (D110). Every read is bounded: a raider whose launch draw hit takes one pool row, then the
@@ -84,7 +85,7 @@ async function pickRival(ctx: MutationCtx, raider: Doc<'heroes'>, tick: number, 
   const owner = await ctx.db.get(follow.followedUserId)
   if (owner === null || owner.publicNameVersion !== follow.followedNameVersion) return undefined
   const hero = await currentHero(ctx, owner)
-  if (hero === null || hero._id === raider._id || hero.publicProfile !== true || hero.raidPoolId === undefined) return undefined
+  if (hero === null || hero._id === raider._id || !pagePublic(hero) || hero.raidPoolId === undefined) return undefined
   const row = await ctx.db.get(hero.raidPoolId)
   if (row === null) return undefined
   const pick = await raidable(ctx, row, hero, tick, content)
@@ -219,7 +220,7 @@ export async function recentRaids(ctx: QueryCtx, heroId: Id<'heroes'>, limit: nu
         role,
         rivalName: name,
         // D109/D110: the name links to the other player's page while it's public.
-        profile: name !== HIDDEN_RIVAL && (await currentHero(ctx, rival))?.publicProfile === true,
+        profile: name !== HIDDEN_RIVAL && pagePublic(await currentHero(ctx, rival)),
         won,
         // The raider's own gold is exact; the target's is what landed, or the ledger amount while still pending.
         gold: role === 'raider' ? row.gold : (row.targetGold ?? row.gold),
