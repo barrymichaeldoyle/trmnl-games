@@ -3,8 +3,9 @@ export const PLATFORM_NAME = 'TRMNL Games'
 export const PLATFORM_ORIGIN = 'https://trmnlgames.com'
 export const DESK_CRAWLER_GAME = 'desk-crawler' as const
 export const IDLE_ANGLER_GAME = 'idle-angler' as const
-export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME
-export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME]
+export const PAPER_LIVES_GAME = 'paper-lives' as const
+export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME | typeof PAPER_LIVES_GAME
+export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME, PAPER_LIVES_GAME]
 
 /**
  * Lifecycle status (idle-angler.md "Architecture"). `hidden`: nothing lists the game and its routes
@@ -54,10 +55,23 @@ export const games = {
     managePath: '/connect/trmnl/idle-angler/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID_IDLE_ANGLER',
   },
+  [PAPER_LIVES_GAME]: {
+    slug: PAPER_LIVES_GAME,
+    name: 'Paper Lives',
+    description: 'A life story that writes itself on your TRMNL.',
+    // D159: hidden (admin-only) while it is built, until its own listing.
+    defaultStatus: 'hidden',
+    publicPath: '/games/paper-lives',
+    companionPath: '/app/paper-lives',
+    helpPath: '/help/paper-lives',
+    installPath: '/connect/trmnl/paper-lives/install',
+    managePath: '/connect/trmnl/paper-lives/manage',
+    clientIdEnv: 'TRMNL_CLIENT_ID_PAPER_LIVES',
+  },
 } as const satisfies Record<GameSlug, GameEntry>
 
 export function isGameSlug(value: unknown): value is GameSlug {
-  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME
+  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME || value === PAPER_LIVES_GAME
 }
 
 export function isGameStatus(value: unknown): value is GameStatus {

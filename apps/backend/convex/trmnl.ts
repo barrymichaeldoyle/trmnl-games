@@ -1,5 +1,5 @@
 import { currentHero, gameProfile, setCurrentHero, DESK_CRAWLER } from './lib/gameProfile'
-import { deskCrawlerDeleting, isGame, IDLE_ANGLER_HOOKS } from './lib/gameHooks'
+import { currentCharacterOf, gameDeletingFor, isGame, otherGameHooks } from './lib/gameHooks'
 import { gameSlug as gameSlugValidator, heroGender } from './schema'
 import type { HeroGender } from '@trmnl-games/desk-crawler/art/hero'
 import type { GameSlug } from '@trmnl-games/platform'
@@ -21,9 +21,9 @@ import { runIntent } from './lib/intent'
 import { MANAGEMENT_PROOF_MS, verifyManagementJwt } from './lib/trmnlManagement'
 
 /** D115: which game's profile is being deleted, its player character, and its name in messages. */
-const gameDeleting = (slug: GameSlug) => (slug === DESK_CRAWLER ? deskCrawlerDeleting : IDLE_ANGLER_HOOKS.deleting)
-const gameLabel = (slug: GameSlug) => (slug === DESK_CRAWLER ? 'Desk Crawler' : IDLE_ANGLER_HOOKS.label)
-const currentCharacter = (slug: GameSlug) => (slug === DESK_CRAWLER ? currentHero : IDLE_ANGLER_HOOKS.current)
+const gameDeleting = (slug: GameSlug) => (ctx: Parameters<typeof gameDeletingFor>[0], userId: Id<'users'>) => gameDeletingFor(ctx, slug, userId)
+const gameLabel = (slug: GameSlug) => (slug === DESK_CRAWLER ? 'Desk Crawler' : otherGameHooks(slug).label)
+const currentCharacter = (slug: GameSlug) => (ctx: Parameters<typeof currentCharacterOf>[0], user: Doc<'users'> | null) => currentCharacterOf(ctx, slug, user)
 const deletingError = (slug: GameSlug) => appError('GAME_UNAVAILABLE', `${gameLabel(slug)} progress is being deleted. Try again shortly.`)
 
 /** Install attempts stay valid for 20 minutes (data-model.md). */
@@ -167,7 +167,7 @@ export const linkInstall = internalMutation({
     const existing = await currentCharacter(slug)(ctx, user)
     if (existing) return { activationState: existing.activationState, heroCreated: false }
     if (slug !== DESK_CRAWLER) {
-      await IDLE_ANGLER_HOOKS.prepare(ctx, user, now)
+      await otherGameHooks(slug).prepare(ctx, user, now)
       return { activationState: 'pending_trmnl' as const, heroCreated: true }
     }
 
@@ -248,7 +248,7 @@ export const confirmInstance = internalMutation({
     })
     await ctx.db.patch(attempt._id, { state: 'completed', completedUuid: args.uuid })
     if (slug === DESK_CRAWLER) await activateForConfirmedInstallation(ctx, grant.userId, now)
-    else await IDLE_ANGLER_HOOKS.activate(ctx, grant.userId, now)
+    else await otherGameHooks(slug).activate(ctx, grant.userId, now)
     return { ok: true, reason: 'confirmed' as const }
   },
 })

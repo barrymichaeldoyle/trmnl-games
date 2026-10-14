@@ -242,3 +242,13 @@ export const IDLE_ANGLER_TABLES = {
   publications: 'iaLeaderboardPublications',
   achievementStats: 'iaAchievementStats',
 } as const
+
+/** Paper Lives' engine tables (paper-lives.md "Data"), prefixed `pl`. Its boards are life records, so it has no ranking tables. */
+export const PAPER_LIVES_TABLES = {
+  subject: 'lives',
+  world: 'plWorldState',
+  runs: 'plSimulationRuns',
+  failures: 'plSimulationFailures',
+  publications: 'plLeaderboardPublications',
+  achievementStats: 'plAchievementStats',
+} as const

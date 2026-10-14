@@ -21,8 +21,8 @@ export const RETENTION = {
   alertOutboxMs: 7 * DAY,
 } as const
 
-type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'iaTickLogs' | 'iaFailures' | 'iaRuns'
-const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'iaTickLogs', 'iaFailures', 'iaRuns']
+type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'iaTickLogs' | 'iaFailures' | 'iaRuns' | 'plTickLogs' | 'plFailures' | 'plRuns'
+const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'iaTickLogs', 'iaFailures', 'iaRuns', 'plTickLogs', 'plFailures', 'plRuns']
 
 export const cleanup = internalMutation({
   args: { job: v.optional(v.union(...ORDER.map((j) => v.literal(j)))) },
@@ -119,6 +119,33 @@ export const cleanup = internalMutation({
         const world = await ctx.db.query('iaWorldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
         for (const row of rows) {
           const publication = await ctx.db.query('iaLeaderboardPublications').withIndex('by_runId', (q) => q.eq('runId', row._id)).unique()
+          if (publication || row._id === world?.activeRunId) continue
+          await ctx.db.delete(row._id)
+          deleted += 1
+        }
+        break
+      }
+      // D159: Paper Lives keeps the same retention in its own tables. A life's lasting story is its record and highlights.
+      case 'plTickLogs': {
+        const rows = await ctx.db.query('plTickLogs').withIndex('by_at', (q) => q.lt('at', now - RETENTION.tickLogsMs)).take(BATCH)
+        for (const row of rows) await ctx.db.delete(row._id)
+        deleted = rows.length
+        break
+      }
+      case 'plFailures': {
+        const rows = await ctx.db.query('plSimulationFailures').withIndex('by_createdAt', (q) => q.lt('createdAt', now - RETENTION.failuresMs)).take(BATCH)
+        for (const row of rows) await ctx.db.delete(row._id)
+        deleted = rows.length
+        break
+      }
+      case 'plRuns': {
+        const rows = await ctx.db
+          .query('plSimulationRuns')
+          .withIndex('by_state_and_startedAt', (q) => q.eq('state', 'completed').lt('startedAt', now - RETENTION.runsMs))
+          .take(BATCH)
+        const world = await ctx.db.query('plWorldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
+        for (const row of rows) {
+          const publication = await ctx.db.query('plLeaderboardPublications').withIndex('by_runId', (q) => q.eq('runId', row._id)).unique()
           if (publication || row._id === world?.activeRunId) continue
           await ctx.db.delete(row._id)
           deleted += 1

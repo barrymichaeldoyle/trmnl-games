@@ -24,12 +24,13 @@ describe('game lifecycle status (D115)', () => {
     expect(await player().query(api.platform.list, {})).toEqual(expected)
   })
 
-  it('shows admins the hidden game and lets them open it', async () => {
+  it('shows admins the hidden games and lets them open them', async () => {
     expect(await admin().query(api.platform.list, {})).toEqual({
       admin: true,
       games: [
         { slug: 'desk-crawler', status: 'live', canOpen: true },
         { slug: 'idle-angler', status: 'hidden', canOpen: true },
+        { slug: 'paper-lives', status: 'hidden', canOpen: true },
       ],
     })
   })

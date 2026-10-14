@@ -1,14 +1,18 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
-import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, engineTables, rankingTables } from './lib/engine/tables'
+import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, waterId } from './idleAngler/validators'
+import { glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind } from './paperLives/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
 
 /** Idle Angler's engine tables, prefixed `ia` so retention and deletion stay per game (idle-angler.md "Data"); no XP boards (D116). */
 const idleAnglerEngine = engineTables(IDLE_ANGLER_TABLES, ['landed', 'released', 'gotAway'])
+
+/** Paper Lives' engine tables, prefixed `pl` (paper-lives.md "Data"); no XP boards, its boards are life records. */
+const paperLivesEngine = engineTables(PAPER_LIVES_TABLES, ['events', 'years', 'deaths'])
 
 /**
  * Current-release schema only (data-model.md). Tables arrive with the work
@@ -169,7 +173,7 @@ export const logKind = v.union(
 )
 
 /** Every registered game (packages/platform). Storage accepts any of them; each write path still names its own game. */
-export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'))
+export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'))
 export const gameStatus = v.union(v.literal('hidden'), v.literal('preview'), v.literal('live'))
 
 /** D149: a hero's look; chosen free at creation, changed later with a makeover. */
@@ -301,6 +305,88 @@ export default defineSchema({
     .index('by_waterId_and_period_and_grams', ['waterId', 'period', 'grams', 'earlierFirst'])
     .index('by_anglerId_and_waterId_and_period', ['anglerId', 'waterId', 'period'])
     .index('by_period', ['period']),
+
+  plWorldState: paperLivesEngine.world,
+  plSimulationRuns: defineTable(paperLivesEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
+  plSimulationFailures: paperLivesEngine.failures,
+  plLeaderboardPublications: defineTable(paperLivesEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
+  plAchievementStats: paperLivesEngine.achievementStats,
+
+  /** One per user once they start Paper Lives (D159), like `idleAnglerProfiles`. */
+  paperLivesProfiles: defineTable({
+    userId: v.id('users'),
+    state: v.union(v.literal('active'), v.literal('deleting')),
+    lifeId: v.optional(v.id('lives')),
+    createdAt: v.number(),
+  }).index('by_userId', ['userId']),
+
+  /**
+   * The Paper Lives player character: the account's current life, the pure core's state stored whole in `life`
+   * (paperLives/validators.ts). An ended life stays the current row until the next life begins in place, so the
+   * profile pointer never changes. Engine tables call it `heroId` (lib/engine/tables.ts).
+   */
+  lives: defineTable({
+    userId: v.id('users'),
+    createdAt: v.number(),
+    isActive: v.boolean(),
+    activationState: v.union(v.literal('pending_trmnl'), v.literal('active')),
+    activatedAt: v.optional(v.number()),
+    life: lifeState,
+    /** The account's nth life, from 1. */
+    ordinal: v.number(),
+    publicProfile: v.optional(v.boolean()),
+    eligibleFromTick: v.number(),
+    lastTick: v.number(),
+    lastProgressTick: v.number(),
+    lastAdvancedAt: v.optional(v.number()),
+    logSequence: v.number(),
+    simulationState: v.union(v.literal('healthy'), v.literal('quarantined')),
+    quarantineReasonCode: v.optional(v.string()),
+  })
+    .index('by_userId_and_isActive', ['userId', 'isActive'])
+    .index('by_createdAt', ['createdAt'])
+    .index('by_simulationState', ['simulationState']),
+
+  /** Finished lives (paper-lives.md "Data"): one row per life, written once at death; the album and the family tree read them. */
+  lifeRecords: defineTable(lifeRecordFields).index('by_userId_and_endedAt', ['userId', 'endedAt']).index('by_userId_and_ordinal', ['userId', 'ordinal']),
+
+  /**
+   * Record boards (paper-lives.md "Leaderboards"): each player's best finished life per board, once for the week
+   * (`period` is its Monday, "w2026-10-12", UTC) and once for all time ("all"). `value` is the age at death or the peak
+   * money; `earlierFirst` is minus the death time, so ties rank the earlier death first. Written at death only.
+   */
+  plLifeBoards: defineTable({
+    board: lifeBoard,
+    period: v.string(),
+    userId: v.id('users'),
+    recordId: v.id('lifeRecords'),
+    value: v.number(),
+    age: v.number(),
+    endedAt: v.number(),
+    earlierFirst: v.number(),
+  })
+    .index('by_board_and_period_and_value', ['board', 'period', 'value', 'earlierFirst'])
+    .index('by_userId_and_board_and_period', ['userId', 'board', 'period'])
+    .index('by_userId', ['userId']),
+
+  /** A life's story lines: events, decisions, the yearly checks, recaps and the death, marked with the age. */
+  plTickLogs: defineTable({
+    lifeId: v.id('lives'),
+    ordinal: v.number(),
+    source: v.union(v.literal('tick'), v.literal('command'), v.literal('lifecycle')),
+    tick: v.optional(v.number()),
+    runId: v.optional(v.id('plSimulationRuns')),
+    sequence: v.number(),
+    at: v.number(),
+    kind: plLogKind,
+    glyph: plGlyph,
+    age: v.number(),
+    summary: v.string(),
+    remarkable: v.optional(v.boolean()),
+    major: v.optional(v.boolean()),
+  })
+    .index('by_lifeId_and_at_and_sequence', ['lifeId', 'at', 'sequence'])
+    .index('by_at', ['at']),
 
   iaTickLogs: defineTable({
     anglerId: v.id('anglers'),
@@ -628,7 +714,7 @@ export default defineSchema({
 
 
   operationReceipts: defineTable({
-    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'))),
+    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'))),
     userId: v.id('users'),
     operationId: v.string(),
     operation: v.string(),

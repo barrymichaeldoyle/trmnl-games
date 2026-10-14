@@ -1,25 +1,24 @@
 import { v } from 'convex/values'
 import { internal } from './_generated/api'
 import { internalAction, internalQuery } from './_generated/server'
-import { currentHero } from './lib/gameProfile'
-import { currentAngler } from './idleAngler/profile'
+import { currentCharacterOf } from './lib/gameHooks'
 import { gameSlug } from './schema'
 
 /** Re-check consent and account state at send time; no telemetry in simulation or polling. */
 export const activationSubject = internalQuery({
-  args: { userId: v.id('users'), event: v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started')), game: v.optional(gameSlug) },
+  args: { userId: v.id('users'), event: v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started')), game: v.optional(gameSlug) },
   returns: v.union(v.null(), v.object({ distinctId: v.string() })),
   handler: async (ctx, { userId, event, game }) => {
     const user = await ctx.db.get(userId)
     if (!user || user.state !== 'active' || user.analyticsConsent !== true) return null
-    const hero = game === 'idle-angler' ? await currentAngler(ctx, user) : await currentHero(ctx, user)
+    const hero = await currentCharacterOf(ctx, game ?? 'desk-crawler', user)
     const distinctId = user.tokenIdentifier.split('|').at(-1)
     return (event === 'installation connected' || hero?.activationState === 'active') && distinctId ? { distinctId } : null
   },
 })
 
 export const captureActivation = internalAction({
-  args: { userId: v.id('users'), event: v.optional(v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'))), game: v.optional(gameSlug) },
+  args: { userId: v.id('users'), event: v.optional(v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started'))), game: v.optional(gameSlug) },
   returns: v.null(),
   handler: async (ctx, { userId, event = 'hero activated', game = 'desk-crawler' }) => {
     const token = process.env.POSTHOG_PROJECT_TOKEN

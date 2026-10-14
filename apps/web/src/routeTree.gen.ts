@@ -24,12 +24,14 @@ import { Route as AccountDeleteRouteImport } from './routes/account_.delete'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppDeskCrawlerRouteImport } from './routes/app/desk-crawler'
 import { Route as AppIdleAnglerRouteImport } from './routes/app/idle-angler'
+import { Route as AppPaperLivesRouteImport } from './routes/app/paper-lives'
 import { Route as DeskCrawlerUnsubscribeRouteImport } from './routes/desk-crawler/unsubscribe'
 import { Route as DeskCrawlerWaitingListRouteImport } from './routes/desk-crawler/waiting-list'
 import { Route as DevDeskCrawlerRouteImport } from './routes/dev/desk-crawler'
 import { Route as DevOgRouteImport } from './routes/dev/og'
 import { Route as GamesDeskCrawlerRouteImport } from './routes/games/desk-crawler'
 import { Route as GamesIdleAnglerRouteImport } from './routes/games/idle-angler'
+import { Route as GamesPaperLivesRouteImport } from './routes/games/paper-lives'
 import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
@@ -132,6 +134,11 @@ const AppIdleAnglerRoute = AppIdleAnglerRouteImport.update({
   path: '/idle-angler',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPaperLivesRoute = AppPaperLivesRouteImport.update({
+  id: '/paper-lives',
+  path: '/paper-lives',
+  getParentRoute: () => AppRoute,
+} as any)
 const DeskCrawlerUnsubscribeRoute = DeskCrawlerUnsubscribeRouteImport.update({
   id: '/desk-crawler/unsubscribe',
   path: '/desk-crawler/unsubscribe',
@@ -160,6 +167,11 @@ const GamesDeskCrawlerRoute = GamesDeskCrawlerRouteImport.update({
 const GamesIdleAnglerRoute = GamesIdleAnglerRouteImport.update({
   id: '/games/idle-angler',
   path: '/games/idle-angler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesPaperLivesRoute = GamesPaperLivesRouteImport.update({
+  id: '/games/paper-lives',
+  path: '/games/paper-lives',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpDeskCrawlerRoute = HelpDeskCrawlerRouteImport.update({
@@ -316,12 +328,14 @@ export interface FileRoutesByFullPath {
   '/account/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
   '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
+  '/app/paper-lives': typeof AppPaperLivesRoute
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
   '/games/idle-angler': typeof GamesIdleAnglerRoute
+  '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/profile/$alias': typeof ProfileAliasRoute
@@ -362,12 +376,14 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
   '/account/delete': typeof AccountDeleteRoute
+  '/app/paper-lives': typeof AppPaperLivesRoute
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
   '/games/idle-angler': typeof GamesIdleAnglerRoute
+  '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/profile/$alias': typeof ProfileAliasRoute
@@ -412,12 +428,14 @@ export interface FileRoutesById {
   '/account_/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
   '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
+  '/app/paper-lives': typeof AppPaperLivesRoute
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
   '/games/idle-angler': typeof GamesIdleAnglerRoute
+  '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/profile/$alias': typeof ProfileAliasRoute
@@ -463,12 +481,14 @@ export interface FileRouteTypes {
     | '/account/delete'
     | '/app/desk-crawler'
     | '/app/idle-angler'
+    | '/app/paper-lives'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
     | '/games/desk-crawler'
     | '/games/idle-angler'
+    | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/profile/$alias'
@@ -509,12 +529,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/whats-new'
     | '/account/delete'
+    | '/app/paper-lives'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
     | '/games/desk-crawler'
     | '/games/idle-angler'
+    | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/profile/$alias'
@@ -558,12 +580,14 @@ export interface FileRouteTypes {
     | '/account_/delete'
     | '/app/desk-crawler'
     | '/app/idle-angler'
+    | '/app/paper-lives'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
     | '/games/desk-crawler'
     | '/games/idle-angler'
+    | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/profile/$alias'
@@ -612,6 +636,7 @@ export interface RootRouteChildren {
   DevOgRoute: typeof DevOgRoute
   GamesDeskCrawlerRoute: typeof GamesDeskCrawlerRoute
   GamesIdleAnglerRoute: typeof GamesIdleAnglerRoute
+  GamesPaperLivesRoute: typeof GamesPaperLivesRoute
   HelpDeskCrawlerRoute: typeof HelpDeskCrawlerRoute
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
   ProfileAliasRoute: typeof ProfileAliasRoute
@@ -729,6 +754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIdleAnglerRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/paper-lives': {
+      id: '/app/paper-lives'
+      path: '/paper-lives'
+      fullPath: '/app/paper-lives'
+      preLoaderRoute: typeof AppPaperLivesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/desk-crawler/unsubscribe': {
       id: '/desk-crawler/unsubscribe'
       path: '/desk-crawler/unsubscribe'
@@ -769,6 +801,13 @@ declare module '@tanstack/react-router' {
       path: '/games/idle-angler'
       fullPath: '/games/idle-angler'
       preLoaderRoute: typeof GamesIdleAnglerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/paper-lives': {
+      id: '/games/paper-lives'
+      path: '/games/paper-lives'
+      fullPath: '/games/paper-lives'
+      preLoaderRoute: typeof GamesPaperLivesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help/desk-crawler': {
@@ -1015,12 +1054,14 @@ const AppIdleAnglerRouteWithChildren = AppIdleAnglerRoute._addFileChildren(
 interface AppRouteChildren {
   AppDeskCrawlerRoute: typeof AppDeskCrawlerRouteWithChildren
   AppIdleAnglerRoute: typeof AppIdleAnglerRouteWithChildren
+  AppPaperLivesRoute: typeof AppPaperLivesRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDeskCrawlerRoute: AppDeskCrawlerRouteWithChildren,
   AppIdleAnglerRoute: AppIdleAnglerRouteWithChildren,
+  AppPaperLivesRoute: AppPaperLivesRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -1045,6 +1086,7 @@ const rootRouteChildren: RootRouteChildren = {
   DevOgRoute: DevOgRoute,
   GamesDeskCrawlerRoute: GamesDeskCrawlerRoute,
   GamesIdleAnglerRoute: GamesIdleAnglerRoute,
+  GamesPaperLivesRoute: GamesPaperLivesRoute,
   HelpDeskCrawlerRoute: HelpDeskCrawlerRoute,
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
   ProfileAliasRoute: ProfileAliasRoute,

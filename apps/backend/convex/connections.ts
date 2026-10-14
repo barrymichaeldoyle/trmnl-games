@@ -2,7 +2,10 @@ import { currentHero, gameProfile } from './lib/gameProfile'
 import { v } from 'convex/values'
 import { isGame } from './lib/gameHooks'
 import { gameSlug } from './schema'
-import { currentAngler, idleAnglerProfile } from './idleAngler/profile'
+import { currentAngler } from './idleAngler/profile'
+import { currentLife } from './paperLives/profile'
+import type { GameSlug } from '@trmnl-games/platform'
+import { gameDeletingFor } from './lib/gameHooks'
 import type { Doc, Id } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
@@ -10,13 +13,17 @@ import { appError } from './lib/errors'
 import { currentUser, runIntent } from './lib/intent'
 
 /** D115: each game's connections are its own; a game being deleted shows none. */
-async function gameDeleting(ctx: QueryCtx, userId: Id<'users'>, slug: 'desk-crawler' | 'idle-angler'): Promise<boolean> {
-  return slug === 'idle-angler' ? (await idleAnglerProfile(ctx, userId))?.state === 'deleting' : (await gameProfile(ctx, userId))?.state === 'deleting'
+async function gameDeleting(ctx: QueryCtx, userId: Id<'users'>, slug: GameSlug): Promise<boolean> {
+  return await gameDeletingFor(ctx, slug, userId)
 }
 
-/** The name the management page shows: the hero, or for Idle Angler the angler's public name. */
-async function characterName(ctx: QueryCtx, user: Doc<'users'>, slug: 'desk-crawler' | 'idle-angler'): Promise<string | null> {
+/** The name the management page shows: the hero, the angler's public name, or the life's character. */
+async function characterName(ctx: QueryCtx, user: Doc<'users'>, slug: GameSlug): Promise<string | null> {
   if (slug === 'idle-angler') return (await currentAngler(ctx, user)) ? user.publicAlias : null
+  if (slug === 'paper-lives') {
+    const life = await currentLife(ctx, user)
+    return life ? `${life.life.first} ${life.life.last}` : null
+  }
   return (await currentHero(ctx, user))?.name ?? null
 }
 
