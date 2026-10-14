@@ -23,7 +23,7 @@ Three problems follow.
 
 ## The idea in one paragraph
 
-Idle Angler grows from three waters and a shop into a fishing year. A **goal** at the top of the Dock always names one next step. The game opens up as the logbook fills: orders, the trophy wall, deadbait and the weekend opens each arrive with a goal that uses them. The **fishmonger** posts three orders that pay more than the market for fish already in the cooler. A small fish can go back on the hook as **deadbait** for the predators. Three new waters (**Heron Lake** by rowing boat, a **deep-sea charter** out of the harbour and **Frozen Tarn**, open in winter only) bring 28 new species. **Seasons** belong to the world, shared by every angler like the weather: they change which fish feed, dress the scene and bring **runs**, two weeks when the mackerel or the salmon are in. Every weekend each water holds an **Open** for its heaviest fish of one species. Medals and specimen fish go on a **trophy wall**. Every new system is also a place to spend coins.
+Idle Angler grows from three waters and a shop into a fishing year. A **goal** at the top of the Dock always names one next step. The game opens up as the logbook fills: orders, the trophy wall, deadbait and the weekend opens each arrive with a goal that uses them. The **fishmonger** posts three orders that pay more than the market for fish already in the cooler. A small fish can go back on the hook as **deadbait** for the predators. Three new waters (**Heron Lake** by rowing boat, a **deep-sea charter** out of the harbour and **Frozen Tarn**, open in winter only) bring 28 new species. **Seasons** belong to the world, shared by every angler like the weather: they change which fish feed, dress the scene and bring **runs**, a few days when the mackerel or the salmon are in. Every weekend each water holds an **Open** for its heaviest fish of one species. Medals and specimen fish go on a **trophy wall**. Every new system is also a place to spend coins.
 
 ## What a player sees
 
@@ -50,7 +50,7 @@ The shape is Desk Crawler's career ladder (D128, [spec](objectives.md)). There i
 | Deadbait | 10 species | day 7 | day 12 |
 | Harbour Pier (unchanged), Heron Lake | 5 River Bend species / 6 River Bend species | day 11 / day 12 | day 25 / day 27 |
 | Deep-sea charter | 6 Harbour Pier species | about day 20 | about day 45 |
-| Frozen Tarn | 5 Heron Lake species, in winter | the next winter after, at most six weeks later | the same |
+| Frozen Tarn | 5 Heron Lake species, in winter | the next winter week, at most three weeks later | the same |
 
 Days for the first six rows come from the v1 pacing above; the last three are estimates for waters that do not exist yet. The F1 harness measures every row on content v2 before the help page prints it.
 
@@ -126,7 +126,7 @@ Each new water has ten or so species, a backdrop, an ambient line set and a pose
 | --- | --- | --- | --- | --- | --- |
 | Heron Lake | 6 River Bend species | Rowing Boat, 1,200 coins, permanent | 12% | worms, maggots, bread, boilies (new), deadbait | Big carp and catfish; the boat pose |
 | Deep-sea charter | 6 Harbour Pier species | Charter ticket, 400 coins for 96 casts at sea | 15% | ragworm, strip, spinner, deadbait | Leaves from the Pier; when the ticket's casts run out the angler sails back to the Pier. Casts, not hours, so a pause does not waste a ticket |
-| Frozen Tarn | 5 Heron Lake species, world winter only | Ice Auger, 2,500 coins, permanent | 10% | maggots, worms, deadbait | Open the two winter weeks of every eight. An angler there when the ice goes out walks back to Heron Lake with a log line |
+| Frozen Tarn | 5 Heron Lake species, world winter only | Ice Auger, 2,500 coins, permanent | 10% | maggots, worms, deadbait | Open the winter week of every four. An angler there when the ice goes out walks back to Heron Lake with a log line |
 
 A fifth rod, the **Boat Rod** (lands up to 60 kg, +20% bite, 4,000 coins), is needed for the largest sea fish and the catfish. **Boilies** (12 bites a tub, 45 coins) are the carp bait at Heron Lake. The cooler stays at 24 fish, so the per-angler read stays bounded.
 
@@ -143,11 +143,11 @@ That is 28 new species and 58 in all. Titles extend past Master Angler (26): Old
 
 ### Seasons and runs
 
-- **The season is the world's, on the game's own calendar** (Barry, 2026-10-14: seasons and weather are shared by everyone and do not follow the real year). A fishing year lasts eight weeks: spring, summer, autumn and winter of two weeks each, every season starting on a Monday 00:00 UTC so each holds two weekend Opens. The cycle is counted from a fixed epoch in the catalog, so it is a pure function of the UTC time. Every angler at a water sees the same season, the same run and the same rain, so an Open is fished in the same conditions by everyone. The Dock names it with its week ("Autumn, week 2 of 2"), never a real month.
+- **The season is the world's, on the game's own calendar** (Barry, 2026-10-14: seasons and weather are shared by everyone and do not follow the real year). A fishing year lasts four weeks, one season a week: spring, summer, autumn and winter, each starting on Monday 00:00 UTC, the same moment the weekend Open's target and the weekly fly code change. The cycle is counted from a fixed epoch in the catalog, so it is a pure function of the UTC time. Every angler at a water sees the same season, the same run and the same rain, so an Open is fished in the same conditions by everyone. The Dock names it plainly ("Autumn at the waters until Monday"), never a real month.
 - **One world forecast.** Weather tables shift by season (more rain in autumn, more fog in winter), and the forecast still hashes `[worldSeed, waterId, blockKey]`, with the season read from the block's UTC date. No per-player term.
 - **Time of day stays local.** Dawn, day, dusk and night still come from the owner's `utc_offset` (D112), so the scene's sky matches the player's window. A shared clock would show night at midday for half the world.
 - **What a season changes:** species gain an optional `seasons` window, as they have `times` and `weather` today. Each water has a season bite multiplier (freshwater winter 85%, spring and autumn 110%), and the scene takes the season's dressing. No season closes a water except the Tarn.
-- **Runs** are four-day windows inside their season, the same for everyone, starting on a Wednesday so they never sit on an Open's weekend. Mackerel at the Harbour Pier in high summer, Salmon at River Bend in autumn (rain no longer needed, the species' draw weight ×4), Cod on the charter in winter and Sea Trout at River Bend at midsummer. A run writes "The mackerel are in at the Pier." on its first day and shows a Dock banner. A run is a catalog rule like a Desk Crawler occasion (D139), so it needs no admin and no ongoing work.
+- **Runs** are four-day windows inside their season week, Monday to Thursday, the same for everyone, so they never sit on an Open's weekend. One run per season, so each week has one. Mackerel at the Harbour Pier in high summer, Salmon at River Bend in autumn (rain no longer needed, the species' draw weight ×4), Cod on the charter in winter and Sea Trout at River Bend at midsummer. A run writes "The mackerel are in at the Pier." on its first day and shows a Dock banner. A run is a catalog rule like a Desk Crawler occasion (D139), so it needs no admin and no ongoing work.
 - **Pure.** The season and the run come from the cast's UTC time, which the simulator already receives, so they need no new input.
 
 ### Weekend Opens
@@ -269,7 +269,7 @@ Content and art are the long poles. F1's numbers decide every price above, so F1
 
 Barry asked for the best option on each open point. Each is settled as recommended, with the reason.
 
-1. **Seasons, runs and weather are one world calendar shared by everyone, on the game's own eight-week year.** First settled as hemisphere seasons from the account's timezone; Barry changed it the same day so the world is shared, like the weather already was, and does not follow the real year. A real season would keep Frozen Tarn shut nine months and the "every season" goal most of a year away, and one real calendar would put snow in summer for half the world. Two-week seasons let a player see the whole cycle in two months. It keeps one forecast and makes every Open fair across timezones. Time of day stays local so the sky matches the player's window.
+1. **Seasons, runs and weather are one world calendar shared by everyone, on the game's own four-week year, one season a week.** First settled as hemisphere seasons from the account's timezone; Barry changed it the same day so the world is shared, like the weather already was, and does not follow the real year. A real season would keep Frozen Tarn shut nine months and the "every season" goal most of a year away, and one real calendar would put snow in summer for half the world. Barry then asked for the simplest version, one season a week, so the season, the Open and the fly code all turn over on the same Monday and a player sees the whole cycle in a month. Two-week seasons were considered and dropped. It keeps one forecast and makes every Open fair across timezones. Time of day stays local so the sky matches the player's window.
 2. **The charter is a recurring ticket of 96 casts.** It is the one sink that keeps a late-game player's coins meaningful, it stays optional, and counting casts rather than hours means a pause or a quiet night never wastes it. The angler always sails back to the Pier, so nobody is stranded.
 3. **An Open at every water every weekend.** With one rotating Open, a new player at the Millpond would sit out most weekends; with one per water, every angler is in one every week from the day Opens unlock.
 4. **Mounting costs the fish's value plus 100 coins.** The wall is a sink and a mounted fish should mean something; a free mount would fill the wall with no cost.
