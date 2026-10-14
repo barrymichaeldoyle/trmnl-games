@@ -4,14 +4,17 @@
  * rounding beyond the PRNG's own documented draws.
  */
 
-export type WaterId = 'millpond' | 'river_bend' | 'harbour_pier'
-export type BaitClass = 'worms' | 'bread' | 'maggots' | 'spinner' | 'ragworm' | 'strip'
+export type WaterId = 'millpond' | 'river_bend' | 'harbour_pier' | 'heron_lake' | 'deep_sea' | 'frozen_tarn'
+export type BaitClass = 'worms' | 'bread' | 'maggots' | 'spinner' | 'ragworm' | 'strip' | 'boilies' | 'deadbait'
 export type TimeBand = 'dawn' | 'day' | 'dusk' | 'night'
 export type Weather = 'clear' | 'overcast' | 'rain' | 'wind' | 'fog'
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic'
-export type AccessId = 'waders' | 'pier_permit'
-export type StreamName = 'bite' | 'species' | 'size' | 'narrative'
-export type StreamSeeds = Readonly<Record<StreamName, number>>
+export type AccessId = 'waders' | 'pier_permit' | 'rowing_boat' | 'ice_auger'
+/** D162: the world's season, one a week on a four-week fishing year (idle-angler-full.md "Seasons and runs"). */
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter'
+export type StreamName = 'bite' | 'species' | 'size' | 'narrative' | 'orders'
+/** `orders` (content v2) draws only at an order refill; v1 never reads it. */
+export type StreamSeeds = Readonly<Record<Exclude<StreamName, 'orders'>, number>> & { readonly orders?: number }
 
 export interface SpeciesDef {
   readonly id: string
@@ -31,6 +34,10 @@ export interface SpeciesDef {
   readonly weather?: readonly Weather[]
   /** Base sale price in gold; a fish sells for between this and double it by weight. */
   readonly price: number
+  /** v2: seasons the species feeds in; absent means every season. */
+  readonly seasons?: readonly Season[]
+  /** v2: a small fish that can go back on the hook as deadbait. */
+  readonly baitFish?: true
 }
 
 export interface WaterDef {
@@ -48,6 +55,18 @@ export interface WaterDef {
   readonly weather: ReadonlyArray<readonly [Weather, number]>
   readonly timePercent: Readonly<Record<TimeBand, number>>
   readonly weatherPercent: Readonly<Record<Weather, number>>
+  /** v2: bite chance by the world's season, a whole percent; absent means 100 in every season. */
+  readonly seasonPercent?: Readonly<Record<Season, number>>
+  /** v2: the six-hour forecast weights by season, replacing `weather` in that season. */
+  readonly seasonWeather?: Readonly<Partial<Record<Season, ReadonlyArray<readonly [Weather, number]>>>>
+  /** v2: the only seasons the water can be fished (Frozen Tarn); an angler there when it closes walks to `returnsTo`. */
+  readonly openIn?: readonly Season[]
+  /** v2: where the angler goes when the water closes or a charter ticket runs out. */
+  readonly returnsTo?: WaterId
+  /** v2: the water is fished on a charter ticket's casts rather than a permanent access item. */
+  readonly charter?: true
+  /** v2: the story line on arriving, replacing the bank line. */
+  readonly arrival?: string
 }
 
 export interface RodDef {
@@ -102,9 +121,119 @@ export interface IdleAnglerCatalog {
   /** A quiet tick writes an ambient line every this many quiet ticks. */
   readonly ambientEvery: number
   /** Ambient lines per water. */
-  readonly ambient: Readonly<Record<WaterId, readonly string[]>>
+  readonly ambient: Readonly<Partial<Record<WaterId, readonly string[]>>>
   /** Local-hour boundaries: dawn starts, day starts, dusk starts, night starts. */
   readonly bands: { readonly dawn: number; readonly day: number; readonly dusk: number; readonly night: number }
+  /** v2 (D162): the rules below exist only in content v2 and later; v1 has none and replays unchanged. */
+  readonly seasons?: SeasonsRule
+  readonly runs?: readonly RunDef[]
+  readonly deadbait?: DeadbaitRule
+  readonly charterTicket?: CharterRule
+  readonly orders?: OrdersRule
+  readonly goals?: readonly GoalDef[]
+  /** Species logged at which each feature opens. */
+  readonly unlocks?: Readonly<Record<FeatureId, number>>
+  readonly opens?: OpensRule
+  readonly trophies?: TrophiesRule
+  /** Most units of a bait class held, where it differs from `baitCap` (deadbait). */
+  readonly baitCaps?: Readonly<Partial<Record<BaitClass, number>>>
+}
+
+/** The fishing year: the fly code's week (Monday 00:00 UTC) plus `offsetWeeks`, modulo four, in `order`. */
+export interface SeasonsRule {
+  readonly order: readonly [Season, Season, Season, Season]
+  readonly offsetWeeks: number
+}
+
+/** A run: four days (Monday to Thursday UTC) of its season when one species is in at one water. */
+export interface RunDef {
+  readonly id: string
+  readonly season: Season
+  readonly water: WaterId
+  readonly species: string
+  /** Draw weight multiplier while the run is on. */
+  readonly weightPercent: number
+  /** The run lifts the species' weather requirement (the salmon run needs no rain). */
+  readonly anyWeather?: true
+  /** First line of the run, written on its first cast at the water. */
+  readonly line: string
+}
+
+export interface DeadbaitRule {
+  readonly unitsPerFish: number
+  /** Bite chance with deadbait on, as a percent of a matched bait's. */
+  readonly bitePercent: number
+}
+
+export interface CharterRule {
+  readonly water: WaterId
+  readonly price: number
+  readonly casts: number
+}
+
+export type FeatureId = 'shop_upgrades' | 'orders' | 'trophies' | 'opens' | 'deadbait'
+
+export type OrderKind = 'species' | 'weight' | 'water' | 'time' | 'rarity' | 'teaching'
+
+export interface OrdersRule {
+  readonly slots: number
+  /** Local hour of the daily refill (the D112 stand-up). */
+  readonly refillHour: number
+  /** Reward = round(value × multiplierPercent ÷ 100) + the kind's bonus. */
+  readonly multiplierPercent: number
+  readonly bonus: Readonly<Record<OrderKind, number>>
+  /** Draw weight of each kind at a refill; teaching only while no teaching order is on the slate. */
+  readonly weights: Readonly<Record<OrderKind, number>>
+}
+
+export interface Order {
+  readonly id: string
+  readonly kind: OrderKind
+  readonly count: number
+  readonly bonus: number
+  readonly speciesId?: string
+  readonly water?: WaterId
+  readonly minGrams?: number
+  readonly bands?: readonly TimeBand[]
+  readonly rarity?: Rarity
+}
+
+export type GoalPredicate =
+  | { readonly kind: 'counter'; readonly counter: keyof AnglerCounters; readonly at: number }
+  | { readonly kind: 'species'; readonly at: number; readonly water?: WaterId }
+  | { readonly kind: 'rod'; readonly at: number }
+  | { readonly kind: 'cooler'; readonly at: number }
+  | { readonly kind: 'access'; readonly id: AccessId }
+  | { readonly kind: 'fished'; readonly water: WaterId }
+  | { readonly kind: 'bought'; readonly bait: BaitClass }
+  | { readonly kind: 'logged'; readonly anyOf: readonly string[] }
+  | { readonly kind: 'seasons'; readonly at: number }
+
+export interface GoalDef {
+  readonly id: string
+  readonly title: string
+  readonly predicate: GoalPredicate
+  readonly coins: number
+  /** The companion page the player uses for it, for the Dock's link. */
+  readonly page?: 'cooler' | 'shop' | 'dock' | 'log'
+  /** D128's pity rule: a bite is forced once this many casts pass on the goal, with `bait` on the hook if named. */
+  readonly guarantee?: { readonly casts: number; readonly bait?: BaitClass }
+}
+
+export interface OpensRule {
+  /** Target species per water, one per week in turn. */
+  readonly rotation: Readonly<Partial<Record<WaterId, readonly string[]>>>
+  readonly prizes: readonly [number, number, number]
+}
+
+export interface TrophiesRule {
+  /** A fish at least this percent of its species' maximum can be mounted. */
+  readonly minPercent: number
+  /** Mounting costs the fish's value plus this. */
+  readonly fee: number
+  /** Pegs on the wall by step, and the price of each step after the first. */
+  readonly pegs: readonly number[]
+  readonly pegPrices: readonly number[]
 }
 
 export interface LogbookEntry {
@@ -127,6 +256,22 @@ export interface AnglerCounters {
   readonly fishSold: number
   readonly trips: number
   readonly baitRunOuts: number
+  /** v2 counters, absent until the first one counts. */
+  readonly ordersFilled?: number
+  readonly deadbaitUsed?: number
+  readonly deadbaitCatches?: number
+  readonly trophiesMounted?: number
+  readonly opensEntered?: number
+  readonly medals?: number
+  readonly charters?: number
+  readonly breadCatches?: number
+  readonly dawnDuskCatches?: number
+  readonly rainCatches?: number
+  readonly goalsReached?: number
+  /** Bit per season (spring 1, summer 2, autumn 4, winter 8) with a fish landed. */
+  readonly seasonsFished?: number
+  /** Bit per run, in catalog order, with its species landed during it. */
+  readonly runsFished?: number
 }
 
 export type AnglerStatus = 'fishing' | 'paused'
@@ -146,6 +291,18 @@ export interface AnglerState {
   readonly counters: AnglerCounters
   /** Quiet ticks since the last bite or ambient line. */
   readonly quietTicks: number
+  /** v2: the current goal (D128 shape) and the casts counter when it started, for its guarantee. */
+  readonly goal?: { readonly rung: number; readonly castsAtStart: number }
+  /** v2: the fishmonger's slate, the refill day it was last filled for, and the day of the last swap. */
+  readonly orders?: readonly Order[]
+  readonly ordersDay?: number
+  readonly swapDay?: number
+  /** v2: casts left on a charter ticket. */
+  readonly charterCasts?: number
+  /** v2: pegs on the trophy wall. */
+  readonly pegs?: number
+  /** v2: the last run whose first line was written, so a run announces itself once. */
+  readonly runSeen?: string
 }
 
 export interface CatchRecord {
@@ -153,9 +310,13 @@ export interface CatchRecord {
   readonly grams: number
   readonly value: number
   readonly caughtTick: number
+  /** v2: when and how it was caught, for orders. */
+  readonly band?: TimeBand
+  readonly weather?: Weather
+  readonly season?: Season
 }
 
-export type EventKind = 'catch' | 'release' | 'got_away' | 'ambient' | 'travel' | 'bait_out' | 'milestone' | 'system'
+export type EventKind = 'catch' | 'release' | 'got_away' | 'ambient' | 'travel' | 'bait_out' | 'milestone' | 'system' | 'goal' | 'run'
 
 export interface EventDetail {
   readonly speciesId?: string
@@ -167,6 +328,9 @@ export interface EventDetail {
   readonly bait?: BaitClass
   readonly weather?: Weather
   readonly band?: TimeBand
+  readonly season?: Season
+  readonly goalId?: string
+  readonly runId?: string
 }
 
 export interface TickEvent {
@@ -179,6 +343,9 @@ export interface TickEvent {
 export interface Conditions {
   readonly band: TimeBand
   readonly weather: Weather
+  /** v2: the world's season and the run on at this water, if any. */
+  readonly season?: Season
+  readonly run?: string
 }
 
 export interface CastInput {

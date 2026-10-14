@@ -135,7 +135,7 @@ export interface AchievementState {
 export function measure(predicate: Predicate, state: AchievementState, content: IdleAnglerCatalog): { value: number; target: number } {
   switch (predicate.kind) {
     case 'counter':
-      return { value: state.counters[predicate.counter], target: predicate.atLeast }
+      return { value: state.counters[predicate.counter] ?? 0, target: predicate.atLeast }
     case 'rod':
       return { value: state.rodTier, target: predicate.atLeast }
     case 'logbook':

@@ -16,6 +16,13 @@ export function toAnglerState(doc: Doc<'anglers'>): AnglerState {
     logbook: doc.logbook,
     counters: doc.counters,
     quietTicks: doc.quietTicks,
+    ...(doc.goal === undefined ? {} : { goal: doc.goal }),
+    ...(doc.orders === undefined ? {} : { orders: doc.orders }),
+    ...(doc.ordersDay === undefined ? {} : { ordersDay: doc.ordersDay }),
+    ...(doc.swapDay === undefined ? {} : { swapDay: doc.swapDay }),
+    ...(doc.charterCasts === undefined ? {} : { charterCasts: doc.charterCasts }),
+    ...(doc.pegs === undefined ? {} : { pegs: doc.pegs }),
+    ...(doc.runSeen === undefined ? {} : { runSeen: doc.runSeen }),
   }
 }
 
@@ -34,6 +41,13 @@ export function fromAnglerState(state: AnglerState): Partial<Doc<'anglers'>> {
     logbook: state.logbook as Doc<'anglers'>['logbook'],
     counters: state.counters,
     quietTicks: state.quietTicks,
+    goal: state.goal,
+    orders: state.orders === undefined ? undefined : (state.orders.map((o) => ({ ...o, ...(o.bands ? { bands: [...o.bands] } : {}) })) as Doc<'anglers'>['orders']),
+    ordersDay: state.ordersDay,
+    swapDay: state.swapDay,
+    charterCasts: state.charterCasts,
+    pegs: state.pegs,
+    runSeen: state.runSeen,
   }
 }
 
@@ -51,6 +65,9 @@ export function storedDetail(event: TickEvent): Doc<'iaTickLogs'>['detail'] {
     ...(d.bait === undefined ? {} : { bait: d.bait }),
     ...(d.weather === undefined ? {} : { weather: d.weather }),
     ...(d.band === undefined ? {} : { band: d.band }),
+    ...(d.season === undefined ? {} : { season: d.season }),
+    ...(d.goalId === undefined ? {} : { goalId: d.goalId }),
+    ...(d.runId === undefined ? {} : { runId: d.runId }),
   }
 }
 

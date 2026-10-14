@@ -46,7 +46,8 @@ The shape is Desk Crawler's career ladder (D128, [spec](objectives.md)). There i
 | Cooler and rod upgrades in the Shop | 2 species | day 0 | day 0 |
 | Fishmonger orders | 4 species (Regular) | day 1 to 2 | day 2 |
 | River Bend, Waders | 6 Millpond species (unchanged) | day 3 to 4 | day 7 |
-| Trophy wall, weekend Opens | 8 species (Local) | day 5 | day 9 |
+| Weekend Opens | 6 species (F1: from 8, so a never-visiting angler enters them) | day 3 to 4 | day 7 |
+| Trophy wall | 8 species (Local) | day 5 | day 9 |
 | Deadbait | 10 species | day 7 | day 12 |
 | Harbour Pier (unchanged), Heron Lake | 5 River Bend species / 6 River Bend species | day 11 / day 12 | day 25 / day 27 |
 | Deep-sea charter | 6 Harbour Pier species | about day 20 | about day 45 |
@@ -115,8 +116,8 @@ The fishmonger's slate holds three orders. Each names fish the angler has to han
 Small fish can go back on the hook for the predators that eat them.
 
 - **Bait fish:** Minnow, Roach, Rudd, Gudgeon, Dace, Bleak, Smelt, Sand Eel, Mackerel and Whiting. On the Cooler page, "Use as bait" turns one into three units of deadbait. The fish is not sold. Deadbait holds at most 24 units and never spoils.
-- **Who takes it:** Perch, Chub, Eel, Pike, Zander, Wels Catfish, Burbot, Sea Bass, Conger Eel, Smoothhound, Ling, Cod, Turbot, Tope, Blue Shark and Halibut. With deadbait on, only these species can bite, which makes it the way to hunt one predator.
-- **The effect:** bite chance 75% of a matched bait's, and the weight draw leans to the top of the species' range (the same single `size` draw, mapped through a square root), so deadbait catches bigger fish less often.
+- **Who takes it:** Perch, Eel, Pike, Zander, Wels Catfish, Burbot, Sea Bass, Conger Eel, Smoothhound, Ling, Cod, Turbot, Tope, Blue Shark and Halibut. With deadbait on, only these species can bite, which makes it the way to hunt one predator.
+- **The effect:** bite chance 110% of a matched bait's (F1 tuned it from 75%, and took Chub off the list), and the weight draw leans to the top of the species' range (the same single `size` draw, mapped through a square root), so deadbait catches bigger fish less often.
 - **Limit.** F1 gates deadbait's coins a day at a water to between 0.9× and 1.3× that water's best tub bait, so it is a choice, not the new default.
 
 ### New waters
@@ -126,10 +127,10 @@ Each new water has ten or so species, a backdrop, an ambient line set and a pose
 | Water | Opens after | Access | Base bite | Baits | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Heron Lake | 6 River Bend species | Rowing Boat, 1,200 coins, permanent | 12% | worms, maggots, bread, boilies (new), deadbait | Big carp and catfish; the boat pose |
-| Deep-sea charter | 6 Harbour Pier species | Charter ticket, 400 coins for 96 casts at sea | 15% | ragworm, strip, spinner, deadbait | Leaves from the Pier; when the ticket's casts run out the angler sails back to the Pier. Casts, not hours, so a pause does not waste a ticket, and casts left when the player brings the angler ashore stay on the ticket for the next trip. One ticket at a time |
-| Frozen Tarn | 5 Heron Lake species, world winter only | Ice Auger, 2,500 coins, permanent | 10% | maggots, worms, deadbait | Open the winter week of every four. An angler there when the ice goes out walks back to Heron Lake with a log line |
+| Deep-sea charter | 6 Harbour Pier species | Charter ticket, 550 coins for 96 casts at sea (F1: from 400) | 15% | ragworm, strip, spinner, deadbait | Leaves from the Pier; when the ticket's casts run out the angler sails back to the Pier. Casts, not hours, so a pause does not waste a ticket, and casts left when the player brings the angler ashore stay on the ticket for the next trip. One ticket at a time |
+| Frozen Tarn | 5 Heron Lake species, world winter only | Ice Auger, 3,500 coins, permanent (F1: from 2,500) | 10% | maggots, worms, deadbait | Open the winter week of every four. An angler there when the ice goes out walks back to Heron Lake with a log line |
 
-A fifth rod, the **Boat Rod** (lands up to 60 kg, +20% bite, 4,000 coins), is needed for the largest sea fish and the catfish. **Boilies** (12 bites a tub, 45 coins) are the carp bait at Heron Lake. The cooler stays at 24 fish, so the per-angler read stays bounded.
+A fifth rod, the **Boat Rod** (lands up to 60 kg, +20% bite, 6,000 coins after F1; the spec started at 4,000), is needed for the largest sea fish and the catfish. **Boilies** (12 bites a tub, 45 coins) are the carp bait at Heron Lake. The cooler stays at 24 fish, so the per-angler read stays bounded.
 
 **Species** (starting table; F1 sets weights and prices like S1 did):
 
@@ -162,7 +163,7 @@ That is 28 new species and 58 in all. Titles extend past Master Angler (26): Old
 ### The trophy wall
 
 - **Mounting.** A fish in the cooler that weighs at least 60% of its species' maximum can go to the taxidermist instead of the market. Mounting costs the fish's value plus 100 coins and takes the fish out of sale. The wall keeps species, weight, water and date.
-- **Pegs.** The wall starts with 6 pegs and extends to 12, 18 and 24 for 500, 1,500 and 4,000 coins. A mounted fish can be taken down, which frees its peg (no refund). The ceiling of 24 keeps the read bounded.
+- **Pegs.** The wall starts with 6 pegs and extends to 12, 18 and 24 for 800, 2,500 and 6,000 coins (F1: from 500, 1,500 and 4,000). A mounted fish can be taken down, which frees its peg (no refund). The ceiling of 24 keeps the read bounded.
 - **The shelf** holds Open medals and rosettes and needs no pegs.
 - **Where it shows:** the Log tab's Trophies page, and the public profile (D109) when the player has opted in.
 
@@ -188,14 +189,14 @@ One pass over the whole companion, done with goals because goals change what the
 
 ## Economy
 
-The new coin sinks are the rowing boat (1,200), the Boat Rod (4,000), the Ice Auger (2,500), charter tickets (400 each, recurring), mounting (value + 100 each) and pegs (6,000 in all). That is about 13,700 coins of one-off purchases on top of today's shop, plus the charter as a sink that never runs out. The new income is order premiums, Open prizes and goal coins.
+The new coin sinks are the rowing boat (1,200), the Boat Rod (6,000), the Ice Auger (3,500), charter tickets (550 each, recurring), mounting (value + 100 each) and pegs (9,300 in all), the prices after F1. That is 20,000 coins of one-off purchases on top of today's shop, plus the charter as a sink that never runs out. The new income is order premiums, Open prizes and goal coins.
 
-**F1 gates** (the harness decides the final numbers, as S1 did):
+**F1 gates** (the harness decides the final numbers, as S1 did). F1 ran on 2026-10-14 and every gate passes ([evidence](evidence/idle-angler-v2-balance.md)); the evidence lists each number it changed from this spec:
 
 | Gate | Range |
 | --- | --- |
 | Day a daily player owns every one-off purchase | 45 to 75 |
-| Coins a daily player holds at day 60, in days of its own income | under 10 |
+| Coins a daily player holds at day 60 beyond its next one-off purchase, in days of its own income | under 10 |
 | A charter day's catch value against its ticket | 1.2× to 1.8× |
 | Order premiums as a share of a daily player's income | under 25% |
 | Deadbait coins a day against the water's best tub bait | 0.9× to 1.3× |

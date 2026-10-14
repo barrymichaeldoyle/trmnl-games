@@ -12,6 +12,10 @@ export const TITLES = [
   { id: 'old_hand', name: 'Old Hand', species: 14 },
   { id: 'specimen_hunter', name: 'Specimen Hunter', species: 20 },
   { id: 'master_angler', name: 'Master Angler', species: 26 },
+  // D162 (content v2, 58 species): v1 has 30 species, so these never fire under it.
+  { id: 'old_salt', name: 'Old Salt', species: 36 },
+  { id: 'lakeside_legend', name: 'Lakeside Legend', species: 46 },
+  { id: 'keeper', name: 'Keeper of the Logbook', species: 56 },
 ] as const
 
 export type Title = (typeof TITLES)[number]

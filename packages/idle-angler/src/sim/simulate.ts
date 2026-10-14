@@ -2,6 +2,9 @@ import { createRng, pickOne, pickWeighted, type Rng } from '@trmnl-games/engine/
 import { BAND_PHRASE, effectiveBands, localHour, timeBand } from './conditions'
 import { articleFor, fishValue, formatWeight } from './progress'
 import { speciesLogged, titleFor } from './titles'
+import { evaluateGoal, guaranteedBite, unlockEvents } from './goals'
+import { orderDay, refillOrders } from './orders'
+import { SEASON_BIT, runAt, seasonAt, waterOpenIn } from './seasons'
 import type { AnglerCounters, AnglerState, BaitClass, CastInput, CastResult, Conditions, IdleAnglerCatalog, SpeciesDef, TickEvent, WaterDef } from './types'
 
 /**
@@ -54,28 +57,42 @@ export function activeBait(angler: Pick<AnglerState, 'baitOnHook' | 'bait'>, wat
   return (angler.bait[chosen] ?? 0) > 0 ? chosen : undefined
 }
 
-/** Bite chance in permille for these conditions (each multiplier a whole percent, floored once at the end). */
+/**
+ * Bite chance in permille for these conditions (each multiplier a whole percent, floored once at the end). Content v2
+ * adds the season's percent and deadbait's; v1 has neither and keeps its formula exactly.
+ */
 export function bitePermille(content: IdleAnglerCatalog, water: WaterDef, rodTier: number, bait: BaitClass | undefined, conditions: Conditions): number {
   const rod = rodOf(content, rodTier)
-  const baitPercent = bait === undefined ? content.bareHookPercent : 100
-  return Math.floor((water.biteBasePermille * water.timePercent[conditions.band] * water.weatherPercent[conditions.weather] * (100 + rod.biteBonusPercent) * baitPercent) / 100 ** 4)
+  const baitPercent = bait === undefined ? content.bareHookPercent : bait === 'deadbait' ? (content.deadbait?.bitePercent ?? 100) : 100
+  const base = water.biteBasePermille * water.timePercent[conditions.band] * water.weatherPercent[conditions.weather] * (100 + rod.biteBonusPercent) * baitPercent
+  if (water.seasonPercent === undefined || conditions.season === undefined) return Math.floor(base / 100 ** 4)
+  return Math.floor((base * water.seasonPercent[conditions.season]) / 100 ** 5)
 }
 
 /** Species that could take this cast, with their draw weights. */
 export function candidates(content: IdleAnglerCatalog, water: WaterDef, bait: BaitClass | undefined, conditions: Conditions): Array<readonly [SpeciesDef, number]> {
   const bands = effectiveBands(conditions.band, conditions.weather)
+  const run = conditions.run === undefined ? undefined : content.runs?.find((r) => r.id === conditions.run)
   return content.species
     .filter((s) => s.water === water.id)
     .filter((s) => (bait === undefined ? s.anyBait === true : s.baits.includes(bait)))
     .filter((s) => s.times === undefined || s.times.some((t) => bands.includes(t)))
-    .filter((s) => s.weather === undefined || s.weather.includes(conditions.weather))
-    .map((s) => [s, s.weight ?? content.rarityWeights[s.rarity]] as const)
+    .filter((s) => s.weather === undefined || s.weather.includes(conditions.weather) || (run?.species === s.id && run.anyWeather === true))
+    .filter((s) => s.seasons === undefined || (conditions.season !== undefined && s.seasons.includes(conditions.season)))
+    .map((s) => {
+      const weight = s.weight ?? content.rarityWeights[s.rarity]
+      return [s, run?.species === s.id ? Math.round((weight * run.weightPercent) / 100) : weight] as const
+    })
 }
 
-/** Skewed weight: most fish in the lower third of the range, a long tail to the maximum. One draw. */
-export function drawGrams(rng: Rng, species: SpeciesDef): number {
+/**
+ * Skewed weight: most fish in the lower third of the range, a long tail to the maximum. One draw. Deadbait (v2) maps the
+ * same draw through a square root, which leaves it even across the range, so predators on deadbait run heavier.
+ */
+export function drawGrams(rng: Rng, species: SpeciesDef, bait?: BaitClass): number {
   const u = rng.next()
-  return species.minGrams + Math.floor((species.maxGrams - species.minGrams) * u * u)
+  const share = bait === 'deadbait' ? u : u * u
+  return species.minGrams + Math.floor((species.maxGrams - species.minGrams) * share)
 }
 
 const NO_METRICS = { landed: 0, released: 0, gotAway: 0 } as const
@@ -86,34 +103,82 @@ function bump(counters: AnglerCounters, patch: Partial<Record<keyof AnglerCounte
   return next
 }
 
-export function conditionsAt(input: Pick<CastInput, 'tickAt' | 'utcOffsetSeconds' | 'weather' | 'content'>): Conditions {
-  return { band: timeBand(localHour(input.tickAt, input.utcOffsetSeconds), input.content), weather: input.weather }
+export function conditionsAt(input: Pick<CastInput, 'tickAt' | 'utcOffsetSeconds' | 'weather' | 'content'>, waterId?: string): Conditions {
+  const band = timeBand(localHour(input.tickAt, input.utcOffsetSeconds), input.content)
+  const season = seasonAt(input.content, input.tickAt)
+  if (season === undefined) return { band, weather: input.weather }
+  const run = waterId === undefined ? undefined : runAt(input.content, waterId, input.tickAt)
+  return { band, weather: input.weather, season, ...(run ? { run: run.id } : {}) }
+}
+
+/**
+ * Content v2's steps after an evaluation: the goal (D128 shape) and the fishmonger's refill at the owner's 07:00, both
+ * after the cast so an unlock and its first slate arrive together. v1 has neither rule and returns the result as is.
+ */
+function finish(input: CastInput, result: CastResult): CastResult {
+  const { content } = input
+  if (content.goals === undefined && content.orders === undefined) return result
+  let angler = refillOrders(content, result.angler, orderDay(content, input.tickAt, input.utcOffsetSeconds), input.streams.orders)
+  const goal = evaluateGoal(content, angler)
+  angler = goal.angler
+  const extraEvents = goal.event ? [...(result.extraEvents ?? []), goal.event] : result.extraEvents
+  return { ...result, angler, ...(extraEvents ? { extraEvents } : {}) }
+}
+
+const RETURN_LINE: Readonly<Record<string, string>> = {
+  frozen_tarn: 'The ice is going out. You walk back to Heron Lake.',
+  deep_sea: 'The charter ties up. You walk back along the Harbour Pier.',
 }
 
 export function simulateAngler(input: CastInput): CastResult {
+  if (input.angler.status === 'paused') return { angler: input.angler, conditions: conditionsAt(input, input.angler.waterId), metrics: NO_METRICS, disposition: 'paused' }
+  return finish(input, cast(input))
+}
+
+function cast(input: CastInput): CastResult {
   const { content, tick } = input
   let angler = input.angler
-  const conditions = conditionsAt(input)
+  let conditions = conditionsAt(input, angler.waterId)
 
-  if (angler.status === 'paused') return { angler, conditions, metrics: NO_METRICS, disposition: 'paused' }
+  // v2: a seasonal water that has closed, or a charter whose ticket is spent, sends the angler back (D162).
+  const here = waterOf(content, angler.waterId)
+  let returnLine: string | undefined
+  if (angler.travelTo === undefined && here.returnsTo !== undefined && (!waterOpenIn(here, conditions.season) || (here.charter && (angler.charterCasts ?? 0) <= 0))) {
+    angler = { ...angler, travelTo: here.returnsTo }
+    returnLine = RETURN_LINE[here.id]
+  }
 
   // Travel takes the whole tick: arrive, no cast (idle-angler.md "Waters").
   if (angler.travelTo !== undefined) {
     const to = waterOf(content, angler.travelTo)
     const { travelTo: _drop, ...rest } = angler
     angler = { ...rest, waterId: to.id, quietTicks: 0, counters: bump(angler.counters, { trips: 1 }) }
-    const event: TickEvent = { kind: 'travel', summary: `You set up on the bank at ${to.the}.`.replace('on the bank at the Harbour Pier', 'at the end of the Harbour Pier'), detail: { waterId: to.id }, deltas: { gold: 0 } }
-    return { angler, event, conditions, metrics: NO_METRICS, disposition: 'travelled' }
+    const summary = returnLine ?? to.arrival ?? `You set up on the bank at ${to.the}.`.replace('on the bank at the Harbour Pier', 'at the end of the Harbour Pier')
+    const event: TickEvent = { kind: 'travel', summary, detail: { waterId: to.id }, deltas: { gold: 0 } }
+    return { angler, event, conditions: conditionsAt(input, to.id), metrics: NO_METRICS, disposition: 'travelled' }
   }
 
-  const water = waterOf(content, angler.waterId)
+  const water = here
   const bait = activeBait(angler, water)
   const extraEvents: TickEvent[] = []
 
+  // v2: a run announces itself on its first cast at the water.
+  const run = conditions.run === undefined ? undefined : content.runs?.find((r) => r.id === conditions.run)
+  if (run) {
+    const seen = `${run.id}:${Math.floor(input.tickAt / 86_400_000 / 7)}`
+    if (angler.runSeen !== seen) {
+      angler = { ...angler, runSeen: seen }
+      extraEvents.push({ kind: 'run', summary: run.line, detail: { waterId: water.id, runId: run.id }, deltas: { gold: 0 } })
+    }
+  }
+  // v2: each cast at sea spends one cast of the charter ticket, bite or not.
+  if (water.charter) angler = { ...angler, charterCasts: Math.max(0, (angler.charterCasts ?? 0) - 1) }
+
+  const forced = content.goals !== undefined && guaranteedBite(content, angler, bait)
   angler = { ...angler, counters: bump(angler.counters, { casts: 1 }) }
 
   const biteRng = createRng(input.streams.bite)
-  const bit = biteRng.int(1, 1000) <= bitePermille(content, water, angler.rodTier, bait, conditions)
+  const bit = biteRng.int(1, 1000) <= bitePermille(content, water, angler.rodTier, bait, conditions) || forced
   const pool = bit ? candidates(content, water, bait, conditions) : []
   if (pool.length === 0) {
     // Quiet: every Nth quiet tick writes one ambient line so the story never goes stale for long.
@@ -121,14 +186,14 @@ export function simulateAngler(input: CastInput): CastResult {
     angler = { ...angler, quietTicks: quietTicks % content.ambientEvery }
     const event: TickEvent | undefined =
       quietTicks % content.ambientEvery === 0
-        ? { kind: 'ambient', summary: pickOne(createRng(input.streams.narrative), content.ambient[water.id]), detail: { waterId: water.id, ...conditions }, deltas: { gold: 0 } }
+        ? { kind: 'ambient', summary: pickOne(createRng(input.streams.narrative), content.ambient[water.id] ?? []), detail: { waterId: water.id, ...conditions }, deltas: { gold: 0 } }
         : undefined
     return { angler, ...(event ? { event } : {}), ...(extraEvents.length ? { extraEvents } : {}), conditions, metrics: NO_METRICS, disposition: 'cast' }
   }
 
   angler = { ...angler, quietTicks: 0, counters: bump(angler.counters, { bites: 1 }) }
   const species = pickWeighted(createRng(input.streams.species), pool)
-  const grams = drawGrams(createRng(input.streams.size), species)
+  const grams = drawGrams(createRng(input.streams.size), species, bait)
   const rod = rodOf(content, angler.rodTier)
   const capacity = coolerOf(content, angler.coolerTier).capacity
   const kept = input.coolerCount < capacity
@@ -165,6 +230,23 @@ export function simulateAngler(input: CastInput): CastResult {
       nightCatches: conditions.band === 'night' ? 1 : 0,
     }),
   }
+  if (conditions.season !== undefined) {
+    // v2 counters for goals and achievements; v1 conditions carry no season and skip this.
+    const runIndex = run?.species === species.id ? (content.runs ?? []).indexOf(run) : -1
+    angler = {
+      ...angler,
+      counters: {
+        ...bump(angler.counters, {
+          breadCatches: bait === 'bread' ? 1 : 0,
+          deadbaitCatches: bait === 'deadbait' ? 1 : 0,
+          dawnDuskCatches: conditions.band === 'dawn' || conditions.band === 'dusk' ? 1 : 0,
+          rainCatches: conditions.weather === 'rain' ? 1 : 0,
+        }),
+        seasonsFished: (angler.counters.seasonsFished ?? 0) | SEASON_BIT[conditions.season],
+        runsFished: (angler.counters.runsFished ?? 0) | (runIndex >= 0 ? 1 << runIndex : 0),
+      },
+    }
+  }
   if (grams > angler.counters.heaviestGrams) angler = { ...angler, counters: { ...angler.counters, heaviestGrams: grams } }
 
   const value = fishValue(species.price, grams, species.maxGrams)
@@ -175,7 +257,7 @@ export function simulateAngler(input: CastInput): CastResult {
   let event: TickEvent
   let catchRecord
   if (kept) {
-    catchRecord = { speciesId: species.id, grams, value, caughtTick: tick }
+    catchRecord = { speciesId: species.id, grams, value, caughtTick: tick, ...(conditions.season !== undefined ? { band: conditions.band, weather: conditions.weather, season: conditions.season } : {}) }
     event = { kind: 'catch', summary: `${lead} took ${baitPhrase} ${BAND_PHRASE[conditions.band]}.${tail}`, detail, deltas: { gold: 0 } }
   } else {
     angler = { ...angler, counters: bump(angler.counters, { released: 1 }) }
@@ -201,6 +283,7 @@ function logbookEvents(content: IdleAnglerCatalog, angler: AnglerState, species:
   const total = speciesLogged(content, angler.logbook)
   const title = titleFor(total)
   if (titleFor(total - 1).id !== title.id) events.push({ kind: 'milestone', summary: `Now a ${title.name}, with ${total} species in the logbook.`, detail: {}, deltas: { gold: 0 } })
+  events.push(...unlockEvents(content, total))
   const here = speciesLogged(content, angler.logbook, species.water)
   for (const water of content.waters) {
     if (water.opensAfter?.water !== species.water || water.opensAfter.species !== here) continue

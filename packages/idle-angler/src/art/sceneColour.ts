@@ -25,6 +25,9 @@ const WATER: Record<WaterId, Record<TimeBand, string>> = {
   millpond: { dawn: '#8fb8b0', day: '#5fa8b8', dusk: '#9a7f90', night: '#243a5a' },
   river_bend: { dawn: '#8fb0c8', day: '#4f98c8', dusk: '#8a7aa0', night: '#20365a' },
   harbour_pier: { dawn: '#7fa0c0', day: '#3f80b8', dusk: '#7a6f98', night: '#1b2f52' },
+  heron_lake: { dawn: '#94b8a8', day: '#5a9fa0', dusk: '#958396', night: '#22384f' },
+  deep_sea: { dawn: '#6f90b8', day: '#2f6aa8', dusk: '#6a6290', night: '#16284a' },
+  frozen_tarn: { dawn: '#d8e4ec', day: '#e6f0f6', dusk: '#c8c4d4', night: '#3a4a66' },
 }
 
 export function sceneBands(key: Pick<SceneKey, 'water' | 'band' | 'weather'>): { sky: string; water: string } {

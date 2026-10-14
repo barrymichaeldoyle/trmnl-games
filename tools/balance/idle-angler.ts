@@ -25,7 +25,9 @@ export interface Policy {
 }
 
 /** Bait a sensible player keeps on the hook at each water. */
-export const POLICY_BAIT: Readonly<Record<WaterId, BaitClass>> = { millpond: 'worms', river_bend: 'maggots', harbour_pier: 'ragworm' }
+/** The v1 harness plays content v1's three waters. */
+type V1Water = Extract<WaterId, 'millpond' | 'river_bend' | 'harbour_pier'>
+export const POLICY_BAIT: Readonly<Record<V1Water, BaitClass>> = { millpond: 'worms', river_bend: 'maggots', harbour_pier: 'ragworm' }
 
 export interface AnglerLog {
   readonly dailyLanded: number[]
@@ -90,7 +92,7 @@ function visit(content: IdleAnglerCatalog, angler: AnglerState, cooler: number[]
 }
 
 /** The newest water the angler can fish, needing the Carbon Rod before the pier. */
-function bestWater(content: IdleAnglerCatalog, angler: AnglerState): WaterId {
+function bestWater(content: IdleAnglerCatalog, angler: AnglerState): V1Water {
   if (canFish(content, angler, 'harbour_pier') && angler.rodTier >= 3) return 'harbour_pier'
   if (canFish(content, angler, 'river_bend')) return 'river_bend'
   return 'millpond'

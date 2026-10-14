@@ -1,5 +1,6 @@
 import { createRng, pickWeighted } from '@trmnl-games/engine/rng'
-import type { IdleAnglerCatalog, TimeBand, WaterDef, Weather } from './types'
+import type { IdleAnglerCatalog, Season, TimeBand, WaterDef, Weather } from './types'
+import { weatherTable } from './seasons'
 
 const HOUR_MS = 3_600_000
 /** Weather holds for six UTC hours at each water (idle-angler.md "Weather and the shared forecast"). */
@@ -9,8 +10,8 @@ export const FORECAST_BLOCK_MS = 6 * HOUR_MS
 export const forecastBlock = (at: number): number => Math.floor(at / FORECAST_BLOCK_MS)
 
 /** The block's weather from its shared seed: one weighted draw, the same for every angler at the water. */
-export function weatherFromSeed(seed: number, water: WaterDef): Weather {
-  return pickWeighted(createRng(seed), water.weather)
+export function weatherFromSeed(seed: number, water: WaterDef, season?: Season): Weather {
+  return pickWeighted(createRng(seed), weatherTable(water, season))
 }
 
 /** Local hour (0 to 23) for a wall slot and an optional UTC offset in seconds. */
