@@ -20,7 +20,7 @@ Release order is a commitment; the dates are not. A release ends when its gate p
 - **Next task:** watch the first salvages and workbench jobs on production (D129, switched on 2026-10-12 at 16:27 UTC; run 807 clean); then the items below.
 - **Potion strengths (D131, 2026-10-12):** built as content v14 ([spec](potions.md), [evidence](evidence/potions.md)) and switched on in production at about 17:52 UTC the same day (run 813 clean). Barry's order for what follows, chosen with the review still open and no public players: content early players see first. Then the Archive and the Parking Garage (D133, 2026-10-12) as content v16 ([spec](biomes.md), [evidence](evidence/biomes.md)) with field notes for all five floors and twenty monsters, live in production since 19:10 UTC the same day (run 818 clean). Bigger bags wait until heroes sit at +3 in both slots.
 - **v1.2 Other people** is complete as of 2026-10-13. Every core row is live: desk raids (D110, content v7), public hero pages (D109, public by default since D144), the hero roster and the Rogue (D136, v18), world events as an office calendar (D139, v19 and scene version 5), meetings (D141, v20) and friends and rivals with rival raids (D143). Two items stay open without blocking the release: a third class waits for live data on the Rogue, and graveyard items are built as lost property (D145, content v21), live since run 902.
-- **Next release:** the rest of v2.0 Depth. Salvage, the workbench (D129, v13), potion strengths (D131, v14) and the Archive and Parking Garage (D133, v16) were pulled ahead of v1.2 on 2026-10-12 and are live. Bigger bags are live as content v22 (D146, 2026-10-13, run 908 clean), ahead of the +3 wait at Barry's call. Persistent elite encounters are live as dug-in elites (D163, content v24, [spec](elites.md)) since run 984 on 2026-10-14. The later slices remain.
+- **Next release:** the rest of v2.0 Depth. Salvage, the workbench (D129, v13), potion strengths (D131, v14) and the Archive and Parking Garage (D133, v16) were pulled ahead of v1.2 on 2026-10-12 and are live. Bigger bags are live as content v22 (D146, 2026-10-13, run 908 clean), ahead of the +3 wait at Barry's call. Persistent elite encounters are live as dug-in elites (D163, content v24, [spec](elites.md)) since run 984 on 2026-10-14, which completes the core batch. Still open: legendary gear, lore and hardcore as separate slices, Rooftop, Sub-Basement and dungeons as capacity permits, and the release gate's measurements (retention by account age and level, and a fresh pacing run against the best-in-slot assumption).
 
 ## Idle Angler, the second game (D115)
 
@@ -111,7 +111,7 @@ Core batch: player meetings, friends/rivals, world-event banner, shareable publi
 
 Gate: meeting side effects commit at most once for both parties; social data does not add unbounded per-hero simulation reads; public-profile exposure is intentional. Measure follow adoption without imposing it as a launch blocker.
 
-## v2.0 — Depth (was Month 4; next, four slices live)
+## v2.0 — Depth (was Month 4; core batch live 2026-10-14)
 
 Goal: sustained progression for older heroes. Major because it raises ceilings.
 
