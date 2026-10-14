@@ -17,10 +17,12 @@
  * under the ticks instead of running under the QR code.
  * Template v6 (D162) pins the current goal under content v2 on the X's full landscape, behind the star, as Desk
  * Crawler's does (D138): it heads the stories' column, which gives up a story for it, so the board keeps its rows.
+ * Template v7 (2026-10-14) lets every layout show as many stories as fit, up to sixteen, rather than a fixed count
+ * chosen for the smallest screen: the framework's overflow engine on the OG, counts measured per layout on the X.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 6
+export const TEMPLATE_VERSION = 7
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -124,9 +126,20 @@ const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !=
 const goal = () =>
   `{% if goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">Goal: {{ goal_line | escape }}</span></div>{% endif %}`
 
-/** The newest stories, each behind its glyph. */
-const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') =>
-  `<div class="flex flex--col flex--left gap--xsmall stretch-x h--min-0" data-stories="true">{% for story in stories limit:${limit} %}${storyGlyph}<div class="flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span></div>{% endfor %}</div>`
+/**
+ * The newest stories, each behind its glyph. Template v7: `limit` is the most a layout may show; the stories are a
+ * `data-overflow` list inside a `.columns > .column` pair, so the framework's overflow engine measures them in place
+ * against the space down to the end of the `.columns` box and hides the trailing ones that do not fit, so a tall slot such as the X's full view fills with stories instead of stopping at a fixed count (Barry,
+ * 2026-10-14). The list and the full layouts' wrappers are `flex-auto`, so before the engine trims they shrink to
+ * exactly the space left (siblings that are `stretch-x` keep their content height), and the column is top-aligned.
+ * On the X the engine misjudged heights (the X scales its content), so the X's list is one line a story, every row the
+ * same height, with a fixed count per layout measured to fill it (`xLimit`); the OG's keeps the engine and two or three
+ * lines where the layout asks for them.
+ */
+const storyList = (limit: number, clamp: number, classes: string, show: string, engine = true) =>
+  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full"${engine ? ' data-overflow="true"' : ''}>{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span></div>{% endfor %}</div></div></div>`
+/** The OG's list keeps the layout's clamp; the X's is one line a story, the only clamp its engine pass keeps exactly. */
+const stories = (limit: number, clamp = 1, classes = 'description lg:title--small', xLimit = 12) => storyList(limit, clamp, classes, 'lg:hidden') + storyList(xLimit, 1, classes, 'hidden lg:flex', false)
 
 /**
  * This week's heaviest fish at the angler's water: the trophy and water, the angler's rank and best, then each row's
@@ -137,7 +150,7 @@ const board = (rows: number) =>
   `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true">` +
   `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="1">{{ board.label | escape }}</span></div>` +
   `<span class="${LABEL} w--full" data-clamp="1">{{ board.rank_label | escape }}</span>` +
-  `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. {{ row.name | escape }}</span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
+  `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. <span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span></span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
 
 /**
  * The twelve-hour recap as Desk Crawler's ribbon: a rule, then its name in bold and each fact behind its mark. Each
@@ -145,7 +158,7 @@ const board = (rows: number) =>
  * at the foot of the layout.
  */
 const recap = () =>
-  `{% if recap_items %}<div class="grow"></div><div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div>` +
+  `{% if recap_items %}<div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div>` +
   `<div class="pt--2 flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x"><span class="${LABEL} text--bold no-shrink">Last 12 hours</span>` +
   `{% for item in recap_items %}{% case item.k %}{% when "best" %}{% assign m_recap = m_trophy %}{% when "got_away" %}{% assign m_recap = m_got_away %}{% else %}{% assign m_recap = m_catch %}{% endcase %}` +
   `<div class="flex flex--row flex--center-y gap--[3px] no-shrink" data-recap-item="{{ item.k }}"><img class="${ICON}" src="{{ m_recap }}" alt=""><span class="${LABEL}">{{ item.text | escape }}</span></div>{% endfor %}</div></div>{% endif %}`
@@ -188,15 +201,15 @@ const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
   ready(`${header(2, 4)}
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
-    <div class="lg:hidden flex flex--col flex--left flex--top gap--small stretch-x no-shrink">${attention(1)}{% if attention %}${stories(4)}{% else %}${stories(5)}{% endif %}</div>
-    <div class="hidden lg:flex flex--col flex--left flex--top gap--medium stretch-x no-shrink">${scene([170, 6], [170, 6])}${attention(1)}
-      <div class="flex flex--row flex--top gap--large stretch-x"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}{% if goal_line %}${stories(4, 2)}{% else %}${stories(5, 2)}{% endif %}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
+    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${stories(16)}</div>
+    <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
+      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2, undefined, 10)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
     ${recap()}`),
   ready(`${header(2, 4)}
     ${scene([153, 3], [152, 5])}
     ${attention(3)}
-    ${stories(5, 2, 'label')}
+    ${stories(16, 2, 'label', 9)}
     ${catchPanel(3, 8)}
     ${board(6)}
     ${recap()}`),
@@ -210,7 +223,7 @@ const halfHorizontal = oriented(
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
       ${statusRow()}
       ${counters('short')}
-      {% if attention %}${attention(1)}{% else %}${stories(1, 1)}{% endif %}
+      {% if attention %}${attention(1)}{% else %}${stories(16, 1, undefined, 4)}{% endif %}
     </div>
     ${qr(2, 4)}`, true),
   ready(`
@@ -219,7 +232,7 @@ const halfHorizontal = oriented(
       ${scene([220, 2], [185, 4])}
       ${statusRow()}
       ${counters()}
-      {% if attention %}${attention()}{% else %}${stories(2, 2)}{% endif %}
+      {% if attention %}${attention()}{% else %}${stories(16, 2, undefined, 4)}{% endif %}
     </div>`),
 )
 
@@ -232,7 +245,7 @@ const halfVertical = oriented(
     ${statusRow()}
     ${counters()}
     ${attention()}
-    ${stories(3, 2)}
+    ${stories(16, 2, undefined, 12)}
     ${recap()}`),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
@@ -241,9 +254,8 @@ const halfVertical = oriented(
     ${statusRow()}
     ${counters('short')}
     ${attention(3)}
-    ${stories(3, 3, 'description')}
+    ${stories(16, 3, 'description', 16)}
     ${board(5)}
-    <div class="grow"></div>
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`),
   true,
 )
@@ -259,13 +271,12 @@ const quadrant = oriented(
       </div>
       ${qr(2, 4)}
     </div>
-    {% if attention %}${attention(2)}{% else %}${stories(1, 2)}{% endif %}`, true),
+    {% if attention %}${attention(2)}{% else %}${stories(16, 2, undefined, 8)}{% endif %}`, true),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${statusRow(false)}
     ${counters('compact')}
-    {% if attention %}${attention(3)}{% else %}${stories(2, 3, 'description')}{% endif %}
-    <div class="grow"></div>
+    {% if attention %}${attention(3)}<div class="grow"></div>{% else %}${stories(16, 3, 'description', 11)}{% endif %}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, true),
   true,
 )

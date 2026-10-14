@@ -117,7 +117,7 @@ describe('Idle Angler payload', () => {
       latest_catch: { species_id: 'barbel', name: 'Barbel', weight_label: '1.9 kg' },
       scene_base: `${ART}/art/ia/scene/v4/river_bend/dusk/overcast/noseason/holding/barbel/red_tag`,
       qr_base: `${ART}/art/ia/qr/v1/home`,
-      recap: 'Last 12 hours: 3 fish, best 1.9 kg Barbel, 1 got away',
+      recap: 'Last 12 hours: 7 fish, best 1.9 kg Barbel, 1 got away',
     })
   })
 
@@ -126,7 +126,7 @@ describe('Idle Angler payload', () => {
       bait_name: 'Maggots',
       bait_count: 34,
       attention_kind: null,
-      recap_items: [{ k: 'catch', text: '3 fish' }, { k: 'best', text: 'Best 1.9 kg Barbel' }, { k: 'got_away', text: '1 got away' }],
+      recap_items: [{ k: 'catch', text: '7 fish' }, { k: 'best', text: 'Best 1.9 kg Barbel' }, { k: 'got_away', text: '1 got away' }],
       newest_catch: { name: 'Barbel', weight_label: '1.9 kg', released: false, fish_base: `${ART}/art/ia/fish/v1/barbel` },
     })
     // The newest fish is found past a story that is not a catch, and a release says so.
@@ -139,7 +139,9 @@ describe('Idle Angler payload', () => {
   it('keeps a catch on screen when it also earned a title and achievements', () => {
     // Barry's log on 2026-10-10: the Perch fell sixth behind its own level-up (now a title) and three achievements.
     const payload = buildPayload(scenarios.achievements!)
-    expect(payload.stories.map((s) => s.kind)).toEqual(['ambient', 'catch', 'milestone', 'achievement', 'ambient'])
+    // Template v7 sends up to sixteen stories; the cast's lines still lead in this order.
+    expect(payload.stories.map((s) => s.kind).slice(0, 5)).toEqual(['ambient', 'catch', 'milestone', 'achievement', 'ambient'])
+    expect(payload.stories.length).toBeLessThanOrEqual(16)
     expect(payload.stories[1]!.summary).toContain('1.3 kg Perch')
     expect(payload.stories[3]!.summary).toBe('3 achievements: Specimen Perch, First Perch, A Kilo Fish')
     expect(payload.newest_catch).toMatchObject({ name: 'Perch', weight_label: '1.3 kg' })

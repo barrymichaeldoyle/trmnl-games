@@ -14,7 +14,8 @@ import type { AnglerStatus, BaitClass, IdleAnglerCatalog, TimeBand, WaterId, Wea
 export const PAYLOAD_VERSION = 1
 /** Two missed Idle Angler ticks before the device says updates are delayed. */
 export const STALE_AFTER_MS = 30 * 60 * 1000
-export const MAX_STORIES = 5
+/** Stories sent to the device; each layout shows as many as fit (template v7). */
+export const MAX_STORIES = 16
 /** The recap covers the last twelve hours of stories (idle-angler.md "Device"). */
 export const RECAP_MS = 12 * 3_600_000
 /** Stories the backend reads for the recap: a busy twelve hours is under 60 lines. */
@@ -103,6 +104,13 @@ export interface PayloadBoard {
   /** The angler's own heaviest fish this week at this water, for a row below the top; null before one. */
   readonly ownGrams?: number | null
 }
+
+/**
+ * A board name short enough for the OG's columns (ten characters, then an ellipsis). The framework sizes the story list
+ * (template v7) before its clamp pass trims names, and a long name that wrapped there left the stories too little room;
+ * the X shows the full name, which fits.
+ */
+const shortName = (name: string) => (name.length > 10 ? `${name.slice(0, 9)}\u2026` : name)
 
 const BAND_WORD: Readonly<Record<TimeBand, string>> = { dawn: 'dawn', day: 'day', dusk: 'dusk', night: 'night' }
 
@@ -220,8 +228,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
           label: 'This week',
           rank_label: input.board.ownGrams == null ? 'No fish here this week yet' : input.board.rank === null ? `Your best ${formatWeight(input.board.ownGrams)}` : `#${input.board.rank}, best ${formatWeight(input.board.ownGrams)}`,
           rows: [
-            ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, weight_label: formatWeight(row.grams), own: row.own })),
-            ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, weight_label: formatWeight(input.board.ownGrams), own: true }] : []),
+            ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), weight_label: formatWeight(row.grams), own: row.own })),
+            ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, name_short: shortName(angler.alias), weight_label: formatWeight(input.board.ownGrams), own: true }] : []),
           ],
         }
       : null,

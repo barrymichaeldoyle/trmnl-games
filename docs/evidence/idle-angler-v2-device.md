@@ -13,3 +13,12 @@ Recorded 2026-10-14 for D162 ([spec](../idle-angler-full.md)).
 ## Companion
 
 The fixtures harness (`node tools/review/companion-fixtures.mjs`) gains `v2=1` (content v2's goal, slate, season, run, charter, wall and Opens) and `v2=new` (a first-day angler with everything locked), and serves `/app/idle-angler/trophies`. At 390 wide the Dock, Cooler, Shop (both variants), Trophies, Rankings and Log pages have no horizontal overflow and no console errors.
+
+## Template v7: every layout fills with stories (2026-10-14)
+
+Barry noticed the X showed about five stories with most of the screen empty. The payload sent only five, and every layout had a fixed count chosen for the smallest screen. The payload now sends up to sixteen, and each layout shows as many as fit:
+
+- **OG and BWRY:** the stories are a `data-overflow` list inside a `.columns > .column` pair, so the framework's overflow engine measures them in place and hides the trailing ones that do not fit above what follows. The list and the full layouts' wrappers are `flex-auto` so they take exactly the space left, the recap's spacer is gone (it split that space), and board names on the OG are sent short (`name_short`, ten characters) because a long name wrapped before the framework's clamp pass and shrank the measured space. The `.columns` engine itself was tried first and dropped: it plans in a fresh column with the default 10px gap and so showed one story fewer.
+- **X:** the same engine misjudges heights on the X preview, so the X has one line a story (every row the same height) and a fixed count per layout, measured as the most that fits the tightest state: full 10 landscape and 9 portrait, half horizontal 4 and 4, half vertical 12 and 16, quadrant 8 and 11.
+- **Counts for the catch state** (before → now): OG full 5 → 6, OG portrait full 5 → 9, OG half vertical 3 → 5, X full 5 → 10, X portrait full 5 → 9, X half vertical 3 → 12 and 16, X quadrant 1 → 8 and 11.
+- **Checks:** a clip check (`.previews/clip-check.mjs`, every page: a story whose box runs past the list's box) finds none, because `.columns` hides its overflow and the sweep cannot see a clipped story; all 528 previews pass the sweep; the Ruby Liquid crosscheck matches 732 renders and the linter passes.

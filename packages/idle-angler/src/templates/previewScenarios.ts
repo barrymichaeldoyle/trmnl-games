@@ -34,6 +34,18 @@ const stories: PayloadStory[] = [
   { kind: 'catch', summary: 'A 410 g Chub took the maggots in the day.', at: minutes(140), speciesId: 'chub', grams: 410 },
   { kind: 'got_away', summary: 'Something heavy took the maggots and kept going.', at: minutes(200) },
   { kind: 'catch', summary: 'A 230 g Dace took the maggots in the day.', at: minutes(260), speciesId: 'dace', grams: 230 },
+  // Template v7 shows as many stories as fit, so the matrix sends the payload's full sixteen.
+  { kind: 'ambient', summary: 'Leaves drift down the main flow.', at: minutes(330) },
+  { kind: 'catch', summary: 'A 620 g Grayling took the maggots in the day.', at: minutes(400), speciesId: 'grayling', grams: 620 },
+  { kind: 'catch', summary: 'A 1.1 kg Chub took the maggots in the day.', at: minutes(470), speciesId: 'chub', grams: 1100 },
+  { kind: 'ambient', summary: 'Water chatters over the gravel run.', at: minutes(540) },
+  { kind: 'catch', summary: 'A 90 g Gudgeon took the maggots at first light.', at: minutes(610), speciesId: 'gudgeon', grams: 90 },
+  { kind: 'release', summary: 'Cooler full. Released a 340 g Dace.', at: minutes(680), speciesId: 'dace', grams: 340 },
+  { kind: 'ambient', summary: 'A trout rises once, out of reach.', at: minutes(750) },
+  { kind: 'catch', summary: 'A 1.4 kg Barbel took the maggots in the dark.', at: minutes(820), speciesId: 'barbel', grams: 1400 },
+  { kind: 'ambient', summary: 'The far bank is all willow roots.', at: minutes(890) },
+  { kind: 'catch', summary: 'A 180 g Dace took the maggots in the dark.', at: minutes(960), speciesId: 'dace', grams: 180 },
+  { kind: 'got_away', summary: 'Something heavy took the maggots and kept going.', at: minutes(1030) },
 ]
 
 const base: IdleAnglerPayloadInput = {
