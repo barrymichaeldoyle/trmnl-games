@@ -133,7 +133,7 @@ const sceneImage = (field: SceneField, classes = 'lg:hidden') =>
 /** Base scene everywhere, swapped for an integer-scaled larger image on screen--lg (TRMNL X). */
 const scene = (field: SceneField, large = field === 'scene_url' ? 'scene_url_large' : 'scene_url_medium') => {
   return `
-  {% if ${field} != "" %}<div class="flex flex--row flex--center-x stretch-x">${sceneImage(field)}<img class="image hidden lg:block" src="{{ ${large} }}" alt=""></div>{% endif %}`
+  {% if ${field} != "" %}<div class="flex flex--row flex--center-x stretch-x" data-scene-art="true">${sceneImage(field)}<img class="image hidden lg:block" src="{{ ${large} }}" alt=""></div>{% endif %}`
 }
 
 /** The rune rule across the full width of its column. */
@@ -394,7 +394,8 @@ const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelo
  * Pinned framework 3.4 emits its final stats before signalling readiness. Fit the
  * actual rich-text boxes at that point, reserving the footer and following rank
  * line, and trim boards marked `data-fit-rows` to their slot. First, widen any stat column a device text scale has
- * outgrown, by swapping its framework width class. Only classes change; there are no styles, network calls or writes.
+ * outgrown, by swapping its framework width class; last, if even the newest story has no room, trim the board and then
+ * hide the scene. Only classes change; there are no styles, network calls or writes.
  * Scope to this view so another Desk Crawler slot has its own height budget, and
  * to the orientation layout the framework is showing (the other is display: none).
  */
@@ -406,6 +407,8 @@ const fitStories = `<script>
     const layout = Array.from(view.querySelectorAll('.layout')).find(el => el.getClientRects().length > 0);
     const footer = Array.from(view.querySelectorAll('.title_bar')).find(el => el.getClientRects().length > 0);
     if (!layout || !footer) return;
+    // Undo the last run's giving way (below) before measuring anything.
+    view.querySelectorAll('[data-gave-way]').forEach(el => { el.classList.remove('hidden'); delete el.dataset.gaveWay; });
     // Stat columns (D165): a text scale grows the numbers but not the cells' pixel widths, so give every cell of a
     // column the framework width class its widest change needs (the classes run to 128 pixels).
     ['xp', 'gold', 'hp'].forEach(kind => {
@@ -478,22 +481,46 @@ const fitStories = `<script>
       if (!shown().length || board.getBoundingClientRect().bottom > bound + 0.5) board.classList.add('hidden');
       board.dataset.rowCount = String(board.classList.contains('hidden') ? 0 : shown().length);
     });
-    view.querySelectorAll('[data-story-list]').forEach(list => {
-      if (!list.getClientRects().length) return;
-      const entries = Array.from(list.children).filter(entry => entry.classList.contains('block'));
-      entries.forEach(entry => entry.classList.remove('hidden'));
-      const parent = list.parentElement;
-      let bottom = Math.min(layoutBottom, parent.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(parent).paddingBottom) || 0));
-      const gap = parseFloat(getComputedStyle(parent).rowGap) || 0;
-      for (let sibling = list.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
-        if (getComputedStyle(sibling).display !== 'none') bottom -= sibling.getBoundingClientRect().height + gap;
-      }
-      let count = entries.length;
-      while (count && entries[count - 1].getBoundingClientRect().bottom > bottom + 0.5) entries[--count].classList.add('hidden');
-      list.dataset.storyFit = 'complete';
-      list.dataset.storyCount = String(count);
-      list.dataset.storyBottom = String(bottom);
-    });
+    const fitLists = () => {
+      let starved = false;
+      view.querySelectorAll('[data-story-list]').forEach(list => {
+        if (!list.getClientRects().length) return;
+        const entries = Array.from(list.children).filter(entry => entry.classList.contains('block'));
+        entries.forEach(entry => entry.classList.remove('hidden'));
+        const parent = list.parentElement;
+        let bottom = Math.min(layoutBottom, parent.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(parent).paddingBottom) || 0));
+        const gap = parseFloat(getComputedStyle(parent).rowGap) || 0;
+        for (let sibling = list.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
+          if (getComputedStyle(sibling).display !== 'none') bottom -= sibling.getBoundingClientRect().height + gap;
+        }
+        let count = entries.length;
+        while (count && entries[count - 1].getBoundingClientRect().bottom > bottom + 0.5) entries[--count].classList.add('hidden');
+        list.dataset.storyFit = 'complete';
+        list.dataset.storyCount = String(count);
+        list.dataset.storyBottom = String(bottom);
+        if (entries.length && !count) starved = true;
+      });
+      return starved;
+    };
+    // D165: at a large device scale the header, scene and board can leave no room for even the newest story. Then the
+    // board gives way first, a row at a time from the end farther from the hero, and the scene after it (with the
+    // standing code hung in its corner, where it has one).
+    const giveWay = el => { el.classList.add('hidden'); el.dataset.gaveWay = 'true'; };
+    let starved = fitLists();
+    while (starved) {
+      const rows = Array.from(view.querySelectorAll('[data-rank-row]')).filter(row => row.getClientRects().length > 0);
+      if (rows.length < 2) break;
+      const own = rows.findIndex(row => row.classList.contains('label--inverted'));
+      const drop = own >= 0 && own > rows.length - 1 - own ? rows[0] : rows[rows.length - 1];
+      giveWay(drop);
+      const rule = drop.previousElementSibling && drop.previousElementSibling.matches('.border--h-30') ? drop.previousElementSibling : drop.nextElementSibling && drop.nextElementSibling.matches('.border--h-30') ? drop.nextElementSibling : null;
+      if (rule && rule.getClientRects().length) giveWay(rule);
+      starved = fitLists();
+    }
+    if (starved) {
+      view.querySelectorAll('[data-scene-art]').forEach(art => { if (art.getClientRects().length) giveWay(art.closest('[data-scene-row]') || art); });
+      fitLists();
+    }
   };
   window.addEventListener('trmnl:terminalize:stats', fit);
   window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
@@ -824,7 +851,7 @@ const xStackedHeader = (clamp: number, gear = gearLine) => `<div class="flex fle
 const xCode = `{% if qr_base != "" or companion_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall w--[96px]" data-companion-qr="true">{% if qr_base != "" %}<img class="image" src="{{ qr_base }}/3.png" alt=""><span class="title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>{% else %}<img class="image" src="{{ companion_qr_base }}/3.png" alt="">{% endif %}</div>{% endif %}`
 /** The standing bag code hung in a scene's corner, like the full portrait's (D93); an urgent code keeps its own block. */
 const xSceneCode = `{% if qr_base == "" and companion_qr_base != "" %}<div class="absolute top--0 right--0 flex bg--black p--1" data-companion-qr="true"><img class="image" src="{{ companion_qr_base }}/3.png" alt=""></div>{% endif %}`
-const xScene = (field: SceneField, code = '') => `{% if ${field} != "" %}<div class="relative no-shrink" data-scene-row="x"><img class="image" src="{{ ${field} }}" alt="">${code}</div>{% endif %}`
+const xScene = (field: SceneField, code = '') => `{% if ${field} != "" %}<div class="relative no-shrink" data-scene-row="x" data-scene-art="true"><img class="image" src="{{ ${field} }}" alt="">${code}</div>{% endif %}`
 /**
  * A ruled board of up to `limit` rows under its caption; a hero below them takes the last row's place. The X keeps
  * whole rows at its size, so the narrow columns clamp the name rather than the score.
@@ -1024,7 +1051,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   </div>
   <div class="no-shrink flex flex--col gap--small stretch-x">
     <div class="flex flex--row flex--top lg:flex--center-x gap--medium stretch-x" data-scene-row="true">
-      {% if scene_url != "" %}<div class="no-shrink">${sceneImage('scene_url_medium')}<img class="image hidden lg:block" src="{{ scene_url_large }}" alt=""></div>{% endif %}
+      {% if scene_url != "" %}<div class="no-shrink" data-scene-art="true">${sceneImage('scene_url_medium')}<img class="image hidden lg:block" src="{{ scene_url_large }}" alt=""></div>{% endif %}
       ${ogBoard}
     </div>
     <div class="grid stretch-x gap--none" data-rune-rule="true">
