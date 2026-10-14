@@ -20,6 +20,25 @@ export const Route = createFileRoute('/app/paper-lives/')({
 const clock = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 const time = (at: number) => <LocalTime at={at} format={clock} />
 const SEASON = { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' } as const
+type Log = NonNullable<LifeView['logs']>[number]
+
+/**
+ * The story as rows, newest first: quiet lines and prompts left out, achievements unlocked together on one row
+ * ("3 achievements: …"), and each age shown once, on the first row of its year.
+ */
+function storyRows(logs: readonly Log[]): Array<Log & { newAge: boolean }> {
+  const rows: Log[] = []
+  for (const log of logs) {
+    if (log.kind === 'decision_offered' || log.kind === 'ambient') continue
+    const last = rows.at(-1)
+    if (log.kind === 'achievement' && last?.kind === 'achievement' && last.age === log.age) {
+      const names = [...(last.summary.match(/^\d+ achievements: (.*)$/)?.[1]?.split(', ') ?? [last.summary.replace(/^Achievement: /, '')]), log.summary.replace(/^Achievement: /, '')]
+      rows[rows.length - 1] = { ...last, summary: `${names.length} achievements: ${names.join(', ')}` }
+    } else rows.push(log)
+  }
+  return rows.slice(0, 20).map((row, i, all) => ({ ...row, newAge: row.kind !== 'recap' && (i === 0 || all.slice(0, i).every((r) => r.kind === 'recap' || r.age !== row.age)) }))
+}
+
 /** "in 1 h 20 min" until a moment, kept current each minute; hidden until the browser owns the page. */
 function Until({ at }: { at: number }) {
   const hydrated = useHydrated()
@@ -165,11 +184,11 @@ function LifePage() {
 
       <Card title="The story so far">
         {(view.logs ?? []).every((log) => log.kind === 'decision_offered' || log.kind === 'ambient') ? <p className="text-muted">Nothing yet. The first lines arrive within fifteen minutes.</p> : null}
-        <ol className="flex flex-col gap-2">
-          {(view.logs ?? []).filter((log) => log.kind !== 'decision_offered' && log.kind !== 'ambient').slice(0, 20).map((log) => (
-            <li key={log.id} className={`flex gap-3 text-sm ${log.kind === 'recap' ? 'text-muted' : ''}`}>
-              <span className="w-8 shrink-0 text-right tabular-nums text-muted">{log.kind === 'recap' ? '' : log.age}</span>
-              <span className={`min-w-0 ${log.remarkable || log.major ? 'font-semibold' : ''}`}><Named text={log.summary} names={names} /></span>
+        <ol className="flex flex-col gap-1.5">
+          {storyRows(view.logs ?? []).map((row) => (
+            <li key={row.id} className={`flex gap-3 text-sm ${row.kind === 'recap' ? 'text-muted' : ''} ${row.newAge ? 'mt-2 first:mt-0' : ''}`}>
+              <span className="w-8 shrink-0 text-right tabular-nums text-muted">{row.newAge ? row.age : ''}</span>
+              <span className={`min-w-0 ${row.kind === 'death' || row.remarkable ? 'font-semibold' : ''} ${row.kind === 'achievement' ? 'text-gold-ink' : ''}`}><Named text={row.summary} names={names} /></span>
             </li>
           ))}
         </ol>
