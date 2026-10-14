@@ -440,13 +440,29 @@ describe('log lines (D44)', () => {
     expect(cells('xp')).toEqual(['+14\u00a0XP', '+14\u00a0XP'])
     expect(cells('gold')).toEqual(['', ''])
     expect(cells('hp')).toEqual(['−12\u00a0HP', '−12\u00a0HP'])
-    expect(html).toMatch(/data-story-chips-inline="true"><span class="label lg:title--small label--outline">\+1\u00a0healing potion<\/span><span[^>]*data-chip-cell="xp"/)
+    expect(html).toMatch(/data-story-chips-inline="true">\s*<span class="label lg:title--small label--outline">\+1\u00a0healing potion<\/span><span[^>]*data-chip-cell="xp"/)
     // The second entry has no changes, so it reserves no columns and its story keeps the line.
     expect(html.match(/data-story-chips-inline/g)).toHaveLength(2)
     expect(html).toMatch(/<div class="lg:hidden flex[^"]*" data-story-changes="true">/)
     // The narrower layouts keep the changes under the story on both devices.
     const side = await new Liquid({ timezoneOffset: 0 }).parseAndRender(screenMarkup.markup_half_vertical, { ...vars, utc_offset: 7200 })
     expect(side).not.toContain('data-story-chips-inline')
+  })
+
+  it('puts an older row\'s other changes under its story in the X portrait ledger, keeping the stat columns on the line', async () => {
+    const vars = payload() as { log: Array<Record<string, unknown>> } & Record<string, unknown>
+    const bought = { ...vars.log[0], n: 'Bought a [[Laptop Backpack]]. Bag holds 13.', d: '−100\u00a0gold · +3\u00a0bag slots' }
+    const html = await render({ ...vars, utc_offset: 7200, log: [vars.log[0], bought] })
+    const [landscape, portrait] = html.split('landscape:hidden')
+    const row = portrait!.split('Bag holds 13.')[1]!.split('border--h-30')[0]!
+    // A device scale leaves the story a word wide if the chip shares its line, so it takes a line under the story.
+    expect(row).toMatch(/^<\/span><\/span><div class="hidden lg:block pt--1" data-story-chips-other="true">\s*<span class="label lg:title--small label--outline">\+3\u00a0bag slots<\/span><\/div><\/div><span class="hidden lg:flex[^"]*" data-story-chips-inline="true"><span[^>]*data-chip-cell="xp">/)
+    expect(row).toMatch(/data-chip-cell="gold"><span[^>]*>−100\u00a0gold<\/span>/)
+    // The row aligns to the story's first line rather than centring between it and the chip.
+    expect(portrait!.split('Bag holds 13.')[0]!.split('border--h-30').at(-1)).toMatch(/<div class="flex flex--row flex--left flex--top gap--xsmall">/)
+    // The screen-wide landscape ledger keeps it on the line.
+    expect(landscape).not.toContain('data-story-chips-other')
+    expect(landscape.split('Bag holds 13.')[1]).toMatch(/data-story-chips-inline="true">\s*<span class="label lg:title--small label--outline">\+3\u00a0bag slots/)
   })
 
   it('leaves the time out without an offset', async () => {

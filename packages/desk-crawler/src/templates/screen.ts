@@ -303,11 +303,13 @@ const chip = (text: string) => `<span class="label lg:title--small label--outlin
 const chipCell = (field: string, kind: string, width: string) => `<span class="flex flex--row flex--right no-shrink ${width}" data-chip-cell="${kind}">{% if ${field} != "" %}${chip(field)}{% endif %}</span>`
 /**
  * The X full layouts' changes on the story's line (D89): XP, gold and HP each in their own fixed column before the
- * time, so they line up down the ledger, and any other change (a potion, a bag slot, "No effect") just before them.
- * A story without changes keeps the whole line, and one with only other changes ("No effect") reserves no stat columns.
- * Units arrive joined by a no-break space, so the last word after it names the stat.
+ * time, so they line up down the ledger, and any other change (a potion, a bag slot, "No effect") just before them,
+ * or under the story where `others` is false. A story without changes keeps the whole line, and one with only other
+ * changes ("No effect") reserves no stat columns. Units arrive joined by a no-break space, so the last word after it
+ * names the stat.
  */
-const chipColumns = (visibility = 'hidden lg:flex') => `{% assign chip_xp = "" %}{% assign chip_gold = "" %}{% assign chip_hp = "" %}{% assign chip_other = "" %}{% for change in line_changes %}{% assign chip_unit = change | split: "\u00a0" | last %}{% if chip_unit == "XP" %}{% assign chip_xp = change %}{% elsif chip_unit == "gold" %}{% assign chip_gold = change %}{% elsif chip_unit == "HP" %}{% assign chip_hp = change %}{% else %}{% capture chip_other %}{{ chip_other }}${chip('change')}{% endcapture %}{% endif %}{% endfor %}<span class="${visibility} flex--row flex--center-y flex--right gap--xsmall no-shrink" data-story-chips-inline="true">{{ chip_other }}{% if chip_xp != "" or chip_gold != "" or chip_hp != "" %}${chipCell('chip_xp', 'xp', 'w--[66px]')}${chipCell('chip_gold', 'gold', 'w--[92px]')}${chipCell('chip_hp', 'hp', 'w--[66px]')}{% endif %}</span>`
+const chipSort = `{% assign chip_xp = "" %}{% assign chip_gold = "" %}{% assign chip_hp = "" %}{% assign chip_other = "" %}{% for change in line_changes %}{% assign chip_unit = change | split: "\u00a0" | last %}{% if chip_unit == "XP" %}{% assign chip_xp = change %}{% elsif chip_unit == "gold" %}{% assign chip_gold = change %}{% elsif chip_unit == "HP" %}{% assign chip_hp = change %}{% else %}{% capture chip_other %}{{ chip_other }} ${chip('change')}{% endcapture %}{% endif %}{% endfor %}`
+const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSort}<span class="${visibility} flex--row flex--center-y flex--right gap--xsmall no-shrink" data-story-chips-inline="true">${others ? '{{ chip_other }}' : ''}{% if chip_xp != "" or chip_gold != "" or chip_hp != "" %}${chipCell('chip_xp', 'xp', 'w--[66px]')}${chipCell('chip_gold', 'gold', 'w--[92px]')}${chipCell('chip_hp', 'hp', 'w--[66px]')}{% endif %}</span>`
 
 /**
  * One story as a ledger line: the glyph, the story, and its HH:MM at the end of the line; the stat changes follow as
@@ -335,14 +337,22 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   const changes = `{% for change in line_changes %} ${chip('change')}{% endfor %}`
   const hasChanges = `${entry}.d != nil and ${entry}.d != ""`
   const columns = chipColumns(shown)
+  // The portrait ledger (`'lg'`) is too narrow for a story, a long change ("+3 bag slots") and three stat columns on one
+  // line once a device scale enlarges them, so its other changes take a line under the story there instead.
+  const othersBelow = inline === 'lg' && !lead
   const lineFit = Math.max(0, fit - (timeBelow ? 0 : 14))
   // D112: on the OG, a to-do line too long for this row's fit says its count instead ("Stand-up: 3 new tasks."), so it
   // never clamps mid-name; `line_full` keeps the labels for the X.
   const compactSwap = `{% assign line_full = nil %}{% if ${entry}.c and line_plain.size > ${lineFit} %}{% assign line_full = line_story %}{% assign line_story = ${entry}.c %}{% assign line_plain = line_story %}{% endif %}`
-  const inlineChips = inline && !lead ? `{% if ${hasChanges} %}${columns}{% endif %}` : ''
+  const inlineChips = inline && !lead ? `{% if ${hasChanges} %}${othersBelow ? chipColumns(shown, false) : columns}{% endif %}` : ''
+  const storySpan = `<span class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
+  // Sorted before the row opens, so a row with changes under its story aligns to the story's first line, not its middle.
+  const sortFirst = othersBelow ? `{% assign chip_other = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
+  const story = othersBelow ? `<div class="grow w--min-0">${storySpan}{% if chip_other != "" %}<div class="hidden lg:block pt--1" data-story-chips-other="true">{{ chip_other }}</div>{% endif %}</div>` : storySpan
+  const centred = inline && !lead ? (othersBelow ? '{% if chip_other == "" %} lg:flex--center-y{% endif %}' : ` ${onlyX('lg:')}flex--center-y`) : ''
   const leadRow = lead ? `{% if line_timed or ${hasChanges} %}<div class="${shown} flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true">{% if ${hasChanges} %}${columns}{% endif %}${timeSpan()}</div>{% endif %}` : ''
   const stacked = `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
-  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none">${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}<div class="flex flex--row flex--left flex--top${inline && !lead ? ` ${onlyX('lg:')}flex--center-y` : ''} gap--xsmall"><div class="no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div><span class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
+  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none">${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"><div class="no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
 }
 
 /** The status line, its clamp fitted like log lines. */
