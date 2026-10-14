@@ -552,6 +552,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 content v2 after Barry saw first steps at five ([notes](paper-lives.md#content-v2-2026-10-14)): age windows on milestones, no lines naming a dead parent, conditions for jobs, cars, homes and children, decisions about the event's person, nobody engaged before 20, and validator rules that keep these out. Family labels (Mother, Father, Sister, Son) from sorted name lists, at Barry's request, and names in bold in the companion's story. v1 is unchanged for replays; production switches with one command.
 
+2026-10-14, D159 content v3 at Barry's choice of a content pack first: 180 events, 30 decisions and 30 quiet lines, major decisions at double weight. Age up reworked after Barry found it anticlimactic: every event of a year now happens inside its two-hour minimum, a ready year ends the moment Age up is pressed, and before then the button queues and says when, with a countdown. Production switches straight from v1 to v3.
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.

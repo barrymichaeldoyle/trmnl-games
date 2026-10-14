@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { contentV1 as content } from '@trmnl-games/paper-lives/content'
+import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/paper-lives/content'
+
+const content = catalogs[ACTIVE_CONTENT]
 import { requireOpenGame } from '../../lib/gameAccess'
 import { ProsePage, SUPPORT_EMAIL } from '../../lib/prose'
 import { seo } from '../../lib/seo'
@@ -37,7 +39,7 @@ export const Route = createFileRoute('/help/paper-lives')({
       <p>In the first year you can change the first name and choose pronouns (they, she or he) on the Life page.</p>
       <h2 id="how-a-year-works">How a year works</h2>
       <p>The first six years pass quickly, one every fifteen minutes. After that, a year lasts at least {hours(t.minYearTicks)} hours. Events happen through the year without you, such as making a friend, catching a cold, getting a raise or the dog getting out. Your screen shows each one with the age it happened at.</p>
-      <p>When you are around, press <strong>Age up</strong> on the Life page and the year ends as soon as its {hours(t.minYearTicks)} hours have passed. Otherwise the year closes automatically after {hours(t.closeYearTicks)} hours. If you check in often, a life takes about a week. If you never do, it takes about a month.</p>
+      <p>Everything a year has in store happens in its first {hours(t.minYearTicks)} hours. After that the year is ready: press <strong>Age up</strong> on the Life page and it ends there and then, with its recap and the next year's decision. Press it earlier and it waits until the year is ready, so nothing is skipped. If you are away, the year closes by itself after {hours(t.closeYearTicks)} hours. If you check in often, a life takes about a week. If you never do, it takes about a month.</p>
       <p>The seasons run through each year's first {hours(t.minYearTicks)} hours. A year left open after that is winding down, and the screen says when it will close.</p>
       <h2 id="decisions">Decisions</h2>
       <p>Most years bring one decision, such as a job abroad, a house or a puppy. Your screen shows the question and you answer on the Life page. The choice happens when the year ends, so you can change your mind until then. Some options need a trait, enough money or a stat. These show greyed out, with the reason.</p>

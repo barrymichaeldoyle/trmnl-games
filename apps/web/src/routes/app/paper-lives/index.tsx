@@ -1,12 +1,12 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { HERO_NAME_RULE, validateName } from '@trmnl-games/platform'
 import { captureAnalytics } from '../../../lib/analytics'
 import { useIntent } from '../../../lib/intent'
-import { LocalTime } from '../../../lib/localTime'
+import { LocalTime, useHydrated } from '../../../lib/localTime'
 import { preload } from '../../../lib/preload'
 import { money, Named, namesIn, Portrait, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
 import { ActionFeedback, Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
@@ -20,6 +20,20 @@ export const Route = createFileRoute('/app/paper-lives/')({
 const clock = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 const time = (at: number) => <LocalTime at={at} format={clock} />
 const SEASON = { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' } as const
+/** "in 1 h 20 min" until a moment, kept current each minute; hidden until the browser owns the page. */
+function Until({ at }: { at: number }) {
+  const hydrated = useHydrated()
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30_000)
+    return () => window.clearInterval(timer)
+  }, [])
+  if (!hydrated) return null
+  const minutes = Math.max(1, Math.ceil((at - now) / 60_000))
+  const hours = Math.floor(minutes / 60)
+  return <span className="text-muted">({hours > 0 ? `in ${hours} h ${minutes % 60} min` : `in ${minutes} min`})</span>
+}
+
 const ORDINALS = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth']
 
 /** How far into the year Age up was pressed, in bands of the year's two-hour minimum (eight ticks). */
@@ -30,6 +44,7 @@ function LifePage() {
   const { notice, notify, dismiss } = useNotice()
   const choose = useIntent(api.paperLives.lives.choose, { onFeedback: notify })
   const ageUp = useIntent(api.paperLives.lives.ageUp, { onFeedback: notify })
+  const [agedFrom, setAgedFrom] = useState<number | null>(null)
   const view = data as LifeView | undefined
   const life = view?.life
   if (!view || !life) return null
@@ -37,6 +52,9 @@ function LifePage() {
   const decision = year?.decision ?? null
   const ended = life.status === 'ended'
   const names = namesIn(view)
+  // A year is ready once its two-hour minimum is reached at the next tick; Age up then ends it on the spot.
+  const ready = year !== null && year.elapsed + 1 >= year.minimum
+  const lastYear = agedFrom !== null && life.age === agedFrom + 1 ? (view.logs ?? []).filter((log) => log.age === agedFrom && (log.kind === 'event' || log.kind === 'decision_resolved' || log.kind === 'check')).reverse() : null
   const generation = `${ORDINALS[life.generation - 1] ?? `${life.generation}th`} generation`
   return (
     <>
@@ -80,6 +98,18 @@ function LifePage() {
         </Card>
       ) : null}
 
+      {lastYear !== null ? (
+        <Card title={`${life.first} is ${life.age}`}>
+          {lastYear.length > 0 ? (
+            <>
+              <p className="text-sm text-muted">Age {agedFrom}, looking back:</p>
+              <ol className="mt-2 flex flex-col gap-1 text-sm">{lastYear.map((log) => <li key={log.id}><Named text={log.summary} names={names} /></li>)}</ol>
+            </>
+          ) : <p className="text-sm text-muted">A quiet year, and a new one begins.</p>}
+          <div className="mt-3"><Button variant="quiet" onClick={() => setAgedFrom(null)}>Carry on</Button></div>
+        </Card>
+      ) : null}
+
       {year && life.status === 'living' ? (
         <Card title={`Age ${life.age}, ${year.yearEnd ? 'the year’s end' : SEASON[year.season].toLowerCase()}`}>
           {decision ? (
@@ -109,16 +139,21 @@ function LifePage() {
             <p>No decision this year.</p>
           )}
           <div className="mt-4 flex flex-col gap-2 border-t border-rule pt-3">
-            {year.ageUpRequested ? (
-              <p className="font-semibold">The year ends at {time(year.elapsed >= year.minimum ? (view.nextTickAt ?? year.minimumAt) : year.minimumAt)}{decision && !decision.chosen ? ', with the gentle choice unless you pick one' : ''}.</p>
+            {ready ? (
+              <>
+                <div>
+                  <Button pending={ageUp.pending} busyLabel="Ageing up…" onClick={() => { const from = life.age; void ageUp.run({}, 'A new year begins.').then((done) => { if (done) { setAgedFrom(from); captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) } }) }}>Age up to {life.age + 1}</Button>
+                </div>
+                <p className="text-sm text-muted">Everything this year had in store has happened. Age up now, or the year closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.</p>
+              </>
+            ) : year.ageUpRequested ? (
+              <p className="text-sm"><span className="font-semibold">Age up is queued for {time(year.minimumAt)}</span> <Until at={year.minimumAt} />. The rest of the year happens first, so nothing is skipped.</p>
             ) : (
               <>
                 <div>
-                  <Button pending={ageUp.pending} onClick={() => void ageUp.run({}, year.elapsed >= year.minimum ? 'The year ends within fifteen minutes.' : 'The year ends as soon as two hours have passed.').then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Age up</Button>
+                  <Button variant="secondary" pending={ageUp.pending} onClick={() => void ageUp.run({}, 'Queued. The birthday comes once the year is ready.').then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Queue Age up</Button>
                 </div>
-                <p className="text-sm text-muted">
-                  {year.elapsed >= year.minimum ? 'Ends the year within fifteen minutes.' : <>A year lasts at least two hours. Age up now and it ends at {time(year.minimumAt)}.</>} Otherwise it closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.
-                </p>
+                <p className="text-sm text-muted">This year is still happening. It is ready to end at {time(year.minimumAt)} <Until at={year.minimumAt} />, and closes by itself at {time(year.closesAt)} if you are away.</p>
               </>
             )}
             <ActionFeedback error={ageUp.error ?? choose.error} message={null} />

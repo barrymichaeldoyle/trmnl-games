@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { ACTIVE_CONTENT, contentV1, contentV2 } from '@trmnl-games/paper-lives/content'
+import { contentV1, contentV2 } from '@trmnl-games/paper-lives/content'
 import { validateContent } from '@trmnl-games/paper-lives/content/validate'
 import { simulateLifeRun, POLICIES } from '../../tools/balance/paper-lives'
 
 /** Barry, 2026-10-14: a character took their first steps at five. Content v2 keeps the story to the right ages and people. */
 describe('Paper Lives content v2', () => {
-  it('is active, passes the validator and keeps every v1 id', () => {
-    expect(ACTIVE_CONTENT).toBe('v2')
+  it('passes the validator and keeps every v1 id', () => {
     expect(validateContent(contentV2).problems).toEqual([])
     const ids = new Set([...contentV2.events, ...contentV2.decisions].map((x) => x.id))
     for (const x of [...contentV1.events, ...contentV1.decisions]) expect(ids.has(x.id)).toBe(true)

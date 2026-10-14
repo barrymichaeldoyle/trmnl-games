@@ -14,6 +14,8 @@ import {
   resume as resumeLife,
   seasonAt,
   setPronouns as setLifePronouns,
+  simulateLife,
+  PaperLivesInvariantError,
   slotsFor,
   starterLife,
   yearlyIncome,
@@ -32,6 +34,7 @@ import { currentUser, runIntent, type IntentResult } from '../lib/intent'
 import { HERO_NAME_RULE, validateName } from '../lib/names'
 import { readEngineWorld } from '../lib/engine/world'
 import { fromLifeState, toLifeState } from './adapter'
+import { applyStep } from './tick'
 import { currentLife, paperLivesProfile } from './profile'
 import { recordOf } from './records'
 import { awardLife } from './achievements'
@@ -102,11 +105,38 @@ export const choose = mutation({
     strip(await lifeIntent('paperLives.choose', async (ctx, life, content, i) => await applyAction(ctx, life, chooseOption(toLifeState(life), content, i.decisionId as string, i.optionId as string)))(ctx, operationId, { decisionId, optionId })),
 })
 
-/** Queue the year's end: it comes at the first tick on or after the minimum. */
+/**
+ * Age up. Once the year's minimum has passed (or passes at the next tick), the year ends now: the boundary runs here
+ * with the scheduled tick's own step and seeds of its own, so the new age, the recap and the next decision appear
+ * at once. Before that it queues, and the year ends at the first tick on or after the minimum. A quarantined life only
+ * queues, so the tick's guard still sees it.
+ */
 export const ageUp = mutation({
   args: { operationId: v.string() },
   returns: intentResult,
-  handler: async (ctx, { operationId }) => strip(await lifeIntent('paperLives.ageUp', async (ctx, life) => await applyAction(ctx, life, requestAgeUp(toLifeState(life))))(ctx, operationId, {})),
+  handler: async (ctx, { operationId }) =>
+    strip(
+      await lifeIntent('paperLives.ageUp', async (ctx, life, content) => {
+        const queued = requestAgeUp(toLifeState(life))
+        if (!queued.ok) throw appError('INVALID_STATE', queued.reason)
+        const world = await readEngineWorld(ctx, PAPER_LIVES_RUNTIME)
+        const ready = queued.life.year.elapsed + 1 >= content.tuning.minYearTicks
+        if (!ready || world === null || life.simulationState === 'quarantined') return await applyAction(ctx, life, queued)
+        const owner = await ctx.db.get(life.userId)
+        if (owner === null) throw appError('INVALID_STATE', 'This life has no owner.')
+        const streams = deriveLifeSeeds(world.worldSeed, `${life._id}:ageup`, world.currentTick, PAPER_LIVES_RUNTIME.simulationVersion)
+        let result
+        try {
+          result = simulateLife({ life: queued.life, content, streams })
+        } catch (error) {
+          // A broken life is the tick's to quarantine; here the request simply queues.
+          if (error instanceof PaperLivesInvariantError) return await applyAction(ctx, life, queued)
+          throw error
+        }
+        await applyStep(ctx, life, owner, result, content, { tick: world.currentTick }, Date.now())
+        return { changed: true }
+      })(ctx, operationId, {}),
+    ),
 })
 
 /** Change the first name, in the first year only, under the hero-name rules. */

@@ -25,6 +25,7 @@
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
+ *   year=early (content v3: a year not ready yet, Queue Age up)   year=queued (the same, queued)
  *   photos=done (L6: this week's photo taken)   photos=none (no photos, no TRMNL connected)   alerts=on also turns on Paper Lives' three kinds
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.
  */
@@ -337,7 +338,13 @@ const iaBook = [
 const queries = {
   'users:me': () => data.me,
   'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }, { slug: 'paper-lives', status: 'hidden', canOpen: true }] }),
-  'paperLives/lives:view': () => (params.get('pl') === 'none' ? { gameState: null, life: null } : paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult),
+  'paperLives/lives:view': () => {
+    if (params.get('pl') === 'none') return { gameState: null, life: null }
+    const view = paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult
+    // year=early: an hour into the year, not ready; year=queued: the same with Age up queued.
+    const early = params.get('year') === 'early' || params.get('year') === 'queued'
+    return early && view.year ? { ...view, year: { ...view.year, elapsed: 3, ageUpRequested: params.get('year') === 'queued', minimumAt: Date.now() + 75 * 60_000, closesAt: Date.now() + 7 * 3600_000 } } : view
+  },
   'paperLives/payload:preview': () => null,
   'paperLives/album:view': () => (params.get('album') === '0' ? { ...paperLives.album, lives: [], tree: [], following: [] } : { ...paperLives.album, lives: paperLives.album.lives.map((life, i) => ({ ...life, photos: i === 0 ? plPhotos().slice(0, 2) : [] })), following: [{ alias: 'Quillfeather_Longname', name: 'Ottilie Achterberg', age: 52, job: 'Museum director', status: 'living' }, { alias: 'Mo', name: 'Sid Rook', age: 81, job: null, status: 'ended' }] }),
   'paperLives/achievements:mine': () => paperLives.achievements,

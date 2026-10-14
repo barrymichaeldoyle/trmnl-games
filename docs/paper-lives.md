@@ -430,5 +430,17 @@ Not changed, noted for later: years can be busy (up to six lines in an absent pl
 
 **Family labels.** Barry asked to see mother or father. Content v2 sorts the first names into female, male and either (`names.female`, `names.male`); the People page labels family by them (Mother, Brother, Daughter, Granddaughter, Wife), and names used either way keep the plain label. The parent who was the last character takes the label from that life's pronouns. Story lines stay name-based. The companion now sets the names of people and pets in bold in the story, the recap and people's histories.
 
-Production runs v1 until it is switched: `npx convex run --prod paperLives/operations:setActiveContentVersion '{"contentVersion":"v2"}'`. Lives keep their state; the next year draws from v2.
+Production runs v1 until it is switched; content v3 below supersedes v2, so the switch goes straight to v3.
+
+## Content v3: the first content pack, and Age up (2026-10-14)
+
+Barry chose a content pack as the first work after the MVP. Content v3 (`packages/paper-lives/src/content/v3`) adds 180 events (607 in all), 30 decisions (120, still 18 major) and 30 quiet lines to v2, weighted to adult and senior life, where years are many: the harness's worst stage repeat rate falls from 6% to under 1%. New jobs and pets would need achievements and portrait art, so the pack sticks to events, decisions and lines. Major decisions weigh twice the rest, so the bigger draw does not crowd out families, homes and wills (lives with children 69%, wills 54%, as before). All 13 gates pass over 2,700 lives.
+
+**Age up.** Barry found Age up anticlimactic: it promised a birthday and then said to wait, and he worried that ageing up cost the year its events. He was partly right. In v1 and v2 about two events fell inside a year's two-hour minimum and one more trickled in over the next six hours, so ageing up at the minimum gave up about a third of the year's events. Times were right: the companion shows them in the browser's timezone, the device in TRMNL's offset (D42). The changes:
+
+- In v3 every event happens inside the minimum (`eventPercent` raised, `yearEndEventPercent` 0), so the rest of the year has only quiet lines and Age up skips nothing else.
+- Once the minimum is reached, Age up ends the year on the spot. The intent runs the tick's own step (`applyStep` in `paperLives/tick.ts`) with seeds of its own, so the new age, the recap and the next decision appear at once. The next scheduled tick carries on from there.
+- Before the minimum, the button reads **Queue Age up** and says when the year will be ready, with a live countdown, and that nothing is skipped. Once the year is ready, the button reads **Age up to 35**. After the birthday, a card shows last year's lines.
+
+Switch production to v3: `npx convex run --prod paperLives/operations:setActiveContentVersion '{"contentVersion":"v3"}'`. Lives keep their state; the next year draws from v3.
 

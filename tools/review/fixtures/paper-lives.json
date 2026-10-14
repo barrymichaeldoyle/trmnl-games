@@ -7,7 +7,7 @@
    "canRename": false,
    "first": "Maud",
    "generation": 1,
-   "gold": 12400,
+   "gold": 12200,
    "id": "000000000000000000000010001lives",
    "last": "Okafor",
    "ordinal": 1,
@@ -24,9 +24,9 @@
    "recap": null,
    "stage": "adult",
    "stats": {
-    "charm": 35,
+    "charm": 36,
     "happiness": 58,
-    "health": 69,
+    "health": 74,
     "smarts": 81
    },
    "status": "living",
@@ -46,19 +46,9 @@
   "logs": [
    {
     "age": 34,
-    "at": 1793634903000,
+    "at": 1793633103000,
     "glyph": "none",
-    "id": "0000000000000000010091plTickLogs",
-    "kind": "ambient",
-    "major": false,
-    "remarkable": false,
-    "summary": "Another birthday on the way."
-   },
-   {
-    "age": 34,
-    "at": 1793631303000,
-    "glyph": "none",
-    "id": "0000000000000000010078plTickLogs",
+    "id": "0000000000000000010087plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -66,9 +56,9 @@
    },
    {
     "age": 34,
-    "at": 1793627703000,
+    "at": 1793629503000,
     "glyph": "none",
-    "id": "0000000000000000010065plTickLogs",
+    "id": "0000000000000000010074plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -76,9 +66,29 @@
    },
    {
     "age": 34,
-    "at": 1793624103000,
+    "at": 1793625903000,
     "glyph": "none",
-    "id": "0000000000000000010052plTickLogs",
+    "id": "0000000000000000010061plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A long walk on the last Sunday of the year."
+   },
+   {
+    "age": 34,
+    "at": 1793622303000,
+    "glyph": "none",
+    "id": "0000000000000000010048plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Last year’s birthday cards, found in a drawer."
+   },
+   {
+    "age": 34,
+    "at": 1793618703000,
+    "glyph": "none",
+    "id": "0000000000000000010035plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -86,43 +96,33 @@
    },
    {
     "age": 34,
-    "at": 1793620503000,
-    "glyph": "none",
-    "id": "0000000000000000010039plTickLogs",
-    "kind": "ambient",
-    "major": false,
-    "remarkable": false,
-    "summary": "A year of small things, nearly done."
-   },
-   {
-    "age": 34,
-    "at": 1793616903000,
-    "glyph": "family",
-    "id": "0000000000000000010026plTickLogs",
+    "at": 1793615103000,
+    "glyph": "health",
+    "id": "0000000000000000010022plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Lenny gave some unasked-for advice that turned out to be right."
+    "summary": "Walked twenty miles for charity with blisters to show for it."
    },
    {
     "age": 34,
-    "at": 1793616003000,
-    "glyph": "none",
-    "id": "0000000000000000010023plTickLogs",
-    "kind": "ambient",
+    "at": 1793614203000,
+    "glyph": "family",
+    "id": "0000000000000000010019plTickLogs",
+    "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Looking for the house keys, again."
+    "summary": "Realised you had not seen Finn in two years. Sent a card."
    },
    {
     "age": 34,
     "at": 1793612403000,
-    "glyph": "health",
+    "glyph": "paw",
     "id": "0000000000000000010011plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Back trouble after a weekend of gardening."
+    "summary": "Biscuit was poorly for a week and got better on chicken and fuss."
    }
   ],
   "memorial": null,
@@ -131,13 +131,11 @@
    {
     "age": 64,
     "alive": true,
-    "history": [
-     "34: Lenny gave some unasked-for advice that turned out to be right."
-    ],
+    "history": [],
     "id": "p1",
     "label": "Father",
     "name": "Lenny",
-    "relationship": 77,
+    "relationship": 74,
     "role": "parent",
     "step": null
    },
@@ -181,12 +179,13 @@
     "alive": true,
     "history": [
      "8: Made a friend called Finn over a shared rubber.",
-     "20: A long weekend in a cottage with Finn and too much cheese."
+     "20: A long weekend in a cottage with Finn and too much cheese.",
+     "34: Realised you had not seen Finn in two years. Sent a card."
     ],
     "id": "p5",
     "label": "Friend",
     "name": "Finn",
-    "relationship": 66,
+    "relationship": 62,
     "role": "friend",
     "step": null
    }
@@ -272,9 +271,9 @@
    "stage": "child",
    "stats": {
     "charm": 65,
-    "happiness": 49,
+    "happiness": 51,
     "health": 42,
-    "smarts": 38
+    "smarts": 37
    },
    "status": "living",
    "traits": [
@@ -293,19 +292,29 @@
   "logs": [
    {
     "age": 9,
-    "at": 1793659203000,
+    "at": 1793660103000,
     "glyph": "none",
-    "id": "0000000000000000010212plTickLogs",
+    "id": "0000000000000000010217plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
-    "summary": "Counting the days to a birthday."
+    "summary": "Counting down the days to the holidays."
    },
    {
     "age": 9,
-    "at": 1793655603000,
+    "at": 1793656503000,
     "glyph": "none",
-    "id": "0000000000000000010198plTickLogs",
+    "id": "0000000000000000010203plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Writing a birthday list, longer than the last one."
+   },
+   {
+    "age": 9,
+    "at": 1793652903000,
+    "glyph": "none",
+    "id": "0000000000000000010189plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -313,9 +322,9 @@
    },
    {
     "age": 9,
-    "at": 1793652003000,
+    "at": 1793649303000,
     "glyph": "none",
-    "id": "0000000000000000010184plTickLogs",
+    "id": "0000000000000000010175plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -323,9 +332,9 @@
    },
    {
     "age": 9,
-    "at": 1793648403000,
+    "at": 1793645703000,
     "glyph": "none",
-    "id": "0000000000000000010170plTickLogs",
+    "id": "0000000000000000010161plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -333,43 +342,33 @@
    },
    {
     "age": 9,
-    "at": 1793644803000,
-    "glyph": "none",
-    "id": "0000000000000000010156plTickLogs",
-    "kind": "ambient",
+    "at": 1793642103000,
+    "glyph": "family",
+    "id": "0000000000000000010147plTickLogs",
+    "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Growing out of the school shoes already."
+    "summary": "Built a den with Tess out of every cushion in the house."
    },
    {
     "age": 9,
     "at": 1793641203000,
     "glyph": "book",
-    "id": "0000000000000000010142plTickLogs",
+    "id": "0000000000000000010143plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "A school trip to the museum. Stood under the whale for ages."
+    "summary": "Started writing to a pen pal across the sea."
    },
    {
     "age": 9,
-    "at": 1793640303000,
-    "glyph": "none",
-    "id": "0000000000000000010138plTickLogs",
-    "kind": "ambient",
-    "major": false,
-    "remarkable": false,
-    "summary": "Lying in the grass watching clouds go over."
-   },
-   {
-    "age": 9,
-    "at": 1793636703000,
-    "glyph": "family",
-    "id": "0000000000000000010103plTickLogs",
+    "at": 1793639403000,
+    "glyph": "health",
+    "id": "0000000000000000010136plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Flew a kite on the hill until the string snapped."
+    "summary": "Lost a tooth in an apple. The fairy paid well."
    }
   ],
   "memorial": null,
@@ -400,11 +399,13 @@
    {
     "age": 12,
     "alive": true,
-    "history": [],
+    "history": [
+     "9: Built a den with Tess out of every cushion in the house."
+    ],
     "id": "p3",
     "label": "Sister",
     "name": "Tess",
-    "relationship": 60,
+    "relationship": 65,
     "role": "sibling",
     "step": null
    }
@@ -448,7 +449,7 @@
    "first": "Robin",
    "generation": 1,
    "gold": 0,
-   "id": "000000000000000000000010222lives",
+   "id": "000000000000000000000010225lives",
    "last": "Hale",
    "ordinal": 1,
    "portrait": {
@@ -534,7 +535,7 @@
    "first": "Robin",
    "generation": 1,
    "gold": 0,
-   "id": "000000000000000000000010225lives",
+   "id": "000000000000000000000010228lives",
    "last": "Hale",
    "ordinal": 1,
    "portrait": {
@@ -620,7 +621,7 @@
    "first": "Dot",
    "generation": 1,
    "gold": 140500,
-   "id": "000000000000000000000010228lives",
+   "id": "000000000000000000000010231lives",
    "last": "Achterberg",
    "ordinal": 1,
    "portrait": {
@@ -628,7 +629,7 @@
     "frame": false,
     "glasses": false,
     "hair": 1,
-    "pet": "cat",
+    "pet": null,
     "stage": "senior"
    },
    "pronouns": "they",
@@ -636,9 +637,9 @@
    "recap": null,
    "stage": "senior",
    "stats": {
-    "charm": 77,
-    "happiness": 88,
-    "health": 23,
+    "charm": 78,
+    "happiness": 89,
+    "health": 31,
     "smarts": 60
    },
    "status": "living",
@@ -669,18 +670,8 @@
    {
     "age": 78,
     "at": 1793682603000,
-    "glyph": "paw",
-    "id": "0000000000000000010354plTickLogs",
-    "kind": "event",
-    "major": false,
-    "remarkable": false,
-    "summary": "Took in an old cat from the rescue, called Waffle. Two old timers."
-   },
-   {
-    "age": 78,
-    "at": 1793679003000,
     "glyph": "none",
-    "id": "0000000000000000010336plTickLogs",
+    "id": "0000000000000000010354plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -688,13 +679,23 @@
    },
    {
     "age": 78,
-    "at": 1793675403000,
+    "at": 1793679003000,
     "glyph": "none",
-    "id": "0000000000000000010319plTickLogs",
+    "id": "0000000000000000010337plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
     "summary": "Turning the pages of an old photo album."
+   },
+   {
+    "age": 78,
+    "at": 1793675403000,
+    "glyph": "none",
+    "id": "0000000000000000010320plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "The good tablecloth out for the turn of the year."
    },
    {
     "age": 78,
@@ -704,37 +705,37 @@
     "kind": "ambient",
     "major": false,
     "remarkable": false,
-    "summary": "A birthday coming. Asked for nothing, as usual."
+    "summary": "Copying the birthdays into the new diary."
    },
    {
     "age": 78,
     "at": 1793668203000,
-    "glyph": "house",
-    "id": "0000000000000000010285plTickLogs",
+    "glyph": "family",
+    "id": "0000000000000000010284plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Bought a bench for the front garden and sat on it a lot."
+    "summary": "Made a new friend, Olu, at the doctor’s waiting room."
    },
    {
     "age": 78,
-    "at": 1793667303000,
-    "glyph": "none",
-    "id": "0000000000000000010272plTickLogs",
-    "kind": "ambient",
+    "at": 1793666403000,
+    "glyph": "family",
+    "id": "0000000000000000010271plTickLogs",
+    "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Sorting through a drawer of old letters."
+    "summary": "Cards with neighbours on Wednesday afternoons, for buttons."
    },
    {
     "age": 78,
     "at": 1793663703000,
-    "glyph": "health",
-    "id": "0000000000000000010249plTickLogs",
+    "glyph": "family",
+    "id": "0000000000000000010251plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "A long illness, well managed. Good days and bad days."
+    "summary": "Got to know Noor next door, who brings round soup on Sundays."
    }
   ],
   "memorial": null,
@@ -772,14 +773,31 @@
     "relationship": 90,
     "role": "grandchild",
     "step": null
+   },
+   {
+    "age": 74,
+    "alive": true,
+    "history": [],
+    "id": "p3",
+    "label": "Friend",
+    "name": "Noor",
+    "relationship": 61,
+    "role": "friend",
+    "step": null
+   },
+   {
+    "age": 73,
+    "alive": true,
+    "history": [],
+    "id": "p4",
+    "label": "Friend",
+    "name": "Olu",
+    "relationship": 55,
+    "role": "friend",
+    "step": null
    }
   ],
-  "pet": {
-   "age": 0,
-   "kind": "Cat",
-   "name": "Waffle",
-   "relationship": 70
-  },
+  "pet": null,
   "work": {
    "education": "none",
    "hobby": null,
@@ -947,11 +965,11 @@
   "gameState": "active",
   "life": {
    "activationState": "active",
-   "age": 100,
-   "canRename": true,
+   "age": 101,
+   "canRename": false,
    "first": "Maud",
    "generation": 3,
-   "gold": 30500,
+   "gold": 25000,
    "id": "000000000000000000000010376lives",
    "last": "Okafor",
    "ordinal": 1,
@@ -965,12 +983,12 @@
    },
    "pronouns": "they",
    "publicProfile": true,
-   "recap": null,
+   "recap": "Age 100: nothing much, and that was fine.",
    "stage": "senior",
    "stats": {
     "charm": 60,
-    "happiness": 69,
-    "health": 3,
+    "happiness": 75,
+    "health": 0,
     "smarts": 60
    },
    "status": "ended",
@@ -989,180 +1007,230 @@
   },
   "logs": [
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010574plTickLogs",
+    "id": "0000000000000000010725plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: The Oldest of All"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010572plTickLogs",
+    "id": "0000000000000000010723plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: Never Left Home"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010570plTickLogs",
-    "kind": "achievement",
-    "major": false,
-    "remarkable": false,
-    "summary": "Achievement: Nest Egg"
-   },
-   {
-    "age": 100,
-    "at": 1793715003000,
-    "glyph": "star",
-    "id": "0000000000000000010568plTickLogs",
-    "kind": "achievement",
-    "major": false,
-    "remarkable": false,
-    "summary": "Achievement: Grandparent’s Grandchild"
-   },
-   {
-    "age": 100,
-    "at": 1793715003000,
-    "glyph": "star",
-    "id": "0000000000000000010566plTickLogs",
-    "kind": "achievement",
-    "major": false,
-    "remarkable": false,
-    "summary": "Achievement: Second Generation"
-   },
-   {
-    "age": 100,
-    "at": 1793715003000,
-    "glyph": "star",
-    "id": "0000000000000000010564plTickLogs",
+    "id": "0000000000000000010721plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: A Letter from the Mayor"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010562plTickLogs",
+    "id": "0000000000000000010719plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: Ninety and Counting"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010560plTickLogs",
+    "id": "0000000000000000010717plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: Eighty Summers"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010558plTickLogs",
+    "id": "0000000000000000010715plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: Sixty Not Out"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "star",
-    "id": "0000000000000000010556plTickLogs",
+    "id": "0000000000000000010713plTickLogs",
     "kind": "achievement",
     "major": false,
     "remarkable": false,
     "summary": "Achievement: A Life Lived"
    },
    {
-    "age": 100,
-    "at": 1793715003000,
+    "age": 101,
+    "at": 1793743803000,
     "glyph": "candle",
-    "id": "0000000000000000010549plTickLogs",
+    "id": "0000000000000000010706plTickLogs",
     "kind": "death",
     "major": false,
     "remarkable": false,
-    "summary": "Died at 100 when their heart gave out, at home in the armchair."
+    "summary": "Died peacefully at 101, after a long life."
    },
    {
-    "age": 100,
-    "at": 1793715003000,
-    "glyph": "candle",
-    "id": "0000000000000000010548plTickLogs",
-    "kind": "check",
+    "age": 101,
+    "at": 1793743803000,
+    "glyph": "money",
+    "id": "0000000000000000010705plTickLogs",
+    "kind": "decision_resolved",
+    "major": true,
+    "remarkable": false,
+    "summary": "Put the will off for another year. Plenty of time."
+   },
+   {
+    "age": 101,
+    "at": 1793741103000,
+    "glyph": "none",
+    "id": "0000000000000000010689plTickLogs",
+    "kind": "ambient",
     "major": false,
     "remarkable": false,
-    "summary": "Lark died. A good friend for a lot of years."
+    "summary": "Copying the birthdays into the new diary."
    },
    {
-    "age": 100,
-    "at": 1793713203000,
+    "age": 101,
+    "at": 1793737503000,
     "glyph": "none",
-    "id": "0000000000000000010535plTickLogs",
+    "id": "0000000000000000010671plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
     "summary": "A birthday coming. Asked for nothing, as usual."
    },
    {
-    "age": 100,
-    "at": 1793709603000,
+    "age": 101,
+    "at": 1793733903000,
     "glyph": "none",
-    "id": "0000000000000000010517plTickLogs",
+    "id": "0000000000000000010653plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
     "summary": "Quiet days, and that is fine."
    },
    {
-    "age": 100,
-    "at": 1793706003000,
-    "glyph": "money",
-    "id": "0000000000000000010499plTickLogs",
-    "kind": "event",
-    "major": false,
-    "remarkable": false,
-    "summary": "Found 3,000 in an old savings account you had forgotten."
-   },
-   {
-    "age": 100,
-    "at": 1793703303000,
+    "age": 101,
+    "at": 1793730303000,
     "glyph": "none",
-    "id": "0000000000000000010483plTickLogs",
+    "id": "0000000000000000010635plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
     "summary": "Watching the light change across the garden."
    },
    {
-    "age": 100,
-    "at": 1793699703000,
+    "age": 101,
+    "at": 1793726703000,
     "glyph": "none",
-    "id": "0000000000000000010464plTickLogs",
+    "id": "0000000000000000010615plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
     "summary": "Writing the date in a new diary."
    },
    {
-    "age": 100,
-    "at": 1793696103000,
+    "age": 101,
+    "at": 1793723103000,
     "glyph": "none",
-    "id": "0000000000000000010444plTickLogs",
+    "id": "0000000000000000010591plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Another year nearly gone, and a good one."
+   },
+   {
+    "age": 101,
+    "at": 1793719503000,
+    "glyph": "none",
+    "id": "0000000000000000010568plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Listening to the radio in the kitchen."
+   },
+   {
+    "age": 101,
+    "at": 1793715903000,
+    "glyph": "family",
+    "id": "0000000000000000010547plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday with candles in the shape of the numbers. Easier to count."
+   },
+   {
+    "age": 101,
+    "at": 1793715003000,
+    "glyph": "star",
+    "id": "0000000000000000010543plTickLogs",
+    "kind": "achievement",
+    "major": false,
+    "remarkable": false,
+    "summary": "Achievement: Nest Egg"
+   },
+   {
+    "age": 101,
+    "at": 1793715003000,
+    "glyph": "star",
+    "id": "0000000000000000010541plTickLogs",
+    "kind": "achievement",
+    "major": false,
+    "remarkable": false,
+    "summary": "Achievement: Grandparent’s Grandchild"
+   },
+   {
+    "age": 101,
+    "at": 1793715003000,
+    "glyph": "star",
+    "id": "0000000000000000010539plTickLogs",
+    "kind": "achievement",
+    "major": false,
+    "remarkable": false,
+    "summary": "Achievement: Second Generation"
+   },
+   {
+    "age": 101,
+    "at": 1793715003000,
+    "glyph": "money",
+    "id": "0000000000000000010537plTickLogs",
+    "kind": "decision_offered",
+    "major": true,
+    "remarkable": false,
+    "summary": "Time to write a will?"
+   },
+   {
+    "age": 100,
+    "at": 1793715003000,
+    "glyph": "none",
+    "id": "0000000000000000010536plTickLogs",
+    "kind": "recap",
+    "major": false,
+    "remarkable": false,
+    "summary": "Age 100: nothing much, and that was fine."
+   },
+   {
+    "age": 100,
+    "at": 1793711403000,
+    "glyph": "none",
+    "id": "0000000000000000010518plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -1170,110 +1238,104 @@
    },
    {
     "age": 100,
-    "at": 1793692503000,
-    "glyph": "family",
-    "id": "0000000000000000010420plTickLogs",
-    "kind": "event",
+    "at": 1793707803000,
+    "glyph": "none",
+    "id": "0000000000000000010500plTickLogs",
+    "kind": "ambient",
     "major": false,
     "remarkable": false,
-    "summary": "Made a new friend, Lark, at the doctor’s waiting room."
+    "summary": "Turning the pages of an old photo album."
+   },
+   {
+    "age": 100,
+    "at": 1793704203000,
+    "glyph": "none",
+    "id": "0000000000000000010482plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "The good tablecloth out for the turn of the year."
+   },
+   {
+    "age": 100,
+    "at": 1793700603000,
+    "glyph": "none",
+    "id": "0000000000000000010464plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Copying the birthdays into the new diary."
+   },
+   {
+    "age": 100,
+    "at": 1793697003000,
+    "glyph": "none",
+    "id": "0000000000000000010445plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday coming. Asked for nothing, as usual."
+   },
+   {
+    "age": 100,
+    "at": 1793693403000,
+    "glyph": "none",
+    "id": "0000000000000000010421plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A long phone call with an old friend."
    },
    {
     "age": 100,
     "at": 1793689803000,
-    "glyph": "health",
-    "id": "0000000000000000010406plTickLogs",
-    "kind": "event",
+    "glyph": "none",
+    "id": "0000000000000000010401plTickLogs",
+    "kind": "ambient",
     "major": false,
     "remarkable": false,
-    "summary": "Swimming at the leisure centre every morning at seven."
-   },
-   {
-    "age": 100,
-    "at": 1793688903000,
-    "glyph": "heart",
-    "id": "0000000000000000010390plTickLogs",
-    "kind": "event",
-    "major": false,
-    "remarkable": false,
-    "summary": "Eating with the radio on for company. The news is very loud."
-   },
-   {
-    "age": 100,
-    "at": 1793688003000,
-    "glyph": "family",
-    "id": "0000000000000000010387plTickLogs",
-    "kind": "event",
-    "major": false,
-    "remarkable": false,
-    "summary": "Worried about Jago, who works too hard. Said so, once."
-   },
-   {
-    "age": 100,
-    "at": 1793687103000,
-    "glyph": "family",
-    "id": "0000000000000000010382plTickLogs",
-    "kind": "event",
-    "major": false,
-    "remarkable": false,
-    "summary": "A row with Jago about moving somewhere smaller. Unresolved."
+    "summary": "Feeding the birds at the window."
    }
   ],
   "memorial": {
    "epitaph": "Saw ninety birthdays and remembered most of them.",
    "heirs": [
     {
-     "age": 69,
+     "age": 70,
      "id": "c1",
      "name": "Ida"
     },
     {
-     "age": 66,
+     "age": 67,
      "id": "c2",
      "name": "Jago"
     }
    ],
-   "line": "Died at 100 when their heart gave out, at home in the armchair.",
+   "line": "Died peacefully at 101, after a long life.",
    "recorded": true
   },
-  "nextTickAt": 1793715900000,
+  "nextTickAt": 1793744700000,
   "people": [
    {
-    "age": 69,
+    "age": 70,
     "alive": true,
     "history": [],
     "id": "c1",
     "label": "Daughter",
     "name": "Ida",
-    "relationship": 87,
+    "relationship": 86,
     "role": "child",
     "step": null
    },
    {
-    "age": 66,
+    "age": 67,
     "alive": true,
-    "history": [
-     "100: A row with Jago about moving somewhere smaller. Unresolved.",
-     "100: Worried about Jago, who works too hard. Said so, once."
-    ],
+    "history": [],
     "id": "c2",
     "label": "Son",
     "name": "Jago",
-    "relationship": 56,
+    "relationship": 59,
     "role": "child",
-    "step": null
-   },
-   {
-    "age": 101,
-    "alive": false,
-    "history": [
-     "100: Lark died. A good friend for a lot of years."
-    ],
-    "id": "p3",
-    "label": "Friend",
-    "name": "Lark",
-    "relationship": 50,
-    "role": "friend",
     "step": null
    }
   ],
@@ -1289,7 +1351,7 @@
    "retired": false,
    "will": null
   },
-  "worldTick": 116,
+  "worldTick": 148,
   "year": null
  },
  "long": {
@@ -1300,8 +1362,8 @@
    "canRename": true,
    "first": "Ottilie",
    "generation": 1,
-   "gold": -500,
-   "id": "000000000000000000000010576lives",
+   "gold": -2000,
+   "id": "000000000000000000000010727lives",
    "last": "Achterberg",
    "ordinal": 1,
    "portrait": {
@@ -1318,8 +1380,8 @@
    "stage": "adult",
    "stats": {
     "charm": 0,
-    "happiness": 0,
-    "health": 100,
+    "happiness": 2,
+    "health": 99,
     "smarts": 100
    },
    "status": "living",
@@ -1339,9 +1401,29 @@
   "logs": [
    {
     "age": 52,
-    "at": 1793740203000,
+    "at": 1793768103000,
     "glyph": "none",
-    "id": "0000000000000000010723plTickLogs",
+    "id": "0000000000000000010872plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A long walk on the last Sunday of the year."
+   },
+   {
+    "age": 52,
+    "at": 1793764503000,
+    "glyph": "none",
+    "id": "0000000000000000010854plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Last year’s birthday cards, found in a drawer."
+   },
+   {
+    "age": 52,
+    "at": 1793760903000,
+    "glyph": "none",
+    "id": "0000000000000000010836plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -1349,9 +1431,9 @@
    },
    {
     "age": 52,
-    "at": 1793736603000,
+    "at": 1793757303000,
     "glyph": "none",
-    "id": "0000000000000000010705plTickLogs",
+    "id": "0000000000000000010816plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -1359,9 +1441,9 @@
    },
    {
     "age": 52,
-    "at": 1793733003000,
+    "at": 1793753703000,
     "glyph": "none",
-    "id": "0000000000000000010687plTickLogs",
+    "id": "0000000000000000010793plTickLogs",
     "kind": "ambient",
     "major": false,
     "remarkable": false,
@@ -1369,47 +1451,37 @@
    },
    {
     "age": 52,
-    "at": 1793729403000,
-    "glyph": "none",
-    "id": "0000000000000000010669plTickLogs",
-    "kind": "ambient",
-    "major": false,
-    "remarkable": false,
-    "summary": "Another birthday on the way."
-   },
-   {
-    "age": 52,
-    "at": 1793725803000,
-    "glyph": "none",
-    "id": "0000000000000000010649plTickLogs",
-    "kind": "ambient",
-    "major": false,
-    "remarkable": false,
-    "summary": "Looking back on the year over a cup of tea."
-   },
-   {
-    "age": 52,
-    "at": 1793722203000,
-    "glyph": "none",
-    "id": "0000000000000000010627plTickLogs",
-    "kind": "ambient",
-    "major": false,
-    "remarkable": false,
-    "summary": "The washing machine on its third load."
-   },
-   {
-    "age": 52,
-    "at": 1793718603000,
-    "glyph": "money",
-    "id": "0000000000000000010600plTickLogs",
+    "at": 1793750103000,
+    "glyph": "family",
+    "id": "0000000000000000010767plTickLogs",
     "kind": "event",
     "major": false,
     "remarkable": false,
-    "summary": "Put a little away every month. The pot is growing."
+    "summary": "Helped Wellington move house. Carried a piano up a flight of stairs."
+   },
+   {
+    "age": 52,
+    "at": 1793748303000,
+    "glyph": "none",
+    "id": "0000000000000000010754plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A quiet evening, nothing on the telly."
+   },
+   {
+    "age": 52,
+    "at": 1793744703000,
+    "glyph": "health",
+    "id": "0000000000000000010731plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A whole year without so much as a cold."
    }
   ],
   "memorial": null,
-  "nextTickAt": 1793741100000,
+  "nextTickAt": 1793769900000,
   "people": [
    {
     "age": 50,
@@ -1418,7 +1490,7 @@
      "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer.",
      "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer.",
      "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer.",
-     "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer."
+     "52: Helped Wellington move house. Carried a piano up a flight of stairs."
     ],
     "id": "p1",
     "label": "Friend",
@@ -1445,11 +1517,11 @@
    "retired": false,
    "will": null
   },
-  "worldTick": 144,
+  "worldTick": 176,
   "year": {
    "ageUpRequested": false,
    "close": 32,
-   "closesAt": 1793743800000,
+   "closesAt": 1793772600000,
    "decision": {
     "chosen": null,
     "default": "call",
@@ -1473,7 +1545,7 @@
    },
    "elapsed": 28,
    "minimum": 8,
-   "minimumAt": 1793741100000,
+   "minimumAt": 1793769900000,
    "season": "winter",
    "yearEnd": true
   }
@@ -1487,7 +1559,7 @@
    "first": "Jude",
    "generation": 1,
    "gold": 0,
-   "id": "000000000000000000000010725lives",
+   "id": "000000000000000000000010882lives",
    "last": "Fenwick",
    "ordinal": 1,
    "portrait": {
@@ -1524,7 +1596,7 @@
   },
   "logs": [],
   "memorial": null,
-  "nextTickAt": 1793741100000,
+  "nextTickAt": 1793769900000,
   "people": [
    {
     "age": 36,
@@ -1561,7 +1633,7 @@
    "retired": false,
    "will": null
   },
-  "worldTick": 144,
+  "worldTick": 176,
   "year": null
  },
  "album": {
@@ -1570,35 +1642,39 @@
   "lives": [
    {
     "age": 96,
-    "endedAt": 1793769003000,
+    "endedAt": 1793797803000,
     "epitaph": "Saw ninety birthdays and remembered most of them.",
     "generation": 4,
     "generationLabel": "Fourth of the Okafors",
-    "highlights": [],
+    "highlights": [
+     "96: A long-lost cousin, Rafe, found you through a family tree website."
+    ],
     "name": "Ida Okafor",
     "ordinal": 2,
     "parentOrdinal": 1,
     "photos": [],
     "portrait": {
-     "extra": "scarf",
+     "extra": "none",
      "frame": true,
      "glasses": false,
-     "hair": 4,
+     "hair": 3,
      "pet": null,
      "stage": "senior"
     },
     "traits": [
-     "Restless",
-     "Dreamy"
+     "Gentle",
+     "Restless"
     ]
    },
    {
-    "age": 100,
-    "endedAt": 1793715003000,
+    "age": 101,
+    "endedAt": 1793743803000,
     "epitaph": "Saw ninety birthdays and remembered most of them.",
     "generation": 3,
     "generationLabel": "Third of the Okafors",
-    "highlights": [],
+    "highlights": [
+     "101: Put the will off for another year. Plenty of time."
+    ],
     "name": "Maud Okafor",
     "ordinal": 1,
     "parentOrdinal": null,
@@ -1620,7 +1696,7 @@
   "publicProfile": true,
   "tree": [
    {
-    "age": 100,
+    "age": 101,
     "depth": 0,
     "name": "Maud Okafor",
     "ordinal": 1,
@@ -1637,7 +1713,7 @@
  },
  "achievements": {
   "catalogVersion": 2,
-  "earnedCount": 13,
+  "earnedCount": 14,
   "families": [
    {
     "category": "Lives",
@@ -1646,7 +1722,7 @@
      "id": "lives_1",
      "name": "A Life Lived",
      "tier": 1,
-     "unlockedAt": 1793715003000
+     "unlockedAt": 1793743803000
     },
     "family": "lives",
     "name": "Lives",
@@ -1673,7 +1749,7 @@
     },
     "target": 50,
     "tiers": 5,
-    "value": 6
+    "value": 7
    },
    {
     "category": "Lives",
@@ -1682,14 +1758,14 @@
      "id": "long_life_4",
      "name": "A Letter from the Mayor",
      "tier": 4,
-     "unlockedAt": 1793715003000
+     "unlockedAt": 1793743803000
     },
     "family": "long_life",
     "name": "Long life",
     "next": null,
     "target": 100,
     "tiers": 4,
-    "value": 100
+    "value": 101
    },
    {
     "category": "Family",
@@ -1759,24 +1835,18 @@
    },
    {
     "category": "Work and money",
-    "earned": {
-     "blurb": "A first job.",
-     "id": "careers_1",
-     "name": "First Payslip",
-     "tier": 1,
-     "unlockedAt": 1793740203000
-    },
+    "earned": null,
     "family": "careers",
     "name": "Careers",
     "next": {
-     "blurb": "Five different jobs.",
-     "id": "careers_2",
-     "name": "Varied Work",
-     "tier": 2
+     "blurb": "A first job.",
+     "id": "careers_1",
+     "name": "First Payslip",
+     "tier": 1
     },
-    "target": 5,
+    "target": 1,
     "tiers": 4,
-    "value": 1
+    "value": 0
    },
    {
     "category": "Work and money",
@@ -1797,7 +1867,7 @@
     },
     "target": 100000,
     "tiers": 3,
-    "value": 30500
+    "value": 27500
    },
    {
     "category": "Work and money",
@@ -1816,18 +1886,24 @@
    },
    {
     "category": "Family",
-    "earned": null,
-    "family": "good_company",
-    "name": "Good company",
-    "next": {
+    "earned": {
      "blurb": "A first pet.",
      "id": "good_company_1",
      "name": "Good Company",
-     "tier": 1
+     "tier": 1,
+     "unlockedAt": 1793797803000
     },
-    "target": 1,
+    "family": "good_company",
+    "name": "Good company",
+    "next": {
+     "blurb": "Five pets, all told.",
+     "id": "good_company_2",
+     "name": "Full Basket",
+     "tier": 2
+    },
+    "target": 5,
     "tiers": 3,
-    "value": 0
+    "value": 1
    },
    {
     "category": "Lives",
@@ -1863,7 +1939,7 @@
     },
     "target": 8,
     "tiers": 3,
-    "value": 5
+    "value": 6
    },
    {
     "category": "Choices",
@@ -1893,22 +1969,28 @@
     },
     "target": 10,
     "tiers": 3,
-    "value": 0
+    "value": 1
    },
    {
     "category": "Choices",
-    "earned": null,
-    "family": "remarkable",
-    "name": "Remarkable",
-    "next": {
+    "earned": {
      "blurb": "Something to tell the grandchildren.",
      "id": "remarkable_1",
      "name": "Remarkable",
-     "tier": 1
+     "tier": 1,
+     "unlockedAt": 1793797803000
     },
-    "target": 1,
+    "family": "remarkable",
+    "name": "Remarkable",
+    "next": {
+     "blurb": "Five remarkable moments.",
+     "id": "remarkable_2",
+     "name": "Stories to Tell",
+     "tier": 2
+    },
+    "target": 5,
     "tiers": 4,
-    "value": 0
+    "value": 1
    },
    {
     "category": "Lives",
@@ -2212,20 +2294,14 @@
    },
    {
     "category": "Jobs",
-    "earned": {
-     "blurb": "Worked as a journalist.",
-     "id": "job_journalist",
-     "name": "Journalist",
-     "tier": 1,
-     "unlockedAt": 1793740203000
-    },
+    "earned": null,
     "family": "job_journalist",
     "name": "Journalist",
     "next": {
-     "blurb": "Twenty years as a journalist in one life.",
-     "id": "job_journalist_20",
-     "name": "Journalist, twenty years",
-     "tier": 2
+     "blurb": "Worked as a journalist.",
+     "id": "job_journalist",
+     "name": "Journalist",
+     "tier": 1
     },
     "target": 1,
     "tiers": 2,
@@ -2403,7 +2479,7 @@
      "id": "piece_homebody",
      "name": "Never Left Home",
      "tier": 1,
-     "unlockedAt": 1793715003000
+     "unlockedAt": 1793743803000
     },
     "family": "piece_homebody",
     "name": "Never Left Home",
@@ -2464,7 +2540,7 @@
      "id": "piece_oldest_ever",
      "name": "The Oldest of All",
      "tier": 1,
-     "unlockedAt": 1793715003000
+     "unlockedAt": 1793743803000
     },
     "family": "piece_oldest_ever",
     "name": "The Oldest of All",
@@ -2505,18 +2581,19 @@
    },
    {
     "category": "Set pieces",
-    "earned": null,
-    "family": "piece_cause_runner_beans",
-    "name": "Among the Beans",
-    "next": {
+    "earned": {
      "blurb": "Died in the garden, among the runner beans.",
      "id": "piece_cause_runner_beans",
      "name": "Among the Beans",
-     "tier": 1
+     "tier": 1,
+     "unlockedAt": 1793797803000
     },
+    "family": "piece_cause_runner_beans",
+    "name": "Among the Beans",
+    "next": null,
     "target": 1,
     "tiers": 1,
-    "value": 0
+    "value": 1
    },
    {
     "category": "Set pieces",
@@ -2536,28 +2613,28 @@
   ],
   "rarity": {
    "counts": {
-    "careers_1": 3,
+    "careers_1": 2,
     "decisions_1": 1,
     "family_1": 1,
     "fortune_1": 3,
     "fortune_2": 1,
     "generations_1": 1,
     "generations_2": 1,
-    "good_company_1": 2,
+    "good_company_1": 3,
     "grandparent_1": 1,
-    "job_journalist": 1,
     "job_museum_director": 1,
     "job_nurse": 1,
-    "job_shop_assistant": 1,
     "let_it_be_1": 1,
     "lives_1": 1,
     "long_life_1": 1,
     "long_life_2": 1,
     "long_life_3": 1,
     "long_life_4": 1,
-    "pastimes_1": 4,
+    "pastimes_1": 1,
+    "piece_cause_runner_beans": 1,
     "piece_homebody": 1,
     "piece_oldest_ever": 1,
+    "remarkable_1": 1,
     "traits_1": 1,
     "vows_1": 1
    },
@@ -2569,20 +2646,20 @@
   "board": "longest",
   "entries": [
    {
-    "age": 100,
+    "age": 101,
     "life": "Maud Okafor",
     "name": "Fxmemorial",
     "own": true,
     "profile": true,
     "rank": 1,
-    "value": 100
+    "value": 101
    }
   ],
   "full": false,
   "own": {
-   "age": 100,
+   "age": 101,
    "rank": 1,
-   "value": 100
+   "value": 101
   },
   "period": "week",
   "weekEndsAt": 1794182400000
@@ -2591,20 +2668,20 @@
   "board": "fortune",
   "entries": [
    {
-    "age": 100,
+    "age": 101,
     "life": "Maud Okafor",
     "name": "Fxmemorial",
     "own": true,
     "profile": true,
     "rank": 1,
-    "value": 30500
+    "value": 27500
    }
   ],
   "full": false,
   "own": {
-   "age": 100,
+   "age": 101,
    "rank": 1,
-   "value": 30500
+   "value": 27500
   },
   "period": "all",
   "weekEndsAt": 1794182400000
