@@ -16,6 +16,7 @@
  *   notes=1 (D133: /field-notes for a level-17 veteran with most notes open)   notes=new (a fresh hero, the Office's note only)
  *   roster=locked (P37: Warrior level 4, the Hero page's locked card)   roster=open (one hero, the Rogue ready to recruit)   roster=two (a parked Warrior, the Rogue current, switch spent)   roster=undo (the same, inside the ten-minute undo)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
+ *   whatsnew=1 (D154: the What's new card, with every entry after 12 October)
  *   rank=9 (D152: the hero ninth on every board, so the rankings open with the rows around it)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
  * Slow Cast (D115): /app/slow-cast, /cooler, /shop, /logbook, /settings, with sc=full (cooler full), sc=empty (empty cooler, no bait here),
@@ -125,6 +126,7 @@ if (flag('achievements')) {
 if (flag('fresh') && data.achievements.unlocked.length) data.achievements.unlocked[0].unlockedAt = Date.now() - 600000; // an achievement ten minutes ago hides the hint (D127)
 if (flag('quiet')) { data.log = []; data.achievements.families.forEach((f) => { f.earned = null }); data.achievements.unlocked = [] }
 const raidsOn = flag('raids');
+if (flag('whatsnew')) data.me.user.whatsNewSince = '2026-10-12';
 // D152: move the hero down every board, swapping rows so the ranks stay in order.
 if (params.get('rank')) for (const board of Object.values(data.leaderboard)) {
   const to = Number(params.get('rank')) - 1, from = board.own.rank - 1, scores = board.entries.map((row) => row.score);

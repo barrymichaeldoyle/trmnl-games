@@ -19,6 +19,7 @@ import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
 import { RosterCard } from './-rosterCard'
+import { WhatsNewCard } from './-whatsNew'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
   head: () => seo({ title: 'Hero', index: false }),
@@ -50,6 +51,7 @@ function HeroHome() {
       <PlaylistNudge activatedAt={hero.activatedAt} screenServed={hero.screenServed} />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
       <ReturnNudge />
+      <WhatsNewCard />
       <HeroSheet hero={hero} />
     </div>
   )

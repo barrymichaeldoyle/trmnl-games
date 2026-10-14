@@ -11,6 +11,9 @@ import { aliasTaken } from './lib/aliases'
 /** D142: a player can change their public name once every 7 days, and the old one is kept from others as long. */
 export const PUBLIC_NAME_GAP_MS = 7 * 24 * 60 * 60 * 1000
 
+/** A timestamp's UTC day as YYYY-MM-DD, the form What's new entries are dated in. */
+const utcDate = (at: number) => new Date(at).toISOString().slice(0, 10)
+
 /**
  * The signed-in owner's profile, or null when signed out. `signedIn` with a
  * null `user` means authenticated but not yet onboarded.
@@ -25,7 +28,7 @@ export const me = query({
       hasActiveInstallation: v.boolean(),
       user: v.union(
         v.null(),
-        v.object({ publicAlias: v.string(), timezone: v.string(), state: v.string(), nameRepairRequired: v.boolean(), analyticsConsent: v.boolean(), publicNameChangeAt: v.union(v.number(), v.null()) }),
+        v.object({ publicAlias: v.string(), timezone: v.string(), state: v.string(), nameRepairRequired: v.boolean(), analyticsConsent: v.boolean(), publicNameChangeAt: v.union(v.number(), v.null()), whatsNewSince: v.string() }),
       ),
       hero: v.union(
         v.null(),
@@ -47,7 +50,7 @@ export const me = query({
       signedIn: true as const,
       hasActiveInstallation: installation !== null,
       gameState: user ? (await gameProfile(ctx, user._id))?.state ?? (hero ? 'active' as const : null) : null,
-      user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false, publicNameChangeAt: user.publicNameChangedAt === undefined ? null : user.publicNameChangedAt + PUBLIC_NAME_GAP_MS },
+      user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false, publicNameChangeAt: user.publicNameChangedAt === undefined ? null : user.publicNameChangedAt + PUBLIC_NAME_GAP_MS, whatsNewSince: user.whatsNewSeen ?? utcDate(user.createdAt) },
       hero: hero === null ? null : { name: hero.name, activationState: hero.activationState, status: hero.status },
     }
   },
@@ -60,6 +63,21 @@ export const setAnalyticsConsent = mutation({
   handler: async (ctx, { allowed }) => {
     const user = await currentUser(ctx)
     if (user?.state === 'active' && user.analyticsConsent !== allowed) await ctx.db.patch(user._id, { analyticsConsent: allowed })
+    return null
+  },
+})
+
+/**
+ * D154: the owner has seen the What's new entries up to `seen` (the newest entry's YYYY-MM-DD), so the companion's
+ * card hides until a later one. Only moves forward; a cosmetic preference with no game effect.
+ */
+export const dismissWhatsNew = mutation({
+  args: { seen: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { seen }) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(seen)) throw appError('INVALID_INPUT', 'Not a date.')
+    const user = await currentUser(ctx)
+    if (user?.state === 'active' && seen > (user.whatsNewSeen ?? '')) await ctx.db.patch(user._id, { whatsNewSeen: seen })
     return null
   },
 })

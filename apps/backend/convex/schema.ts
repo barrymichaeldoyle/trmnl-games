@@ -337,6 +337,8 @@ export default defineSchema({
     trmnlUtcOffset: v.optional(v.number()),
     /** P33: opt-in push alerts; absent means every kind off. Quiet hours are whole hours in `timezone`. */
     alerts: v.optional(alertPreferences),
+    /** D154: the date (YYYY-MM-DD) of the newest What's new entry the owner dismissed; absent means none since joining. */
+    whatsNewSeen: v.optional(v.string()),
   })
     .index('by_tokenIdentifier', ['tokenIdentifier'])
     .index('by_normalizedAlias', ['normalizedAlias'])
