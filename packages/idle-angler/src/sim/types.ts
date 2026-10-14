@@ -272,6 +272,8 @@ export interface AnglerCounters {
   readonly seasonsFished?: number
   /** Bit per run, in catalog order, with its species landed during it. */
   readonly runsFished?: number
+  /** Bit per water, in catalog order, with an Open entered there (a rosette from it). */
+  readonly openWaters?: number
 }
 
 export type AnglerStatus = 'fishing' | 'paused'

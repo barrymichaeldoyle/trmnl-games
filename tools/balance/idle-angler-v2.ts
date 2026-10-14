@@ -241,7 +241,8 @@ export function runCohort(policy: Policy, anglers: number, days: number, content
         if (entersOpen(content, before.waterId, detail.speciesId, at) && speciesLogged(content, run.angler.logbook) >= (content.unlocks?.opens ?? 0)) {
           const key = `${period}:${before.waterId}`
           const best = run.openBest.get(key)
-          if (!best) run.angler = { ...run.angler, counters: { ...run.angler.counters, opensEntered: (run.angler.counters.opensEntered ?? 0) + 1 } }
+          const bit = 1 << content.waters.findIndex((w) => w.id === before.waterId)
+          if (!best) run.angler = { ...run.angler, counters: { ...run.angler.counters, opensEntered: (run.angler.counters.opensEntered ?? 0) + 1, openWaters: (run.angler.counters.openWaters ?? 0) | bit } }
           if (!best || detail.grams > best.grams) run.openBest.set(key, { grams: detail.grams, tick })
         }
       }

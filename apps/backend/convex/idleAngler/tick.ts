@@ -139,7 +139,8 @@ async function simulateAnglerStep(ctx: MutationCtx, subject: Doc<'heroes'>, step
     const { firstOpenEntry } = await recordCatch(ctx, angler, { waterId: landed.waterId, speciesId: landed.speciesId, grams: landed.grams }, run.wallSlot, open)
     if (firstOpenEntry) {
       const counters = patch.counters ?? angler.counters
-      patch.counters = { ...counters, opensEntered: (counters.opensEntered ?? 0) + 1 }
+      const waterBit = 1 << Math.max(0, content.waters.findIndex((w) => w.id === landed.waterId))
+      patch.counters = { ...counters, opensEntered: (counters.opensEntered ?? 0) + 1, openWaters: (counters.openWaters ?? 0) | waterBit }
       sequence += 1
       const target = content.species.find((s) => s.id === landed.speciesId)!
       await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'tick', tick: run.tick, runId: run._id as unknown as Id<'iaSimulationRuns'>, sequence, at: now, kind: 'open', summary: `Entered the ${target.name} Open at ${waterOf(content, landed.waterId).the} with ${formatWeight(landed.grams)}.`, detail: { v: 1, speciesId: landed.speciesId, grams: landed.grams, waterId: landed.waterId }, deltas: { gold: 0 } })

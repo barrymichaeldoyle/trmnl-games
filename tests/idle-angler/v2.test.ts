@@ -28,6 +28,7 @@ import { drawGrams } from '@trmnl-games/idle-angler/sim/simulate'
 import { baitFromCatch, buyCharter, buyPegs, buyRod, mountFish, travel } from '@trmnl-games/idle-angler/sim/shop'
 import { deriveAnglerSeeds, forecast } from '@trmnl-games/idle-angler/sim/seed'
 import { createRng } from '@trmnl-games/engine/rng'
+import { allSatisfied } from '@trmnl-games/idle-angler/content/achievements'
 import { runCohort, runHarness } from '../../tools/balance/idle-angler-v2'
 
 const content = contentV2
@@ -245,6 +246,16 @@ describe('the trophy wall and the Opens', () => {
     expect(entersOpen(content, 'millpond', target.id, SPRING)).toBe(false)
     expect(openTarget(content, 'frozen_tarn', saturday)).toBeUndefined()
     expect(openTarget(content, 'frozen_tarn', WINTER + 5 * 86_400_000)).toBeDefined()
+  })
+})
+
+describe('achievements v5', () => {
+  it('earns the Rosettes tiers from Opens entered at three and at every water', () => {
+    const state = (openWaters: number) => ({ rodTier: 1, counters: { ...starterAngler(content, 0).counters, openWaters }, logbook: {}, flies: 0 })
+    const ids = (openWaters: number) => allSatisfied(state(openWaters), content).map((a) => a.id).filter((id) => id.startsWith('rosettes'))
+    expect(ids(0b000011)).toEqual([])
+    expect(ids(0b010101)).toEqual(['rosettes_1'])
+    expect(ids(0b111111)).toEqual(['rosettes_1', 'rosettes_2'])
   })
 })
 

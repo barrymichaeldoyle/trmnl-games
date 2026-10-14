@@ -38,6 +38,7 @@ export const anglerCounters = v.object({
   goalsReached: v.optional(v.number()),
   seasonsFished: v.optional(v.number()),
   runsFished: v.optional(v.number()),
+  openWaters: v.optional(v.number()),
 })
 
 /** D162: one fishmonger order on the slate (packages/idle-angler/src/sim/orders.ts). */

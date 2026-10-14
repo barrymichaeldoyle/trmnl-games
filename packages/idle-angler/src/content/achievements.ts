@@ -8,9 +8,10 @@ import { contentV2 } from './v2'
  */
 /**
  * v2 (S6) appends the Flies family; v3 retires the Levels family with XP and levels (titles replace them); v4 (D162)
- * appends the full game's families, higher tiers for waters, rods, the logbook and epics, and the new species' tiers.
+ * appends the full game's families, higher tiers for waters, rods, the logbook and epics, and the new species' tiers;
+ * v5 appends Rosettes, an Open entered at each water.
  */
-export const ACHIEVEMENTS_VERSION = 4
+export const ACHIEVEMENTS_VERSION = 5
 
 export type AchievementCategory = 'Fishing' | 'Logbook' | 'Trade' | 'Progress' | 'Species'
 
@@ -23,7 +24,7 @@ export type Predicate =
   | { readonly kind: 'specimen'; readonly speciesId: string; readonly grams: number }
   | { readonly kind: 'flies'; readonly atLeast: number }
   /** v4: set bits in a bit-set counter (seasons or runs fished). */
-  | { readonly kind: 'bits'; readonly counter: 'seasonsFished' | 'runsFished'; readonly atLeast: number }
+  | { readonly kind: 'bits'; readonly counter: 'seasonsFished' | 'runsFished' | 'openWaters'; readonly atLeast: number }
 
 export interface AchievementDef {
   readonly id: string
@@ -128,7 +129,7 @@ const FLIES: AchievementDef[] = family('flies', 'Flies', 'Logbook', (n) => ({ ki
 /** A higher tier appended to an existing family under v4, with the id the family's next index would take. */
 const more = (familyId: string, familyName: string, category: AchievementCategory, from: number, make: (atLeast: number) => Predicate, tiers: readonly Tier[]): AchievementDef[] =>
   tiers.map(([atLeast, name, blurb], index) => ({ id: `${familyId}_${from + index}`, family: familyId, familyName, category, tier: from + index, name, blurb, predicate: make(atLeast) }))
-const bits = (name: 'seasonsFished' | 'runsFished') => (atLeast: number): Predicate => ({ kind: 'bits', counter: name, atLeast })
+const bits = (name: 'seasonsFished' | 'runsFished' | 'openWaters') => (atLeast: number): Predicate => ({ kind: 'bits', counter: name, atLeast })
 
 /** Version 4 (D162): the full game. */
 const FULL: AchievementDef[] = [
@@ -172,6 +173,11 @@ const FULL: AchievementDef[] = [
   ]),
   ...family('seasons', 'Seasons', 'Fishing', bits('seasonsFished'), [[4, 'All Year Round', 'A fish in every season.']]),
   ...family('runs', 'Runs', 'Fishing', bits('runsFished'), [[4, 'Right Place, Right Week', 'A fish from every run.']]),
+  // v5: a rosette from each water's weekend Open.
+  ...family('rosettes', 'Rosettes', 'Progress', bits('openWaters'), [
+    [3, 'Rosettes on the Line', 'Opens entered at three waters.'],
+    [6, 'A Rosette from Every Water', 'An Open entered at every water, the ice and the open sea included.'],
+  ]),
 ]
 
 export const ACHIEVEMENTS: readonly AchievementDef[] = [...FAMILIES, ...SPECIES, ...FLIES, ...FULL]
