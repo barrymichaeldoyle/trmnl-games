@@ -105,6 +105,7 @@ The fishmonger's slate holds three orders. Each names fish the angler has to han
 - **Filling.** On the Cooler page, an order lists the fish that match. "Hand over" sells them to the fishmonger for the order's reward instead of the market price. This is a receipted intent; the fish are chosen explicitly and nothing is filled on its own.
 - **Refill.** An empty slot gets a new order at the angler's 07:00 local time (the D112 boundary, from the stored `utc_offset`), at most one per slot per day. A full slate with nothing filled stays as it is. **Orders never expire.**
 - **One free swap a day** replaces an order the player does not want.
+- **Seasonal fish.** Orders never name a species that feeds only in some seasons, so no order waits weeks for its fish.
 - **Teaching orders.** At most one slot names a species not yet logged at a water the angler can fish, with its bait and time of day. This is how the game teaches bait without a tutorial screen: the harness's stalled 18 species are exactly the fish these orders point at.
 - **Draws.** Orders come from a new `orders` stream drawn only at refill, so casts are unchanged. Each catch row gains its time band, weather and season, so time and weather orders can be checked.
 - **Limit.** The F1 gate keeps order premiums under 25% of a daily player's income, so selling to the market stays the main way to earn.
@@ -125,7 +126,7 @@ Each new water has ten or so species, a backdrop, an ambient line set and a pose
 | Water | Opens after | Access | Base bite | Baits | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Heron Lake | 6 River Bend species | Rowing Boat, 1,200 coins, permanent | 12% | worms, maggots, bread, boilies (new), deadbait | Big carp and catfish; the boat pose |
-| Deep-sea charter | 6 Harbour Pier species | Charter ticket, 400 coins for 96 casts at sea | 15% | ragworm, strip, spinner, deadbait | Leaves from the Pier; when the ticket's casts run out the angler sails back to the Pier. Casts, not hours, so a pause does not waste a ticket |
+| Deep-sea charter | 6 Harbour Pier species | Charter ticket, 400 coins for 96 casts at sea | 15% | ragworm, strip, spinner, deadbait | Leaves from the Pier; when the ticket's casts run out the angler sails back to the Pier. Casts, not hours, so a pause does not waste a ticket, and casts left when the player brings the angler ashore stay on the ticket for the next trip. One ticket at a time |
 | Frozen Tarn | 5 Heron Lake species, world winter only | Ice Auger, 2,500 coins, permanent | 10% | maggots, worms, deadbait | Open the winter week of every four. An angler there when the ice goes out walks back to Heron Lake with a log line |
 
 A fifth rod, the **Boat Rod** (lands up to 60 kg, +20% bite, 4,000 coins), is needed for the largest sea fish and the catfish. **Boilies** (12 bites a tub, 45 coins) are the carp bait at Heron Lake. The cooler stays at 24 fish, so the per-angler read stays bounded.
@@ -137,22 +138,22 @@ A fifth rod, the **Boat Rod** (lands up to 60 kg, +20% bite, 4,000 coins), is ne
 | Heron Lake | Bleak, Ide, Silver Bream | Mirror Carp, Grass Carp (summer) | Leather Carp, Wels Catfish (summer, night, to 40 kg), Lake Trout (spring, autumn) | Ghost Koi (summer, dawn, clear) |
 | Deep-sea charter | Gurnard, Coalfish, Haddock | Ling, Cod (autumn, winter), Turbot (summer) | Tope (summer), Blue Shark (summer, to 60 kg) | Halibut (winter, to 60 kg) |
 | Frozen Tarn | Smelt, Whitefish, Ruffe | Vendace, Arctic Char | Burbot (night) | Golden Char (dawn, clear) |
-| Season visitors | Sea Trout at River Bend (summer nights), Garfish at the Harbour Pier (spring) | | | |
+| Season visitors | Sea Trout at River Bend (summer nights), Garfish at the Harbour Pier (spring, its run) | | | |
 
 That is 28 new species and 58 in all. Titles extend past Master Angler (26): Old Salt at 36, Lakeside Legend at 46 and Keeper of the Logbook at 56.
 
 ### Seasons and runs
 
-- **The season is the world's, on the game's own calendar** (Barry, 2026-10-14: seasons and weather are shared by everyone and do not follow the real year). A fishing year lasts four weeks, one season a week: spring, summer, autumn and winter, each starting on Monday 00:00 UTC, the same moment the weekend Open's target and the weekly fly code change. The cycle is counted from a fixed epoch in the catalog, so it is a pure function of the UTC time. Every angler at a water sees the same season, the same run and the same rain, so an Open is fished in the same conditions by everyone. The Dock names it plainly ("Autumn at the waters until Monday"), never a real month.
+- **The season is the world's, on the game's own calendar** (Barry, 2026-10-14: seasons and weather are shared by everyone and do not follow the real year). A fishing year lasts four weeks, one season a week: spring, summer, autumn and winter, each starting on Monday 00:00 UTC, the same moment the weekend Open's target and the weekly fly code change. The season is the fly code's week number (`keepsakeWeek`, Monday 00:00 UTC) modulo four, so it is a pure function of the UTC time and shares the calendar the game already has. Every angler at a water sees the same season, the same run and the same rain, so an Open is fished in the same conditions by everyone. The Dock names it plainly ("Autumn at the waters until Monday"), never a real month.
 - **One world forecast.** Weather tables shift by season (more rain in autumn, more fog in winter), and the forecast still hashes `[worldSeed, waterId, blockKey]`, with the season read from the block's UTC date. No per-player term.
 - **Time of day stays local.** Dawn, day, dusk and night still come from the owner's `utc_offset` (D112), so the scene's sky matches the player's window. A shared clock would show night at midday for half the world.
 - **What a season changes:** species gain an optional `seasons` window, as they have `times` and `weather` today. Each water has a season bite multiplier (freshwater winter 85%, spring and autumn 110%), and the scene takes the season's dressing. No season closes a water except the Tarn.
-- **Runs** are four-day windows inside their season week, Monday to Thursday, the same for everyone, so they never sit on an Open's weekend. One run per season, so each week has one. Mackerel at the Harbour Pier in high summer, Salmon at River Bend in autumn (rain no longer needed, the species' draw weight ×4), Cod on the charter in winter and Sea Trout at River Bend at midsummer. A run writes "The mackerel are in at the Pier." on its first day and shows a Dock banner. A run is a catalog rule like a Desk Crawler occasion (D139), so it needs no admin and no ongoing work.
+- **Runs** are four-day windows inside their season week, Monday to Thursday, the same for everyone, so they never sit on an Open's weekend. One run per season, so each week has one: Garfish at the Harbour Pier in spring, Mackerel at the Pier in summer, Salmon at River Bend in autumn (rain no longer needed) and Cod on the charter in winter. During its run a species' draw weight is ×4. A run writes "The mackerel are in at the Pier." on its first day and shows a Dock banner. A run is a catalog rule like a Desk Crawler occasion (D139), so it needs no admin and no ongoing work.
 - **Pure.** The season and the run come from the cast's UTC time, which the simulator already receives, so they need no new input.
 
 ### Weekend Opens
 
-- **Every water holds an Open every weekend**, from Saturday 00:00 to Sunday 23:59 UTC, so every timezone gets two full days. The catalog names one target species per water per week from a fixed rotation, chosen from the species the water's entry gear can land: "This weekend: the Perch Open at the Millpond."
+- **Every open water holds an Open every weekend**, from Saturday 00:00 to Sunday 23:59 UTC, so every timezone gets two full days. Frozen Tarn holds one only in its winter week, and the charter's Open is fished by anglers at sea. The catalog names one target species per water per week from a fixed rotation, chosen from the species the water's entry gear can land: "This weekend: the Perch Open at the Millpond."
 - **Entry is automatic.** An angler takes part by landing the target at that water during the window, kept or released. Its heaviest one is its entry. Nothing to sign up for.
 - **Boards.** Each Open is a board on the D116 record machinery: `iaCatchRecords` rows with a period `o2026-10-17`, written only for the target species, read with the same bounded indexed queries. Rankings shows the top rows and your own neighbours (D152).
 - **Medals.** A cron at Monday 00:10 UTC reads each water's top three and awards gold, silver and bronze medals with 500, 300 and 150 coins. Every entrant gets a rosette. With few players a medal is easy to win, which is fine for a cosy game.
@@ -162,7 +163,7 @@ That is 28 new species and 58 in all. Titles extend past Master Angler (26): Old
 
 - **Mounting.** A fish in the cooler that weighs at least 60% of its species' maximum can go to the taxidermist instead of the market. Mounting costs the fish's value plus 100 coins and takes the fish out of sale. The wall keeps species, weight, water and date.
 - **Pegs.** The wall starts with 6 pegs and extends to 12, 18 and 24 for 500, 1,500 and 4,000 coins. A mounted fish can be taken down, which frees its peg (no refund). The ceiling of 24 keeps the read bounded.
-- **The shelf** holds Open medals, rosettes and one cup per completed season, and needs no pegs.
+- **The shelf** holds Open medals and rosettes and needs no pegs.
 - **Where it shows:** the Log tab's Trophies page, and the public profile (D109) when the player has opted in.
 
 ### The UI pass
@@ -179,6 +180,11 @@ One pass over the whole companion, done with goals because goals change what the
 - **The Log:** gains Trophies and seasons on each species.
 - **Help:** rewritten per system.
 - **Gate:** every page checked at 390 wide with no overflow, as every companion change is.
+
+## Alerts and analytics
+
+- **No new alert kinds.** The two D114 kinds (`cooler_full`, `bait_out`) stay the only ones. A medal, a goal, a new order or the end of a charter is not something the player must act on, so it is a log line, not a push.
+- **Analytics** (consent-gated, as now): `goal reached` (rung id), `order filled` (kind), `bait from catch`, `trophy mounted`, `charter booked`, `open entered`. No per-cast events.
 
 ## Economy
 
@@ -236,7 +242,7 @@ New species append their two tiers each.
   - counters `ordersFilled`, `deadbaitUsed`, `deadbaitCatches`, `trophiesMounted`, `opensEntered`, `medals`, `charters`, `seasonsFished` (a bit set) and `runsFished` (a bit set)
 - **Catch rows** gain `band`, `weather` and `season`.
 - **New tables:**
-  - `iaTrophies { anglerId, kind: 'fish' | 'medal' | 'rosette' | 'cup', speciesId?, grams?, water, periodKey?, at, peg? }`, indexed by angler. Mounted fish are bounded by pegs (24). The shelf grows by about two rows a week and is read a page at a time.
+  - `iaTrophies { anglerId, kind: 'fish' | 'medal' | 'rosette', speciesId?, grams?, water, periodKey?, at, peg? }`, indexed by angler. Mounted fish are bounded by pegs (24). The shelf grows by about two rows a week and is read a page at a time.
   - `iaOpenAwards`: the Monday run's receipt per Open, so a medal is awarded once.
 - **Opens** reuse `iaCatchRecords` with an `o` period. No new board tables.
 - **Deletion** purges the new table with the angler, and the purge test covers it.
@@ -275,3 +281,13 @@ Barry asked for the best option on each open point. Each is settled as recommend
 4. **Mounting costs the fish's value plus 100 coins.** The wall is a sink and a mounted fish should mean something; a free mount would fill the wall with no cost.
 5. **Teaching orders may name a species not yet caught.** They are the game's bait and timing tutorial and the fix for the logbook stall the harness measured. At most one of the three slots does it.
 6. **Submit for review after F6.** The reviewer and the first players see the full game, the listing's featured image shows it, and nothing needs migrating after launch. The game stays hidden while the slices land in production.
+
+Smaller points settled on the same day's review, each the simplest rule that keeps the cosy terms:
+
+7. **The season is the fly code's week modulo four**, so seasons, Opens and fly codes share one calendar.
+8. **One run per season:** Garfish in spring, Mackerel in summer, Salmon in autumn, Cod in winter. Sea Trout is a summer-night visitor, not a run.
+9. **No season cups.** With a season a week, a cup would repeat the weekend medal. The shelf holds medals and rosettes.
+10. **Frozen Tarn holds its Open only in winter weeks; the charter's Open is for anglers at sea.**
+11. **Charter casts left on a ticket stay for the next trip**, one ticket held at a time, so nothing bought is lost.
+12. **Orders never name a fish that feeds only in some seasons**, so no order waits weeks.
+13. **No new alert kinds**, and six consent-gated analytics events.
