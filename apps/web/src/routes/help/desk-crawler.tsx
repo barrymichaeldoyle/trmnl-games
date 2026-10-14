@@ -23,7 +23,6 @@ const SHOP_BAGS = BAGS.filter((tier) => tier.milestone === undefined && tier.pri
 const SHOP_POUCHES = POUCHES.filter((tier) => tier.milestone === undefined && tier.price !== undefined).map((tier) => ({ name: tier.name, size: tier.cap, price: tier.price }))
 const TOTE = BAGS.find((tier) => tier.milestone?.ticksExplored !== undefined)
 const TOP_BAG = BAGS.at(-1)?.capacity ?? 0
-const MERCHANT_LINE = MERCHANT_OFF > 0 ? ` A wandering merchant sometimes offers the next one at ${MERCHANT_OFF}% off.` : ''
 /** D129: the workbench's materials and prices, read from the active catalog. */
 const WORKBENCH = catalogs[ACTIVE_CONTENT].workbench
 const MATERIAL_NAME = (id: string) => WORKBENCH?.materials.find((m) => m.id === id)?.name ?? id
@@ -262,7 +261,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <p>Your hero drinks automatically when HP falls below the stance's potion level while exploring: the weakest potion that puts it back above the stance's potion level, or the strongest it has when nothing weaker would do. The adventure log names what it drank. With no potions left, your hero rests below the rest level and sets off again once recovered. You can also drink one yourself from the Hero page whenever your hero is exploring, resting or travelling and not at full HP; with more than one strength in the pouch, the Hero page asks which.</p>
           <p><strong>Combining.</strong> On the Bag page, {COMBINE_LINE}. It never makes more potions than it takes, so the pouch cannot overflow, and nothing combines by itself.</p>
         </>}
-      <p>Potions are kept in a pouch. A new hero carries a {POUCHES[0]?.name ?? 'Thermos'} that holds {POUCHES[0]?.cap ?? 20}. Bigger pouches are bought with gold on the Bag page, one at a time: {rungs(SHOP_POUCHES)}.{MERCHANT_LINE} When the pouch is full, a potion find becomes gold instead.</p>
+      <p>Potions are kept in a pouch. A new hero carries a {POUCHES[0]?.name ?? 'Thermos'} that holds {POUCHES[0]?.cap ?? 20}. Bigger pouches are bought with gold on the Bag page, one at a time: {rungs(SHOP_POUCHES)}. When the pouch is full, a potion find becomes gold instead.</p>
       <h2 id="the-wandering-merchant">The wandering merchant</h2>
       <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and the next pouch or bag{MERCHANT_OFF > 0 ? ` at ${MERCHANT_OFF}% off the Bag page price` : ''}. Each offer sells once. The merchant moves on after four adventures or after your last purchase. Missing a visit costs nothing.</p>
       <h2 id="decisions">Decisions</h2>
@@ -303,7 +302,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
       <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. A full bag alone does not stop adventures. The next piece you find is held safely, and then your hero sleeps until you make room. The held find is never automatically sold or discarded.</p>
       <h2 id="bigger-bags">Bigger bags</h2>
-      <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements and no bag drops: save up and buy.{MERCHANT_LINE}</p>
+      <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements and no bag drops: save up and buy.</p>
       <ol className="[&_li]:list-decimal">
         <li>Open Bag in the companion. Equip any upgrades and sell spare gear to free space.</li>
         <li>If a find is being held, choose Claim find. Leave at least one free slot after claiming it so adventures can resume.</li>
