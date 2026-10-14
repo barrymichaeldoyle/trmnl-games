@@ -3,6 +3,7 @@ import { games } from '@trmnl-games/platform'
 import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, InstallCta } from '../lib/deskCrawlerPitch'
 import { FAQ_JSON_LD } from '../lib/deskCrawlerFaq'
 import { Glyph } from '../lib/glyphs'
+import { changeDay, latestChanges } from '../lib/changelog'
 import { SITE_FRAME } from '../lib/platformHeader'
 import { SiteShell } from '../lib/prose'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
@@ -43,6 +44,28 @@ function IdleAnglerSection() {
   )
 }
 
+/** The newest few What's new entries (D153), so the front page shows the game is still moving; the page has them all. */
+function RecentChanges() {
+  return (
+    <section aria-labelledby="recent-heading" className="flex flex-col gap-6">
+      <div className="flex max-w-prose flex-col gap-2">
+        <h2 id="recent-heading" className="font-display text-3xl font-bold text-gold-ink">Recently changed</h2>
+        <p className="leading-relaxed text-muted">The latest changes to Desk Crawler. Heroes keep their progress through every update.</p>
+      </div>
+      <ul className="grid gap-4 lg:grid-cols-3">
+        {latestChanges(3).map((change) => (
+          <li key={change.title} className="window flex flex-col gap-2 p-5">
+            <time dateTime={change.date} className="text-sm font-semibold text-muted">{changeDay(change.date)}</time>
+            <h3 className="font-display text-xl font-bold">{change.title}</h3>
+            <p className="line-clamp-4 leading-relaxed text-muted">{change.body}</p>
+          </li>
+        ))}
+      </ul>
+      <Link to="/whats-new" className={`self-start gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="bell" />See every change</Link>
+    </section>
+  )
+}
+
 /** The platform front page: Desk Crawler's screen and install link first, then what the game holds. */
 function Home() {
   return (
@@ -73,6 +96,7 @@ function Home() {
               <Link to="/help/desk-crawler" className={`shrink-0 gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="quest" />Read the full guide</Link>
             </div>
           </div>
+          <RecentChanges />
           <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
             <Faq headingId="faq-heading" />
             <section aria-labelledby="launch-heading" className="window flex flex-col gap-4 self-start p-5 sm:p-6">

@@ -152,7 +152,6 @@ function Settings() {
         <p className="mt-4 text-sm">To delete your sign-in and every game, go to <Link to="/account" className="underline underline-offset-4">Account</Link>.</p>
       </details>
       <nav aria-label="Help" className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-        <Link to="/whats-new" className="inline-flex min-h-11 items-center underline underline-offset-4">What’s new</Link>
         <Link to="/support" className="inline-flex min-h-11 items-center underline underline-offset-4">Contact support</Link>
         <Link to="/feedback" search={{ from: '/app/desk-crawler/settings' }} className="inline-flex min-h-11 items-center underline underline-offset-4">Send feedback</Link>
       </nav>

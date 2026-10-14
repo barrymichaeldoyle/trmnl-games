@@ -14,8 +14,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-14',
     changes: [
       {
+        title: 'What’s new has a home in More',
+        body: 'Hiding the What’s new card on the Hero tab used to leave no easy way back to the list of changes. It now has its own row on the More tab, with the day of the latest update.',
+      },
+      {
         title: 'The quarter-size TRMNL view says when your hero is paused or knocked out',
-        body: 'If Desk Crawler shares your TRMNL with other plugins in a quarter slot, it now says "Paused by you" while you have paused, and the time your hero is back after a knockout. A long hero name no longer hides your level, and the latest adventure gets more of the width.',
+        body: 'If Desk Crawler shares your TRMNL with other plugins in a quarter slot, it now says “Paused by you” while you have paused, and the time your hero is back after a knockout. A long hero name no longer hides your level, and the latest adventure gets more of the width.',
       },
       {
         title: 'Less on the Hero page until you need it',
@@ -56,3 +60,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
  */
 export const changeKeys = (): Array<{ key: string; title: string }> =>
   CHANGELOG.flatMap((entry) => entry.changes.map((change, index) => ({ key: `${entry.date}.${String(entry.changes.length - index).padStart(2, '0')}`, title: change.title })))
+
+/** The day an entry went live, written out in English ("14 October 2026"), the same on the server and in every browser. */
+export const changeDay = (date: string, year = true) => new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', ...(year ? { year: 'numeric' } : {}), timeZone: 'UTC' })
+
+/** The newest `count` changes, newest first, each with the day it went live. */
+export const latestChanges = (count: number): Array<{ date: string; title: string; body: string }> =>
+  CHANGELOG.flatMap((entry) => entry.changes.map((change) => ({ date: entry.date, ...change }))).slice(0, count)

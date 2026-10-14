@@ -1,10 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CHANGELOG } from '../lib/changelog'
+import { CHANGELOG, changeDay as day } from '../lib/changelog'
 import { ProsePage } from '../lib/prose'
 import { seo } from '../lib/seo'
-
-/** The day an entry went live, written out in English ("14 October 2026"), the same on the server and in every browser. */
-const day = (date: string) => new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
 
 export const Route = createFileRoute('/whats-new')({
   head: () => seo({ title: 'What’s new', path: '/whats-new', description: 'What changed in Desk Crawler and when: new features and fixes, newest first.' }),

@@ -3,6 +3,7 @@ import { Card } from '../../../lib/ui'
 import { Glyph, type GlyphName } from '../../../lib/glyphs'
 import { captureAnalytics } from '../../../lib/analytics'
 import { SPONSOR_URL } from '../../../lib/prose'
+import { CHANGELOG, changeDay } from '../../../lib/changelog'
 
 /** The More tab's pages (D124), each a row with its glyph: what the Hero tab used to hold under the world map. */
 const MORE_LINKS = [
@@ -13,6 +14,8 @@ const MORE_LINKS = [
   { to: '/app/desk-crawler/keepsakes', label: 'Desk keepsakes', blurb: 'The weekly code from your TRMNL and your shelf.', glyph: 'keepsake' },
   { to: '/app/desk-crawler/trmnl', label: 'On your TRMNL', blurb: 'What the plugin is showing, in every layout.', glyph: 'screen' },
   { to: '/help/desk-crawler', label: 'How Desk Crawler works', blurb: 'Adventures, floors, gear, stances and setup help.', glyph: 'quest' },
+  // Always here, so the changes stay one tap away after the Hero tab's card is hidden (D154).
+  { to: '/whats-new', label: 'What’s new', blurb: `Every change to the game, newest first. Last updated ${changeDay(CHANGELOG[0]!.date, false)}.`, glyph: 'bell' },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; blurb: string; glyph: GlyphName }>
 
 export function MoreLinks() {
