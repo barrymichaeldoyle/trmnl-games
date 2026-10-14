@@ -35,7 +35,7 @@ Device resolves published pointer, own `heroRanks` row for recent_7d, its captur
 
 Web `leaderboard.view` selects board/cohort and returns Top 100, own rank only if it belongs to that selected cohort, score/period/cohort/count/cutoff/publication identity. Offer a link back to the own group when browsing another. Public entries contain aliases/hero name/level/class plus recent score where applicable; never auth IDs/private gear/logs.
 
-All shown rank/Top 5/count belong to the same generation/publication. Live hero stats may be newer; label ranks with board cutoff/group. Privacy masking reads current user state and treats missing users as hidden. Preserve cached ordinal gaps/counts until a new coherent publication; never renumber only part of a board.
+All shown rank/Top 5/count belong to the same generation/publication. Live hero stats may be newer; label ranks with board cutoff/group. Privacy masking reads current user state and treats missing users as hidden. Rows show the owner's current public name, so a public name change shows on the boards at once; only a gone, suspended, deleting or name-repair owner, or a hero that is no longer the owner's current one, reads "Hidden player" (2026-10-14). Preserve cached ordinal gaps/counts until a new coherent publication; never renumber only part of a board.
 
 ## Delta, empty states and retention
 

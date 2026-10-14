@@ -80,6 +80,17 @@ describe('public hero profiles (v1.2)', () => {
     expect((await t.fetch('/art/card/hero/%E0%A4%A.png')).status).toBe(404)
   })
 
+  it('shows a renamed owner under the new name on the leaderboard, and hides a name under repair', async () => {
+    const heroId = await seedHero(t, { level: 4, counters: { ...zeroCounters(), combatWins: 2 } }, 'Moss')
+    await runTick(t)
+    const userId = await t.run(async (ctx) => (await ctx.db.get(heroId))!.userId)
+    await t.run(async (ctx) => await ctx.db.patch(userId, { publicAlias: 'Bramble', publicNameVersion: 2 }))
+    const names = async () => ((await t.query(api.leaderboard.view, { board: 'overall', cohortKey: 'all' })).entries as Array<{ name: string }>).map((row) => row.name)
+    expect(await names()).toEqual(['Bramble'])
+    await t.run(async (ctx) => await ctx.db.patch(userId, { nameRepairRequired: true }))
+    expect(await names()).toEqual(['Hidden player'])
+  })
+
   it('treats suspended, name-repair and unknown aliases exactly like a private profile', async () => {
     const heroId = await seedHero(t, { publicProfile: true }, 'Fern')
     expect(await t.query(api.profiles.view, { alias: 'Fern' })).not.toBeNull()

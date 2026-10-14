@@ -17,17 +17,20 @@ export const labelFor = (cohortKey: string) => {
 /** The owner's current player character in the board's game; Desk Crawler's hero unless a game passes its own. */
 type CurrentSubject = (ctx: QueryCtx, owner: Doc<'users'> | null) => Promise<{ _id: string; publicProfile?: boolean } | null>
 
-/** Mask copied public names whose owner is gone, suspended/deleting, or renamed since the snapshot (leaderboards.md). */
+/**
+ * Rows show the owner's current public name, so a rename shows at once rather than waiting for the next publication.
+ * A row is masked when its owner is gone, suspended/deleting, under name repair, or has moved to another hero.
+ */
 export async function maskedEntries(ctx: QueryCtx, entries: Doc<'leaderboardGenerations'>['entries'], limit: number, options: { profiles?: boolean; current?: CurrentSubject } = {}) {
   const rows = entries.slice(0, limit)
   const owners = await Promise.all(rows.map((row) => ctx.db.get(row.userId)))
   const heroes = await Promise.all(owners.map((owner) => (options.current ?? currentHero)(ctx, owner ?? null)))
   return rows.map((row, index) => {
     const owner = owners[index]
-    const visible = owner !== null && owner !== undefined && owner.state === 'active' && owner.publicNameVersion === row.publicNameVersion && heroes[index]?._id === row.heroId
+    const visible = owner !== null && owner !== undefined && owner.state === 'active' && !owner.nameRepairRequired && heroes[index]?._id === row.heroId
     return {
       rank: row.rank,
-      name: visible ? row.ownerAlias : 'Hidden player',
+      name: visible ? owner.publicAlias : 'Hidden player',
       hero_name: visible ? row.heroName : '',
       level: row.level,
       score: row.score ?? 0,
