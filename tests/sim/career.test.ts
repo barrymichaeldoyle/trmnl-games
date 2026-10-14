@@ -430,3 +430,52 @@ describe('level 7 and Bold before the raid goal (D135, content v17)', () => {
     expect(remapRung(from, to, index(v16, 'cafeteria_win'), unmet(['level_7', 'go_bold', 'cafeteria_win']))).toBe(index(v17, 'cafeteria_win'))
   })
 })
+
+describe('the workbench opens at level 4 (D155, content v23)', () => {
+  const v22 = catalogs.v22
+  const v23 = catalogs.v23
+  const ids = (content: ContentCatalog) => content.career!.rungs.map((r) => r.id)
+  const index = (content: ContentCatalog, id: string) => ids(content).indexOf(id)
+
+  it('is valid, opens the workbench at level 4 and moves only the salvage goal, to straight after level 4', () => {
+    expect(validateCatalog(v23)).toEqual([])
+    expect(v23.unlocks).toEqual({ ...v22.unlocks, workbench: 4 })
+    const rest = ids(v22).filter((id) => id !== 'first_salvage')
+    const at = rest.indexOf('level_4') + 1
+    expect(ids(v23)).toEqual([...rest.slice(0, at), 'first_salvage', ...rest.slice(at)])
+    const { workbench: _w, ...without } = v23
+    expect(validateCatalog(without as ContentCatalog)).toContain('workbench unlock without a workbench')
+    // Catalogs before v23 had salvage and the workbench open from level 1.
+    expect(unlocked(v22, 1, 'workbench')).toBe(true)
+    expect(unlocked(v23, 3, 'workbench')).toBe(false)
+    expect(unlocked(v23, 4, 'workbench')).toBe(true)
+  })
+
+  it('says the workbench unlocked on the tick that reaches level 4, then names the salvage goal', () => {
+    const done = { combatWins: 5, itemsEquipped: 1, tasksCompleted: 3, itemsSold: 1 }
+    const { hero: h, inventory } = hero({ level: 3, xp: xpToLeave(3) - 1, career: { rung: index(v23, 'level_4'), startedTick: 0, reached: [] } }, done)
+    const result = find(h, inventory, 10, (r) => (r.event?.detail.levelsGained ?? 0) > 0, v23)
+    expect(careerLines(result).map((e) => e.summary)).toEqual(['Unlocked: the workbench.', 'Goal reached: Reach level 4. Next: Salvage a piece of gear.'])
+    expect(result.nextHero.career!.rung).toBe(index(v23, 'first_salvage'))
+    // The same tick under v22 announces nothing: the workbench was already open.
+    const before = find(h, inventory, 10, (r) => (r.event?.detail.levelsGained ?? 0) > 0, v22)
+    expect(careerLines(before).some((e) => e.detail.outcome.variant === 'career' && e.detail.outcome.phase === 'unlocked')).toBe(false)
+  })
+
+  it('remaps stored pointers so nobody lands past an unmet salvage goal, either way', () => {
+    const from = v22.career!
+    const to = v23.career!
+    const unmet = (open: string[]) => (rung: { id: string }) => open.includes(rung.id)
+    // Below level 4 nothing moves but the index.
+    for (const id of ['first_win', 'equip_find', 'level_2', 'level_4']) expect(remapRung(from, to, index(v22, id), unmet([id, 'first_salvage']))).toBe(index(v23, id))
+    // Past level 4 without a salvage, the moved goal comes first, however far ahead the pointer was.
+    expect(remapRung(from, to, index(v22, 'first_trip'), unmet(['first_trip', 'first_salvage']))).toBe(index(v23, 'first_salvage'))
+    expect(remapRung(from, to, index(v22, 'rolling_suitcase'), unmet(['rolling_suitcase', 'first_salvage']))).toBe(index(v23, 'first_salvage'))
+    // Already salvaged: the pointer keeps its own goal.
+    expect(remapRung(from, to, index(v22, 'first_trip'), unmet(['first_trip']))).toBe(index(v23, 'first_trip'))
+    expect(remapRung(from, to, index(v22, 'first_salvage'), unmet(['first_salvage']))).toBe(index(v23, 'first_salvage'))
+    // Rolling back: a hero on the salvage goal under v23 meets the goals v22 puts before it.
+    expect(remapRung(to, from, index(v23, 'first_salvage'), unmet(['first_salvage', 'first_trip']))).toBe(index(v22, 'first_trip'))
+    expect(remapRung(to, from, index(v23, 'first_upgrade'), unmet(['first_upgrade']))).toBe(index(v22, 'first_upgrade'))
+  })
+})

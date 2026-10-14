@@ -211,11 +211,18 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   // D129: a player sells while a bag or pouch is still to buy, then salvages. Yields pile into the material rows.
   // D146: a bag past the Rolling Suitcase does not hold the workbench back unless the cohort buys bags first.
   const bagsDone = nextEarlyTier(content, h) === undefined || (!policy.bagsFirst && h.bagCapacity >= CORE_BAG_TOP)
-  const workbench = policy.workbench !== false && content.workbench !== undefined && bagsDone && nextEarlyPouchTier(content, { level: h.level, ...(h.potionCap === undefined ? {} : { potionCap: h.potionCap }) }) === undefined
+  // D155: nothing is salvaged or upgraded below the workbench unlock. A player on the salvage goal salvages one spare
+  // for it; one on the upgrade goal salvages and upgrades as soon as it can, ahead of the bags, to reach it.
+  const open = policy.workbench !== false && content.workbench !== undefined && unlocked(content, h.level, 'workbench')
+  const goalNow = currentRung(content, h)?.predicate
+  const chasing = (counter: string) => goalNow?.kind === 'counter' && goalNow.counter === counter
+  const workbench = open && (chasing('gearUpgraded') || (bagsDone && nextEarlyPouchTier(content, { level: h.level, ...(h.potionCap === undefined ? {} : { potionCap: h.potionCap }) }) === undefined))
+  let salvageOne = open && !workbench && chasing('itemsSalvaged')
   let yielded: MaterialCount = {}
   let kept = inventory.filter((item) => {
     if (!isGear(item.kind) || item.id === h.weaponId || item.id === h.armorId) return true
-    if (workbench) {
+    if (workbench || salvageOne) {
+      salvageOne = false
       yielded = addMaterials(yielded, salvageYield(content, item))
       salvaged += 1
       return false

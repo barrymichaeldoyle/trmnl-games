@@ -236,6 +236,7 @@ export function validateCatalog(content: ContentCatalog): string[] {
     if (content.unlocks.choices > 1 && content.choices === undefined) problems.push('choice unlock without choices')
     if (content.unlocks.merchant > 1 && content.merchant === undefined) problems.push('merchant unlock without a merchant')
     if (content.unlocks.raids > 1 && content.raids === undefined) problems.push('raid unlock without raid rules')
+    if (content.unlocks.workbench !== undefined && content.workbench === undefined) problems.push('workbench unlock without a workbench')
   }
   if (content.career) {
     const counters = new Set(Object.keys(zeroCounters()))

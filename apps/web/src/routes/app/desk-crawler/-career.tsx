@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { Button } from '../../../lib/ui'
-import { Glyph, SectionTitle } from '../../../lib/glyphs'
+import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
 import { LocalTime } from '../../../lib/localTime'
 import { captureAnalytics } from '../../../lib/analytics'
 import { PixelIcon } from './-pixelIcon'
@@ -19,7 +19,7 @@ export type CareerView = {
 }
 
 /** heroes.mine's `unlocks` (P35): each gated feature, its level and whether this hero has it. */
-export type UnlockView = Array<{ feature: 'todo' | 'meetings' | 'stances' | 'choices' | 'merchant' | 'raids'; label: string; level: number; unlocked: boolean }>
+export type UnlockView = Array<{ feature: 'todo' | 'meetings' | 'workbench' | 'stances' | 'choices' | 'merchant' | 'raids'; label: string; level: number; unlocked: boolean }>
 
 /** " The Server Room opens at level 4, the Cafeteria Depths at level 8, the Archive at level 12 and the Parking Garage at level 16." */
 function floorsLine(floors: ReadonlyArray<{ name: string; unlockLevel: number }>): string {
@@ -116,11 +116,11 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
 }
 
 /** A feature the hero's level has not reached yet, in the place its card will take (P35). Never a control. */
-export function LockedCard({ title, glyph, level, blurb }: { title: string; glyph: 'todo' | 'shield'; level: number; blurb: string }) {
+export function LockedCard({ title, glyph, level, blurb }: { title: string; glyph: 'todo' | GlyphName; level: number; blurb: string }) {
   return (
     <section aria-label={`${title}, unlocks at level ${level}`} className="flex min-w-0 flex-col gap-1 border-[3px] border-dashed border-faint px-3 py-3 text-muted min-[375px]:px-4">
       <p className="flex items-center gap-3 font-display text-xl font-bold">
-        {glyph === 'todo' ? <PixelIcon kind="todoOpen" plain className="shrink-0" /> : <Glyph name="shield" className="shrink-0" />}
+        {glyph === 'todo' ? <PixelIcon kind="todoOpen" plain className="shrink-0" /> : <Glyph name={glyph} className="shrink-0" />}
         <span>{title}</span>
         <span className="hud ml-auto text-hud-sm">Level {level}</span>
       </p>

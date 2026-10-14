@@ -363,9 +363,12 @@ export interface TodoRule {
 }
 
 /** P35: features that arrive at a level. Below it a hero behaves as under a catalog without that feature's rules. */
-export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids' | 'meetings' | 'roster'
-/** P37: `roster` is optional, so catalogs before it simply never open the roster; D141: `meetings` likewise. */
-export type UnlockRule = Readonly<Record<Exclude<UnlockableFeature, 'roster' | 'meetings'>, number>> & { readonly roster?: number; readonly meetings?: number }
+export type UnlockableFeature = 'todo' | 'stances' | 'choices' | 'merchant' | 'raids' | 'meetings' | 'workbench' | 'roster'
+/**
+ * P37: `roster` is optional, so catalogs before it simply never open the roster; D141: `meetings` likewise. D155:
+ * `workbench` is optional the other way round: catalogs before it had salvage and the workbench open from level 1.
+ */
+export type UnlockRule = Readonly<Record<Exclude<UnlockableFeature, 'roster' | 'meetings' | 'workbench'>, number>> & { readonly roster?: number; readonly meetings?: number; readonly workbench?: number }
 
 /** P35: what a career rung asks for, over the same bounded state achievements read. */
 export type CareerPredicate =

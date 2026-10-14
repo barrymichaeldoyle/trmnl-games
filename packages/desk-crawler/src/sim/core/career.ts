@@ -9,7 +9,7 @@ import type { CareerPredicate, CareerRule, CareerRung, CareerState, ContentCatal
  * announce them are written here, once, on the tick the hero crosses the level.
  */
 
-export const FEATURES: readonly UnlockableFeature[] = ['todo', 'meetings', 'stances', 'choices', 'merchant', 'raids', 'roster']
+export const FEATURES: readonly UnlockableFeature[] = ['todo', 'meetings', 'workbench', 'stances', 'choices', 'merchant', 'raids', 'roster']
 
 /** How each feature reads on the device and in the companion. */
 export const FEATURE_LABEL: Readonly<Record<UnlockableFeature, string>> = {
@@ -19,6 +19,7 @@ export const FEATURE_LABEL: Readonly<Record<UnlockableFeature, string>> = {
   merchant: 'the wandering merchant',
   raids: 'desk raids',
   meetings: 'meetings with coworkers',
+  workbench: 'the workbench',
   roster: 'a second hero',
 }
 
@@ -34,6 +35,8 @@ export function unlockLevel(content: ContentCatalog, feature: UnlockableFeature)
  */
 export function unlocked(content: ContentCatalog, level: number, feature: UnlockableFeature): boolean {
   if (feature !== 'roster' && content.unlocks === undefined) return true
+  // D155: catalogs before the workbench unlock had salvage and the workbench open from level 1.
+  if (feature === 'workbench' && content.unlocks?.workbench === undefined) return true
   const at = unlockLevel(content, feature)
   return at !== undefined && level >= at
 }
@@ -89,6 +92,8 @@ export function liveRung(rules: CareerRule, from: number): number {
  * rung it has; one past the old ladder's end stays past the new one's. With `open` (the hero has not met this rung),
  * rungs the new ladder inserts right before the pointer's rung come first when the hero has not met them: a level-6
  * hero waiting on the raid goal meets "Reach level 7" first, while one already level 7 and Bold keeps the raid goal.
+ * D155: a rung the new ladder moves from ahead of the pointer to before it is still ahead for this hero, so an unmet
+ * one comes first too, wherever it now sits: moving "Salvage a piece of gear" up the ladder skips nobody past it.
  */
 export function remapRung(from: CareerRule, to: CareerRule, rung: number, open?: (rung: CareerRung) => boolean): number {
   for (let i = rung; i < from.rungs.length; i += 1) {
@@ -97,7 +102,8 @@ export function remapRung(from: CareerRule, to: CareerRule, rung: number, open?:
     if (open === undefined || i !== rung) return index
     let start = index
     while (start > 0 && !from.rungs.some((entry) => entry.id === to.rungs[start - 1]!.id)) start -= 1
-    for (let j = start; j < index; j += 1) if (!to.rungs[j]!.retired && open(to.rungs[j]!)) return j
+    const movedBack = (id: string) => from.rungs.findIndex((entry) => entry.id === id) > rung
+    for (let j = 0; j < index; j += 1) if ((j >= start || movedBack(to.rungs[j]!.id)) && !to.rungs[j]!.retired && open(to.rungs[j]!)) return j
     return index
   }
   return to.rungs.length

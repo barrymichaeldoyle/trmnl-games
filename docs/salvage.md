@@ -2,6 +2,8 @@
 
 Proposed 2026-10-12 as P36 and approved as D129 the same day, when Barry handed over the open points ("just go with what you think is best"). Built the same day as content v13 through slices W1 to W4 ([evidence](evidence/workbench.md)); switched on in production the same day (W5, run 807 clean). It is the design amendment the [roadmap](roadmap.md) requires before v2.0 Depth starts, covering its first two slices together: salvage (P26) and owned-gear upgrades (P27), with O13 settled. Potion strengths (P30), bigger bags, legendary gear and elite encounters stay separate slices and are only named where this design must leave room for them.
 
+**Since v23 (D155)** salvage, the workbench and potion combining open at level 4, the level Mk II gear needs, with an "Unlocked: the workbench" line; below it the Bag page shows Sell only and a locked Workbench card, and the intents refuse with `LOCKED`. The "Salvage a piece of gear" goal moved up to straight after "Reach level 4" ([evidence](evidence/workbench-unlock.md)).
+
 Companions: [inventory](inventory.md) (the bag, sale and sleep rules this extends), [achievements](achievements.md) (the counters and the next catalog version), [objectives](objectives.md) (D128, whose ladder gains rungs for the new actions) and the [gold-only ladders evidence](evidence/gold-only-ladders.md) (the gold figures that motivate this release).
 
 ## The problem it solves

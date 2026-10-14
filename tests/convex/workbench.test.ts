@@ -188,3 +188,37 @@ describe('salvage and the workbench (D129, content v13)', () => {
     expect(hero.career?.reached.map((r) => r.id)).toEqual(['first_salvage'])
   })
 })
+
+describe('the workbench opens at level 4 (D155, content v23)', () => {
+  let t: T
+  beforeEach(async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(SLOT)
+    t = convexTest(schema, modules)
+    await seedWorld(t, { activeContentVersion: 'v23', currentTick: 1, lastPublishedAt: SLOT - 30 * 60_000 })
+  })
+  afterEach(() => vi.useRealTimers())
+
+  it('refuses salvage, upgrades, affixes and combining below level 4, and the Bag page shows a locked card instead', async () => {
+    const heroId = await seedHero(t, { level: 3, gold: 5000, bagCapacity: 10 }, 'Gus')
+    const user = as(t, 'Gus')
+    const spare = await giveGear(t, heroId)
+    const rare = await giveGear(t, heroId, { rarity: 'rare' }, true)
+    for (const call of [
+      user.mutation(api.inventory.salvageMany, { operationId: opId(), itemIds: [spare] }),
+      user.mutation(api.inventory.upgrade, { operationId: opId(), itemId: rare }),
+      user.mutation(api.inventory.chooseAffix, { operationId: opId(), itemId: rare, affixId: 'lucky' }),
+      user.mutation(api.inventory.combinePotions, { operationId: opId() }),
+    ]) expect(await errorCode(call)).toBe('LOCKED')
+    const view = await user.query(api.inventory.mine, {})
+    expect(view).toMatchObject({ workbench: null, workbenchUnlockLevel: 4, materials: [], potionCombine: null })
+    expect(view.gear.find((g: { id: string }) => g.id === spare)).toMatchObject({ nextStep: null })
+
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { level: 4 }))
+    expect(await user.mutation(api.inventory.salvageMany, { operationId: opId(), itemIds: [spare] })).toMatchObject({ changed: true, count: 1 })
+    const open = await user.query(api.inventory.mine, {})
+    expect(open.workbench).not.toBeNull()
+    expect(open.workbenchUnlockLevel).toBeNull()
+    expect(open.potionCombine).not.toBeNull()
+  })
+})

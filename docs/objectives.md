@@ -31,6 +31,7 @@ Unlocks are **level milestones** in the catalog, under a new `unlocks` rule. The
 | To-do list | level 2 | day 1 | The first thing to look forward to, and the first system that needs no companion |
 | Stances | level 3, level 7 from v15 (D132) | day 2 | The first real choice, once the player has seen a rest and a potion. Moved to level 7 by D132: in Office Cubicles Bold has no knockout risk, so the choice first matters with raids and the Cafeteria |
 | Server Room | level 4 | day 3 to 4 | Unchanged (D24) |
+| Salvage, the workbench and potion combining | level 4, from v23 (D155) | day 7 | Open from the start in v13 to v22, but the first workbench step (Mk II) needs level 4, so a new player got materials it could not spend. They open together at the level Mk II gear needs, and the salvage goal follows at once |
 | Narrative choices | level 5 | day 5 | Needs a hero that already opens the companion for travel |
 | Wandering merchant | level 6 | day 7 | By now the hero has 100 to 300 gold, so a 25% off bag offer means something; also the Lunchbox level under v4 |
 | Desk raids | level 7 | day 9 | Raiding and being raided wait until the hero has gold worth moving and a stance to set its odds; a starter cannot lose 30% of its HP to a veteran on day one |
@@ -57,6 +58,7 @@ The ladder is an ordered list of rungs in the catalog, under a new `career` rule
 | 5 | Sell a piece of gear | `itemsSold ≥ 1` | Bag page | 20 | |
 | 6 | Pick a stance | `stanceChanges ≥ 1` | Hero page | 20 | Retired in v15 (D132) |
 | 7 | Reach level 4 | `level ≥ 4` | no | 25 | |
+| 7a | Salvage a piece of gear | `itemsSalvaged ≥ 1` | Bag page | 60 | Moved here from after rung 19 in v23 (D155), as the goal after the workbench unlock |
 | 8 | Travel to the Server Room | `trips ≥ 1` | Hero page | 25 | |
 | 9 | Buy the Satchel | `bagCapacity ≥ 15` | Bag page | 30 | |
 | 10 | Answer an office decision | `choicesMade ≥ 1` | Hero page | 30 | first choice within 48 adventures of level 5 |
@@ -71,7 +73,7 @@ The ladder is an ordered list of rungs in the catalog, under a new `career` rule
 | 17 | Find a rare | `rareFinds ≥ 1` | no | 60 | none: luck stays luck |
 | 18 | Buy the Rolling Suitcase | `bagCapacity ≥ 20` | Bag page | 100 | |
 | 19 | Reach level 12 | `level ≥ 12` | no | 100 | |
-| 20–24 | Salvage, Upgrade, Reinforce to +3, Win in the Archive, Win in the Parking Garage | see v13 and v16 | Bag page / Hero page | 60–150 | Appended in v13 (D129) and v16 (D133) |
+| 20–24 | Salvage (moved to 7a in v23), Upgrade, Reinforce to +3, Win in the Archive, Win in the Parking Garage | see v13 and v16 | Bag page / Hero page | 60–150 | Appended in v13 (D129) and v16 (D133). The upgrade goal stays here: a level-4 hero needs about five more days of gold and Scrap for Mk II, and a goal that waits that long holds up every goal behind it (D155) |
 | 25 | Buy the Gym Duffel | `bagCapacity ≥ 24` | Bag page | 150 | Appended in v22 (D146); rung 18's blurb no longer calls the Rolling Suitcase the biggest bag |
 
 Eight of nineteen rungs need the companion, and each is a thing the player would do anyway; none asks for a visit for its own sake. Companion rungs alternate with passive ones so a device-only player always has a visible goal and reaches it on their own about half the time, then sees the companion rung sit until they visit. That is the one soft nudge in the design, and it costs nothing: the hero keeps earning, unlocking and finishing tasks regardless.

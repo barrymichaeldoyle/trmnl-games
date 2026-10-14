@@ -21,6 +21,7 @@ import { addMaterials, applyStep, heldMaterials, isGear, materialShortfall, next
 import { bestFitPotion, combineBatches, healPctOf, potionItem, potionStrengths, potionWord, potionsHeld, strengthById, strengthOf } from '@trmnl-games/desk-crawler/sim/core/potions'
 import type { ItemSnapshot, MaterialCount } from '@trmnl-games/desk-crawler/sim/core/types'
 import { BATCH_ITEMS, INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
+import { unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
 
 const currentTick = async (ctx: QueryCtx) => (await readWorld(ctx))?.currentTick ?? 0
 
@@ -201,7 +202,9 @@ export const mine = query({
     const capacity = hero.bagCapacity
     const used = bagUsed(asBagHero(hero), asSnapshots(items))
     const held = heldMaterials(items.map(snapshotOf))
-    const workbench = content.workbench
+    // D155: below the workbench unlock the Bag page shows neither salvage nor the workbench, only a locked card.
+    const workbenchOpen = unlocked(content, hero.level, 'workbench')
+    const workbench = workbenchOpen ? content.workbench : undefined
     // D145: whose name is on each found spare.
     const spares = await spareOwners(ctx, items)
     return {
@@ -210,6 +213,7 @@ export const mine = query({
       // D129: the material rows and the workbench's prices, absent under a catalog without one.
       materials: (workbench?.materials ?? []).map((m) => ({ id: m.id, name: m.name, glyph: m.glyph, count: held[m.id] ?? 0 })),
       workbench: workbench === undefined ? null : { affix: workbench.affix, affixes: (content.affixes ?? []).map((affix) => ({ id: affix.id, name: affix.name, blurb: affix.blurb })) },
+      workbenchUnlockLevel: content.workbench !== undefined && !workbenchOpen ? (unlockLevel(content, 'workbench') ?? null) : null,
       ladder: bagLadderView(content, hero),
       pouch: pouchView(content, hero),
       merchant: merchantView(hero, await currentTick(ctx)),
@@ -222,7 +226,7 @@ export const mine = query({
       potions: potionsHeld(items),
       // D131: one entry per strength in catalog order (count 0 included), and the combine recipe with what it would make.
       potionRows: potionStrengths(content).map((strength) => ({ templateId: strength.templateId, name: strength.name, healPct: strength.healPct, heals: Math.min(heroMaxHp(content, hero), pctOf(heroMaxHp(content, hero), strength.healPct)), count: items.find((item) => item.kind === 'potion' && item.templateId === strength.templateId)?.quantity ?? 0 })),
-      potionCombine: combineView(content, items, held),
+      potionCombine: workbenchOpen ? combineView(content, items, held) : null,
       canResume: hero.status === 'sleeping' && hero.heldItemId === undefined && !bagFull(hero, items) && hero.wakeAtTick === undefined,
       gear: items
         .filter((item) => isGear(item.kind))
@@ -320,6 +324,8 @@ export const combinePotions = mutation({
       const hero = await requirePlayableHero(ctx, user)
       if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Potions can't be combined while your hero is recovering or paused.")
       const content = await contentOf(ctx)
+      // D155: the recipe spends Scrap, which only salvage makes, so combining opens with the workbench.
+      if (content.workbench !== undefined) requireWorkbench(content, hero)
       const rule = content.potions?.combine
       const from = rule === undefined ? undefined : strengthById(content, rule.from)
       const to = rule === undefined ? undefined : strengthById(content, rule.to)
@@ -636,7 +642,7 @@ export const salvageMany = mutation({
       const hero = await requirePlayableHero(ctx, user)
       if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be salvaged while your hero is recovering or paused.")
       const content = await contentOf(ctx)
-      if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+      requireWorkbench(content, hero)
       const chosen = await bagGear(ctx, hero, args.itemIds)
       const yielded = addMaterials(...chosen.map((item) => salvageYield(content, snapshotOf(item))))
       for (const item of chosen) await ctx.db.delete(item._id)
@@ -649,6 +655,13 @@ export const salvageMany = mutation({
       return { changed: true, count: chosen.length }
     }),
 })
+
+/** D129/D155: refuse salvage and the workbench under a catalog without one, or below its unlock level. */
+function requireWorkbench(content: ContentCatalog, hero: Doc<'heroes'>): NonNullable<ContentCatalog['workbench']> {
+  if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+  if (!unlocked(content, hero.level, 'workbench')) throw appError('LOCKED', `The workbench opens at level ${unlockLevel(content, 'workbench') ?? '?'}.`)
+  return content.workbench
+}
 
 /** Refuse a workbench price the hero cannot pay, naming the shortfall. */
 function requireAffordable(content: ContentCatalog, hero: Doc<'heroes'>, held: MaterialCount, price: { gold: number; materials: MaterialCount }): void {
@@ -678,7 +691,7 @@ export const upgrade = mutation({
       const hero = await requirePlayableHero(ctx, user)
       if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "The workbench is closed while your hero is recovering or paused.")
       const content = await contentOf(ctx)
-      if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+      requireWorkbench(content, hero)
       const item = await workbenchItem(ctx, hero, args.itemId)
       const snapshot = snapshotOf(item)
       const step = nextStep(content, snapshot)
@@ -707,14 +720,14 @@ export const chooseAffix = mutation({
       const hero = await requirePlayableHero(ctx, user)
       if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "The workbench is closed while your hero is recovering or paused.")
       const content = await contentOf(ctx)
-      if (content.workbench === undefined) throw appError('WORKBENCH_UNAVAILABLE', 'There is no workbench yet.')
+      const workbench = requireWorkbench(content, hero)
       const item = await workbenchItem(ctx, hero, args.itemId)
       if (!(content.affixRarities ?? []).includes(item.rarity)) throw appError('ITEM_NOT_AVAILABLE', 'Only rare and epic gear can take an affix.')
       const affix = affixById(content, args.affixId)
       if (affix === undefined) throw appError('INVALID_INPUT', 'Unknown affix.')
       if (item.affixId === affix.id) throw appError('INVALID_INPUT', `The ${itemLabel(item)} is already ${affix.name}.`)
       const items = await heroItems(ctx, hero._id)
-      const price = content.workbench.affix
+      const price = workbench.affix
       requireAffordable(content, hero, heldMaterials(items.map(snapshotOf)), price)
       await ctx.db.patch(item._id, { affixId: affix.id })
       await adjustMaterials(ctx, hero, items, content, Object.fromEntries(Object.entries(price.materials).map(([id, n]) => [id, -n])))
