@@ -1,5 +1,5 @@
 import { catchMatches, currentGoal, describeOrder, goalLine, orderDay, orderReward, runsAt, SEASON_NAME, seasonAt, seasonEndsAt, speciesLogged, teachingHint, unlocked, type CatchRecord, type IdleAnglerCatalog, type Order } from '@trmnl-games/idle-angler/sim'
-import { mountCost, nextPegs, pegsOf } from '@trmnl-games/idle-angler/sim/shop'
+import { canFish, mountCost, nextPegs, pegsOf } from '@trmnl-games/idle-angler/sim/shop'
 import type { Doc } from '../_generated/dataModel'
 import { toAnglerState } from './adapter'
 
@@ -47,7 +47,8 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
     }),
     swappedToday: angler.swapDay === orderDay(content, now, utcOffsetSeconds),
     season: season ? { id: season, name: SEASON_NAME[season], endsAt: seasonEndsAt(now) } : null,
-    runs: runsAt(content, now).map((r) => ({ id: r.id, line: r.line, water: r.water, species: speciesName(content, r.species) })),
+    // Only runs at waters the angler can fish (D157): a newcomer is not told about the charter's cod.
+    runs: runsAt(content, now).filter((r) => canFish(content, { ...state, charterCasts: 1 }, r.water)).map((r) => ({ id: r.id, line: r.line, water: r.water, species: speciesName(content, r.species) })),
     charter: content.charterTicket ? { price: content.charterTicket.price, casts: content.charterTicket.casts, castsLeft: angler.charterCasts ?? 0 } : null,
     pegs: { pegs: pegsOf(content, state), next: nextPegs(content, state) },
     deadbait: angler.bait.deadbait ?? 0,

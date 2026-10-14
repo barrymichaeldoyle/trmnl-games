@@ -152,7 +152,7 @@ function DockPage() {
                 {water.open ? (
                   <>
                     <p className="text-sm text-muted">{BAND_LABEL[water.band]}, {WEATHER_LABEL[water.weather]?.toLowerCase()} until {time(water.weatherUntil)}</p>
-                    <p className="text-sm text-muted">Bait: {water.baits.map((b) => BAIT_LABEL[b]).join(', ')}</p>
+                    <p className="text-sm text-muted">Bait: {water.baits.filter((b) => b !== 'deadbait' || !full || full.features.deadbait).map((b) => BAIT_LABEL[b]).join(', ')}</p>
                     {held(water).length === 0 ? <p className="text-sm text-hp-ink">You have none of its bait.</p> : null}
                   </>
                 ) : water.closed ? <p className="text-sm text-muted">Open in the winter week only, when the ice is thick enough.</p> : water.charter ? <p className="text-sm text-muted">Fished on a charter ticket. <Link to="/app/idle-angler/shop" className="underline underline-offset-4">Book one in the shop</Link>.</p> : <p className="text-sm text-muted">{water.opensAfter ? <>Opens once {water.opensAfter.species} <WaterName id={water.opensAfter.waterId}>{water.opensAfter.waterName}</WaterName> species are in your logbook ({Math.min(water.opensAfter.logged, water.opensAfter.species)} so far)</> : 'Opens later'}{water.access ? <>, with the <strong>{ACCESS_NAME[water.access] ?? water.access}</strong> from the shop</> : ''}.</p>}
