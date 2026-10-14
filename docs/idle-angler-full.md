@@ -276,6 +276,8 @@ Content and art are the long poles. F1's numbers decide every price above, so F1
 
 - 2026-10-14, F6 (prepared): the MVP spec's "Not in the MVP" list keeps only what D162 leaves out. The dev deployment switched to v2 at 11:12 UTC; its first v2 tick (12) ran clean, DevWalk's goal pointer backfilled silently to "Sell a fish", achievements moved to v4, and a real screen request served a winter scene from `/art/ia/scene/v4/`. Production switches with `npx convex run --prod idleAngler/operations:setActiveContentVersion '{"contentVersion":"v2"}'`, Barry's command, after which his angler moves to v2 at its next cast.
 
+- 2026-10-14, F6: Barry switched production to content v2 (`setActiveContentVersion` returned v1 to v2). The game stays hidden; F7 (play-test, featured image, submission) is next.
+
 ## Still not in the game
 
 - Raids and meetings between anglers, prestige, XP and levels.
