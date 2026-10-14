@@ -548,6 +548,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 L6: alerts, photos and analytics built ([build notes](paper-lives.md#l6-build-2026-10-14)): the three alert kinds on the shared push machinery, the weekly photo code on the device (template v2) with the album's photos and the Photos family (achievements v2), the analytics events, and the privacy and help sections. The alert switches live on `users.alerts` beside the other games' rather than in a separate block. Deleting Paper Lives progress now also removes its achievements and career totals, which L5 left behind. The MVP build is complete; L7 (plugin and listing) is Barry's.
 
+2026-10-14, D159 L7 at Barry's request, everything but the submission ([notes](paper-lives.md#l7-2026-10-14)): the install and manage pages, the colour icon and listing image, and the private development plugin on trmnl.com (569) with its client ID in `wrangler.jsonc`. Installing on Barry's device, the status switch and the review submission are his.
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.

@@ -393,5 +393,22 @@ Next: L6, the three alert kinds, the weekly photo on the device code, the Photos
 
 Tests: alert queueing, the recheck, quiet hours and the round trip to the push service; the photo code on the device only, the weekly limit, last week's code, wrong guesses and the memorial; photos on the album and public page; deletion of photos, achievements, career and switches. 264 device previews pass the sweep with the code in the title bar; lint and the Ruby crosscheck (724 renders) pass. At 390 wide the Album, More and public life pages have no overflow or console errors.
 
-Next: L7, Barry's: the Paper Lives OAuth client, the listing image and the marketplace submission.
+Next: L7, the plugin and listing.
+
+## L7 (2026-10-14)
+
+Barry asked for everything but the submission.
+
+- **Connect pages.** `/connect/trmnl/paper-lives/install` and `/manage`, Idle Angler's pages on the shared install and management functions, gated like the other Paper Lives pages. The install asks only for a public name when the account has none, since the game names each character.
+- **Art.** A colour pixel-art icon in the style of the other two (`tools/art/gameIcons.ts`: a snapshot of a character and their dog in gold album corners over an older photo), with the web icon set under `public/games/paper-lives/` and the 512px plugin icon at [`docs/assets/paper-lives-plugin-icon.png`](assets/paper-lives-plugin-icon.png). Listing image candidate: [`docs/assets/paper-lives-featured.png`](assets/paper-lives-featured.png), the OG full layout of a fictional 34-year-old nurse with no photo code; the same picture is the game page's sample.
+- **The plugin.** Created on trmnl.com as plugin 569, in development and private, with the icon, categories entertainment, games and life, a 15-minute refresh and these URLs:
+  - Installation: `https://trmnlgames.com/connect/trmnl/paper-lives/install`
+  - Installation success webhook: `https://exciting-cormorant-948.convex.site/trmnl/paper-lives/install/success`
+  - Management: `https://trmnlgames.com/connect/trmnl/paper-lives/manage`
+  - Markup: `https://exciting-cormorant-948.convex.site/trmnl/paper-lives/v1/screen`
+  - Uninstall webhook: `https://exciting-cormorant-948.convex.site/trmnl/paper-lives/uninstall`
+  - Knowledge base: `https://trmnlgames.com/help/paper-lives`
+- **Client ID.** `TRMNL_CLIENT_ID_PAPER_LIVES` in `apps/web/wrangler.jsonc`; the manage page verifies Configure links with it. Installs exchange only the code, so no secret is stored.
+
+Left for Barry: install it on your TRMNL while the game is hidden (the admin allowlist lets you through), Save, and check the first screen, the companion and an uninstall; switch the game to preview or live from the admin page's Games card; submit for review when you choose.
 
