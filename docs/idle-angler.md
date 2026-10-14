@@ -320,13 +320,12 @@ Each step is an outward-facing action, so none was taken overnight.
 
 ## Not in the MVP
 
-P44 ([the full game](idle-angler-full.md), proposed 2026-10-14) brings further waters, seasons and runs, tournaments, daily orders and a trophy wall into the pre-launch scope if approved; this list then shrinks to what P44 keeps out.
+D162 ([the full game](idle-angler-full.md), 2026-10-14) brought further waters, seasons and runs, weekend Opens, fishmonger orders, deadbait and a trophy wall into the pre-launch scope as content v2. What is still left out:
 
 - Cosmetic nods between games (Barry, 2026-10-09: can be built later, not MVP).
 - A tackle accessory slot (floats, weights), a rotating merchant, found gear.
-- Further waters (Lake with a boat, Deep Sea charter, Frozen Lake with an ice auger), seasons and migratory runs, tournaments, a biggest-catch board.
-- Fishing meetings or raids between anglers, daily quests, prestige.
-- A trophy wall or keepsakes. Spoilage, line breaks, lost gear, deaths: never.
+- Fishing meetings or raids between anglers, prestige, XP and levels.
+- Spoilage, line breaks, lost gear, deaths: never.
 
 ## Decisions taken in this revision
 
