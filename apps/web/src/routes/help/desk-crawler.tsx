@@ -297,7 +297,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li><strong>Vampiric</strong> heals 5% of maximum HP after every win.</li>
         <li><strong>Lucky</strong> adds 20% gold from wins and finds.</li>
         <li><strong>Sturdy</strong> takes 40% less damage from traps.</li>
-        <li><strong>Thrifty</strong> keeps more gold when things go wrong: a retreat costs nothing and a knockout costs 5% of gold instead of 10%.</li>
+        <li><strong>Thrifty</strong> loses 5 points less gold when things go wrong: a retreat loses no gold instead of 5%, and a knockout loses 5% instead of 10%.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
       <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero keeps adventuring until it finds another piece. That piece is held for you, never sold or thrown away, and your hero sleeps until you make room.</p>

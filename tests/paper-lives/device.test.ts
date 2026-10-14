@@ -72,9 +72,9 @@ describe('Paper Lives screen templates', () => {
     const payload = buildPayload(input)
     const withOffset = await liquid.parseAndRender(screenMarkup.markup, { ...payload, utc_offset: utcOffset })
     const closes = new Date((payload.closes_at! + utcOffset!) * 1000).toISOString().slice(11, 16)
-    expect(withOffset).toContain(`Closes by itself at ${closes}`)
+    expect(withOffset).toContain(`The year ends at ${closes}`)
     const without = await liquid.parseAndRender(screenMarkup.markup, { ...payload, utc_offset: null })
-    expect(without).toContain('Closes by itself later today')
+    expect(without).toContain('The year ends later today')
   })
 
   it('swaps the column for the memorial once the life has ended', async () => {

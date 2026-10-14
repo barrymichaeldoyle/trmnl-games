@@ -10,10 +10,13 @@
  * lives and the code; a memorial swaps the column for the framed portrait and the epitaph.
  *
  * Template v2 (D159, L6): the weekly photo code in the title bar, as Idle Angler's fly code.
+ *
+ * Template v3: the close line reads "The year ends at 18:00" or "The year ends later today"; the winding-down sentence went,
+ * since it pushed the time off the half-width line. The payload still carries `year_end`.
  */
 import { markUri, STORY_GLYPHS, type PlMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 2
+export const TEMPLATE_VERSION = 3
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -60,7 +63,7 @@ const stats = (withMoney = true) =>
  */
 const prompt = (clamp = 2) =>
   `{% if decision %}<div class="flex flex--row flex--left flex--top gap--small stretch-x no-shrink" data-decision="{% if decision.major %}major{% else %}minor{% endif %}"><img class="${ICON}" src="{{ m_decision }}" alt=""><span class="${LABEL} label--inverted w--min-0" data-clamp="${clamp}">{{ decision.age }}: {{ decision.prompt | escape }} Decide in the companion.</span></div>` +
-  `{% elsif closes_at %}<div class="flex flex--row flex--left flex--center-y gap--small stretch-x no-shrink" data-close="true"><img class="${ICON}" src="{{ m_clock }}" alt=""><span class="${LABEL} w--min-0" data-clamp="1">{% if year_end %}The year is winding down.{% endif %}{% if utc_offset != nil %} Closes by itself at {{ closes_at | plus: utc_offset | date: "%H:%M" }}{% else %} Closes by itself later today{% endif %}</span></div>{% endif %}`
+  `{% elsif closes_at %}<div class="flex flex--row flex--left flex--center-y gap--small stretch-x no-shrink" data-close="true"><img class="${ICON}" src="{{ m_clock }}" alt=""><span class="${LABEL} w--min-0" data-clamp="1">The year ends{% if utc_offset != nil %} at {{ closes_at | plus: utc_offset | date: "%H:%M" }}{% else %} later today{% endif %}</span></div>{% endif %}`
 
 /** One line's glyph by the story's own glyph name. */
 const lineGlyph = `{% case line.glyph %}${STORY_GLYPHS.filter((g) => g !== 'none')
