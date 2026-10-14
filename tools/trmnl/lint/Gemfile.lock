@@ -165,7 +165,7 @@ GEM
       redcarpet (~> 3.6)
       rqrcode (~> 3.2)
       tzinfo (~> 2.0)
-    trmnl_preview (0.27.0)
+    trmnl_preview (0.30.2)
       activesupport (~> 8.0)
       capybara (~> 3.40)
       cgi (~> 0.5)
@@ -212,7 +212,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  trmnl_preview (= 0.27.0)
+  trmnl_preview (= 0.30.2)
 
 CHECKSUMS
   activesupport (8.1.4) sha256=891dd3fe43c4fc8391934b237b1189bb1f661c932a84a840043db9d46a4e80df
@@ -289,7 +289,7 @@ CHECKSUMS
   tilt (2.9.0) sha256=da5735d0280bba96e9a91041bb14aee435ccad5c17b0fa519249ae543d9aa3a5
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
   trmnl-liquid (0.8.2) sha256=ad47dc74afed5e2dffedee35928739950e6435584e004d340e48428860b25232
-  trmnl_preview (0.27.0) sha256=30e8cf343bbca28293575b1f15a2a6439e577765680d7c897ed10303ac54d667
+  trmnl_preview (0.30.2) sha256=a1289887aebac5314a788258d7b66f2e805c0808fd28ca99b360ceffc094d639
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   tzinfo-data (1.2026.5) sha256=0bdc3c5a540b1704f73a7b5c9be5c90bd0a5866c8e9e8e8a7885977d23a81645
   uri (1.1.2) sha256=89292e98eabbef6248b0a0ed5e7e398e152f83f17560023a6d94a7f492b169fb
