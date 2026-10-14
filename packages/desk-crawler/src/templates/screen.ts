@@ -395,7 +395,7 @@ const fitStories = `<script>
     });
     const layoutBottom = Math.min(footer.getBoundingClientRect().top, layout.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(layout).paddingBottom) || 0));
     // Boards in a bounded slot (the X half's, under its scene): drop trailing rows, and the rule above each, until the
-    // board ends inside the slot. The hero's own row goes last; the row before it goes first.
+    // board ends inside the slot, keeping the hero's own row.
     view.querySelectorAll('[data-fit-rows]').forEach(board => {
       if (!board.getClientRects().length) return;
       const rows = Array.from(board.querySelectorAll('[data-rank-row]'));
@@ -406,8 +406,10 @@ const fitStories = `<script>
       const shown = () => rows.filter(row => !row.classList.contains('hidden'));
       while (shown().length && board.getBoundingClientRect().bottom > bound + 0.5) {
         const visible = shown();
-        const own = visible[visible.length - 1].classList.contains('label--inverted') && visible.length > 1;
-        const drop = own ? visible[visible.length - 2] : visible[visible.length - 1];
+        // The hero's row stays: drop the end farther from it (the bottom on a tie), or the row before an appended hero.
+        const own = visible.findIndex(row => row.classList.contains('label--inverted'));
+        const appended = own === visible.length - 1 && own > 0 && Number(visible[own].dataset.rankRow) > Number(visible[own - 1].dataset.rankRow) + 1;
+        const drop = visible.length < 2 || own < 0 ? visible[visible.length - 1] : appended ? visible[own - 1] : own > visible.length - 1 - own ? visible[0] : visible[visible.length - 1];
         drop.classList.add('hidden');
         const rule = drop.previousElementSibling && drop.previousElementSibling.matches('.border--h-30') ? drop.previousElementSibling : drop.nextElementSibling && drop.nextElementSibling.matches('.border--h-30') ? drop.nextElementSibling : null;
         if (rule) rule.classList.add('hidden');
@@ -490,6 +492,16 @@ const rankRow = (text: string, score: string, classes: string, own: string) =>
 const columnRule = '<div class="hidden lg:block no-shrink border--v-30" data-column-rule="true"></div>'
 /** A ledger rule between board rows, X only. */
 const rankRule = '<div class="hidden lg:block border--h-30 stretch-x"></div>'
+/**
+ * Pick the rows a board of `limit` shows (D152): from `board`, the rows around the hero, its window of `limit` rows
+ * with the hero in the middle (one more above than below when even) and slid inside the rows sent. A hero outside the
+ * rows sent (`board_own` nil) keeps the first rows and takes the last one's place (`board_append`). `prefix` names the
+ * variables, so two boards in one panel do not overwrite each other.
+ */
+const boardWindow = (limit: number | string, prefix = 'board') => `{% assign board_rows = board | default: top10 | default: top5 %}` +
+  `{% assign ${prefix}_limit = ${limit} %}{% assign ${prefix}_offset = 0 %}{% assign ${prefix}_append = false %}` +
+  `{% if board_own != nil %}{% assign ${prefix}_half = ${prefix}_limit | divided_by: 2 | floor %}{% assign ${prefix}_max = board_rows.size | minus: ${prefix}_limit | at_least: 0 %}{% assign ${prefix}_offset = board_own | minus: ${prefix}_half | at_least: 0 | at_most: ${prefix}_max %}` +
+  `{% elsif rank and rank > ${prefix}_limit %}{% assign ${prefix}_limit = ${prefix}_limit | minus: 1 %}{% assign ${prefix}_append = true %}{% endif %}`
 const rankHeading = `This week{% if leaderboard_cohort_label != "" %} · {{ leaderboard_cohort_label | escape }}{% endif %}`
 const boardRow = rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')
 /**
@@ -499,9 +511,10 @@ const boardRow = rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank
  */
 const OG_PORTRAIT_ROWS = 6
 const rankColumn = (loop: string, extra = '') => `<div class="flex flex--col flex--top flex--stretch-x gap--xsmall">{% for row in board_rows ${loop} %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}${extra}</div>`
-const rankColumns = `<div class="hidden lg:block stretch-x"><div class="grid grid--cols-1 lg:grid--cols-2 gap--none lg:gap--large stretch-x">${rankColumn('limit: 5')}${rankColumn('offset: 5')}</div></div>` +
-  `{% assign board_limit = ${OG_PORTRAIT_ROWS} %}{% if rank and rank > ${OG_PORTRAIT_ROWS} %}{% assign board_limit = ${OG_PORTRAIT_ROWS - 1} %}{% endif %}{% assign board_right = board_limit | minus: 3 %}` +
-  `<div class="lg:hidden grid grid--cols-2 gap--medium stretch-x" data-board-columns="og">${rankColumn('limit: 3')}${rankColumn('offset: 3 limit: board_right', `{% if rank and rank > ${OG_PORTRAIT_ROWS} %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}`)}</div>`
+const rankColumns = `${boardWindow(10, 'x')}{% assign x_right = x_offset | plus: 5 %}{% assign x_right_limit = x_limit | minus: 5 %}` +
+  `<div class="hidden lg:block stretch-x"><div class="grid grid--cols-1 lg:grid--cols-2 gap--none lg:gap--large stretch-x">${rankColumn('offset: x_offset limit: 5')}${rankColumn('offset: x_right limit: x_right_limit')}</div></div>` +
+  `${boardWindow(OG_PORTRAIT_ROWS)}{% assign board_right = board_offset | plus: 3 %}{% assign board_right_limit = board_limit | minus: 3 %}` +
+  `<div class="lg:hidden grid grid--cols-2 gap--medium stretch-x" data-board-columns="og">${rankColumn('offset: board_offset limit: 3')}${rankColumn('offset: board_right limit: board_right_limit', `{% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}`)}</div>`
 /** Period and group caption set into the rune rule above the ranking (D92); the OG shortens "Levels" to "Lv". */
 const rankCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label lg:title--small no-shrink lg:hidden">This week{% if leaderboard_cohort_label != "" %} · {{ leaderboard_cohort_label | replace: "Levels ", "Lv " | escape }}{% endif %}</span><span class="hidden lg:inline-block label lg:title--small no-shrink">${rankHeading}</span>${ruleFill}</div>`
 /**
@@ -512,16 +525,15 @@ const OG_BOARD_ROWS = 5
 const ogBoard = `<div class="lg:hidden grow w--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall" data-board-column="og">
       ${rankCaption}
       {% unless rank %}{% if rank_status == "dormant" %}<span class="label">Not ranked while paused</span>{% else %}<span class="label">Ranking within the hour</span>{% endif %}{% endunless %}
-      {% assign board_rows = top10 | default: top5 %}{% assign board_limit = ${OG_BOARD_ROWS} %}{% if rank and rank > ${OG_BOARD_ROWS} %}{% assign board_limit = ${OG_BOARD_ROWS - 1} %}{% endif %}
-      {% for row in board_rows limit: board_limit %}${rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')}{% endfor %}
-      {% if rank and rank > ${OG_BOARD_ROWS} %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}
+      ${boardWindow(OG_BOARD_ROWS)}
+      {% for row in board_rows offset: board_offset limit: board_limit %}${rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')}{% endfor %}
+      {% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}
     </div>`
 const rankPanel = (heading: boolean) => `
       ${heading ? rankCaption : ''}
       {% unless rank %}{% if rank_status == "dormant" %}<span class="label lg:title--small">Not ranked while paused</span>{% else %}<span class="label lg:title--small">Ranking within the hour</span>{% endif %}{% endunless %}
-      {% assign board_rows = top10 | default: top5 %}
-      ${heading ? rankColumns : `{% assign board_limit = board_rows.size %}{% if rank and rank > board_rows.size and board_rows.size >= 10 %}{% assign board_limit = 9 %}{% endif %}{% for row in board_rows limit: board_limit %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}`}
-      {% if rank and rank > board_rows.size %}${rankRule}${rankRow('rank', 'leaderboard_score', 'hidden lg:flex ', 'true')}{% endif %}`
+      ${heading ? rankColumns : `${boardWindow(10, 'x')}{% for row in board_rows offset: x_offset limit: x_limit %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}`}
+      {% if x_append %}${rankRule}${rankRow('rank', 'leaderboard_score', 'hidden lg:flex ', 'true')}{% endif %}`
 
 
 /**
@@ -750,9 +762,9 @@ const xScene = (field: SceneField, code = '') => `{% if ${field} != "" %}<div cl
 const xBoard = (limit: number, fit = false) => `<div class="flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x" data-board-column="x"${fit ? ' data-fit-rows="true"' : ''}>
       ${rankCaption}
       {% unless rank %}{% if rank_status == "dormant" %}<span class="title--small">Not ranked while paused</span>{% else %}<span class="title--small">Ranking within the hour</span>{% endif %}{% endunless %}
-      {% assign board_rows = top10 | default: top5 %}{% assign board_limit = ${limit} %}{% if rank and rank > ${limit} %}{% assign board_limit = ${limit - 1} %}{% endif %}
-      {% for row in board_rows limit: board_limit %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}${rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')}{% endfor %}
-      {% if rank and rank > ${limit} %}<div class="border--h-30 stretch-x"></div>${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}
+      ${boardWindow(limit)}
+      {% for row in board_rows offset: board_offset limit: board_limit %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}${rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')}{% endfor %}
+      {% if board_append %}<div class="border--h-30 stretch-x"></div>${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}
     </div>`
 /**
  * The stories under the attention line, the recap (capped at `recapLines`, none for 0) and the badge. `inline` puts each

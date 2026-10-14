@@ -86,7 +86,7 @@ describe('first-run and companion QR fields', () => {
 describe('board rows (D89)', () => {
   it('sends the first ten rows as top10 and keeps top5 as the first five', () => {
     const top = Array.from({ length: 12 }, (_, i) => ({ rank: i + 1, name: `P${i + 1}`, hero_name: `H${i + 1}`, level: 5, score: 1000 - i }))
-    const ranking = { rank: 3, rankDelta: null, status: 'ranked' as const, cohortKey: '4-7', cohortLabel: 'Levels 4-7', score: 998, scoreAt: NOW, asOfTick: 1, builtAt: NOW, windowStart: NOW - 7 * 86_400_000, totalPlayers: 12, globalTotalPlayers: 12, top }
+    const ranking = { rank: 3, rankDelta: null, status: 'ranked' as const, cohortKey: '4-7', cohortLabel: 'Levels 4-7', score: 998, scoreAt: NOW, asOfTick: 1, builtAt: NOW, windowStart: NOW - 7 * 86_400_000, totalPlayers: 12, globalTotalPlayers: 12, top, nearby: top.slice(0, 10), nearbyOwn: 2 }
     const p = buildPayload({ ...input, ranking }) as unknown as { top5: Array<{ rank: number }>; top10: Array<{ rank: number; class: string }> }
     expect(TOP_ROWS).toBe(10)
     expect(p.top10.map((row) => row.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
@@ -94,6 +94,17 @@ describe('board rows (D89)', () => {
     expect(p.top10[0]!.class).toBe('warrior')
     const empty = buildPayload({ ...input, ranking: null }) as unknown as { top5: unknown[]; top10: unknown[] }
     expect([empty.top5, empty.top10]).toEqual([[], []])
+  })
+
+  it('sends the rows around the hero as board, with its index (D152)', () => {
+    const rows = Array.from({ length: 10 }, (_, i) => ({ rank: i + 9, name: `P${i + 9}`, hero_name: `H${i + 9}`, level: 5, score: 900 - i }))
+    const ranking = { rank: 14, rankDelta: null, status: 'ranked' as const, cohortKey: '4-7', cohortLabel: 'Levels 4-7', score: 895, scoreAt: NOW, asOfTick: 1, builtAt: NOW, windowStart: NOW - 7 * 86_400_000, totalPlayers: 41, globalTotalPlayers: 41, top: [], nearby: rows, nearbyOwn: 5 }
+    const p = buildPayload({ ...input, ranking }) as unknown as { board: Array<{ rank: number; class: string }>; board_own: number | null }
+    expect(p.board.map((row) => row.rank)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
+    expect(p.board[0]!.class).toBe('warrior')
+    expect(p.board_own).toBe(5)
+    const empty = buildPayload({ ...input, ranking: null }) as unknown as { board: unknown[]; board_own: number | null }
+    expect([empty.board, empty.board_own]).toEqual([[], null])
   })
 })
 

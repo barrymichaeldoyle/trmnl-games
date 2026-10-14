@@ -96,7 +96,7 @@ D46: the authenticated screen envelope additionally includes `desk_keepsake_code
 
 ## Canonical payload v1
 
-Root values are flat; bounded `log`, `top5` and `top10` arrays are intentionally nested. This means “Liquid-friendly,” not “every JSON value is scalar.” Omit raw IDs, emails, tokens/hashes, seeds, hidden rolls, full bag contents and structured combat detail.
+Root values are flat; bounded `log`, `top5`, `top10` and `board` arrays are intentionally nested. This means “Liquid-friendly,” not “every JSON value is scalar.” Omit raw IDs, emails, tokens/hashes, seeds, hidden rolls, full bag contents and structured combat detail.
 
 | Field(s) | Type / meaning |
 | --- | --- |
@@ -133,6 +133,7 @@ Root values are flat; bounded `log`, `top5` and `top10` arrays are intentionally
 | `total_players`, `global_total_players` | Selected-group population and the population ranked on `recent_7d` across all groups (dormant heroes excluded) from the same publication; 0 with no applicable publication/unlinked scope |
 | `top5` | Max 5 `{ rank, name, hero_name, level, class, score }` entries; `name` is owner alias |
 | `top10` | The same group's first 10 rows in the same shape; `top5` is its first five. The X board draws it (template v37, D89); a template falls back to `top5` without it. Additive |
+| `board`, `board_own` | Up to 10 consecutive rows of the same group around the hero, same shape, and the hero's index in them (D152). Every device board draws the slice of its size centred on the hero. When the hero is unranked or outside the stored Top 100, `board` is the first rows and `board_own` is null, and the board appends the hero's row instead. Additive |
 | `attention` | String/null, <=120 supported characters: service pause > unlinked > delayed updates > death/revival > inventory sleep/held-find or scheduled-wake guidance > otherwise null; gameplay status remains visible independently |
 | `plugin_instance_name` | Sanitized <=40-character label or “Desk Crawler” |
 | `scene_url`, `scene_url_small` | Public versioned scene images (`/art/scene/v5/<biome>/<day-or-night>/<occasion-or-plain>/<pose>/<subject>/<scale>.png`) for the full (760×200) and smaller (304×80) layouts; empty when no art origin is configured. Canonical payloads default to day; the screen envelope selects the local sky using the request time and TRMNL offset (D50). Since D139 the payload names the occasion live on the device's local date (`plain` otherwise), so the scene dresses for it. Frozen v4 paths (no occasion segment) and v3 night paths (no sky segment) remain served. Additive v1 fields (revision 12) |

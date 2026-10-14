@@ -38,8 +38,26 @@ export async function maskedEntries(ctx: QueryCtx, entries: Doc<'leaderboardGene
 }
 
 /**
+ * The group's first `TOP_ROWS` rows and the `TOP_ROWS` rows around the hero (D152), masked in one pass. Outside the
+ * stored Top 100 the hero has no neighbours to show, so the window is the first rows and `nearbyOwn` is null.
+ */
+async function deviceRows(ctx: QueryCtx, entries: Doc<'leaderboardGenerations'>['entries'], heroId: string) {
+  const ownIndex = entries.findIndex((row) => row.heroId === heroId)
+  const start = ownIndex < 0 ? 0 : Math.max(0, Math.min(ownIndex - TOP_ROWS / 2, entries.length - TOP_ROWS))
+  const end = Math.max(TOP_ROWS, start + TOP_ROWS)
+  // Only the first rows and the window are read: the rows between them are never masked.
+  const wanted = entries.slice(0, end).filter((_, index) => index < TOP_ROWS || index >= start)
+  const masked = await maskedEntries(ctx, wanted, wanted.length)
+  return {
+    top: masked.slice(0, TOP_ROWS),
+    nearby: masked.slice(masked.length - Math.min(TOP_ROWS, entries.length)),
+    nearbyOwn: ownIndex < 0 ? null : ownIndex - start,
+  }
+}
+
+/**
  * Device ranking (D20/D31/D32): the hero's own seven-day group rank from the
- * published set, its group's first `TOP_ROWS` rows and both populations. Fixed indexed reads;
+ * published set, its group's first `TOP_ROWS` rows, the rows around it and both populations. Fixed indexed reads;
  * the captured cohort comes from the hero's own row, never from live level.
  */
 export async function readDeviceRanking(ctx: QueryCtx, world: Doc<'worldState'> | null, hero: Doc<'heroes'>): Promise<PayloadRanking | null> {
@@ -71,6 +89,6 @@ export async function readDeviceRanking(ctx: QueryCtx, world: Doc<'worldState'> 
     windowStart: hourStart(publication.scoreAt) - (WINDOW_7D_HOURS - 1) * HOUR_MS,
     totalPlayers: generation?.totalPlayers ?? 0,
     globalTotalPlayers: publication.globalTotalPlayers,
-    top: generation ? await maskedEntries(ctx, generation.entries, TOP_ROWS) : [],
+    ...(await deviceRows(ctx, generation?.entries ?? [], hero._id)),
   }
 }

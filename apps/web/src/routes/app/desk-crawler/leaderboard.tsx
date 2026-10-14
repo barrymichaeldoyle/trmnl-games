@@ -29,6 +29,30 @@ const groupLabel = (key: string) => (key === 'all' ? 'All heroes' : `Levels ${ke
 
 const updatedAt = (date: Date) => date.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
+type Row = { rank: number; name: string; hero_name: string; level: number; score: number; profile?: boolean }
+/** The neighbours block shows once the hero sits below this many rows (zero-based index), where the top of the list stops showing it. */
+const AROUND_FROM = 5
+
+function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) {
+  return (
+    <li aria-current={own ? 'true' : undefined} className={`flex min-w-0 items-start gap-3 py-3 ${own ? '-mx-2 bg-ground px-2 outline-2 outline-gold' : ''}`}>
+      {/* The podium wears a crown and medals beside its gold numerals; the rest keep a blank column so names stay aligned. */}
+      <span aria-hidden="true" className="flex h-6 w-4 shrink-0 items-center text-gold-ink">{row.rank === 1 ? <Glyph name="crown" /> : row.rank <= 3 ? <Glyph name="medal" /> : null}</span>
+      <span className={`-ml-1 w-7 text-right font-bold tabular-nums ${row.rank <= 3 ? 'hud text-sm leading-6 text-gold-ink' : ''}`}>{row.rank}</span>
+      <span className="min-w-0 flex-1 [overflow-wrap:break-word]">
+        {/* D109: a hero whose owner made its page public links to it. */}
+        {row.profile ? (
+          <Link to="/desk-crawler/heroes/$alias" params={{ alias: row.name }} className="block font-semibold underline decoration-dotted underline-offset-4">{breakable(row.name)}</Link>
+        ) : (
+          <span className="block font-semibold">{breakable(row.name)}</span>
+        )}
+        {row.hero_name ? <span className="block text-sm text-muted">{row.hero_name}</span> : null}
+      </span>
+      <span className={`min-w-0 max-w-[45%] shrink-0 text-right text-sm font-semibold tabular-nums [overflow-wrap:anywhere] ${board === 'overall' ? 'text-gold-ink' : 'text-xp-ink'}`}>{board === 'overall' ? `Level ${row.level}` : `${row.score.toLocaleString()} XP`}</span>
+    </li>
+  )
+}
+
 function Leaderboard() {
   const [board, setBoard] = useState<Board>('recent_24h')
   const [cohortKey, setCohortKey] = useState<string | undefined>(undefined)
@@ -38,6 +62,11 @@ function Leaderboard() {
   const ownGroup = data?.ownCohortKey ?? (hero ? levelGroup(hero.level).key : '1-3')
   const groups = [...new Set(['1-3', '4-7', '8-11', ownGroup, ...(cohortKey ? [cohortKey] : [])])]
   const stopped = hero && (hero.status === 'paused' || (hero.status === 'sleeping' && hero.wakeAtTick === null))
+  // D152: below the top five, the hero's neighbours lead the card, two either side, before the full list.
+  const entries: Row[] = data?.published ? data.entries : []
+  const ownIndex = data?.published && data.own ? entries.findIndex((row) => row.rank === data.own!.rank) : -1
+  const aroundStart = Math.max(0, Math.min(ownIndex - 2, entries.length - 5))
+  const around = ownIndex >= AROUND_FROM ? entries.slice(aroundStart, aroundStart + 5) : []
   return (
     <>
       <h1 className="font-display text-3xl font-bold">Rankings</h1>
@@ -83,27 +112,20 @@ function Leaderboard() {
           ) : (
             <p className="mb-3 text-sm text-muted">{stopped && board !== 'overall' ? 'Unranked: stopped, with no XP left in this period.' : 'Your hero’s rank appears at the next hourly update.'}</p>
           )}
+          {around.length > 0 ? (
+            <section aria-label="Around you" className="mb-4">
+              <h3 className="mb-1 text-sm font-semibold text-muted">Around you</h3>
+              <ol className="flex flex-col divide-y divide-rule">
+                {around.map((row: Row) => <RankRow key={row.rank} row={row} own={data.own?.rank === row.rank} board={board} />)}
+              </ol>
+            </section>
+          ) : null}
+          {around.length > 0 ? <h3 className="mb-1 text-sm font-semibold text-muted">Top {data.entries.length}</h3> : null}
           {data.entries.length === 0 ? (
             <p>No ranked heroes in this group for this period.</p>
           ) : (
             <ol className="flex flex-col divide-y divide-rule">
-              {data.entries.map((row: { rank: number; name: string; hero_name: string; level: number; score: number; profile?: boolean }) => (
-                <li key={row.rank} aria-current={data.own?.rank === row.rank ? 'true' : undefined} className={`flex min-w-0 items-start gap-3 py-3 ${data.own?.rank === row.rank ? '-mx-2 bg-ground px-2 outline-2 outline-gold' : ''}`}>
-                  {/* The podium wears a crown and medals beside its gold numerals; the rest keep a blank column so names stay aligned. */}
-                  <span aria-hidden="true" className="flex h-6 w-4 shrink-0 items-center text-gold-ink">{row.rank === 1 ? <Glyph name="crown" /> : row.rank <= 3 ? <Glyph name="medal" /> : null}</span>
-                  <span className={`-ml-1 w-7 text-right font-bold tabular-nums ${row.rank <= 3 ? 'hud text-sm leading-6 text-gold-ink' : ''}`}>{row.rank}</span>
-                  <span className="min-w-0 flex-1 [overflow-wrap:break-word]">
-                    {/* D109: a hero whose owner made its page public links to it. */}
-                    {row.profile ? (
-                      <Link to="/desk-crawler/heroes/$alias" params={{ alias: row.name }} className="block font-semibold underline decoration-dotted underline-offset-4">{breakable(row.name)}</Link>
-                    ) : (
-                      <span className="block font-semibold">{breakable(row.name)}</span>
-                    )}
-                    {row.hero_name ? <span className="block text-sm text-muted">{row.hero_name}</span> : null}
-                  </span>
-                  <span className={`min-w-0 max-w-[45%] shrink-0 text-right text-sm font-semibold tabular-nums [overflow-wrap:anywhere] ${board === 'overall' ? 'text-gold-ink' : 'text-xp-ink'}`}>{board === 'overall' ? `Level ${row.level}` : `${row.score.toLocaleString()} XP`}</span>
-                </li>
-              ))}
+              {data.entries.map((row: Row) => <RankRow key={row.rank} row={row} own={data.own?.rank === row.rank} board={board} />)}
             </ol>
           )}
           {data.totalPlayers > data.entries.length ? <p className="mt-3 text-sm text-muted">Top {data.entries.length} of {data.totalPlayers.toLocaleString()} heroes.</p> : null}

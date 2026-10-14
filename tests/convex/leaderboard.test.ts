@@ -2,6 +2,7 @@
 import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import schema from '../../apps/backend/convex/schema'
+import { readDeviceRanking } from '../../apps/backend/convex/lib/rankingRead'
 import { runTick, seedHero, seedWorld, world, type T } from './helpers'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
@@ -75,6 +76,24 @@ describe('hourly leaderboard publication', () => {
       expect(generation.entries.map(e => e.rank)).toEqual(Array.from({ length: 100 }, (_, i) => i + 1))
       expect(ranks.filter(r => r.generationId === generation._id).map(r => r.rank).sort((a,b) => a-b)).toEqual(Array.from({ length: expected }, (_, i) => i + 1))
     }
+  })
+
+  it('sends the device the first rows and the ten rows around the hero (D152)', { timeout: 30_000 }, async () => {
+    await seedWorld(t)
+    const heroes = []
+    for (let i = 0; i < 25; i++) heroes.push(await seedHero(t, { status: 'paused', pausedFromStatus: 'exploring', level: 5, hp: 148, scoreHour: Math.floor(PUBLISH_SLOT / HOUR) * HOUR, scoreHourXp: 100 - i }))
+    await runTick(t)
+    const device = async (index: number) => await t.run(async (ctx) => await readDeviceRanking(ctx, await ctx.db.query('worldState').first(), (await ctx.db.get(heroes[index]!))!))
+    const ranks = (rows: ReadonlyArray<{ rank: number }>) => rows.map((row) => row.rank)
+    const mid = (await device(13))!
+    expect(mid.rank).toBe(14)
+    expect(ranks(mid.top)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    expect([ranks(mid.nearby), mid.nearbyOwn]).toEqual([[9, 10, 11, 12, 13, 14, 15, 16, 17, 18], 5])
+    // Near either end the window stays ten rows long.
+    const second = (await device(1))!
+    expect([ranks(second.nearby), second.nearbyOwn]).toEqual([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 1])
+    const last = (await device(24))!
+    expect([ranks(last.nearby), last.nearbyOwn]).toEqual([[16, 17, 18, 19, 20, 21, 22, 23, 24, 25], 9])
   })
 
   it('computes same-board deltas across publications and cleans sets older than the previous one', async () => {

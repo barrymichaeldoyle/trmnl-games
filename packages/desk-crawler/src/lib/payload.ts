@@ -113,8 +113,14 @@ export interface PayloadRanking {
   readonly totalPlayers: number
   readonly globalTotalPlayers: number
   /** The group's first `TOP_ROWS` rows. */
-  readonly top: ReadonlyArray<{ rank: number; name: string; hero_name: string; level: number; score: number }>
+  readonly top: ReadonlyArray<RankingRow>
+  /** Up to `TOP_ROWS` consecutive rows around the hero (D152); the first rows when the hero is not among them. */
+  readonly nearby: ReadonlyArray<RankingRow>
+  /** The hero's index in `nearby`, or null when the hero is not in it. */
+  readonly nearbyOwn: number | null
 }
+
+type RankingRow = { rank: number; name: string; hero_name: string; level: number; score: number }
 
 const iso = (timestamp: number) => new Date(timestamp).toISOString().replace(/\.\d{3}Z$/, 'Z')
 const clampPct = (value: number) => Math.max(0, Math.min(100, value))
@@ -165,6 +171,8 @@ function rankingFields(ranking: PayloadRanking | null, unlinked: boolean, timeZo
       global_total_players: unlinked ? 0 : (ranking?.globalTotalPlayers ?? 0),
       top5: [] as Array<{ rank: number; name: string; hero_name: string; level: number; class: string; score: number }>,
       top10: [] as Array<{ rank: number; name: string; hero_name: string; level: number; class: string; score: number }>,
+      board: [] as Array<{ rank: number; name: string; hero_name: string; level: number; class: string; score: number }>,
+      board_own: null as number | null,
       leaderboard_as_of_label: 'Ranking within the hour',
     }
   }
@@ -185,6 +193,8 @@ function rankingFields(ranking: PayloadRanking | null, unlinked: boolean, timeZo
     global_total_players: ranking.globalTotalPlayers,
     top5: ranking.top.slice(0, 5).map((row) => ({ ...row, class: 'warrior' })),
     top10: ranking.top.slice(0, TOP_ROWS).map((row) => ({ ...row, class: 'warrior' })),
+    board: ranking.nearby.map((row) => ({ ...row, class: 'warrior' })),
+    board_own: ranking.nearbyOwn,
     leaderboard_as_of_label: `${asOf.label} ${asOf.offset}`,
   }
 }

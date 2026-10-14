@@ -57,6 +57,18 @@ const olderLogs: PayloadInput['logs'] = Array.from({ length: 14 }, (_, i) => {
 })
 
 export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
+  const topRows = [
+    { rank: 1, name: 'Ana', hero_name: 'Pip', level: 7, score: 2410 },
+    { rank: 2, name: 'Bo', hero_name: 'Staple', level: 6, score: 1990 },
+    { rank: 3, name: 'barrymichaeldoyle', hero_name: 'Baz', level: 5, score: 1840 },
+    { rank: 4, name: 'Cy', hero_name: 'Mug', level: 5, score: 1700 },
+    { rank: 5, name: 'Dee', hero_name: 'Clip', level: 4, score: 1515 },
+    { rank: 6, name: 'Eli', hero_name: 'Toner', level: 6, score: 1390 },
+    { rank: 7, name: 'Fen', hero_name: 'Lanyard', level: 4, score: 1210 },
+    { rank: 8, name: 'Gus', hero_name: 'Memo', level: 5, score: 1085 },
+    { rank: 9, name: 'Hal', hero_name: 'Badge', level: 4, score: 940 },
+    { rank: 10, name: 'Ivy', hero_name: 'Ream', level: 7, score: 815 },
+  ]
   const base: PayloadInput = {
     now: NOW,
     world: { currentTick: 120, lastCompletedTick: 120, lastCompletedAt: NOW - 7 * 60_000, createdAt: NOW - 86_400_000, ticksPaused: false, maintenanceMode: false },
@@ -107,20 +119,31 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       windowStart: NOW - 167 * 3_600_000,
       totalPlayers: 41,
       globalTotalPlayers: 212,
-      top: [
-        { rank: 1, name: 'Ana', hero_name: 'Pip', level: 7, score: 2410 },
-        { rank: 2, name: 'Bo', hero_name: 'Staple', level: 6, score: 1990 },
-        { rank: 3, name: 'barrymichaeldoyle', hero_name: 'Baz', level: 5, score: 1840 },
-        { rank: 4, name: 'Cy', hero_name: 'Mug', level: 5, score: 1700 },
-        { rank: 5, name: 'Dee', hero_name: 'Clip', level: 4, score: 1515 },
-        { rank: 6, name: 'Eli', hero_name: 'Toner', level: 6, score: 1390 },
-        { rank: 7, name: 'Fen', hero_name: 'Lanyard', level: 4, score: 1210 },
-        { rank: 8, name: 'Gus', hero_name: 'Memo', level: 5, score: 1085 },
-        { rank: 9, name: 'Hal', hero_name: 'Badge', level: 4, score: 940 },
-        { rank: 10, name: 'Ivy', hero_name: 'Ream', level: 7, score: 815 },
-      ],
+      top: topRows,
+      // Ranked third, so the window is the first rows with the hero third (D152).
+      nearby: topRows,
+      nearbyOwn: 2,
     },
   }
+  /** Base's ranking with `patch`, its neighbour window (D152) the first rows with the hero found by rank. */
+  const ranked = (patch: Partial<NonNullable<PayloadInput['ranking']>>): NonNullable<PayloadInput['ranking']> => {
+    const ranking = { ...base.ranking!, ...patch }
+    const own = ranking.top.findIndex((row) => row.rank === ranking.rank)
+    return { ...ranking, nearby: patch.nearby ?? ranking.top, nearbyOwn: patch.nearbyOwn !== undefined ? patch.nearbyOwn : own < 0 ? null : own }
+  }
+  // A hero mid-board (D152): ranked 14th of 41, so the window holds ranks 9 to 18 with the hero sixth.
+  const midRows = [
+    { rank: 9, name: 'Hal', hero_name: 'Badge', level: 4, score: 940 },
+    { rank: 10, name: 'Ivy', hero_name: 'Ream', level: 7, score: 815 },
+    { rank: 11, name: 'Jo', hero_name: 'Ledger', level: 5, score: 790 },
+    { rank: 12, name: 'Kit', hero_name: 'Folder', level: 4, score: 742 },
+    { rank: 13, name: 'Lou', hero_name: 'Stamp', level: 6, score: 701 },
+    { rank: 14, name: 'barrymichaeldoyle', hero_name: 'Baz', level: 5, score: 655 },
+    { rank: 15, name: 'Mo', hero_name: 'Tack', level: 4, score: 610 },
+    { rank: 16, name: 'Nat', hero_name: 'Quill', level: 5, score: 588 },
+    { rank: 17, name: 'Oz', hero_name: 'Binder', level: 6, score: 540 },
+    { rank: 18, name: 'Pam', hero_name: 'Eraser', level: 4, score: 512 },
+  ]
 
   const hero = (patch: Partial<NonNullable<PayloadInput['hero']>>) => ({ ...base.hero!, ...patch })
   const officeLogs: PayloadInput['logs'] = [{ at: NOW - 7 * 60_000, kind: 'combat', summary: 'Filed a [[Paper Imp]] under defeated. +6 XP, +2 gold.', deltas: { xpEarned: 6, gold: 2, hp: -4 } }]
@@ -134,7 +157,7 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     dead: { ...base, hero: hero({ status: 'dead', hp: 0, reviveAtTick: 125 }), latestEvent: { kind: 'death', outcome: { variant: 'combat', monsterId: 'firewall_gremlin', elite: false } }, logs: [{ at: NOW - 7 * 60_000, kind: 'death', summary: 'Flattened by a [[Firewall Gremlin]]. Lost 64 gold.', deltas: { xpEarned: 0, gold: -64, hp: -118 } }, ...base.logs] },
     travelling: { ...base, hero: hero({ status: 'travelling', targetBiomeId: 'cafeteria_depths', arriveAtTick: 121 }), latestEvent: { kind: 'system' }, logs: [{ at: NOW - 3 * 60_000, kind: 'system', summary: 'Set off for the Cafeteria Depths.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs] },
     sleeping: { ...base, hero: hero({ status: 'sleeping' }), heldItemName: 'Rare Spork Halberd', bagUsed: 20, latestEvent: { kind: 'loot', outcome: { variant: 'loot', found: 'gear' } }, logs: [{ at: NOW - 7 * 60_000, kind: 'loot', summary: 'Found a [[Rare Spork Halberd]]. Bag full. Holding it until you make room.' }, ...base.logs] },
-    paused: { ...base, hero: hero({ status: 'paused' }), ranking: { ...base.ranking!, rank: null, rankDelta: null, status: 'dormant', score: null } },
+    paused: { ...base, hero: hero({ status: 'paused' }), ranking: ranked({ rank: null, rankDelta: null, status: 'dormant', score: null }) },
     quarantined: { ...base, hero: hero({ quarantined: true }) },
     // D79: a pending choice shows the decision notice; the offer is the newest story.
     choice: { ...base, hero: hero({ choiceExpiresAtTick: 216 }), logs: [{ at: NOW - 7 * 60_000, kind: 'choice', summary: 'A wallet is lying by the lifts, full of gold, with a photo of a cat inside.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs], latestEvent: { kind: 'choice' } },
@@ -148,7 +171,7 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       latestEvent: { kind: 'combat', outcome: { variant: 'combat', monsterId: 'microwave_wraith', elite: true, outcome: 'victory' } },
       ownerAlias: 'A_Very_Long_Alias__',
       // Widest case for the unclamped rank rows: a 20-character public name with a five-digit score.
-      ranking: { ...base.ranking!, rank: 1, score: 12840, top: [{ rank: 1, name: 'Maximilian_Wolfgangs', hero_name: 'Sir Staplington', level: 12, score: 12840 }, ...base.ranking!.top.slice(1)] },
+      ranking: ranked({ rank: 1, score: 12840, top: [{ rank: 1, name: 'Maximilian_Wolfgangs', hero_name: 'Sir Staplington', level: 12, score: 12840 }, ...base.ranking!.top.slice(1)] }),
       logs: [{ at: NOW - 7 * 60_000, kind: 'combat', summary: 'Sent an elite [[Microwave Wraith]] back to the kitchen. +188 XP, +57 gold. Reached level 12! Found a [[Rare Ladle of Ruin]].', deltas: { xpEarned: 188, gold: 57, hp: -48 } }, ...base.logs],
       // The longest task labels and goal title, so the to-do column wraps and the goal clamps at their worst.
       todoTasks: [
@@ -184,7 +207,8 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     unlinked: { ...base, hero: null, ranking: null, logs: [], latestEvent: null },
     // Setup screen while the service is paused: no code to scan, so the panel says so instead of asking for a scan.
     unlinkedPaused: { ...base, hero: null, ranking: null, logs: [], latestEvent: null, world: { ...base.world!, maintenanceMode: true } },
-    firstRun: { ...base, hero: hero({ level: 1, xp: 0, hp: 60, gold: 0, biomeId: 'office_cubicles', lastTick: 0 }), logs: [], latestEvent: null, ranking: { ...base.ranking!, rank: null, rankDelta: null, status: 'awaiting', score: null, top: [] } },
+    midBoard: { ...base, ranking: ranked({ rank: 14, score: 655, nearby: midRows, nearbyOwn: 5 }) },
+    firstRun: { ...base, hero: hero({ level: 1, xp: 0, hp: 60, gold: 0, biomeId: 'office_cubicles', lastTick: 0 }), logs: [], latestEvent: null, ranking: ranked({ rank: null, rankDelta: null, status: 'awaiting', score: null, top: [] }) },
   }
 
   // A fictional public sample generated through the same payload and templates.
@@ -249,7 +273,7 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     longHero: { ...base, hero: hero({ name: 'W'.repeat(16) }), logs: denseLogs('Filed a [[Paper Imp]] under defeated.') },
     denseRaid: { ...base, logs: denseLogs("The raid on [[Maximilian_Wolfgangs]]'s desk went badly. Dropped the loot on the way out.").map(log => ({ ...log, kind: 'raid', deltas: { xpEarned: 0, gold: -1240, hp: -54 } })) },
     noMetadata: { ...base, logs: denseLogs('A quiet moment.').map(({ deltas: _deltas, ...entry }) => entry) },
-    largeRanking: { ...base, logs: denseLogs('Filed a [[Paper Imp]] under defeated.'), ranking: { ...base.ranking!, rank: 12345, totalPlayers: 999999, top: base.ranking!.top.map(row => ({ ...row, score: 999999 })) } },
+    largeRanking: { ...base, logs: denseLogs('Filed a [[Paper Imp]] under defeated.'), ranking: ranked({ rank: 12345, totalPlayers: 999999, top: base.ranking!.top.map(row => ({ ...row, score: 999999 })) }) },
   })
 
   const marketing: Record<string, PayloadInput> = {
@@ -261,7 +285,7 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       hero: hero({ name: 'Pip', level: 7, xp: 412, hp: 141, stance: 'bold' }),
       logs: base.logs.map((log, i) => i === 2 ? { at: log.at, kind: 'raid', summary: "Raided [[Bo]]'s desk while they were at lunch.", deltas: { xpEarned: 0, gold: 31, hp: -17 } } : log),
       goal: { title: 'Win a fight in the Cafeteria Depths', value: 0, target: 1, gold: 50 },
-      ranking: { ...base.ranking!, top: base.ranking!.top.map(row => row.rank === 3 ? { ...row, name: 'Steve', hero_name: 'Pip' } : row) },
+      ranking: ranked({ top: base.ranking!.top.map(row => row.rank === 3 ? { ...row, name: 'Steve', hero_name: 'Pip' } : row) }),
     },
   }
   return { groups: { states, recap: recapStates, potionFinds: potionStates, noEffect: noEffectStates, marketing }, overnightEntries, base }

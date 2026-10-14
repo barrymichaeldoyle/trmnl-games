@@ -31,7 +31,7 @@ Publications pin `paginationVersion: 1` for portable index-key cursors. Keep `ne
 
 ## Read contracts
 
-Device resolves published pointer, own `heroRanks` row for recent_7d, its captured cohort generation, Top 5/count, global publication count/cutoff. If own rank is absent, use current-level cohort only to locate an existing board and show null rank. Fixed bounded lookups; no global scans, live count or history scan.
+Device resolves published pointer, own `heroRanks` row for recent_7d, its captured cohort generation, Top 10/count, the ten rows around the hero from the stored Top 100 (D152), global publication count/cutoff. If own rank is absent, use current-level cohort only to locate an existing board and show null rank. Fixed bounded lookups; no global scans, live count or history scan.
 
 Web `leaderboard.view` selects board/cohort and returns Top 100, own rank only if it belongs to that selected cohort, score/period/cohort/count/cutoff/publication identity. Offer a link back to the own group when browsing another. Public entries contain aliases/hero name/level/class plus recent score where applicable; never auth IDs/private gear/logs.
 

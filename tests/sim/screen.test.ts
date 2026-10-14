@@ -239,12 +239,12 @@ describe('full layout', () => {
     expect(xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     expect(ogPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6])
     // A hero below the tenth row takes the tenth row's place in the X landscape, the fifth beside the OG scene, and the
-    // sixth in the OG portrait; the X portrait appends it.
+    // sixth in the OG portrait, and the fifth of the X portrait's right column.
     const eleventh = boards(await render({ ...board(11, 400), top10: ten }))
     expect(eleventh.xLandscape.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [6, false], [7, false], [8, false], [9, false], [11, true]])
     expect(eleventh.ogLandscape.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, false], [4, false], [11, true]])
     expect(eleventh.ogPortrait.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [11, true]])
-    expect(eleventh.xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+    expect(eleventh.xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 11])
     // An older payload without top10 still draws its five rows.
     expect(boards(await render(board(3))).xLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5])
   })
@@ -257,6 +257,25 @@ describe('full layout', () => {
     expect(twelfth.ogLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 12])
     expect(twelfth.xLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 12])
     expect(twelfth.xLandscape.slice(0, 5).every((r) => !r.own)).toBe(true)
+  })
+
+  it('centres every board on the hero from the rows around it (D152)', async () => {
+    const window = Array.from({ length: 10 }, (_, i) => ({ rank: i + 9, name: `P${i + 9}`, hero_name: `H${i + 9}`, level: 4, score: 900 - i * 10 }))
+    const mid = boards(await render({ ...board(14, 850), board: window, board_own: 5 }))
+    // Ten rows on the X, the hero sixth; five beside the OG scene and six in the OG portrait, the hero in the middle.
+    expect(mid.xLandscape.map((r) => r.rank)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
+    expect(mid.xPortrait.map((r) => r.rank)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
+    expect(mid.ogLandscape.map((r) => [r.rank, r.own])).toEqual([[12, false], [13, false], [14, true], [15, false], [16, false]])
+    expect(mid.ogPortrait.map((r) => r.rank)).toEqual([11, 12, 13, 14, 15, 16])
+    // Near either end the window slides inside the rows sent rather than leaving blanks.
+    const top = Array.from({ length: 10 }, (_, i) => ({ rank: i + 1, name: `P${i + 1}`, hero_name: `H${i + 1}`, level: 4, score: 900 - i * 10 }))
+    expect(boards(await render({ ...board(2, 890), board: top, board_own: 1 })).ogLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5])
+    const last = boards(await render({ ...board(18, 810), board: window, board_own: 9 }))
+    expect(last.ogLandscape.map((r) => [r.rank, r.own])).toEqual([[14, false], [15, false], [16, false], [17, false], [18, true]])
+    // A short board shows what there is.
+    expect(boards(await render({ ...board(3), board: top.slice(0, 4), board_own: 2 })).ogLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4])
+    // A hero outside the rows sent keeps the first rows and takes the last one's place.
+    expect(boards(await render({ ...board(140, 20), board: top, board_own: null })).ogLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 140])
   })
 
   it('explains an absent rank without marking any row', async () => {
