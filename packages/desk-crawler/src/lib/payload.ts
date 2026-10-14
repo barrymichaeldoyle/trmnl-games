@@ -246,7 +246,10 @@ export function buildPayload(input: PayloadInput) {
   const servicePaused = world !== null && (world.ticksPaused || world.maintenanceMode)
   const gameAsOf = lastCompletedAt === undefined ? null : formatLocal(lastCompletedAt, input.timezone)
   const logs = input.logs.slice(0, MAX_LOGS).map((log) => {
-    const { narrative, changes } = logPresentation(log, { compactGold: true })
+    // The device draws each change behind its mark, so a row without one already reads as no effect (the companion
+    // still says so). Every signed number is tied to its unit, which names the mark ("+3 bag slots", "−12k gold").
+    const { narrative, changes: told } = logPresentation(log, { compactGold: true })
+    const changes = told.filter((part) => part !== 'No effect').map((part) => part.replace(/^([+−-]\d+k?) /, '$1\u00a0'))
     return { at: iso(log.at), u: Math.floor(log.at / 1000), t: formatLocal(log.at, input.timezone).label, k: log.kind, s: keepUnitsTogether(log.summary), n: keepUnitsTogether(narrative), d: keepUnitsTogether(changes.join(' · ')), ...(log.compact === undefined ? {} : { c: log.compact }) }
   })
 

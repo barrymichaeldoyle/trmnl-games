@@ -1,5 +1,6 @@
 /**
- * Four self-contained TRMNL layouts. Template v55 shows a dug-in elite in the attention slot of every layout: its name,
+ * Four self-contained TRMNL layouts. Template v56 draws each story's changes behind its HUD mark, like the recap ("+14"
+ * behind the letters XP), without "No effect", and puts changes in words under the story on the X portrait ledger (D165). Template v55 shows a dug-in elite in the attention slot of every layout: its name,
  * ten HP ticks and the share left, and in the full layouts when it leaves (D163). Template v54 makes the OG quarter say a pause, a knockout's return time or a set
  * wake time, keeps the level beside a long name, gives its stories the width the QR column did not use, and shows the
  * standing code at 2x in the OG portrait quarter; the X portrait quarter gains the status line (D160). Template v53 gives the X full landscape today's to-do tasks at the head of its
@@ -44,7 +45,7 @@
 import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 
-export const TEMPLATE_VERSION = 55
+export const TEMPLATE_VERSION = 56
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -148,7 +149,7 @@ const HUD_ASSIGNS =
  `{% assign hud_heart_full_ink = "${hudMarkUri('heartFull', 36, 32, '#ff0000')}" %}{% assign hud_heart_half_ink = "${hudMarkUri('heartHalf', 36, 32, '#ff0000')}" %}{% assign hud_heart_empty_ink = "${hudMarkUri('heartEmpty', 36, 32, '#ff0000')}" %}` +
   `{% assign hud_tick_full = "${hudMarkUri('tickFull', 36, 16)}" %}{% assign hud_tick_half = "${hudMarkUri('tickHalf', 36, 16)}" %}{% assign hud_tick_empty = "${hudMarkUri('tickEmpty', 36, 16)}" %}` +
   `{% assign hud_sword = "${hudMarkUri('sword', 24, 24)}" %}{% assign hud_shield = "${hudMarkUri('shield', 24, 24)}" %}` +
-  `{% assign hud_coin = "${hudMarkUri('coin', 24, 24)}" %}{% assign hud_potion = "${hudMarkUri('potion', 24, 24)}" %}{% assign hud_star = "${hudMarkUri('star', 24, 24)}" %}{% assign hud_bag = "${hudMarkUri('bag', 24, 24)}" %}` +
+  `{% assign hud_coin = "${hudMarkUri('coin', 24, 24)}" %}{% assign hud_potion = "${hudMarkUri('potion', 24, 24)}" %}{% assign hud_xp = "${hudMarkUri('xp', 48, 32)}" %}{% assign hud_bag = "${hudMarkUri('bag', 24, 24)}" %}` +
   `{% assign hud_stance_cautious = "${hudMarkUri('stanceCautious', 24, 24)}" %}{% assign hud_stance_balanced = "${hudMarkUri('stanceBalanced', 24, 24)}" %}{% assign hud_stance_bold = "${hudMarkUri('stanceBold', 24, 24)}" %}`
 
 /**
@@ -297,19 +298,28 @@ const plainOf = (expr: string) => `${expr} | replace: "[[", "" | replace: "]]", 
 
 /** On ink panels a lost HP reads red and found gold sits on yellow (D94); units follow a no-break space. */
 const chipInk = (text: string) => `{% if ${text} contains "\u00a0HP" and ${text} contains "−" %} ${ink('text', 'red')}{% elsif ${text} contains "\u00a0gold" and ${text} contains "+" %} ${ink('bg', 'yellow', 'white')}{% endif %}`
-/** One change as an outlined chip. */
-const chip = (text: string) => `<span class="label lg:title--small label--outline${chipInk(text)}">{{ ${text} | escape }}</span>`
+/**
+ * One change drawn like a recap fact: its HUD mark and the number ("+14" behind the letters XP), so a row reads at a glance
+ * without "XP", "gold" and "HP" spelled out on every line. Units arrive after a no-break space; a change with no mark
+ * ("Pouch holds 4", an effect) stays as its words.
+ */
+const chip = (text: string) =>
+  `{% assign change_parts = ${text} | split: "\u00a0" %}{% assign change_unit = change_parts | last %}{% assign change_icon = "" %}{% assign change_size = "${COUNTER_ICON}" %}{% assign change_text = ${text} %}` +
+  `{% if change_parts.size > 1 %}{% case change_unit %}{% when "XP" %}{% assign change_icon = hud_xp %}{% assign change_size = "w--[24px] h--[16px] no-shrink" %}{% when "gold" %}{% assign change_icon = hud_coin %}{% when "HP" %}{% assign change_icon = hud_heart_full %}{% assign change_size = "w--[18px] h--[16px] no-shrink" %}{% when "bag slot", "bag slots" %}{% assign change_icon = hud_bag %}{% endcase %}` +
+  `{% if change_unit contains "potion" %}{% assign change_icon = hud_potion %}{% endif %}` +
+  `{% if change_icon != "" %}{% assign change_text = change_parts | first %}{% if change_unit == "HP from potion" %}{% assign change_text = change_text | append: "\u00a0HP" %}{% endif %}{% endif %}{% endif %}` +
+  `<span class="flex flex--row flex--center-y gap--[3px] no-shrink" data-change="true">{% if change_icon != "" %}<img class="{{ change_size }}" src="{{ change_icon }}" alt="">{% endif %}<span class="label lg:title--small${chipInk(text)}">{{ change_text | escape }}</span></span>`
 /** A fixed-width, right-aligned cell, so the same stat sits in the same place on every line. */
-const chipCell = (field: string, kind: string, width: string) => `<span class="flex flex--row flex--right no-shrink ${width}" data-chip-cell="${kind}">{% if ${field} != "" %}${chip(field)}{% endif %}</span>`
+const chipCell = (field: string, kind: string, width: string) => `<span class="flex flex--row flex--left no-shrink ${width}" data-chip-cell="${kind}">{% if ${field} != "" %}${chip(field)}{% endif %}</span>`
 /**
  * The X full layouts' changes on the story's line (D89): XP, gold and HP each in their own fixed column before the
- * time, so they line up down the ledger, and any other change (a potion, a bag slot, "No effect") just before them,
- * or under the story where `others` is false. A story without changes keeps the whole line, and one with only other
- * changes ("No effect") reserves no stat columns. Units arrive joined by a no-break space, so the last word after it
- * names the stat.
+ * time, so their marks line up down the ledger, and any other marked change (potions, bag slots) just before them.
+ * A change with no mark ("Pouch holds 4", an effect) joins them, or takes a line under the story where `others` is
+ * false. A story without changes keeps the whole line, and one with only other changes reserves no stat columns.
+ * Units arrive joined by a no-break space, so the words after it name the stat.
  */
-const chipSort = `{% assign chip_xp = "" %}{% assign chip_gold = "" %}{% assign chip_hp = "" %}{% assign chip_other = "" %}{% for change in line_changes %}{% assign chip_unit = change | split: "\u00a0" | last %}{% if chip_unit == "XP" %}{% assign chip_xp = change %}{% elsif chip_unit == "gold" %}{% assign chip_gold = change %}{% elsif chip_unit == "HP" %}{% assign chip_hp = change %}{% else %}{% capture chip_other %}{{ chip_other }} ${chip('change')}{% endcapture %}{% endif %}{% endfor %}`
-const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSort}<span class="${visibility} flex--row flex--center-y flex--right gap--xsmall no-shrink" data-story-chips-inline="true">${others ? '{{ chip_other }}' : ''}{% if chip_xp != "" or chip_gold != "" or chip_hp != "" %}${chipCell('chip_xp', 'xp', 'w--[66px]')}${chipCell('chip_gold', 'gold', 'w--[92px]')}${chipCell('chip_hp', 'hp', 'w--[66px]')}{% endif %}</span>`
+const chipSort = `{% assign chip_xp = "" %}{% assign chip_gold = "" %}{% assign chip_hp = "" %}{% assign chip_marked = "" %}{% assign chip_words = "" %}{% for change in line_changes %}{% assign chip_unit = change | split: "\u00a0" | last %}{% if chip_unit == "XP" %}{% assign chip_xp = change %}{% elsif chip_unit == "gold" %}{% assign chip_gold = change %}{% elsif chip_unit == "HP" %}{% assign chip_hp = change %}{% elsif change contains "\u00a0" and chip_unit contains "potion" or change contains "\u00a0" and chip_unit contains "bag slot" %}{% capture chip_marked %}{{ chip_marked }}${chip('change')}{% endcapture %}{% else %}{% capture chip_words %}{{ chip_words }}${chip('change')}{% endcapture %}{% endif %}{% endfor %}`
+const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSort}<span class="${visibility} flex--row flex--center-y flex--right gap--small no-shrink" data-story-chips-inline="true">{{ chip_marked }}${others ? '{{ chip_words }}' : ''}{% if chip_xp != "" or chip_gold != "" or chip_hp != "" %}${chipCell('chip_xp', 'xp', 'w--[78px]')}${chipCell('chip_gold', 'gold', 'w--[74px]')}${chipCell('chip_hp', 'hp', 'w--[66px]')}{% endif %}</span>`
 
 /**
  * One story as a ledger line: the glyph, the story, and its HH:MM at the end of the line; the stat changes follow as
@@ -337,8 +347,8 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   const changes = `{% for change in line_changes %} ${chip('change')}{% endfor %}`
   const hasChanges = `${entry}.d != nil and ${entry}.d != ""`
   const columns = chipColumns(shown)
-  // The portrait ledger (`'lg'`) is too narrow for a story, a long change ("+3 bag slots") and three stat columns on one
-  // line once a device scale enlarges them, so its other changes take a line under the story there instead.
+  // The portrait ledger (`'lg'`) is too narrow for a story, a change in words ("Pouch holds 6") and three stat columns
+  // on one line once a device scale enlarges them, so those changes take a line under the story there instead.
   const othersBelow = inline === 'lg' && !lead
   const lineFit = Math.max(0, fit - (timeBelow ? 0 : 14))
   // D112: on the OG, a to-do line too long for this row's fit says its count instead ("Stand-up: 3 new tasks."), so it
@@ -347,11 +357,11 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   const inlineChips = inline && !lead ? `{% if ${hasChanges} %}${othersBelow ? chipColumns(shown, false) : columns}{% endif %}` : ''
   const storySpan = `<span class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
   // Sorted before the row opens, so a row with changes under its story aligns to the story's first line, not its middle.
-  const sortFirst = othersBelow ? `{% assign chip_other = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
-  const story = othersBelow ? `<div class="grow w--min-0">${storySpan}{% if chip_other != "" %}<div class="hidden lg:block pt--1" data-story-chips-other="true">{{ chip_other }}</div>{% endif %}</div>` : storySpan
-  const centred = inline && !lead ? (othersBelow ? '{% if chip_other == "" %} lg:flex--center-y{% endif %}' : ` ${onlyX('lg:')}flex--center-y`) : ''
+  const sortFirst = othersBelow ? `{% assign chip_words = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
+  const story = othersBelow ? `<div class="grow w--min-0">${storySpan}{% if chip_words != "" %}<div class="hidden lg:flex flex--row flex--wrap flex--left flex--center-y gap--small pt--1" data-story-chips-other="true">{{ chip_words }}</div>{% endif %}</div>` : storySpan
+  const centred = inline && !lead ? (othersBelow ? '{% if chip_words == "" %} lg:flex--center-y{% endif %}' : ` ${onlyX('lg:')}flex--center-y`) : ''
   const leadRow = lead ? `{% if line_timed or ${hasChanges} %}<div class="${shown} flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true">{% if ${hasChanges} %}${columns}{% endif %}${timeSpan()}</div>{% endif %}` : ''
-  const stacked = `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
+  const stacked = `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
   return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none">${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"><div class="no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
 }
 
@@ -456,9 +466,9 @@ const fitStories = `<script>
 </script>`
 
 /** The mark for one recap item (`item.k`): HUD marks for XP, gold, wins and potions, log glyphs for the rest. */
-const recapIcon = `{% case item.k %}{% when "xp" %}{% assign recap_icon = hud_star %}{% when "coin" %}{% assign recap_icon = hud_coin %}{% when "sword" %}{% assign recap_icon = hud_sword %}{% when "potion" %}{% assign recap_icon = hud_potion %}${GLYPH_KINDS.filter((k) => k !== 'system')
+const recapIcon = `{% assign recap_size = "${COUNTER_ICON}" %}{% case item.k %}{% when "xp" %}{% assign recap_icon = hud_xp %}{% assign recap_size = "w--[24px] h--[16px] no-shrink" %}{% when "coin" %}{% assign recap_icon = hud_coin %}{% when "sword" %}{% assign recap_icon = hud_sword %}{% when "potion" %}{% assign recap_icon = hud_potion %}${GLYPH_KINDS.filter((k) => k !== 'system')
   .map((k) => `{% when "${k}" %}{% assign recap_icon = glyph16_${k} %}`)
-  .join('')}{% else %}{% assign recap_icon = "" %}{% endcase %}{% if recap_icon != "" %}<img class="${COUNTER_ICON}" src="{{ recap_icon }}" alt="">{% endif %}`
+  .join('')}{% else %}{% assign recap_icon = "" %}{% endcase %}{% if recap_icon != "" %}<img class="{{ recap_size }}" src="{{ recap_icon }}" alt="">{% endif %}`
 
 /**
  * The recap as one wrapping row: its name and hours ("Night recap 19:00-07:00"), then each fact behind its icon.

@@ -204,9 +204,14 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     todoTwo: { ...base, hero: hero({ biomeId: 'cafeteria_depths', level: 9 }), logs: [{ at: NOW - 7 * 60_000, kind: 'todo', summary: 'Ticked off: Defeat 5 [[Leftovers Hydras]]. Explore the [[Cafeteria Depths]] for 40 adventures.', compact: 'Ticked off 2 tasks.', deltas: { xpEarned: 0, gold: 60, hp: 0 } }, ...base.logs] },
     todoStandup: { ...base, hero: hero({ biomeId: 'cafeteria_depths', level: 9 }), logs: [{ at: NOW - 7 * 60_000, kind: 'todo', summary: 'Stand-up: Defeat 5 [[Leftovers Hydras]]. Earn 260 gold adventuring. Dodge 2 traps.', compact: 'Stand-up: 3 new tasks.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs] },
     todoStandupRow: { ...base, logs: [base.logs[0]!, { at: NOW - 22 * 60_000, kind: 'todo', summary: 'Stand-up: Defeat 5 [[Legacy Mainframes]]. Earn 140 gold adventuring. Beat an elite.', compact: 'Stand-up: 3 new tasks.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs.slice(1)] },
-    // A shop purchase in an older row: its bag-slot chip sits under the story on the X portrait, not beside the stat
-    // columns, where it left the story a word wide.
-    bagBoughtRow: { ...base, logs: [base.logs[0]!, { at: NOW - 22 * 60_000, kind: 'system', summary: 'Bought a [[Laptop Backpack]]. Bag holds 13.', deltas: { xpEarned: 0, gold: -100, hp: 0, bagSlots: 3 } }, { at: NOW - 23 * 60_000, kind: 'system', summary: 'Sold 6 items.', deltas: { xpEarned: 0, gold: 40, hp: 0 } }, ...base.logs.slice(1)] },
+    // Older rows with every kind of change: a shop purchase with a bag-slot mark (which once left the story a word wide
+    // on a scaled portrait X), a potion found and drunk, the widest numbers each column holds, and a change with no mark.
+    ledgerChanges: { ...base, logs: [base.logs[0]!,
+      { at: NOW - 22 * 60_000, kind: 'system', summary: 'Bought a [[Laptop Backpack]]. Bag holds 13.', deltas: { xpEarned: 0, gold: -100, hp: 0, bagSlots: 3 } },
+      { at: NOW - 23 * 60_000, kind: 'loot', summary: 'Found a healing potion. Drank a potion.', deltas: { xpEarned: 0, gold: 0, hp: 8, potionsFound: 1, potionHealing: 20 } },
+      { at: NOW - 24 * 60_000, kind: 'raid', summary: 'Raided [[Maximilian_Wolfgangs]] and came back heavy.', deltas: { xpEarned: 2256, gold: -8888, hp: -148 } },
+      { at: NOW - 25 * 60_000, kind: 'system', summary: 'Sold 6 items.', deltas: { xpEarned: 0, gold: 40, hp: 0, pouchCap: 6 } },
+      ...base.logs.slice(1)] },
     // P35: the longest goal line with its "Next:" clause as the newest story (the compact form in narrow rows), the
     // celebration it brings, and an unlock line. The scene keeps following the tick's story.
     careerGoal: { ...base, hero: hero({ level: 5, biomeId: 'server_room' }), newestEvent: { kind: 'career', title: 'Goal reached: Answer an office decision' }, logs: [{ at: NOW - 7 * 60_000, kind: 'career', summary: 'Goal reached: Answer an office decision. Next: Buy the Lunchbox.', compact: 'Goal reached: Answer an office decision.', deltas: { xpEarned: 0, gold: 30, hp: 0 } }, ...base.logs] },

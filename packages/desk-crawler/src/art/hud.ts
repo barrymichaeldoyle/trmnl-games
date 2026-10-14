@@ -1,9 +1,9 @@
 /**
  * 1-bit HUD marks for the device screen: the companion's half-heart health
  * (D60), the XP ticks that match it, and the attack, defense, coin and potion
- * counters, the bag, the stance gauges and the recap's XP star, drawn in the same grid style as the log glyphs. Each row is a
+ * counters, the bag, the stance gauges and the XP letters, drawn in the same grid style as the log glyphs. Each row is a
  * string of cells; '#' is ink. Hearts and XP ticks are 9 wide so the two halves
- * meet on a centre column; the counters are 8x8.
+ * meet on a centre column; the counters are 8x8 and the XP letters 12x8.
  */
 export const HUD_MARKS = {
   /** Outline only: this half-heart pair is spent. */
@@ -22,8 +22,8 @@ export const HUD_MARKS = {
   shield: ['########', '#......#', '#..##..#', '#..##..#', '#......#', '.#....#.', '..#..#..', '...##...'],
   /** Bag slots: a satchel with its flap and buckle. */
   bag: ['..####..', '.#....#.', '########', '#......#', '#.####.#', '#......#', '#......#', '########'],
-  /** Experience, for the recap's XP: a five-point star. */
-  star: ['...##...', '...##...', '########', '.######.', '..####..', '.######.', '.##..##.', '##....##'],
+  /** Experience, for the ledger's and the recap's XP: the letters themselves in two-cell strokes, 12 wide (D165). */
+  xp: ['##..##.####.', '##..##.##.##', '.####..##.##', '..##...##.##', '..##...####.', '.####..##...', '##..##.##...', '##..##.##...'],
   /** Stances (D103): one gauge, its needle low, centred or high. */
   stanceCautious: ['........', '..####..', '.#....#.', '#.#....#', '#..#...#', '#..##..#', '########', '........'],
   stanceBalanced: ['........', '..####..', '.#....#.', '#..##..#', '#..##..#', '#..##..#', '########', '........'],

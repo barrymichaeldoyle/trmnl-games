@@ -5,9 +5,15 @@ import { buildPayload } from '@trmnl-games/desk-crawler/payload'
 import { parseUtcOffset, screenMarkup, glyphUri } from '@trmnl-games/desk-crawler/templates/screen'
 import { hudMarkUri } from '@trmnl-games/desk-crawler/art/hud'
 
+/** The ledger's changes as drawn: each mark (named by the HUD mark it uses), its ink classes and its text. */
+const MARK_NAMES: Record<string, string> = { [hudMarkUri('xp', 48, 32)]: 'xp', [hudMarkUri('coin', 24, 24)]: 'gold', [hudMarkUri('heartFull', 36, 32)]: 'hp', [hudMarkUri('potion', 24, 24)]: 'potion', [hudMarkUri('bag', 24, 24)]: 'bag' }
+const drawnChanges = (html: string) =>
+  [...html.matchAll(/data-change="true">(?:<img class="[^"]*" src="([^"]*)" alt="">)?<span class="([^"]*)">([^<]*)<\/span><\/span>/g)].map(([, src, classes, text]) => ({ mark: src === undefined ? '' : MARK_NAMES[src] ?? '?', classes: classes!, text: text! }))
+const changeText = (html: string) => drawnChanges(html).map((c) => `${c.mark}:${c.text}`)
+
 const NOW = Date.UTC(2026, 9, 4, 8, 20)
 
-const payload = () =>
+const payload = (logs: Parameters<typeof buildPayload>[0]['logs'] = [{ at: NOW - 60_000, kind: 'combat', summary: 'Unplugged a Cable Serpent. +14 XP, +5 gold.', deltas: { xpEarned: 14, gold: 5, hp: -12 } }]) =>
   buildPayload({
     now: NOW,
     world: { currentTick: 120, lastCompletedTick: 120, lastCompletedAt: NOW - 60_000, createdAt: NOW - 86_400_000, ticksPaused: false, maintenanceMode: false },
@@ -22,7 +28,7 @@ const payload = () =>
     bagUsed: 3,
     bagCapacity: 30,
     heldItemName: null,
-    logs: [{ at: NOW - 60_000, kind: 'combat', summary: 'Unplugged a Cable Serpent. +14 XP, +5 gold.', deltas: { xpEarned: 14, gold: 5, hp: -12 } }],
+    logs,
     instanceName: 'Desk Crawler',
     content: contentV1,
     spriteBaseUrl: null,
@@ -66,10 +72,11 @@ describe('device catch-up summary (D54)', () => {
       expect(recapRows).toBeGreaterThanOrEqual(2)
       expect(html.match(/data-recap-item="true"><img /g)).toHaveLength(recapRows * 3)
       expect(text).toContain('Unplugged a Cable Serpent.')
-      for (const change of ['+14\u00a0XP', '+5\u00a0gold', '−12\u00a0HP']) expect(html).toMatch(new RegExp(`label--outline[^"]*">${change.replace('+', '\\+')}<`))
+      // Each change behind its mark, like the recap's facts.
+      expect(changeText(html)).toEqual(expect.arrayContaining(['xp:+14', 'gold:+5', 'hp:−12']))
       // Ink panels print lost HP in red and found gold on yellow (D94).
-      expect(html).toContain('label--outline text--red 1bit:text--black 2bit:text--black 4bit:text--black">−12\u00a0HP<')
-      expect(html).toContain('label--outline bg--yellow 1bit:bg--white 2bit:bg--white 4bit:bg--white">+5\u00a0gold<')
+      expect(drawnChanges(html).find((c) => c.mark === 'hp')!.classes).toBe('label lg:title--small text--red 1bit:text--black 2bit:text--black 4bit:text--black')
+      expect(drawnChanges(html).find((c) => c.mark === 'gold')!.classes).toBe('label lg:title--small bg--yellow 1bit:bg--white 2bit:bg--white 4bit:bg--white')
       const escaped = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...payload(), recap: { ...recap, label: '<script>unsafe</script>', items: [{ k: 'xp', t: '<b>x</b>' }] } })
       expect(escaped).toContain('&lt;b&gt;x&lt;/b&gt;')
       expect(escaped).toContain('&lt;script&gt;unsafe&lt;/script&gt;')
@@ -405,9 +412,8 @@ describe('log lines (D44)', () => {
   it('shows potion acquisition beside the other changes in all four layouts', async () => {
     const vars = payload()
     for (const markup of Object.values(screenMarkup)) {
-      const html = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...vars, log: [{ n: 'Found a healing potion. Drank a potion.', s: 'Found a healing potion. Drank a potion.', k: 'loot', u: NOW / 1000, d: '+1 healing potion · +20 HP' }] })
-      expect(html).toContain('label--outline">+1\u00a0healing potion<')
-      expect(html).toContain('label--outline">+20\u00a0HP<')
+      const html = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...vars, log: [{ n: 'Found a healing potion. Drank a potion.', s: 'Found a healing potion. Drank a potion.', k: 'loot', u: NOW / 1000, d: '+1\u00a0healing potion · +20\u00a0HP from potion · +3\u00a0bag slots · Pouch holds 6' }] })
+      expect(changeText(html)).toEqual(expect.arrayContaining(['potion:+1', 'potion:+20\u00a0HP', 'bag:+3', ':Pouch holds 6']))
     }
   })
   it('shows each line with its glyph and owner-local HH:MM', async () => {
@@ -435,12 +441,12 @@ describe('log lines (D44)', () => {
   it('puts the changes on the story line on the X in the full layout, in fixed XP, gold and HP columns', async () => {
     const vars = payload() as { log: Array<Record<string, unknown>> } & Record<string, unknown>
     const html = await render({ ...vars, utc_offset: 7200, log: [{ ...vars.log[0], d: '+1\u00a0healing potion · +14\u00a0XP · −12\u00a0HP' }, { ...vars.log[0], d: '' }] })
-    const cells = (kind: string) => [...html.matchAll(new RegExp(`data-chip-cell="${kind}">(<span[^>]*>[^<]*</span>)?</span>`, 'g'))].map((m) => (m[1] ?? '').replace(/<[^>]+>/g, ''))
-    // The first entry: XP and HP in their columns, gold empty, the potion just before them; landscape and portrait each draw it once.
-    expect(cells('xp')).toEqual(['+14\u00a0XP', '+14\u00a0XP'])
+    const cells = (kind: string) => html.split(`data-chip-cell="${kind}">`).slice(1).map((cell: string) => changeText(cell.split(/data-chip-cell|data-story-time/)[0]!).join(' '))
+    // The first entry: XP and HP marks in their columns, gold empty, the potion just before them; landscape and portrait each draw it once.
+    expect(cells('xp')).toEqual(['xp:+14', 'xp:+14'])
     expect(cells('gold')).toEqual(['', ''])
-    expect(cells('hp')).toEqual(['−12\u00a0HP', '−12\u00a0HP'])
-    expect(html).toMatch(/data-story-chips-inline="true">\s*<span class="label lg:title--small label--outline">\+1\u00a0healing potion<\/span><span[^>]*data-chip-cell="xp"/)
+    expect(cells('hp')).toEqual(['hp:−12', 'hp:−12'])
+    expect(html).toMatch(/data-story-chips-inline="true"><span[^>]*data-change="true"><img [^>]*><span[^>]*>\+1<\/span><\/span><span[^>]*data-chip-cell="xp"/)
     // The second entry has no changes, so it reserves no columns and its story keeps the line.
     expect(html.match(/data-story-chips-inline/g)).toHaveLength(2)
     expect(html).toMatch(/<div class="lg:hidden flex[^"]*" data-story-changes="true">/)
@@ -449,20 +455,30 @@ describe('log lines (D44)', () => {
     expect(side).not.toContain('data-story-chips-inline')
   })
 
-  it('puts an older row\'s other changes under its story in the X portrait ledger, keeping the stat columns on the line', async () => {
+  it('keeps marked changes on an older row\'s line in the X portrait ledger and puts changes in words under its story', async () => {
     const vars = payload() as { log: Array<Record<string, unknown>> } & Record<string, unknown>
-    const bought = { ...vars.log[0], n: 'Bought a [[Laptop Backpack]]. Bag holds 13.', d: '−100\u00a0gold · +3\u00a0bag slots' }
+    const bought = { ...vars.log[0], n: 'Bought a [[Laptop Backpack]]. Bag holds 13.', d: '−100\u00a0gold · +3\u00a0bag slots · Pouch holds 6' }
     const html = await render({ ...vars, utc_offset: 7200, log: [vars.log[0], bought] })
     const [landscape, portrait] = html.split('landscape:hidden')
     const row = portrait!.split('Bag holds 13.')[1]!.split('border--h-30')[0]!
-    // A device scale leaves the story a word wide if the chip shares its line, so it takes a line under the story.
-    expect(row).toMatch(/^<\/span><\/span><div class="hidden lg:block pt--1" data-story-chips-other="true">\s*<span class="label lg:title--small label--outline">\+3\u00a0bag slots<\/span><\/div><\/div><span class="hidden lg:flex[^"]*" data-story-chips-inline="true"><span[^>]*data-chip-cell="xp">/)
-    expect(row).toMatch(/data-chip-cell="gold"><span[^>]*>−100\u00a0gold<\/span>/)
-    // The row aligns to the story's first line rather than centring between it and the chip.
+    // A device scale leaves the story a word wide if words share its line, so they take a line under the story.
+    const below = row.split('data-story-chips-other="true">')[1]!.split('</div>')[0]!
+    expect(changeText(below)).toEqual([':Pouch holds 6'])
+    const inline = row.split('data-story-chips-inline="true">')[1]!.split('data-story-time')[0]!
+    expect(changeText(inline)).toEqual(['bag:+3', 'gold:−100'])
+    // The row aligns to the story's first line rather than centring between it and the words.
     expect(portrait!.split('Bag holds 13.')[0]!.split('border--h-30').at(-1)).toMatch(/<div class="flex flex--row flex--left flex--top gap--xsmall">/)
-    // The screen-wide landscape ledger keeps it on the line.
+    // The screen-wide landscape ledger keeps everything on the line.
     expect(landscape).not.toContain('data-story-chips-other')
-    expect(landscape.split('Bag holds 13.')[1]).toMatch(/data-story-chips-inline="true">\s*<span class="label lg:title--small label--outline">\+3\u00a0bag slots/)
+    expect(changeText(landscape!.split('Bag holds 13.')[1]!.split('data-story-time')[0]!)).toEqual(['bag:+3', ':Pouch holds 6', 'gold:−100'])
+  })
+
+  it('leaves "No effect" off the device, where a row without marks already says it', () => {
+    const vars = payload([{ at: NOW, kind: 'rest', summary: 'Took a coffee break anyway.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }]) as { log: Array<{ d: string }> }
+    expect(vars.log[0]!.d).toBe('')
+    // Every signed change is tied to its unit, which names its mark, compact gold included.
+    const raid = payload([{ at: NOW, kind: 'raid', summary: 'Raided a desk.', deltas: { xpEarned: 0, gold: 12_400, hp: 0, bagSlots: 3 } }]) as { log: Array<{ d: string }> }
+    expect(raid.log[0]!.d).toBe('+12k\u00a0gold · +3\u00a0bag slots')
   })
 
   it('leaves the time out without an offset', async () => {
@@ -500,8 +516,9 @@ describe('log lines (D44)', () => {
       const html = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, vars)
       const text = html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ')
       expect(text).toContain('Unplugged a Cable Serpent.')
-      expect(text).toContain('+14 XP +5 gold −12 HP')
-      expect(html).toMatch(/data-story-changes="true"><div class="no-shrink w--\[\d+px\]"><\/div><div class="grow w--min-0"> <span class="label lg:title--small label--outline">\+14\u00a0XP<\/span> <span[^>]*>\+5\u00a0gold<\/span> <span[^>]*>−12\u00a0HP<\/span><\/div>/)
+      const stacked = html.split('data-story-changes="true">')[1]!.split('</div></div>')[0]!
+      expect(stacked).toMatch(/^<div class="no-shrink w--\[\d+px\]"><\/div><div class="grow w--min-0 flex flex--row flex--wrap[^"]*">/)
+      expect(changeText(stacked)).toEqual(['xp:+14', 'gold:+5', 'hp:−12'])
     }
   })
 
@@ -639,7 +656,7 @@ describe('HUD hearts and counters (D72)', () => {
     const quadrant = await new Liquid({ timezoneOffset: 0 }).parseAndRender(screenMarkup.markup_quadrant, { ...payload(), utc_offset: 7200 })
     const [landscape, portrait] = quadrant.split('landscape:hidden')
     expect(landscape).toMatch(/data-story-time="true">10:19<\/span><\/div>/)
-    expect(portrait).toMatch(/data-story-changes="true"><div[^>]*><\/div><div class="grow w--min-0"><span class="label lg:title--small no-shrink" data-story-time="true">10:19<\/span> <span/)
+    expect(portrait).toMatch(/data-story-changes="true"><div[^>]*><\/div><div class="grow w--min-0[^"]*"><span class="label lg:title--small no-shrink" data-story-time="true">10:19<\/span>\s*<span[^>]*data-change="true">/)
   })
 })
 
