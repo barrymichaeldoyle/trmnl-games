@@ -16,6 +16,13 @@ export async function purgeAngler(ctx: MutationCtx, anglerId: Id<'anglers'>, bat
     await ctx.db.delete(row._id)
     removed += 1
   }
+  // D162: the trophy wall and the shelf.
+  for (const kind of ['fish', 'medal'] as const) {
+    for (const row of await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', anglerId).eq('kind', kind)).take(batch)) {
+      await ctx.db.delete(row._id)
+      removed += 1
+    }
+  }
   // Board rows: the angler's records at every water, weekly and all time.
   for (const row of await ctx.db.query('iaCatchRecords').withIndex('by_anglerId_and_waterId_and_period', (q) => q.eq('anglerId', anglerId)).take(batch)) {
     await ctx.db.delete(row._id)

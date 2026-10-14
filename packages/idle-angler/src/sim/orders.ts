@@ -153,3 +153,39 @@ export function swapOrder(content: IdleAnglerCatalog, angler: AnglerState, order
   if (!replacement) return { ok: false, code: 'NOTHING_ELSE' }
   return { ok: true, angler: { ...angler, orders: slate.map((o, i) => (i === index ? replacement : o)), swapDay: day } }
 }
+
+const COUNT_WORD = ['No', 'One', 'Two', 'Three'] as const
+const BAND_WORDS: Readonly<Record<TimeBand, string>> = { dawn: 'dawn', day: 'the day', dusk: 'dusk', night: 'night' }
+
+/** An order as the slate reads it: "Two Roach", "One fish over 1.5 kg", "Three fish from River Bend". */
+export function describeOrder(content: IdleAnglerCatalog, order: Order): string {
+  const count = COUNT_WORD[order.count] ?? String(order.count)
+  const species = order.speciesId ? speciesById(content, order.speciesId) : undefined
+  switch (order.kind) {
+    case 'species':
+    case 'teaching':
+      return `${count} ${species?.name ?? order.speciesId}`
+    case 'weight':
+      return `${count} fish over ${order.minGrams! >= 1000 ? `${(order.minGrams! / 1000).toFixed(1)} kg` : `${order.minGrams} g`}`
+    case 'water':
+      return `${count} fish from ${content.waters.find((w) => w.id === order.water)?.name ?? order.water}`
+    case 'time':
+      return `${count} fish caught at ${(order.bands ?? []).map((b) => BAND_WORDS[b]).join(' or ')}`
+    case 'rarity':
+      return `${order.count === 1 ? (order.rarity === 'uncommon' ? 'An' : 'A') : count} ${order.rarity} fish`
+  }
+}
+
+/** A teaching order's hint: where, on what and when the fish feeds. */
+export function teachingHint(content: IdleAnglerCatalog, order: Order): string | null {
+  if (order.kind !== 'teaching' || !order.speciesId) return null
+  const species = speciesById(content, order.speciesId)
+  if (!species) return null
+  const baits = species.baits
+    .filter((b) => b !== 'deadbait')
+    .map((b) => content.baits.find((x) => x.class === b)?.name.toLowerCase() ?? b)
+  const water = content.waters.find((w) => w.id === species.water)?.name ?? species.water
+  const when = species.times ? `, at ${species.times.map((t) => BAND_WORDS[t]).join(' or ')}` : ''
+  const weather = species.weather ? `, in ${species.weather.join(' or ')} weather` : ''
+  return `${water}, on ${baits.join(' or ')}${when}${weather}`
+}

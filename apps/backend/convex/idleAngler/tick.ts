@@ -9,7 +9,7 @@ import { fromAnglerState, progressed, storedDetail, toAnglerState } from './adap
 import { currentAngler } from './profile'
 import { awardAngler, stateOf, tallyAnglerUnlocks } from './achievements'
 import { needsFullPass } from '@trmnl-games/idle-angler/content/achievements'
-import { coolerOf } from '@trmnl-games/idle-angler/sim'
+import { coolerOf, entersOpen, formatWeight, unlocked, waterOf } from '@trmnl-games/idle-angler/sim'
 import { queueIdleAnglerAlerts } from '../lib/alerts'
 import { IDLE_ANGLER_RUNTIME } from './runtime'
 import { recordCatch } from './records'
@@ -131,11 +131,22 @@ async function simulateAnglerStep(ctx: MutationCtx, subject: Doc<'heroes'>, step
       deltas: event.deltas,
     })
   }
+  // The boards: a landed fish, kept or released, may be the angler's heaviest at this water this week or ever, and
+  // under content v2 it may enter that weekend's Open (D162); a first entry counts and gets its own line.
+  const landed = result.event && (result.event.kind === 'catch' || result.event.kind === 'release') ? result.event.detail : undefined
+  if (landed?.speciesId !== undefined && landed.grams !== undefined && landed.waterId !== undefined) {
+    const open = entersOpen(content, landed.waterId, landed.speciesId, run.wallSlot) && unlocked(content, result.angler, 'opens')
+    const { firstOpenEntry } = await recordCatch(ctx, angler, { waterId: landed.waterId, speciesId: landed.speciesId, grams: landed.grams }, run.wallSlot, open)
+    if (firstOpenEntry) {
+      const counters = patch.counters ?? angler.counters
+      patch.counters = { ...counters, opensEntered: (counters.opensEntered ?? 0) + 1 }
+      sequence += 1
+      const target = content.species.find((s) => s.id === landed.speciesId)!
+      await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'tick', tick: run.tick, runId: run._id as unknown as Id<'iaSimulationRuns'>, sequence, at: now, kind: 'open', summary: `Entered the ${target.name} Open at ${waterOf(content, landed.waterId).the} with ${formatWeight(landed.grams)}.`, detail: { v: 1, speciesId: landed.speciesId, grams: landed.grams, waterId: landed.waterId }, deltas: { gold: 0 } })
+    }
+  }
   if (sequence !== angler.logSequence) patch.logSequence = sequence
   await ctx.db.patch(angler._id, patch)
-  // The boards: a landed fish, kept or released, may be the angler's heaviest at this water this week or ever.
-  const landed = result.event && (result.event.kind === 'catch' || result.event.kind === 'release') ? result.event.detail : undefined
-  if (landed?.speciesId !== undefined && landed.grams !== undefined && landed.waterId !== undefined) await recordCatch(ctx, angler, { waterId: landed.waterId, speciesId: landed.speciesId, grams: landed.grams }, run.wallSlot)
   // Achievements: diff lifetime state; an angler behind the catalog version gets one full pass.
   if (result.event !== undefined || result.extraEvents !== undefined || needsFullPass(angler.achievementsVersion)) {
     const updated = (await ctx.db.get(angler._id))!

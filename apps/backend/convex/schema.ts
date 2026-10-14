@@ -400,6 +400,31 @@ export default defineSchema({
     .index('by_lifeId_and_at_and_sequence', ['lifeId', 'at', 'sequence'])
     .index('by_at', ['at']),
 
+  /**
+   * D162: the trophy wall (mounted fish, at most 24 pegs) and the shelf (Open medals). Rosettes are the angler's
+   * `opensEntered` count, not rows, so the shelf grows only by medals.
+   */
+  iaTrophies: defineTable({
+    anglerId: v.id('anglers'),
+    userId: v.id('users'),
+    kind: v.union(v.literal('fish'), v.literal('medal')),
+    speciesId: v.optional(v.string()),
+    grams: v.optional(v.number()),
+    water: waterId,
+    at: v.number(),
+    peg: v.optional(v.number()),
+    periodKey: v.optional(v.string()),
+    place: v.optional(v.number()),
+  }).index('by_anglerId_and_kind', ['anglerId', 'kind']),
+
+  /** D162: one row per weekend Open closed, so its medals are awarded once. */
+  iaOpenAwards: defineTable({
+    period: v.string(),
+    waterId,
+    awarded: v.number(),
+    at: v.number(),
+  }).index('by_period_and_waterId', ['period', 'waterId']),
+
   iaTickLogs: defineTable({
     anglerId: v.id('anglers'),
     source: v.union(v.literal('tick'), v.literal('command'), v.literal('lifecycle')),

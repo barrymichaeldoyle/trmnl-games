@@ -16,6 +16,7 @@ import { IDLE_ANGLER_RUNTIME, IDLE_ANGLER_SCHEDULE } from './runtime'
 import { awardAfterAnglerIntent } from './achievements'
 import { accessId, baitClass, waterId } from './validators'
 import { MAX_RECAP_STORIES, RECAP_MS } from '@trmnl-games/idle-angler/payload'
+import { fullDock } from './dockFull'
 
 /**
  * Idle Angler companion API (idle-angler.md "Selling and the shop"). Every change is
@@ -25,13 +26,13 @@ import { MAX_RECAP_STORIES, RECAP_MS } from '@trmnl-games/idle-angler/payload'
 
 export const MAX_SELL = 24
 
-async function worldContentOf(ctx: QueryCtx): Promise<{ world: Doc<'worldState'> | null; content: IdleAnglerCatalog }> {
+export async function worldContentOf(ctx: QueryCtx): Promise<{ world: Doc<'worldState'> | null; content: IdleAnglerCatalog }> {
   const world = await readEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
   return { world, content: (world && IDLE_ANGLER_RUNTIME.content(world.activeContentVersion)) ?? contentV1 }
 }
 
 /** Intents need an activated, healthy angler. */
-async function playableAngler(ctx: QueryCtx, user: Doc<'users'>): Promise<Doc<'anglers'>> {
+export async function playableAngler(ctx: QueryCtx, user: Doc<'users'>): Promise<Doc<'anglers'>> {
   const angler = await currentAngler(ctx, user)
   if (angler === null) throw appError('HERO_NOT_FOUND', 'No angler yet.')
   if (angler.activationState !== 'active') throw appError('TRMNL_REQUIRED', 'Save Idle Angler in TRMNL to start fishing.')
@@ -39,18 +40,24 @@ async function playableAngler(ctx: QueryCtx, user: Doc<'users'>): Promise<Doc<'a
   return angler
 }
 
-const REFUSAL: Record<string, string> = {
+export const REFUSAL: Record<string, string> = {
   NOT_ENOUGH_GOLD: 'Not enough coins yet.',
   MAX_TIER: 'You already have the best one.',
   ALREADY_OWNED: 'You already have that.',
   BAIT_FULL: 'That would hold more bait than the tub allows.',
-  LOCKED: 'That water is not open to you yet.',
+  LOCKED: 'That is not open to you yet.',
   UNKNOWN: 'That item is not in the shop.',
   SAME_WATER: 'You are already fishing there.',
   NOT_USED_HERE: 'That bait is not used here.',
+  CLOSED: 'Frozen Tarn is only open in winter.',
+  NO_TICKET: 'Book a charter ticket in the tackle shop first.',
+  TICKET_HELD: 'You already hold a charter ticket.',
+  TOO_SMALL: 'That fish is too small to mount.',
+  WALL_FULL: 'Every peg on the wall is taken.',
+  NOT_BAIT_FISH: 'Only small fish go on the hook as deadbait.',
 }
 
-async function commandLog(ctx: MutationCtx, angler: Doc<'anglers'>, operation: string, summary: string, gold = 0): Promise<number> {
+export async function commandLog(ctx: MutationCtx, angler: Doc<'anglers'>, operation: string, summary: string, gold = 0): Promise<number> {
   const sequence = angler.logSequence + 1
   await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'command', sequence, at: Date.now(), kind: 'system', summary: summary.slice(0, 90), detail: { v: 1, operation }, deltas: { gold } })
   return sequence
@@ -67,7 +74,7 @@ async function applyShop(ctx: MutationCtx, angler: Doc<'anglers'>, result: ShopR
   return { changed: true, gold: result.angler.gold }
 }
 
-function shopIntent(operation: string, apply: (content: IdleAnglerCatalog, angler: AnglerState, input: Record<string, unknown>) => ShopResult, summary: (next: AnglerState, content: IdleAnglerCatalog, input: Record<string, unknown>) => string) {
+export function shopIntent(operation: string, apply: (content: IdleAnglerCatalog, angler: AnglerState, input: Record<string, unknown>) => ShopResult, summary: (next: AnglerState, content: IdleAnglerCatalog, input: Record<string, unknown>) => string) {
   return async (ctx: MutationCtx, operationId: string, input: Record<string, unknown>) =>
     await runIntent(ctx, operationId, operation, input, async (user) => {
       const angler = await playableAngler(ctx, user)
@@ -76,8 +83,8 @@ function shopIntent(operation: string, apply: (content: IdleAnglerCatalog, angle
     })
 }
 
-const intentResult = v.object({ operationId: v.string(), changed: v.boolean(), gold: v.optional(v.number()), count: v.optional(v.number()) })
-const strip = (r: IntentResult & { operationId: string }) => ({ operationId: r.operationId, changed: r.changed, ...(r.gold === undefined ? {} : { gold: r.gold }), ...(r.count === undefined ? {} : { count: r.count }) })
+export const intentResult = v.object({ operationId: v.string(), changed: v.boolean(), gold: v.optional(v.number()), count: v.optional(v.number()) })
+export const strip = (r: IntentResult & { operationId: string }) => ({ operationId: r.operationId, changed: r.changed, ...(r.gold === undefined ? {} : { gold: r.gold }), ...(r.count === undefined ? {} : { count: r.count }) })
 
 export const buyNextRod = mutation({
   args: { operationId: v.string() },
@@ -116,7 +123,7 @@ export const travelTo = mutation({
   args: { operationId: v.string(), waterId },
   returns: intentResult,
   handler: async (ctx, { operationId, waterId: to }) =>
-    strip(await shopIntent('idleAngler.travel', (c, a, i) => travel(c, a, i.waterId as WaterId), (_n, c, i) => `Packing up for ${waterOf(c, i.waterId as string).the}.`)(ctx, operationId, { waterId: to })),
+    strip(await shopIntent('idleAngler.travel', (c, a, i) => travel(c, a, i.waterId as WaterId, Date.now()), (_n, c, i) => `Packing up for ${waterOf(c, i.waterId as string).the}.`)(ctx, operationId, { waterId: to })),
 })
 
 /** Sell chosen fish from the cooler. Selection is explicit; there is no auto-sell. */
@@ -232,7 +239,10 @@ export const dock = query({
         // Logbook gate (titles.ts): species of the previous water needed, and how many are logged.
         opensAfter: w.opensAfter ? { waterId: w.opensAfter.water, waterName: waterOf(content, w.opensAfter.water).name, species: w.opensAfter.species, logged: speciesLogged(content, angler.logbook, w.opensAfter.water) } : null,
         access: w.access ?? null,
-        open: canFish(content, state, w.id),
+        open: canFish(content, state, w.id, now),
+        // D162: a charter water needs a ticket, and a seasonal water is closed out of season.
+        charter: w.charter === true,
+        closed: w.openIn !== undefined && !canFish(content, state, w.id, now) && canFish(content, { ...state, charterCasts: 1 }, w.id),
         weather: weatherNow,
         band: conditions.band,
         // The chance a cast here bites right now, with the bait on the hook (or a bare hook if this water does not use it).
@@ -286,6 +296,8 @@ export const dock = query({
       },
       nextTickAt: IDLE_ANGLER_SCHEDULE.nextSlotAfter(now),
       worldTick: world?.currentTick ?? 0,
+      // D162: content v2's goal, slate, season and wall; absent under v1.
+      full: fullDock(content, angler, catches, now, user.trmnlUtcOffset) ?? null,
     }
   },
 })

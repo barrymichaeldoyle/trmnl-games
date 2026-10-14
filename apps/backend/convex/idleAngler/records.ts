@@ -1,4 +1,4 @@
-import type { WaterId } from '@trmnl-games/idle-angler/sim'
+import { openPeriod, type WaterId } from '@trmnl-games/idle-angler/sim'
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { currentAngler } from './profile'
@@ -32,17 +32,25 @@ export function weekEndsAt(at: number): number {
 
 export const periodKey = (period: Period, at: number) => (period === 'all' ? 'all' : weekKey(at))
 
-/** Keep the heavier of a landed fish and the angler's row for its water, this week and all time. */
-export async function recordCatch(ctx: MutationCtx, angler: Doc<'anglers'>, fish: { waterId: WaterId; speciesId: string; grams: number }, at: number): Promise<void> {
-  for (const period of [weekKey(at), 'all']) {
+/**
+ * Keep the heavier of a landed fish and the angler's row for its water, this week and all time, and, when the fish
+ * enters that weekend's Open (D162), for the Open's `o` period. Returns whether this was the angler's first entry in
+ * that Open, so the tick counts it and says so.
+ */
+export async function recordCatch(ctx: MutationCtx, angler: Doc<'anglers'>, fish: { waterId: WaterId; speciesId: string; grams: number }, at: number, open = false): Promise<{ firstOpenEntry: boolean }> {
+  let firstOpenEntry = false
+  for (const period of [weekKey(at), 'all', ...(open ? [openPeriod(at)] : [])]) {
     const existing = await ctx.db
       .query('iaCatchRecords')
       .withIndex('by_anglerId_and_waterId_and_period', (q) => q.eq('anglerId', angler._id).eq('waterId', fish.waterId).eq('period', period))
       .unique()
     const row = { speciesId: fish.speciesId, grams: fish.grams, at, earlierFirst: -at }
-    if (existing === null) await ctx.db.insert('iaCatchRecords', { waterId: fish.waterId, period, anglerId: angler._id, userId: angler.userId, ...row })
-    else if (fish.grams > existing.grams) await ctx.db.patch(existing._id, row)
+    if (existing === null) {
+      await ctx.db.insert('iaCatchRecords', { waterId: fish.waterId, period, anglerId: angler._id, userId: angler.userId, ...row })
+      if (period.startsWith('o')) firstOpenEntry = true
+    } else if (fish.grams > existing.grams) await ctx.db.patch(existing._id, row)
   }
+  return { firstOpenEntry }
 }
 
 export type BoardRow = { rank: number; name: string; speciesId: string; grams: number; own: boolean; profile: boolean }

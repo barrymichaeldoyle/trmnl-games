@@ -9,6 +9,8 @@ crons.cron('world tick', '0,15,30,45 * * * *', internal.sim.runs.tick.startTick,
 /** Idle Angler (D115): its own world, five minutes into each quarter-hour so the two never share a slot. */
 crons.cron('idle angler tick', '5,20,35,50 * * * *', internal.idleAngler.tick.startTick, {})
 crons.interval('idle angler watchdog', { minutes: 5 }, internal.idleAngler.tick.watchdog, {})
+// D162: last weekend's Opens close and award their medals on Monday at 00:10 UTC.
+crons.cron('idle angler opens', '10 0 * * 1', internal.idleAngler.full.closeOpens, {})
 
 /** Paper Lives (D159): its own world, ten minutes into each quarter-hour so the three never share a slot. */
 crons.cron('paper lives tick', '10,25,40,55 * * * *', internal.paperLives.tick.startTick, {})
