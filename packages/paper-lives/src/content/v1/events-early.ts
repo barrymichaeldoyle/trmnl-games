@@ -1,0 +1,90 @@
+import type { EventDef } from '../../sim/types'
+
+type Rest = Omit<EventDef, 'id' | 'stage' | 'rarity' | 'glyph' | 'line' | 'note'>
+const make = (stage: EventDef['stage']) => (id: string, rarity: EventDef['rarity'], glyph: EventDef['glyph'], line: string, note: string, rest: Rest = {}): EventDef => ({ id, stage, rarity, glyph, line, note, ...rest })
+
+const infant = make('infant')
+const child = make('child')
+
+/** Ages 0 to 5: one family line a year, no decisions (paper-lives.md "Stages"). */
+export const infantEvents: readonly EventDef[] = [
+  infant('inf_first_word', 'common', 'family', 'First word was “biscuit”, said with great conviction.', 'a first word'),
+  infant('inf_steps', 'common', 'family', 'First steps, from the sofa to {parent}, then a sit-down.', 'first steps'),
+  infant('inf_tooth', 'common', 'health', 'A first tooth, and a week when nobody slept.', 'a first tooth'),
+  infant('inf_sibling', 'common', 'family', '{Person} taught you to blow raspberries at the dinner table.', 'raspberries', { when: { person: 'sibling' }, effects: { relationship: 5 } }),
+  infant('inf_bath', 'common', 'family', 'Splashed the whole bathroom at bath time, delighted with yourself.', 'bath time'),
+  infant('inf_ducks', 'common', 'family', 'Fed the ducks at the park, and mostly fed yourself.', 'the ducks'),
+  infant('inf_nursery', 'common', 'family', 'Started nursery. Cried at the door, then forgot to.', 'nursery'),
+  infant('inf_haircut', 'common', 'family', 'First haircut. {Parent} kept a curl in an envelope.', 'a first haircut'),
+  infant('inf_chickenpox', 'uncommon', 'health', 'Chickenpox, calamine lotion and a lot of cartoons.', 'chickenpox', { effects: { stats: { health: -2 } } }),
+  infant('inf_drawing', 'uncommon', 'family', 'Drew {parent} as a circle with legs. It went on the fridge.', 'a drawing'),
+  infant('inf_snow', 'rare', 'family', 'First snow. Ate a great deal of it.', 'first snow', { effects: { stats: { happiness: 3 } } }),
+  infant('inf_clover', 'remarkable', 'star', 'Found a four-leaf clover at the park and gave it to {parent}.', 'a four-leaf clover', { effects: { stats: { happiness: 5 } } }),
+]
+
+/** Ages 6 to 12: school, friends, a pet, a hobby. */
+export const childEvents: readonly EventDef[] = [
+  child('ch_new_friend', 'common', 'family', 'Made a friend called {person} over a shared rubber.', 'a new friend', { effects: { addPerson: 'friend', stats: { happiness: 3 } } }),
+  child('ch_tooth', 'common', 'health', 'Lost a tooth in an apple. The fairy paid well.', 'a wobbly tooth', { effects: { stats: { happiness: 2 } } }),
+  child('ch_cold', 'common', 'health', 'A cold that went round the whole class, twice.', 'a cold', { effects: { stats: { health: -3 } } }),
+  child('ch_spelling', 'common', 'book', 'Won the spelling test with “necessary”.', 'a spelling prize', { effects: { stats: { smarts: 3 } } }),
+  child('ch_knee', 'common', 'health', 'Fell off the wall outside the shop. Two plasters and a lolly.', 'a scraped knee', { effects: { stats: { health: -2 } } }),
+  child('ch_play', 'common', 'star', 'Played a sheep in the school play and got the biggest laugh.', 'the school play', { effects: { stats: { charm: 4 } } }),
+  child('ch_swim', 'common', 'health', 'Learned to swim a width without the float.', 'swimming lessons', { effects: { stats: { health: 3 } } }),
+  child('ch_sleepover', 'common', 'family', 'A sleepover at {person}’s house. Nobody slept.', 'a sleepover', { when: { person: 'friend' }, effects: { relationship: 5 } }),
+  child('ch_caravan', 'common', 'family', 'A week in a caravan by the sea. It rained, and it was brilliant.', 'a caravan holiday', { when: { seasons: ['summer'] }, effects: { stats: { happiness: 3 } } }),
+  child('ch_library', 'common', 'book', 'Got a library card and took out the maximum every week.', 'a library card', { effects: { stats: { smarts: 3 } } }),
+  child('ch_bike', 'common', 'health', 'Learned to ride a bike down the back lane, wobbling.', 'a bike', { effects: { stats: { health: 2, happiness: 3 } } }),
+  child('ch_told_off', 'common', 'book', 'Kept in at break for talking. Talked through that as well.', 'a telling-off', { effects: { stats: { happiness: -2 } } }),
+  child('ch_yoghurt', 'common', 'family', 'Fell out with {person} over the last yoghurt.', 'a squabble', { when: { person: 'sibling' }, effects: { relationship: -5 } }),
+  child('ch_den', 'common', 'family', 'Built a den with {person} out of every cushion in the house.', 'a den', { when: { person: 'sibling' }, effects: { relationship: 5 } }),
+  child('ch_fair', 'common', 'family', '{Person} took you to the fair and won a coconut on the third go.', 'the fair', { when: { person: 'parent' }, effects: { relationship: 4 } }),
+  child('ch_story', 'common', 'book', 'The teacher read your story out to the whole class.', 'a story read aloud', { effects: { stats: { smarts: 2, charm: 2 } } }),
+  child('ch_sports_day', 'common', 'health', 'Came third in the egg and spoon race. The egg survived.', 'sports day', { when: { seasons: ['summer'] }, effects: { stats: { health: 2 } } }),
+  child('ch_snow_day', 'common', 'family', 'A snow day. Sledged down the hill on a tea tray.', 'a snow day', { when: { seasons: ['winter'] }, effects: { stats: { happiness: 3 } } }),
+  child('ch_party', 'common', 'family', 'A birthday party in the garden, with a cake shaped like a castle.', 'a birthday party', { when: { seasons: ['spring', 'summer'] }, effects: { stats: { charm: 2 } } }),
+  child('ch_pen_pal', 'common', 'book', 'Started writing to a pen pal across the sea.', 'a pen pal', { effects: { stats: { smarts: 2 } } }),
+  child('ch_museum', 'common', 'book', 'A school trip to the museum. Stood under the whale for ages.', 'a school trip', { effects: { stats: { smarts: 3 } } }),
+  child('ch_glasses', 'common', 'health', 'Got glasses. The board is suddenly very clear.', 'new glasses', { when: { notFlags: ['glasses'] }, effects: { flag: 'glasses', stats: { smarts: 1 } } }),
+  child('ch_treasure', 'common', 'family', 'Dug for treasure in the garden and found a spoon.', 'a dig'),
+  child('ch_recorder', 'common', 'book', 'Learned three songs on the recorder. So did the whole house.', 'the recorder'),
+  child('ch_sandcastle', 'common', 'family', 'Built a sandcastle with a moat that actually held water.', 'a day at the beach', { when: { seasons: ['summer'] }, effects: { stats: { happiness: 2 } } }),
+  child('ch_long_division', 'common', 'book', 'Long division finally made sense on a Tuesday afternoon.', 'long division', { effects: { stats: { smarts: 2 } } }),
+  child('ch_conkers', 'common', 'family', 'Won the conker contest with a conker soaked in vinegar.', 'conkers', { when: { seasons: ['autumn'] }, effects: { stats: { happiness: 2 } } }),
+  child('ch_kite', 'common', 'family', 'Flew a kite on the hill until the string snapped.', 'a lost kite', { when: { seasons: ['spring', 'autumn'] } }),
+  child('ch_hard_term', 'uncommon', 'book', 'A hard term with some older kids at school. Kept your head down.', 'a hard term', { effects: { stats: { happiness: -4, charm: -2 } } }),
+  child('ch_stand_up', 'uncommon', 'family', 'Stood up for a new kid called {person}, and made a friend of it.', 'a new friend', { effects: { addPerson: 'friend', stats: { charm: 3 } } }),
+  child('ch_tonsils', 'uncommon', 'health', 'Tonsils out. Ice cream for a week.', 'a hospital stay', { effects: { stats: { health: -4 } } }),
+  child('ch_moved', 'uncommon', 'house', 'The family moved across town. New school, new street.', 'a move', { effects: { stats: { happiness: -3 } } }),
+  child('ch_broken_arm', 'uncommon', 'health', 'Broke an arm falling out of a tree. Everyone signed the cast.', 'a broken arm', { effects: { stats: { health: -6 } } }),
+  child('ch_colouring', 'uncommon', 'money', 'Won a colouring competition at the library. The prize was 50 in book tokens.', 'a colouring prize', { effects: { gold: 50 } }),
+  child('ch_maths', 'uncommon', 'book', 'Moved up a year in maths.', 'moving up in maths', { when: { traits: ['bookish', 'curious', 'sharp'] }, effects: { stats: { smarts: 5 } } }),
+  child('ch_choir', 'uncommon', 'star', 'Sang a solo at the carol concert.', 'a solo', { when: { seasons: ['winter'] }, effects: { stats: { charm: 4 } } }),
+  child('ch_friend_moves', 'uncommon', 'family', '{Person} moved away and promised to write every week.', 'a friend moving away', { when: { person: 'friend' }, effects: { relationship: -10, stats: { happiness: -4 } } }),
+  child('ch_parent_job', 'uncommon', 'family', '{Person} got a new job and bought everyone chips.', 'chips to celebrate', { when: { person: 'parent' }, effects: { stats: { happiness: 2 } } }),
+  child('ch_poem', 'uncommon', 'book', 'Read a poem in assembly. Shaking, but finished it.', 'a poem in assembly', { when: { traits: ['shy'] }, effects: { stats: { charm: 4 } } }),
+  child('ch_puddle', 'uncommon', 'money', 'Found a 20 note in a puddle on the way to school.', 'a lucky find', { when: { traits: ['lucky'] }, effects: { gold: 20 } }),
+  child('ch_garage_roof', 'uncommon', 'health', 'Climbed onto the garage roof. Got down less gracefully.', 'a roof adventure', { when: { traits: ['restless', 'stubborn'] }, effects: { stats: { health: -3 } } }),
+  child('ch_tidy_room', 'uncommon', 'family', 'Tidied your room without being asked. {Parent} took a photo.', 'a tidy room', { when: { traits: ['tidy'] } }),
+  child('ch_newspaper', 'rare', 'star', 'Your drawing of the town hall was printed in the local paper.', 'a picture in the paper', { effects: { stats: { charm: 5 } } }),
+  child('ch_long_illness', 'rare', 'health', 'A long spell in hospital with a chest illness. A lot of jigsaws.', 'a long illness', { effects: { stats: { health: -10 }, ailment: 'chronic' } }),
+  child('ch_talent_show', 'rare', 'star', 'Won the school talent show with a card trick.', 'the talent show', { effects: { stats: { charm: 6 } } }),
+  child('ch_alarm', 'remarkable', 'star', 'Spotted smoke from the bin shed and raised the alarm. A certificate followed.', 'a certificate for bravery', { effects: { stats: { charm: 5, happiness: 5 } } }),
+  child('ch_space_stone', 'remarkable', 'star', 'Found a black stone in the garden. The museum says it came from space.', 'a stone from space', { effects: { stats: { smarts: 5 } } }),
+  // Pets.
+  child('ch_pet_goldfish', 'common', 'paw', 'Won a goldfish at the fair and named it {pet}.', 'a goldfish', { kind: 'pet', when: { pet: false }, effects: { pet: 'goldfish', stats: { happiness: 3 } } }),
+  child('ch_pet_rabbit', 'uncommon', 'paw', 'A rabbit called {pet} came to live in a hutch by the shed.', 'a rabbit', { kind: 'pet', when: { pet: false }, effects: { pet: 'rabbit', stats: { happiness: 3 } } }),
+  child('ch_pet_walks', 'common', 'paw', 'Walked {pet} round the block before school every day.', 'dog walks', { kind: 'pet', when: { pet: ['dog'] }, effects: { stats: { health: 2 } } }),
+  child('ch_pet_bed', 'common', 'paw', '{Pet} sleeps on your bed and nowhere else.', 'a cat on the bed', { kind: 'pet', when: { pet: ['cat'] }, effects: { stats: { happiness: 2 } } }),
+  child('ch_pet_paw', 'common', 'paw', 'Taught {pet} to give a paw. It took three weeks and a lot of cheese.', 'a new trick', { kind: 'pet', when: { pet: ['dog'] }, effects: { stats: { happiness: 2 } } }),
+  child('ch_pet_budgie', 'uncommon', 'paw', '{Pet} the budgie learned to copy the doorbell.', 'a talking budgie', { kind: 'pet', when: { pet: ['budgie'] } }),
+  child('ch_pet_tortoise', 'uncommon', 'paw', '{Pet} escaped and turned up two gardens down, very pleased.', 'a tortoise escape', { kind: 'pet', when: { pet: ['tortoise'] } }),
+  child('ch_pet_portrait', 'common', 'paw', 'Drew {pet} for the classroom wall.', 'a pet portrait', { kind: 'pet', when: { pet: true } }),
+  // Hobbies.
+  child('ch_hob_goal', 'common', 'star', 'Scored the winner for the under-elevens in the rain.', 'a winning goal', { kind: 'hobby', when: { hobby: ['football'] }, effects: { stats: { health: 3, happiness: 3 } } }),
+  child('ch_hob_piano', 'common', 'book', 'Passed grade one piano with only a small wobble in the scales.', 'a piano exam', { kind: 'hobby', when: { hobby: ['piano'] }, effects: { stats: { smarts: 2 } } }),
+  child('ch_hob_sketch', 'common', 'book', 'Filled a whole sketchbook with dinosaurs.', 'a full sketchbook', { kind: 'hobby', when: { hobby: ['drawing'] }, effects: { stats: { happiness: 2 } } }),
+  child('ch_hob_chess', 'common', 'book', 'Beat {parent} at chess, fair and square.', 'a chess win', { kind: 'hobby', when: { hobby: ['chess'] }, effects: { stats: { smarts: 3 } } }),
+  child('ch_hob_bake', 'common', 'family', 'Baked fairy cakes for the school fair. Sold out by eleven.', 'a bake sale', { kind: 'hobby', when: { hobby: ['baking'] }, effects: { stats: { charm: 2 } } }),
+  child('ch_hob_saturdays', 'common', 'star', 'Spent every Saturday morning on {hobby}.', 'Saturdays of {hobby}', { kind: 'hobby', when: { hobby: true }, effects: { stats: { happiness: 2 } } }),
+]

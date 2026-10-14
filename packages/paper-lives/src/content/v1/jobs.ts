@@ -1,0 +1,43 @@
+import type { JobDef, Stage } from '../../sim/types'
+
+const WORKING: readonly Stage[] = ['young', 'adult', 'senior']
+const TEEN: readonly Stage[] = ['teen']
+
+/** Thirty jobs in five tiers (paper-lives.md "Work and money"). Incomes are yearly, in plain numbers. */
+export const jobs: readonly JobDef[] = [
+  // Tier 1: Saturday jobs for teens.
+  { id: 'paper_round', name: 'Paper round', tier: 1, income: [600, 900], stages: TEEN, easedBy: 'restless', startLines: ['Took on the paper round. Up at six, bag heavier than expected.', 'Got the paper round on the hill streets. Calves like iron by spring.'] },
+  { id: 'dog_walker', name: 'Dog walker', tier: 1, income: [700, 1_100], stages: TEEN, easedBy: 'gentle', startLines: ['Started walking three dogs for the neighbours. One of them walks you.', 'Paid to walk the spaniel from number nine twice a day.'] },
+  { id: 'shelf_stacker', name: 'Shelf stacker', tier: 1, income: [1_200, 1_900], stages: TEEN, easedBy: 'tidy', startLines: ['Saturday job stacking tins at the corner shop.', 'Got a weekend job filling shelves. Learned where the custard lives.'] },
+  { id: 'babysitter', name: 'Babysitter', tier: 1, income: [800, 1_400], stages: TEEN, floor: { stat: 'charm', min: 35 }, easedBy: 'gentle', startLines: ['Babysitting for the family across the road. Paid in cash and crisps.', 'Started babysitting on Friday nights. The twins never sleep.'] },
+  // Tier 2.
+  { id: 'barista', name: 'Barista', tier: 2, income: [15_000, 18_000], stages: WORKING, easedBy: 'sunny', startLines: ['Started as a barista at the station cafe.', 'Got a job pulling coffees by the bus garage. Hands smell of beans.'] },
+  { id: 'shop_assistant', name: 'Shop assistant', tier: 2, income: [15_000, 18_500], stages: WORKING, easedBy: 'sunny', startLines: ['Started on the tills at the hardware shop on the high street.', 'Took a job in the shoe shop. Knows every size by eye within a month.'] },
+  { id: 'cleaner', name: 'Cleaner', tier: 2, income: [14_500, 18_000], stages: WORKING, easedBy: 'tidy', startLines: ['Started cleaning offices before dawn. The building is quiet at five.', 'Took on cleaning rounds for four houses on the same street.'] },
+  { id: 'postal_worker', name: 'Postal worker', tier: 2, income: [17_000, 20_500], stages: WORKING, easedBy: 'hardy', startLines: ['Started on a post round. Learned which gates stick.', 'Joined the sorting office on the early shift.'] },
+  { id: 'bus_driver', name: 'Bus driver', tier: 2, income: [18_000, 22_000], stages: WORKING, easedBy: 'stubborn', startLines: ['Passed the bus test. The number 14, out and back, all day.', 'Started driving the town loop. Knows every regular by their stop.'] },
+  { id: 'care_worker', name: 'Care worker', tier: 2, income: [16_000, 19_500], stages: WORKING, easedBy: 'gentle', startLines: ['Started at the care home on the hill. Long shifts, good company.', 'Took a job visiting older people at home. Drinks a lot of tea.'] },
+  { id: 'waiter', name: 'Waiter', tier: 2, income: [14_500, 18_500], stages: WORKING, floor: { stat: 'charm', min: 30 }, easedBy: 'sunny', startLines: ['Started waiting tables at the Italian place by the river.', 'Took a job serving breakfasts at the seafront hotel.'] },
+  // Tier 3.
+  { id: 'nurse', name: 'Nurse', tier: 3, income: [24_000, 31_000], stages: WORKING, floor: { stat: 'smarts', min: 45 }, easedBy: 'gentle', startLines: ['Qualified as a nurse. First week on the children’s ward.', 'Started nursing on nights at the general hospital.'] },
+  { id: 'electrician', name: 'Electrician', tier: 3, income: [25_000, 33_000], stages: WORKING, floor: { stat: 'smarts', min: 40 }, easedBy: 'sharp', startLines: ['Got the electrician’s ticket. The van has your name on it.', 'Started rewiring old houses. Finds a lot of strange fuses.'] },
+  { id: 'plumber', name: 'Plumber', tier: 3, income: [25_000, 34_000], stages: WORKING, floor: { stat: 'smarts', min: 35 }, easedBy: 'hardy', startLines: ['Started as a plumber. Knees already complaining.', 'Took over a retiring plumber’s round and most of the customers.'] },
+  { id: 'chef', name: 'Chef', tier: 3, income: [22_000, 30_000], stages: WORKING, floor: { stat: 'charm', min: 30 }, easedBy: 'restless', startLines: ['Started on the line in a hotel kitchen. Burnt forearms, good soup.', 'Got a job as a cook at the bistro behind the market.'] },
+  { id: 'librarian', name: 'Librarian', tier: 3, income: [22_000, 28_000], stages: WORKING, floor: { stat: 'smarts', min: 50 }, easedBy: 'bookish', startLines: ['Started at the town library. Knows where every atlas lives.', 'Took a job at the college library, mostly shushing.'] },
+  { id: 'hairdresser', name: 'Hairdresser', tier: 3, income: [21_000, 29_000], stages: WORKING, floor: { stat: 'charm', min: 45 }, easedBy: 'sunny', startLines: ['Started cutting hair at a salon by the station.', 'Got a chair at the barber’s on the corner. Hears everyone’s news.'] },
+  { id: 'carpenter', name: 'Carpenter', tier: 3, income: [24_000, 32_000], stages: WORKING, floor: { stat: 'smarts', min: 35 }, easedBy: 'tidy', startLines: ['Started as a carpenter. Sawdust in every pocket.', 'Took a job fitting kitchens. Measures twice, as promised.'] },
+  // Tier 4.
+  { id: 'teacher', name: 'Teacher', tier: 4, income: [30_000, 40_000], stages: WORKING, floor: { stat: 'smarts', min: 55 }, easedBy: 'gentle', startLines: ['Started teaching at the primary school. Thirty names to learn.', 'Got a job teaching history at the comprehensive.'] },
+  { id: 'journalist', name: 'Journalist', tier: 4, income: [29_000, 39_000], stages: WORKING, floor: { stat: 'charm', min: 55 }, easedBy: 'curious', startLines: ['Started on the local paper. First story about a lost tortoise.', 'Got a reporter’s job covering council meetings and fetes.'] },
+  { id: 'software_developer', name: 'Software developer', tier: 4, income: [36_000, 50_000], stages: WORKING, floor: { stat: 'smarts', min: 60 }, easedBy: 'sharp', startLines: ['Started as a software developer. Mostly fixing other people’s bugs.', 'Got a job writing code for a company that makes train timetables.'] },
+  { id: 'architect', name: 'Architect', tier: 4, income: [35_000, 48_000], stages: WORKING, floor: { stat: 'smarts', min: 62 }, easedBy: 'dreamy', startLines: ['Qualified as an architect. First job, a bike shed.', 'Started drawing houses for a small practice above the bakery.'] },
+  { id: 'vet', name: 'Vet', tier: 4, income: [36_000, 48_000], stages: WORKING, floor: { stat: 'smarts', min: 62 }, easedBy: 'gentle', startLines: ['Qualified as a vet. First patient, a guinea pig with a cough.', 'Joined a country practice. Half the work is cows.'] },
+  { id: 'accountant', name: 'Accountant', tier: 4, income: [34_000, 46_000], stages: WORKING, floor: { stat: 'smarts', min: 58 }, easedBy: 'thrifty', startLines: ['Started as an accountant. Columns that add up, every time.', 'Got a job doing the books for half the shops in town.'] },
+  { id: 'pharmacist', name: 'Pharmacist', tier: 4, income: [35_000, 45_000], stages: WORKING, floor: { stat: 'smarts', min: 60 }, easedBy: 'tidy', startLines: ['Qualified as a pharmacist. The shop bell rings all day.', 'Took over the counter at the chemist by the clock tower.'] },
+  // Tier 5.
+  { id: 'surgeon', name: 'Surgeon', tier: 5, income: [60_000, 80_000], stages: WORKING, floor: { stat: 'smarts', min: 72 }, easedBy: 'sharp', startLines: ['Became a surgeon. Steady hands, early starts.', 'First operation as the lead surgeon. It went fine.'] },
+  { id: 'headteacher', name: 'Headteacher', tier: 5, income: [52_000, 66_000], stages: ['adult', 'senior'], floor: { stat: 'charm', min: 62 }, easedBy: 'stubborn', startLines: ['Made headteacher. The office has a biscuit tin.', 'Took over as head of the school on the hill.'] },
+  { id: 'novelist', name: 'Novelist', tier: 5, income: [20_000, 90_000], stages: WORKING, floor: { stat: 'smarts', min: 60 }, easedBy: 'dreamy', startLines: ['Sold a first novel. The advance covers the rent for a year.', 'A publisher took the book. Writing the next one in the shed.'] },
+  { id: 'pilot', name: 'Pilot', tier: 5, income: [58_000, 78_000], stages: WORKING, floor: { stat: 'smarts', min: 66 }, easedBy: 'hardy', startLines: ['Earned the wings. Flying short hops over the sea.', 'Started flying the early route north. Sunrise at work.'] },
+  { id: 'museum_director', name: 'Museum director', tier: 5, income: [50_000, 64_000], stages: ['adult', 'senior'], floor: { stat: 'charm', min: 60 }, easedBy: 'curious', startLines: ['Made director of the town museum. The whale skeleton is in your care.', 'Took charge of the museum. First job, fixing the roof.'] },
+]

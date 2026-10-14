@@ -1,0 +1,58 @@
+import type { EventDef } from '../../sim/types'
+
+type Rest = Omit<EventDef, 'id' | 'stage' | 'rarity' | 'glyph' | 'line' | 'note'>
+const teen = (id: string, rarity: EventDef['rarity'], glyph: EventDef['glyph'], line: string, note: string, rest: Rest = {}): EventDef => ({ id, stage: 'teen', rarity, glyph, line, note, ...rest })
+
+/** Ages 13 to 17: exams, first jobs, first love. */
+export const teenEvents: readonly EventDef[] = [
+  teen('tn_friend', 'common', 'family', 'Fell in with {person} at the bus stop, and stayed friends.', 'a new friend', { effects: { addPerson: 'friend', stats: { happiness: 3 } } }),
+  teen('tn_haircut', 'common', 'family', 'A bold haircut that {parent} still talks about.', 'a bold haircut', { effects: { stats: { charm: 2 } } }),
+  teen('tn_spots', 'common', 'health', 'A spot on your chin the size of a small planet, on photo day.', 'photo day', { effects: { stats: { happiness: -2 } } }),
+  teen('tn_revision', 'common', 'book', 'Revised at the kitchen table every night for a month.', 'revision', { effects: { stats: { smarts: 3, happiness: -1 } } }),
+  teen('tn_gig', 'common', 'star', 'First gig, in a hall above a pub. Ears rang for two days.', 'a first gig', { effects: { stats: { happiness: 3 } } }),
+  teen('tn_bedroom', 'common', 'house', 'Painted the bedroom dark blue. {Parent} said nothing, carefully.', 'a blue bedroom', { effects: { stats: { happiness: 2 } } }),
+  teen('tn_sulk', 'common', 'family', 'Did not speak to {person} for a week over a curfew.', 'a sulk', { when: { person: 'parent' }, effects: { relationship: -4 } }),
+  teen('tn_sibling_cover', 'common', 'family', '{Person} covered for you when you missed the last bus.', 'a favour', { when: { person: 'sibling' }, effects: { relationship: 6 } }),
+  teen('tn_camping', 'common', 'family', 'A camping trip with friends. The tent let in most of the rain.', 'a soggy camping trip', { when: { seasons: ['summer', 'spring'] }, effects: { stats: { happiness: 3, health: 1 } } }),
+  teen('tn_debate', 'common', 'book', 'Argued well in the school debate and lost on a technicality.', 'a debate', { effects: { stats: { charm: 2, smarts: 2 } } }),
+  teen('tn_flu', 'common', 'health', 'Flu over the half-term week. Missed the trip to the coast.', 'flu', { effects: { stats: { health: -4 } } }),
+  teen('tn_driving', 'common', 'family', '{Person} took you out for a driving lesson in the supermarket car park.', 'a driving lesson', { when: { person: 'parent', minAge: 16 }, effects: { relationship: 3 } }),
+  teen('tn_volunteer', 'common', 'family', 'Helped out at the charity shop on Saturdays, sorting jigsaws.', 'volunteering', { effects: { stats: { charm: 2, happiness: 2 } } }),
+  teen('tn_diary', 'common', 'book', 'Kept a diary for a whole year, then hid it very well.', 'a diary', { effects: { stats: { smarts: 1, happiness: 1 } } }),
+  teen('tn_late_nights', 'common', 'health', 'Stayed up far too late, most nights, talking on the phone.', 'late nights', { effects: { stats: { health: -2, charm: 2 } } }),
+  teen('tn_school_trip', 'common', 'book', 'A school trip abroad. Mostly remember the ferry.', 'a school trip abroad', { effects: { stats: { smarts: 2, happiness: 2 } } }),
+  teen('tn_crush', 'common', 'heart', 'A crush on someone in the year above. Never said a word.', 'a crush', { effects: { stats: { happiness: -1 } } }),
+  teen('tn_bus', 'common', 'family', 'Missed the school bus four times in a week and walked.', 'a lot of walking', { effects: { stats: { health: 2 } } }),
+  teen('tn_saturday_job', 'common', 'work', 'Went looking for a Saturday job and found one.', 'a Saturday job', { when: { job: false, minAge: 14 }, effects: { job: 'offer' } }),
+  teen('tn_first_wage', 'common', 'money', 'Spent the first proper wage on trainers and a pizza.', 'a first wage', { when: { job: true }, effects: { gold: -60, stats: { happiness: 3 } } }),
+  teen('tn_savings', 'common', 'money', 'Saved up every week in a tin under the bed.', 'savings', { when: { job: true }, effects: { gold: 150 } }),
+  teen('tn_first_love', 'uncommon', 'heart', 'Started going out with {person} from the swimming club.', 'first love', { when: { minAge: 16, partner: false }, effects: { addPerson: 'partner', stats: { happiness: 5 } } }),
+  teen('tn_heartbreak', 'uncommon', 'heart', '{Person} ended it at the school gates. Played sad songs for a month.', 'heartbreak', { when: { partner: 'dating' }, effects: { partner: 'separate', stats: { happiness: -6 } } }),
+  teen('tn_prefect', 'uncommon', 'star', 'Made a prefect. The badge is slightly crooked.', 'a prefect badge', { effects: { stats: { charm: 3 } } }),
+  teen('tn_sprain', 'uncommon', 'health', 'Sprained an ankle on the trampoline at a party.', 'a sprained ankle', { effects: { stats: { health: -4 } } }),
+  teen('tn_fallout_friend', 'uncommon', 'family', 'Fell out with {person} over something nobody remembers now.', 'a falling out', { when: { person: 'friend' }, effects: { relationship: -10, stats: { happiness: -3 } } }),
+  teen('tn_shy_party', 'uncommon', 'family', 'Went to a party and stood in the kitchen all night, happily.', 'a party', { when: { traits: ['shy'] }, effects: { stats: { charm: 2 } } }),
+  teen('tn_book_prize', 'uncommon', 'book', 'Won the school reading prize, a book token and a handshake.', 'a reading prize', { when: { traits: ['bookish', 'dreamy'] }, effects: { stats: { smarts: 4 } } }),
+  teen('tn_run_away', 'uncommon', 'family', 'Ran away from home as far as the end of the road. Came back for tea.', 'a short escape', { when: { traits: ['restless', 'stubborn'] }, effects: { stats: { happiness: -2 } } }),
+  teen('tn_thrift', 'uncommon', 'money', 'Sold your old toys at a car boot sale for 85.', 'a car boot sale', { when: { traits: ['thrifty', 'sharp'] }, effects: { gold: 85 } }),
+  teen('tn_lucky_find', 'uncommon', 'money', 'Found a 100 note tucked inside a second-hand book.', 'a lucky book', { when: { traits: ['lucky'] }, effects: { gold: 100 } }),
+  teen('tn_concussion', 'rare', 'health', 'Knocked out cold in a goalmouth scramble. Fine, after a night in hospital.', 'a bump on the head', { effects: { stats: { health: -6 } } }),
+  teen('tn_exchange', 'rare', 'book', 'Spent a month on a school exchange, living with a family abroad.', 'an exchange trip', { effects: { stats: { smarts: 4, charm: 4 } } }),
+  teen('tn_radio', 'rare', 'star', 'Read the weather on the local radio for a school project.', 'the radio', { effects: { stats: { charm: 5 } } }),
+  teen('tn_rescue_swim', 'remarkable', 'star', 'Pulled a younger kid out of the swimming pool at the deep end.', 'a rescue at the pool', { effects: { stats: { charm: 6, happiness: 6 } } }),
+  teen('tn_invention', 'remarkable', 'star', 'A science fair project about rainwater won a regional prize.', 'a regional science prize', { effects: { stats: { smarts: 7 } } }),
+  // Pets.
+  teen('tn_pet_dog', 'uncommon', 'paw', 'A dog from the rescue centre, called {pet}, chose you on sight.', 'a rescue dog', { kind: 'pet', when: { pet: false }, effects: { pet: 'dog', stats: { happiness: 4 } } }),
+  teen('tn_pet_cat', 'uncommon', 'paw', 'A stray cat moved in and the family named it {pet}.', 'a stray cat', { kind: 'pet', when: { pet: false }, effects: { pet: 'cat', stats: { happiness: 3 } } }),
+  teen('tn_pet_vet', 'common', 'paw', '{Pet} ate a sock. A night at the vet, all fine.', 'a trip to the vet', { kind: 'pet', when: { pet: ['dog'] }, effects: { gold: -80 } }),
+  teen('tn_pet_homework', 'common', 'paw', '{Pet} sat on your homework every evening.', 'a cat on the homework', { kind: 'pet', when: { pet: ['cat'] } }),
+  teen('tn_pet_company', 'common', 'paw', 'Told {pet} everything during the exams. A good listener.', 'a patient listener', { kind: 'pet', when: { pet: true }, effects: { stats: { happiness: 2 } } }),
+  teen('tn_pet_hutch', 'common', 'paw', 'Rebuilt {pet}’s hutch with offcuts from the timber yard.', 'a new hutch', { kind: 'pet', when: { pet: ['rabbit'] } }),
+  // Hobbies.
+  teen('tn_hob_team', 'common', 'star', 'Picked for the county football team. Muddy every Saturday.', 'the county team', { kind: 'hobby', when: { hobby: ['football'] }, effects: { stats: { health: 3, charm: 2 } } }),
+  teen('tn_hob_recital', 'common', 'star', 'Played the piano at a school recital without looking at your hands.', 'a recital', { kind: 'hobby', when: { hobby: ['piano'] }, effects: { stats: { charm: 3 } } }),
+  teen('tn_hob_mural', 'common', 'star', 'Painted a mural in the school canteen. It is still there.', 'a mural', { kind: 'hobby', when: { hobby: ['drawing'] }, effects: { stats: { charm: 2, happiness: 2 } } }),
+  teen('tn_hob_parkrun', 'common', 'health', 'Ran a whole 5k on a Saturday morning in under half an hour.', 'a fast 5k', { kind: 'hobby', when: { hobby: ['running'] }, effects: { stats: { health: 4 } } }),
+  teen('tn_hob_chess_club', 'common', 'book', 'Started the school chess club. Seven members and a kettle.', 'a chess club', { kind: 'hobby', when: { hobby: ['chess'] }, effects: { stats: { smarts: 2, charm: 2 } } }),
+  teen('tn_hob_any', 'common', 'star', 'Gave most evenings to {hobby}. Getting good.', 'evenings of {hobby}', { kind: 'hobby', when: { hobby: true }, effects: { stats: { happiness: 2 } } }),
+]

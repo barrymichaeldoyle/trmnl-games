@@ -17,12 +17,15 @@ importers:
       '@trmnl-games/engine':
         specifier: workspace:*
         version: link:packages/engine
-      '@trmnl-games/platform':
-        specifier: workspace:*
-        version: link:packages/platform
       '@trmnl-games/idle-angler':
         specifier: workspace:*
         version: link:packages/idle-angler
+      '@trmnl-games/paper-lives':
+        specifier: workspace:*
+        version: link:packages/paper-lives
+      '@trmnl-games/platform':
+        specifier: workspace:*
+        version: link:packages/platform
       convex:
         specifier: ^1.46.0
         version: 1.46.0(@clerk/react@6.17.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
@@ -96,12 +99,12 @@ importers:
       '@trmnl-games/engine':
         specifier: workspace:*
         version: link:../../packages/engine
-      '@trmnl-games/platform':
-        specifier: workspace:*
-        version: link:../../packages/platform
       '@trmnl-games/idle-angler':
         specifier: workspace:*
         version: link:../../packages/idle-angler
+      '@trmnl-games/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
       convex:
         specifier: ^1.46.0
         version: 1.46.0(@clerk/react@6.17.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
@@ -157,12 +160,12 @@ importers:
       '@trmnl-games/engine':
         specifier: workspace:*
         version: link:../../packages/engine
-      '@trmnl-games/platform':
-        specifier: workspace:*
-        version: link:../../packages/platform
       '@trmnl-games/idle-angler':
         specifier: workspace:*
         version: link:../../packages/idle-angler
+      '@trmnl-games/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
       convex:
         specifier: ^1.46.0
         version: 1.46.0(@clerk/react@6.17.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
@@ -239,17 +242,27 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
-  packages/platform:
-    devDependencies:
-      typescript:
-        specifier: ~6.0.3
-        version: 6.0.3
-
   packages/idle-angler:
     dependencies:
       '@trmnl-games/engine':
         specifier: workspace:*
         version: link:../engine
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/paper-lives:
+    dependencies:
+      '@trmnl-games/engine':
+        specifier: workspace:*
+        version: link:../engine
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/platform:
     devDependencies:
       typescript:
         specifier: ~6.0.3

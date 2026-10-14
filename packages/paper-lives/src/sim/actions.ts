@@ -1,0 +1,53 @@
+import { decisionOf, optionOf, optionOpen } from './simulate'
+import type { LifeState, PaperLivesCatalog, Pronouns } from './types'
+
+/**
+ * The player's intents as pure state changes (paper-lives.md "Decisions" and "Architecture"). The backend
+ * wraps each in the common intent contract; name moderation is the platform's (HERO_NAME_RULE).
+ */
+export type ActionResult = { ok: true; life: LifeState } | { ok: false; code: string; reason: string }
+
+const fail = (code: string, reason: string): ActionResult => ({ ok: false, code, reason })
+
+/** Record a choice; it resolves at the boundary. Choosing again before then replaces it. */
+export function choose(life: LifeState, content: PaperLivesCatalog, decisionId: string, optionId: string): ActionResult {
+  if (life.status !== 'living') return fail('NOT_LIVING', 'This life is not living.')
+  const pending = life.year.pending
+  if (!pending || pending.decisionId !== decisionId) return fail('NO_DECISION', 'That decision is no longer open.')
+  const def = decisionOf(content, decisionId)
+  if (!def.options.some((o) => o.id === optionId)) return fail('UNKNOWN_OPTION', 'That option does not exist.')
+  const option = optionOf(def, optionId)
+  if (!optionOpen(life, option)) return fail('OPTION_GATED', option.gateReason ?? 'That option is not open.')
+  return { ok: true, life: { ...life, year: { ...life.year, pending: { ...pending, chosen: optionId } } } }
+}
+
+/**
+ * Queue the year's end: it comes at the first tick on or after the minimum, so asking early never
+ * shortens a year (L1 change: queueable at any time, not only from the minimum). A second ask is a no-op.
+ */
+export function requestAgeUp(life: LifeState): ActionResult {
+  if (life.status !== 'living') return fail('NOT_LIVING', 'This life is not living.')
+  if (life.stage === 'infant') return fail('INFANT', 'The first years pass by themselves.')
+  return { ok: true, life: life.year.ageUpRequested ? life : { ...life, year: { ...life.year, ageUpRequested: true } } }
+}
+
+/** The first name and pronouns can change until the first year closes. */
+export function rename(life: LifeState, first: string): ActionResult {
+  if (life.counters.yearsLived > 0) return fail('TOO_LATE', 'The name is settled after the first year.')
+  return { ok: true, life: { ...life, first } }
+}
+
+export function setPronouns(life: LifeState, pronouns: Pronouns): ActionResult {
+  if (life.counters.yearsLived > 0) return fail('TOO_LATE', 'Pronouns are settled after the first year.')
+  return { ok: true, life: { ...life, pronouns } }
+}
+
+export function pause(life: LifeState): ActionResult {
+  if (life.status !== 'living') return fail('NOT_LIVING', 'Only a living life can pause.')
+  return { ok: true, life: { ...life, status: 'paused' } }
+}
+
+export function resume(life: LifeState): ActionResult {
+  if (life.status !== 'paused') return fail('NOT_PAUSED', 'This life is not paused.')
+  return { ok: true, life: { ...life, status: 'living' } }
+}
