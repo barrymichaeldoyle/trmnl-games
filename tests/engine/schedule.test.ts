@@ -12,12 +12,12 @@ describe('engine schedule', () => {
   })
 
   it('offsets a second world by five minutes so the two never share a slot', () => {
-    const slowCast = makeSchedule(5 * 60_000)
-    expect(slowCast.cronMinutes).toBe('5,20,35,50')
-    expect(slowCast.wallSlotFor(Date.UTC(2026, 9, 9, 10, 19, 59))).toBe(Date.UTC(2026, 9, 9, 10, 5))
-    expect(slowCast.wallSlotFor(Date.UTC(2026, 9, 9, 10, 20))).toBe(Date.UTC(2026, 9, 9, 10, 20))
-    expect(slowCast.nextSlotAfter(Date.UTC(2026, 9, 9, 10, 0))).toBe(Date.UTC(2026, 9, 9, 10, 5))
-    expect(slowCast.slotEta(Date.UTC(2026, 9, 9, 10, 0), 3)).toBe(Date.UTC(2026, 9, 9, 10, 35))
+    const idleAngler = makeSchedule(5 * 60_000)
+    expect(idleAngler.cronMinutes).toBe('5,20,35,50')
+    expect(idleAngler.wallSlotFor(Date.UTC(2026, 9, 9, 10, 19, 59))).toBe(Date.UTC(2026, 9, 9, 10, 5))
+    expect(idleAngler.wallSlotFor(Date.UTC(2026, 9, 9, 10, 20))).toBe(Date.UTC(2026, 9, 9, 10, 20))
+    expect(idleAngler.nextSlotAfter(Date.UTC(2026, 9, 9, 10, 0))).toBe(Date.UTC(2026, 9, 9, 10, 5))
+    expect(idleAngler.slotEta(Date.UTC(2026, 9, 9, 10, 0), 3)).toBe(Date.UTC(2026, 9, 9, 10, 35))
   })
 
   it('refuses an offset outside one slot', () => {

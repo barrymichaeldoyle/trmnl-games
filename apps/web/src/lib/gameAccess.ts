@@ -8,7 +8,7 @@ import type { GameSlug } from '@trmnl-games/platform'
 import { useConvexAuth } from 'convex/react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
-/** The games this viewer can see, with each one's lifecycle status (slow-cast.md "Architecture"). */
+/** The games this viewer can see, with each one's lifecycle status (idle-angler.md "Architecture"). */
 export const gamesQuery = convexQuery(api.platform.list, {})
 
 /**

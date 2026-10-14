@@ -2,7 +2,7 @@ import { currentHero, gameProfile } from './lib/gameProfile'
 import { v } from 'convex/values'
 import { isGame } from './lib/gameHooks'
 import { gameSlug } from './schema'
-import { currentAngler, slowCastProfile } from './slowCast/profile'
+import { currentAngler, idleAnglerProfile } from './idleAngler/profile'
 import type { Doc, Id } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
@@ -10,13 +10,13 @@ import { appError } from './lib/errors'
 import { currentUser, runIntent } from './lib/intent'
 
 /** D115: each game's connections are its own; a game being deleted shows none. */
-async function gameDeleting(ctx: QueryCtx, userId: Id<'users'>, slug: 'desk-crawler' | 'slow-cast'): Promise<boolean> {
-  return slug === 'slow-cast' ? (await slowCastProfile(ctx, userId))?.state === 'deleting' : (await gameProfile(ctx, userId))?.state === 'deleting'
+async function gameDeleting(ctx: QueryCtx, userId: Id<'users'>, slug: 'desk-crawler' | 'idle-angler'): Promise<boolean> {
+  return slug === 'idle-angler' ? (await idleAnglerProfile(ctx, userId))?.state === 'deleting' : (await gameProfile(ctx, userId))?.state === 'deleting'
 }
 
-/** The name the management page shows: the hero, or for Slow Cast the angler's public name. */
-async function characterName(ctx: QueryCtx, user: Doc<'users'>, slug: 'desk-crawler' | 'slow-cast'): Promise<string | null> {
-  if (slug === 'slow-cast') return (await currentAngler(ctx, user)) ? user.publicAlias : null
+/** The name the management page shows: the hero, or for Idle Angler the angler's public name. */
+async function characterName(ctx: QueryCtx, user: Doc<'users'>, slug: 'desk-crawler' | 'idle-angler'): Promise<string | null> {
+  if (slug === 'idle-angler') return (await currentAngler(ctx, user)) ? user.publicAlias : null
   return (await currentHero(ctx, user))?.name ?? null
 }
 

@@ -29,23 +29,23 @@ describe('game lifecycle status (D115)', () => {
       admin: true,
       games: [
         { slug: 'desk-crawler', status: 'live', canOpen: true },
-        { slug: 'slow-cast', status: 'hidden', canOpen: true },
+        { slug: 'idle-angler', status: 'hidden', canOpen: true },
       ],
     })
   })
 
   it('lists a preview game for everyone but opens it only for admins', async () => {
-    await admin().mutation(api.platform.setGameStatus, { slug: 'slow-cast', status: 'preview', reasonCode: 'art_ready' })
-    expect((await player().query(api.platform.list, {})).games).toContainEqual({ slug: 'slow-cast', status: 'preview', canOpen: false })
-    expect((await admin().query(api.platform.list, {})).games).toContainEqual({ slug: 'slow-cast', status: 'preview', canOpen: true })
-    await t.mutation(internal.platform.setGameStatusInternal, { slug: 'slow-cast', status: 'live' })
-    expect((await player().query(api.platform.list, {})).games).toContainEqual({ slug: 'slow-cast', status: 'live', canOpen: true })
+    await admin().mutation(api.platform.setGameStatus, { slug: 'idle-angler', status: 'preview', reasonCode: 'art_ready' })
+    expect((await player().query(api.platform.list, {})).games).toContainEqual({ slug: 'idle-angler', status: 'preview', canOpen: false })
+    expect((await admin().query(api.platform.list, {})).games).toContainEqual({ slug: 'idle-angler', status: 'preview', canOpen: true })
+    await t.mutation(internal.platform.setGameStatusInternal, { slug: 'idle-angler', status: 'live' })
+    expect((await player().query(api.platform.list, {})).games).toContainEqual({ slug: 'idle-angler', status: 'live', canOpen: true })
   })
 
   it('refuses the switch to non-admins and audits it for admins', async () => {
-    await expect(player().mutation(api.platform.setGameStatus, { slug: 'slow-cast', status: 'live', reasonCode: 'nope' })).rejects.toThrow()
-    expect(await admin().mutation(api.platform.setGameStatus, { slug: 'slow-cast', status: 'preview', reasonCode: 'art_ready' })).toEqual({ from: 'hidden', to: 'preview' })
+    await expect(player().mutation(api.platform.setGameStatus, { slug: 'idle-angler', status: 'live', reasonCode: 'nope' })).rejects.toThrow()
+    expect(await admin().mutation(api.platform.setGameStatus, { slug: 'idle-angler', status: 'preview', reasonCode: 'art_ready' })).toEqual({ from: 'hidden', to: 'preview' })
     const events = await t.run(async (ctx) => await ctx.db.query('adminAuditEvents').collect())
-    expect(events).toMatchObject([{ action: 'platform.setGameStatus', targetRef: 'slow-cast', reasonCode: 'art_ready', outcome: 'hidden -> preview' }])
+    expect(events).toMatchObject([{ action: 'platform.setGameStatus', targetRef: 'idle-angler', reasonCode: 'art_ready', outcome: 'hidden -> preview' }])
   })
 })

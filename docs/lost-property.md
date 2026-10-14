@@ -94,7 +94,7 @@ One grow-only counter, `lostPropertyFound`, on the finder. A new achievement cat
 - No workbench tier, reinforcement or chosen affix travels with a spare.
 - No choosing whose spare you find, no searching, no returning it, no finder's fee.
 - Spares replace ordinary loot gear finds only, never combat drops, gifts or career guarantees.
-- No spares in the Office, and none from Slow Cast.
+- No spares in the Office, and none from Idle Angler.
 - No notification beyond the device line and the companion card.
 
 ## Work slices

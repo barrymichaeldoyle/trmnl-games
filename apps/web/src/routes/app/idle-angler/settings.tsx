@@ -1,0 +1,119 @@
+import { convexQuery } from '@convex-dev/react-query'
+import { useQuery } from '@tanstack/react-query'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
+import { api } from '@trmnl-games/backend/api'
+import { useIntent } from '../../../lib/intent'
+import { preload } from '../../../lib/preload'
+import type { Dock } from '../../../lib/idleAngler'
+import { ActionFeedback, Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
+import { AlertsCard, type AlertKindCopy } from '../desk-crawler/-alerts'
+import { ConfirmSheet, Consequences } from '../desk-crawler/-confirm'
+
+/** The More tab: links to rankings, achievements and help, then settings (pause, public profile, alerts, deleting Idle Angler progress alone). */
+export const Route = createFileRoute('/app/idle-angler/settings')({
+  loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {})),
+  component: SettingsPage,
+})
+
+const IDLE_ANGLER_ALERTS: readonly AlertKindCopy[] = [
+  { id: 'coolerFull', name: 'Cooler full', blurb: 'New catches are being released. Sent half an hour after the cooler fills, once each time.' },
+  { id: 'baitOut', name: 'Out of bait', blurb: 'Your angler used up the bait they were fishing with and is on a bare hook.' },
+]
+
+const MORE_LINKS = [
+  { to: '/app/idle-angler/rankings', label: 'Rankings', blurb: 'The heaviest fish at each water, this week and all time.' },
+  { to: '/app/idle-angler/achievements', label: 'Achievements', blurb: 'Every tier you have earned and what comes next.' },
+  { to: '/help/idle-angler', label: 'How Idle Angler works', blurb: 'Bait, weather, waters and the cooler.' },
+] as const
+
+function SettingsPage() {
+  const { notice, notify, dismiss } = useNotice()
+  const { data } = useQuery(convexQuery(api.idleAngler.anglers.dock, {}))
+  const dock = data as Dock | undefined
+  const pause = useIntent(api.idleAngler.anglers.pause)
+  const resume = useIntent(api.idleAngler.anglers.resume)
+  const profile = useIntent(api.idleAngler.anglers.setPublicProfile)
+  const deletion = useIntent(api.deletion.requestGameDeletion)
+  const [confirm, setConfirm] = useState('')
+  const [askingPause, setAskingPause] = useState(false)
+  const angler = dock?.angler
+  if (!angler) return null
+  const active = angler.activationState === 'active'
+  return (
+    <>
+      <h1 className="font-display text-3xl font-bold">More</h1>
+      <Card>
+        <ul className="flex flex-col">
+          {MORE_LINKS.map((link) => (
+            <li key={link.to} className="border-b border-rule last:border-b-0">
+              <Link to={link.to} className="flex min-h-12 flex-col justify-center py-2">
+                <span className="font-semibold underline underline-offset-4">{link.label}</span>
+                <span className="text-sm text-muted">{link.blurb}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Card>
+      <h2 className="font-display text-2xl font-bold">Settings</h2>
+      {active ? (
+        <Card title="Fishing">
+          <p>{angler.status === 'paused' ? 'Fishing is paused. Your angler catches nothing until you resume, and keeps everything they have.' : 'Your angler casts every fifteen minutes, day and night.'}</p>
+          <div className="mt-3">
+            {angler.status === 'paused'
+              ? <Button pending={resume.pending} onClick={() => void resume.run({}, 'Fishing resumed.')}>Resume fishing</Button>
+              : <Button variant="secondary" disabled={pause.pending} onClick={() => setAskingPause(true)}>Pause fishing</Button>}
+          </div>
+          <ActionFeedback error={pause.error ?? resume.error} message={pause.message ?? resume.message} />
+        </Card>
+      ) : null}
+      {active ? (
+        <Card title="Public profile">
+          <p>{angler.publicProfile ? 'Your Idle Angler title, achievements and logbook count show on your public profile.' : 'Idle Angler is hidden from your public profile.'} Leaderboards always show your public name.</p>
+          <div className="mt-3">
+            {/* D144: shown by default; hiding stays available but quiet. */}
+            <Button variant={angler.publicProfile ? 'quiet' : 'secondary'} pending={profile.pending} onClick={() => void profile.run({ visible: !angler.publicProfile }, angler.publicProfile ? 'Idle Angler is hidden from your profile.' : 'Idle Angler now shows on your profile.')}>
+              {angler.publicProfile ? 'Hide from my profile' : 'Show on my profile'}
+            </Button>
+          </div>
+          {angler.publicProfile ? <p className="mt-3 text-sm"><Link to="/profile/$alias" params={{ alias: angler.alias }} className="underline underline-offset-4">Open your public profile</Link></p> : null}
+          <ActionFeedback error={profile.error} message={profile.message} />
+        </Card>
+      ) : null}
+      {active ? <AlertsCard notify={notify} kinds={IDLE_ANGLER_ALERTS} intro="Get a nudge on this phone when your angler needs you." quietNote="A cooler alert waits until quiet hours end; an out-of-bait alert during quiet hours is skipped." /> : null}
+      <Card title="Delete Idle Angler progress">
+        <p>This removes your angler, cooler, logbook and Idle Angler connections. Your TRMNL Games account and your other games stay. It cannot be undone.</p>
+        <label className="mt-3 flex flex-col gap-1">
+          <span className="text-sm font-semibold">Type DELETE to confirm</span>
+          <input value={confirm} onChange={(event) => setConfirm(event.target.value)} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" autoComplete="off" />
+        </label>
+        <div className="mt-3">
+          <Button variant="danger" disabled={confirm !== 'DELETE'} pending={deletion.pending} onClick={() => void deletion.run({ confirm: 'DELETE', gameSlug: 'idle-angler' }, 'Removing Idle Angler progress.')}>Delete Idle Angler progress</Button>
+        </div>
+        <ActionFeedback error={deletion.error} message={deletion.message} />
+      </Card>
+      <p className="text-sm"><Link to="/account" className="underline underline-offset-4">Account settings</Link> cover your public name, analytics and deleting your whole account.</p>
+      <ConfirmSheet
+        open={askingPause}
+        title="Pause fishing?"
+        confirmLabel="Pause fishing"
+        busyLabel="Pausing…"
+        cancelLabel="Keep fishing"
+        pending={pause.pending}
+        onClose={() => setAskingPause(false)}
+        onConfirm={async () => {
+          if (pause.pending) return
+          await pause.run({}, 'Fishing paused.')
+          setAskingPause(false)
+        }}
+      >
+        <Consequences>
+          <li>No casts or fish until you resume, and missed casts are not made up later.</li>
+          <li>Your fish stay on the boards, but you can't add to this week's while paused.</li>
+          <li>Your cooler, bait and coins stay as they are. Resume any time.</li>
+        </Consequences>
+      </ConfirmSheet>
+      <NoticeBar notice={notice} onDismiss={dismiss} />
+    </>
+  )
+}

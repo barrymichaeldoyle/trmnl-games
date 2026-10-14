@@ -4,19 +4,19 @@ import { PRIVACY_UPDATED, ProsePage, SUPPORT_EMAIL } from '../lib/prose'
 import { seo } from '../lib/seo'
 
 /**
- * Slow Cast's part of the policy (D115). It renders once the game is listed (preview or live), so a hidden game stays
+ * Idle Angler's part of the policy (D115). It renders once the game is listed (preview or live), so a hidden game stays
  * unannounced; admins, the only players while it is hidden, see it too. It renders in the browser (AfterListing), so the
  * rest of the policy is not held behind the listing.
  */
-function SlowCastPrivacy() {
+function IdleAnglerPrivacy() {
   const data = useGames()
-  if (!data?.games.some((game) => game.slug === 'slow-cast')) return null
+  if (!data?.games.some((game) => game.slug === 'idle-angler')) return null
   return (
     <>
-      <h2>Slow Cast</h2>
-      <p>Slow Cast stores your angler: gold, the water and bait, your cooler, your logbook of species and best weights, your fishing history, your heaviest fish at each water, achievements and fly box. Your heaviest fish appear under your public name on Slow Cast's leaderboards and on other players' TRMNL screens. Unless you hide Slow Cast from your public profile in Slow Cast settings, anyone with the link sees your title, start date, achievement count and species logged.</p>
-      <p>If you turn on Slow Cast alerts, they use the same devices and quiet hours as your other games' alerts. The weekly fly code on your TRMNL is keyed to your installation and never shown in the companion.</p>
-      <p>In <Link to="/app/slow-cast/settings">Slow Cast settings</Link>, Delete Slow Cast progress removes your angler, cooler, logbook, leaderboard records, fly box, achievements, Slow Cast connections and Slow Cast alert settings. Your account and other games stay. Deleting your TRMNL Games account removes Slow Cast with everything else.</p>
+      <h2>Idle Angler</h2>
+      <p>Idle Angler stores your angler: gold, the water and bait, your cooler, your logbook of species and best weights, your fishing history, your heaviest fish at each water, achievements and fly box. Your heaviest fish appear under your public name on Idle Angler's leaderboards and on other players' TRMNL screens. Unless you hide Idle Angler from your public profile in Idle Angler settings, anyone with the link sees your title, start date, achievement count and species logged.</p>
+      <p>If you turn on Idle Angler alerts, they use the same devices and quiet hours as your other games' alerts. The weekly fly code on your TRMNL is keyed to your installation and never shown in the companion.</p>
+      <p>In <Link to="/app/idle-angler/settings">Idle Angler settings</Link>, Delete Idle Angler progress removes your angler, cooler, logbook, leaderboard records, fly box, achievements, Idle Angler connections and Idle Angler alert settings. Your account and other games stay. Deleting your TRMNL Games account removes Idle Angler with everything else.</p>
     </>
   )
 }
@@ -134,7 +134,7 @@ export const Route = createFileRoute('/privacy')({
 
       <h2>Changes</h2>
       <p>When this policy changes we update this page and the date at the top.</p>
-      <AfterListing><SlowCastPrivacy /></AfterListing>
+      <AfterListing><IdleAnglerPrivacy /></AfterListing>
     </ProsePage>
   ),
 })

@@ -2,14 +2,14 @@ import { defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
 /**
- * Engine tables (slow-cast.md "Architecture", S0). Every game's world, runs,
+ * Engine tables (idle-angler.md "Architecture", S0). Every game's world, runs,
  * publications and, for XP boards, score windows and leaderboard sets come from these factories, so their
  * shapes and indexes are identical by construction and the engine code in this
  * folder can serve them all. Desk Crawler's instantiation produces exactly the
  * tables it had before S0.
  *
  * `heroId` is the engine's name for the game's player character: a hero in Desk
- * Crawler, an angler in Slow Cast. One field name keeps one code path.
+ * Crawler, an angler in Idle Angler. One field name keeps one code path.
  */
 export interface EngineTableNames {
   readonly subject: string
@@ -233,12 +233,12 @@ export const DESK_CRAWLER_TABLES = {
   achievementStats: 'achievementStats',
 } as const
 
-/** Slow Cast's engine tables, prefixed so retention and deletion stay per game. Its boards are catch records, so it has no ranking tables (D116). */
-export const SLOW_CAST_TABLES = {
+/** Idle Angler's engine tables, prefixed so retention and deletion stay per game. Its boards are catch records, so it has no ranking tables (D116). */
+export const IDLE_ANGLER_TABLES = {
   subject: 'anglers',
-  world: 'swWorldState',
-  runs: 'swSimulationRuns',
-  failures: 'swSimulationFailures',
-  publications: 'swLeaderboardPublications',
-  achievementStats: 'swAchievementStats',
+  world: 'iaWorldState',
+  runs: 'iaSimulationRuns',
+  failures: 'iaSimulationFailures',
+  publications: 'iaLeaderboardPublications',
+  achievementStats: 'iaAchievementStats',
 } as const

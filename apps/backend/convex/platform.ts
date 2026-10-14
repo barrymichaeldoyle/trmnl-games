@@ -6,7 +6,7 @@ import { audit } from './admin'
 import { gameSlug, gameStatus } from './schema'
 
 /**
- * Game lifecycle (slow-cast.md "Architecture", D115). The status lives on the
+ * Game lifecycle (idle-angler.md "Architecture", D115). The status lives on the
  * server so it changes without a deploy. A hidden game is invisible to everyone
  * but admins: this query leaves it out, and its routes answer not-found.
  */
@@ -59,7 +59,7 @@ export const setGameStatus = mutation({
   },
 })
 
-/** Operator switch: `npx convex run --prod platform:setGameStatusInternal '{"slug":"slow-cast","status":"live"}'`. */
+/** Operator switch: `npx convex run --prod platform:setGameStatusInternal '{"slug":"idle-angler","status":"live"}'`. */
 export const setGameStatusInternal = internalMutation({
   args: { slug: gameSlug, status: gameStatus },
   returns: v.object({ from: gameStatus, to: gameStatus }),

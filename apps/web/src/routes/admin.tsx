@@ -37,7 +37,7 @@ function AdminGate() {
   return (
     <>
       <Health />
-      <SlowCastHealth />
+      <IdleAnglerHealth />
       <GameStatuses />
       <UserTools />
     </>
@@ -202,11 +202,11 @@ function GameStatuses() {
   )
 }
 
-/** Slow Cast's world (D115): its own tick, run, publication and quarantined anglers, with the same recovery actions. */
-function SlowCastHealth() {
-  const { data } = useQuery(convexQuery(api.slowCast.operations.health, {}))
-  const resume = useMutation(api.slowCast.operations.resumeBlockedRun)
-  const release = useMutation(api.slowCast.operations.releaseAngler)
+/** Idle Angler's world (D115): its own tick, run, publication and quarantined anglers, with the same recovery actions. */
+function IdleAnglerHealth() {
+  const { data } = useQuery(convexQuery(api.idleAngler.operations.health, {}))
+  const resume = useMutation(api.idleAngler.operations.resumeBlockedRun)
+  const release = useMutation(api.idleAngler.operations.releaseAngler)
   const [error, setError] = useState<string | null>(null)
   if (!data) return null
   const act = async (fn: () => Promise<unknown>) => {
@@ -218,7 +218,7 @@ function SlowCastHealth() {
     }
   }
   return (
-    <Card title="Slow Cast health">
+    <Card title="Idle Angler health">
       <dl className="grid grid-cols-2 gap-2 text-sm">
         <dt>World tick</dt>
         <dd>{data.world?.currentTick ?? 'none'}{data.world?.ticksPaused ? ' · paused' : ''}</dd>

@@ -1,7 +1,7 @@
 import { gameProfile, DESK_CRAWLER } from './lib/gameProfile'
 import { isGame } from './lib/gameHooks'
-import { slowCastProfile } from './slowCast/profile'
-import { purgeAngler } from './slowCast/purge'
+import { idleAnglerProfile } from './idleAngler/profile'
+import { purgeAngler } from './idleAngler/purge'
 import { gameSlug as gameSlugValidator } from './schema'
 import { purgeRaidRows } from './lib/raids'
 import { purgeMeetingRows } from './lib/meetings'
@@ -69,15 +69,15 @@ export const requestGameDeletion = mutation({
   args: { operationId: v.string(), confirm: v.literal('DELETE'), gameSlug: v.optional(gameSlugValidator) },
   returns: v.object({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
-    // D115: Slow Cast progress is deleted on its own; the account and Desk Crawler stay.
-    if (args.gameSlug === 'slow-cast') {
-      const result = await runIntent(ctx, args.operationId, 'deletion.requestGameDeletion', { gameSlug: 'slow-cast' }, async (user) => {
-        const profile = await slowCastProfile(ctx, user._id)
+    // D115: Idle Angler progress is deleted on its own; the account and Desk Crawler stay.
+    if (args.gameSlug === 'idle-angler') {
+      const result = await runIntent(ctx, args.operationId, 'deletion.requestGameDeletion', { gameSlug: 'idle-angler' }, async (user) => {
+        const profile = await idleAnglerProfile(ctx, user._id)
         if (profile?.state === 'deleting') return { changed: false }
         if (profile) await ctx.db.patch(profile._id, { state: 'deleting' })
-        else await ctx.db.insert('slowCastProfiles', { userId: user._id, state: 'deleting', createdAt: Date.now() })
+        else await ctx.db.insert('idleAnglerProfiles', { userId: user._id, state: 'deleting', createdAt: Date.now() })
         const now = Date.now()
-        const jobId = await ctx.db.insert('gameDeletionJobs', { userId: user._id, gameSlug: 'slow-cast', state: 'running', phase: 'connections', createdAt: now, lastProgressAt: now })
+        const jobId = await ctx.db.insert('gameDeletionJobs', { userId: user._id, gameSlug: 'idle-angler', state: 'running', phase: 'connections', createdAt: now, lastProgressAt: now })
         await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
         return { changed: true }
       })
@@ -109,6 +109,12 @@ export const purgeGameStep = internalMutation({
     const job = await ctx.db.get(jobId)
     if (!job || job.state !== 'running') return null
     const now = Date.now()
+    // D158: a job from before the rename to Idle Angler; `idleAngler/legacyReset:run` clears what it would have.
+    if (job.gameSlug === 'slow-cast') {
+      await ctx.db.patch(jobId, { state: 'completed', phase: 'done', completedAt: now, lastProgressAt: now })
+      return null
+    }
+    const gameSlug = job.gameSlug
     const again = async (phase: 'connections' | 'gameplay' = job.phase === 'connections' ? 'connections' : 'gameplay') => {
       await ctx.db.patch(jobId, { phase, lastProgressAt: now })
       await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
@@ -117,7 +123,7 @@ export const purgeGameStep = internalMutation({
     if (job.phase === 'connections') {
       // D115: only this game's connections; the other game's installations keep working. A user has a
       // handful of connections, so a page of them always includes this game's remaining rows.
-      const ours = <R extends { gameSlug?: string }>(rows: R[]) => rows.filter((row) => isGame(row, job.gameSlug))
+      const ours = <R extends { gameSlug?: string }>(rows: R[]) => rows.filter((row) => isGame(row, gameSlug))
       const grants = ours(await ctx.db.query('trmnlGrants').withIndex('by_userId', (q) => q.eq('userId', job.userId)).take(CONNECTION_PAGE))
       for (const grant of grants) {
         const known = await ctx.db.query('revokedTrmnlCredentials').withIndex('by_tokenHash', (q) => q.eq('tokenHash', grant.tokenHash)).first()
@@ -129,14 +135,14 @@ export const purgeGameStep = internalMutation({
       const removed = grants.length + await deleteBatch(ctx, instances) + await deleteBatch(ctx, attempts)
       return await again(removed ? 'connections' : 'gameplay')
     }
-    if (job.gameSlug === 'slow-cast') {
-      const profile = await slowCastProfile(ctx, job.userId)
+    if (job.gameSlug === 'idle-angler') {
+      const profile = await idleAnglerProfile(ctx, job.userId)
       if (profile?.anglerId) {
         if ((await purgeAngler(ctx, profile.anglerId, BATCH)) > 0) return await again()
         await ctx.db.patch(profile._id, { anglerId: undefined })
       }
-      const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', 'slow-cast')).take(BATCH)
-      if ((await deleteBatch(ctx, receipts)) + (await purgeGameAlertRows(ctx, job.userId, 'slow-cast', BATCH)) > 0) return await again()
+      const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', 'idle-angler')).take(BATCH)
+      if ((await deleteBatch(ctx, receipts)) + (await purgeGameAlertRows(ctx, job.userId, 'idle-angler', BATCH)) > 0) return await again()
       if (profile) await ctx.db.patch(profile._id, { state: 'active' })
       await ctx.db.patch(jobId, { state: 'completed', phase: 'done', completedAt: now, lastProgressAt: now })
       return null
@@ -149,7 +155,7 @@ export const purgeGameStep = internalMutation({
     if (user?.activeHeroId) await ctx.db.patch(user._id, { activeHeroId: undefined })
     const keepsakes = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', job.userId)).take(BATCH)
     const unlocks = await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', job.userId)).take(BATCH)
-    // P33: Desk Crawler's alert switches and outbox rows; devices and quiet hours are shared with Slow Cast (D115).
+    // P33: Desk Crawler's alert switches and outbox rows; devices and quiet hours are shared with Idle Angler (D115).
     // D143: follows both ways go with Desk Crawler progress.
     if (await deleteBatch(ctx, keepsakes) + await deleteBatch(ctx, unlocks) + await purgeGameAlertRows(ctx, job.userId, 'desk-crawler', BATCH) + await purgeFollowRows(ctx, job.userId, BATCH) > 0) return await again()
     const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', DESK_CRAWLER)).take(BATCH)
@@ -271,11 +277,11 @@ export const purgeStep = internalMutation({
         if ((await purgeHeroes(ctx, job.userId!)) > 0) return await again()
         if (user?.activeHeroId) await ctx.db.patch(job.userId, { activeHeroId: undefined })
         if (profile?.activeHeroId) await ctx.db.patch(profile._id, { activeHeroId: undefined, lastSwitch: undefined })
-        // D115: the account's Slow Cast angler and its rows.
-        const sc = await slowCastProfile(ctx, job.userId)
-        if (sc?.anglerId) {
-          if ((await purgeAngler(ctx, sc.anglerId, BATCH)) > 0) return await again()
-          await ctx.db.patch(sc._id, { anglerId: undefined })
+        // D115: the account's angler and its rows.
+        const ia = await idleAnglerProfile(ctx, job.userId)
+        if (ia?.anglerId) {
+          if ((await purgeAngler(ctx, ia.anglerId, BATCH)) > 0) return await again()
+          await ctx.db.patch(ia._id, { anglerId: undefined })
         }
         const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_operationId', (q) => q.eq('userId', job.userId!)).take(BATCH)
         return (await deleteBatch(ctx, receipts)) > 0 ? await again() : await advance('provider')
@@ -294,8 +300,8 @@ export const purgeStep = internalMutation({
         }
         const profile = await gameProfile(ctx, job.userId)
         if (profile) await ctx.db.delete(profile._id)
-        const scProfile = await slowCastProfile(ctx, job.userId)
-        if (scProfile) await ctx.db.delete(scProfile._id)
+        const iaProfile = await idleAnglerProfile(ctx, job.userId)
+        if (iaProfile) await ctx.db.delete(iaProfile._id)
         const gameJobs = await ctx.db.query('gameDeletionJobs').withIndex('by_userId_and_state', (q) => q.eq('userId', job.userId!)).take(BATCH)
         if (gameJobs.length > 0) { await deleteBatch(ctx, gameJobs); return await again() }
         if (user) await ctx.db.delete(user._id)

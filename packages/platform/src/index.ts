@@ -2,12 +2,12 @@
 export const PLATFORM_NAME = 'TRMNL Games'
 export const PLATFORM_ORIGIN = 'https://trmnlgames.com'
 export const DESK_CRAWLER_GAME = 'desk-crawler' as const
-export const SLOW_CAST_GAME = 'slow-cast' as const
-export type GameSlug = typeof DESK_CRAWLER_GAME | typeof SLOW_CAST_GAME
-export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, SLOW_CAST_GAME]
+export const IDLE_ANGLER_GAME = 'idle-angler' as const
+export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME
+export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME]
 
 /**
- * Lifecycle status (slow-cast.md "Architecture"). `hidden`: nothing lists the game and its routes
+ * Lifecycle status (idle-angler.md "Architecture"). `hidden`: nothing lists the game and its routes
  * answer not-found for everyone but admins. `preview`: a "Coming soon" tile, routes still closed.
  * `live`: listed everywhere, every route open. The server holds the current value; `defaultStatus`
  * applies only until an admin sets one.
@@ -34,7 +34,7 @@ export const games = {
     name: 'Desk Crawler',
     description: 'An office RPG that plays itself on your TRMNL.',
     defaultStatus: 'live',
-    // Home is Desk Crawler's page until Slow Cast launches; /games/desk-crawler redirects there meanwhile (D137).
+    // Home is Desk Crawler's page until Idle Angler launches; /games/desk-crawler redirects there meanwhile (D137).
     publicPath: '/',
     companionPath: '/app/desk-crawler',
     helpPath: '/help/desk-crawler',
@@ -42,22 +42,22 @@ export const games = {
     managePath: '/connect/trmnl/desk-crawler/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID',
   },
-  [SLOW_CAST_GAME]: {
-    slug: SLOW_CAST_GAME,
-    name: 'Slow Cast',
+  [IDLE_ANGLER_GAME]: {
+    slug: IDLE_ANGLER_GAME,
+    name: 'Idle Angler',
     description: 'A fishing game that plays itself on your TRMNL.',
     defaultStatus: 'hidden',
-    publicPath: '/games/slow-cast',
-    companionPath: '/app/slow-cast',
-    helpPath: '/help/slow-cast',
-    installPath: '/connect/trmnl/slow-cast/install',
-    managePath: '/connect/trmnl/slow-cast/manage',
-    clientIdEnv: 'TRMNL_CLIENT_ID_SLOW_CAST',
+    publicPath: '/games/idle-angler',
+    companionPath: '/app/idle-angler',
+    helpPath: '/help/idle-angler',
+    installPath: '/connect/trmnl/idle-angler/install',
+    managePath: '/connect/trmnl/idle-angler/manage',
+    clientIdEnv: 'TRMNL_CLIENT_ID_IDLE_ANGLER',
   },
 } as const satisfies Record<GameSlug, GameEntry>
 
 export function isGameSlug(value: unknown): value is GameSlug {
-  return value === DESK_CRAWLER_GAME || value === SLOW_CAST_GAME
+  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME
 }
 
 export function isGameStatus(value: unknown): value is GameStatus {
@@ -65,7 +65,7 @@ export function isGameStatus(value: unknown): value is GameStatus {
 }
 
 /**
- * Platform achievements (slow-cast.md "Platform profile and achievements"): earned across games, shown on the shared
+ * Platform achievements (idle-angler.md "Platform profile and achievements"): earned across games, shown on the shared
  * profile. `games` counts games with an active character; `collected` counts achievements earned in every game.
  */
 export interface PlatformAchievement {

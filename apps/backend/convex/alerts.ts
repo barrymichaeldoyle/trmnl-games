@@ -6,10 +6,10 @@ import { appError } from './lib/errors'
 import { sha256Hex } from './lib/hash'
 import { currentUser, runIntent } from './lib/intent'
 import { validateTimezone } from './lib/names'
-import { ALERTS, alertMessage, DESK_CRAWLER_KINDS, ensureSender, inQuietHours, kindOn, localDay, PREF_FOR, quietEndsAt, SLOW_CAST_KINDS, type AlertKind } from './lib/alerts'
-import { currentAngler } from './slowCast/profile'
-import { coolerOf } from '@trmnl-games/slow-cast/sim'
-import { contentV1 } from '@trmnl-games/slow-cast/content'
+import { ALERTS, alertMessage, DESK_CRAWLER_KINDS, ensureSender, inQuietHours, kindOn, localDay, PREF_FOR, quietEndsAt, IDLE_ANGLER_KINDS, type AlertKind } from './lib/alerts'
+import { currentAngler } from './idleAngler/profile'
+import { coolerOf } from '@trmnl-games/idle-angler/sim'
+import { contentV1 } from '@trmnl-games/idle-angler/content'
 import { readWorld } from './world'
 
 /** P33 hero alerts: preferences, this account's push devices and the sender's two transactions (alerts.md). */
@@ -206,7 +206,7 @@ export const claimDue = internalMutation({
       let ttlSeconds = 12 * 60 * 60
       let name = owner.publicAlias
       if (row.kind === 'cooler_full' || row.kind === 'bait_out') {
-        // D115: Slow Cast rechecks its angler; the cooler must still be full, or the hook still bare.
+        // D115: Idle Angler rechecks its angler; the cooler must still be full, or the hook still bare.
         const angler = await currentAngler(ctx, owner)
         if (angler === null || angler._id !== row.anglerId || angler.status === 'paused') { await skip(row, 'angler_gone'); continue }
         if (row.kind === 'cooler_full') {
@@ -304,11 +304,11 @@ export const devicesForTest = internalQuery({
  * other game still has a character to alert about; otherwise everything goes, as D114 removed it with Desk Crawler.
  * Returns how many rows went.
  */
-export async function purgeGameAlertRows(ctx: MutationCtx, userId: Id<'users'>, game: 'desk-crawler' | 'slow-cast', batch: number): Promise<number> {
+export async function purgeGameAlertRows(ctx: MutationCtx, userId: Id<'users'>, game: 'desk-crawler' | 'idle-angler', batch: number): Promise<number> {
   const owner = await ctx.db.get(userId)
-  const otherGame = owner === null ? null : game === 'slow-cast' ? await currentHero(ctx, owner) : await currentAngler(ctx, owner)
+  const otherGame = owner === null ? null : game === 'idle-angler' ? await currentHero(ctx, owner) : await currentAngler(ctx, owner)
   if (otherGame === null) return await purgeAlertRows(ctx, userId, batch)
-  const kinds: readonly AlertKind[] = game === 'slow-cast' ? SLOW_CAST_KINDS : DESK_CRAWLER_KINDS
+  const kinds: readonly AlertKind[] = game === 'idle-angler' ? IDLE_ANGLER_KINDS : DESK_CRAWLER_KINDS
   const rows = (await ctx.db.query('alertOutbox').withIndex('by_userId_and_localDay', (q) => q.eq('userId', userId)).take(batch * 4)).filter((row) => kinds.includes(row.kind)).slice(0, batch)
   for (const row of rows) await ctx.db.delete(row._id)
   if (rows.length === 0) {

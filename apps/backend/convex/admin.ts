@@ -162,8 +162,8 @@ export const releaseHero = mutation({
 })
 
 /**
- * Stop or restart new Desk Crawler tick starts (operations.md "Content releases"); Slow Cast has its own in
- * slowCast/operations.ts. `npx convex run --prod admin:setTicksPaused '{"paused":true}'`.
+ * Stop or restart new Desk Crawler tick starts (operations.md "Content releases"); Idle Angler has its own in
+ * idleAngler/operations.ts. `npx convex run --prod admin:setTicksPaused '{"paused":true}'`.
  */
 export const setTicksPaused = internalMutation({
   args: { paused: v.boolean() },

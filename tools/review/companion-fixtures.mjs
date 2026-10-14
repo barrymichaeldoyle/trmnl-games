@@ -19,8 +19,8 @@
  *   whatsnew=1 (D154: the What's new card, with every entry after 12 October)
  *   rank=9 (D152: the hero ninth on every board, so the rankings open with the rows around it)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
- * Slow Cast (D115): /app/slow-cast, /cooler, /shop, /logbook, /settings, with sc=full (cooler full), sc=empty (empty cooler, no bait here),
- *   sc=paused, sc=pending, sc=none (not started), sc=rich (Master Angler at the pier with every pass)
+ * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
+ *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -261,45 +261,45 @@ if (params.has('todo')) {
     { id: 'todo2', at: Date.now() - 36e5 * 3, tick: 899, kind: 'todo', summary: 'Stand-up: Defeat 3 [[Legacy Mainframes]]. Find 2 pieces of gear.', source: 'tick', deltas: { xpEarned: 0, gold: 0, hp: 0 } },
   );
 }
-// D115: Slow Cast's dock, logbook and preview from a fictional angler, varied by ?sc=.
-const sc = params.get('sc');
+// D115: Idle Angler's dock, logbook and preview from a fictional angler, varied by ?ia=.
+const ia = params.get('ia');
 const now = Date.now();
 const bait = (cls, name, units, tub, price) => ({ class: cls, name, units, tubSize: tub, price, tubsThatFit: Math.max(0, Math.floor((72 - units) / tub)) });
-const scCatches = [['barbel', 'Barbel', 1900, 96], ['chub', 'Chub', 410, 41], ['dace', 'Dace', 230, 22], ['gudgeon', 'Gudgeon', 60, 18], ['chub', 'Chub', 1240, 53], ['grayling', 'Grayling', 820, 72], ['brown_trout', 'Brown Trout', 1500, 103]];
-const scDock = sc === 'none' ? { gameState: null, angler: null } : {
+const iaCatches = [['barbel', 'Barbel', 1900, 96], ['chub', 'Chub', 410, 41], ['dace', 'Dace', 230, 22], ['gudgeon', 'Gudgeon', 60, 18], ['chub', 'Chub', 1240, 53], ['grayling', 'Grayling', 820, 72], ['brown_trout', 'Brown Trout', 1500, 103]];
+const iaDock = ia === 'none' ? { gameState: null, angler: null } : {
   gameState: 'active',
-  angler: { alias: 'Barry', activationState: sc === 'pending' ? 'pending_trmnl' : 'active', status: sc === 'paused' ? 'paused' : 'fishing', title: sc === 'rich' ? 'Master Angler' : 'Local', nextTitle: sc === 'rich' ? null : { name: 'Old Hand', species: 14 }, gold: sc === 'rich' ? 18450 : 1240, waterId: sc === 'rich' ? 'harbour_pier' : 'river_bend', travelTo: null,
-    rod: { tier: sc === 'rich' ? 4 : 2, name: sc === 'rich' ? 'Beachcaster' : 'Fibreglass Rod', limitGrams: sc === 'rich' ? 30000 : 4000 },
-    cooler: { tier: 3, name: 'Chest Cooler', capacity: 18, used: sc === 'full' ? 18 : sc === 'empty' ? 0 : 7 },
-    baitOnHook: sc === 'rich' ? 'strip' : 'maggots',
-    bait: [bait('worms', 'Worms', 12, 12, 25), bait('bread', 'Bread', 0, 12, 20), bait('maggots', 'Maggots', sc === 'empty' ? 0 : 34, 12, 30), bait('spinner', 'Spinner', 0, 72, 240), bait('ragworm', 'Ragworm', 24, 12, 60), bait('strip', 'Mackerel strip', sc === 'rich' ? 48 : 0, 12, 75)],
-    access: sc === 'rich' ? ['waders', 'pier_permit'] : ['waders'], counters: {}, publicProfile: false, speciesLogged: sc === 'rich' ? 26 : 10, speciesTotal: 30 },
-  catches: sc === 'empty' ? [] : Array.from({ length: sc === 'full' ? 18 : 7 }, (_, i) => { const [speciesId, name, grams, value] = scCatches[i % scCatches.length]; return { id: 'c' + i, speciesId, name, grams: grams + i * 10, value, caughtTick: 900 - i, record: i === 0 } }),
+  angler: { alias: 'Barry', activationState: ia === 'pending' ? 'pending_trmnl' : 'active', status: ia === 'paused' ? 'paused' : 'fishing', title: ia === 'rich' ? 'Master Angler' : 'Local', nextTitle: ia === 'rich' ? null : { name: 'Old Hand', species: 14 }, gold: ia === 'rich' ? 18450 : 1240, waterId: ia === 'rich' ? 'harbour_pier' : 'river_bend', travelTo: null,
+    rod: { tier: ia === 'rich' ? 4 : 2, name: ia === 'rich' ? 'Beachcaster' : 'Fibreglass Rod', limitGrams: ia === 'rich' ? 30000 : 4000 },
+    cooler: { tier: 3, name: 'Chest Cooler', capacity: 18, used: ia === 'full' ? 18 : ia === 'empty' ? 0 : 7 },
+    baitOnHook: ia === 'rich' ? 'strip' : 'maggots',
+    bait: [bait('worms', 'Worms', 12, 12, 25), bait('bread', 'Bread', 0, 12, 20), bait('maggots', 'Maggots', ia === 'empty' ? 0 : 34, 12, 30), bait('spinner', 'Spinner', 0, 72, 240), bait('ragworm', 'Ragworm', 24, 12, 60), bait('strip', 'Mackerel strip', ia === 'rich' ? 48 : 0, 12, 75)],
+    access: ia === 'rich' ? ['waders', 'pier_permit'] : ['waders'], counters: {}, publicProfile: false, speciesLogged: ia === 'rich' ? 26 : 10, speciesTotal: 30 },
+  catches: ia === 'empty' ? [] : Array.from({ length: ia === 'full' ? 18 : 7 }, (_, i) => { const [speciesId, name, grams, value] = iaCatches[i % iaCatches.length]; return { id: 'c' + i, speciesId, name, grams: grams + i * 10, value, caughtTick: 900 - i, record: i === 0 } }),
   waters: [
     { id: 'millpond', name: 'Millpond', opensAfter: null, access: null, open: true, weather: 'clear', band: 'dusk', bitePercent: 17, baits: ['worms', 'bread', 'spinner'], weatherUntil: now + 36e5 * 2 },
     { id: 'river_bend', name: 'River Bend', opensAfter: { waterId: 'millpond', waterName: 'Millpond', species: 6, logged: 7 }, access: 'waders', open: true, weather: 'overcast', band: 'dusk', bitePercent: 21, baits: ['worms', 'maggots', 'spinner'], weatherUntil: now + 36e5 * 2 },
-    { id: 'harbour_pier', name: 'Harbour Pier', opensAfter: { waterId: 'river_bend', waterName: 'River Bend', species: 5, logged: sc === 'rich' ? 9 : 3 }, access: 'pier_permit', open: sc === 'rich', weather: 'fog', band: 'dusk', bitePercent: 18, baits: ['ragworm', 'strip', 'spinner'], weatherUntil: now + 36e5 * 2 },
+    { id: 'harbour_pier', name: 'Harbour Pier', opensAfter: { waterId: 'river_bend', waterName: 'River Bend', species: 5, logged: ia === 'rich' ? 9 : 3 }, access: 'pier_permit', open: ia === 'rich', weather: 'fog', band: 'dusk', bitePercent: 18, baits: ['ragworm', 'strip', 'spinner'], weatherUntil: now + 36e5 * 2 },
   ],
-  shop: { rod: sc === 'rich' ? null : { name: 'Carbon Rod', price: 700, limitGrams: 10000, biteBonusPercent: 10 }, cooler: { name: 'Dockside Crate', price: 1500, capacity: 24 }, access: [{ id: 'waders', name: 'Waders', price: 250, water: 'river_bend', owned: true }, { id: 'pier_permit', name: 'Pier Permit', price: 900, water: 'harbour_pier', owned: sc === 'rich' }] },
+  shop: { rod: ia === 'rich' ? null : { name: 'Carbon Rod', price: 700, limitGrams: 10000, biteBonusPercent: 10 }, cooler: { name: 'Dockside Crate', price: 1500, capacity: 24 }, access: [{ id: 'waders', name: 'Waders', price: 250, water: 'river_bend', owned: true }, { id: 'pier_permit', name: 'Pier Permit', price: 900, water: 'harbour_pier', owned: ia === 'rich' }] },
   logs: [['A 1.9 kg Barbel took the maggots at dusk. A new personal best.', 96], ['A kingfisher flashes past, low and blue.', 0], ['A 410 g Chub took the maggots in the day.', 41], ['Something heavy took the maggots and kept going.', 0], ['Sold 6 fish for 312 gold.', 0]].map(([summary], i) => ({ id: 'l' + i, at: now - i * 36e5, kind: 'catch', summary, gold: 0 })),
-  recap: sc === 'empty' ? { landed: 0, released: 0, records: 0, firsts: 0, best: null, gotAway: 0, awayGrams: [] } : { landed: 9, released: sc === 'full' ? 3 : 0, records: 1, firsts: 1, best: { speciesId: 'barbel', grams: 1900 }, gotAway: 2, awayGrams: [5200, 11800] },
+  recap: ia === 'empty' ? { landed: 0, released: 0, records: 0, firsts: 0, best: null, gotAway: 0, awayGrams: [] } : { landed: 9, released: ia === 'full' ? 3 : 0, records: 1, firsts: 1, best: { speciesId: 'barbel', grams: 1900 }, gotAway: 2, awayGrams: [5200, 11800] },
   nextTickAt: now + 6e5,
 };
-if (sc === 'empty' && scDock.angler) scDock.angler.baitOnHook = 'maggots';
+if (ia === 'empty' && iaDock.angler) iaDock.angler.baitOnHook = 'maggots';
 const species = (water, list) => ({ water, species: list.map(([id, name, rarity, count, best, max, baits, times, weather]) => count ? { id, seen: true, name, rarity, count, bestGrams: best, maxGrams: max, baits, times, weather } : { id, seen: false, rarity, baits: rarity === 'epic' ? null : baits ?? null }) });
-const scBook = [
+const iaBook = [
   species({ id: 'millpond', name: 'Millpond' }, [['minnow', 'Minnow', 'common', 12, 48, 50, ['worms', 'bread'], null, null], ['roach', 'Roach', 'common', 30, 590, 600, ['worms', 'bread'], null, null], ['perch', 'Perch', 'common', 9, 1210, 1400, ['worms', 'spinner'], null, null], ['bream', 'Bream', 'uncommon', 3, 2200, 3500, ['bread', 'worms'], ['dawn', 'dusk', 'night'], null], ['eel', 'Eel', 'rare', 0, 0, 0, ['worms']], ['golden_carp', 'Golden Carp', 'epic', 0]]),
   species({ id: 'river_bend', name: 'River Bend' }, [['chub', 'Chub', 'common', 22, 2100, 2500, ['worms', 'maggots'], null, null], ['grayling', 'Grayling', 'uncommon', 4, 1100, 1500, ['maggots'], null, ['overcast', 'rain']], ['pike', 'Pike', 'rare', 0, 0, 0, ['spinner']], ['salmon', 'Salmon', 'epic', 0]]),
 ];
 const queries = {
   'users:me': () => data.me,
-  'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'slow-cast', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }] }),
-  'slowCast/anglers:dock': () => scDock,
-  'slowCast/anglers:logbook': () => scBook,
-  'slowCast/payload:preview': () => ({ scene_base: '' }),
-  'slowCast/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
-  'slowCast/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, own: { rank: 3, speciesId: 'barbel', grams: 1900 }, entries: [['Quillfeather_Longname', 'pike', 5240], ['Mo', 'chub', 2410], ['Barry', 'barbel', 1900], ['Hidden player', 'grayling', 1210], ['Bea', 'dace', 380]].map(([name, speciesId, grams], i) => ({ rank: i + 1, name, speciesId, grams, own: name === 'Barry', profile: name === 'Mo' })) }),
-  'slowCast/achievements:mine': () => ({ earnedCount: 23, rarity: { counts: { catches_3: 12, logbook_2: 7, got_away_1: 30 }, totalPlayers: 41 }, families: [
+  'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }] }),
+  'idleAngler/anglers:dock': () => iaDock,
+  'idleAngler/anglers:logbook': () => iaBook,
+  'idleAngler/payload:preview': () => ({ scene_base: '' }),
+  'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
+  'idleAngler/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, own: { rank: 3, speciesId: 'barbel', grams: 1900 }, entries: [['Quillfeather_Longname', 'pike', 5240], ['Mo', 'chub', 2410], ['Barry', 'barbel', 1900], ['Hidden player', 'grayling', 1210], ['Bea', 'dace', 380]].map(([name, speciesId, grams], i) => ({ rank: i + 1, name, speciesId, grams, own: name === 'Barry', profile: name === 'Mo' })) }),
+  'idleAngler/achievements:mine': () => ({ earnedCount: 23, rarity: { counts: { catches_3: 12, logbook_2: 7, got_away_1: 30 }, totalPlayers: 41 }, families: [
     { family: 'catches', name: 'Catches', category: 'Fishing', tiers: 5, earned: { id: 'catches_3', name: 'Regular on the Bank', blurb: 'A hundred fish from the bank.', tier: 3 }, next: { id: 'catches_4', name: 'Old Hand', tier: 4 }, value: 412, target: 1000 },
     { family: 'got_away', name: 'Got away', category: 'Fishing', tiers: 3, earned: { id: 'got_away_1', name: 'The One That Got Away', blurb: 'The line went slack.', tier: 1 }, next: { id: 'got_away_2', name: 'Snapped Again', tier: 2 }, value: 7, target: 10 },
     { family: 'epic_catches', name: 'Epic catches', category: 'Fishing', tiers: 2, earned: null, next: { id: 'epic_catches_1', name: 'Once in a Season', tier: 1 }, value: 0, target: 1 },
@@ -336,7 +336,7 @@ const queries = {
   'profiles:view': (args) => flag('private') ? null : { alias: args.alias, heroName: hero.name, heroClass: 'warrior', level: hero.level, status: hero.status, biome: 'Server Room', scenePath: hero.scenePath, adventuringSince: Date.now() - 86400000 * 12, rank: { rank: 3, totalPlayers: 41 }, lifetime: { combatWins: hero.counters.combatWins, itemsFound: hero.counters.itemsFound, trips: hero.counters.trips ?? 4, rescues: hero.counters.rescues, epicFinds: hero.counters.epicFinds ?? 1 }, raids: raidsOn ? { won: 5, failed: 4, repelled: 4, lost: 3 } : { won: 0, failed: 0, repelled: 0, lost: 0 }, achievements: data.achievements.families.filter((f) => f.earned).slice(0, 4).map((f) => ({ id: f.earned.id, tier: f.earned.tier, name: f.earned.name, blurb: f.earned.blurb, family: f.name })), rarity: null, achievementCount: data.achievements.unlocked.length },
 };
 if (raidsOn) data.leaderboard.recent_24h?.entries?.forEach((row, i) => { row.profile = i % 2 === 0 });
-// A nested path proxy: api.users.me reads 'users:me' and api.slowCast.anglers.dock reads 'slowCast/anglers:dock'.
+// A nested path proxy: api.users.me reads 'users:me' and api.idleAngler.anglers.dock reads 'idleAngler/anglers:dock'.
 const path = (parts) => new Proxy(function () {}, { get: (_, key) => (key === Symbol.toPrimitive || key === 'toString' ? () => parts.slice(0, -1).join('/') + ':' + parts.at(-1) : path([...parts, key])) });
 export const api = path([]);
 export const convexQuery = (fn, args = {}) => ({ queryKey: ['convexQuery', String(fn), args] });
@@ -380,25 +380,25 @@ import { Route as Roster } from '../../apps/web/src/routes/app/desk-crawler/rost
 import { Route as Keepsakes } from '../../apps/web/src/routes/app/desk-crawler/keepsakes';
 import { Route as Device } from '../../apps/web/src/routes/app/desk-crawler/trmnl';
 import { Route as Profile } from '../../apps/web/src/routes/desk-crawler/heroes.$alias';
-import { Route as ScShell } from '../../apps/web/src/routes/app/slow-cast';
-import { Route as ScDock } from '../../apps/web/src/routes/app/slow-cast/index';
-import { Route as ScCooler } from '../../apps/web/src/routes/app/slow-cast/cooler';
-import { Route as ScShop } from '../../apps/web/src/routes/app/slow-cast/shop';
-import { Route as ScLogbook } from '../../apps/web/src/routes/app/slow-cast/logbook';
-import { Route as ScSettings } from '../../apps/web/src/routes/app/slow-cast/settings';
-import { Route as ScRankings } from '../../apps/web/src/routes/app/slow-cast/rankings';
-import { Route as ScAchievements } from '../../apps/web/src/routes/app/slow-cast/achievements';
+import { Route as IaShell } from '../../apps/web/src/routes/app/idle-angler';
+import { Route as IaDock } from '../../apps/web/src/routes/app/idle-angler/index';
+import { Route as IaCooler } from '../../apps/web/src/routes/app/idle-angler/cooler';
+import { Route as IaShop } from '../../apps/web/src/routes/app/idle-angler/shop';
+import { Route as IaLogbook } from '../../apps/web/src/routes/app/idle-angler/logbook';
+import { Route as IaSettings } from '../../apps/web/src/routes/app/idle-angler/settings';
+import { Route as IaRankings } from '../../apps/web/src/routes/app/idle-angler/rankings';
+import { Route as IaAchievements } from '../../apps/web/src/routes/app/idle-angler/achievements';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
-  '/app/slow-cast': ScDock.options.component, '/app/slow-cast/cooler': ScCooler.options.component, '/app/slow-cast/shop': ScShop.options.component, '/app/slow-cast/logbook': ScLogbook.options.component, '/app/slow-cast/settings': ScSettings.options.component, '/app/slow-cast/rankings': ScRankings.options.component, '/app/slow-cast/achievements': ScAchievements.options.component };
+  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component };
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);
 function App() {
   const pathname = useLocation({ select: (l) => l.pathname.replace(/\\/$/, '') });
-  const AppShell = (pathname.startsWith('/app/slow-cast') ? ScShell : Shell).options.component;
+  const AppShell = (pathname.startsWith('/app/idle-angler') ? IaShell : Shell).options.component;
   return <OutletContext.Provider value={pages[pathname] ?? pages['/app/desk-crawler']}><AuthShell><AppShell /></AuthShell></OutletContext.Provider>;
 }
 document.body.className = 'bg-ground text-ink';

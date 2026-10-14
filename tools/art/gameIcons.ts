@@ -78,13 +78,13 @@ const GOLD = '#ffd166'
 const GOLD_HI = '#ffe08f'
 const GOLD_LO = '#b07a00'
 
-/* ---------------------------------------------------------------- Slow Cast */
+/* ---------------------------------------------------------------- Idle Angler */
 
 /**
  * A rainbow trout leaping on the line out of a dusk lake: sky in bands from night purple to sunset gold, the sun half
  * down behind the far shore, its road of light on the water, and the splash where the fish broke the surface.
  */
-export function slowCastIcon(): Image {
+export function idleAnglerIcon(): Image {
   const W = 64
   const HORIZON = 39
   const sky = new Layer(W, W)
@@ -211,7 +211,7 @@ export function slowCastIcon(): Image {
 }
 
 /** The 16px tab icon: the trout leaping on the line over a sunset, drawn by hand at tab size. */
-export function slowCastFavicon(): Image {
+export function idleAnglerFavicon(): Image {
   const layer = new Layer(16, 16)
   layer.draw(`
 aaaaaaaaaaaaaaal

@@ -9,7 +9,7 @@ import { DESK_CRAWLER_JSON_LD, DESK_CRAWLER_OG, seo } from '../../lib/seo'
 
 /**
  * While Desk Crawler is the only game, the home page is its page: this one repeated it, so it redirects there (D137).
- * The redirect is temporary (302) and the page below is kept: at the Slow Cast launch home becomes a two-game front page
+ * The redirect is temporary (302) and the page below is kept: at the Idle Angler launch home becomes a two-game front page
  * and this becomes Desk Crawler's own page again, so remove the redirect then.
  */
 export const Route = createFileRoute('/games/desk-crawler')({ beforeLoad: () => { throw redirect({ to: '/', statusCode: 302 }) }, head: () => seo({ title: 'Desk Crawler', path: '/games/desk-crawler', description: 'Desk Crawler is a free office RPG that plays itself on your TRMNL e-ink display. Every 15 minutes your hero takes on another adventure across five office floors, and it climbs the weekly rankings against other players.', image: DESK_CRAWLER_OG, jsonLd: DESK_CRAWLER_JSON_LD }), component: Landing })

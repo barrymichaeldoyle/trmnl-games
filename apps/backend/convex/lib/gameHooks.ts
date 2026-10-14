@@ -1,8 +1,8 @@
 import type { GameSlug } from '@trmnl-games/platform'
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
-import { activateAngler, prepareAngler } from '../slowCast/lifecycle'
-import { currentAngler, slowCastProfile } from '../slowCast/profile'
+import { activateAngler, prepareAngler } from '../idleAngler/lifecycle'
+import { currentAngler, idleAnglerProfile } from '../idleAngler/profile'
 import { currentHero, gameProfile } from './gameProfile'
 
 /**
@@ -25,10 +25,10 @@ export function isGame(row: { gameSlug?: string }, slug: GameSlug): boolean {
   return row.gameSlug === slug || (row.gameSlug === undefined && slug === 'desk-crawler')
 }
 
-export const SLOW_CAST_HOOKS: GameHooks & { prepare: (ctx: MutationCtx, user: Doc<'users'>, now: number) => Promise<unknown> } = {
-  slug: 'slow-cast',
-  label: 'Slow Cast',
-  deleting: async (ctx, userId) => (await slowCastProfile(ctx, userId))?.state === 'deleting',
+export const IDLE_ANGLER_HOOKS: GameHooks & { prepare: (ctx: MutationCtx, user: Doc<'users'>, now: number) => Promise<unknown> } = {
+  slug: 'idle-angler',
+  label: 'Idle Angler',
+  deleting: async (ctx, userId) => (await idleAnglerProfile(ctx, userId))?.state === 'deleting',
   current: currentAngler,
   needsName: false,
   activate: activateAngler,

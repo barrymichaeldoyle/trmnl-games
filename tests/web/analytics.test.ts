@@ -72,13 +72,13 @@ describe('v1.1 intent analytics', () => {
   })
 })
 
-describe('Slow Cast analytics (D115)', () => {
-  it('maps Slow Cast intents to their events with no personal data', () => {
-    expect(intentAnalytics('slowCast/anglers:sellCatches', { catchIds: ['a', 'b', 'c'] })).toEqual(['fish sold', { count: '3' }])
-    expect(intentAnalytics('slowCast/anglers:buyNextRod', {})).toEqual(['tackle bought', { item: 'rod' }])
-    expect(intentAnalytics('slowCast/anglers:buyBaitTubs', { bait: 'worms', tubs: 2 })).toEqual(['tackle bought', { item: 'worms' }])
-    expect(intentAnalytics('slowCast/anglers:travelTo', { waterId: 'river_bend' })).toEqual(['water changed', { water: 'river_bend' }])
-    expect(intentAnalytics('slowCast/anglers:chooseBait', { bait: 'bread' })).toEqual(['bait changed', { bait: 'bread' }])
-    expect(intentAnalytics('slowCast/anglers:pause', {})).toBeNull()
+describe('Idle Angler analytics (D115)', () => {
+  it('maps Idle Angler intents to their events with no personal data', () => {
+    expect(intentAnalytics('idleAngler/anglers:sellCatches', { catchIds: ['a', 'b', 'c'] })).toEqual(['fish sold', { count: '3' }])
+    expect(intentAnalytics('idleAngler/anglers:buyNextRod', {})).toEqual(['tackle bought', { item: 'rod' }])
+    expect(intentAnalytics('idleAngler/anglers:buyBaitTubs', { bait: 'worms', tubs: 2 })).toEqual(['tackle bought', { item: 'worms' }])
+    expect(intentAnalytics('idleAngler/anglers:travelTo', { waterId: 'river_bend' })).toEqual(['water changed', { water: 'river_bend' }])
+    expect(intentAnalytics('idleAngler/anglers:chooseBait', { bait: 'bread' })).toEqual(['bait changed', { bait: 'bread' }])
+    expect(intentAnalytics('idleAngler/anglers:pause', {})).toBeNull()
   })
 })

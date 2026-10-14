@@ -28,8 +28,8 @@
     "knip": "knip",
     "build:deploy": "node tools/deploy/check-target.mjs && pnpm check && convex deploy -y --cmd 'pnpm build'",
     "deploy:web": "pnpm --filter @trmnl-games/web run deploy",
-    "balance:slowcast": "tsx tools/balance/slowcast.ts",
-    "preview:slowcast": "tsx tools/trmnl/preview-slowcast.ts --inline-art",
+    "balance:idle-angler": "tsx tools/balance/idle-angler.ts",
+    "preview:idle-angler": "tsx tools/trmnl/preview-idle-angler.ts --inline-art",
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
@@ -58,7 +58,7 @@
     "@trmnl-games/desk-crawler": "workspace:*",
     "@trmnl-games/engine": "workspace:*",
     "@trmnl-games/platform": "workspace:*",
-    "@trmnl-games/slow-cast": "workspace:*",
+    "@trmnl-games/idle-angler": "workspace:*",
     "convex": "^1.46.0",
     "jose": "^6.2.12",
     "react": "^19.3.0",

@@ -46,7 +46,7 @@ export async function keepsakeGrant(ctx: QueryCtx, userId: Id<'users'>) {
   return grant && isDeskCrawler(grant) && grant.userId === userId && grant.state === 'active' ? grant : null
 }
 
-/** Slow Cast's weekly fly code (D115): the keepsake code under its own tag, keyed with the Slow Cast installation. */
-export const flyCode = (tokenHash: string, userId: string, week: number) => keepsakeCode(tokenHash, userId, week, 'slow-cast-fly-v1')
+/** Idle Angler's weekly fly code (D115): the keepsake code under its own tag, keyed with the Idle Angler installation. */
+export const flyCode = (tokenHash: string, userId: string, week: number) => keepsakeCode(tokenHash, userId, week, 'idle-angler-fly-v1')
 
 export const normalizedKeepsakeCode = (code: string) => code.trim().toUpperCase().replace(/[\s-]/g, '')

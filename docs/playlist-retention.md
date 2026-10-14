@@ -33,6 +33,6 @@ See [keepsake evidence](evidence/playlist-retention.md). Integration tests cover
 
 The preview harness accepts `--keepsakes` after the art origin to supply a clearly fictional sample code for the layout matrix. Local screenshots are layout evidence, not proof of hardware delivery or Creator Fund impressions. Authorized production deployment and a successful live server render are recorded; Barry waived the remaining physical glance and real claim checks on 2026-10-05; they were not performed.
 
-## Slow Cast's fly box (D115)
+## Idle Angler's fly box (D115)
 
-Slow Cast uses the same mechanism for its fly box: a weekly six-digit code in the device's title bar ("Fly code", or "Fly" in narrow portrait columns), minted with the keepsake HMAC under the tag `slow-cast-fly-v1` and keyed with the Slow Cast installation's token hash. One fly per account a week, last week's code accepted, ten wrong codes a day, no missed-week penalty, and no effect on catches, XP or rank. The newest fly is drawn on the angler's hat. Twelve designs fill a box; the Flies achievement family is 1, 6, 12 and 24.
+Idle Angler uses the same mechanism for its fly box: a weekly six-digit code in the device's title bar ("Fly code", or "Fly" in narrow portrait columns), minted with the keepsake HMAC under the tag `idle-angler-fly-v1` and keyed with the Idle Angler installation's token hash. One fly per account a week, last week's code accepted, ten wrong codes a day, no missed-week penalty, and no effect on catches, XP or rank. The newest fly is drawn on the angler's hat. Twelve designs fill a box; the Flies achievement family is 1, 6, 12 and 24.

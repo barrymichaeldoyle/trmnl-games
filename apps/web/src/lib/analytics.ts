@@ -145,7 +145,7 @@ export function captureAnalytics(event: AnalyticsEvent, properties: Record<strin
 }
 
 /** The game a page belongs to, for every event's `game` property (D115); platform pages count as Desk Crawler's, as before. */
-const currentGame = () => (typeof window !== 'undefined' && /(^|\/)slow-cast(\/|$)/.test(window.location.pathname) ? 'slow-cast' : 'desk-crawler')
+const currentGame = () => (typeof window !== 'undefined' && /(^|\/)idle-angler(\/|$)/.test(window.location.pathname) ? 'idle-angler' : 'desk-crawler')
 
 /** v1.1 choices worth measuring: intent → event and the one catalog id argument it may carry. */
 const INTENT_EVENTS: Record<string, [AnalyticsEvent, string, string]> = {
@@ -155,11 +155,11 @@ const INTENT_EVENTS: Record<string, [AnalyticsEvent, string, string]> = {
   'inventory:buyOffer': ['merchant purchase', 'offerId', 'offer'],
   'inventory:buyPouch': ['pouch bought', 'tierId', 'tier'],
   'inventory:buyBag': ['bag bought', 'tierId', 'tier'],
-  // D115: Slow Cast's choices.
-  'slowCast/anglers:travelTo': ['water changed', 'waterId', 'water'],
-  'slowCast/anglers:chooseBait': ['bait changed', 'bait', 'bait'],
-  'slowCast/anglers:buyAccessItem': ['tackle bought', 'access', 'item'],
-  'slowCast/anglers:buyBaitTubs': ['tackle bought', 'bait', 'item'],
+  // D115: Idle Angler's choices.
+  'idleAngler/anglers:travelTo': ['water changed', 'waterId', 'water'],
+  'idleAngler/anglers:chooseBait': ['bait changed', 'bait', 'bait'],
+  'idleAngler/anglers:buyAccessItem': ['tackle bought', 'access', 'item'],
+  'idleAngler/anglers:buyBaitTubs': ['tackle bought', 'bait', 'item'],
 }
 
 /** Intents whose event carries a count or a fixed kind rather than one catalog id. */
@@ -170,9 +170,9 @@ const SPECIAL_EVENTS: Record<string, (args: Record<string, unknown>) => [Analyti
   'inventory:chooseAffix': (args) => ['affix chosen', { affix: String(args.affixId ?? '') }],
   // D131: potions combined, by batches.
   'inventory:combinePotions': (args) => ['potion combined', { batches: String(args.batches ?? 1) }],
-  'slowCast/anglers:sellCatches': (args) => ['fish sold', { count: String(Array.isArray(args.catchIds) ? args.catchIds.length : 0) }],
-  'slowCast/anglers:buyNextRod': () => ['tackle bought', { item: 'rod' }],
-  'slowCast/anglers:buyNextCooler': () => ['tackle bought', { item: 'cooler' }],
+  'idleAngler/anglers:sellCatches': (args) => ['fish sold', { count: String(Array.isArray(args.catchIds) ? args.catchIds.length : 0) }],
+  'idleAngler/anglers:buyNextRod': () => ['tackle bought', { item: 'rod' }],
+  'idleAngler/anglers:buyNextCooler': () => ['tackle bought', { item: 'cooler' }],
   // D142: never the names themselves.
   'inventory:buyNameTag': () => ['name tag bought', {}],
   'inventory:buyMakeover': () => ['makeover bought', {}],

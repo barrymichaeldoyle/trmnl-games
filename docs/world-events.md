@@ -136,6 +136,6 @@ Barry approved every recommendation on 2026-10-13 (D139):
 3. **The eighteen occasions in the table.** The first draft had eleven. Barry then added the candidates (Lunar New Year, Diwali, Boss's Day, Pi Day, Leap Day and a summer occasion) on the grounds that more is better and occasions can be cut later in favour of sponsored ones.
 4. **Local dates**, from the stored `utc_offset`, falling back to UTC.
 5. **Halloween by 31 October** as the first deliverable: W1 to W3 with Halloween's art.
-6. **Slow Cast later**, in its own small proposal.
+6. **Idle Angler later**, in its own small proposal.
 
 Barry's addition: Friday the 13th's effect is the raid mishap above, in place of the drafted −10% defense and +25% XP.

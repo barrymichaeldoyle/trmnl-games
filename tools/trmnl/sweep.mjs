@@ -102,7 +102,7 @@ for (const file of files.sort()) {
     const ribbon = Array.from(layoutEl.querySelectorAll('[data-recap-ribbon]')).find(visible)
     const ribbonTop = ribbon ? ribbon.getBoundingClientRect().top : null
     const underRibbon = ribbon ? Array.from(layoutEl.querySelectorAll('span,img')).filter(visible).filter((e) => !ribbon.contains(e) && e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().bottom > ribbonTop + 1).map((e) => ({ tag: e.tagName, text: (e.innerText || '').slice(0, 40), bottom: e.getBoundingClientRect().bottom, ribbonTop })) : []
-    // No text may sit under a scannable code: a no-shrink row once ran a Slow Cast XP count under the X's QR.
+    // No text may sit under a scannable code: a no-shrink row once ran an Idle Angler XP count under the X's QR.
     const codes = Array.from(layoutEl.querySelectorAll('[data-companion-qr] img, [data-home-qr] img')).filter(visible).map((e) => e.getBoundingClientRect())
     const underCode = Array.from(layoutEl.querySelectorAll('span')).filter(visible).filter((e) => !e.querySelector('span') && e.innerText.trim()).filter((e) => {
       const r = e.getBoundingClientRect()

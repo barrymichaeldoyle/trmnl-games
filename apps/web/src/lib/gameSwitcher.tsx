@@ -21,7 +21,7 @@ export function currentGame(pathname: string): GameSlug | null {
 }
 
 /**
- * The header's game switcher (slow-cast.md "Companion", D124). Inside a game's companion the "My games" link becomes
+ * The header's game switcher (idle-angler.md "Companion", D124). Inside a game's companion the "My games" link becomes
  * that game's icon and name; when another game is listed for this viewer it opens a menu of the games they play
  * (each with its character and status), the listed games they have not started, and the library. A player who can
  * see one game only keeps a plain link, so nobody meets an empty menu. The visible part depends on the pathname and
@@ -68,8 +68,8 @@ function SwitcherMenu({ id, current, listing, close }: { id: string; current: Ga
   const { isSignedIn } = useAuth()
   const ready = isAuthenticated && isSignedIn === true
   const { data: me } = useQuery({ ...convexQuery(api.users.me, {}), enabled: ready })
-  const slowCast = listing.games.find((game) => game.slug === 'slow-cast')
-  const { data: dock } = useQuery({ ...convexQuery(api.slowCast.anglers.dock, {}), enabled: ready && slowCast?.canOpen === true })
+  const idleAngler = listing.games.find((game) => game.slug === 'idle-angler')
+  const { data: dock } = useQuery({ ...convexQuery(api.idleAngler.anglers.dock, {}), enabled: ready && idleAngler?.canOpen === true })
   const angler = (dock as { angler?: { title: string; activationState: string; status: string } | null } | undefined)?.angler
   const rows = listing.games.map((game) => {
     const entry = games[game.slug]

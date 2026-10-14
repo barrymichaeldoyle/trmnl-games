@@ -10,13 +10,13 @@ import { games } from '@trmnl-games/platform'
 import { gamesQuery, useGames } from '../../lib/gameAccess'
 import { HERO_STATUS, anglerLine } from '../../lib/gameSwitcher'
 
-const dockQuery = convexQuery(api.slowCast.anglers.dock, {})
+const dockQuery = convexQuery(api.idleAngler.anglers.dock, {})
 
 export const Route = createFileRoute('/app/')({ head: () => seo({ title: 'My games', index: false }), loader: async ({ context }) => {
   await preload(context, convexQuery(api.users.me, {}), gamesQuery)
-  // An open Slow Cast tile shows the angler, so fetch it too rather than flash the sample screen first.
+  // An open Idle Angler tile shows the angler, so fetch it too rather than flash the sample screen first.
   const listing = context.queryClient.getQueryData<FunctionReturnType<typeof api.platform.list>>(gamesQuery.queryKey)
-  if (listing?.games.some((game) => game.slug === 'slow-cast' && game.canOpen)) await preload(context, dockQuery)
+  if (listing?.games.some((game) => game.slug === 'idle-angler' && game.canOpen)) await preload(context, dockQuery)
 }, component: Library })
 
 function Library() {
@@ -45,24 +45,24 @@ function Library() {
   )
 }
 
-/** Slow Cast in the library (D115): its angler's state once started, a "Coming soon" tile in preview, and a hidden-status mark for admins. */
+/** Idle Angler in the library (D115): its angler's state once started, a "Coming soon" tile in preview, and a hidden-status mark for admins. */
 function UpcomingGames() {
   const data = useGames()
-  const game = data?.games.find((g) => g.slug === 'slow-cast')
+  const game = data?.games.find((g) => g.slug === 'idle-angler')
   const { data: dock, isPending } = useQuery({ ...dockQuery, enabled: game?.canOpen === true })
   if (!game) return null
   const loading = game.canOpen && isPending
   const angler = (dock as { angler?: { activationState: string; status: string; title: string } | null } | undefined)?.angler
   return (
-    <section className="window flex flex-col gap-3 p-5" aria-labelledby="library-sc">
+    <section className="window flex flex-col gap-3 p-5" aria-labelledby="library-ia">
       <div className="flex items-center gap-4">
-        <img src="/games/slow-cast/icon-192.png" alt="" width={64} height={64} className="h-16 w-16 [image-rendering:pixelated]" />
-        <h2 id="library-sc" className="font-display text-2xl font-bold text-gold-ink">{games['slow-cast'].name}</h2>
+        <img src="/games/idle-angler/icon-192.png" alt="" width={64} height={64} className="h-16 w-16 [image-rendering:pixelated]" />
+        <h2 id="library-ia" className="font-display text-2xl font-bold text-gold-ink">{games['idle-angler'].name}</h2>
       </div>
-      {!angler && !loading ? <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen" width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
-      {loading ? null : <p className="text-muted">{angler ? anglerLine(angler) : games['slow-cast'].description}</p>}
+      {!angler && !loading ? <img src="/games/idle-angler/sample.png" alt="A sample Idle Angler screen" width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
+      {loading ? null : <p className="text-muted">{angler ? anglerLine(angler) : games['idle-angler'].description}</p>}
       {game.status !== 'live' ? <p className="label-px self-start">{game.status === 'hidden' ? 'Hidden: only admins can see this' : 'Coming soon'}</p> : null}
-      {game.canOpen && !loading ? <Link to="/app/slow-cast" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{angler ? 'Open Slow Cast' : 'About Slow Cast'}</Link> : null}
+      {game.canOpen && !loading ? <Link to="/app/idle-angler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{angler ? 'Open Idle Angler' : 'About Idle Angler'}</Link> : null}
     </section>
   )
 }

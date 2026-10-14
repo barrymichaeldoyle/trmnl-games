@@ -1,7 +1,7 @@
 /**
  * World tick schedule (D42): one tick per quarter-hour. Each game picks its own
  * offset inside the quarter so two worlds never tick in the same slot
- * (Desk Crawler at :00, :15, :30, :45; Slow Cast at :05, :20, :35, :50).
+ * (Desk Crawler at :00, :15, :30, :45; Idle Angler at :05, :20, :35, :50).
  * Shared by the scheduler and the companion countdown so they can never disagree.
  */
 export const SLOT_MS = 15 * 60 * 1000

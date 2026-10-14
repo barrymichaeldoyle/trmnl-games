@@ -97,7 +97,7 @@ The scene is where meetings should feel new, so the starter's and the partner's 
 - No stance or class edge. Meetings happen at the same rate for everyone.
 - No new modifier kinds and no boon above +10% (or −30% trap damage), so a meeting can't swing a fight or a board.
 - No notifications and no recap fact. The device story and the companion card are enough, and the morning stand-up stays short.
-- No cross-game meetings with Slow Cast.
+- No cross-game meetings with Idle Angler.
 
 ## Work slices
 

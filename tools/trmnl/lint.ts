@@ -1,5 +1,5 @@
 /**
- * Run the pinned official TRMNL linter against the authoritative TS templates: Desk Crawler's, then Slow Cast's.
+ * Run the pinned official TRMNL linter against the authoritative TS templates: Desk Crawler's, then Idle Angler's.
  * Then check that every static class in the templates exists in the pinned framework's CSS (or is one its JS
  * reads), since the official rules accept made-up classes like `mt--[1px]` or `-mt--2` that silently do nothing.
  */
@@ -7,7 +7,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync,
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
-import { screenMarkup as slowCastMarkup } from '@trmnl-games/slow-cast/templates/screen'
+import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { FRAMEWORK_VERSION } from '@trmnl-games/desk-crawler/templates/preview'
 import { bundle, bundleConfig as config, requireBundle, root } from './bundle'
 
@@ -89,7 +89,7 @@ function unknownClasses(markup: Markup, known: Set<string>): Array<{ layout: str
 
 const games: Array<[Markup, string]> = [
   [screenMarkup, 'Desk Crawler'],
-  [slowCastMarkup, 'Slow Cast'],
+  [idleAnglerMarkup, 'Idle Angler'],
 ]
 let failed = games.map(([markup, label]) => lintGame(markup, label)).some((status) => status !== 0)
 

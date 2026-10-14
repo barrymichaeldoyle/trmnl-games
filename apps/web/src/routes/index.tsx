@@ -15,27 +15,27 @@ export const Route = createFileRoute('/')({
     description: 'Games that play themselves on your TRMNL e-ink display. Desk Crawler is a free office RPG where your hero takes on a new adventure every 15 minutes, on the screen on your desk.',
     jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, FAQ_JSON_LD].map(({ '@context': _, ...node }) => node) },
   }),
-  // No loader: the page is static, and the games listing (only for the Slow Cast teaser) loads in the browser after it.
+  // No loader: the page is static, and the games listing (only for the Idle Angler teaser) loads in the browser after it.
   component: Home,
 })
 
-/** Slow Cast (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
-function SlowCastSection() {
+/** Idle Angler (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
+function IdleAnglerSection() {
   const data = useGames()
-  const game = data?.games.find((g) => g.slug === 'slow-cast')
+  const game = data?.games.find((g) => g.slug === 'idle-angler')
   if (!game || (game.status === 'hidden' && !data?.admin)) return null
   const live = game.status === 'live'
   return (
-    <section aria-labelledby="slow-cast-heading" className="grid gap-6 md:grid-cols-2 md:items-center">
-      <img src="/games/slow-cast/sample.png" alt="A sample Slow Cast screen: an angler holding a barbel at River Bend at dusk" width={780} height={460} loading="lazy" className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
+    <section aria-labelledby="idle-angler-heading" className="grid gap-6 md:grid-cols-2 md:items-center">
+      <img src="/games/idle-angler/sample.png" alt="A sample Idle Angler screen: an angler holding a barbel at River Bend at dusk" width={780} height={460} loading="lazy" className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
       <div className="flex flex-col gap-3">
         {live ? null : <p className="text-sm font-semibold text-muted">Coming next</p>}
-        <h2 id="slow-cast-heading" className="font-display text-3xl font-bold text-gold-ink">{games['slow-cast'].name}</h2>
-        <p className="max-w-prose leading-relaxed">{games['slow-cast'].description} Every fifteen minutes your angler casts, and the screen on your desk shows what bit.</p>
+        <h2 id="idle-angler-heading" className="font-display text-3xl font-bold text-gold-ink">{games['idle-angler'].name}</h2>
+        <p className="max-w-prose leading-relaxed">{games['idle-angler'].description} Every fifteen minutes your angler casts, and the screen on your desk shows what bit.</p>
         {game.canOpen ? (
           <div className="flex flex-wrap gap-3">
-            <Link to="/games/slow-cast" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
-            <Link to="/app/slow-cast" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
+            <Link to="/games/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
+            <Link to="/app/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
           </div>
         ) : null}
       </div>
@@ -80,7 +80,7 @@ function Home() {
               <InstallCta place="home end" />
             </section>
           </div>
-          <AfterListing><SlowCastSection /></AfterListing>
+          <AfterListing><IdleAnglerSection /></AfterListing>
         </div>
       </main>
     </SiteShell>

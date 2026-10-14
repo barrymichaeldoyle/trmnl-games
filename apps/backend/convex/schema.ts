@@ -1,14 +1,14 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
-import { DESK_CRAWLER_TABLES, SLOW_CAST_TABLES, engineTables, rankingTables } from './lib/engine/tables'
-import { accessId, anglerCounters, baitClass, logbookEntry, swLogDetail, swLogKind, waterId } from './slowCast/validators'
+import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, engineTables, rankingTables } from './lib/engine/tables'
+import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, waterId } from './idleAngler/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
 
-/** Slow Cast's engine tables, prefixed `sw` so retention and deletion stay per game (slow-cast.md "Data"); no XP boards (D116). */
-const slowCastEngine = engineTables(SLOW_CAST_TABLES, ['landed', 'released', 'gotAway'])
+/** Idle Angler's engine tables, prefixed `ia` so retention and deletion stay per game (idle-angler.md "Data"); no XP boards (D116). */
+const idleAnglerEngine = engineTables(IDLE_ANGLER_TABLES, ['landed', 'released', 'gotAway'])
 
 /**
  * Current-release schema only (data-model.md). Tables arrive with the work
@@ -138,7 +138,7 @@ export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.l
 export const alertPreferences = v.object({
   asleep: v.boolean(),
   merchant: v.boolean(),
-  /** D115: Slow Cast's kinds; absent means off. Devices and quiet hours are shared by both games. */
+  /** D115: Idle Angler's kinds; absent means off. Devices and quiet hours are shared by both games. */
   coolerFull: v.optional(v.boolean()),
   baitOut: v.optional(v.boolean()),
   quietStart: v.number(),
@@ -169,7 +169,12 @@ export const logKind = v.union(
 )
 
 /** Every registered game (packages/platform). Storage accepts any of them; each write path still names its own game. */
-export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('slow-cast'))
+export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'))
+/**
+ * D158: rows written before the rename to Idle Angler still carry 'slow-cast' until `idleAngler/legacyReset:run`
+ * clears them. The follow-up deploy narrows these fields back to `gameSlug`.
+ */
+const storedGameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('slow-cast'))
 export const gameStatus = v.union(v.literal('hidden'), v.literal('preview'), v.literal('live'))
 
 /** D149: a hero's look; chosen free at creation, changed later with a makeover. */
@@ -188,9 +193,9 @@ export default defineSchema({
     at: v.number(),
   }).index('by_key', ['key']),
 
-  /** Server-controlled game lifecycle (slow-cast.md "Architecture"): one row per game once an admin sets its status. */
+  /** Server-controlled game lifecycle (idle-angler.md "Architecture"): one row per game once an admin sets its status. */
   platformGames: defineTable({
-    slug: gameSlug,
+    slug: storedGameSlug,
     status: gameStatus,
     updatedAt: v.number(),
   }).index('by_slug', ['slug']),
@@ -205,21 +210,21 @@ export default defineSchema({
   heroRanks: deskCrawlerEngine.ranks,
   achievementStats: deskCrawlerEngine.achievementStats,
 
-  swWorldState: slowCastEngine.world,
-  swSimulationRuns: defineTable(slowCastEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
-  swSimulationFailures: slowCastEngine.failures,
-  swLeaderboardPublications: defineTable(slowCastEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
-  swAchievementStats: slowCastEngine.achievementStats,
+  iaWorldState: idleAnglerEngine.world,
+  iaSimulationRuns: defineTable(idleAnglerEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
+  iaSimulationFailures: idleAnglerEngine.failures,
+  iaLeaderboardPublications: defineTable(idleAnglerEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
+  iaAchievementStats: idleAnglerEngine.achievementStats,
 
-  /** One per user once they start Slow Cast (D115), like `deskCrawlerProfiles`. */
-  slowCastProfiles: defineTable({
+  /** One per user once they start Idle Angler (D115), like `deskCrawlerProfiles`. */
+  idleAnglerProfiles: defineTable({
     userId: v.id('users'),
     state: v.union(v.literal('active'), v.literal('deleting')),
     anglerId: v.optional(v.id('anglers')),
     createdAt: v.number(),
   }).index('by_userId', ['userId']),
 
-  /** The Slow Cast player character. Engine tables call it `heroId` (lib/engine/tables.ts). */
+  /** The Idle Angler player character. Engine tables call it `heroId` (lib/engine/tables.ts). */
   anglers: defineTable({
     userId: v.id('users'),
     createdAt: v.number(),
@@ -252,7 +257,7 @@ export default defineSchema({
     .index('by_createdAt', ['createdAt'])
     .index('by_simulationState', ['simulationState']),
 
-  /** Slow Cast's fly box (D115, the D46 shape): one fly a week from the device's code; cosmetic only. */
+  /** Idle Angler's fly box (D115, the D46 shape): one fly a week from the device's code; cosmetic only. */
   flyBoxes: defineTable({
     userId: v.id('users'),
     totalCollected: v.number(),
@@ -260,8 +265,8 @@ export default defineSchema({
     lastClaimedAt: v.number(),
   }).index('by_userId', ['userId']),
 
-  /** One row per earned Slow Cast achievement, keyed by owner (D65 shape); bounded by the catalog. */
-  swAchievements: defineTable({
+  /** One row per earned Idle Angler achievement, keyed by owner (D65 shape); bounded by the catalog. */
+  iaAchievements: defineTable({
     userId: v.id('users'),
     anglerId: v.id('anglers'),
     achievementId: v.string(),
@@ -284,11 +289,11 @@ export default defineSchema({
   }).index('by_anglerId', ['anglerId']),
 
   /**
-   * Slow Cast boards (2026-10-10): each angler's heaviest fish per water, once for the week (`period` is the Monday,
+   * Idle Angler boards (2026-10-10): each angler's heaviest fish per water, once for the week (`period` is the Monday,
    * "w2026-10-05", UTC) and once for all time ("all"). A landed fish, kept or released, replaces the row when heavier.
    * `earlierFirst` is minus the catch time, so equal weights rank the earlier catch first.
    */
-  swCatchRecords: defineTable({
+  iaCatchRecords: defineTable({
     waterId,
     period: v.string(),
     anglerId: v.id('anglers'),
@@ -302,20 +307,34 @@ export default defineSchema({
     .index('by_anglerId_and_waterId_and_period', ['anglerId', 'waterId', 'period'])
     .index('by_period', ['period']),
 
-  swTickLogs: defineTable({
+  iaTickLogs: defineTable({
     anglerId: v.id('anglers'),
     source: v.union(v.literal('tick'), v.literal('command'), v.literal('lifecycle')),
     tick: v.optional(v.number()),
-    runId: v.optional(v.id('swSimulationRuns')),
+    runId: v.optional(v.id('iaSimulationRuns')),
     sequence: v.number(),
     at: v.number(),
-    kind: swLogKind,
+    kind: iaLogKind,
     summary: v.string(),
-    detail: swLogDetail,
+    detail: iaLogDetail,
     deltas: v.object({ gold: v.number() }),
   })
     .index('by_anglerId_and_at_and_sequence', ['anglerId', 'at', 'sequence'])
     .index('by_at', ['at']),
+
+  /**
+   * D158: the tables as named before the rename to Idle Angler (`sw` was the working title Still Waters). Kept, loosely
+   * typed, only until `idleAngler/legacyReset:run` empties them; the follow-up deploy drops them from the schema.
+   */
+  swWorldState: defineTable(v.any()),
+  swSimulationRuns: defineTable(v.any()),
+  swSimulationFailures: defineTable(v.any()),
+  swLeaderboardPublications: defineTable(v.any()),
+  swAchievementStats: defineTable(v.any()),
+  slowCastProfiles: defineTable(v.any()),
+  swAchievements: defineTable(v.any()),
+  swCatchRecords: defineTable(v.any()),
+  swTickLogs: defineTable(v.any()),
 
   users: defineTable({
     analyticsConsent: v.optional(v.boolean()),
@@ -381,7 +400,7 @@ export default defineSchema({
 
   gameDeletionJobs: defineTable({
     userId: v.id('users'),
-    gameSlug: gameSlug,
+    gameSlug: storedGameSlug,
     state: v.union(v.literal('running'), v.literal('completed')),
     phase: v.union(v.literal('connections'), v.literal('gameplay'), v.literal('done')),
     createdAt: v.number(),
@@ -628,7 +647,7 @@ export default defineSchema({
 
 
   operationReceipts: defineTable({
-    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('slow-cast'))),
+    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('slow-cast'))),
     userId: v.id('users'),
     operationId: v.string(),
     operation: v.string(),
@@ -664,7 +683,7 @@ export default defineSchema({
   /** P33: one alert per qualifying event, written by the tick and drained by the sender; kept 7 days. */
   alertOutbox: defineTable({
     userId: v.id('users'),
-    /** Desk Crawler rows carry the hero, Slow Cast rows the angler (D115). */
+    /** Desk Crawler rows carry the hero, Idle Angler rows the angler (D115). */
     heroId: v.optional(v.id('heroes')),
     anglerId: v.optional(v.id('anglers')),
     kind: alertKind,
@@ -764,8 +783,8 @@ export default defineSchema({
 
   operationalIncidents: defineTable({
     incidentKey: v.string(),
-    /** A Desk Crawler or Slow Cast run (D115). */
-    runId: v.union(v.id('simulationRuns'), v.id('swSimulationRuns')),
+    /** A Desk Crawler or Idle Angler run (D115). */
+    runId: v.union(v.id('simulationRuns'), v.id('iaSimulationRuns'), v.id('swSimulationRuns')),
     state: v.union(v.literal('open'), v.literal('recovered')),
     openedAt: v.number(),
     recoveredAt: v.optional(v.number()),
@@ -804,7 +823,7 @@ export default defineSchema({
     .index('by_at', ['at']),
 
   trmnlGrants: defineTable({
-    gameSlug: v.optional(gameSlug),
+    gameSlug: v.optional(storedGameSlug),
     userId: v.id('users'),
     tokenHash: v.string(),
     // Reused revoked credentials authorize only the freshly verified UUID.
@@ -834,7 +853,7 @@ export default defineSchema({
     .index('by_expiresAt', ['expiresAt']),
 
   trmnlInstallAttempts: defineTable({
-    gameSlug: v.optional(gameSlug),
+    gameSlug: v.optional(storedGameSlug),
     userId: v.id('users'),
     grantId: v.id('trmnlGrants'),
     state: v.union(v.literal('pending'), v.literal('completed'), v.literal('expired')),
@@ -847,7 +866,7 @@ export default defineSchema({
     .index('by_expiresAt', ['expiresAt']),
 
   trmnlInstances: defineTable({
-    gameSlug: v.optional(gameSlug),
+    gameSlug: v.optional(storedGameSlug),
     grantId: v.id('trmnlGrants'),
     userId: v.id('users'),
     uuid: v.string(),

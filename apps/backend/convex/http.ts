@@ -8,8 +8,8 @@ import { renderHeroCardPng } from '@trmnl-games/desk-crawler/art/heroCard'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { DEFAULT_COMPANION_ORIGIN, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
 import { parseUtcOffset, screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
-import { screenMarkup as slowCastMarkup } from '@trmnl-games/slow-cast/templates/screen'
-import { renderSlowCastArt } from '@trmnl-games/slow-cast/art/route'
+import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
+import { renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import type { GameSlug } from '@trmnl-games/platform'
 
 /**
@@ -87,11 +87,14 @@ const uninstall = (gameSlug: GameSlug) =>
     return found ? json(200, { ok: true }) : notFound()
   })
 
-// Desk Crawler keeps its original paths; Slow Cast's plugin points at its own (D115).
+// Desk Crawler keeps its original paths; Idle Angler's plugin points at its own (D115).
 http.route({ path: '/trmnl/install/success', method: 'POST', handler: installSuccess('desk-crawler') })
 http.route({ path: '/trmnl/uninstall', method: 'POST', handler: uninstall('desk-crawler') })
-http.route({ path: '/trmnl/slow-cast/install/success', method: 'POST', handler: installSuccess('slow-cast') })
-http.route({ path: '/trmnl/slow-cast/uninstall', method: 'POST', handler: uninstall('slow-cast') })
+http.route({ path: '/trmnl/idle-angler/install/success', method: 'POST', handler: installSuccess('idle-angler') })
+http.route({ path: '/trmnl/idle-angler/uninstall', method: 'POST', handler: uninstall('idle-angler') })
+// D158: the plugin's URLs from before the rename, until the plugin settings on trmnl.com point at the new ones.
+http.route({ path: '/trmnl/slow-cast/install/success', method: 'POST', handler: installSuccess('idle-angler') })
+http.route({ path: '/trmnl/slow-cast/uninstall', method: 'POST', handler: uninstall('idle-angler') })
 
 /** Shared screen request parsing: bearer, form type and size, one `user_uuid`. */
 async function parseScreenRequest(request: Request): Promise<{ tokenHash: string; form: URLSearchParams; uuid: string } | Response> {
@@ -107,26 +110,24 @@ async function parseScreenRequest(request: Request): Promise<{ tokenHash: string
   return { tokenHash, form, uuid }
 }
 
-http.route({
-  path: '/trmnl/slow-cast/v1/screen',
-  method: 'POST',
-  handler: httpAction(async (ctx, request) => {
-    const parsed = await parseScreenRequest(request)
-    if (parsed instanceof Response) return parsed
-    const { tokenHash, form, uuid } = parsed
-    const now = Date.now()
-    const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
-    const args = { tokenHash, uuid, now, utcOffset }
-    let result = await ctx.runQuery(internal.slowCast.payload.forInstance, args)
-    if (result?.outcome === 'recoverable') {
-      await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'slow-cast', tokenHash, uuid, confirmedBy: 'screen_request' })
-      result = await ctx.runQuery(internal.slowCast.payload.forInstance, args)
-    }
-    if (result === null || result.outcome !== 'payload') return notFound()
-    if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
-    return json(200, { ...slowCastMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, utc_offset: utcOffset } })
-  }),
+const idleAnglerScreen = httpAction(async (ctx, request) => {
+  const parsed = await parseScreenRequest(request)
+  if (parsed instanceof Response) return parsed
+  const { tokenHash, form, uuid } = parsed
+  const now = Date.now()
+  const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
+  const args = { tokenHash, uuid, now, utcOffset }
+  let result = await ctx.runQuery(internal.idleAngler.payload.forInstance, args)
+  if (result?.outcome === 'recoverable') {
+    await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'idle-angler', tokenHash, uuid, confirmedBy: 'screen_request' })
+    result = await ctx.runQuery(internal.idleAngler.payload.forInstance, args)
+  }
+  if (result === null || result.outcome !== 'payload') return notFound()
+  if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
+  return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, utc_offset: utcOffset } })
 })
+http.route({ path: '/trmnl/idle-angler/v1/screen', method: 'POST', handler: idleAnglerScreen })
+http.route({ path: '/trmnl/slow-cast/v1/screen', method: 'POST', handler: idleAnglerScreen })
 
 http.route({
   path: '/trmnl/v1/screen',
@@ -164,9 +165,9 @@ http.route({
   method: 'GET',
   handler: httpAction(async (ctx, request) => {
     const path = new URL(request.url).pathname
-    // D115: Slow Cast's scenes and codes live under their own prefix.
-    if (path.startsWith('/art/sc/')) {
-      const art = renderSlowCastArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
+    // D115: Idle Angler's scenes and codes live under their own prefix.
+    if (path.startsWith('/art/ia/')) {
+      const art = renderIdleAnglerArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
       if (art === null) return new Response('Not found', { status: 404 })
       return new Response(new Blob([art.png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': art.immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' } })
     }

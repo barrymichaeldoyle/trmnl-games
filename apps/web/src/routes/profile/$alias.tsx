@@ -7,7 +7,7 @@ import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
 
-type Game = { slug: 'desk-crawler' | 'slow-cast'; name: string; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null }
+type Game = { slug: 'desk-crawler' | 'idle-angler'; name: string; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null }
 type Profile = { alias: string; games: Game[]; platform: Array<{ id: string; name: string; blurb: string; share: number | null }> } | null
 
 const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { alias })

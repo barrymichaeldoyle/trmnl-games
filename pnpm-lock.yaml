@@ -20,9 +20,9 @@ importers:
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:packages/platform
-      '@trmnl-games/slow-cast':
+      '@trmnl-games/idle-angler':
         specifier: workspace:*
-        version: link:packages/slow-cast
+        version: link:packages/idle-angler
       convex:
         specifier: ^1.46.0
         version: 1.46.0(@clerk/react@6.17.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
@@ -99,9 +99,9 @@ importers:
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:../../packages/platform
-      '@trmnl-games/slow-cast':
+      '@trmnl-games/idle-angler':
         specifier: workspace:*
-        version: link:../../packages/slow-cast
+        version: link:../../packages/idle-angler
       convex:
         specifier: ^1.46.0
         version: 1.46.0(@clerk/react@6.17.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
@@ -160,9 +160,9 @@ importers:
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:../../packages/platform
-      '@trmnl-games/slow-cast':
+      '@trmnl-games/idle-angler':
         specifier: workspace:*
-        version: link:../../packages/slow-cast
+        version: link:../../packages/idle-angler
       convex:
         specifier: ^1.46.0
         version: 1.46.0(@clerk/react@6.17.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
@@ -245,7 +245,7 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
-  packages/slow-cast:
+  packages/idle-angler:
     dependencies:
       '@trmnl-games/engine':
         specifier: workspace:*

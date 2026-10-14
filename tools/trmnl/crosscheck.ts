@@ -4,7 +4,7 @@
  * rendered by both engines from the same context and the markup must match
  * exactly. Ruby runs with strict filters, so a filter liquidjs knows but TRMNL
  * lacks fails here instead of silently passing through on TRMNL. Neither engine
- * replaces the live TRMNL render check. Slow Cast's templates are checked the same way over its preview scenarios
+ * replaces the live TRMNL render check. Idle Angler's templates are checked the same way over its preview scenarios
  * (D115, template v2).  Usage: pnpm crosscheck:trmnl
  */
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
@@ -13,9 +13,9 @@ import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { Liquid } from 'liquidjs'
 import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
-import { screenMarkup as slowCastMarkup } from '@trmnl-games/slow-cast/templates/screen'
-import { previewScenarios } from '@trmnl-games/slow-cast/templates/previewScenarios'
-import { buildPayload } from '@trmnl-games/slow-cast/payload'
+import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
+import { previewScenarios } from '@trmnl-games/idle-angler/templates/previewScenarios'
+import { buildPayload } from '@trmnl-games/idle-angler/payload'
 import type { PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
 import { bundle, requireBundle, root } from './bundle'
 
@@ -35,10 +35,10 @@ try {
     cases.push(...dumped.map(({ name, layout, context }) => ({ id: `${flags.join(' ')} ${name} ${layout}`, layout, context })))
   }
 
-  // Slow Cast: every preview scenario, with and without the weekly fly code.
-  const slowCastCases = Object.entries(previewScenarios('https://local-art.invalid')).flatMap(([name, input]) =>
+  // Idle Angler: every preview scenario, with and without the weekly fly code.
+  const idleAnglerCases = Object.entries(previewScenarios('https://local-art.invalid')).flatMap(([name, input]) =>
     [null, '482 917'].flatMap((flyCode) =>
-      (Object.keys(slowCastMarkup) as PreviewLayout[]).map((layout) => ({ id: `slow-cast ${name}${flyCode ? ' fly' : ''} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPayload(input), fly_code: flyCode })) as Record<string, unknown> })),
+      (Object.keys(idleAnglerMarkup) as PreviewLayout[]).map((layout) => ({ id: `idle-angler ${name}${flyCode ? ' fly' : ''} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPayload(input), fly_code: flyCode })) as Record<string, unknown> })),
     ),
   )
 
@@ -53,13 +53,13 @@ try {
     if (ruby.status !== 0) throw new Error('Ruby render failed')
     return JSON.parse(ruby.stdout.toString()) as Record<string, string>
   }
-  const rubyHtml = { ...renderRuby(screenMarkup, cases), ...renderRuby(slowCastMarkup, slowCastCases) }
+  const rubyHtml = { ...renderRuby(screenMarkup, cases), ...renderRuby(idleAnglerMarkup, idleAnglerCases) }
 
   const liquid = new Liquid({ timezoneOffset: 0 })
   const out = join(root, '.previews/crosscheck')
   rmSync(out, { recursive: true, force: true })
   let mismatches = 0
-  const allCases = [...cases.map((c) => ({ ...c, templates: screenMarkup as Record<string, string> })), ...slowCastCases.map((c) => ({ ...c, templates: slowCastMarkup as Record<string, string> }))]
+  const allCases = [...cases.map((c) => ({ ...c, templates: screenMarkup as Record<string, string> })), ...idleAnglerCases.map((c) => ({ ...c, templates: idleAnglerMarkup as Record<string, string> }))]
   for (const { id, layout, context, templates } of allCases) {
     const js = await liquid.parseAndRender(templates[layout]!, context)
     const rb = rubyHtml[id] ?? 'RUBY ERROR: no output'

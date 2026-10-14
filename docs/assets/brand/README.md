@@ -1,6 +1,6 @@
 # Sign-in provider branding
 
-Square TRMNL Games logos on a gold tile (D59): a cream desk display with a night-ink d-pad and two buttons, padded so circular crops stay clear of it. Regenerate with `pnpm tsx tools/art/brand.ts`; the art lives in `tools/art/platformArt.ts` and is coloured by `tools/art/colour.ts`, shared with the site's `public/` icons. Each game has its own colour pixel-art icon (`tools/art/gameIcons.ts`, 64px art with a hand-drawn 16px tab icon), written by `pnpm tsx tools/art/web.ts` to `public/games/<game>/` and to the TRMNL plugin icons: [Desk Crawler](../plugin-icon.png) and [Slow Cast](../slow-cast-plugin-icon.png).
+Square TRMNL Games logos on a gold tile (D59): a cream desk display with a night-ink d-pad and two buttons, padded so circular crops stay clear of it. Regenerate with `pnpm tsx tools/art/brand.ts`; the art lives in `tools/art/platformArt.ts` and is coloured by `tools/art/colour.ts`, shared with the site's `public/` icons. Each game has its own colour pixel-art icon (`tools/art/gameIcons.ts`, 64px art with a hand-drawn 16px tab icon), written by `pnpm tsx tools/art/web.ts` to `public/games/<game>/` and to the TRMNL plugin icons: [Desk Crawler](../plugin-icon.png) and [Idle Angler](../idle-angler-plugin-icon.png).
 
 | Where | File | Notes |
 | --- | --- | --- |

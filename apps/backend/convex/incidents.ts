@@ -35,8 +35,8 @@ export const getIncident = internalQuery({
     const incident = await ctx.db.get(incidentId)
     if (incident === null) return null
     const run = await ctx.db.get(incident.runId)
-    // D115: a Slow Cast run lives in its own table.
-    const game = ctx.db.normalizeId('swSimulationRuns', incident.runId) === null ? 'Desk Crawler' : 'Slow Cast'
+    // D115: an Idle Angler run lives in its own table.
+    const game = ctx.db.normalizeId('iaSimulationRuns', incident.runId) === null ? 'Desk Crawler' : 'Idle Angler'
     return { incident, game, run: run ? { tick: run.tick, state: run.state, phase: run.state, contentVersion: run.contentVersion, simulationVersion: run.simulationVersion } : null }
   },
 })

@@ -114,7 +114,7 @@ counters.careerRungs, counters.itemsEquipped                                    
 - No guarantee for anything with a ranking weight beyond its own rung: no guaranteed rare, epic, jackpot or raid win.
 - No new achievement family. The ladder is finite and its record lives under Career; a family would be a second copy of it.
 - Keepsakes and alerts are account features, not hero features, and are not gated.
-- Slow Cast gets the same shape later, with its logbook titles as the natural rewards and waters as the natural unlocks; not in this release.
+- Idle Angler gets the same shape later, with its logbook titles as the natural rewards and waters as the natural unlocks; not in this release.
 
 ## Work slices
 

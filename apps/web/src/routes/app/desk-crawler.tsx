@@ -23,7 +23,7 @@ export const Route = createFileRoute('/app/desk-crawler')({
 })
 
 /**
- * Five tabs, the shape Slow Cast uses (D124): play on Hero, gear on Bag, what happened on Log, standing on Ranks, and
+ * Five tabs, the shape Idle Angler uses (D124): play on Hero, gear on Bag, what happened on Log, standing on Ranks, and
  * everything else behind More. Five share a phone's width, so the last three take short names.
  */
 const NAV = [

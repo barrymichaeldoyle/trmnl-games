@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, internal } from '@trmnl-games/backend/api'
 import schema from '../../apps/backend/convex/schema'
 import { seedHero, seedWorld, type T } from './helpers'
-import { seedAngler } from './slowCastHelpers'
+import { seedAngler } from './idleAnglerHelpers'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
 
@@ -15,7 +15,7 @@ describe('shared public profile (D115, S5)', () => {
     vi.setSystemTime(Date.UTC(2026, 10, 2, 6, 5, 3))
     t = convexTest(schema, modules)
     await seedWorld(t)
-    await t.mutation(internal.platform.setGameStatusInternal, { slug: 'slow-cast', status: 'live' })
+    await t.mutation(internal.platform.setGameStatusInternal, { slug: 'idle-angler', status: 'live' })
   })
   afterEach(() => vi.useRealTimers())
 
@@ -29,11 +29,11 @@ describe('shared public profile (D115, S5)', () => {
     await seedHero(t, { publicProfile: true }, 'Both')
     await seedAngler(t, { publicProfile: true }, 'Both')
     const profile = await t.query(api.platformProfile.view, { alias: 'both' })
-    expect(profile).toMatchObject({ alias: 'Both', games: [{ slug: 'desk-crawler', name: 'Baz' }, { slug: 'slow-cast', title: 'Newcomer', species: 0 }], platform: [{ id: 'regular_1', name: 'Regular', share: null }] })
+    expect(profile).toMatchObject({ alias: 'Both', games: [{ slug: 'desk-crawler', name: 'Baz' }, { slug: 'idle-angler', title: 'Newcomer', species: 0 }], platform: [{ id: 'regular_1', name: 'Regular', share: null }] })
   })
 
   it('keeps a game that is not live off the profile for everyone but admins', async () => {
-    await t.mutation(internal.platform.setGameStatusInternal, { slug: 'slow-cast', status: 'hidden' })
+    await t.mutation(internal.platform.setGameStatusInternal, { slug: 'idle-angler', status: 'hidden' })
     await seedHero(t, { publicProfile: true }, 'Both')
     await seedAngler(t, { publicProfile: true }, 'Both')
     expect((await t.query(api.platformProfile.view, { alias: 'Both' })).games.map((g: { slug: string }) => g.slug)).toEqual(['desk-crawler'])

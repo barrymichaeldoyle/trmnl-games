@@ -1,5 +1,5 @@
 import { currentHero, gameProfile, setCurrentHero, DESK_CRAWLER } from './lib/gameProfile'
-import { deskCrawlerDeleting, isGame, SLOW_CAST_HOOKS } from './lib/gameHooks'
+import { deskCrawlerDeleting, isGame, IDLE_ANGLER_HOOKS } from './lib/gameHooks'
 import { gameSlug as gameSlugValidator, heroGender } from './schema'
 import type { HeroGender } from '@trmnl-games/desk-crawler/art/hero'
 import type { GameSlug } from '@trmnl-games/platform'
@@ -21,9 +21,9 @@ import { runIntent } from './lib/intent'
 import { MANAGEMENT_PROOF_MS, verifyManagementJwt } from './lib/trmnlManagement'
 
 /** D115: which game's profile is being deleted, its player character, and its name in messages. */
-const gameDeleting = (slug: GameSlug) => (slug === DESK_CRAWLER ? deskCrawlerDeleting : SLOW_CAST_HOOKS.deleting)
-const gameLabel = (slug: GameSlug) => (slug === DESK_CRAWLER ? 'Desk Crawler' : SLOW_CAST_HOOKS.label)
-const currentCharacter = (slug: GameSlug) => (slug === DESK_CRAWLER ? currentHero : SLOW_CAST_HOOKS.current)
+const gameDeleting = (slug: GameSlug) => (slug === DESK_CRAWLER ? deskCrawlerDeleting : IDLE_ANGLER_HOOKS.deleting)
+const gameLabel = (slug: GameSlug) => (slug === DESK_CRAWLER ? 'Desk Crawler' : IDLE_ANGLER_HOOKS.label)
+const currentCharacter = (slug: GameSlug) => (slug === DESK_CRAWLER ? currentHero : IDLE_ANGLER_HOOKS.current)
 const deletingError = (slug: GameSlug) => appError('GAME_UNAVAILABLE', `${gameLabel(slug)} progress is being deleted. Try again shortly.`)
 
 /** Install attempts stay valid for 20 minutes (data-model.md). */
@@ -112,7 +112,7 @@ export const linkInstall = internalMutation({
     // Deleted accounts: replayed Clerk tokens and old TRMNL codes/tokens never regain authority (D22/V09).
     assertNotRevoked(await ctx.db.query('revokedAuthIdentities').withIndex('by_identityHash', (q) => q.eq('identityHash', identityHash(args.tokenIdentifier))).first())
     if (await ctx.db.query('revokedTrmnlCredentials').withIndex('by_tokenHash', (q) => q.eq('tokenHash', args.tokenHash)).first()) {
-      // The verified reconnection flow (D69) is Desk Crawler's; a revoked Slow Cast token needs a fresh install.
+      // The verified reconnection flow (D69) is Desk Crawler's; a revoked Idle Angler token needs a fresh install.
       if (!args.allowReconnection || slug !== DESK_CRAWLER) throw appError('CONNECTION_UNAVAILABLE', 'This connection needs fresh verification from TRMNL. Start from Install, then Save and open Configure.')
       await reserveReconnection(ctx, args, now)
       return { activationState: 'pending_trmnl' as const, heroCreated: false, reconnectionRequired: true as const }
@@ -167,7 +167,7 @@ export const linkInstall = internalMutation({
     const existing = await currentCharacter(slug)(ctx, user)
     if (existing) return { activationState: existing.activationState, heroCreated: false }
     if (slug !== DESK_CRAWLER) {
-      await SLOW_CAST_HOOKS.prepare(ctx, user, now)
+      await IDLE_ANGLER_HOOKS.prepare(ctx, user, now)
       return { activationState: 'pending_trmnl' as const, heroCreated: true }
     }
 
@@ -248,7 +248,7 @@ export const confirmInstance = internalMutation({
     })
     await ctx.db.patch(attempt._id, { state: 'completed', completedUuid: args.uuid })
     if (slug === DESK_CRAWLER) await activateForConfirmedInstallation(ctx, grant.userId, now)
-    else await SLOW_CAST_HOOKS.activate(ctx, grant.userId, now)
+    else await IDLE_ANGLER_HOOKS.activate(ctx, grant.userId, now)
     return { ok: true, reason: 'confirmed' as const }
   },
 })

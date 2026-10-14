@@ -21,8 +21,8 @@ export const RETENTION = {
   alertOutboxMs: 7 * DAY,
 } as const
 
-type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'swTickLogs' | 'swFailures' | 'swRuns'
-const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'swTickLogs', 'swFailures', 'swRuns']
+type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'iaTickLogs' | 'iaFailures' | 'iaRuns'
+const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'iaTickLogs', 'iaFailures', 'iaRuns']
 
 export const cleanup = internalMutation({
   args: { job: v.optional(v.union(...ORDER.map((j) => v.literal(j)))) },
@@ -98,27 +98,27 @@ export const cleanup = internalMutation({
         deleted = rows.length
         break
       }
-      // D115: Slow Cast keeps the same retention as Desk Crawler in its own tables.
-      case 'swTickLogs': {
-        const rows = await ctx.db.query('swTickLogs').withIndex('by_at', (q) => q.lt('at', now - RETENTION.tickLogsMs)).take(BATCH)
+      // D115: Idle Angler keeps the same retention as Desk Crawler in its own tables.
+      case 'iaTickLogs': {
+        const rows = await ctx.db.query('iaTickLogs').withIndex('by_at', (q) => q.lt('at', now - RETENTION.tickLogsMs)).take(BATCH)
         for (const row of rows) await ctx.db.delete(row._id)
         deleted = rows.length
         break
       }
-      case 'swFailures': {
-        const rows = await ctx.db.query('swSimulationFailures').withIndex('by_createdAt', (q) => q.lt('createdAt', now - RETENTION.failuresMs)).take(BATCH)
+      case 'iaFailures': {
+        const rows = await ctx.db.query('iaSimulationFailures').withIndex('by_createdAt', (q) => q.lt('createdAt', now - RETENTION.failuresMs)).take(BATCH)
         for (const row of rows) await ctx.db.delete(row._id)
         deleted = rows.length
         break
       }
-      case 'swRuns': {
+      case 'iaRuns': {
         const rows = await ctx.db
-          .query('swSimulationRuns')
+          .query('iaSimulationRuns')
           .withIndex('by_state_and_startedAt', (q) => q.eq('state', 'completed').lt('startedAt', now - RETENTION.runsMs))
           .take(BATCH)
-        const world = await ctx.db.query('swWorldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
+        const world = await ctx.db.query('iaWorldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
         for (const row of rows) {
-          const publication = await ctx.db.query('swLeaderboardPublications').withIndex('by_runId', (q) => q.eq('runId', row._id)).unique()
+          const publication = await ctx.db.query('iaLeaderboardPublications').withIndex('by_runId', (q) => q.eq('runId', row._id)).unique()
           if (publication || row._id === world?.activeRunId) continue
           await ctx.db.delete(row._id)
           deleted += 1

@@ -160,19 +160,19 @@ D55 log density: verify the closer story/stat rows with ordinary and wrapping de
 
 D56 adaptive log capacity: check ordinary and saturated short/long histories, marked names, wide hero names, long ordinal ranks, missing time/change metadata, absent QR, empty history and attention states. Wait for final framework readiness, then verify every displayed story/stat pair remains above the reserved footer/rank line and the next hidden complete entry would not fit. Inspect the X full bag caption/divider, recap below the unchanged QR and narrow rank column. Scope the fitter to its own mashup view. [Candidate evidence](evidence/adaptive-log-layout.md) records 256 OG/X checks; an authorized production server render remains required.
 
-## Slow Cast proofs (D115)
+## Idle Angler proofs (D115)
 
 | Area | Where |
 | --- | --- |
-| Pure core: conditions, forecast, bait use, landing, release, travel, pause, articles | `tests/slowcast/core.test.ts` |
-| Balance gates (13) and harness invariants | `pnpm balance:slowcast`, `tests/slowcast/harness.test.ts`, [evidence](evidence/slow-cast-balance.md) |
-| Art, payload and markup (escaping, no inline style, every state renders) | `tests/slowcast/device.test.ts` |
-| Layout matrix (OG, X, BWRY, both orientations, title bar codes) | `pnpm preview:slowcast` then `pnpm sweep:trmnl <out> --filter sc-`, [evidence](evidence/slow-cast-device.md) |
-| Tick on the shared engine, publication, retention | `tests/convex/slowcast-tick.test.ts` |
-| Intents and receipts | `tests/convex/slowcast-intents.test.ts` |
-| Lifecycle, hidden-game install gate, per-game management | `tests/convex/slowcast-lifecycle.test.ts` |
-| Deletion by game and account, shared alert devices | `tests/convex/slowcast-deletion.test.ts` |
-| Achievements, fly box, alerts, operator controls | `tests/convex/slowcast-achievements.test.ts`, `slowcast-flies.test.ts`, `slowcast-alerts.test.ts`, `slowcast-operations.test.ts` |
+| Pure core: conditions, forecast, bait use, landing, release, travel, pause, articles | `tests/idle-angler/core.test.ts` |
+| Balance gates (13) and harness invariants | `pnpm balance:idle-angler`, `tests/idle-angler/harness.test.ts`, [evidence](evidence/idle-angler-balance.md) |
+| Art, payload and markup (escaping, no inline style, every state renders) | `tests/idle-angler/device.test.ts` |
+| Layout matrix (OG, X, BWRY, both orientations, title bar codes) | `pnpm preview:idle-angler` then `pnpm sweep:trmnl <out> --filter ia-`, [evidence](evidence/idle-angler-device.md) |
+| Tick on the shared engine, publication, retention | `tests/convex/idle-angler-tick.test.ts` |
+| Intents and receipts | `tests/convex/idle-angler-intents.test.ts` |
+| Lifecycle, hidden-game install gate, per-game management | `tests/convex/idle-angler-lifecycle.test.ts` |
+| Deletion by game and account, shared alert devices | `tests/convex/idle-angler-deletion.test.ts` |
+| Achievements, fly box, alerts, operator controls | `tests/convex/idle-angler-achievements.test.ts`, `idle-angler-flies.test.ts`, `idle-angler-alerts.test.ts`, `idle-angler-operations.test.ts` |
 | Game lifecycle status and shared profile | `tests/convex/game-lifecycle.test.ts`, `tests/convex/platform-profile.test.ts` |
 
 The sweep's title bar check (added for D115) fails any title bar text or icon outside the view and any truncated `.instance` text, since that is where weekly codes appear.

@@ -25,7 +25,7 @@ export function deriveNamedSeeds<S extends string>(worldSeed: string, subjectId:
 
 /**
  * Shared forecast seed: the same hash family over [worldSeed, 'forecast', scopeId, blockKey], with no
- * subject, so everyone at one water in one block draws the same weather (slow-cast.md).
+ * subject, so everyone at one water in one block draws the same weather (idle-angler.md).
  */
 export function deriveSharedSeed(worldSeed: string, scopeId: string, blockKey: number): number {
   const bytes = new TextEncoder().encode(JSON.stringify([worldSeed, 'forecast', scopeId, blockKey]))

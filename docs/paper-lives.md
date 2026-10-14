@@ -4,7 +4,7 @@ Proposed 2026-10-13 for Barry's review and widened the same day at his request (
 
 Settled with Barry on 2026-10-13 before drafting: the name Paper Lives; a year that never waits on the player (a minimum length, then the player ages up, or the year closes itself with safe defaults); early childhood compressed; at most one decision a year; death as the payoff rather than a loss, with the next life as the deceased's child or a stranger; a warm and dry tone rather than BitLife's crime and prison; authored, deterministic content; the game to reuse the shared engine wherever it fits while staying distinct from the other two; and a large MVP with later versions defined.
 
-The game reuses what [Slow Cast](slow-cast.md) lifted out of Desk Crawler: the quarter-hour tick, the pure seeded simulator, bounded cohort reads, receipted intents, achievements over counters, the hourly publication, immutable record boards, the TRMNL lifecycle with the `hidden`, `preview` and `live` status, push alerts, the weekly device code, follows (D143) and the two-level deletion boundary. Where this spec says "as Desk Crawler" or "as Slow Cast", the named document is the authority and Paper Lives inherits the rule unchanged.
+The game reuses what [Idle Angler](idle-angler.md) lifted out of Desk Crawler: the quarter-hour tick, the pure seeded simulator, bounded cohort reads, receipted intents, achievements over counters, the hourly publication, immutable record boards, the TRMNL lifecycle with the `hidden`, `preview` and `live` status, push alerts, the weekly device code, follows (D143) and the two-level deletion boundary. Where this spec says "as Desk Crawler" or "as Idle Angler", the named document is the authority and Paper Lives inherits the rule unchanged.
 
 ## The idea in one paragraph
 
@@ -12,7 +12,7 @@ Every player has one life at a time. A character is born with a name, two traits
 
 ## How it is different from the other two games
 
-| | Desk Crawler | Slow Cast | Paper Lives |
+| | Desk Crawler | Idle Angler | Paper Lives |
 | --- | --- | --- | --- |
 | Progress | A hero that levels for ever | A logbook that fills for months | Finite lives, then the next generation |
 | The player's role | Gear, floors, stances, raids | Setup: water, bait, selling | Decisions, and the choice of when a year ends |
@@ -142,7 +142,7 @@ Tone: warm, dry, concrete, in the register of a kind diary. Short lines (device 
 
 ## Leaderboards
 
-Two record boards on the Slow Cast immutable-record path (`swCatchRecords`, D116), from `lifeRecords` only, so a living character never ranks and nothing is scanned at a tick:
+Two record boards on the Idle Angler immutable-record path (`iaCatchRecords`, D116), from `lifeRecords` only, so a living character never ranks and nothing is scanned at a tick:
 
 | Board | Measure | Windows |
 | --- | --- | --- |
@@ -210,12 +210,12 @@ Consent-gated, as the other games: `paper lives started` (server, per life, with
 
 ## Data
 
-New tables prefixed `pl`, as Slow Cast's `sw`. Shared tables gain the game where they already carry a slug.
+New tables prefixed `pl`, as Idle Angler's `ia`. Shared tables gain the game where they already carry a slug.
 
 - `paperLivesProfiles` `{ userId, lifeId }`, one per user.
 - `lives`: owner, name, pronouns, traits (2), generation, age, stage, season, status, stats, gold, education, job, jobSince, home, hobby, pet?, people (at most 12), flags (a bounded set of string ids, at most 48), pendingDecision?, ageUpRequested?, yearStartedTick, yearElapsedTicks, recap, will?, counters, publicProfile, activation fields, lastTick, eligibleFromTick, createdAt. Indexes `by_owner`, `by_createdAt`. The ended life stays the current row until `life.begin` replaces it in place (same id, new life fields, `previousLifeRecordId`), so the profile pointer never changes.
 - `lifeRecords`: the finished-life summary above with `parentRecordId?` and `ordinal` (the account's nth life); indexes `by_owner_and_endedAt`, `by_owner_and_ordinal`. One row per life, written once; bounded per account by time (a life takes a week at least).
-- `plLifeBoards`: the two record boards' inputs (owner, recordId, age, peakMoney, endedAt, week), the `swCatchRecords` shape; written once at death.
+- `plLifeBoards`: the two record boards' inputs (owner, recordId, age, peakMoney, endedAt, week), the `iaCatchRecords` shape; written once at death.
 - `plPhotos`: owner, lifeRecordId? (set when that life ends), name, age, traits, pet, week; index `by_owner`. One a week, plus the free stage portraits as rows with `week` unset (at most six per life).
 - `plTickLogs`, `plWorldState`, `plSimulationRuns`, `plSimulationFailures`, `plLeaderboardPublications`, `plAchievements`, `plAchievementStats`: the engine shapes with `heroId` read as the life id (the S0 convention).
 - Shared: `users` (plus a `paperLivesAlerts` block), the TRMNL tables (`gameSlug` widens), `follows` (already per account), `operationReceipts`, `rateLimitBuckets`, `pushSubscriptions`, `alertOutbox`, `gameDeletionJobs`, `platformGames`.
@@ -226,18 +226,18 @@ Deleting Paper Lives progress revokes its installations, denies its authority an
 
 - **Package** `packages/paper-lives` with `content`, `sim`, `art`, `templates` and `payload` subpath exports, pure and network-free.
 - **Backend module** `apps/backend/convex/paperLives/` owning the `pl` tables, its crons, its screen route and its intents. Crons ten minutes into each quarter-hour (UTC minutes 10, 25, 40, 55), so the three worlds never tick in the same slot; its own watchdog, run guards and operations card.
-- **Shared engine.** Everything Paper Lives needs from the engine already exists after Slow Cast's S0: the runner, publication, world singleton, the lifecycle hooks (`lib/gameHooks.ts`), the deletion jobs, the keepsake code minting, the record-board shape and follows. One addition: the engine's publication must allow a game with no score windows at all (Slow Cast still writes empty ones); if that is awkward, Paper Lives writes empty windows as Slow Cast does and the cleanup is a later tidy.
+- **Shared engine.** Everything Paper Lives needs from the engine already exists after Idle Angler's S0: the runner, publication, world singleton, the lifecycle hooks (`lib/gameHooks.ts`), the deletion jobs, the keepsake code minting, the record-board shape and follows. One addition: the engine's publication must allow a game with no score windows at all (Idle Angler still writes empty ones); if that is awkward, Paper Lives writes empty windows as Idle Angler does and the cleanup is a later tidy.
 - **Registry.** `packages/platform` adds `paper-lives` to `games` and `GameSlug` with `defaultStatus: 'hidden'`; `clientIdEnv` is `TRMNL_CLIENT_ID_PAPER_LIVES`.
-- **Lifecycle status.** `hidden` while built (admin-only routes, crons on an empty world), `preview` for the coming-soon tile once the portraits exist, `live` on marketplace approval, as Slow Cast.
+- **Lifecycle status.** `hidden` while built (admin-only routes, crons on an empty world), `preview` for the coming-soon tile once the portraits exist, `live` on marketplace approval, as Idle Angler.
 - **Intents.** `life.choose`, `life.ageUp`, `life.rename` and `life.setPronouns` (first year only), `life.begin`, `life.pause`, `life.resume`, `life.setPublicProfile`, `photos.claim`, `connections.disconnect`; receipted, rate-limited and owner-checked under the [common intent contract](api.md#common-intent-contract). Follows reuse `follows.*`.
 
 ## TRMNL
 
-A separate marketplace plugin with its own OAuth client, listing image, knowledge-base URL and install and manage routes under `/connect/trmnl/paper-lives/`; the same install → Save → activation → uninstall tombstone lifecycle. Refresh every 15 minutes offered as the fastest; nothing in the game depends on it. Submission is a separate authorized action after Slow Cast's listing, so the reviewer sees a platform with two live games.
+A separate marketplace plugin with its own OAuth client, listing image, knowledge-base URL and install and manage routes under `/connect/trmnl/paper-lives/`; the same install → Save → activation → uninstall tombstone lifecycle. Refresh every 15 minutes offered as the fastest; nothing in the game depends on it. Submission is a separate authorized action after Idle Angler's listing, so the reviewer sees a platform with two live games.
 
 ## Art
 
-Six stage portraits at one size with trait layers (hair, glasses, old-age hat or scarf), six pets drawn beside the portrait, a frame for the memorial, a camera glyph for photos, stat bar marks and a set of story glyphs (family, work, money, health, heart, paw, star for remarkable, a candle for a death, a ring, a house, a pram). All 1-bit and hand-authored on the engine's art primitives; the companion tones the same drawings in colour. Still about a fifth of Slow Cast's art count.
+Six stage portraits at one size with trait layers (hair, glasses, old-age hat or scarf), six pets drawn beside the portrait, a frame for the memorial, a camera glyph for photos, stat bar marks and a set of story glyphs (family, work, money, health, heart, paw, star for remarkable, a candle for a death, a ring, a house, a pram). All 1-bit and hand-authored on the engine's art primitives; the companion tones the same drawings in colour. Still about a fifth of Idle Angler's art count.
 
 ## Work slices
 
@@ -264,7 +264,7 @@ Each is a minor release on the roadmap's terms: additive schema and content unde
 | v1.3 Eras | When a life is set | A life is born into an era (1950s, 1970s, 1990s, today) drawn at birth or chosen for a stranger, with era-flavoured jobs, events and lines, and a child's life moves into the next era. Era achievements. Content only; no rule changes |
 | v1.4 Challenges | Lives with a brief | Start conditions for a stranger (born into money, born with a trait pair, a hard winter), and a weekly **shared life**: everyone who starts it that week draws the same birth and the same events, so decisions alone make the lives differ; a board of that week's shared lives by age and happiness |
 | v2.0 Dynasty | The family as the unit | The estate (a house, savings and heirlooms that pass down with the will and a family name's reputation), a family business a child can take over, a named town with places that persist across generations (the school, the clinic, the pub, the graveyard with every ancestor), playing as any living descendant including grandchildren, and a family-tree view across accounts for pen-pal marriages. The major: it changes what a life starts with |
-| Later | Longer lives | A second language for the content, names from the player's own pool, more pets and hobbies, voice lines on the companion, cosmetic nods between games (a hero's cardigan in a wardrobe decision, a fishing hobby that reads Slow Cast's logbook) |
+| Later | Longer lives | A second language for the content, names from the player's own pool, more pets and hobbies, voice lines on the companion, cosmetic nods between games (a hero's cardigan in a wardrobe decision, a fishing hobby that reads Idle Angler's logbook) |
 
 ## Not in the MVP
 
@@ -280,6 +280,6 @@ Barry asked on 2026-10-13 for a large MVP with later versions defined, so the op
 
 1. **Year lengths stay at two and eight hours.** A four-hour close would default more decisions overnight for a two-week passive life; the week-long active life is the pace Barry asked for, and the close only matters to the absent.
 2. **The first name is editable in the first year, and pronouns are chosen.** The Desk Crawler hero-name rules already carry the moderation; "my character" is worth the surface. Pronouns are a content slot, not a stat, and the device avoids them.
-3. **Two record boards ship**, longest lives and fortunes, on the Slow Cast record path, so no tick scans anything and only finished lives rank.
+3. **Two record boards ship**, longest lives and fortunes, on the Idle Angler record path, so no tick scans anything and only finished lives rank.
 4. **Traits, hobbies, pets, grandchildren, the will, the family tree, public life pages and the Following card are in the MVP.** Each is content and bounded document fields on the same tick order; none adds a stream beyond the six.
-5. **Order.** L1 (content and core) starts whenever Barry says, in parallel with the rest of v2.0 Depth, since it touches nothing shared; L2 onward waits for the engine tidy noted in Architecture; the listing waits for Slow Cast's.
+5. **Order.** L1 (content and core) starts whenever Barry says, in parallel with the rest of v2.0 Depth, since it touches nothing shared; L2 onward waits for the engine tidy noted in Architecture; the listing waits for Idle Angler's.

@@ -1,0 +1,53 @@
+import { starterAngler, FIRST_LOG } from '@trmnl-games/idle-angler/sim'
+import type { Doc, Id } from '../_generated/dataModel'
+import type { MutationCtx } from '../_generated/server'
+import { internal } from '../_generated/api'
+import { getOrCreateEngineWorld } from '../lib/engine/world'
+import { currentAngler, setCurrentAngler } from './profile'
+import { IDLE_ANGLER_RUNTIME } from './runtime'
+
+/**
+ * Idle Angler's half of the TRMNL lifecycle (idle-angler.md "Angler and starting state"). An angler is prepared
+ * pending at install and activated once by a confirmed saved installation of the Idle Angler plugin. It has no
+ * name of its own: the public alias is its name.
+ */
+export async function prepareAngler(ctx: MutationCtx, user: Doc<'users'>, now: number): Promise<Id<'anglers'>> {
+  const world = await getOrCreateEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
+  const content = IDLE_ANGLER_RUNTIME.content(world.activeContentVersion)!
+  const base = starterAngler(content, world.currentTick)
+  const anglerId = await ctx.db.insert('anglers', {
+    userId: user._id,
+    createdAt: now,
+    isActive: true,
+    activationState: 'pending_trmnl',
+    gold: base.gold,
+    status: base.status,
+    waterId: base.waterId,
+    rodTier: base.rodTier,
+    coolerTier: base.coolerTier,
+    ...(base.baitOnHook === undefined ? {} : { baitOnHook: base.baitOnHook }),
+    bait: base.bait as Record<string, number>,
+    access: [],
+    logbook: {},
+    counters: base.counters,
+    quietTicks: 0,
+    eligibleFromTick: world.currentTick + 1,
+    lastTick: world.currentTick,
+    lastProgressTick: world.currentTick,
+    logSequence: 1,
+    simulationState: 'healthy',
+  })
+  await setCurrentAngler(ctx, user, anglerId)
+  await ctx.db.insert('iaTickLogs', { anglerId, source: 'lifecycle', sequence: 1, at: now, kind: 'system', summary: FIRST_LOG, detail: { v: 1, operation: 'angler_created' }, deltas: { gold: 0 } })
+  return anglerId
+}
+
+/** First activation baseline: the next Idle Angler tick, no catch-up. Never resets an active angler. */
+export async function activateAngler(ctx: MutationCtx, userId: Id<'users'>, now: number): Promise<void> {
+  const user = await ctx.db.get(userId)
+  const angler = await currentAngler(ctx, user)
+  if (angler === null || angler.activationState === 'active') return
+  const world = await getOrCreateEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
+  await ctx.db.patch(angler._id, { activationState: 'active', activatedAt: now, eligibleFromTick: world.currentTick + 1, lastTick: world.currentTick, lastProgressTick: world.currentTick })
+  if (user?.analyticsConsent === true) await ctx.scheduler.runAfter(0, internal.analytics.captureActivation, { userId, event: 'idle angler started', game: 'idle-angler' })
+}

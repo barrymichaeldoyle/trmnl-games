@@ -205,19 +205,19 @@ Provider events are asynchronous and can arrive more than once or out of order; 
 
 `trmnl.recordReconnectionProof` is internal and accepts identity/timestamp only from the verifying action. Callback/first-screen recovery still cannot authorize revoked tokens for unknown UUIDs. A pending reconnect permits a Save callback acknowledgement without creating state; polling remains 404 until the explicit confirmed scope exists. See [returning flow](trmnl.md#returning-after-deletion-d68).
 
-## Slow Cast (D115)
+## Idle Angler (D115)
 
-Functions live under `slowCast.*` ([spec](slow-cast.md)). Intents use the common contract with receipt scope `slow-cast`:
+Functions live under `idleAngler.*` ([spec](idle-angler.md)). Intents use the common contract with receipt scope `idle-angler`:
 
 | Function | Effect |
 | --- | --- |
-| `slowCast.anglers.sellCatches({ catchIds })` | Sells 1 to 24 chosen fish from the owner's cooler |
-| `slowCast.anglers.buyNextRod`, `buyNextCooler` | Buys the next tier at its fixed price |
-| `slowCast.anglers.buyAccessItem({ access })` | Waders or the Pier Permit |
-| `slowCast.anglers.buyBaitTubs({ bait, tubs })` | Whole tubs up to 72 units of that bait |
-| `slowCast.anglers.chooseBait({ bait })` | The bait on the hook from the next cast |
-| `slowCast.anglers.travelTo({ waterId })` | Moves at the next tick, which casts nothing |
-| `slowCast.anglers.pause`, `resume`, `setPublicProfile` | As Desk Crawler's |
-| `deletion.requestGameDeletion({ gameSlug: 'slow-cast' })` | Deletes Slow Cast progress only |
+| `idleAngler.anglers.sellCatches({ catchIds })` | Sells 1 to 24 chosen fish from the owner's cooler |
+| `idleAngler.anglers.buyNextRod`, `buyNextCooler` | Buys the next tier at its fixed price |
+| `idleAngler.anglers.buyAccessItem({ access })` | Waders or the Pier Permit |
+| `idleAngler.anglers.buyBaitTubs({ bait, tubs })` | Whole tubs up to 72 units of that bait |
+| `idleAngler.anglers.chooseBait({ bait })` | The bait on the hook from the next cast |
+| `idleAngler.anglers.travelTo({ waterId })` | Moves at the next tick, which casts nothing |
+| `idleAngler.anglers.pause`, `resume`, `setPublicProfile` | As Desk Crawler's |
+| `deletion.requestGameDeletion({ gameSlug: 'idle-angler' })` | Deletes Idle Angler progress only |
 
-Queries: `slowCast.anglers.dock` (angler, cooler, bait, shop, forecast, stories), `slowCast.anglers.logbook`, `slowCast.payload.preview`, and `platform.list` (games this viewer can see). Admin: `platform.setGameStatus`.
+Queries: `idleAngler.anglers.dock` (angler, cooler, bait, shop, forecast, stories), `idleAngler.anglers.logbook`, `idleAngler.payload.preview`, and `platform.list` (games this viewer can see). Admin: `platform.setGameStatus`.

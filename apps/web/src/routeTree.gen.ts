@@ -15,23 +15,23 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as DcRouteImport } from './routes/dc'
 import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as IaRouteImport } from './routes/ia'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ScRouteImport } from './routes/sc'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WhatsNewRouteImport } from './routes/whats-new'
 import { Route as AccountDeleteRouteImport } from './routes/account_.delete'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppDeskCrawlerRouteImport } from './routes/app/desk-crawler'
-import { Route as AppSlowCastRouteImport } from './routes/app/slow-cast'
+import { Route as AppIdleAnglerRouteImport } from './routes/app/idle-angler'
 import { Route as DeskCrawlerUnsubscribeRouteImport } from './routes/desk-crawler/unsubscribe'
 import { Route as DeskCrawlerWaitingListRouteImport } from './routes/desk-crawler/waiting-list'
 import { Route as DevDeskCrawlerRouteImport } from './routes/dev/desk-crawler'
 import { Route as DevOgRouteImport } from './routes/dev/og'
 import { Route as GamesDeskCrawlerRouteImport } from './routes/games/desk-crawler'
-import { Route as GamesSlowCastRouteImport } from './routes/games/slow-cast'
+import { Route as GamesIdleAnglerRouteImport } from './routes/games/idle-angler'
 import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
-import { Route as HelpSlowCastRouteImport } from './routes/help/slow-cast'
+import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
 import { Route as AppDeskCrawlerIndexRouteImport } from './routes/app/desk-crawler/index'
 import { Route as AppDeskCrawlerAchievementsRouteImport } from './routes/app/desk-crawler/achievements'
@@ -44,16 +44,18 @@ import { Route as AppDeskCrawlerLogRouteImport } from './routes/app/desk-crawler
 import { Route as AppDeskCrawlerRosterRouteImport } from './routes/app/desk-crawler/roster'
 import { Route as AppDeskCrawlerSettingsRouteImport } from './routes/app/desk-crawler/settings'
 import { Route as AppDeskCrawlerTrmnlRouteImport } from './routes/app/desk-crawler/trmnl'
-import { Route as AppSlowCastIndexRouteImport } from './routes/app/slow-cast/index'
-import { Route as AppSlowCastAchievementsRouteImport } from './routes/app/slow-cast/achievements'
-import { Route as AppSlowCastCoolerRouteImport } from './routes/app/slow-cast/cooler'
-import { Route as AppSlowCastLogbookRouteImport } from './routes/app/slow-cast/logbook'
-import { Route as AppSlowCastRankingsRouteImport } from './routes/app/slow-cast/rankings'
-import { Route as AppSlowCastSettingsRouteImport } from './routes/app/slow-cast/settings'
-import { Route as AppSlowCastShopRouteImport } from './routes/app/slow-cast/shop'
+import { Route as AppIdleAnglerIndexRouteImport } from './routes/app/idle-angler/index'
+import { Route as AppIdleAnglerAchievementsRouteImport } from './routes/app/idle-angler/achievements'
+import { Route as AppIdleAnglerCoolerRouteImport } from './routes/app/idle-angler/cooler'
+import { Route as AppIdleAnglerLogbookRouteImport } from './routes/app/idle-angler/logbook'
+import { Route as AppIdleAnglerRankingsRouteImport } from './routes/app/idle-angler/rankings'
+import { Route as AppIdleAnglerSettingsRouteImport } from './routes/app/idle-angler/settings'
+import { Route as AppIdleAnglerShopRouteImport } from './routes/app/idle-angler/shop'
 import { Route as DeskCrawlerHeroesAliasRouteImport } from './routes/desk-crawler/heroes.$alias'
 import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/connect/trmnl/desk-crawler/install'
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
+import { Route as ConnectTrmnlIdleAnglerInstallRouteImport } from './routes/connect/trmnl/idle-angler/install'
+import { Route as ConnectTrmnlIdleAnglerManageRouteImport } from './routes/connect/trmnl/idle-angler/manage'
 import { Route as ConnectTrmnlSlowCastInstallRouteImport } from './routes/connect/trmnl/slow-cast/install'
 import { Route as ConnectTrmnlSlowCastManageRouteImport } from './routes/connect/trmnl/slow-cast/manage'
 
@@ -87,14 +89,14 @@ const FeedbackRoute = FeedbackRouteImport.update({
   path: '/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IaRoute = IaRouteImport.update({
+  id: '/ia',
+  path: '/ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ScRoute = ScRouteImport.update({
-  id: '/sc',
-  path: '/sc',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -127,9 +129,9 @@ const AppDeskCrawlerRoute = AppDeskCrawlerRouteImport.update({
   path: '/desk-crawler',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSlowCastRoute = AppSlowCastRouteImport.update({
-  id: '/slow-cast',
-  path: '/slow-cast',
+const AppIdleAnglerRoute = AppIdleAnglerRouteImport.update({
+  id: '/idle-angler',
+  path: '/idle-angler',
   getParentRoute: () => AppRoute,
 } as any)
 const DeskCrawlerUnsubscribeRoute = DeskCrawlerUnsubscribeRouteImport.update({
@@ -157,9 +159,9 @@ const GamesDeskCrawlerRoute = GamesDeskCrawlerRouteImport.update({
   path: '/games/desk-crawler',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GamesSlowCastRoute = GamesSlowCastRouteImport.update({
-  id: '/games/slow-cast',
-  path: '/games/slow-cast',
+const GamesIdleAnglerRoute = GamesIdleAnglerRouteImport.update({
+  id: '/games/idle-angler',
+  path: '/games/idle-angler',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpDeskCrawlerRoute = HelpDeskCrawlerRouteImport.update({
@@ -167,9 +169,9 @@ const HelpDeskCrawlerRoute = HelpDeskCrawlerRouteImport.update({
   path: '/help/desk-crawler',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HelpSlowCastRoute = HelpSlowCastRouteImport.update({
-  id: '/help/slow-cast',
-  path: '/help/slow-cast',
+const HelpIdleAnglerRoute = HelpIdleAnglerRouteImport.update({
+  id: '/help/idle-angler',
+  path: '/help/idle-angler',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileAliasRoute = ProfileAliasRouteImport.update({
@@ -235,40 +237,41 @@ const AppDeskCrawlerTrmnlRoute = AppDeskCrawlerTrmnlRouteImport.update({
   path: '/trmnl',
   getParentRoute: () => AppDeskCrawlerRoute,
 } as any)
-const AppSlowCastIndexRoute = AppSlowCastIndexRouteImport.update({
+const AppIdleAnglerIndexRoute = AppIdleAnglerIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppSlowCastRoute,
+  getParentRoute: () => AppIdleAnglerRoute,
 } as any)
-const AppSlowCastAchievementsRoute = AppSlowCastAchievementsRouteImport.update({
-  id: '/achievements',
-  path: '/achievements',
-  getParentRoute: () => AppSlowCastRoute,
-} as any)
-const AppSlowCastCoolerRoute = AppSlowCastCoolerRouteImport.update({
+const AppIdleAnglerAchievementsRoute =
+  AppIdleAnglerAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AppIdleAnglerRoute,
+  } as any)
+const AppIdleAnglerCoolerRoute = AppIdleAnglerCoolerRouteImport.update({
   id: '/cooler',
   path: '/cooler',
-  getParentRoute: () => AppSlowCastRoute,
+  getParentRoute: () => AppIdleAnglerRoute,
 } as any)
-const AppSlowCastLogbookRoute = AppSlowCastLogbookRouteImport.update({
+const AppIdleAnglerLogbookRoute = AppIdleAnglerLogbookRouteImport.update({
   id: '/logbook',
   path: '/logbook',
-  getParentRoute: () => AppSlowCastRoute,
+  getParentRoute: () => AppIdleAnglerRoute,
 } as any)
-const AppSlowCastRankingsRoute = AppSlowCastRankingsRouteImport.update({
+const AppIdleAnglerRankingsRoute = AppIdleAnglerRankingsRouteImport.update({
   id: '/rankings',
   path: '/rankings',
-  getParentRoute: () => AppSlowCastRoute,
+  getParentRoute: () => AppIdleAnglerRoute,
 } as any)
-const AppSlowCastSettingsRoute = AppSlowCastSettingsRouteImport.update({
+const AppIdleAnglerSettingsRoute = AppIdleAnglerSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => AppSlowCastRoute,
+  getParentRoute: () => AppIdleAnglerRoute,
 } as any)
-const AppSlowCastShopRoute = AppSlowCastShopRouteImport.update({
+const AppIdleAnglerShopRoute = AppIdleAnglerShopRouteImport.update({
   id: '/shop',
   path: '/shop',
-  getParentRoute: () => AppSlowCastRoute,
+  getParentRoute: () => AppIdleAnglerRoute,
 } as any)
 const DeskCrawlerHeroesAliasRoute = DeskCrawlerHeroesAliasRouteImport.update({
   id: '/desk-crawler/heroes/$alias',
@@ -285,6 +288,18 @@ const ConnectTrmnlDeskCrawlerManageRoute =
   ConnectTrmnlDeskCrawlerManageRouteImport.update({
     id: '/connect/trmnl/desk-crawler/manage',
     path: '/connect/trmnl/desk-crawler/manage',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ConnectTrmnlIdleAnglerInstallRoute =
+  ConnectTrmnlIdleAnglerInstallRouteImport.update({
+    id: '/connect/trmnl/idle-angler/install',
+    path: '/connect/trmnl/idle-angler/install',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ConnectTrmnlIdleAnglerManageRoute =
+  ConnectTrmnlIdleAnglerManageRouteImport.update({
+    id: '/connect/trmnl/idle-angler/manage',
+    path: '/connect/trmnl/idle-angler/manage',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ConnectTrmnlSlowCastInstallRoute =
@@ -307,22 +322,22 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
+  '/ia': typeof IaRoute
   '/privacy': typeof PrivacyRoute
-  '/sc': typeof ScRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
   '/account/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
-  '/app/slow-cast': typeof AppSlowCastRouteWithChildren
+  '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
-  '/games/slow-cast': typeof GamesSlowCastRoute
+  '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
-  '/help/slow-cast': typeof HelpSlowCastRoute
+  '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -335,17 +350,19 @@ export interface FileRoutesByFullPath {
   '/app/desk-crawler/roster': typeof AppDeskCrawlerRosterRoute
   '/app/desk-crawler/settings': typeof AppDeskCrawlerSettingsRoute
   '/app/desk-crawler/trmnl': typeof AppDeskCrawlerTrmnlRoute
-  '/app/slow-cast/achievements': typeof AppSlowCastAchievementsRoute
-  '/app/slow-cast/cooler': typeof AppSlowCastCoolerRoute
-  '/app/slow-cast/logbook': typeof AppSlowCastLogbookRoute
-  '/app/slow-cast/rankings': typeof AppSlowCastRankingsRoute
-  '/app/slow-cast/settings': typeof AppSlowCastSettingsRoute
-  '/app/slow-cast/shop': typeof AppSlowCastShopRoute
+  '/app/idle-angler/achievements': typeof AppIdleAnglerAchievementsRoute
+  '/app/idle-angler/cooler': typeof AppIdleAnglerCoolerRoute
+  '/app/idle-angler/logbook': typeof AppIdleAnglerLogbookRoute
+  '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
+  '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
+  '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
-  '/app/slow-cast/': typeof AppSlowCastIndexRoute
+  '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
+  '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
+  '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
   '/connect/trmnl/slow-cast/install': typeof ConnectTrmnlSlowCastInstallRoute
   '/connect/trmnl/slow-cast/manage': typeof ConnectTrmnlSlowCastManageRoute
 }
@@ -355,8 +372,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
+  '/ia': typeof IaRoute
   '/privacy': typeof PrivacyRoute
-  '/sc': typeof ScRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
@@ -366,9 +383,9 @@ export interface FileRoutesByTo {
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
-  '/games/slow-cast': typeof GamesSlowCastRoute
+  '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
-  '/help/slow-cast': typeof HelpSlowCastRoute
+  '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -381,17 +398,19 @@ export interface FileRoutesByTo {
   '/app/desk-crawler/roster': typeof AppDeskCrawlerRosterRoute
   '/app/desk-crawler/settings': typeof AppDeskCrawlerSettingsRoute
   '/app/desk-crawler/trmnl': typeof AppDeskCrawlerTrmnlRoute
-  '/app/slow-cast/achievements': typeof AppSlowCastAchievementsRoute
-  '/app/slow-cast/cooler': typeof AppSlowCastCoolerRoute
-  '/app/slow-cast/logbook': typeof AppSlowCastLogbookRoute
-  '/app/slow-cast/rankings': typeof AppSlowCastRankingsRoute
-  '/app/slow-cast/settings': typeof AppSlowCastSettingsRoute
-  '/app/slow-cast/shop': typeof AppSlowCastShopRoute
+  '/app/idle-angler/achievements': typeof AppIdleAnglerAchievementsRoute
+  '/app/idle-angler/cooler': typeof AppIdleAnglerCoolerRoute
+  '/app/idle-angler/logbook': typeof AppIdleAnglerLogbookRoute
+  '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
+  '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
+  '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler': typeof AppDeskCrawlerIndexRoute
-  '/app/slow-cast': typeof AppSlowCastIndexRoute
+  '/app/idle-angler': typeof AppIdleAnglerIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
+  '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
+  '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
   '/connect/trmnl/slow-cast/install': typeof ConnectTrmnlSlowCastInstallRoute
   '/connect/trmnl/slow-cast/manage': typeof ConnectTrmnlSlowCastManageRoute
 }
@@ -403,22 +422,22 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
+  '/ia': typeof IaRoute
   '/privacy': typeof PrivacyRoute
-  '/sc': typeof ScRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
   '/account_/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
-  '/app/slow-cast': typeof AppSlowCastRouteWithChildren
+  '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
-  '/games/slow-cast': typeof GamesSlowCastRoute
+  '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
-  '/help/slow-cast': typeof HelpSlowCastRoute
+  '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -431,17 +450,19 @@ export interface FileRoutesById {
   '/app/desk-crawler/roster': typeof AppDeskCrawlerRosterRoute
   '/app/desk-crawler/settings': typeof AppDeskCrawlerSettingsRoute
   '/app/desk-crawler/trmnl': typeof AppDeskCrawlerTrmnlRoute
-  '/app/slow-cast/achievements': typeof AppSlowCastAchievementsRoute
-  '/app/slow-cast/cooler': typeof AppSlowCastCoolerRoute
-  '/app/slow-cast/logbook': typeof AppSlowCastLogbookRoute
-  '/app/slow-cast/rankings': typeof AppSlowCastRankingsRoute
-  '/app/slow-cast/settings': typeof AppSlowCastSettingsRoute
-  '/app/slow-cast/shop': typeof AppSlowCastShopRoute
+  '/app/idle-angler/achievements': typeof AppIdleAnglerAchievementsRoute
+  '/app/idle-angler/cooler': typeof AppIdleAnglerCoolerRoute
+  '/app/idle-angler/logbook': typeof AppIdleAnglerLogbookRoute
+  '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
+  '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
+  '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
-  '/app/slow-cast/': typeof AppSlowCastIndexRoute
+  '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
+  '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
+  '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
   '/connect/trmnl/slow-cast/install': typeof ConnectTrmnlSlowCastInstallRoute
   '/connect/trmnl/slow-cast/manage': typeof ConnectTrmnlSlowCastManageRoute
 }
@@ -454,22 +475,22 @@ export interface FileRouteTypes {
     | '/app'
     | '/dc'
     | '/feedback'
+    | '/ia'
     | '/privacy'
-    | '/sc'
     | '/support'
     | '/terms'
     | '/whats-new'
     | '/account/delete'
     | '/app/desk-crawler'
-    | '/app/slow-cast'
+    | '/app/idle-angler'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
     | '/games/desk-crawler'
-    | '/games/slow-cast'
+    | '/games/idle-angler'
     | '/help/desk-crawler'
-    | '/help/slow-cast'
+    | '/help/idle-angler'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -482,17 +503,19 @@ export interface FileRouteTypes {
     | '/app/desk-crawler/roster'
     | '/app/desk-crawler/settings'
     | '/app/desk-crawler/trmnl'
-    | '/app/slow-cast/achievements'
-    | '/app/slow-cast/cooler'
-    | '/app/slow-cast/logbook'
-    | '/app/slow-cast/rankings'
-    | '/app/slow-cast/settings'
-    | '/app/slow-cast/shop'
+    | '/app/idle-angler/achievements'
+    | '/app/idle-angler/cooler'
+    | '/app/idle-angler/logbook'
+    | '/app/idle-angler/rankings'
+    | '/app/idle-angler/settings'
+    | '/app/idle-angler/shop'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
-    | '/app/slow-cast/'
+    | '/app/idle-angler/'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
+    | '/connect/trmnl/idle-angler/install'
+    | '/connect/trmnl/idle-angler/manage'
     | '/connect/trmnl/slow-cast/install'
     | '/connect/trmnl/slow-cast/manage'
   fileRoutesByTo: FileRoutesByTo
@@ -502,8 +525,8 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dc'
     | '/feedback'
+    | '/ia'
     | '/privacy'
-    | '/sc'
     | '/support'
     | '/terms'
     | '/whats-new'
@@ -513,9 +536,9 @@ export interface FileRouteTypes {
     | '/dev/desk-crawler'
     | '/dev/og'
     | '/games/desk-crawler'
-    | '/games/slow-cast'
+    | '/games/idle-angler'
     | '/help/desk-crawler'
-    | '/help/slow-cast'
+    | '/help/idle-angler'
     | '/profile/$alias'
     | '/app'
     | '/app/desk-crawler/achievements'
@@ -528,17 +551,19 @@ export interface FileRouteTypes {
     | '/app/desk-crawler/roster'
     | '/app/desk-crawler/settings'
     | '/app/desk-crawler/trmnl'
-    | '/app/slow-cast/achievements'
-    | '/app/slow-cast/cooler'
-    | '/app/slow-cast/logbook'
-    | '/app/slow-cast/rankings'
-    | '/app/slow-cast/settings'
-    | '/app/slow-cast/shop'
+    | '/app/idle-angler/achievements'
+    | '/app/idle-angler/cooler'
+    | '/app/idle-angler/logbook'
+    | '/app/idle-angler/rankings'
+    | '/app/idle-angler/settings'
+    | '/app/idle-angler/shop'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler'
-    | '/app/slow-cast'
+    | '/app/idle-angler'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
+    | '/connect/trmnl/idle-angler/install'
+    | '/connect/trmnl/idle-angler/manage'
     | '/connect/trmnl/slow-cast/install'
     | '/connect/trmnl/slow-cast/manage'
   id:
@@ -549,22 +574,22 @@ export interface FileRouteTypes {
     | '/app'
     | '/dc'
     | '/feedback'
+    | '/ia'
     | '/privacy'
-    | '/sc'
     | '/support'
     | '/terms'
     | '/whats-new'
     | '/account_/delete'
     | '/app/desk-crawler'
-    | '/app/slow-cast'
+    | '/app/idle-angler'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
     | '/games/desk-crawler'
-    | '/games/slow-cast'
+    | '/games/idle-angler'
     | '/help/desk-crawler'
-    | '/help/slow-cast'
+    | '/help/idle-angler'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -577,17 +602,19 @@ export interface FileRouteTypes {
     | '/app/desk-crawler/roster'
     | '/app/desk-crawler/settings'
     | '/app/desk-crawler/trmnl'
-    | '/app/slow-cast/achievements'
-    | '/app/slow-cast/cooler'
-    | '/app/slow-cast/logbook'
-    | '/app/slow-cast/rankings'
-    | '/app/slow-cast/settings'
-    | '/app/slow-cast/shop'
+    | '/app/idle-angler/achievements'
+    | '/app/idle-angler/cooler'
+    | '/app/idle-angler/logbook'
+    | '/app/idle-angler/rankings'
+    | '/app/idle-angler/settings'
+    | '/app/idle-angler/shop'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
-    | '/app/slow-cast/'
+    | '/app/idle-angler/'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
+    | '/connect/trmnl/idle-angler/install'
+    | '/connect/trmnl/idle-angler/manage'
     | '/connect/trmnl/slow-cast/install'
     | '/connect/trmnl/slow-cast/manage'
   fileRoutesById: FileRoutesById
@@ -599,8 +626,8 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   DcRoute: typeof DcRoute
   FeedbackRoute: typeof FeedbackRoute
+  IaRoute: typeof IaRoute
   PrivacyRoute: typeof PrivacyRoute
-  ScRoute: typeof ScRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   WhatsNewRoute: typeof WhatsNewRoute
@@ -610,13 +637,15 @@ export interface RootRouteChildren {
   DevDeskCrawlerRoute: typeof DevDeskCrawlerRoute
   DevOgRoute: typeof DevOgRoute
   GamesDeskCrawlerRoute: typeof GamesDeskCrawlerRoute
-  GamesSlowCastRoute: typeof GamesSlowCastRoute
+  GamesIdleAnglerRoute: typeof GamesIdleAnglerRoute
   HelpDeskCrawlerRoute: typeof HelpDeskCrawlerRoute
-  HelpSlowCastRoute: typeof HelpSlowCastRoute
+  HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
   ProfileAliasRoute: typeof ProfileAliasRoute
   DeskCrawlerHeroesAliasRoute: typeof DeskCrawlerHeroesAliasRoute
   ConnectTrmnlDeskCrawlerInstallRoute: typeof ConnectTrmnlDeskCrawlerInstallRoute
   ConnectTrmnlDeskCrawlerManageRoute: typeof ConnectTrmnlDeskCrawlerManageRoute
+  ConnectTrmnlIdleAnglerInstallRoute: typeof ConnectTrmnlIdleAnglerInstallRoute
+  ConnectTrmnlIdleAnglerManageRoute: typeof ConnectTrmnlIdleAnglerManageRoute
   ConnectTrmnlSlowCastInstallRoute: typeof ConnectTrmnlSlowCastInstallRoute
   ConnectTrmnlSlowCastManageRoute: typeof ConnectTrmnlSlowCastManageRoute
 }
@@ -665,18 +694,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ia': {
+      id: '/ia'
+      path: '/ia'
+      fullPath: '/ia'
+      preLoaderRoute: typeof IaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sc': {
-      id: '/sc'
-      path: '/sc'
-      fullPath: '/sc'
-      preLoaderRoute: typeof ScRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -721,11 +750,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDeskCrawlerRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/slow-cast': {
-      id: '/app/slow-cast'
-      path: '/slow-cast'
-      fullPath: '/app/slow-cast'
-      preLoaderRoute: typeof AppSlowCastRouteImport
+    '/app/idle-angler': {
+      id: '/app/idle-angler'
+      path: '/idle-angler'
+      fullPath: '/app/idle-angler'
+      preLoaderRoute: typeof AppIdleAnglerRouteImport
       parentRoute: typeof AppRoute
     }
     '/desk-crawler/unsubscribe': {
@@ -763,11 +792,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesDeskCrawlerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/games/slow-cast': {
-      id: '/games/slow-cast'
-      path: '/games/slow-cast'
-      fullPath: '/games/slow-cast'
-      preLoaderRoute: typeof GamesSlowCastRouteImport
+    '/games/idle-angler': {
+      id: '/games/idle-angler'
+      path: '/games/idle-angler'
+      fullPath: '/games/idle-angler'
+      preLoaderRoute: typeof GamesIdleAnglerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help/desk-crawler': {
@@ -777,11 +806,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpDeskCrawlerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/help/slow-cast': {
-      id: '/help/slow-cast'
-      path: '/help/slow-cast'
-      fullPath: '/help/slow-cast'
-      preLoaderRoute: typeof HelpSlowCastRouteImport
+    '/help/idle-angler': {
+      id: '/help/idle-angler'
+      path: '/help/idle-angler'
+      fullPath: '/help/idle-angler'
+      preLoaderRoute: typeof HelpIdleAnglerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$alias': {
@@ -868,54 +897,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDeskCrawlerTrmnlRouteImport
       parentRoute: typeof AppDeskCrawlerRoute
     }
-    '/app/slow-cast/': {
-      id: '/app/slow-cast/'
+    '/app/idle-angler/': {
+      id: '/app/idle-angler/'
       path: '/'
-      fullPath: '/app/slow-cast/'
-      preLoaderRoute: typeof AppSlowCastIndexRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/'
+      preLoaderRoute: typeof AppIdleAnglerIndexRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
-    '/app/slow-cast/achievements': {
-      id: '/app/slow-cast/achievements'
+    '/app/idle-angler/achievements': {
+      id: '/app/idle-angler/achievements'
       path: '/achievements'
-      fullPath: '/app/slow-cast/achievements'
-      preLoaderRoute: typeof AppSlowCastAchievementsRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/achievements'
+      preLoaderRoute: typeof AppIdleAnglerAchievementsRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
-    '/app/slow-cast/cooler': {
-      id: '/app/slow-cast/cooler'
+    '/app/idle-angler/cooler': {
+      id: '/app/idle-angler/cooler'
       path: '/cooler'
-      fullPath: '/app/slow-cast/cooler'
-      preLoaderRoute: typeof AppSlowCastCoolerRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/cooler'
+      preLoaderRoute: typeof AppIdleAnglerCoolerRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
-    '/app/slow-cast/logbook': {
-      id: '/app/slow-cast/logbook'
+    '/app/idle-angler/logbook': {
+      id: '/app/idle-angler/logbook'
       path: '/logbook'
-      fullPath: '/app/slow-cast/logbook'
-      preLoaderRoute: typeof AppSlowCastLogbookRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/logbook'
+      preLoaderRoute: typeof AppIdleAnglerLogbookRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
-    '/app/slow-cast/rankings': {
-      id: '/app/slow-cast/rankings'
+    '/app/idle-angler/rankings': {
+      id: '/app/idle-angler/rankings'
       path: '/rankings'
-      fullPath: '/app/slow-cast/rankings'
-      preLoaderRoute: typeof AppSlowCastRankingsRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/rankings'
+      preLoaderRoute: typeof AppIdleAnglerRankingsRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
-    '/app/slow-cast/settings': {
-      id: '/app/slow-cast/settings'
+    '/app/idle-angler/settings': {
+      id: '/app/idle-angler/settings'
       path: '/settings'
-      fullPath: '/app/slow-cast/settings'
-      preLoaderRoute: typeof AppSlowCastSettingsRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/settings'
+      preLoaderRoute: typeof AppIdleAnglerSettingsRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
-    '/app/slow-cast/shop': {
-      id: '/app/slow-cast/shop'
+    '/app/idle-angler/shop': {
+      id: '/app/idle-angler/shop'
       path: '/shop'
-      fullPath: '/app/slow-cast/shop'
-      preLoaderRoute: typeof AppSlowCastShopRouteImport
-      parentRoute: typeof AppSlowCastRoute
+      fullPath: '/app/idle-angler/shop'
+      preLoaderRoute: typeof AppIdleAnglerShopRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
     }
     '/desk-crawler/heroes/$alias': {
       id: '/desk-crawler/heroes/$alias'
@@ -936,6 +965,20 @@ declare module '@tanstack/react-router' {
       path: '/connect/trmnl/desk-crawler/manage'
       fullPath: '/connect/trmnl/desk-crawler/manage'
       preLoaderRoute: typeof ConnectTrmnlDeskCrawlerManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect/trmnl/idle-angler/install': {
+      id: '/connect/trmnl/idle-angler/install'
+      path: '/connect/trmnl/idle-angler/install'
+      fullPath: '/connect/trmnl/idle-angler/install'
+      preLoaderRoute: typeof ConnectTrmnlIdleAnglerInstallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect/trmnl/idle-angler/manage': {
+      id: '/connect/trmnl/idle-angler/manage'
+      path: '/connect/trmnl/idle-angler/manage'
+      fullPath: '/connect/trmnl/idle-angler/manage'
+      preLoaderRoute: typeof ConnectTrmnlIdleAnglerManageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/connect/trmnl/slow-cast/install': {
@@ -987,39 +1030,39 @@ const AppDeskCrawlerRouteWithChildren = AppDeskCrawlerRoute._addFileChildren(
   AppDeskCrawlerRouteChildren,
 )
 
-interface AppSlowCastRouteChildren {
-  AppSlowCastAchievementsRoute: typeof AppSlowCastAchievementsRoute
-  AppSlowCastCoolerRoute: typeof AppSlowCastCoolerRoute
-  AppSlowCastLogbookRoute: typeof AppSlowCastLogbookRoute
-  AppSlowCastRankingsRoute: typeof AppSlowCastRankingsRoute
-  AppSlowCastSettingsRoute: typeof AppSlowCastSettingsRoute
-  AppSlowCastShopRoute: typeof AppSlowCastShopRoute
-  AppSlowCastIndexRoute: typeof AppSlowCastIndexRoute
+interface AppIdleAnglerRouteChildren {
+  AppIdleAnglerAchievementsRoute: typeof AppIdleAnglerAchievementsRoute
+  AppIdleAnglerCoolerRoute: typeof AppIdleAnglerCoolerRoute
+  AppIdleAnglerLogbookRoute: typeof AppIdleAnglerLogbookRoute
+  AppIdleAnglerRankingsRoute: typeof AppIdleAnglerRankingsRoute
+  AppIdleAnglerSettingsRoute: typeof AppIdleAnglerSettingsRoute
+  AppIdleAnglerShopRoute: typeof AppIdleAnglerShopRoute
+  AppIdleAnglerIndexRoute: typeof AppIdleAnglerIndexRoute
 }
 
-const AppSlowCastRouteChildren: AppSlowCastRouteChildren = {
-  AppSlowCastAchievementsRoute: AppSlowCastAchievementsRoute,
-  AppSlowCastCoolerRoute: AppSlowCastCoolerRoute,
-  AppSlowCastLogbookRoute: AppSlowCastLogbookRoute,
-  AppSlowCastRankingsRoute: AppSlowCastRankingsRoute,
-  AppSlowCastSettingsRoute: AppSlowCastSettingsRoute,
-  AppSlowCastShopRoute: AppSlowCastShopRoute,
-  AppSlowCastIndexRoute: AppSlowCastIndexRoute,
+const AppIdleAnglerRouteChildren: AppIdleAnglerRouteChildren = {
+  AppIdleAnglerAchievementsRoute: AppIdleAnglerAchievementsRoute,
+  AppIdleAnglerCoolerRoute: AppIdleAnglerCoolerRoute,
+  AppIdleAnglerLogbookRoute: AppIdleAnglerLogbookRoute,
+  AppIdleAnglerRankingsRoute: AppIdleAnglerRankingsRoute,
+  AppIdleAnglerSettingsRoute: AppIdleAnglerSettingsRoute,
+  AppIdleAnglerShopRoute: AppIdleAnglerShopRoute,
+  AppIdleAnglerIndexRoute: AppIdleAnglerIndexRoute,
 }
 
-const AppSlowCastRouteWithChildren = AppSlowCastRoute._addFileChildren(
-  AppSlowCastRouteChildren,
+const AppIdleAnglerRouteWithChildren = AppIdleAnglerRoute._addFileChildren(
+  AppIdleAnglerRouteChildren,
 )
 
 interface AppRouteChildren {
   AppDeskCrawlerRoute: typeof AppDeskCrawlerRouteWithChildren
-  AppSlowCastRoute: typeof AppSlowCastRouteWithChildren
+  AppIdleAnglerRoute: typeof AppIdleAnglerRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDeskCrawlerRoute: AppDeskCrawlerRouteWithChildren,
-  AppSlowCastRoute: AppSlowCastRouteWithChildren,
+  AppIdleAnglerRoute: AppIdleAnglerRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -1032,8 +1075,8 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   DcRoute: DcRoute,
   FeedbackRoute: FeedbackRoute,
+  IaRoute: IaRoute,
   PrivacyRoute: PrivacyRoute,
-  ScRoute: ScRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   WhatsNewRoute: WhatsNewRoute,
@@ -1043,13 +1086,15 @@ const rootRouteChildren: RootRouteChildren = {
   DevDeskCrawlerRoute: DevDeskCrawlerRoute,
   DevOgRoute: DevOgRoute,
   GamesDeskCrawlerRoute: GamesDeskCrawlerRoute,
-  GamesSlowCastRoute: GamesSlowCastRoute,
+  GamesIdleAnglerRoute: GamesIdleAnglerRoute,
   HelpDeskCrawlerRoute: HelpDeskCrawlerRoute,
-  HelpSlowCastRoute: HelpSlowCastRoute,
+  HelpIdleAnglerRoute: HelpIdleAnglerRoute,
   ProfileAliasRoute: ProfileAliasRoute,
   DeskCrawlerHeroesAliasRoute: DeskCrawlerHeroesAliasRoute,
   ConnectTrmnlDeskCrawlerInstallRoute: ConnectTrmnlDeskCrawlerInstallRoute,
   ConnectTrmnlDeskCrawlerManageRoute: ConnectTrmnlDeskCrawlerManageRoute,
+  ConnectTrmnlIdleAnglerInstallRoute: ConnectTrmnlIdleAnglerInstallRoute,
+  ConnectTrmnlIdleAnglerManageRoute: ConnectTrmnlIdleAnglerManageRoute,
   ConnectTrmnlSlowCastInstallRoute: ConnectTrmnlSlowCastInstallRoute,
   ConnectTrmnlSlowCastManageRoute: ConnectTrmnlSlowCastManageRoute,
 }
