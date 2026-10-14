@@ -29,6 +29,14 @@ import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
  */
 /** How often a screen request may refresh an instance's `lastScreenServedAt`. */
 export const SCREEN_SERVED_THROTTLE_MS = 60 * 60_000
+/**
+ * TRMNL renders the screen once when the player clicks Save, whether or not the device ever shows it. Only a fetch this
+ * long after the installation counts as the device's own playlist fetching it; with the hourly throttle that means the
+ * second recorded fetch.
+ */
+export const INSTALL_RENDER_MS = 30 * 60_000
+export const screenFetchedAfterInstall = (instance: { createdAt: number; lastScreenServedAt?: number }) =>
+  instance.lastScreenServedAt !== undefined && instance.lastScreenServedAt - instance.createdAt >= INSTALL_RENDER_MS
 
 export const forInstance = internalQuery({
   args: { gameSlug: v.optional(v.literal('desk-crawler')), tokenHash: v.string(), uuid: v.string(), now: v.number(), instanceName: v.union(v.string(), v.null()), utcOffset: v.optional(v.union(v.number(), v.null())) },

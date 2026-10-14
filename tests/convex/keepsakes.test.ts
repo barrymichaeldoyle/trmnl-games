@@ -57,18 +57,20 @@ describe('weekly TRMNL keepsakes', () => {
     expect(await t.withIdentity({ issuer: 'issuer', subject: 'Nobody' }).query(api.keepsakes.mine, {})).toBeNull()
   })
 
-  it('records a served screen at most once an hour, and the hero says TRMNL has fetched one', async () => {
+  it('records a served screen at most once an hour, and the hero says TRMNL has fetched one after the Save', async () => {
     const served = () => t.run(async (ctx) => (await ctx.db.query('trmnlInstances').first())!.lastScreenServedAt)
     expect((await owner().query(api.heroes.mine, {})).screenServed).toBe(false)
     await envelope(t)
     expect(await served()).toBe(NOW)
-    expect((await owner().query(api.heroes.mine, {})).screenServed).toBe(true)
+    // The fetch TRMNL makes on Save says nothing about the device.
+    expect((await owner().query(api.heroes.mine, {})).screenServed).toBe(false)
     vi.setSystemTime(NOW + 30 * 60_000)
     await envelope(t)
     expect(await served()).toBe(NOW)
     vi.setSystemTime(NOW + 61 * 60_000)
     await envelope(t)
     expect(await served()).toBe(NOW + 61 * 60_000)
+    expect((await owner().query(api.heroes.mine, {})).screenServed).toBe(true)
   })
 
   it('claims once, replays the same receipt, and never alters game rewards or ranking state', async () => {
