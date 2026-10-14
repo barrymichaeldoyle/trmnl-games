@@ -107,7 +107,7 @@ export function HowItPlays({ headingId }: { headingId: string }) {
 const FEATURES: ReadonlyArray<{ glyph: GlyphName; tone: string; title: string; body: string }> = [
   { glyph: 'sword', tone: 'text-hp-ink', title: 'Desk raids', body: 'Heroes raid each other’s desks for gold while they explore. Your stance tilts the coin toss; level and gear never count.' },
   { glyph: 'trophy', tone: 'text-gold-ink', title: 'Rankings and rivals', body: 'Your screen shows the seven-day XP Top 5 for your level group. You can follow other heroes from their public pages and mark one as your rival.' },
-  { glyph: 'shield', tone: 'text-sky-ink', title: 'Stances', body: 'Choose how careful your hero is. Bolder heroes earn more and get knocked out more often; how much more is something you find out on the screen.' },
+  { glyph: 'shield', tone: 'text-sky-ink', title: 'Stances', body: 'Choose how careful your hero is. Bolder heroes earn more and get knocked out more often.' },
   { glyph: 'coin', tone: 'text-gold-ink', title: 'Decisions and a merchant', body: 'Chip in for the cake or stay late. A wandering merchant sometimes sells items at a discount.' },
   { glyph: 'cog', tone: 'text-rare-ink', title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage the spares to upgrade what you wear. Gold buys bigger bags.' },
   { glyph: 'heart', tone: 'text-hp-ink', title: 'Meetings', body: 'Sometimes your hero bumps into another player’s hero on the same floor. They might split a sandwich or swap war stories, and both get a small boost for the next couple of hours.' },
@@ -125,7 +125,7 @@ export function FeatureGrid({ headingId }: { headingId: string }) {
     <section aria-labelledby={headingId} className="flex flex-col gap-6">
       <div className="flex max-w-prose flex-col gap-2">
         <h2 id={headingId} className="font-display text-3xl font-bold text-gold-ink">What’s in the game</h2>
-        <p className="leading-relaxed text-muted">Your hero plays on its own, and the companion gives you plenty to steer.</p>
+        <p className="leading-relaxed text-muted">Your hero plays on its own, and the companion is where you steer it.</p>
       </div>
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map((feature) => (

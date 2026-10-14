@@ -28,7 +28,7 @@ export function LostProperty() {
       <div className="flex flex-col gap-1">
         <h3 className="caps text-sm text-muted">Your spare</h3>
         {mySpare === null ? (
-          <p className="text-sm">Nothing of yours is lying about. A knockout outside the Office leaves one.</p>
+          <p className="text-sm">No spare of yours is out there. A knockout outside the Office leaves one.</p>
         ) : mySpare.found ? (
           <p className="text-sm"><WithName text={`{name} found your spare ${mySpare.name} in the ${mySpare.floor}.`} name={mySpare.finderName ?? ''} profile={mySpare.finderProfile} /></p>
         ) : (

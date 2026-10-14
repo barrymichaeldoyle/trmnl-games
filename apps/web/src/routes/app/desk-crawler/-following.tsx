@@ -28,7 +28,7 @@ function headToHead(name: string, hero: Hero, own: Following['own']): string {
     const gap = Math.abs(hero.rank - own.rank)
     return own.rank < hero.rank ? `You're ${plural(gap, 'place')} ahead of ${name}, all time.` : `${name} is ${plural(gap, 'place')} ahead of you, all time.`
   }
-  if (hero.level === own.level) return `Level and level with ${name}.`
+  if (hero.level === own.level) return `You're the same level as ${name}.`
   const gap = Math.abs(hero.level - own.level)
   return own.level > hero.level ? `You're ${plural(gap, 'level')} ahead of ${name}.` : `${name} is ${plural(gap, 'level')} ahead of you.`
 }

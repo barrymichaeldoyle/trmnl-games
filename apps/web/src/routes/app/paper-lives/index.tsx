@@ -69,7 +69,7 @@ function LifePage() {
 
       {!ended && life.stage === 'infant' ? (
         <Card title="The first years">
-          <p>The first six years pass by themselves, one every fifteen minutes. School starts at six, and the first decisions come after that.</p>
+          <p>The first six years pass quickly, one every fifteen minutes. School starts at six, and the first decisions come after that.</p>
         </Card>
       ) : null}
 
@@ -105,7 +105,7 @@ function LifePage() {
               </ul>
             </div>
           ) : (
-            <p>No decision this year. Things will happen by themselves.</p>
+            <p>No decision this year.</p>
           )}
           <div className="mt-4 flex flex-col gap-2 border-t border-rule pt-3">
             {year.ageUpRequested ? (
@@ -113,10 +113,10 @@ function LifePage() {
             ) : (
               <>
                 <div>
-                  <Button pending={ageUp.pending} onClick={() => void ageUp.run({}, year.elapsed >= year.minimum ? 'The year ends at the next tick.' : 'The year ends as soon as two hours have passed.').then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Age up</Button>
+                  <Button pending={ageUp.pending} onClick={() => void ageUp.run({}, year.elapsed >= year.minimum ? 'The year ends within fifteen minutes.' : 'The year ends as soon as two hours have passed.').then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Age up</Button>
                 </div>
                 <p className="text-sm text-muted">
-                  {year.elapsed >= year.minimum ? 'Ends the year at the next tick, within fifteen minutes.' : <>A year lasts at least two hours. Age up now and it ends at {time(year.minimumAt)}.</>} Otherwise it closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.
+                  {year.elapsed >= year.minimum ? 'Ends the year within fifteen minutes.' : <>A year lasts at least two hours. Age up now and it ends at {time(year.minimumAt)}.</>} Otherwise it closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.
                 </p>
               </>
             )}

@@ -49,8 +49,8 @@ function Landing() {
 
         <div className="grid gap-14 md:grid-cols-2 md:gap-x-16">
           <Topic id="choices-heading" glyph="shield" tone="text-sky-ink" title="Choices that change the run" help="stances">
-            <p>Pick a stance on the Hero page: Cautious, Balanced or Bold. It changes how your hero handles danger and how its desk raids go. Which one pays best depends on the floor, and working that out is part of the game.</p>
-            <p>Now and then the office asks something small, like chipping in for a cake or staying late. Both options say exactly what they change, and if you don’t answer within about a day the default happens on its own.</p>
+            <p>Pick a stance on the Hero page: Cautious, Balanced or Bold. It changes how your hero handles danger and how its desk raids go. Which one pays best depends on the floor.</p>
+            <p>Now and then the office asks something small, like chipping in for a cake or staying late. Both options say exactly what they change, and if you don’t answer within about a day, the default is chosen for you.</p>
           </Topic>
           <Topic id="gear-heading" glyph="cog" tone="text-rare-ink" title="Gear, bags and the workbench" help="salvage-and-the-workbench">
             <p>Gear comes as common, uncommon, rare or epic. Rare and epic pieces carry a trait: Vampiric heals after every win, Lucky adds gold, Sturdy takes less damage from traps and Thrifty loses less when things go wrong.</p>

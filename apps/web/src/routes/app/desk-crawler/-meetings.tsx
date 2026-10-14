@@ -39,7 +39,7 @@ export function Meetings({ enabled }: { enabled: boolean }) {
         </div>
       </dl>
       {meetings.length === 0 ? (
-        <p className="text-sm">Nobody yet. Meetings happen by themselves while your hero explores.</p>
+        <p className="text-sm">Nobody yet. Meetings happen automatically while your hero explores.</p>
       ) : (
         <ol aria-label="Recent meetings" className="flex flex-col gap-2">
           {meetings.map((meeting) => (

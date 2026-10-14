@@ -188,7 +188,7 @@ export async function queuePaperLivesAlerts(ctx: MutationCtx, args: { owner: Doc
 
 /** Paper Lives' lock-screen lines (D159): the character's first name and nothing from the story itself. */
 export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: string, arrival?: { name: string; role: 'child' | 'grandchild' }): { title: string; body: string; url: string } {
-  if (row.kind === 'major_decision') return { title: `A big decision for ${first}`, body: `${first} has a choice to make this year. Left alone, the year closes with the gentle option.`, url: '/app/paper-lives?alert=major_decision' }
+  if (row.kind === 'major_decision') return { title: `A big decision for ${first}`, body: `${first} has a choice to make this year. If you don’t choose, the quietest option is picked when the year closes.`, url: '/app/paper-lives?alert=major_decision' }
   if (row.kind === 'life_ended') return { title: `${first}'s life has ended`, body: `${first}'s page is in the album now, and the next life is ready to begin.`, url: '/app/paper-lives?alert=life_ended' }
   const baby = arrival?.name ?? 'A baby'
   return arrival?.role === 'grandchild'

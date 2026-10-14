@@ -36,12 +36,12 @@ export const Route = createFileRoute('/help/paper-lives')({
       </ul>
       <p>In the first year you can change the first name and choose pronouns (they, she or he) on the Life page.</p>
       <h2 id="how-a-year-works">How a year works</h2>
-      <p>The first six years pass quickly, one every fifteen minutes. After that, a year lasts at least {hours(t.minYearTicks)} hours. Things happen during the year on their own: a friend made, a cold caught, a raise, the dog getting out. Your screen shows each one with the age it happened at.</p>
-      <p>When you are around, press <strong>Age up</strong> on the Life page and the year ends as soon as its {hours(t.minYearTicks)} hours have passed. When you are not, the year closes by itself after {hours(t.closeYearTicks)} hours. A year never ends early and never waits for you. If you check in often, a life takes about a week. If you never do, it takes about a month.</p>
+      <p>The first six years pass quickly, one every fifteen minutes. After that, a year lasts at least {hours(t.minYearTicks)} hours. Events happen through the year without you, such as making a friend, catching a cold, getting a raise or the dog getting out. Your screen shows each one with the age it happened at.</p>
+      <p>When you are around, press <strong>Age up</strong> on the Life page and the year ends as soon as its {hours(t.minYearTicks)} hours have passed. Otherwise the year closes automatically after {hours(t.closeYearTicks)} hours. If you check in often, a life takes about a week. If you never do, it takes about a month.</p>
       <p>The seasons run through each year's first {hours(t.minYearTicks)} hours. A year left open after that is winding down, and the screen says when it will close.</p>
       <h2 id="decisions">Decisions</h2>
       <p>Most years bring one decision, such as a job abroad, a house or a puppy. Your screen shows the question and you answer on the Life page. The choice happens when the year ends, so you can change your mind until then. Some options need a trait, enough money or a stat. These show greyed out, with the reason.</p>
-      <p>If you choose nothing, the gentle option happens: stay where you are, say nothing, let it be. A life that is never touched is ordinary, not unlucky. About one decision in five is a big one (marriage, a child, a house, a career, the will) and is marked as such.</p>
+      <p>If you choose nothing, the quietest option happens, such as staying put or saying nothing. A life where you never choose ends up ordinary. About one decision in five is a big one (marriage, a child, a house, a career, the will) and is marked as such.</p>
       <h2 id="stats-and-traits">Stats and traits</h2>
       <p>Health, happiness, smarts and charm run from 0 to 100. Health slips with age, and illness knocks it down for a while. Happiness follows how close you are to the people around you, your money and having a hobby. Smarts and charm open jobs and some decisions.</p>
       <p>Each life has two traits that never change. They decide some events and options, and each one shifts one thing:</p>
@@ -55,18 +55,18 @@ export const Route = createFileRoute('/help/paper-lives')({
       <h2 id="work-and-money">Work, money and a home</h2>
       <p>At 18 the life goes to university, learns a trade or goes straight to work. That choice sets which jobs are possible, and night school at 30 opens one more tier. There are {content.jobs.length} jobs, from a paper round to a surgeon. Each year adds income and takes living costs. Money never falls below {t.debtFloor.toLocaleString('en-GB')}. A house is a big decision from 25, once there is enough saved. Retirement comes when you choose it after 60, or at 70.</p>
       <h2 id="the-end-of-a-life">The end of a life</h2>
-      <p>Every life ends, mostly in old age. That is the point, not a failure. From 60 the will is offered: split among the children, all to one child, to a partner or to a good cause. Without one, a partner takes half and the children share the rest.</p>
+      <p>Every life ends, mostly in old age. From 60 the will is offered: split among the children, all to one child, to a partner or to a good cause. Without one, a partner takes half and the children share the rest.</p>
       <p>A finished life becomes a page in the album with its epitaph and the moments that mattered. If it was among the longest or wealthiest of the week, it goes on the boards.</p>
       <h2 id="the-next-life">The next life</h2>
-      <p>After a death, your screen shows a memorial until you start the next life on the Life page. You can carry on as one of the children, at the age they are, with the family name and what the will left them. Or you can start again as a stranger at birth. Nothing starts by itself.</p>
+      <p>After a death, your screen shows a memorial until you start the next life on the Life page. You can carry on as one of the children, at the age they are, with the family name and what the will left them. Or you can start again as a stranger at birth.</p>
       <h2 id="your-screen">Your screen</h2>
       <p>The full layout shows the portrait with the pet, the stats, the newest lines with their ages, the year's decision or the time it closes, last year's recap and this week's longest lives. Smaller layouts keep the name, the newest lines and the decision. The code in the corner opens the companion.</p>
       <h2 id="photos">Photos</h2>
-      <p>Each week your TRMNL shows a Photo code in its title bar. Enter it on the Album page to take a photo of your character as they are that week, pet and all. One photo a week; last week's code still works if your screen was slow to refresh, and a missed week costs nothing. Photos change nothing in the life. They stay with the life they were taken in, in the album and on its public page, and count towards the Photos achievements.</p>
+      <p>Each week your TRMNL shows a Photo code in its title bar. Enter it on the Album page to take a photo of your character as they are that week, pet and all. You can take one photo a week, and last week's code still works if your screen was slow to refresh. Photos don't affect the life. They stay with the life they were taken in, in the album and on its public page, and count towards the Photos achievements.</p>
       <h2 id="alerts">Alerts</h2>
       <p>On the More page you can turn on alerts for this phone: a big decision waiting once the year can close, a life that has ended, and a new child or grandchild in the family. They are off until you turn them on, share quiet hours with your other games, and never come more than twice a day. Ordinary decisions never send an alert.</p>
       <h2 id="pausing-and-removing">Pausing and removing</h2>
-      <p>Pause a life on the More page and no years pass until you resume. Uninstalling the plugin in TRMNL keeps the life with your account. Deleting Paper Lives progress on the More page removes every life and the album, and leaves your account and your other games.</p>
+      <p>Pause a life on the More page and no years pass until you resume. Uninstalling the plugin in TRMNL keeps the life with your account. Deleting Paper Lives progress on the More page removes every life and the album, but keeps your account and your other games.</p>
       <h2 id="help">Help</h2>
       <p>Write to <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.</p>
     </ProsePage>

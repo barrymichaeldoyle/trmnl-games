@@ -72,7 +72,7 @@ export function TodoCard({ todo, biomes, healthy, notify }: { todo: TodoView; bi
           )
         })}
       </ol>
-      <p className="text-xs text-muted">Your hero works through these by itself. Tasks never expire, and gold is the only reward.</p>
+      <p className="text-xs text-muted">Your hero works through these while exploring. Tasks never expire and pay only gold.</p>
       <ConfirmSheet
         open={askingTask !== null}
         title="Swap this task?"
@@ -96,7 +96,7 @@ export function TodoCard({ todo, biomes, healthy, notify }: { todo: TodoView; bi
               <li>You get <strong>one swap between stand-ups</strong>. The next one comes with the {clock(todo.refillHour)} stand-up.</li>
               <li>The new task is a different kind, picked at random{askingTask.local ? '' : ', and it can be done where your hero is'}.</li>
               {askingTask.progress > 0 ? <li>Progress on this task ({askingTask.progress.toLocaleString()}/{askingTask.target.toLocaleString()}) is lost.</li> : null}
-              <li>Swapping is optional: a task your hero can't get on with is swapped by itself after two stand-ups.</li>
+              <li>A task your hero can't get on with is swapped automatically after two stand-ups.</li>
             </Consequences>
           </>
         ) : null}

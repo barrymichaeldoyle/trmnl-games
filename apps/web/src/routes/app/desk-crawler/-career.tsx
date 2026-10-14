@@ -97,7 +97,7 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
           <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
             <span className="text-gold-ink">+{goal.gold.toLocaleString()} gold</span>
             {counted ? <span className="text-muted">{Math.min(goal.value, goal.target).toLocaleString()} of {goal.target.toLocaleString()}</span> : null}
-            {met ? null : goal.companion ? <span className="text-muted">Done here in the companion</span> : <span className="text-muted">Your hero does this by itself</span>}
+            {met ? null : goal.companion ? <span className="text-muted">Done here in the companion</span> : <span className="text-muted">Your hero does this while adventuring</span>}
           </p>
           {counted ? (
             <div role="meter" aria-label="Progress" aria-valuemin={0} aria-valuemax={goal.target} aria-valuenow={Math.min(goal.value, goal.target)} className="h-3 overflow-hidden border-2 border-night bg-night">
@@ -108,7 +108,7 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
       ) : (
         <>
           <p className="font-display text-2xl leading-tight font-bold">Reach level {level + 1}</p>
-          <p className="text-sm">The ladder is climbed, for now. Every level from here is its own goal.</p>
+          <p className="text-sm">You've reached every goal for now. From here, each new level is a goal.</p>
         </>
       )}
     </section>
@@ -117,7 +117,7 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
 
 /** D157: what each feature does, in one line for the Hero page's "Coming up". */
 const FEATURE_BLURB: Record<UnlockView[number]['feature'] | 'roster', string> = {
-  todo: 'Three small jobs a day from the morning stand-up, which your hero ticks off by itself for a little gold.',
+  todo: 'Three small jobs a day from the morning stand-up. Your hero works through them for a little gold.',
   meetings: 'Your hero bumps into other players’ heroes around the office.',
   workbench: 'Salvage spare gear for materials, then spend them with gold to improve what your hero wears.',
   stances: 'Cautious, Balanced or Bold: how far your hero pushes before it rests.',

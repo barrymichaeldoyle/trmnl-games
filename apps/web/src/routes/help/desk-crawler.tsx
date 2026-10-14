@@ -169,19 +169,19 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <li key={floor.id}><strong>{floor.name}</strong>{floor.unlockLevel > 1 ? ` (level ${floor.unlockLevel})` : ' (from the start)'}: {floor.monsterIds.map((id) => catalogs[ACTIVE_CONTENT].monsters.find((m) => m.id === id)?.name ?? id).join(', ')}.</li>
         ))}
       </ul>
-      {LORE !== undefined ? <p>The Field notes page under More keeps what your hero has written down about each floor and monster. A floor's note opens the first time your hero stands on it, a monster's note with the first win over it. Notes are for reading; they change nothing in play.</p> : null}
+      {LORE !== undefined ? <p>The Field notes page under More keeps what your hero has written down about each floor and monster. A floor's note opens the first time your hero stands on it, a monster's note with the first win over it. Notes don't affect play.</p> : null}
       <h2 id="desk-keepsakes">Desk keepsakes</h2>
       <p>Keep Desk Crawler in your playlist and look for “Keepsake code” and a six-digit code, like 482 917, in the screen’s title bar (narrow portrait mashups shorten it to “Keepsake”). Enter that code in the companion’s Settings to collect a permanent office souvenir. Full-screen and mashup layouts both show it; the companion preview hides it.</p>
       <p>You can collect one keepsake each week, with a new code from Monday at 00:00 UTC. Last week’s code works too if your screen refreshes slowly. If you miss a week, you get the same design the week after. After collecting the full set, you can collect more of each. Keepsakes do not change XP, gear or rankings, and extra devices or faster refresh earn no extras.</p>
       {CAREER !== undefined ? (
         <>
           <h2 id="career">Career</h2>
-          <p>Your hero always has one goal, shown at the top of the Hero page: “Win your first fight”, “Equip a piece of gear you found”, “Reach the Server Room”, “Buy the Laptop Backpack”. Some are reached by adventuring; the rest are things you do here, on the Bag or Hero page. Reaching a goal shows “Goal reached” on your TRMNL and sets a little gold aside ({CAREER_GOLD.toLocaleString('en-US')} across the whole ladder); press Claim on the Hero page to collect it, whenever you like. Goals never give XP, never expire and never fail; the next one simply waits, and the ladder keeps moving whether or not you have claimed.</p>
+          <p>Your hero always has one goal, shown at the top of the Hero page: “Win your first fight”, “Equip a piece of gear you found”, “Reach the Server Room”, “Buy the Laptop Backpack”. Some are reached by adventuring; the rest are things you do here, on the Bag or Hero page. Reaching a goal shows “Goal reached” on your TRMNL and sets a little gold aside ({CAREER_GOLD.toLocaleString('en-US')} across the whole ladder); press Claim on the Hero page to collect it. Goals give no XP and never expire, and the next goal starts whether or not you have claimed.</p>
           <ul>
             <li>The Career page under More lists the {CAREER.rungs.filter((rung) => !rung.retired).length} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
             {UNLOCKS !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {UNLOCKS.todo}, stances at level {UNLOCKS.stances}, office decisions at level {UNLOCKS.choices}, {MEETING_LEVEL !== undefined ? `meetings with coworkers at level ${MEETING_LEVEL}, ` : ''}{WORKBENCH_LEVEL !== undefined ? `salvage and the workbench at level ${WORKBENCH_LEVEL}, ` : ''}the wandering merchant at level {UNLOCKS.merchant} and desk raids at level {UNLOCKS.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
-            <li>One goal asks you to switch your stance to Bold, which raids twice as often as Balanced. Once it counts you can switch back whenever you like.</li>
-            <li>A few early goals come with a guarantee, so a new hero is never left waiting on luck: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is the ordinary roll.</li>
+            <li>One goal asks you to switch your stance to Bold, which raids twice as often as Balanced. Once it counts, you can switch back.</li>
+            <li>A few early goals are guaranteed to come up in time: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is down to chance.</li>
           </ul>
         </>
       ) : null}
@@ -190,7 +190,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <h2 id="heroes-and-classes">Heroes and classes</h2>
           <p>Everyone starts as a Warrior. When your Warrior reaches level {ROSTER_LEVEL}, your TRMNL says “Unlocked: a second hero”, and you can recruit a Rogue from the Heroes page under More. The Rogue starts at level 1 with its own name, gear, gold, potions and goals.</p>
           <ul>
-            <li>One hero adventures at a time, and that is the one your TRMNL shows and the one on the leaderboards. The other waits exactly where you left it. It doesn't adventure or catch up later, and nothing runs out while it waits, though a merchant visiting it leaves.</li>
+            <li>One hero adventures at a time, and that is the one your TRMNL shows and the one on the leaderboards. The other stays where you left it. It doesn't adventure or catch up later, and a merchant visiting it leaves.</li>
             <li>You can switch once a day. Switching straight back within ten minutes does not count. A hero that is knocked out or on the road has to recover or arrive first.</li>
             <li>You can have one hero of each class. Achievements belong to you whichever hero earns them; a few belong to the Rogue alone.</li>
             <li><strong>Warrior</strong>: {CLASSES.warrior.blurb}</li>
@@ -199,7 +199,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         </>
       ) : null}
       <h2 id="stances">Stances</h2>
-      <p>Choose how careful your hero is on the Hero page.{arrives('stances')} The stance applies from the next adventure, and you can change it whenever you like. Your TRMNL shows it beside the bag count, under a gauge whose needle sits low for Cautious, in the middle for Balanced and high for Bold.</p>
+      <p>Choose how careful your hero is on the Hero page.{arrives('stances')} The stance applies from the next adventure, and you can change it at any time. Your TRMNL shows it beside the bag count, under a gauge whose needle sits low for Cautious, in the middle for Balanced and high for Bold.</p>
       <ul>
         <li><strong>Cautious</strong> drinks a potion below 65% HP, rests below 50% and sets off again at 90%. It earns 90% of the usual XP from wins.</li>
         <li><strong>Balanced</strong>, the default, drinks below 50%, rests below 35% and sets off again at 75%, with the usual XP.</li>
@@ -207,7 +207,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       </ul>
       <p>Office Cubicles can't knock a hero out, so Bold has no knockout risk there. On every other floor a knockout costs gold and sends your hero back to Office Cubicles, and Bold is knocked out most often.</p>
       <h2 id="desk-raids">Desk raids</h2>
-      <p>While exploring, heroes sometimes raid each other's desks. It happens by itself, to every active hero{UNLOCKS === undefined ? '' : ` from level ${UNLOCKS.raids}`}, with nothing to press and no way to aim it.{UNLOCKS === undefined ? '' : ` Below level ${UNLOCKS.raids} a hero neither raids nor gets raided.`} The raid shows up in both heroes' adventure logs with the other player's public name, and the Hero page keeps a record of your hero's raids.</p>
+      <p>While exploring, heroes sometimes raid each other's desks. Every active hero{UNLOCKS === undefined ? '' : ` from level ${UNLOCKS.raids}`} raids and gets raided automatically. You can't start a raid or pick its target.{UNLOCKS === undefined ? '' : ` Below level ${UNLOCKS.raids} a hero neither raids nor gets raided.`} The raid shows up in both heroes' adventure logs with the other player's public name, and the Hero page keeps a record of your hero's raids.</p>
       <ul>
         <li>Who wins is a coin toss, moved only by stance. Level, gear and effects never count. Cautious adds 10 points to its side of the toss, Balanced adds nothing and Bold takes 5 away, whether raiding or defending.</li>
         <li>How often your hero raids depends on stance too: Cautious about every other day of exploring, Balanced about once a day, Bold about twice a day.</li>
@@ -224,7 +224,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
               const effect = EFFECTS.find((rule) => rule.id === kind.effectId)
               return <li key={kind.id}><strong>{kind.name}</strong>: {effect?.name ?? kind.effectId}, {effect === undefined ? '' : boonLine(effect.modifiers)}.</li>
             })}
-            <li>Nothing changes hands and nobody can lose. A meeting takes the place of one adventure, and the boon about makes up for it.</li>
+            <li>Nothing changes hands. A meeting takes the place of one adventure, and the boon roughly makes up for it.</li>
             <li>It happens at the same rate whatever your stance or class, about every other day for a hero who is out exploring. Heroes only meet while exploring or resting, and a hero who has just had a meeting is left alone for about twelve hours.</li>
           </ul>
         </>
@@ -236,7 +236,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <ul>
             <li>Your hero can find other players' spares the same way. A spare is ordinary gear: equip it, sell it, salvage it or take it to the workbench. It comes at the plain stats for its kind and rarity, without the first owner's upgrades.</li>
             <li>The name stays on it. The Bag page and the Log tab's Lost property card show whose it was, and so does your hero page while you hold it.</li>
-            <li>A spare only ever takes the place of a find your hero was making anyway, so nobody gets extra gear and nothing is lost. Career goals and Christmas presents are always new.</li>
+            <li>A spare only replaces a find your hero was about to make anyway, so nobody gets extra gear. Career goals and Christmas presents are always new gear.</li>
             <li>Only one spare of yours lies about at a time. If your hero is knocked out again before anyone finds it, the new spare replaces the old one.</li>
           </ul>
         </>
@@ -244,12 +244,12 @@ export const Route = createFileRoute('/help/desk-crawler')({
       {TODO !== undefined ? (
         <>
           <h2 id="to-do-list">To-do list</h2>
-          <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”.{arrives('todo')} It works through them by itself while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TASK_PAY} depending on the floor. Tasks never give XP, so they never change the rankings.</p>
+          <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”.{arrives('todo')} It works through them while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TASK_PAY} depending on the floor. Tasks give no XP, so they don't affect rankings.</p>
           <ul>
             <li>Every morning at {STANDUP} your TRMNL's local time, the stand-up gives new tasks for the ones that are done. Your screen lists them.</li>
-            <li>Tasks never expire and an unfinished task costs nothing. A task your hero can't get on with is swapped by itself after two stand-ups.</li>
+            <li>Tasks never expire. A task your hero can't get on with is swapped automatically after two stand-ups.</li>
             <li>At least two of the three tasks can be done where your hero is. At most one asks for a trip to another area, if you want to send your hero there.</li>
-            <li>Once between stand-ups you can swap one unfinished task for a different one on the Hero page. That's optional; the list runs fine on its own.</li>
+            <li>Once between stand-ups you can swap one unfinished task for a different one on the Hero page.</li>
           </ul>
         </>
       ) : null}
@@ -259,13 +259,13 @@ export const Route = createFileRoute('/help/desk-crawler')({
         : <>
           <p>Potions come in {POTIONS.strengths.length} strengths: {STRENGTHS_LINE}, each restoring that share of your hero's maximum HP, rounded up. Finds depend on where your hero is: {DROPS_LINE}. A new hero starts with healing potions, and the merchant and office decisions hand out healing potions too. All strengths share one pouch and never take up bag space.</p>
           <p>Your hero drinks automatically when HP falls below the stance's potion level while exploring: the weakest potion that puts it back above the stance's potion level, or the strongest it has when nothing weaker would do. The adventure log names what it drank. With no potions left, your hero rests below the rest level and sets off again once recovered. You can also drink one yourself from the Hero page whenever your hero is exploring, resting or travelling and not at full HP; with more than one strength in the pouch, the Hero page asks which.</p>
-          <p><strong>Combining.</strong> On the Bag page, {COMBINE_LINE}. It never makes more potions than it takes, so the pouch cannot overflow, and nothing combines by itself.</p>
+          <p><strong>Combining.</strong> On the Bag page, {COMBINE_LINE}. Combining never leaves you with more potions than before, so the pouch can't overflow. It only happens when you choose it.</p>
         </>}
       <p>Potions are kept in a pouch. A new hero carries a {POUCHES[0]?.name ?? 'Thermos'} that holds {POUCHES[0]?.cap ?? 20}. Bigger pouches are bought with gold on the Bag page, one at a time: {rungs(SHOP_POUCHES)}. When the pouch is full, a potion find becomes gold instead.</p>
       <h2 id="the-wandering-merchant">The wandering merchant</h2>
       <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and the next pouch or bag{MERCHANT_OFF > 0 ? ` at ${MERCHANT_OFF}% off the Bag page price` : ''}. Each offer sells once. The merchant moves on after four adventures or after your last purchase.</p>
       <h2 id="decisions">Decisions</h2>
-      <p>Sometimes the office asks your hero something small, like chipping in for a cake or staying late. Your screen says “A decision is waiting in the companion.” and the Hero page shows both options with exactly what each one changes. If you don't answer within about a day, the option marked as the default happens by itself, so adventures never wait for you.</p>
+      <p>Sometimes the office asks your hero something small, like chipping in for a cake or staying late. Your screen says “A decision is waiting in the companion.” and the Hero page shows both options with exactly what each one changes. If you don't answer within about a day, the option marked as the default is chosen for you.</p>
       <h2 id="effects">Effects</h2>
       <p>Some moments leave your hero with a short effect, listed on the Hero page with the adventures it has left. Beating an elite makes your hero Fired up (+10% attack for eight adventures). Chipping in for cake makes your hero Well fed (+10% XP for eight adventures). A trap leaves your hero Bruised (−15% defense for four adventures). Your hero holds at most three effects. Any rest shakes off bad effects, and a knockout clears them all.</p>
       {STANDOFF !== undefined && DIG_IN_FLOOR !== undefined ? (
@@ -300,9 +300,9 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li><strong>Thrifty</strong> keeps more gold when things go wrong: a retreat costs nothing and a knockout costs 5% of gold instead of 10%.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
-      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. A full bag alone does not stop adventures. The next piece you find is held safely, and then your hero sleeps until you make room. The held find is never automatically sold or discarded.</p>
+      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero keeps adventuring until it finds another piece. That piece is held for you, never sold or thrown away, and your hero sleeps until you make room.</p>
       <h2 id="bigger-bags">Bigger bags</h2>
-      <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements and no bag drops: save up and buy.</p>
+      <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements, and bags never drop as loot.</p>
       <ol className="[&_li]:list-decimal">
         <li>Open Bag in the companion. Equip any upgrades and sell spare gear to free space.</li>
         <li>If a find is being held, choose Claim find. Leave at least one free slot after claiming it so adventures can resume.</li>
@@ -311,25 +311,25 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>Equipping gear does not free a slot. Selling gear or claiming a find does not wake your hero automatically. Bag sleep is separate from your TRMNL’s Sleep Mode; a sleeping display never stops the game.</p>
       {WORKBENCH !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
-        <p>{WORKBENCH_LEVEL !== undefined ? `From level ${WORKBENCH_LEVEL}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {MATERIALS_LINE}. Epic gear pays {WORKBENCH.epicYieldMultiplier} times as much. Materials sit beside your potions, take no bag space and are never sold. Nothing is salvaged unless you choose it.{WORKBENCH_LEVEL !== undefined ? ` Before level ${WORKBENCH_LEVEL}, sell your spares: the first upgrade needs level ${WORKBENCH_LEVEL} anyway.` : ''}</p>
+        <p>{WORKBENCH_LEVEL !== undefined ? `From level ${WORKBENCH_LEVEL}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {MATERIALS_LINE}. Epic gear pays {WORKBENCH.epicYieldMultiplier} times as much. Materials take no bag space and are never sold. Gear is only salvaged when you choose to.{WORKBENCH_LEVEL !== undefined ? ` Before level ${WORKBENCH_LEVEL}, sell your spares: the first upgrade needs level ${WORKBENCH_LEVEL} anyway.` : ''}</p>
         <p>The workbench spends materials and gold on the gear your hero wears, in place: the piece keeps its name and trait, and only its numbers change. Each piece has one next step. {TIER_STEPS.map((s, i) => `${i === 0 ? 'Raising a tier-1 piece to Mk II' : `Mk II to Mk III`} costs ${price(s)}`).join('; ')}; a piece can only be raised to a tier your hero’s level could equip. Once a piece is Mk III (or was found there), reinforcement adds one point a step: {REINFORCE_STEPS.map((s) => `+${s.to} for ${price(s)}`).join(', ')}. {REINFORCE_STEPS.length > 0 ? `After +${REINFORCE_STEPS.at(-1)!.to} the piece is finished.` : ''} Rare and epic gear can also have a trait of your choosing fitted for {price(WORKBENCH.affix)}, replacing the one it has.</p>
-        <p>Upgrades never fail and nothing is left to chance. The workbench only does what you ask it to. Salvaging an upgraded piece pays what it was found at, not what you spent on it, so build what you will wear.</p>
+        <p>Upgrades always succeed. Salvaging an upgraded piece pays what it was found at, not what you spent on it, so only upgrade gear you plan to keep wearing.</p>
       </> : null}
       <h2 id="getting-knocked-out">Getting knocked out</h2>
-      <p>Your hero revives automatically after about two hours and returns to Office Cubicles. You keep your XP and equipment; getting knocked out costs 10% of your current gold. You do not need to open the companion or press anything.</p>
+      <p>Your hero revives automatically after about two hours and returns to Office Cubicles. You keep your XP and equipment but lose 10% of your current gold.</p>
       <h2 id="recaps">Recaps</h2>
-      <p>Your screen carries a short recap of the last finished night or day, in your TRMNL's local time. At 07:00 the night recap reports 19:00 to 07:00 and stays up all day. At 19:00 the day recap reports 07:00 to 19:00 and stays up all evening and overnight. The office window shows day and night on the same hours. The newest stories above it are always live.</p>
+      <p>Your screen carries a short recap of the last finished night or day, in your TRMNL's local time. At 07:00 the night recap reports 19:00 to 07:00 and stays up all day. At 19:00 the day recap reports 07:00 to 19:00 and stays up all evening and overnight. The office window shows day and night on the same hours. The stories above it are always the latest.</p>
       <h2 id="understanding-rankings">Understanding rankings</h2>
       <p>The screen shows the seven-day XP Top 5 for your level group, with your own row marked, or added below the list when you sit lower. The companion also offers a 24-hour view and a lifetime board. Rankings publish hourly, so a recent adventure or level-up can appear before your rank updates.</p>
       <p>Paused and sleeping heroes keep their progress, but their recent XP ages out. After seven days without earned XP, they leave the weekly board until they earn XP again. Lifetime progress stays recorded.</p>
       <h2 id="sharing-your-hero">Sharing your hero</h2>
-      <p>Your hero has a public page with its level, rank, current floor, lifetime counts and achievements. Gold and the adventure log are never shown, and gear only when it's another player's spare your hero is holding. Your name links to the page from the rankings and from other players' raids and meetings, and that's where other players follow you. Settings has Share and Copy link buttons, and a shared link shows a picture card of your hero with its name, level and rank. If you'd rather not have a page, Hide my hero page in Settings hides it straight away. Nobody can then follow you or name you their rival.</p>
+      <p>Your hero has a public page with its level, rank, current floor, lifetime counts and achievements. Gold and the adventure log are never shown, and gear only when it's another player's spare your hero is holding. Your name links to the page from the rankings and from other players' raids and meetings, and that's where other players follow you. Settings has Share and Copy link buttons, and a shared link shows a picture card of your hero with its name, level and rank. To hide it, choose Hide my hero page in Settings. It goes straight away, and while it's hidden nobody can follow you or name you their rival.</p>
       <h2 id="following-and-rivals">Following and rivals</h2>
       <p>Signed in, you can follow another player from their public hero page, up to 20 players. Everyone you follow is listed under Rankings, with their hero's level, rank and where they are, and links to their pages. Mark one of them as your rival to keep them at the top of the list with a line saying who is ahead. Your rival also gets raided more: half your hero's raids go after their desk when they can be raided. Your rival is told who named them and can name you back. Following anyone else changes nothing in play, and nobody is told when you follow them. If a player hides their page, you see only their name until they show it again. If they change their public name, they drop off your list.</p>
       <h2 id="names">Names</h2>
       <p>You have two names. Your hero's name is on your TRMNL, the rankings and your hero page; to change it, buy a “Hi, my name is” name tag on the Bag page for 200 gold. One is in stock a day. Your public name is you, across every TRMNL game: it shows beside your hero in the rankings, in other players' raids and meetings, and in your page's link. You can change it for free once every 7 days from Account. Links to your old page stop working, and nobody else can take your old name for 7 days.</p>
       <h2 id="gender">Gender</h2>
-      <p>You pick your hero's gender, male or female, when you create it. It only changes how your hero looks, on your TRMNL, your hero page and in other players' meetings; neither one plays any differently. To change it later, buy a makeover on the Bag page for 200 gold, any time.</p>
+      <p>You pick your hero's gender, male or female, when you create it. It only changes how your hero looks on your TRMNL, your hero page and in other players' meetings. Both play the same. To change it later, buy a makeover on the Bag page for 200 gold, any time.</p>
       <h2 id="alerts">Alerts</h2>
       <p>Your TRMNL is the main way to keep up with your hero, but Settings can also send a phone notification in two cases, each off until you turn it on:</p>
       <ul>
@@ -349,7 +349,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
       </ul>
       <h3 id="if-the-screen-looks-old">The screen looks old</h3>
       <ul>
-        <li>"Updates delayed" means the game service is running late. Nothing is lost and you don't need to do anything.</li>
+        <li>"Updates delayed" means the game service is running late. Your hero's progress is kept, and the screen catches up once the service does.</li>
         <li>If the companion website is current but the screen is not, check the plugin's refresh setting and playlist position in TRMNL.</li>
         <li>Adventures run every quarter hour, on the hour and at :15, :30 and :45 in your TRMNL timezone. The screen shows no countdown; the time beside each story is when it happened, and the companion shows the next adventure.</li>
         <li>If you disconnected or uninstalled, install again from TRMNL. Your hero keeps all progress.</li>

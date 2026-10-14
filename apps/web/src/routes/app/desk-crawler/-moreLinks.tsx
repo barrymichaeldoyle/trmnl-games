@@ -39,7 +39,7 @@ export function MoreLinks() {
             <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center border-2 border-night bg-night text-gold-ink"><Glyph name="heart" size={20} /></span>
             <span className="flex min-w-0 flex-col">
               <span className="font-semibold underline underline-offset-4">Sponsor on GitHub</span>
-              <span className="text-sm text-muted">Help keep the games running. Optional; nothing in play changes.</span>
+              <span className="text-sm text-muted">Help keep the games running. Sponsors get nothing extra in play.</span>
             </span>
           </a>
         </li>

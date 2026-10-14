@@ -24,7 +24,7 @@ export const Route = createFileRoute('/games/paper-lives')({
         </figure>
         <ul className="flex flex-col gap-2 [&_li]:ml-5 [&_li]:list-disc">
           <li>Sixteen traits, thirty jobs, six kinds of pet and four hundred things that can happen.</li>
-          <li>One decision most years, taken in the companion. Left alone, a life takes the gentle option.</li>
+          <li>One decision most years, taken in the companion. If you don’t answer, the quietest option is chosen.</li>
           <li>Partners, children, grandchildren, a house and a will to pass it on.</li>
           <li>An album of every life lived, a family tree, and weekly boards for the longest and wealthiest lives.</li>
         </ul>

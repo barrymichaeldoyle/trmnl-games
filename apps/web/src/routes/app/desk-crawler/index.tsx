@@ -412,7 +412,7 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
       <ConfirmSheet open title={`${option.label}?`} confirmLabel={option.label} busyLabel="Deciding…" cancelLabel="Not yet" pending={intents.choose.pending} {...common} onConfirm={async () => { if (await intents.choose.run({ optionId: option.id }, 'Decided.')) close() }}>
         <Consequences>
           <li>This costs <strong>{costs}</strong>{gains ? `, and gives ${gains}` : ''}.</li>
-          <li>A decision can't be undone. If you don't answer, “{hero.choice.options.find((o) => o.id === hero.choice!.defaultOptionId)?.label}” happens by itself.</li>
+          <li>A decision can't be undone. If you don't answer, “{hero.choice.options.find((o) => o.id === hero.choice!.defaultOptionId)?.label}” is chosen for you.</li>
         </Consequences>
       </ConfirmSheet>
     )
