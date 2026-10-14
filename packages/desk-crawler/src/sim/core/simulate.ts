@@ -439,6 +439,7 @@ class TickRun {
         const monsterHpMax = standing?.maxHp ?? (digIn ? Math.floor((monster.hp * rule!.hpMultiplierPct) / 100) : elite ? Math.floor((monster.hp * c.elite.hpMultiplierPct) / 100) : monster.hp)
         let monsterHp = standing?.hp ?? monsterHpMax
         const monsterHpStart = monsterHp
+        const monsterAttack = phase !== undefined ? Math.floor((monster.attack * rule!.attackPct) / 100) : monster.attack
         const rounds: CombatRound[] = []
         let result: 'victory' | 'retreat' | 'lethal' = 'retreat'
         for (let round = 0; round < c.maxCombatRounds; round += 1) {
@@ -449,15 +450,16 @@ class TickRun {
             result = 'victory'
             break
           }
-          const monsterDamage = this.damage(monster.attack, stats.defense)
+          const monsterDamage = this.damage(monsterAttack, stats.defense)
           h.hp = Math.max(0, h.hp - monsterDamage)
           rounds.push({ heroDamage, monsterDamage })
           if (h.hp === 0) {
             result = 'lethal'
             break
           }
-          // D163: against a dug-in elite the hero steps back below its stance's rest line; the elite keeps its HP.
-          if (phase !== undefined && h.hp * 100 < max * sustain.restBelowPct) break
+          // D163: against a dug-in elite the hero steps back once it falls below its step-back line, a share of its
+          // stance's rest line; the elite keeps its HP. Fighting on past the rest line is where the knockouts come from.
+          if (phase !== undefined && h.hp * 10_000 < max * sustain.restBelowPct * rule!.stepBackPct) break
         }
         vars.monster = monster.name
         let gearDropped = false

@@ -4,21 +4,24 @@ import { contentV23 } from './v23'
 /*
  * Content catalog v24 (D163): dug-in elites (P42). From level 12, on the
  * Cafeteria Depths or deeper, about one elite in eight digs in: its HP carries
- * over from tick to tick and the hero comes back to it, six rounds a tick,
- * resting by its stance, with no retreat and no gold lost. The fall pays the
- * elite's XP and gold several times over and a rare or epic find from the floor.
- * It leaves after six hours, on a knockout, on travel or when the player walks
- * away. The numbers start from the spec and are tuned by tools/balance/standoffs.ts.
+ * over from tick to tick and the hero comes back to it, six rounds a tick. It
+ * hits hard, and the hero fights on to half its stance's rest line before it
+ * steps back, so a standoff can end in a knockout. The fall pays the elite's XP
+ * and gold many times over and a rare or epic find from the floor. It leaves
+ * after four hours, on a knockout, on travel or when the player walks away.
+ * Tuned by tools/balance/standoffs.ts to about four wins in five.
  * Everything else is v23.
  */
 const standoff: StandoffRule = {
   digInPct: 12,
   minLevel: 12,
   minBiomeTier: 3,
-  hpMultiplierPct: 800,
-  durationTicks: 24,
-  xpMultiplier: 10,
-  goldMultiplier: 6,
+  hpMultiplierPct: 1000,
+  attackPct: 180,
+  stepBackPct: 50,
+  durationTicks: 16,
+  xpMultiplier: 12,
+  goldMultiplier: 8,
   narrative: {
     dugIn: {
       cafeteria_depths: ['An elite {monster} has dug in behind the dishwasher.', 'An elite {monster} has dug in under the salad bar.', 'An elite {monster} has dug in inside the walk-in fridge.'],

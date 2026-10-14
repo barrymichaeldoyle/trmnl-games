@@ -196,6 +196,8 @@ export function validateCatalog(content: ContentCatalog): string[] {
     if (!(standoff.durationTicks >= 4 && standoff.durationTicks <= 96)) problems.push('a standoff lasts 4 to 96 ticks')
     if (!(standoff.hpMultiplierPct > c.elite.hpMultiplierPct)) problems.push('a dug-in elite needs more HP than a one-tick elite')
     if (!(standoff.xpMultiplier >= 1 && standoff.goldMultiplier >= 1)) problems.push('standoff multipliers must be at least 1')
+    if (!(standoff.stepBackPct >= 0 && standoff.stepBackPct <= 100)) problems.push('the step-back line is 0–100% of the rest line')
+    if (!(standoff.attackPct >= 100 && standoff.attackPct <= 300)) problems.push('a dug-in elite hits at 100–300% of the monster\'s attack')
     if (!content.rarities.some((rule) => rule.rarity === 'rare' || rule.rarity === 'epic')) problems.push('a standoff find needs a rare or epic rarity')
     const lines = standoff.narrative
     const floors = content.biomes.filter((b) => !b.safe && b.tier >= standoff.minBiomeTier)

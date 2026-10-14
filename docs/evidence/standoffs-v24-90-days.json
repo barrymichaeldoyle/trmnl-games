@@ -8,23 +8,23 @@
       "cohort": "daily",
       "eligibleHeroWeeks": 1648.1,
       "standoffsPerHeroWeek": 1.1,
-      "starts": 1804,
-      "winShare": 100,
+      "starts": 1791,
+      "winShare": 80.2,
       "ended": {
-        "won": 1804,
-        "knockout": 0,
-        "clock": 0,
+        "won": 1437,
+        "knockout": 143,
+        "clock": 211,
         "other": 0
       },
       "medianFightTicksToWin": 3,
       "medianTicksToWin": 3,
       "knockoutsPerHeroDayAt12": {
         "before": 0.02,
-        "after": 0.018000000000000002,
-        "changePct": -8.6
+        "after": 0.031,
+        "changePct": 55.6
       },
-      "xpMedianChangePct": 1.4,
-      "goldEarnedMedianChangePct": 0.6,
+      "xpMedianChangePct": 0.1,
+      "goldEarnedMedianChangePct": -0.9,
       "finalLevelMedian": {
         "before": 46,
         "after": 46
@@ -34,49 +34,49 @@
       "cohort": "three-day",
       "eligibleHeroWeeks": 1565.3,
       "standoffsPerHeroWeek": 1.1,
-      "starts": 1708,
-      "winShare": 100,
+      "starts": 1657,
+      "winShare": 79.2,
       "ended": {
-        "won": 1708,
-        "knockout": 0,
-        "clock": 0,
+        "won": 1312,
+        "knockout": 127,
+        "clock": 218,
         "other": 0
       },
       "medianFightTicksToWin": 3,
       "medianTicksToWin": 3,
       "knockoutsPerHeroDayAt12": {
         "before": 0.013000000000000001,
-        "after": 0.012,
-        "changePct": -6.3
+        "after": 0.025,
+        "changePct": 95.8
       },
-      "xpMedianChangePct": 1.8,
-      "goldEarnedMedianChangePct": 1.1,
+      "xpMedianChangePct": -0.8,
+      "goldEarnedMedianChangePct": -1.5,
       "finalLevelMedian": {
         "before": 44,
-        "after": 45
+        "after": 44
       }
     },
     {
       "cohort": "seven-day",
       "eligibleHeroWeeks": 1259.6,
       "standoffsPerHeroWeek": 0.7,
-      "starts": 859,
-      "winShare": 100,
+      "starts": 828,
+      "winShare": 60.5,
       "ended": {
-        "won": 859,
-        "knockout": 0,
-        "clock": 0,
+        "won": 501,
+        "knockout": 112,
+        "clock": 215,
         "other": 0
       },
-      "medianFightTicksToWin": 3,
-      "medianTicksToWin": 4,
+      "medianFightTicksToWin": 4,
+      "medianTicksToWin": 5,
       "knockoutsPerHeroDayAt12": {
         "before": 0.012,
-        "after": 0.011000000000000001,
-        "changePct": -12.3
+        "after": 0.024,
+        "changePct": 96.2
       },
-      "xpMedianChangePct": -1,
-      "goldEarnedMedianChangePct": -0.9,
+      "xpMedianChangePct": -5.7,
+      "goldEarnedMedianChangePct": -2.7,
       "finalLevelMedian": {
         "before": 33,
         "after": 33

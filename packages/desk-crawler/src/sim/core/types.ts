@@ -742,6 +742,10 @@ export interface StandoffRule {
   readonly minBiomeTier: number
   /** The dug-in elite's HP as a share of the monster's. */
   readonly hpMultiplierPct: number
+  /** Its attack as a share of the monster's: hard enough that a round can knock out a hero above its rest line. */
+  readonly attackPct: number
+  /** The hero steps back once its HP is below this share of its stance's rest line (100: at the line; 0: never, it fights all six rounds). */
+  readonly stepBackPct: number
   readonly durationTicks: number
   readonly xpMultiplier: number
   readonly goldMultiplier: number

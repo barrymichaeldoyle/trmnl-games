@@ -15,7 +15,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     changes: [
       {
         title: 'Elites can dig in',
-        body: 'From level 12, on the Cafeteria Depths and deeper, an elite sometimes digs in and takes a few adventures to beat. Your TRMNL shows its health going down, and your hero comes back to it between rests. When it falls it pays several times an elite’s XP and gold and a rare or epic find. It leaves after six hours. You can walk away from it on the Hero page.',
+        body: 'From level 12, on the Cafeteria Depths and deeper, an elite sometimes digs in and takes a few adventures to beat. Your TRMNL shows its health going down, and your hero comes back to it between rests. It hits hard and can knock your hero out, and it leaves after four hours. When it falls it pays many times an elite’s XP and gold and a rare or epic find. You can walk away from it on the Hero page.',
       },
       {
         title: 'What’s new has a home in More',

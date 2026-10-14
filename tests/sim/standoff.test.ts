@@ -82,14 +82,14 @@ describe('dug-in elites (D163)', () => {
     expect(dugIn / elites).toBeLessThan(0.16)
   })
 
-  it('saves the elite with its HP, a six-hour clock and no retreat cost', () => {
+  it('saves the elite with its HP, its clock and no retreat cost', () => {
     const [seed] = dugInSeeds(1)
     const { hero, inventory } = setup(contentV24)
     const result = at(contentV24, hero, inventory, seed!)
     const standoff = result.nextHero.standoff!
     const outcome = result.event!.detail.outcome
     if (outcome.variant !== 'combat') throw new Error('expected combat')
-    expect(standoff).toMatchObject({ biomeId: 'archive', hp: outcome.monsterHpEnd, maxHp: outcome.monsterHpMax, startedTick: 500, untilTick: 524 })
+    expect(standoff).toMatchObject({ biomeId: 'archive', hp: outcome.monsterHpEnd, maxHp: outcome.monsterHpMax, startedTick: 500, untilTick: 500 + contentV24.standoff!.durationTicks })
     expect(standoff.hp).toBeGreaterThan(0)
     expect(result.nextHero.gold).toBe(hero.gold)
     expect(result.nextHero.counters.retreats).toBe(hero.counters.retreats)
@@ -98,7 +98,8 @@ describe('dug-in elites (D163)', () => {
   })
 
   it('fights on from the saved HP until it falls, paying the fall once with a rare or better find', () => {
-    let { hero, inventory } = setup(contentV24)
+    // A level-30 hero, strong enough that the hard-hitting elite falls before it can knock the hero out.
+    let { hero, inventory } = setup(contentV24, { level: 30 })
     hero = { ...hero, standoff: auditor({ startedTick: 500, untilTick: 524 }) }
     let tick = 500
     let won: SimulationResult | undefined

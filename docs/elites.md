@@ -130,10 +130,11 @@ These are proposals with the recommended option first. Barry approves or changes
 
 ## Build notes (D163, 2026-10-14)
 
-Built in one pass, E1 to E5, as content v24 with template v55 and achievement catalog version 13. Where the build differs from the spec above:
+Built in one pass, E1 to E5, as content v24 with template v55 and achievement catalog version 13, then retuned the same day when Barry asked for real risk. Where the build differs from the spec above:
 
-- **The hero steps back at its rest line.** Inside a fight tick the hero stops after any round that leaves it below its stance's rest line, and the elite keeps its HP. Six full rounds every tick raised knockouts at level 12+ by 26–50% in the first harness pass; the spec's settled point 3 already gives the rest decision to sustain. Nothing is lost for stepping back.
-- **Numbers.** 800% HP (spec 600%), ×10 XP (spec ×12), ×6 gold (spec ×8). At ×8 the daily cohort's gold rose 5.3%, past the 5% limit.
+- **It hits hard, and the hero fights on past its rest line.** The elite attacks at 180% of the monster's attack (`attackPct`). Inside a fight tick the hero steps back once its HP is below half its stance's rest line (`stepBackPct` 50), and the elite keeps its HP. Nothing is lost for stepping back; a round that lands before then can knock the hero out. The first build stepped back at the rest line itself, which made every standoff a sure win; without any step back, knockouts at level 12+ rose 26–50% with 94% won.
+- **Numbers.** 1000% HP (spec 600%), a 16-tick clock (four hours, spec six), ×12 XP and ×8 gold as in the spec.
+- **Outcomes.** About 80% won, 8% knocked out and 12% slipped away for daily and three-day players; knockouts per hero-day at level 12+ roughly 1.5–2 times the v23 rate, which Barry's request for real risk accepts in place of the 10% limit in E1.
 - **Slipping away is the tick's whole event.** When the clock runs out while the hero explores, "The elite X slipped away." is that tick's story and nothing else happens; it is a combat log with the `standoff_left` outcome.
 - **A fall on the dig-in tick counts.** An elite beaten in the tick it dug in pays the standoff reward and counts as a start and a win.
 - **Travel confirmation** is the `leaveStandoff` argument on `heroes.changeBiome`; without it travel is refused with `STANDOFF_RUNNING` while a standoff runs. The harness player stays to finish a standoff instead of travelling.

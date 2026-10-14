@@ -433,7 +433,7 @@ function StandoffCard({ standoff, status, healthy, pending, onWalkAway }: { stan
         <Meter label={`Elite ${standoff.name} HP`} value={standoff.hp} max={standoff.maxHp} tone="hp" />
         <p className="text-sm">Leaves in {standoff.ticksLeft === 1 ? 'one adventure' : `${standoff.ticksLeft} adventures`} ({aboutTime(standoff.ticksLeft)}).</p>
       </div>
-      <p className="text-sm">{fighting ? 'Your hero fights it every adventure and steps back to rest when its stance says so.' : 'Your hero is resting and goes back to it once its health is up.'} When it falls it pays several times an elite's XP and gold, and a rare or epic find from this floor.</p>
+      <p className="text-sm">{fighting ? 'Your hero fights it every adventure.' : 'Your hero is resting and goes back to it once its health is up.'} It hits hard, and your hero fights on past its stance's rest line, so it can be knocked out. When it falls it pays many times an elite's XP and gold, and a rare or epic find from this floor.</p>
       <Button variant="secondary" icon="door" className="self-start" disabled={!healthy} pending={pending} busyLabel="Walking away…" onClick={onWalkAway}>
         Walk away
       </Button>

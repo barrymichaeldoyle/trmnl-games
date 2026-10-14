@@ -273,7 +273,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <h2 id="dug-in-elites">Dug-in elites</h2>
           <p>From level {STANDOFF.minLevel}, on the {DIG_IN_FLOOR.name} and deeper floors, an elite sometimes digs in instead of falling in one fight. Your TRMNL shows it with its health bar, and your hero comes back to it every adventure until it falls.</p>
           <ul>
-            <li>Each adventure your hero fights it for up to six rounds. Its health carries over, and your hero steps back to rest whenever its stance says so. No gold is lost for breaking off.</li>
+            <li>Each adventure your hero fights it for up to six rounds, and its health carries over. It hits much harder than an ordinary elite, and your hero fights on past its stance's rest line before stepping back, so a standoff can end in a knockout. No gold is lost for breaking off.</li>
             <li>When it falls, it pays {STANDOFF.xpMultiplier} times the monster's XP and {STANDOFF.goldMultiplier} times its gold, plus a rare or epic find from that floor.</li>
             <li>It leaves after {Math.round(STANDOFF.durationTicks / 4)} hours, or sooner if your hero is knocked out or travels. A pause doesn't stop the clock.</li>
             <li>The Hero page shows its health and when it leaves. You can walk away from it there, and travel asks before leaving it behind.</li>
