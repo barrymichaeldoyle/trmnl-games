@@ -164,12 +164,20 @@ export function stepAt(table: readonly (readonly [number, number])[], age: numbe
   return value
 }
 
-/** A person's gender where the story knows it or the name says it plainly (content v2's name lists); else none. */
-export function genderOf(person: Pick<Person, 'name' | 'gender'>, content: Pick<PaperLivesCatalog, 'names'>): 'female' | 'male' | undefined {
+/**
+ * A person's gender: where the story knows it, else what the name says plainly (content v2's name lists), else one
+ * fixed for that person from their id and name, so a Robin or a Sam is the same mother or father every time. Story
+ * lines never use pronouns for other people, so nothing in the story can disagree. Catalogs without name lists
+ * (v1) give none.
+ */
+export function genderOf(person: Pick<Person, 'name' | 'gender'> & { readonly id?: string }, content: Pick<PaperLivesCatalog, 'names'>): 'female' | 'male' | undefined {
   if (person.gender) return person.gender
-  if (content.names.female?.includes(person.name)) return 'female'
-  if (content.names.male?.includes(person.name)) return 'male'
-  return undefined
+  if (!content.names.female || !content.names.male) return undefined
+  if (content.names.female.includes(person.name)) return 'female'
+  if (content.names.male.includes(person.name)) return 'male'
+  let h = 0x811c9dc5
+  for (const ch of `${person.id ?? ''}|${person.name}`) h = Math.imul(h ^ ch.codePointAt(0)!, 0x01000193) >>> 0
+  return h % 2 === 0 ? 'female' : 'male'
 }
 
 const FAMILY: Partial<Record<Role, readonly [female: string, male: string, either: string]>> = {
@@ -181,7 +189,7 @@ const FAMILY: Partial<Record<Role, readonly [female: string, male: string, eithe
 const OTHER: Record<Role, string> = { parent: 'Parent', sibling: 'Sibling', partner: 'Partner', former_partner: 'Former partner', child: 'Child', grandchild: 'Grandchild', friend: 'Friend', colleague: 'Colleague' }
 
 /** How the companion names a person's place in the family: Mother, Brother, Wife, Friend. */
-export function familyLabel(person: Pick<Person, 'name' | 'gender' | 'role' | 'step'>, content: Pick<PaperLivesCatalog, 'names'>): string {
+export function familyLabel(person: Pick<Person, 'name' | 'gender' | 'role' | 'step'> & { readonly id?: string }, content: Pick<PaperLivesCatalog, 'names'>): string {
   const gender = genderOf(person, content)
   if (person.role === 'partner') {
     if (person.step === 'married') return gender === 'female' ? 'Wife' : gender === 'male' ? 'Husband' : 'Spouse'

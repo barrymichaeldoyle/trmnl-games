@@ -36,12 +36,15 @@ describe('Paper Lives content v2', () => {
 })
 
 describe('Paper Lives family labels (Barry, 2026-10-14)', () => {
-  it('says mother or father where the name or the story says so, and stays plain otherwise', async () => {
+  it('says mother or father for every parent, from the story, the name or the person', async () => {
     const { familyLabel } = await import('@trmnl-games/paper-lives/sim')
     const person = (name: string, role: 'parent' | 'sibling' | 'child' | 'grandchild' | 'partner' | 'friend', extra = {}) => ({ name, role, ...extra })
     expect(familyLabel(person('Maud', 'parent'), contentV2)).toBe('Mother')
     expect(familyLabel(person('Hamish', 'parent'), contentV2)).toBe('Father')
-    expect(familyLabel(person('Sam', 'parent'), contentV2)).toBe('Parent')
+    // A name used either way gets one gender for that person, the same every time.
+    const sam = familyLabel({ ...person('Sam', 'parent'), id: 'p2' }, contentV2)
+    expect(['Mother', 'Father']).toContain(sam)
+    expect(familyLabel({ ...person('Sam', 'parent'), id: 'p2' }, contentV2)).toBe(sam)
     expect(familyLabel(person('Sam', 'parent', { gender: 'female' }), contentV2)).toBe('Mother')
     expect(familyLabel(person('Ruby', 'sibling'), contentV2)).toBe('Sister')
     expect(familyLabel(person('Otto', 'child'), contentV2)).toBe('Son')

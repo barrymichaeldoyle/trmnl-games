@@ -428,7 +428,7 @@ The two behaviour changes are tuning fields only v2 sets (`proposalMinAge`, `ope
 
 Not changed, noted for later: years can be busy (up to six lines in an absent player's year), an epitaph can name a teenage Saturday job as the life's work when it was held longest, and job offers take no account of the kind of education (a trade apprentice can become a nurse).
 
-**Family labels.** Barry asked to see mother or father. Content v2 sorts the first names into female, male and either (`names.female`, `names.male`); the People page labels family by them (Mother, Brother, Daughter, Granddaughter, Wife), and names used either way keep the plain label. The parent who was the last character takes the label from that life's pronouns. Story lines stay name-based. The companion now sets the names of people and pets in bold in the story, the recap and people's histories.
+**Family labels.** Barry asked to see mother or father. Content v2 sorts the first names into female, male and either (`names.female`, `names.male`); the People page labels family by them (Mother, Brother, Daughter, Granddaughter, Wife). A name used either way (Robin, Sam) gets one gender for that person, fixed from their id and name, so every parent is a mother or a father. The parent who was the last character takes the label from that life's pronouns. Story lines stay name-based. The companion now sets the names of people and pets in bold in the story, the recap and people's histories.
 
 Production runs v1 until it is switched; content v3 below supersedes v2, so the switch goes straight to v3.
 
