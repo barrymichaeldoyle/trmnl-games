@@ -557,3 +557,5 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 2026-10-14, D163: dug-in elites built as content v24 (P42 approved by Barry's "done and dusted"): rules, harness, backend, companion card, device bar in every layout (template v55), achievement catalog version 13 and one career rung. Production switch to v24 waits for Barry.
 
 2026-10-14, D163 revised for real risk (Barry): 180% attack, step back at half the rest line, 1000% HP, four-hour clock, ×12 XP and ×8 gold; about 80% won, 8% knocked out, 12% slip away.
+
+2026-10-14, D163 live: Barry switched production to content v24; run 984 (tick 984) completed clean on v24, 20 heroes processed, none quarantined.
