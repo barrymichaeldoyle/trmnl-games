@@ -68,6 +68,8 @@ import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/con
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
 import { Route as ConnectTrmnlIdleAnglerInstallRouteImport } from './routes/connect/trmnl/idle-angler/install'
 import { Route as ConnectTrmnlIdleAnglerManageRouteImport } from './routes/connect/trmnl/idle-angler/manage'
+import { Route as ConnectTrmnlPaperLivesInstallRouteImport } from './routes/connect/trmnl/paper-lives/install'
+import { Route as ConnectTrmnlPaperLivesManageRouteImport } from './routes/connect/trmnl/paper-lives/manage'
 import { Route as ProfileAliasLivesNRouteImport } from './routes/profile/$alias_.lives.$n'
 
 const IndexRoute = IndexRouteImport.update({
@@ -374,6 +376,18 @@ const ConnectTrmnlIdleAnglerManageRoute =
     path: '/connect/trmnl/idle-angler/manage',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ConnectTrmnlPaperLivesInstallRoute =
+  ConnectTrmnlPaperLivesInstallRouteImport.update({
+    id: '/connect/trmnl/paper-lives/install',
+    path: '/connect/trmnl/paper-lives/install',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ConnectTrmnlPaperLivesManageRoute =
+  ConnectTrmnlPaperLivesManageRouteImport.update({
+    id: '/connect/trmnl/paper-lives/manage',
+    path: '/connect/trmnl/paper-lives/manage',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ProfileAliasLivesNRoute = ProfileAliasLivesNRouteImport.update({
   id: '/profile/$alias_/lives/$n',
   path: '/profile/$alias/lives/$n',
@@ -440,6 +454,8 @@ export interface FileRoutesByFullPath {
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
+  '/connect/trmnl/paper-lives/install': typeof ConnectTrmnlPaperLivesInstallRoute
+  '/connect/trmnl/paper-lives/manage': typeof ConnectTrmnlPaperLivesManageRoute
   '/profile/$alias/lives/$n': typeof ProfileAliasLivesNRoute
 }
 export interface FileRoutesByTo {
@@ -498,6 +514,8 @@ export interface FileRoutesByTo {
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
+  '/connect/trmnl/paper-lives/install': typeof ConnectTrmnlPaperLivesInstallRoute
+  '/connect/trmnl/paper-lives/manage': typeof ConnectTrmnlPaperLivesManageRoute
   '/profile/$alias/lives/$n': typeof ProfileAliasLivesNRoute
 }
 export interface FileRoutesById {
@@ -561,6 +579,8 @@ export interface FileRoutesById {
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
+  '/connect/trmnl/paper-lives/install': typeof ConnectTrmnlPaperLivesInstallRoute
+  '/connect/trmnl/paper-lives/manage': typeof ConnectTrmnlPaperLivesManageRoute
   '/profile/$alias_/lives/$n': typeof ProfileAliasLivesNRoute
 }
 export interface FileRouteTypes {
@@ -625,6 +645,8 @@ export interface FileRouteTypes {
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
+    | '/connect/trmnl/paper-lives/install'
+    | '/connect/trmnl/paper-lives/manage'
     | '/profile/$alias/lives/$n'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -683,6 +705,8 @@ export interface FileRouteTypes {
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
+    | '/connect/trmnl/paper-lives/install'
+    | '/connect/trmnl/paper-lives/manage'
     | '/profile/$alias/lives/$n'
   id:
     | '__root__'
@@ -745,6 +769,8 @@ export interface FileRouteTypes {
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
+    | '/connect/trmnl/paper-lives/install'
+    | '/connect/trmnl/paper-lives/manage'
     | '/profile/$alias_/lives/$n'
   fileRoutesById: FileRoutesById
 }
@@ -778,6 +804,8 @@ export interface RootRouteChildren {
   ConnectTrmnlDeskCrawlerManageRoute: typeof ConnectTrmnlDeskCrawlerManageRoute
   ConnectTrmnlIdleAnglerInstallRoute: typeof ConnectTrmnlIdleAnglerInstallRoute
   ConnectTrmnlIdleAnglerManageRoute: typeof ConnectTrmnlIdleAnglerManageRoute
+  ConnectTrmnlPaperLivesInstallRoute: typeof ConnectTrmnlPaperLivesInstallRoute
+  ConnectTrmnlPaperLivesManageRoute: typeof ConnectTrmnlPaperLivesManageRoute
   ProfileAliasLivesNRoute: typeof ProfileAliasLivesNRoute
 }
 
@@ -1196,6 +1224,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnectTrmnlIdleAnglerManageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/connect/trmnl/paper-lives/install': {
+      id: '/connect/trmnl/paper-lives/install'
+      path: '/connect/trmnl/paper-lives/install'
+      fullPath: '/connect/trmnl/paper-lives/install'
+      preLoaderRoute: typeof ConnectTrmnlPaperLivesInstallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connect/trmnl/paper-lives/manage': {
+      id: '/connect/trmnl/paper-lives/manage'
+      path: '/connect/trmnl/paper-lives/manage'
+      fullPath: '/connect/trmnl/paper-lives/manage'
+      preLoaderRoute: typeof ConnectTrmnlPaperLivesManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile/$alias_/lives/$n': {
       id: '/profile/$alias_/lives/$n'
       path: '/profile/$alias/lives/$n'
@@ -1334,6 +1376,8 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectTrmnlDeskCrawlerManageRoute: ConnectTrmnlDeskCrawlerManageRoute,
   ConnectTrmnlIdleAnglerInstallRoute: ConnectTrmnlIdleAnglerInstallRoute,
   ConnectTrmnlIdleAnglerManageRoute: ConnectTrmnlIdleAnglerManageRoute,
+  ConnectTrmnlPaperLivesInstallRoute: ConnectTrmnlPaperLivesInstallRoute,
+  ConnectTrmnlPaperLivesManageRoute: ConnectTrmnlPaperLivesManageRoute,
   ProfileAliasLivesNRoute: ProfileAliasLivesNRoute,
 }
 export const routeTree = rootRouteImport

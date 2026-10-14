@@ -79,7 +79,7 @@ function PaperLivesTile() {
   return (
     <section className="window flex flex-col gap-3 p-5" aria-labelledby="library-pl">
       <div className="flex items-center gap-4">
-        <img src="/games/paper-lives/favicon.svg" alt="" width={64} height={64} className="h-16 w-16 [image-rendering:pixelated]" />
+        <img src="/games/paper-lives/icon-192.png" alt="" width={64} height={64} className="h-16 w-16 [image-rendering:pixelated]" />
         <h2 id="library-pl" className="font-display text-2xl font-bold text-gold-ink">{games['paper-lives'].name}</h2>
       </div>
       {loading ? null : <p className="text-muted">{life ? lifeLine(life) : games['paper-lives'].description}</p>}

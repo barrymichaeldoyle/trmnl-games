@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import type { Canvas } from '@trmnl-games/desk-crawler/art/canvas'
 import { BRAND, Image, colourMark, markSvg } from './colour'
-import { deskCrawlerFavicon, deskCrawlerIcon, idleAnglerFavicon, idleAnglerIcon } from './gameIcons'
+import { deskCrawlerFavicon, deskCrawlerIcon, idleAnglerFavicon, idleAnglerIcon, paperLivesFavicon, paperLivesIcon } from './gameIcons'
 import { platformFaviconCanvas, platformIconCanvas } from './platformArt'
 
 function writeIconSet(out: string, iconArt: Canvas, faviconArt: Canvas): void {
@@ -63,3 +63,4 @@ function writeImages(out: string, favicon: Image, sizes: Array<[string, Image, n
 writeIconSet('apps/web/public', platformIconCanvas(), platformFaviconCanvas())
 writeGameIconSet('apps/web/public/games/desk-crawler', deskCrawlerIcon(), deskCrawlerFavicon(), 'docs/assets/plugin-icon.png')
 writeGameIconSet('apps/web/public/games/idle-angler', idleAnglerIcon(), idleAnglerFavicon(), 'docs/assets/idle-angler-plugin-icon.png')
+writeGameIconSet('apps/web/public/games/paper-lives', paperLivesIcon(), paperLivesFavicon(), 'docs/assets/paper-lives-plugin-icon.png')

@@ -233,6 +233,111 @@ wwwwwwwwwwwwwwww`, { a: '#3b2d6b', b: '#a8508f', c: '#f5895f', o: '#ffb35c', u: 
   return flatten(16, 16, [layer])
 }
 
+/* ---------------------------------------------------------------- Paper Lives */
+
+/**
+ * A snapshot from the album: a cream photo pinned at a slight lean over an older one, with a character in a red
+ * cardigan and their dog against a summer sky, a caption line under the picture, and gold corner mounts. Behind it,
+ * the companion's dusk purple with a few gold flecks.
+ */
+export function paperLivesIcon(): Image {
+  const W = 64
+  const back = new Layer(W, W)
+  bands(back, [[0, '#2c2650'], [16, '#3b2d6b'], [34, '#4a3a7a'], [52, '#3b2d6b']], W)
+  for (const [x, y] of [[5, 6], [58, 9], [8, 55], [57, 52], [3, 30], [61, 33], [12, 2], [50, 60]] as const) back.set(x, y, hash(x, y) > 0.5 ? GOLD_HI : '#c9b8ff')
+
+  // The older photo underneath, offset up and left, gone gold with age.
+  const under = new Layer(W, W)
+  for (let y = 5; y < 51; y += 1) for (let x = 7; x < 49; x += 1) under.set(x, y, x < 10 || y < 8 || x > 45 ? '#e8c98a' : '#d9b06a')
+  under.outline(NIGHT)
+
+  // The photo on top: a cream mount with a wider foot for the caption.
+  const photo = new Layer(W, W)
+  const L = 15
+  const T = 12
+  const R = 56
+  const B = 59
+  for (let y = T; y < B; y += 1) for (let x = L; x < R; x += 1) photo.set(x, y, CREAM)
+  // The picture: summer sky over a green hill.
+  const PL = L + 4
+  const PT = T + 4
+  const PR = R - 4
+  const PB = B - 12
+  for (let y = PT; y < PB; y += 1) for (let x = PL; x < PR; x += 1) {
+    const hill = PB - 7 - Math.round(2 * Math.sin((x - PL) / 5))
+    photo.set(x, y, y >= hill ? (y >= hill + 1 && hash(x, y, 2) > 0.8 ? '#5a7f3a' : '#6f9a4a') : y < PT + 8 ? '#7fb3e8' : '#a9c8f5')
+  }
+  photo.set(PL + 5, PT + 3, CREAM)
+  photo.set(PL + 6, PT + 3, CREAM)
+  photo.set(PL + 4, PT + 4, CREAM)
+  photo.set(PL + 7, PT + 4, CREAM)
+  photo.set(PL + 5, PT + 4, CREAM)
+  photo.set(PL + 6, PT + 4, CREAM)
+  // The character, head and shoulders: brown hair, glasses, a smile and a red cardigan.
+  photo.draw(`
+....KKKKKK....
+...KKKKKKKK...
+..KKhhhhhhKK..
+..KhSSSSSShK..
+..KSSSSSSSSK..
+..KSEESSEESK..
+...SSSSSSSS...
+...SPSSSSPS...
+....SmmmmS....
+.....SSSS.....
+...RRRwwRRR...
+..RRRRwwRRRR..
+.RRRRRwwRRRRR.
+.RRRRRwwRGRRR.
+RRRRRRwwRRRRRR
+RRRRRRwwRRRRRR
+RRRRRRwwRRRRRR`, { K: '#3a2416', h: '#6b4226', S: '#f2c39b', E: NIGHT, P: '#ee9a8a', m: '#8a3a3a', R: '#c8443c', w: '#f4e6c8', G: GOLD }, PL + 3, PB - 17)
+  // The dog beside them: a sandy terrier, ears up.
+  photo.draw(`
+.D..D...
+.DDDD...
+DNDDND..
+DDDDDDd.
+.DDDDDDd
+..DDDDDD
+..D.DD.D
+..D.DD.D`, { D: '#d9a35a', d: '#b07a3a', N: NIGHT }, PR - 11, PB - 9)
+  // The caption, written in ink under the picture.
+  for (const [x0, len, y] of [[PL + 1, 18, B - 8], [PL + 1, 11, B - 5]] as const) for (let x = x0; x < x0 + len; x += 1) if (hash(x, y, 9) > 0.18) photo.set(x, y, '#8a7f95')
+  photo.outline(NIGHT)
+
+  // Gold photo corners holding the top photo in the album.
+  const mounts = new Layer(W, W)
+  for (const [cx, cy, dx, dy] of [[L - 1, T - 1, 1, 1], [R, T - 1, -1, 1], [L - 1, B, 1, -1], [R, B, -1, -1]] as const) {
+    for (let i = 0; i < 5; i += 1) for (let j = 0; j < 5 - i; j += 1) mounts.set(cx + dx * i, cy + dy * j, i + j === 4 ? GOLD_LO : i === 0 || j === 0 ? GOLD_HI : GOLD)
+  }
+
+  return flatten(W, W, [back, under, photo, mounts])
+}
+
+/** The 16px tab icon: the snapshot with its gold corners, drawn by hand at tab size. */
+export function paperLivesFavicon(): Image {
+  const layer = new Layer(16, 16)
+  layer.draw(`
+aaaaaaaaaaaaaaaa
+aGGNNNNNNNNNNGGa
+aGNCCCCCCCCCCNGa
+aNCbbbbbbbbbbCNa
+aNCbbKKKbbbbbCNa
+aNCbKSSSKbbbbCNa
+aNCbbSSSbbbbbCNa
+aNCbRRRRRbDbDCNa
+aNCgRRRRRgDDDCNa
+aNCgRRRRRgDDgCNa
+aNCCCCCCCCCCCCNa
+aNCllllllllCCCNa
+aGNCCCCCCCCCCNGa
+aGGNNNNNNNNNNGGa
+aaaaaaaaaaaaaaaa
+aaaaaaaaaaaaaaaa`, { a: '#3b2d6b', N: NIGHT, C: CREAM, G: GOLD, b: '#7fb3e8', g: '#6f9a4a', K: '#3a2416', S: '#f2c39b', R: '#c8443c', D: '#d9a35a', l: '#8a7f95' }, 0, 0)
+  return flatten(16, 16, [layer])
+}
+
 /* ------------------------------------------------------------ Desk Crawler */
 
 /**
