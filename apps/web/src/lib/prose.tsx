@@ -174,11 +174,31 @@ export function SiteFooter() {
   )
 }
 
+/**
+ * The signed-in app's footer (D156): one row of the links a player needs, so the site's full footer of project and
+ * marketing links does not sit under every game page.
+ */
+export function AppFooter() {
+  const link = 'inline-flex min-h-11 items-center underline-offset-4 hover:text-ink hover:underline'
+  return (
+    <footer className="mt-auto border-t border-rule text-sm text-muted">
+      <ul className={`flex flex-wrap gap-x-5 py-4 ${SITE_FRAME}`}>
+        <li><Link to="/whats-new" className={link}>What’s new</Link></li>
+        <li><Link to="/help/desk-crawler" className={link}>Help</Link></li>
+        <li><Link to="/support" className={link}>Support</Link></li>
+        <li><Link to="/privacy" className={link}>Privacy</Link></li>
+        <li><Link to="/terms" className={link}>Terms</Link></li>
+        <AnalyticsLink className={link} />
+      </ul>
+    </footer>
+  )
+}
+
 /** Reopens the analytics consent panel; shown only where analytics can run, after hydration so SSR markup matches. */
-function AnalyticsLink() {
+function AnalyticsLink({ className = FOOTER_LINK }: { className?: string }) {
   const [shown, setShown] = useState(false)
   useEffect(() => setShown(analyticsConfigured()), [])
-  return shown ? <li><button type="button" className={FOOTER_LINK} onClick={openAnalyticsPreferences}>Analytics preferences</button></li> : null
+  return shown ? <li><button type="button" className={className} onClick={openAnalyticsPreferences}>Analytics preferences</button></li> : null
 }
 
 export const SUPPORT_EMAIL = 'barry@barrymichaeldoyle.com'

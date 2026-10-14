@@ -154,7 +154,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const strengths = ((bag?.potionRows ?? []) as PotionRow[]).filter((row) => row.count > 0)
   const fit = strengths.find((row) => hero.hp + row.heals >= hero.maxHp) ?? strengths.at(-1) ?? null
   const healing = fit === null ? 0 : Math.min(hero.maxHp - hero.hp, fit.heals)
-  const potionLabel = !bag ? 'Drink potion' : !bag.potions ? 'No potions' : hero.hp >= hero.maxHp ? `Drink potion (${bag.potions})` : `Drink potion +${healing} HP (${bag.potions})`
+  const potionLabel = `Drink potion +${healing} HP (${bag?.potions ?? 0})`
   const drink = () => (strengths.length > 1 ? setAsk({ kind: 'potion' }) : potion.run(fit === null ? {} : { templateId: fit.templateId }, `${fit === null ? 'Potion' : fit.name} drunk, +${healing} HP.`))
   const chosenStance = hero.stances.find((option) => option.id === hero.stance) ?? null
   // D132: what the stance risks where the hero is now; the safe biome turns a knockout into a rescue.
@@ -186,8 +186,9 @@ function HeroSheet({ hero }: { hero: HeroView }) {
                 Resume adventures
               </Button>
             ) : null}
-            {canDrink ? (
-              <Button icon="potion" variant={hero.hp < hero.maxHp && bag?.potions ? 'primary' : 'secondary'} pending={potion.pending} busyLabel="Drinking…" disabled={hero.hp >= hero.maxHp || !bag?.potions} onClick={drink}>
+            {/* D156: only when a drink would heal; at full health or with an empty pouch there is no dead button. */}
+            {canDrink && hero.hp < hero.maxHp && bag?.potions ? (
+              <Button icon="potion" pending={potion.pending} busyLabel="Drinking…" onClick={drink}>
                 {potionLabel}
               </Button>
             ) : null}
@@ -268,16 +269,18 @@ function HeroSheet({ hero }: { hero: HeroView }) {
           {hero.biomes.map((biome, index) => {
             const here = biome.id === hero.biomeId
             const onTheWay = biome.id === hero.targetBiomeId
+            // D156: the floor's colour lives in its number chip, so a coloured row never passes for a button.
+            const chip = biome.unlocked ? BIOME_SWATCH[biome.id] ?? 'bg-night text-gold-ink' : 'bg-night text-faint'
             return (
-              <li key={biome.id} aria-current={here ? 'location' : undefined} className={`relative flex min-w-0 items-center gap-3 px-3 py-2 sm:flex-col sm:items-stretch sm:gap-1 sm:p-4 sm:not-last:after:absolute sm:not-last:after:top-1/2 sm:not-last:after:-right-[15px] sm:not-last:after:w-[15px] sm:not-last:after:border-t-4 sm:not-last:after:border-dashed sm:not-last:after:border-gold sm:not-last:after:content-[''] ${biome.unlocked ? `border-[3px] border-night ${BIOME_SWATCH[biome.id] ?? 'bg-panel'}` : 'border-[3px] border-dashed border-faint bg-panel text-muted'} ${here ? 'outline-4 outline-gold' : ''}`}>
+              <li key={biome.id} aria-current={here ? 'location' : undefined} className={`relative flex min-w-0 items-center gap-3 px-3 py-2 sm:flex-col sm:items-stretch sm:gap-1 sm:p-4 sm:not-last:after:absolute sm:not-last:after:top-1/2 sm:not-last:after:-right-[15px] sm:not-last:after:w-[15px] sm:not-last:after:border-t-4 sm:not-last:after:border-dashed sm:not-last:after:border-gold sm:not-last:after:content-[''] window ${biome.unlocked ? '' : 'text-muted'} ${here ? 'outline-4 outline-gold' : ''}`}>
                 <span className="sr-only">World {index + 1}: </span>
-                <span aria-hidden="true" className="hud grid size-7 shrink-0 place-items-center border-[3px] border-night bg-night text-hud-sm text-gold-ink sm:hidden">{index + 1}</span>
+                <span aria-hidden="true" className={`hud grid size-7 shrink-0 place-items-center border-[3px] border-night text-hud-sm sm:hidden ${chip}`}>{index + 1}</span>
                 <span className="flex min-w-0 flex-1 flex-col sm:gap-1">
                   <span className="flex items-center gap-2 font-display text-xl font-bold sm:text-2xl">
-                    <span aria-hidden="true" className="hud hidden size-7 shrink-0 place-items-center border-[3px] border-night bg-night text-hud-sm text-gold-ink sm:grid">{index + 1}</span>
+                    <span aria-hidden="true" className={`hud hidden size-7 shrink-0 place-items-center border-[3px] border-night text-hud-sm sm:grid ${chip}`}>{index + 1}</span>
                     <span className="leading-tight [overflow-wrap:normal]">{biome.name}</span>
                   </span>
-                  <span className="text-sm font-semibold">{biome.unlocked ? (here ? 'Exploring' : onTheWay ? 'Arriving next adventure' : 'Unlocked') : `Locked until level ${biome.unlockLevel}`}</span>
+                  <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? 'You’re here' : onTheWay ? 'Arriving next adventure' : 'Unlocked') : `Locked until level ${biome.unlockLevel}`}</span>
                 </span>
                 {biome.unlocked && !here && !onTheWay ? (
                   <Button icon="travel" className="shrink-0 sm:mt-2 sm:self-start" pending={travel.pending} busyLabel="Travelling…" aria-label={travel.pending ? undefined : `Travel to ${biome.name}`} disabled={!canAct} onClick={() => setAsk({ kind: 'travel', biomeId: biome.id })}>

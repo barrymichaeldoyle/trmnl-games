@@ -194,7 +194,7 @@ The TRMNL is the one monochrome object. It sits in a plum bezel with a white e-i
 - The hero's scene leads, in colour, under a platformer HUD and a cream dialogue strip.
 - Hearts red, XP green, coins gold, travel sky, rare violet; never colour alone.
 - Press Start 2P for the HUD voice at two small steps; Pixelify Sans for titles; system sans for reading.
-- Gold primary buttons with a darker bottom lip; dashed edges stamp locked and disabled states.
+- Gold primary buttons with a darker bottom lip; only buttons look pressable, and a choice the player cannot take yet is text, not a button (D156).
 - Square everything; only the TRMNL bezel and screen curve.
 - Pixel parts drawn as crisp SVG cell grids; pixel art rendered pixelated at integer scale.
 
@@ -277,14 +277,14 @@ Flat, with depth drawn as an 8-bit screen draws it: a panel sits above the groun
 
 ## Shapes
 
-Everything the owner touches is square: windows, buttons, tabs, inputs, tiles, badges, bars. Outlines are hard: 3px for windows, buttons and HUD boxes, 4px for the game screen and the away tally, 2px for inputs, segmented groups and badges. Disabled and locked states switch the edge to dashed, so state stamps rather than fades. The only curves describe the TRMNL hardware.
+Everything the owner touches is square: windows, buttons, tabs, inputs, tiles, badges, bars. Outlines are hard: 3px for windows, buttons and HUD boxes, 4px for the game screen and the away tally, 2px for inputs, segmented groups and badges. Only empty bag slots and unearned collection slots wear a dashed edge; disabled buttons are flat raised-plum blocks (D156). The only curves describe the TRMNL hardware.
 
 All glyphs, hearts, coins, gems, cursor arrows, chevrons and checks are SVG cell grids with crisp edges; pixel art renders pixelated at integer scale.
 
 ### Named Rules
 **The Only Curve Is the Device Rule.** Rounded corners belong to the TRMNL bezel and its screen. Nothing interactive is rounded.
 
-**The Stamp, Don't Fade Rule.** Disabled and locked states keep their shape and gain a dashed edge and muted text; they never vanish or drop to bare low opacity.
+**The One Look For Pressable Rule (D156).** Only buttons wear a cream edge or a gold fill. A choice the player cannot take yet is not drawn as a button: an unaffordable purchase shows its price and the gold still to go, and a command with nothing to act on (Drink potion at full health) is left out. A button disabled for a moment (busy, offline, a form not yet valid) turns into a flat raised-plum block with faint text, no edge and no lip, so it never reads as a choice. Containers and rows never take a button's colours: a world tile's colour lives in its number chip, and log lines are ruled rows.
 
 ## Components
 
@@ -295,14 +295,14 @@ Chunky arcade keys in the HUD voice.
 - **Secondary:** transparent with a cream edge and cream text; hover inverts to cream fill, night text.
 - **Quiet:** muted body-type text underlined at 4px offset; hover to cream. For continuations (load more, unequip, clear selection).
 - **Danger:** heart-red edge, heart-red-ink text; hover fills heart red with night text. Destructive confirmations only.
-- **Disabled:** dashed faint edge, no fill, no lip, muted text, not-allowed cursor; also applied while offline.
+- **Disabled:** raised-plum fill and edge, faint text, no lip, not-allowed cursor; also applied while offline. A quiet button only fades its text. Never used for a purchase the player cannot afford, which shows its price as text instead.
 - **Pressed:** the primary key sinks two pixels into its lip (the lip halves); secondary and danger invert as on hover; quiet brightens. A tap answers before the server does.
 - **Busy:** the label becomes a present-participle line ("Travelling…"); the shape holds.
 - **Focus:** global 2px gold outline, 2px offset.
 
 ### Cards / Containers (Window)
 - **Corner Style:** square.
-- **Background:** Window Plum; stacked log entries are compact windows (12px by 10px).
+- **Background:** Window Plum.
 - **Shadow Strategy:** none; see Elevation & Depth.
 - **Border:** 3px Arcade Night.
 - **Internal Padding:** 12px top, 16px sides and bottom; 20px sides from 640px. A Pixelify title opens a titled window.
@@ -334,7 +334,7 @@ Chunky arcade keys in the HUD voice.
 - **Dialogue strip:** cream with a 4px night top rule, a 16px glyph, the HUD Label sentence, an optional bezel-plum detail line, and a 5x3 night "more" arrow in the corner bobbing 2px in two steps (1.2s), the only idle motion.
 
 ### World Map Tile
-- Square tile, 16px padding, 3px night edge, filled with its biome band, night text; a night world-number chip with gold numeral; biome name in Title type; status line; Travel as the primary button. The current tile gains a 4px gold outline; locked tiles are window plum with a dashed faint edge and muted text ("Locked · reach level 9"). Tiles join with 4px dashed gold connectors from 640px; on phones each world is one row (chip, name and status, Travel at the right) with no connectors.
+- A window tile, 16px padding; the world-number chip carries its biome band with a night numeral (D156: a filled tile read as a button); biome name in Title type; status line; Travel as the primary button. The current tile gains a 4px gold outline and a gold "You’re here" status; locked tiles keep a night chip with a faint numeral and muted text ("Locked until level 8"). Tiles join with 4px dashed gold connectors from 640px; on phones each world is one row (chip, name and status, Travel at the right) with no connectors.
 
 ### Stance Row
 - The segmented-tab pattern as a radiogroup: three equal cells (Cautious, Balanced, Bold) in a 2px cream edge, the chosen one pressed in Raised Plum with gold text and the cursor arrow; one body-small line beneath names the chosen stance, its blurb and its thresholds.
@@ -346,7 +346,7 @@ Chunky arcade keys in the HUD voice.
 - Night fill in a 4px gold frame: HUD Title heading in gold, the visit time beside it, then a dashed-rule ledger of HUD Micro labels and HUD Title figures in their stat ink (zero in faint). A 3px gold-edged HUD line counts gains during the visit.
 
 ### Quest Log Row
-- A compact window: a 32px badge (2px night edge) filled with its kind's game colour holding a night glyph, the narrative sentence beside it (bold names), then the timestamp and change chips in stat inks. Day headers are HUD Micro, sticky. Companion commands (all `system` lines) take their command's glyph (coin for a sale or purchase, sword for equipping, play, pause, door for the first shift, potion, bag for a claimed find, shield for stance). Achievements earned one after another in the same minute fold into one line ("3 achievements: A, B and C"). The log shows twelve lines, then Show more adds twenty.
+- A row ruled off by a 2px raised-plum line (D156: boxed lines read as buttons): a 32px badge (2px night edge) filled with its kind's game colour holding a night glyph, the narrative sentence beside it (bold names), then the timestamp and change chips in stat inks. Day headers are HUD Micro, sticky. Companion commands (all `system` lines) take their command's glyph (coin for a sale or purchase, sword for equipping, play, pause, door for the first shift, potion, bag for a claimed find, shield for stance). Achievements earned one after another in the same minute fold into one line ("3 achievements: A, B and C"). The log shows twelve lines, then Show more adds twenty.
 
 ### Achievement Badge
 - The Achievements page (D126) opens on a summary window: a gold Found meter (families started of all families), the tiers earned beneath it, then a ledger of Closest (the next tier nearest to coming, with its count and, for a monster, its floor), Rarest and Latest, each name opening its sheet. A day after the last unlock a Hint row may follow (D127): the quest glyph in gold, one semibold sentence naming a companion action, a small line saying which "?" it fills or the tier count, and a quiet link to the page that does it. Shelves follow on the ground, each a Pixelify title with its glyph (Lifetime and Set pieces gold, the three floors' monsters in heart-red-ink, Decisions gold, Raids violet) and a "2 of 4" count.

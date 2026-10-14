@@ -123,9 +123,9 @@ export function AdventureLog() {
       {status === 'LoadingFirstPage' ? (
         <div role="status" aria-label="Reading the log" className="mt-2 flex flex-col">
           <p aria-hidden="true" className="py-2 label-px text-muted">Today</p>
-          <ol aria-hidden="true" className="flex flex-col gap-2 pb-3">
+          <ol aria-hidden="true" className="flex flex-col pb-3">
             {[0, 1, 2].map((row) => (
-              <li key={row} className="window grid min-h-[4.75rem] grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 px-3 py-2.5">
+              <li key={row} className="grid min-h-[4.75rem] grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 border-b-2 border-rule py-2.5">
                 <span className="size-8 bg-raised" />
                 <span className="flex flex-col gap-2 pt-1">
                   <span className={`h-4 bg-raised ${row === 1 ? 'w-3/5' : 'w-4/5'}`} />
@@ -142,12 +142,13 @@ export function AdventureLog() {
           {days.map((day) => (
             <section key={day.label} aria-label={day.label}>
               <h3 className="sticky top-14 z-[1] bg-ground py-2 label-px text-muted">{day.label}</h3>
-              <ol className="flex flex-col gap-2 pb-3">
+              {/* D156: plain ruled rows, not boxes: a log line is read, never tapped, so it must not look like a button. */}
+              <ol className="flex flex-col pb-3">
                 {day.encounters.map((encounter) => (
                   <li key={encounter.key}>
-                    <ul className="flex flex-col gap-2">
+                    <ul className="flex flex-col">
                       {encounter.entries.map((entry) => (
-                        <li key={entry.id} className="window px-3 py-2.5">
+                        <li key={entry.id} className="border-b-2 border-rule py-2.5">
                           <LogStory entry={entry} />
                         </li>
                       ))}

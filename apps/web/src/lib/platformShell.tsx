@@ -4,7 +4,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Button, LoadingState } from './ui'
 import { OfflineNote } from './network'
-import { DESK_CRAWLER_INSTALL_URL, SiteFooter } from './prose'
+import { AppFooter, DESK_CRAWLER_INSTALL_URL, SiteFooter } from './prose'
 import { captureAnalytics } from './analytics'
 import { DeskCrawlerSignedOut } from './deskCrawlerPitch'
 import { PRELOAD_CLERK_UI } from './clerkUi'
@@ -35,8 +35,8 @@ export function AuthShell({ children }: { children: ReactNode }) {
           </section>
         </main>}
       </Show>
-      <Show when="signed-in">{children}</Show>
-      <SiteFooter />
+      <Show when="signed-in">{children}<AppFooter /></Show>
+      <Show when="signed-out"><SiteFooter /></Show>
     </div>
   )
 }

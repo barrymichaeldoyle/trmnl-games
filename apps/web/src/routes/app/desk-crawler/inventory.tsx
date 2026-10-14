@@ -416,6 +416,11 @@ type Offer = { id: 'potions' | 'pouch' | 'bag'; name: string; quantity: number; 
 type Visit = { offers: Offer[]; expiresAtTick: number; ticksLeft: number; biomeId: string }
 type PurchaseIntent<A> = { pending: boolean; error?: string | null; run: (args: A, message?: string) => Promise<boolean> }
 
+/** D156: a price the hero cannot pay yet, as plain text where the Buy button will be, so no dead button sits on the page. */
+function Price({ price, gold, className = '' }: { price: number; gold: number; className?: string }) {
+  return <p className={`text-sm tabular-nums ${className}`}><span className="font-semibold text-gold-ink">{price} gold</span>. You have {gold}, so {price - gold} to go.</p>
+}
+
 /** D77/D122: the potion pouch, its next tier and how to get it, beside the bag ladder. */
 function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch; potions: number; gold: number; disabled: boolean; intent: PurchaseIntent<{ tierId: string }> }) {
   const next = pouch.next
@@ -427,11 +432,10 @@ function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch;
       <p className="mt-3"><strong>Next: {next.name}</strong>, {next.cap} potions</p>
       <p className="mt-1 text-sm text-muted">{howToGet(next.milestoneLevel !== null ? `at level ${next.milestoneLevel}` : null, pouch.findable, pouch.merchantDiscountPct)}</p>
       {next.price !== null ? next.buyable ? <>
-        <Button className="mt-3" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button>
+        {affordable ? <Button className="mt-3" disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button> : <Price price={next.price} gold={gold} className="mt-3" />}
         <BuySheet open={asking} title={`Buy the ${next.name}?`} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, `${next.name} bought. It holds ${next.cap} potions.`)}>
           <li>Holds {next.cap} potions instead of {pouch.cap}.</li>
         </BuySheet>
-        {!affordable ? <p className="mt-2 text-sm tabular-nums">You have <span className="text-gold-ink">{gold} gold</span>.</p> : null}
       </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? `You can buy it from level ${next.lockedUntilLevel}.` : 'You can buy it after your next pouch milestone.'}</p> : null}
     </> : <p className="mt-3 text-sm text-muted">This is the biggest pouch for now.</p>}
   </Card>
@@ -450,7 +454,7 @@ function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: 
         const deal = offer.id !== 'potions' && discountPct > 0
         return <li key={offer.id} className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-faint pt-3 first:border-t-0 first:pt-0">
           <span><strong>{offer.name}</strong>{deal ? <span className="block text-sm text-muted">{discountPct}% off the Bag page price.</span> : null}{overflow ? <span className="block text-sm text-muted">Your pouch holds {cap}; make room first.</span> : null}</span>
-          <Button variant={affordable && !overflow ? 'primary' : 'secondary'} disabled={disabled || !affordable || overflow} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(offer)}>Buy for {offer.price} gold</Button>
+          {affordable && !overflow ? <Button disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(offer)}>Buy for {offer.price} gold</Button> : <span className="text-sm font-semibold tabular-nums text-gold-ink">{offer.price} gold</span>}
         </li>
       })}
     </ul>
@@ -482,10 +486,10 @@ function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { price: numb
   const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null && name.trim() !== heroName
   return <Card title="Name tag" icon="tag">
     <p>A fresh “Hi, my name is” sticker. Your hero goes by the name you write on it, on your TRMNL, the leaderboard and your hero page.</p>
-    {inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
+    {inStock && !affordable ? <><Price price={tag.price} gold={gold} className="mt-3" /><p className="mt-1 text-sm text-muted">One in stock a day.</p></> : inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
       <NameField label={`New name for ${heroName}`} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={intent.pending} />
-      <Button type="submit" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !valid || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {tag.price} gold</Button>
-      <p className="text-sm text-muted">One in stock a day.{!affordable ? <> You have <span className="text-gold-ink tabular-nums">{gold} gold</span>.</> : null}</p>
+      <Button type="submit" disabled={disabled || !valid} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {tag.price} gold</Button>
+      <p className="text-sm text-muted">One in stock a day.</p>
     </form> : <p className="mt-3 text-sm text-muted">Today's tag is sold. The next one is in stock {new Date(tag.inStockAt!).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}.</p>}
     <BuySheet open={asking} title={`Rename ${heroName} to ${name.trim()}?`} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, `Hi, my name is ${name.trim()}.`); if (done) setName(''); return done }}>
       <li>{heroName} goes by {name.trim()} from now on. Level, gear and rank stay the same.</li>
@@ -504,11 +508,11 @@ function Makeover({ makeover, heroName, gold, disabled, intent }: { makeover: { 
   const label = GENDERS.find((option) => option.id === gender)!.label.toLowerCase()
   return <Card title="Makeover" icon="hero">
     <p>A new look for {heroName}, on your TRMNL, your hero page and other players' meetings.</p>
-    <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (changed && affordable) setAsking(true) }}>
+    {affordable ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (changed) setAsking(true) }}>
       <GenderPicker small value={gender} onChange={setGender} disabled={intent.pending} />
-      <Button type="submit" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !changed || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {makeover.price} gold</Button>
-      {!affordable ? <p className="text-sm text-muted">You have <span className="text-gold-ink tabular-nums">{gold} gold</span>.</p> : null}
-    </form>
+      {/* The button waits for a different look to be picked, so it never offers to buy the one the hero has. */}
+      {changed ? <Button type="submit" disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {makeover.price} gold</Button> : <p className="text-sm text-muted">Pick a new look to buy it.</p>}
+    </form> : <Price price={makeover.price} gold={gold} className="mt-3" />}
     <BuySheet open={asking} title={`Make ${heroName} ${label}?`} price={makeover.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => await intent.run({ gender }, `${heroName} is back with a new look.`)}>
       <li>Only the look changes. Level, gear, stats and rank stay the same.</li>
       <li>You can change it back any time for another {makeover.price} gold.</li>
@@ -527,11 +531,10 @@ function BagLadder({ ladder, capacity, gold, disabled, intent }: { ladder: Ladde
       <p className="mt-3"><strong>Next: {next.name}</strong>, {next.capacity} slots</p>
       <p className="mt-1 text-sm text-muted">{howToGet(next.milestoneAdventures !== null ? `after ${next.milestoneAdventures} adventures` : next.milestoneLevel !== null ? `at level ${next.milestoneLevel}` : null, ladder.findable, ladder.merchantDiscountPct)}</p>
       {next.price !== null ? next.buyable ? <>
-        <Button className="mt-3" variant={affordable ? 'primary' : 'secondary'} disabled={disabled || !affordable} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button>
+        {affordable ? <Button className="mt-3" disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button> : <Price price={next.price} gold={gold} className="mt-3" />}
         <BuySheet open={asking} title={`Buy the ${next.name}?`} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, `${next.name} bought. It holds ${next.capacity}.`)}>
           <li>Holds {next.capacity} pieces of gear instead of {capacity}.</li>
         </BuySheet>
-        {!affordable ? <p className="mt-2 text-sm tabular-nums">You have <span className="text-gold-ink">{gold} gold</span>.</p> : null}
       </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? `You can buy it from level ${next.lockedUntilLevel}.` : 'You can buy it after your next bag milestone.'}</p> : null}
     </> : <p className="mt-3 text-sm text-muted">This is the biggest bag for now.</p>}
   </Card>
@@ -565,10 +568,10 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
             <p className={`mt-1 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}>{item.label}</p>
             {next ? <>
               <p className="mt-1 text-sm tabular-nums">{next.label}: {priceText(next, materials)}. {statLabel(item).charAt(0).toUpperCase() + statLabel(item).slice(1)} {next.stat.from} → <strong>{next.stat.to}</strong>.</p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Button variant={next.affordable ? 'primary' : 'secondary'} disabled={disabled || !next.affordable} pending={intents.upgrade.pending && asking?.id === item.id} busyLabel="Working…" onClick={() => setAsking(item)}>{next.kind === 'tier' ? 'Upgrade' : 'Reinforce'}</Button>
+              {next.affordable || item.affixable ? <div className="mt-2 flex flex-wrap items-center gap-2">
+                {next.affordable ? <Button disabled={disabled} pending={intents.upgrade.pending && asking?.id === item.id} busyLabel="Working…" onClick={() => setAsking(item)}>{next.kind === 'tier' ? 'Upgrade' : 'Reinforce'}</Button> : null}
                 {item.affixable ? <Button variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>Choose affix</Button> : null}
-              </div>
+              </div> : null}
               {!next.affordable ? <p className="mt-2 text-sm tabular-nums">{shortText(next, hero, materials)}</p> : null}
             </> : <>
               <p className="mt-1 text-sm text-muted">Fully reinforced.</p>

@@ -1,6 +1,7 @@
 /**
  * The public dev log (D153), newest first: changes players can see, in their words, dated by the day they went live.
- * Add an entry in the same commit as the change it describes. No decision numbers or internal names.
+ * Add an entry in the same commit as the change it describes. No decision numbers or internal names. A later change on
+ * the same day goes first in that day's list, so each change keeps its key (see `changeKeys`).
  */
 export interface ChangelogEntry {
   /** The day it went live, as YYYY-MM-DD. */
@@ -12,6 +13,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
     date: '2026-10-14',
     changes: [
+      {
+        title: 'Buttons are easier to spot',
+        body: 'Only things you can tap look like buttons now. Something you can’t afford yet shows its price and how much more gold you need instead of a greyed-out button, Drink potion appears only when your hero is hurt, the world map marks where you are, and the quest log is a plain list.',
+      },
       {
         title: 'Rankings show the players around you',
         body: 'The weekly board on your TRMNL now centres on your hero, so you see who is just ahead of you and who is just behind, not only the top of the board. In the app, Rankings opens with the two players either side of you once you are below fifth.',
@@ -36,3 +41,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     ],
   },
 ]
+
+/**
+ * D154: every change with a key that sorts by when it was added: its day, then its place in that day counted from the
+ * day's first change ("2026-10-14.03"). The companion's card shows the keys after the owner's `whatsNewSince`.
+ */
+export const changeKeys = (): Array<{ key: string; title: string }> =>
+  CHANGELOG.flatMap((entry) => entry.changes.map((change, index) => ({ key: `${entry.date}.${String(entry.changes.length - index).padStart(2, '0')}`, title: change.title })))

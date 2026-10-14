@@ -68,14 +68,14 @@ export const setAnalyticsConsent = mutation({
 })
 
 /**
- * D154: the owner has seen the What's new entries up to `seen` (the newest entry's YYYY-MM-DD), so the companion's
- * card hides until a later one. Only moves forward; a cosmetic preference with no game effect.
+ * D154: the owner has seen the What's new changes up to `seen` (the newest change's key, YYYY-MM-DD.NN), so the
+ * companion's card hides until a later one. Only moves forward; a cosmetic preference with no game effect.
  */
 export const dismissWhatsNew = mutation({
   args: { seen: v.string() },
   returns: v.null(),
   handler: async (ctx, { seen }) => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(seen)) throw appError('INVALID_INPUT', 'Not a date.')
+    if (!/^\d{4}-\d{2}-\d{2}(\.\d{2})?$/.test(seen)) throw appError('INVALID_INPUT', 'Not a What’s new key.')
     const user = await currentUser(ctx)
     if (user?.state === 'active' && seen > (user.whatsNewSeen ?? '')) await ctx.db.patch(user._id, { whatsNewSeen: seen })
     return null
