@@ -410,5 +410,7 @@ Barry asked for everything but the submission.
   - Knowledge base: `https://trmnlgames.com/help/paper-lives`
 - **Client ID.** `TRMNL_CLIENT_ID_PAPER_LIVES` in `apps/web/wrangler.jsonc`; the manage page verifies Configure links with it. Installs exchange only the code, so no secret is stored.
 
-Left for Barry: install it on your TRMNL while the game is hidden (the admin allowlist lets you through), Save, and check the first screen, the companion and an uninstall; switch the game to preview or live from the admin page's Games card; submit for review when you choose.
+- **Installed on Barry's TRMNL** (at his request, 2026-10-14) as plugin setting 506186 under his account. The success webhook confirmed it and a first life began (Bodhi Varga). TRMNL's own render of the full screen shows the portrait, stats, the birth line and the photo code; the companion's Life page and TRMNL's Configure button (the manage page, verified with the new client ID) both work. No uninstall was tried, so the life keeps running; the uninstall path is covered by the backend tests.
+
+Left for Barry: switch the game to preview or live from the admin page's Games card, and submit for review when you choose.
 
