@@ -7,7 +7,7 @@ import { poseFor, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { sceneKeyFromUrl } from '@trmnl-games/idle-angler/art/sceneColour'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
-import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/idleAngler'
+import { BAIT_LABEL, BAND_LABEL, GOAL_PAGE, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishIcon, Scene } from './-art'
 import { FishName, FishText, WaterName } from './-fish'
@@ -57,7 +57,11 @@ function DockPage() {
   const nextRod = dock.shop?.rod ?? null
   // Fish that broke free and the next rod would have held: the clearest reason to upgrade.
   const rodWouldLand = nextRod ? (recap?.awayGrams ?? []).filter((g) => g <= nextRod.limitGrams).length : 0
-  const goal = nextGoal(dock)
+  const full = dock.full ?? null
+  const goal = full ? null : nextGoal(dock)
+  // D157 for Idle Angler (D162): open waters, then only the next locked one; the rest stay out of sight until it opens.
+  const firstLocked = dock.waters?.find((w) => !w.open && !w.closed && !w.charter)
+  const shownWaters = full ? (dock.waters ?? []).filter((w) => w.open || w.closed || (w.charter && full.charter && w.opensAfter && w.opensAfter.logged >= w.opensAfter.species) || w === firstLocked) : (dock.waters ?? [])
 
   return (
     <>
@@ -72,7 +76,7 @@ function DockPage() {
           <p className="text-lg font-semibold">
             {angler.status === 'paused' ? <>Fishing is paused. <Link to="/app/idle-angler/settings" className="font-normal underline underline-offset-4">Resume on the More page</Link>.</> : destination ? <>Heading to <WaterName id={destination.id} />.{firstCastThere ? <> First cast there at {firstCastThere}.</> : null}</> : <>Casting at {here ? <WaterName id={here.id} /> : 'the water'}.</>}
           </p>
-          {here ? <p className="text-muted">{BAND_LABEL[here.band]}, {WEATHER_LABEL[here.weather]?.toLowerCase()} · Bite chance {here.bitePercent}%</p> : null}
+          {here ? <p className="text-muted">{full?.season ? <>{full.season.name} · </> : null}{BAND_LABEL[here.band]}, {WEATHER_LABEL[here.weather]?.toLowerCase()} · Bite chance {here.bitePercent}%</p> : null}
           {dock.nextTickAt && !destination && angler.status !== 'paused' ? <p className="text-sm text-muted">Next cast at {time(dock.nextTickAt)}.</p> : null}
         </div>
         {/* The logbook meter counts species towards the next title; the sentence under it says what the title is, in words a first visit can follow. */}
@@ -87,6 +91,13 @@ function DockPage() {
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="underline underline-offset-4">Sell {catches.length} fish for {coolerValue} coins</Link></p>
         ) : null}
         {goal ? <p className="text-sm"><span className="text-muted">Next goal:</span> <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
+        {full?.goal.line ? (
+          <div className="flex flex-col gap-1 border-l-4 border-gold pl-3">
+            <p><span className="text-muted">Goal:</span> {full.goal.page ? <Link to={GOAL_PAGE[full.goal.page]!} className="font-semibold underline underline-offset-4">{full.goal.line}</Link> : <strong>{full.goal.line}</strong>}{full.goal.coins > 0 ? <span className="text-sm text-gold-ink"> · {full.goal.coins} coins</span> : null}</p>
+            {full.comingUp ? <p className="text-sm text-muted">Coming up: {full.comingUp.name}, at {full.comingUp.species} species ({full.comingUp.logged} so far).</p> : null}
+          </div>
+        ) : null}
+        {full?.runs.length ? <ul className="flex flex-col gap-1 text-sm">{full.runs.map((run) => <li key={run.id} className="font-semibold text-sky-ink">{run.line}</li>)}</ul> : null}
         {coolerFull ? (
           <p className="font-semibold text-hp-ink">
             The cooler is full, so new catches are released. <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">Sell your catch</Link>.
@@ -134,7 +145,7 @@ function DockPage() {
 
       <Card title="Waters">
         <ul className="flex flex-col gap-3">
-          {dock.waters?.map((water) => (
+          {shownWaters.map((water) => (
             <li key={water.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
               <div className="min-w-0">
                 <p className="font-semibold"><WaterName id={water.id} />{water.id === angler.waterId ? <span className="text-muted"> · here</span> : water.id === angler.travelTo ? <span className="text-muted"> · heading there</span> : ''}</p>
@@ -144,7 +155,7 @@ function DockPage() {
                     <p className="text-sm text-muted">Bait: {water.baits.map((b) => BAIT_LABEL[b]).join(', ')}</p>
                     {held(water).length === 0 ? <p className="text-sm text-hp-ink">You have none of its bait.</p> : null}
                   </>
-                ) : <p className="text-sm text-muted">{water.opensAfter ? <>Opens once {water.opensAfter.species} <WaterName id={water.opensAfter.waterId}>{water.opensAfter.waterName}</WaterName> species are in your logbook ({Math.min(water.opensAfter.logged, water.opensAfter.species)} so far)</> : 'Opens later'}{water.access ? <>, with the <strong>{water.access === 'waders' ? 'Waders' : 'Pier Permit'}</strong> from the shop</> : ''}.</p>}
+                ) : water.closed ? <p className="text-sm text-muted">Open in the winter week only, when the ice is thick enough.</p> : water.charter ? <p className="text-sm text-muted">Fished on a charter ticket. <Link to="/app/idle-angler/shop" className="underline underline-offset-4">Book one in the shop</Link>.</p> : <p className="text-sm text-muted">{water.opensAfter ? <>Opens once {water.opensAfter.species} <WaterName id={water.opensAfter.waterId}>{water.opensAfter.waterName}</WaterName> species are in your logbook ({Math.min(water.opensAfter.logged, water.opensAfter.species)} so far)</> : 'Opens later'}{water.access ? <>, with the <strong>{ACCESS_NAME[water.access] ?? water.access}</strong> from the shop</> : ''}.</p>}
               </div>
               {water.open && water.id !== angler.waterId && water.id !== angler.travelTo ? (
                 <Button variant="secondary" disabled={travel.pending} onClick={() => {
@@ -155,7 +166,7 @@ function DockPage() {
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-sm text-muted">Weather is the same for every angler at a water and changes every six hours. Moving skips one cast, then the angler fishes the new water.</p>
+        <p className="mt-3 text-sm text-muted">Weather is the same for every angler at a water and changes every six hours.{full?.season ? <> The season changes every Monday for everyone: {full.season.name.toLowerCase()} until <LocalTime at={full.season.endsAt} format={(d) => d.toLocaleDateString([], { weekday: 'long' })} />.</> : null} Moving skips one cast, then the angler fishes the new water.</p>
       </Card>
 
       <Card title="Latest">
@@ -173,6 +184,8 @@ function DockPage() {
   )
 }
 
+const ACCESS_NAME: Record<string, string> = { waders: 'Waders', pier_permit: 'Pier Permit', rowing_boat: 'Rowing Boat', ice_auger: 'Ice Auger' }
+
 /** The scene from the dock alone: the water the angler fishes or heads to, its band and weather, and the pose the latest story calls for. */
 function sceneFromDock(dock: Dock): SceneKey | null {
   const angler = dock.angler
@@ -180,7 +193,7 @@ function sceneFromDock(dock: Dock): SceneKey | null {
   if (!angler || !water) return null
   const pose = poseFor(angler.status === 'paused' ? 'paused' : angler.travelTo ? 'travelling' : 'fishing', dock.logs?.[0]?.kind ?? null)
   // The dock does not say which fish was held, so a catch shows the angler waiting rather than holding nothing.
-  return { water: water.id as SceneKey['water'], band: water.band as SceneKey['band'], weather: water.weather as SceneKey['weather'], pose: pose === 'holding' ? 'waiting' : pose, fish: null, fly: null }
+  return { water: water.id as SceneKey['water'], band: water.band as SceneKey['band'], weather: water.weather as SceneKey['weather'], season: (dock.full?.season?.id ?? null) as SceneKey['season'], pose: pose === 'holding' ? 'waiting' : pose, fish: null, fly: null }
 }
 
 /**

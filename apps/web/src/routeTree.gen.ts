@@ -53,6 +53,7 @@ import { Route as AppIdleAnglerLogbookRouteImport } from './routes/app/idle-angl
 import { Route as AppIdleAnglerRankingsRouteImport } from './routes/app/idle-angler/rankings'
 import { Route as AppIdleAnglerSettingsRouteImport } from './routes/app/idle-angler/settings'
 import { Route as AppIdleAnglerShopRouteImport } from './routes/app/idle-angler/shop'
+import { Route as AppIdleAnglerTrophiesRouteImport } from './routes/app/idle-angler/trophies'
 import { Route as DeskCrawlerHeroesAliasRouteImport } from './routes/desk-crawler/heroes.$alias'
 import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/connect/trmnl/desk-crawler/install'
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
@@ -283,6 +284,11 @@ const AppIdleAnglerShopRoute = AppIdleAnglerShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => AppIdleAnglerRoute,
 } as any)
+const AppIdleAnglerTrophiesRoute = AppIdleAnglerTrophiesRouteImport.update({
+  id: '/trophies',
+  path: '/trophies',
+  getParentRoute: () => AppIdleAnglerRoute,
+} as any)
 const DeskCrawlerHeroesAliasRoute = DeskCrawlerHeroesAliasRouteImport.update({
   id: '/desk-crawler/heroes/$alias',
   path: '/desk-crawler/heroes/$alias',
@@ -356,6 +362,7 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
+  '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
@@ -404,6 +411,7 @@ export interface FileRoutesByTo {
   '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
+  '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler': typeof AppIdleAnglerIndexRoute
@@ -456,6 +464,7 @@ export interface FileRoutesById {
   '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
+  '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
@@ -509,6 +518,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/rankings'
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
+    | '/app/idle-angler/trophies'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
     | '/app/idle-angler/'
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/rankings'
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
+    | '/app/idle-angler/trophies'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler'
     | '/app/idle-angler'
@@ -608,6 +619,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/rankings'
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
+    | '/app/idle-angler/trophies'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
     | '/app/idle-angler/'
@@ -957,6 +969,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIdleAnglerShopRouteImport
       parentRoute: typeof AppIdleAnglerRoute
     }
+    '/app/idle-angler/trophies': {
+      id: '/app/idle-angler/trophies'
+      path: '/trophies'
+      fullPath: '/app/idle-angler/trophies'
+      preLoaderRoute: typeof AppIdleAnglerTrophiesRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
+    }
     '/desk-crawler/heroes/$alias': {
       id: '/desk-crawler/heroes/$alias'
       path: '/desk-crawler/heroes/$alias'
@@ -1034,6 +1053,7 @@ interface AppIdleAnglerRouteChildren {
   AppIdleAnglerRankingsRoute: typeof AppIdleAnglerRankingsRoute
   AppIdleAnglerSettingsRoute: typeof AppIdleAnglerSettingsRoute
   AppIdleAnglerShopRoute: typeof AppIdleAnglerShopRoute
+  AppIdleAnglerTrophiesRoute: typeof AppIdleAnglerTrophiesRoute
   AppIdleAnglerIndexRoute: typeof AppIdleAnglerIndexRoute
 }
 
@@ -1044,6 +1064,7 @@ const AppIdleAnglerRouteChildren: AppIdleAnglerRouteChildren = {
   AppIdleAnglerRankingsRoute: AppIdleAnglerRankingsRoute,
   AppIdleAnglerSettingsRoute: AppIdleAnglerSettingsRoute,
   AppIdleAnglerShopRoute: AppIdleAnglerShopRoute,
+  AppIdleAnglerTrophiesRoute: AppIdleAnglerTrophiesRoute,
   AppIdleAnglerIndexRoute: AppIdleAnglerIndexRoute,
 }
 

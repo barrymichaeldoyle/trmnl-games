@@ -318,7 +318,7 @@ export const logbook = query({
         .map((s) => {
           const entry = angler.logbook[s.id]
           return entry
-            ? { id: s.id, seen: true as const, name: s.name, rarity: s.rarity, count: entry.count, bestGrams: entry.bestGrams, maxGrams: s.maxGrams, baits: s.baits, times: s.times ?? null, weather: s.weather ?? null }
+            ? { id: s.id, seen: true as const, name: s.name, rarity: s.rarity, count: entry.count, bestGrams: entry.bestGrams, maxGrams: s.maxGrams, baits: s.baits, times: s.times ?? null, weather: s.weather ?? null, seasons: s.seasons ?? null }
             // An uncaught fish hints its bait, except the epics, which stay a puzzle.
             : { id: s.id, seen: false as const, rarity: s.rarity, baits: s.rarity === 'epic' ? null : s.baits }
         }),

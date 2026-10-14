@@ -15,7 +15,7 @@ import { LocalTime } from '../../../lib/localTime'
  * itself is the score. Opens on the angler's own water.
  */
 export const Route = createFileRoute('/app/idle-angler/rankings')({
-  loader: ({ context }) => preload(context, convexQuery(api.idleAngler.leaderboard.view, {})),
+  loader: ({ context }) => preload(context, convexQuery(api.idleAngler.leaderboard.view, {}), convexQuery(api.idleAngler.full.opens, {})),
   component: RankingsPage,
 })
 
@@ -23,6 +23,10 @@ const WATERS = [
   { id: 'millpond', label: 'Millpond' },
   { id: 'river_bend', label: 'River Bend' },
   { id: 'harbour_pier', label: 'Harbour Pier' },
+  // Content v2 (D162).
+  { id: 'heron_lake', label: 'Heron Lake' },
+  { id: 'deep_sea', label: 'Charter' },
+  { id: 'frozen_tarn', label: 'Frozen Tarn' },
 ] as const
 const PERIODS = [
   { id: 'week', label: 'This week' },
@@ -34,6 +38,34 @@ type View = { waterId: (typeof WATERS)[number]['id']; period: 'week' | 'all'; we
 
 const TAB = 'hud text-hud-sm min-h-11 flex-1 border-[3px] px-2'
 
+type Opens = { period: string; startsAt: number; endsAt: number; on: boolean; prizes: number[]; waters: Array<{ id: string; name: string; target: { id: string; name: string }; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number } | null }> }
+
+const weekday = (date: Date) => date.toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' })
+
+/** D162: this weekend's Open at every water: the target fish, the top three and your own entry. */
+function OpensCard({ opens }: { opens: Opens }) {
+  return (
+    <Card title={opens.on ? 'This weekend\'s Opens' : 'Next weekend\'s Opens'}>
+      <p className="mb-3 text-sm text-muted">
+        {opens.on ? <>On until <LocalTime at={opens.endsAt} format={weekday} />.</> : <>From <LocalTime at={opens.startsAt} format={weekday} /> to <LocalTime at={opens.endsAt} format={weekday} />.</>} Land the target fish at its water to enter. The top three take {opens.prizes.join(', ')} coins and a medal on Monday.
+      </p>
+      <ul className="flex flex-col gap-3">
+        {opens.waters.map((w) => (
+          <li key={w.id} className="border-b border-rule pb-3 last:border-b-0">
+            <p className="font-semibold"><FishName id={w.target.id}>{w.target.name}</FishName> Open · {w.name}</p>
+            {w.entries.length === 0 ? <p className="text-sm text-muted">No entries yet.</p> : (
+              <ol className="mt-1 flex flex-col text-sm">
+                {w.entries.slice(0, 3).map((row) => <li key={row.rank} className={`flex gap-3 ${row.own ? 'font-semibold text-gold-ink' : ''}`}><span className="w-6 tabular-nums text-muted">{row.rank}</span><span className="min-w-0 flex-1 truncate">{row.name}</span><span className="tabular-nums">{formatWeight(row.grams)}</span></li>)}
+              </ol>
+            )}
+            {w.own && !w.entries.slice(0, 3).some((r) => r.own) ? <p className="mt-1 text-sm text-muted">Your entry: {formatWeight(w.own.grams)}{w.own.rank ? `, #${w.own.rank}` : ''}.</p> : null}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  )
+}
+
 const resetsAt = (date: Date) => date.toLocaleString([], { weekday: 'long', hour: '2-digit', minute: '2-digit' })
 
 function RankingsPage() {
@@ -43,11 +75,14 @@ function RankingsPage() {
   const chosen = water ?? (first as View | undefined)?.waterId ?? 'millpond'
   const { data } = useQuery(convexQuery(api.idleAngler.leaderboard.view, { waterId: chosen, period }))
   const view = data as View | undefined
+  const { data: opensData } = useQuery(convexQuery(api.idleAngler.full.opens, {}))
+  const opens = opensData as Opens | null | undefined
   return (
     <>
       <h1 className="font-display text-3xl font-bold">Rankings</h1>
+      {opens ? <OpensCard opens={opens} /> : null}
       <p className="text-sm text-muted">The heaviest fish each angler has landed at each water, kept or released.</p>
-      <div role="tablist" aria-label="Water" className="flex gap-2">
+      <div role="tablist" aria-label="Water" className="grid grid-cols-3 gap-2">
         {WATERS.map((w) => (
           <button key={w.id} type="button" role="tab" aria-selected={chosen === w.id} onClick={() => setWater(w.id)} className={`${TAB} ${chosen === w.id ? 'border-gold bg-gold text-night' : 'border-edge text-ink'}`}>
             {w.label}

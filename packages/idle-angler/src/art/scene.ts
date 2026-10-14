@@ -1,5 +1,5 @@
 import { Canvas, sprite, type Sprite } from '@trmnl-games/engine/art/canvas'
-import type { TimeBand, WaterId, Weather } from '../sim/types'
+import type { Season, TimeBand, WaterId, Weather } from '../sim/types'
 import { anglerPoses, ROD_HAND, type AnglerPose } from './angler'
 import { FISH_LARGE, fishSprite } from './fish'
 
@@ -12,8 +12,11 @@ import { FISH_LARGE, fishSprite } from './fish'
  * sprite was placed on. A held catch draws the large fish at the angler's hands. Deterministic per key and width, so
  * each image URL is immutable.
  */
-/** v2 (S6) adds the newest fly on the angler's hat; v3 (D125) takes the stage width from the URL. */
-export const SCENE_VERSION = 3
+/**
+ * v2 (S6) adds the newest fly on the angler's hat; v3 (D125) takes the stage width from the URL; v4 (D162) adds the
+ * world's season and the three content v2 waters. v3 paths still render, with no season, while devices catch up.
+ */
+export const SCENE_VERSION = 4
 export const STAGE_WIDTH = 152
 export const STAGE_HEIGHT = 40
 /** The narrowest stage: the cast still lands clear of the right-anchored backdrop. The widest bounds the served image. */
@@ -133,6 +136,64 @@ const gull = sprite(`
  # #
   #
 `)
+// Content v2 waters (D162).
+const boathouse = sprite(`
+    ####
+   #::::#
+  #::::::#
+ ##########
+  #w#  #w#
+  #w#  #w#
+ ##########
+`)
+const heron = sprite(`
+ ##
+#w##
+ ##
+  #
+ ###
+##w#
+ ###
+  #
+  #
+`)
+const pine = sprite(`
+  #
+ ###
+#:::#
+ :::
+#:::#
+#####
+  #
+`)
+const cabin = sprite(`
+#######
+#w#w#w#
+#######
+#     #
+#     #
+#     #
+`)
+const gannet = sprite(`
+##   ##
+  # #
+   #
+`)
+const iceHole = sprite(`
+ #####
+#     #
+ #####
+`)
+const flower = sprite(`
+ #
+# #
+ #
+`)
+const dragonfly = sprite(`
+# #
+ #
+# #
+`)
 const rest = sprite(`
 #   #
  # #
@@ -191,6 +252,31 @@ function backdrop(c: Canvas, water: WaterId): void {
     // The far bank's edge sits just above the river.
     c.region = 'far_bank'
     c.hline(60, c.width - 1, HORIZON - 1, ':')
+  } else if (water === 'heron_lake') {
+    c.region = 'far_bank'
+    c.hline(0, c.width - 1, HORIZON - 1, ':')
+    c.region = 'pines'
+    for (const x of [60, 68, 78]) c.draw(pine, x, HORIZON - 7)
+    c.region = 'boathouse'
+    c.draw(boathouse, anchored(c, 120), HORIZON - 7)
+    c.region = 'heron'
+    c.draw(heron, anchored(c, 100), HORIZON - 6)
+  } else if (water === 'deep_sea') {
+    // Open water: a far headland, a gannet or two and nothing else.
+    c.region = 'far_bank'
+    c.hline(anchored(c, 120), c.width - 1, HORIZON - 1, ':')
+    c.hline(anchored(c, 128), c.width - 1, HORIZON - 2, ':')
+    c.region = 'gull'
+    c.draw(gannet, 72, 7)
+    c.draw(gannet, anchored(c, 104), 11)
+  } else if (water === 'frozen_tarn') {
+    c.region = 'fell'
+    for (let x = anchored(c, 92); x < c.width; x += 1) {
+      const rise = Math.max(0, Math.min(9, Math.floor((x - anchored(c, 92)) / 3), Math.floor((c.width - x) / 2)))
+      c.paint(x, HORIZON - 1 - rise, '#')
+    }
+    c.region = 'pines'
+    for (const x of [58, 66, 74, 84]) c.draw(pine, x, HORIZON - 7)
   } else {
     c.region = 'lighthouse'
     c.draw(lighthouse, anchored(c, 136), HORIZON - 8)
@@ -200,16 +286,70 @@ function backdrop(c: Canvas, water: WaterId): void {
     c.draw(gull, 70, 8)
     c.draw(gull, anchored(c, 82), 12)
   }
+  if (water === 'frozen_tarn') {
+    // Ice, not water: a few cracks instead of ripples.
+    c.region = 'ice'
+    for (const [x, y, len] of [[50, HORIZON + 4, 6], [92, HORIZON + 9, 5], [126, HORIZON + 5, 7], [70, HORIZON + 14, 4]] as const) for (let i = 0; i < len; i += 1) c.paint(anchored(c, x) + i, y + (i % 2), ':')
+    return
+  }
   // Water: ripples, wider apart toward the viewer.
+  const sea = water === 'harbour_pier' || water === 'deep_sea'
   c.region = 'ripple'
   for (let y = HORIZON + 2, row = 0; y < STAGE_HEIGHT; y += 3 + Math.floor(row / 2), row += 1) {
     const gap = 9 + row * 3
-    for (let x = (row * 5) % gap; x < c.width; x += gap) c.hline(x, x + (water === 'harbour_pier' ? 3 : 2), y, water === 'harbour_pier' && row % 2 ? '#' : ':')
+    for (let x = (row * 5) % gap; x < c.width; x += gap) c.hline(x, x + (sea ? 3 : 2), y, sea && row % 2 ? '#' : ':')
+  }
+}
+
+/** D162: the world's season dressed over the backdrop: blossom, a dragonfly, falling leaves or snow. */
+function seasonOver(c: Canvas, water: WaterId, season: Season | null | undefined, weather: Weather): void {
+  if (!season) return
+  if (season === 'spring') {
+    c.region = 'blossom'
+    const ashore = water === 'millpond' || water === 'river_bend'
+    for (const [x, y] of ashore ? ([[6, BANK - 3], [24, BANK - 3], [34, BANK - 3]] as const) : ([[64, HORIZON + 3], [112, HORIZON + 6]] as const)) c.draw(flower, anchored(c, x), y)
+  } else if (season === 'summer') {
+    c.region = 'dragonfly'
+    if (water !== 'deep_sea' && water !== 'harbour_pier') {
+      c.draw(dragonfly, 62, 14)
+      c.draw(dragonfly, anchored(c, 106), 17)
+    }
+  } else if (season === 'autumn') {
+    c.region = 'leaf'
+    for (const [x, y] of [[24, 6], [52, 12], [80, 4], [104, 10], [132, 15]] as const) {
+      c.paint(anchored(c, x), y, '#')
+      c.paint(anchored(c, x) + 1, y + 1, '#')
+    }
+  } else if (weather !== 'rain') {
+    c.region = 'snow'
+    for (let y = 2; y < HORIZON - 2; y += 5) for (let x = (y * 7) % 11; x < c.width; x += 11) c.paint(x, y, '#')
   }
 }
 
 /** Near ground for the angler: a grass bank on fresh water, wooden planks on the pier. Returns the ground's top row. */
 function nearGround(c: Canvas, water: WaterId): number {
+  if (water === 'heron_lake') {
+    // A rowing boat: the gunwale at the bank's row, a planked hull and the oar resting over the side.
+    c.region = 'hull'
+    c.rect(4, BANK, 44, 1, '#')
+    c.rect(6, BANK + 1, 40, 2, '=')
+    c.hline(8, 44, BANK + 3, '#')
+    c.region = 'oar'
+    for (let i = 0; i < 10; i += 1) c.paint(44 + i, BANK + 1 + Math.floor(i / 3), '#')
+    return BANK
+  }
+  if (water === 'deep_sea') {
+    c.region = 'deck'
+    c.rect(0, DECK, 60, 2, '#')
+    c.rect(0, DECK + 2, 60, 1, '=')
+    c.rect(2, DECK + 3, 56, STAGE_HEIGHT - DECK - 3, '.')
+    c.region = 'rail'
+    c.hline(0, 60, DECK - 5, '#')
+    for (const x of [14, 46, 60]) c.rect(x, DECK - 5, 1, 5, '#')
+    c.region = 'cabin'
+    c.draw(cabin, 0, DECK - 6)
+    return DECK
+  }
   if (water === 'harbour_pier') {
     c.region = 'deck'
     const deck = DECK
@@ -218,7 +358,7 @@ function nearGround(c: Canvas, water: WaterId): number {
     for (const x of [4, 22, 40, 56]) c.rect(x, deck + 3, 2, STAGE_HEIGHT - deck - 3, '#')
     return deck
   }
-  c.region = 'grass'
+  c.region = water === 'frozen_tarn' ? 'snowbank' : 'grass'
   const bank = BANK
   c.rect(0, bank, 46, STAGE_HEIGHT - bank, 'w')
   c.hline(0, 40, bank, '#')
@@ -281,13 +421,16 @@ export interface SceneKey {
   readonly fish: string | null
   /** The newest fly from the fly box, pinned to the hat; null for none. */
   readonly fly?: string | null
+  /** D162: the world's season, dressed over the backdrop; null or absent under content v1. */
+  readonly season?: Season | null
 }
 
 /** Where the angler stands on the stage for a key: the sprite's top-left and its pose. */
 export function anglerPlacement(key: SceneKey): { sprite: Sprite; left: number; top: number } {
   const sprite = anglerPoses[key.pose]
-  const ground = key.water === 'harbour_pier' ? DECK : BANK
-  return { sprite, left: key.water === 'harbour_pier' ? 26 : 18, top: ground - sprite.height }
+  const decked = key.water === 'harbour_pier' || key.water === 'deep_sea'
+  const ground = decked ? DECK : BANK
+  return { sprite, left: decked ? 26 : 18, top: ground - sprite.height }
 }
 
 /**
@@ -298,6 +441,7 @@ export function composeScene(key: SceneKey, c: Canvas = new Canvas(STAGE_WIDTH, 
   sky(c, key.band, key.weather)
   backdrop(c, key.water)
   const ground = nearGround(c, key.water)
+  seasonOver(c, key.water, key.season, key.weather)
   const angler = anglerPoses[key.pose]
   const { left: ax, top: ay } = anglerPlacement(key)
   c.region = 'angler'
@@ -315,8 +459,12 @@ export function composeScene(key: SceneKey, c: Canvas = new Canvas(STAGE_WIDTH, 
   const [hx, hy] = ROD_HAND[key.pose]
   const handX = ax + hx
   const handY = ay + hy
-  const floatX = key.water === 'harbour_pier' ? 104 : 96
+  const floatX = key.water === 'harbour_pier' || key.water === 'deep_sea' ? 104 : 96
   const floatY = HORIZON + 7
+  if (key.water === 'frozen_tarn') {
+    c.region = 'hole'
+    c.draw(iceHole, floatX - 2, floatY + 1)
+  }
   switch (key.pose) {
     case 'waiting':
       c.region = 'rod'

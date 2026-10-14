@@ -1,4 +1,5 @@
 import { contentV1 } from '../content/v1'
+import { contentV2 } from '../content/v2'
 import type { IdleAnglerPayloadInput, PayloadAngler, PayloadStory } from '../lib/payload'
 
 /**
@@ -7,6 +8,10 @@ import type { IdleAnglerPayloadInput, PayloadAngler, PayloadStory } from '../lib
  */
 export const PREVIEW_NOW = Date.UTC(2026, 10, 2, 17, 50)
 const minutes = (n: number) => PREVIEW_NOW - n * 60_000
+/** Content v2's world seasons (one a week from Monday 19 Oct 2026, spring): a summer Tuesday, a winter Wednesday, a spring Saturday. */
+const V2_SUMMER = Date.UTC(2026, 9, 27, 17, 50)
+const V2_WINTER = Date.UTC(2026, 10, 11, 9, 0)
+const V2_SPRING_SATURDAY = Date.UTC(2026, 9, 24, 12, 0)
 
 const angler: PayloadAngler = {
   alias: 'Wren',
@@ -54,6 +59,13 @@ const base: IdleAnglerPayloadInput = {
   },
 }
 
+/** A content v2 state at its own moment: the world ticked four minutes before it, and its stories are timed from it. */
+function v2At(b: IdleAnglerPayloadInput, now: number, state: Partial<IdleAnglerPayloadInput>): IdleAnglerPayloadInput {
+  const shift = now - PREVIEW_NOW
+  const stories = (state.stories ?? b.stories).map((story) => ({ ...story, at: story.at + shift }))
+  return { ...b, ...state, content: contentV2, now, world: { createdAt: now - 86_400_000, lastCompletedAt: now - 4 * 60_000, paused: false }, stories }
+}
+
 export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerPayloadInput> {
   const b = { ...base, artBaseUrl }
   return {
@@ -85,6 +97,12 @@ export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerP
     stale: { ...b, world: { ...b.world!, lastCompletedAt: PREVIEW_NOW - 90 * 60_000 } },
     servicePaused: { ...b, world: { ...b.world!, paused: true } },
     pending: { ...b, angler: { ...angler, activationState: 'pending_trmnl' }, stories: [] },
+    // Content v2 (D162): each new water in its season, a run, an Open, a medal, a goal and an unlock.
+    heronLake: v2At(b, V2_SUMMER, { angler: { ...angler, waterId: 'heron_lake', baitOnHook: 'boilies', bait: { boilies: 24 }, rodTier: 4, speciesLogged: 31, goal: 'Win a medal in an Open' }, band: 'night', weather: 'clear', stories: [{ kind: 'catch', summary: 'A 24.6 kg Wels Catfish took the deadbait in the dark. First Wels Catfish in the logbook.', at: minutes(4), speciesId: 'wels_catfish', grams: 24600 }, { kind: 'goal', summary: 'Goal reached: Hire the rowing boat. Next: Win a medal in an Open.', at: minutes(4) }, ...stories.slice(1)] }),
+    charter: v2At(b, V2_WINTER, { angler: { ...angler, waterId: 'deep_sea', baitOnHook: 'deadbait', bait: { deadbait: 21 }, rodTier: 5, coolerTier: 4, speciesLogged: 40, goal: 'Catch a fish in every season' }, coolerUsed: 9, band: 'day', weather: 'wind', stories: [{ kind: 'run', summary: 'The cod are in on the charter grounds.', at: minutes(3) }, { kind: 'catch', summary: 'An 11.8 kg Cod took the deadbait in the day. A new personal best.', at: minutes(18), speciesId: 'cod', grams: 11800 }, ...stories.slice(1)] }),
+    frozenTarn: v2At(b, V2_WINTER, { angler: { ...angler, waterId: 'frozen_tarn', baitOnHook: 'maggots', bait: { maggots: 30 }, rodTier: 5, coolerTier: 4, speciesLogged: 47, goal: 'Log 48 species' }, band: 'dawn', weather: 'clear', stories: [{ kind: 'catch', summary: 'A 3.2 kg Golden Char took the maggots at first light. First Golden Char in the logbook.', at: minutes(2), speciesId: 'golden_char', grams: 3200 }, { kind: 'milestone', summary: 'Now a Lakeside Legend, with 47 species in the logbook.', at: minutes(2) }, ...stories.slice(1)] }),
+    openWeekend: v2At(b, V2_SPRING_SATURDAY, { angler: { ...angler, waterId: 'millpond', baitOnHook: 'worms', bait: { worms: 20 }, speciesLogged: 9, goal: 'Mount a fish on the wall' }, band: 'day', weather: 'clear', stories: [{ kind: 'open', summary: 'Entered the Perch Open at the Millpond with 640 g.', at: minutes(5) }, { kind: 'catch', summary: 'A 640 g Perch took the worm in the day.', at: minutes(5), speciesId: 'perch', grams: 640 }, { kind: 'milestone', summary: 'Unlocked: the trophy wall. Big fish can be mounted.', at: minutes(80) }, ...stories.slice(1)] }),
+    medal: v2At(b, V2_SUMMER, { angler: { ...angler, speciesLogged: 22, goal: 'Book a deep-sea charter' }, stories: [{ kind: 'open', summary: 'Gold in the Chub Open at River Bend with 2.1 kg. 500 coins.', at: minutes(2) }, { kind: 'goal', summary: 'Goal reached: Win a medal in an Open. Next: Book a deep-sea charter.', at: minutes(2) }, ...stories.slice(1)] }),
     unlinked: { ...b, angler: null, stories: [] },
   }
 }

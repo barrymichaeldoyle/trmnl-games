@@ -266,6 +266,13 @@ Everything new lives under content v2 and achievements v4. v1 replays unchanged 
 
 Content and art are the long poles. F1's numbers decide every price above, so F1 comes first. F3 and F4 can run side by side once F1 has fixed the content.
 
+## Build log
+
+- 2026-10-14, F1: content v2, the pure rules and the lockstep harness; every F1 gate passes ([evidence](evidence/idle-angler-v2-balance.md)). Content v1 replays unchanged (a fingerprint test recorded before the change).
+- 2026-10-14, F2: the backend (intents for orders, deadbait, mounting, pegs and charter tickets; Open records and the Monday medal cron; the Dock's v2 block; deletion of the wall and shelf), with a convex-test matrix. Rosettes are the `opensEntered` count rather than rows, so the shelf grows only by medals.
+- 2026-10-14, F3 and F4: the companion pages (goal and coming-up lines, season and run banner, the slate on the Cooler with deadbait and mount actions, the charter in the Shop, the Trophies page, the Opens card in Rankings, seasons in the Log, the help page) and the device (scene v4 with the new waters and seasonal dressing, 28 fish, goal, Open and run lines). 528 previews pass the sweep and the companion pages pass at 390 wide ([evidence](evidence/idle-angler-v2-device.md)).
+- 2026-10-14, F5: achievements v4 (orders, deadbait, trophies, Opens, medals, seasons and runs, higher tiers for epics, the logbook, waters and rods, and two tiers for each new species) and the trophy wall on the public profile.
+
 ## Still not in the game
 
 - Raids and meetings between anglers, prestige, XP and levels.

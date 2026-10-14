@@ -6,7 +6,7 @@ import schema from '../../apps/backend/convex/schema'
 import type { T } from './helpers'
 import { nextIdleAnglerTick, runIdleAnglerTick, seedAngler } from './idleAnglerHelpers'
 import { ACHIEVEMENTS, newlyUnlocked } from '@trmnl-games/idle-angler/content/achievements'
-import { contentV1 } from '@trmnl-games/idle-angler/content'
+import { contentV1, contentV2 } from '@trmnl-games/idle-angler/content'
 import { zeroCounters } from '@trmnl-games/idle-angler/sim'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
@@ -23,7 +23,8 @@ describe('Idle Angler achievements (D115, S5)', () => {
 
   it('has unique ids and appends species tiers for every species', () => {
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENTS.filter((a) => a.category === 'Species')).toHaveLength(contentV1.species.length * 2)
+    // v4 (D162) covers content v2's 58 species, a superset of v1's.
+    expect(ACHIEVEMENTS.filter((a) => a.category === 'Species')).toHaveLength(contentV2.species.length * 2)
   })
 
   it('unlocks on the step that crosses a threshold, and not again', () => {

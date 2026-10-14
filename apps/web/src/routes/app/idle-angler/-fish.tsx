@@ -1,11 +1,11 @@
 import { Fragment, type ReactNode } from 'react'
-import { contentV1 } from '@trmnl-games/idle-angler/content'
+import { contentV2 } from '@trmnl-games/idle-angler/content'
 import { RARITY_TONE } from '../../../lib/palette'
 
-const byId = new Map(contentV1.species.map((s) => [s.id, s]))
-const byName = new Map(contentV1.species.map((s) => [s.name, s]))
-const waterByName = new Map(contentV1.waters.map((w) => [w.name, w]))
-const waterById = new Map<string, { name: string }>(contentV1.waters.map((w) => [w.id, w]))
+const byId = new Map(contentV2.species.map((s) => [s.id, s]))
+const byName = new Map(contentV2.species.map((s) => [s.name, s]))
+const waterByName = new Map(contentV2.waters.map((w) => [w.name, w]))
+const waterById = new Map<string, { name: string }>(contentV2.waters.map((w) => [w.id, w]))
 // Longest first, so "Conger Eel" wins over "Eel" and "Common Carp" over "Carp". Waters are marked in stories too.
 const NAMES = new RegExp(`\\b(${[...byName.keys(), ...waterByName.keys()].sort((a, b) => b.length - a.length).map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})\\b`, 'g')
 
@@ -28,7 +28,7 @@ export function FishText({ text }: { text: string }) {
 
 /** Who takes a bait, split into the fish that take nothing else and the rest; only fish in `seen` are named. */
 export function baitCatches(bait: string, seen: ReadonlySet<string>) {
-  const takers = contentV1.species.filter((s) => s.baits.includes(bait as never))
+  const takers = contentV2.species.filter((s) => s.baits.includes(bait as never))
   const group = (rows: typeof takers) => ({ ids: rows.filter((s) => seen.has(s.id)).map((s) => s.id), unseen: rows.filter((s) => !seen.has(s.id)).length })
   return { only: group(takers.filter((s) => s.baits.length === 1)), also: group(takers.filter((s) => s.baits.length > 1)) }
 }

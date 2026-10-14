@@ -3,6 +3,7 @@ import { poseFor } from '../art/scene'
 import { WEATHER_WORD } from '../sim/conditions'
 import { formatWeight } from '../sim/progress'
 import { nextTitle, titleFor } from '../sim/titles'
+import { seasonAt } from '../sim/seasons'
 import type { AnglerStatus, BaitClass, IdleAnglerCatalog, TimeBand, WaterId, Weather } from '../sim/types'
 
 /**
@@ -34,6 +35,8 @@ export interface PayloadAngler {
   readonly speciesLogged: number
   /** The newest fly from the fly box, drawn on the hat; null for none. */
   readonly fly?: string | null
+  /** D162: the current goal's line under content v2; absent under v1. */
+  readonly goal?: string | null
 }
 
 export interface PayloadStory {
@@ -47,7 +50,7 @@ export interface PayloadStory {
 }
 
 /** Within one cast, the fish comes first, then its milestones (a title, a water opening), then what it earned. */
-const STORY_RANK: Readonly<Record<string, number>> = { catch: 0, release: 0, got_away: 0, milestone: 1, achievement: 2 }
+const STORY_RANK: Readonly<Record<string, number>> = { catch: 0, release: 0, got_away: 0, open: 1, milestone: 1, run: 1, goal: 2, achievement: 3 }
 
 /**
  * The stories as the device lists them (newest first). Lines written at the same moment belong to one cast: the catch
@@ -177,7 +180,9 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
   const titlePct = next ? Math.floor(((angler.speciesLogged - title.species) * 100) / (next.species - title.species)) : 100
   const status = angler.status === 'paused' ? ('paused' as const) : travelling ? ('travelling' as const) : ('fishing' as const)
   const pose = poseFor(status, latest?.kind ?? null)
-  const scene = sceneBase({ water: (destination ?? water).id, band: input.band, weather: input.weather, pose, fish: latestCatch?.species_id ?? null, fly: angler.fly ?? null })
+  // D162: under content v2 the world's season dresses the scene; v1 scenes carry none.
+  const season = seasonAt(content, now) ?? null
+  const scene = sceneBase({ water: (destination ?? water).id, band: input.band, weather: input.weather, season, pose, fish: latestCatch?.species_id ?? null, fly: angler.fly ?? null })
   return {
     v: PAYLOAD_VERSION,
     game: 'idle-angler' as const,
@@ -185,6 +190,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     status,
     status_label: statusLabel,
     conditions_label: conditions,
+    season,
+    goal_line: angler.goal ?? null,
     weather: input.weather,
     band: input.band,
     alias: angler.alias,

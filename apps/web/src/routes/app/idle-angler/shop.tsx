@@ -17,7 +17,7 @@ export const Route = createFileRoute('/app/idle-angler/shop')({
   component: ShopPage,
 })
 
-const WATER_NAME: Record<string, string> = { river_bend: 'River Bend', harbour_pier: 'the Harbour Pier' }
+const WATER_NAME: Record<string, string> = { river_bend: 'River Bend', harbour_pier: 'the Harbour Pier', heron_lake: 'Heron Lake', frozen_tarn: 'Frozen Tarn' }
 
 /** A purchase waiting for its confirmation: a stray tap only opens the sheet. Rows say what changes, as label and value. */
 type Offer = { title: string; price: number; rows: ReadonlyArray<readonly [string, ReactNode]>; buy: () => Promise<boolean> }
@@ -33,19 +33,26 @@ function ShopPage() {
   const cooler = useIntent(api.idleAngler.anglers.buyNextCooler, { onFeedback: notify })
   const access = useIntent(api.idleAngler.anglers.buyAccessItem, { onFeedback: notify })
   const bait = useIntent(api.idleAngler.anglers.buyBaitTubs, { onFeedback: notify })
+  const charter = useIntent(api.idleAngler.full.buyCharterTicket, { onFeedback: notify })
   const [offer, setOffer] = useState<Offer | null>(null)
   const angler = dock?.angler
   if (!dock || !angler || !dock.shop) return null
   const gold = angler.gold
-  const buying = rod.pending || cooler.pending || access.pending || bait.pending
+  const buying = rod.pending || cooler.pending || access.pending || bait.pending || charter.pending
+  const full = dock.full ?? null
+  // D157 for Idle Angler (D162): upgrades stay out of sight until the logbook opens them.
+  const upgradesOpen = !full || full.features.shop_upgrades
+  const sea = dock.waters?.find((w) => w.charter)
+  const seaKnown = sea?.opensAfter ? sea.opensAfter.logged >= sea.opensAfter.species : false
   const short = (price: number) => (gold < price ? <span className="text-sm text-muted">{price - gold} coins short</span> : null)
   const gateOf = (water: string) => dock.waters?.find((w) => w.id === water)?.opensAfter ?? null
   const nextRod = dock.shop.rod
   const nextCooler = dock.shop.cooler
   // Bait for waters the angler can fish comes first; the rest waits under its own heading.
   const openWaters = new Set(dock.waters?.filter((w) => w.open).map((w) => w.id))
-  const usableBait = angler.bait.filter((b) => dock.waters?.some((w) => openWaters.has(w.id) && w.baits.includes(b.class)))
-  const laterBait = angler.bait.filter((b) => !usableBait.includes(b))
+  // Deadbait comes from the cooler, never a tub.
+  const usableBait = angler.bait.filter((b) => b.class !== 'deadbait' && dock.waters?.some((w) => openWaters.has(w.id) && w.baits.includes(b.class)))
+  const laterBait = angler.bait.filter((b) => b.class !== 'deadbait' && !usableBait.includes(b))
   const baitRow = (b: (typeof angler.bait)[number]) => {
     const waters = dock.waters?.filter((w) => w.baits.includes(b.class)).map((w) => w.name) ?? []
     const catches = baitCatches(b.class, seen)
@@ -79,7 +86,8 @@ function ShopPage() {
         <span className="text-sm font-semibold text-gold-ink">{gold} coins</span>
       </div>
 
-      <Card title="Rod">
+      {!upgradesOpen ? <Card title="Rods and coolers"><p>Better rods and bigger coolers arrive once {full?.comingUp?.feature === 'shop_upgrades' ? full.comingUp.species : 2} species are in your logbook.</p></Card> : null}
+      {upgradesOpen ? <Card title="Rod">
         <Rows rows={[
           ['Yours', <><strong>{angler.rod.name}</strong>, lands up to {formatWeight(angler.rod.limitGrams)}</>],
           nextRod ? ['Next', <><strong>{nextRod.name}</strong>, lands up to {formatWeight(nextRod.limitGrams)}, +{nextRod.biteBonusPercent}% bite chance</>] : null,
@@ -95,9 +103,9 @@ function ShopPage() {
             </div>
           </>
         ) : <p className="mt-2 text-sm text-muted">This is the best rod.</p>}
-      </Card>
+      </Card> : null}
 
-      <Card title="Cooler">
+      {upgradesOpen ? <Card title="Cooler">
         <Rows rows={[
           ['Yours', <><strong>{angler.cooler.name}</strong>, holds {angler.cooler.capacity} fish</>],
           nextCooler ? ['Next', <><strong>{nextCooler.name}</strong>, holds {nextCooler.capacity} fish</>] : null,
@@ -113,7 +121,23 @@ function ShopPage() {
             </div>
           </>
         ) : <p className="mt-2 text-sm text-muted">This is the biggest cooler.</p>}
-      </Card>
+      </Card> : null}
+
+      {full?.charter && seaKnown ? (
+        <Card title="Deep-sea charter">
+          <Rows rows={[['Ticket', `${full.charter.casts} casts at sea for ${full.charter.price} coins`], ['On your ticket', `${full.charter.castsLeft} casts`], ['Leaves from', 'The Harbour Pier, and sails back there when the ticket runs out']]} />
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            {full.charter.castsLeft > 0 ? <span className="text-sm text-muted">Casts left on a ticket stay for the next trip. Head out from the Dock.</span> : (
+              <>
+                <Button disabled={gold < full.charter.price || buying} onClick={() => setOffer({ title: 'Book a charter ticket?', price: full.charter!.price, rows: [['You get', `${full.charter!.casts} casts at sea`], ['Then', 'Fish the charter from the Dock']], buy: () => charter.run({}, `Booked a charter for ${full.charter!.casts} casts.`) })}>
+                  Book for {full.charter.price} coins
+                </Button>
+                {short(full.charter.price)}
+              </>
+            )}
+          </div>
+        </Card>
+      ) : null}
 
       <Card title="Passes">
         <ul className="flex flex-col gap-3">

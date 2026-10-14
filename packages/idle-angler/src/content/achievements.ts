@@ -1,13 +1,16 @@
 import type { AnglerCounters, IdleAnglerCatalog } from '../sim/types'
-import { contentV1 } from './v1'
+import { contentV2 } from './v2'
 
 /**
  * Idle Angler achievements (idle-angler.md "Achievements"), versioned like the content catalog: a release appends
  * families under a new version and never edits an existing id. Every predicate reads bounded angler state, so a
  * new achievement is earned retroactively at the next evaluation.
  */
-/** v2 (S6) appends the Flies family; v3 retires the Levels family with XP and levels (titles replace them). */
-export const ACHIEVEMENTS_VERSION = 3
+/**
+ * v2 (S6) appends the Flies family; v3 retires the Levels family with XP and levels (titles replace them); v4 (D162)
+ * appends the full game's families, higher tiers for waters, rods, the logbook and epics, and the new species' tiers.
+ */
+export const ACHIEVEMENTS_VERSION = 4
 
 export type AchievementCategory = 'Fishing' | 'Logbook' | 'Trade' | 'Progress' | 'Species'
 
@@ -19,6 +22,8 @@ export type Predicate =
   | { readonly kind: 'first'; readonly speciesId: string }
   | { readonly kind: 'specimen'; readonly speciesId: string; readonly grams: number }
   | { readonly kind: 'flies'; readonly atLeast: number }
+  /** v4: set bits in a bit-set counter (seasons or runs fished). */
+  | { readonly kind: 'bits'; readonly counter: 'seasonsFished' | 'runsFished'; readonly atLeast: number }
 
 export interface AchievementDef {
   readonly id: string
@@ -60,7 +65,7 @@ const FAMILIES: AchievementDef[] = [
   ]),
   ...family('epic_catches', 'Epic catches', 'Fishing', counter('epicCaught'), [
     [1, 'Once in a Season', 'The right bait, hour and weather, all at once.'],
-    [3, 'Fisher of Legends', 'Golden, silver and spotted.'],
+    [3, 'Fisher of Legends', 'Three epic fish landed.'],
   ]),
   ...family('got_away', 'Got away', 'Fishing', counter('gotAway'), [
     [1, 'The One That Got Away', 'The line went slack.'],
@@ -81,7 +86,7 @@ const FAMILIES: AchievementDef[] = [
     [5, 'Five in the Book', 'The pages start to fill.'],
     [10, 'Naturalist', 'You know a rudd from a roach.'],
     [20, 'Field Guide', 'Other anglers ask you what they caught.'],
-    [30, 'Every Fish in the Book', 'Every species at every water.'],
+    [30, 'Thirty in the Book', 'Thirty species in the logbook.'],
   ]),
   ...family('waters', 'Waters', 'Progress', (n) => ({ kind: 'waters', atLeast: n }), [
     [2, 'Down to the River', 'Waders on, into the current.'],
@@ -107,7 +112,7 @@ const FAMILIES: AchievementDef[] = [
 ]
 
 /** Two tiers per species: the first one caught, and a specimen over three quarters of the species' largest size. */
-const SPECIES: AchievementDef[] = contentV1.species.flatMap((s) => [
+const SPECIES: AchievementDef[] = contentV2.species.flatMap((s) => [
   { id: `first_${s.id}`, family: `species_${s.id}`, familyName: s.name, category: 'Species' as const, tier: 1, name: `First ${s.name}`, blurb: `A ${s.name} in the logbook.`, predicate: { kind: 'first' as const, speciesId: s.id } },
   { id: `specimen_${s.id}`, family: `species_${s.id}`, familyName: s.name, category: 'Species' as const, tier: 2, name: `Specimen ${s.name}`, blurb: `A ${s.name} over ${Math.round(((s.maxGrams * 0.75) / 1000) * 10) / 10} kg.`, predicate: { kind: 'specimen' as const, speciesId: s.id, grams: Math.ceil(s.maxGrams * 0.75) } },
 ])
@@ -120,7 +125,56 @@ const FLIES: AchievementDef[] = family('flies', 'Flies', 'Logbook', (n) => ({ ki
   [24, 'Second Box', 'One for the hat, one for the jacket.'],
 ])
 
-export const ACHIEVEMENTS: readonly AchievementDef[] = [...FAMILIES, ...SPECIES, ...FLIES]
+/** A higher tier appended to an existing family under v4, with the id the family's next index would take. */
+const more = (familyId: string, familyName: string, category: AchievementCategory, from: number, make: (atLeast: number) => Predicate, tiers: readonly Tier[]): AchievementDef[] =>
+  tiers.map(([atLeast, name, blurb], index) => ({ id: `${familyId}_${from + index}`, family: familyId, familyName, category, tier: from + index, name, blurb, predicate: make(atLeast) }))
+const bits = (name: 'seasonsFished' | 'runsFished') => (atLeast: number): Predicate => ({ kind: 'bits', counter: name, atLeast })
+
+/** Version 4 (D162): the full game. */
+const FULL: AchievementDef[] = [
+  ...more('epic_catches', 'Epic catches', 'Fishing', 3, counter('epicCaught'), [[6, 'Every Epic', 'Golden, silver, spotted, ghostly, flat and gold again.']]),
+  ...more('logbook', 'Logbook', 'Logbook', 5, (n) => ({ kind: 'logbook', atLeast: n }), [
+    [40, 'Forty in the Book', 'You need a second notebook.'],
+    [50, 'Fifty in the Book', 'The pages are soft from turning.'],
+    [58, 'Every Fish in the Book', 'Every species at every water.'],
+  ]),
+  ...more('waters', 'Waters', 'Progress', 3, (n) => ({ kind: 'waters', atLeast: n }), [
+    [4, 'Out in the Boat', 'Oars in the rowlocks on Heron Lake.'],
+    [5, 'Off Shore', 'Out past the harbour wall.'],
+    [6, 'Through the Ice', 'A hole cut in Frozen Tarn.'],
+  ]),
+  ...more('rods', 'Rods', 'Progress', 4, (n) => ({ kind: 'rod', atLeast: n }), [[5, 'Boat Rod', 'Short, stiff and made for monsters.']]),
+  ...family('orders', 'Orders', 'Trade', counter('ordersFilled'), [
+    [1, 'First Order', 'The fishmonger nods.'],
+    [10, 'On the Slate', 'Your name chalked up every morning.'],
+    [50, 'Trusted Supplier', 'The best fish go to you first.'],
+    [250, 'Fishmonger\'s Friend', 'Two hundred and fifty orders filled.'],
+  ]),
+  ...family('deadbait', 'Deadbait', 'Fishing', counter('deadbaitCatches'), [
+    [1, 'Bait and Wait', 'A predator on a small fish.'],
+    [25, 'Pike Angler', 'Twenty-five fish on deadbait.'],
+    [250, 'Apex Hunter', 'Two hundred and fifty on deadbait.'],
+  ]),
+  ...family('trophies', 'Trophies', 'Logbook', counter('trophiesMounted'), [
+    [1, 'On the Wall', 'Glass eyes, proud fins.'],
+    [6, 'A Full Wall', 'Six pegs, six fish.'],
+    [24, 'The Trophy Room', 'Twenty-four fish mounted.'],
+  ]),
+  ...family('opens', 'Opens', 'Progress', counter('opensEntered'), [
+    [1, 'Entered', 'A rosette for taking part.'],
+    [10, 'Weekend Regular', 'Ten Opens fished.'],
+    [52, 'Every Weekend', 'Fifty-two Opens fished.'],
+  ]),
+  ...family('medals', 'Medals', 'Progress', counter('medals'), [
+    [1, 'On the Podium', 'A medal from a weekend Open.'],
+    [5, 'Medal Collector', 'Five medals on the shelf.'],
+    [25, 'Champion of the Waters', 'Twenty-five medals won.'],
+  ]),
+  ...family('seasons', 'Seasons', 'Fishing', bits('seasonsFished'), [[4, 'All Year Round', 'A fish in every season.']]),
+  ...family('runs', 'Runs', 'Fishing', bits('runsFished'), [[4, 'Right Place, Right Week', 'A fish from every run.']]),
+]
+
+export const ACHIEVEMENTS: readonly AchievementDef[] = [...FAMILIES, ...SPECIES, ...FLIES, ...FULL]
 export const ACHIEVEMENT_BY_ID: ReadonlyMap<string, AchievementDef> = new Map(ACHIEVEMENTS.map((a) => [a.id, a]))
 
 /** The bounded state predicates read. */
@@ -150,6 +204,11 @@ export function measure(predicate: Predicate, state: AchievementState, content: 
       return { value: state.logbook[predicate.speciesId]?.bestGrams ?? 0, target: predicate.grams }
     case 'flies':
       return { value: state.flies, target: predicate.atLeast }
+    case 'bits': {
+      let n = 0
+      for (let b = state.counters[predicate.counter] ?? 0; b > 0; b >>= 1) n += b & 1
+      return { value: n, target: predicate.atLeast }
+    }
   }
 }
 

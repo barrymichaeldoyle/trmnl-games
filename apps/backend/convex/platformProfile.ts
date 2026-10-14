@@ -64,7 +64,14 @@ export const view = query({
       alias: user.publicAlias,
       games: [
         ...(showDesk ? [{ slug: 'desk-crawler' as const, name: hero.name, level: hero.level, since: hero.activatedAt ?? hero.createdAt, rank: await overallRank(ctx, DESK_CRAWLER_RUNTIME, hero._id), achievements: dcUnlocks, page: `/desk-crawler/heroes/${encodeURIComponent(user.publicAlias)}` }] : []),
-        ...(showIdleAngler ? [{ slug: 'idle-angler' as const, name: user.publicAlias, title: titleFor(Object.keys(angler.logbook).length).name, since: angler.activatedAt ?? angler.createdAt, rank: null, achievements: iaUnlocks, species: Object.keys(angler.logbook).length, page: null }] : []),
+        ...(showIdleAngler
+          ? [{
+              slug: 'idle-angler' as const, name: user.publicAlias, title: titleFor(Object.keys(angler.logbook).length).name, since: angler.activatedAt ?? angler.createdAt, rank: null, achievements: iaUnlocks, species: Object.keys(angler.logbook).length, page: null,
+              // D162: the trophy wall, at most 24 mounted fish, and the medal count.
+              wall: (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24)).map((t) => ({ speciesId: t.speciesId ?? '', grams: t.grams ?? 0 })),
+              medals: angler.counters.medals ?? 0,
+            }]
+          : []),
       ],
       platform: platformAchievements({ games, collected }).map((a) => ({ id: a.id, name: a.name, blurb: a.blurb, family: a.family, tier: a.tier, share: current && current.totalPlayers > 0 ? Math.max(1, Math.round(((current.counts[a.id] ?? 0) * 100) / current.totalPlayers)) : null })),
     }

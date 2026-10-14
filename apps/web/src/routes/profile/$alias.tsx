@@ -6,8 +6,11 @@ import { games } from '@trmnl-games/platform'
 import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
+import { formatWeight } from '../../lib/idleAngler'
+import { FishIcon } from '../app/idle-angler/-art'
+import { FishName } from '../app/idle-angler/-fish'
 
-type Game = { slug: 'desk-crawler' | 'idle-angler'; name: string; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null }
+type Game = { slug: 'desk-crawler' | 'idle-angler'; name: string; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
 type Profile = { alias: string; games: Game[]; platform: Array<{ id: string; name: string; blurb: string; share: number | null }> } | null
 
 const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { alias })
@@ -46,7 +49,13 @@ function ProfilePage() {
                   Playing since {since(game.since)}
                   {game.rank ? ` · #${game.rank.rank} of ${game.rank.totalPlayers} all time` : ''} · {game.achievements} achievements
                   {game.species !== undefined ? ` · ${game.species} species logged` : ''}
+                  {game.medals ? ` · ${game.medals} ${game.medals === 1 ? 'medal' : 'medals'}` : ''}
                 </p>
+                {game.wall && game.wall.length > 0 ? (
+                  <ul className="mt-3 flex flex-wrap gap-3" aria-label="Trophy wall">
+                    {game.wall.map((t, i) => <li key={i} className="flex items-center gap-2 text-sm"><FishIcon id={t.speciesId} scale={2} /><span><FishName id={t.speciesId} /> {formatWeight(t.grams)}</span></li>)}
+                  </ul>
+                ) : null}
                 {game.page ? <Link to={game.page} className="mt-2 inline-flex min-h-11 items-center underline underline-offset-4">Hero page</Link> : null}
               </Card>
             ))}

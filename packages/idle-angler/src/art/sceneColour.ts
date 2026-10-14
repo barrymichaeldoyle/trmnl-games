@@ -61,6 +61,22 @@ const DAY: Record<string, Tones> = {
   rest: { ink: '#8a5a3c' },
   rain: { ink: '#dff0ff' },
   fog: { ink: '#f0f4f8', paper: '#cfdce8' },
+  // Content v2 (D162)
+  pines: { ink: '#1f4a2e', shade: ['#2f6b3a', '#4f8a4a'] },
+  boathouse: { ink: '#5a3a24', paper: '#fff3c4', shade: ['#8a5a3c', '#b5793f'] },
+  heron: { ink: '#4a5a6a', paper: '#e8eef4' },
+  fell: { ink: '#ffffff' },
+  ice: { ink: '#a8c8dc' },
+  hole: { ink: '#2f4f6f' },
+  snowbank: { ink: '#a8c0d4', paper: '#ffffff', shade: ['#d4e4f0', '#ffffff'] },
+  hull: { ink: '#5a3a24', shade: ['#8a5a3c', '#c48a55'] },
+  oar: { ink: '#8a5a3c' },
+  rail: { ink: '#e6e6e6' },
+  cabin: { ink: '#2f3f5a', paper: '#fff3c4' },
+  blossom: { ink: '#f08ab0' },
+  dragonfly: { ink: '#3f8fd0' },
+  leaf: { ink: '#d4782f' },
+  snow: { ink: '#ffffff' },
 }
 const NIGHT: Record<string, Tones> = {
   ...DAY,

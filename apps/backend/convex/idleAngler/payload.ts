@@ -2,6 +2,8 @@ import { v } from 'convex/values'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
 import { buildPayload, MAX_RECAP_STORIES } from '@trmnl-games/idle-angler/payload'
 import { conditionsAt } from '@trmnl-games/idle-angler/sim/simulate'
+import { goalLine } from '@trmnl-games/idle-angler/sim'
+import { toAnglerState } from './adapter'
 import { forecastFor } from '@trmnl-games/idle-angler/sim/seed'
 import type { Doc } from '../_generated/dataModel'
 import { internalQuery, query, type QueryCtx } from '../_generated/server'
@@ -73,6 +75,7 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
       bait: angler.bait,
       speciesLogged: Object.keys(angler.logbook).length,
       fly: await flyTotal(ctx, user._id).then((total) => (total > 0 ? flyForClaim(total).id : null)),
+      goal: goalLine(content, toAnglerState(angler)),
     },
     coolerUsed,
     weather,

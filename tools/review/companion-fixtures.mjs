@@ -21,6 +21,7 @@
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
  * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
+ *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies)   v2=new (a first-day angler with everything locked)
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -286,6 +287,36 @@ const iaDock = ia === 'none' ? { gameState: null, angler: null } : {
   nextTickAt: now + 6e5,
 };
 if (ia === 'empty' && iaDock.angler) iaDock.angler.baitOnHook = 'maggots';
+// D162: content v2's Dock block, three more waters and actions on the cooler's fish.
+const v2 = params.get('v2');
+if (v2 && iaDock.angler) {
+  const fresh = v2 === 'new';
+  iaDock.waters.push(
+    { id: 'heron_lake', name: 'Heron Lake', opensAfter: { waterId: 'river_bend', waterName: 'River Bend', species: 6, logged: fresh ? 0 : 6 }, access: 'rowing_boat', open: !fresh, weather: 'clear', band: 'dusk', bitePercent: 16, baits: ['worms', 'maggots', 'bread', 'boilies', 'spinner', 'deadbait'], weatherUntil: now + 36e5 * 2 },
+    { id: 'deep_sea', name: 'Deep-sea charter', opensAfter: { waterId: 'harbour_pier', waterName: 'Harbour Pier', species: 6, logged: fresh ? 0 : 6 }, access: null, open: false, charter: true, weather: 'wind', band: 'dusk', bitePercent: 15, baits: ['ragworm', 'strip', 'spinner', 'deadbait'], weatherUntil: now + 36e5 * 2 },
+    { id: 'frozen_tarn', name: 'Frozen Tarn', opensAfter: { waterId: 'heron_lake', waterName: 'Heron Lake', species: 5, logged: fresh ? 0 : 5 }, access: 'ice_auger', open: false, closed: !fresh, weather: 'clear', band: 'dusk', bitePercent: 11, baits: ['maggots', 'worms', 'spinner', 'deadbait'], weatherUntil: now + 36e5 * 2 },
+  );
+  iaDock.shop.access.push({ id: 'rowing_boat', name: 'Rowing Boat', price: 1200, water: 'heron_lake', owned: !fresh }, { id: 'ice_auger', name: 'Ice Auger', price: 3500, water: 'frozen_tarn', owned: false });
+  iaDock.angler.bait.push(bait('boilies', 'Boilies', 24, 12, 45), bait('deadbait', 'Deadbait', 6, 3, 0));
+  const ids = iaDock.catches.map((c) => c.id);
+  iaDock.full = {
+    goal: fresh ? { line: 'Land your first fish', coins: 10, page: null, rung: 0, of: 26 } : { line: 'Mount a fish on the wall', coins: 30, page: 'cooler', rung: 13, of: 26 },
+    comingUp: fresh ? { feature: 'shop_upgrades', name: 'Rod and cooler upgrades', species: 2, logged: 0 } : { feature: 'deadbait', name: 'Deadbait', species: 10, logged: 9 },
+    features: { shop_upgrades: !fresh, orders: !fresh, opens: !fresh, trophies: !fresh, deadbait: !fresh },
+    orders: fresh ? [] : [
+      { id: 'o1', kind: 'species', line: 'Two Chub', hint: null, count: 2, catchIds: ids.slice(0, 2), reward: 98, bonus: 20 },
+      { id: 'o2', kind: 'teaching', line: 'One Tench', hint: 'Millpond, on bread or worms, at dawn or dusk', count: 1, catchIds: [], reward: null, bonus: 60 },
+      { id: 'o3', kind: 'time', line: 'Two fish caught at dawn or dusk', hint: null, count: 2, catchIds: [], reward: null, bonus: 30 },
+    ],
+    swappedToday: params.get('swapped') === '1',
+    season: { id: 'autumn', name: 'Autumn', endsAt: now + 864e5 * 3 },
+    runs: fresh ? [] : [{ id: 'salmon_run', line: 'The salmon are running at River Bend.', water: 'river_bend', species: 'Salmon' }],
+    charter: { price: 550, casts: 96, castsLeft: 0 },
+    pegs: { pegs: 6, next: { pegs: 12, price: 800 } },
+    deadbait: 6,
+    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && i === 0 ? 192 : null }])),
+  };
+}
 const species = (water, list) => ({ water, species: list.map(([id, name, rarity, count, best, max, baits, times, weather]) => count ? { id, seen: true, name, rarity, count, bestGrams: best, maxGrams: max, baits, times, weather } : { id, seen: false, rarity, baits: rarity === 'epic' ? null : baits ?? null }) });
 const iaBook = [
   species({ id: 'millpond', name: 'Millpond' }, [['minnow', 'Minnow', 'common', 12, 48, 50, ['worms', 'bread'], null, null], ['roach', 'Roach', 'common', 30, 590, 600, ['worms', 'bread'], null, null], ['perch', 'Perch', 'common', 9, 1210, 1400, ['worms', 'spinner'], null, null], ['bream', 'Bream', 'uncommon', 3, 2200, 3500, ['bread', 'worms'], ['dawn', 'dusk', 'night'], null], ['eel', 'Eel', 'rare', 0, 0, 0, ['worms']], ['golden_carp', 'Golden Carp', 'epic', 0]]),
@@ -297,6 +328,8 @@ const queries = {
   'idleAngler/anglers:dock': () => iaDock,
   'idleAngler/anglers:logbook': () => iaBook,
   'idleAngler/payload:preview': () => ({ scene_base: '' }),
+  'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),
+  'idleAngler/full:opens': () => (params.get('v2') ? { period: 'o2026-10-24', startsAt: now - 36e5 * 5, endsAt: now + 864e5, on: true, prizes: [500, 300, 150], waters: [['millpond', 'Millpond', 'perch', 'Perch'], ['river_bend', 'River Bend', 'chub', 'Chub'], ['heron_lake', 'Heron Lake', 'mirror_carp', 'Mirror Carp']].map(([id, name, tid, tname], w) => ({ id, name, target: { id: tid, name: tname }, own: w === 1 ? { rank: 4, speciesId: tid, grams: 1300 } : null, entries: w === 2 ? [] : [['Quillfeather_Longname', 2400], ['Mo', 1900], ['Bea', 1500], ['Barry', 1300]].map(([n, g], i) => ({ rank: i + 1, name: n, speciesId: tid, grams: g, own: n === 'Barry', profile: false })) })) } : null),
   'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
   'idleAngler/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, own: { rank: 3, speciesId: 'barbel', grams: 1900 }, entries: [['Quillfeather_Longname', 'pike', 5240], ['Mo', 'chub', 2410], ['Barry', 'barbel', 1900], ['Hidden player', 'grayling', 1210], ['Bea', 'dace', 380]].map(([name, speciesId, grams], i) => ({ rank: i + 1, name, speciesId, grams, own: name === 'Barry', profile: name === 'Mo' })) }),
   'idleAngler/achievements:mine': () => ({ earnedCount: 23, rarity: { counts: { catches_3: 12, logbook_2: 7, got_away_1: 30 }, totalPlayers: 41 }, families: [
@@ -388,12 +421,13 @@ import { Route as IaLogbook } from '../../apps/web/src/routes/app/idle-angler/lo
 import { Route as IaSettings } from '../../apps/web/src/routes/app/idle-angler/settings';
 import { Route as IaRankings } from '../../apps/web/src/routes/app/idle-angler/rankings';
 import { Route as IaAchievements } from '../../apps/web/src/routes/app/idle-angler/achievements';
+import { Route as IaTrophies } from '../../apps/web/src/routes/app/idle-angler/trophies';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
-  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component };
+  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component };
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);
 function App() {

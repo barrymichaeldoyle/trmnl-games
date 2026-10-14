@@ -63,11 +63,14 @@ describe('Idle Angler scenes and codes', () => {
   it('round-trips scene paths and refuses anything off the allowlist', () => {
     const key = { water: 'river_bend', band: 'dusk', weather: 'rain', pose: 'holding', fish: 'salmon', fly: 'zulu' } as const
     const base = sceneBase(key)
-    expect(base).toBe('/art/ia/scene/v3/river_bend/dusk/rain/holding/salmon/zulu')
+    expect(base).toBe('/art/ia/scene/v4/river_bend/dusk/rain/noseason/holding/salmon/zulu')
+    expect(sceneBase({ ...key, season: 'winter' })).toBe('/art/ia/scene/v4/river_bend/dusk/rain/winter/holding/salmon/zulu')
+    // v3 paths (no season) still render while devices catch up (D162).
+    expect(parseScenePath('/art/ia/scene/v3/river_bend/dusk/rain/holding/salmon/zulu/182/5.png')).toMatchObject({ water: 'river_bend', season: null, width: 182 })
     expect(scenePath(key, 182, 5)).toBe(`${base}/182/5.png`)
     expect(parseScenePath(`${base}/182/5.png`)).toMatchObject({ water: 'river_bend', fish: 'salmon', fly: 'zulu', width: 182, scale: 5 })
-    expect(sceneBase({ water: 'millpond', band: 'day', weather: 'clear', pose: 'waiting', fish: 'roach' })).toBe('/art/ia/scene/v3/millpond/day/clear/waiting/none/nofly')
-    for (const bad of [`${base}/152/7.png`, `${base}/5.png`, `${base}/119/5.png`, `${base}/401/5.png`, `${base}/1520/5.png`, `${base}/0152/5.png`, '/art/ia/scene/v3/ocean/day/clear/waiting/none/nofly/152/5.png', '/art/ia/scene/v3/millpond/day/clear/waiting/shark/nofly/152/5.png', '/art/ia/scene/v3/millpond/day/clear/waiting/none/dragonfly/152/5.png', '/art/ia/scene/v2/millpond/day/clear/waiting/none/nofly/5.png', '/art/ia/scene/v1/millpond/day/clear/waiting/none/5.png', '/art/ia/qr/v1/anything/3.png'])
+    expect(sceneBase({ water: 'millpond', band: 'day', weather: 'clear', pose: 'waiting', fish: 'roach' })).toBe('/art/ia/scene/v4/millpond/day/clear/noseason/waiting/none/nofly')
+    for (const bad of [`${base}/152/7.png`, `${base}/5.png`, `${base}/119/5.png`, `${base}/401/5.png`, `${base}/1520/5.png`, `${base}/0152/5.png`, '/art/ia/scene/v3/ocean/day/clear/waiting/none/nofly/152/5.png', '/art/ia/scene/v4/millpond/day/clear/monsoon/waiting/none/nofly/152/5.png', '/art/ia/scene/v3/millpond/day/clear/waiting/shark/nofly/152/5.png', '/art/ia/scene/v3/millpond/day/clear/waiting/none/dragonfly/152/5.png', '/art/ia/scene/v2/millpond/day/clear/waiting/none/nofly/5.png', '/art/ia/scene/v1/millpond/day/clear/waiting/none/5.png', '/art/ia/qr/v1/anything/3.png'])
       expect(renderIdleAnglerArt(bad, 'https://trmnlgames.com'), bad).toBeNull()
     expect(renderIdleAnglerArt('/art/ia/qr/v1/home/3.png', 'https://trmnlgames.com')?.immutable).toBe(false)
     expect(renderIdleAnglerArt(`${base}/152/2.png`, 'https://trmnlgames.com')?.immutable).toBe(true)
@@ -112,7 +115,7 @@ describe('Idle Angler payload', () => {
       bait_label: 'Maggots 34',
       attention: null,
       latest_catch: { species_id: 'barbel', name: 'Barbel', weight_label: '1.9 kg' },
-      scene_base: `${ART}/art/ia/scene/v3/river_bend/dusk/overcast/holding/barbel/red_tag`,
+      scene_base: `${ART}/art/ia/scene/v4/river_bend/dusk/overcast/noseason/holding/barbel/red_tag`,
       qr_base: `${ART}/art/ia/qr/v1/home`,
       recap: 'Last 12 hours: 3 fish, best 1.9 kg Barbel, 1 got away',
     })

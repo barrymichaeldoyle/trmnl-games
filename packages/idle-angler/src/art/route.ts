@@ -1,6 +1,6 @@
 import { encodePng1Bit } from '@trmnl-games/engine/art/png'
 import { qrInk } from '@trmnl-games/engine/art/qr'
-import type { TimeBand, WaterId, Weather } from '../sim/types'
+import type { Season, TimeBand, WaterId, Weather } from '../sim/types'
 import { anglerPoses, type AnglerPose } from './angler'
 import { Canvas } from '@trmnl-games/engine/art/canvas'
 import { FISH_LARGE, FISH_TRAITS, fishSprite } from './fish'
@@ -9,13 +9,15 @@ import { composeScene, MAX_STAGE_WIDTH, MIN_STAGE_WIDTH, SCENE_VERSION, STAGE_HE
 
 /**
  * Idle Angler art paths, served by the Convex art route under `/art/ia/` (idle-angler.md "Device"):
- *   /art/ia/scene/v3/<water>/<band>/<weather>/<pose>/<fish|none>/<fly|nofly>/<width>/<scale>.png
+ *   /art/ia/scene/v4/<water>/<band>/<weather>/<season|noseason>/<pose>/<fish|none>/<fly|nofly>/<width>/<scale>.png
+ *   (v3, the same without the season, still renders while devices catch up)
  *   /art/ia/qr/v1/<target>/<scale>.png
  *   /art/ia/fish/v1/<species>/<scale>.png   (template v2's newest-catch panel)
  * Every part is allowlisted and the stage width bounded (`MIN_STAGE_WIDTH` to `MAX_STAGE_WIDTH`, D125), so the
  * route can never draw arbitrary text, mint arbitrary codes or render an unbounded image.
  */
-const WATERS = new Set<WaterId>(['millpond', 'river_bend', 'harbour_pier'])
+const WATERS = new Set<WaterId>(['millpond', 'river_bend', 'harbour_pier', 'heron_lake', 'deep_sea', 'frozen_tarn'])
+const SEASONS = new Set<Season>(['spring', 'summer', 'autumn', 'winter'])
 const BANDS = new Set<TimeBand>(['dawn', 'day', 'dusk', 'night'])
 const WEATHERS = new Set<Weather>(['clear', 'overcast', 'rain', 'wind', 'fog'])
 /** Whole-number scales only, so pixels stay crisp: 1 for narrow portrait columns up to 10 for the X's full view. */
@@ -28,7 +30,7 @@ export const QR_TARGETS = { home: '/ia', cooler: '/app/idle-angler/cooler' } as 
 export type QrTarget = keyof typeof QR_TARGETS
 
 export function sceneBase(key: SceneKey): string {
-  return `/art/ia/scene/v${SCENE_VERSION}/${key.water}/${key.band}/${key.weather}/${key.pose}/${key.pose === 'holding' && key.fish ? key.fish : 'none'}/${key.fly ?? 'nofly'}`
+  return `/art/ia/scene/v${SCENE_VERSION}/${key.water}/${key.band}/${key.weather}/${key.season ?? 'noseason'}/${key.pose}/${key.pose === 'holding' && key.fish ? key.fish : 'none'}/${key.fly ?? 'nofly'}`
 }
 
 export const qrBase = (target: QrTarget) => `/art/ia/qr/v${QR_VERSION}/${target}`
@@ -42,9 +44,12 @@ export const fishBase = (speciesId: string) => `/art/ia/fish/v${FISH_VERSION}/${
 export const scenePath = (key: SceneKey, width: number, scale: number) => `${sceneBase(key)}/${width}/${scale}.png`
 
 export function parseScenePath(path: string): (SceneKey & { width: number; scale: number }) | null {
-  const match = /^\/art\/ia\/scene\/v(\d+)\/([a-z_]+)\/([a-z]+)\/([a-z]+)\/([a-z]+)\/([a-z_]+)\/([a-z_]+)\/(\d{3})\/(\d+)\.png$/.exec(path)
-  if (!match || Number(match[1]) !== SCENE_VERSION) return null
-  const [, , water, band, weather, pose, fish, fly, widthText, scaleText] = match
+  const v4 = /^\/art\/ia\/scene\/v4\/([a-z_]+)\/([a-z]+)\/([a-z]+)\/([a-z]+)\/([a-z]+)\/([a-z_]+)\/([a-z_]+)\/(\d{3})\/(\d+)\.png$/.exec(path)
+  const v3 = v4 ? null : /^\/art\/ia\/scene\/v3\/([a-z_]+)\/([a-z]+)\/([a-z]+)\/([a-z]+)\/([a-z_]+)\/([a-z_]+)\/(\d{3})\/(\d+)\.png$/.exec(path)
+  if (!v4 && !v3) return null
+  const [, water, band, weather, seasonText, pose, fish, fly, widthText, scaleText] = v4 ?? [v3![0], v3![1], v3![2], v3![3], 'noseason', v3![4], v3![5], v3![6], v3![7], v3![8]]
+  if (seasonText !== 'noseason' && !SEASONS.has(seasonText as Season)) return null
+  const season = seasonText === 'noseason' ? null : (seasonText as Season)
   if (fly !== 'nofly' && !FLIES.some((f) => f.id === fly)) return null
   const width = Number(widthText)
   const scale = Number(scaleText)
@@ -52,7 +57,7 @@ export function parseScenePath(path: string): (SceneKey & { width: number; scale
   if (!WATERS.has(water as WaterId) || !BANDS.has(band as TimeBand) || !WEATHERS.has(weather as Weather) || !(pose! in anglerPoses) || !SCENE_SCALES.has(scale)) return null
   if (fish !== 'none' && !(fish! in FISH_TRAITS)) return null
   if ((pose === 'holding') !== (fish !== 'none') && fish !== 'none') return null
-  return { water: water as WaterId, band: band as TimeBand, weather: weather as Weather, pose: pose as AnglerPose, fish: fish === 'none' ? null : fish!, fly: fly === 'nofly' ? null : fly!, width, scale }
+  return { water: water as WaterId, band: band as TimeBand, weather: weather as Weather, season, pose: pose as AnglerPose, fish: fish === 'none' ? null : fish!, fly: fly === 'nofly' ? null : fly!, width, scale }
 }
 
 export function renderIdleAnglerArt(path: string, origin: string): { png: Uint8Array; immutable: boolean } | null {

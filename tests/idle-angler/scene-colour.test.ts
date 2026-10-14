@@ -67,7 +67,8 @@ describe('companion painted scene', () => {
 
   it('reads the scene key back from a device image URL and encodes a PNG', () => {
     const key: SceneKey = { water: 'river_bend', band: 'dusk', weather: 'rain', pose: 'holding', fish: 'salmon', fly: 'zulu' }
-    expect(sceneKeyFromUrl(`https://art.test${sceneBase(key)}/182/3.png?x=1`)).toEqual(key)
+    expect(sceneKeyFromUrl(`https://art.test${sceneBase(key)}/182/3.png?x=1`)).toEqual({ ...key, season: null })
+    expect(sceneKeyFromUrl(`${sceneBase({ ...key, season: 'autumn' })}/182/3.png`)).toEqual({ ...key, season: 'autumn' })
     expect(sceneKeyFromUrl(`${sceneBase(key)}/182/7.png`)).toBeNull()
     expect(sceneKeyFromUrl(`${sceneBase(key)}/3.png`)).toBeNull()
     expect(sceneKeyFromUrl('/art/ia/scene/v3/ocean/day/clear/waiting/none/nofly/152/3.png')).toBeNull()

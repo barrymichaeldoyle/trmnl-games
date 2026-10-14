@@ -113,10 +113,10 @@ const attention = (clamp = 2) =>
   `{% if attention %}{% case attention_kind %}{% when "cooler" %}{% assign m_attention = m_cooler %}{% when "bait" %}{% assign m_attention = m_bait_out %}{% else %}{% assign m_attention = m_system %}{% endcase %}` +
   `<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-attention="{{ attention_kind }}"><img class="${ICON}" src="{{ m_attention }}" alt=""><span class="${LABEL} label--inverted" data-clamp="${clamp}">{{ attention | escape }}</span></div>{% endif %}`
 
-/** One story's glyph: its kind's, a star for a milestone, a dot for anything else. */
+/** One story's glyph: its kind's, a star for a milestone or a goal (D162), the trophy for an Open, a fish for a run, a dot for anything else. */
 const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !== 'system')
   .map((kind) => `{% when "${kind}" %}{% assign m_story = m_${kind} %}`)
-  .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% else %}{% assign m_story = m_system %}{% endcase %}`
+  .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% when "goal" %}{% assign m_story = m_star %}{% when "open" %}{% assign m_story = m_achievement %}{% when "run" %}{% assign m_story = m_catch %}{% else %}{% assign m_story = m_system %}{% endcase %}`
 
 /** The newest stories, each behind its glyph. */
 const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') =>
