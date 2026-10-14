@@ -16,6 +16,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as DcRouteImport } from './routes/dc'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as IaRouteImport } from './routes/ia'
+import { Route as PlRouteImport } from './routes/pl'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -93,6 +94,11 @@ const FeedbackRoute = FeedbackRouteImport.update({
 const IaRoute = IaRouteImport.update({
   id: '/ia',
   path: '/ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlRoute = PlRouteImport.update({
+  id: '/pl',
+  path: '/pl',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -327,6 +333,7 @@ export interface FileRoutesByFullPath {
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
   '/ia': typeof IaRoute
+  '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
   '/ia': typeof IaRoute
+  '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -429,6 +437,7 @@ export interface FileRoutesById {
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
   '/ia': typeof IaRoute
+  '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -483,6 +492,7 @@ export interface FileRouteTypes {
     | '/dc'
     | '/feedback'
     | '/ia'
+    | '/pl'
     | '/privacy'
     | '/support'
     | '/terms'
@@ -534,6 +544,7 @@ export interface FileRouteTypes {
     | '/dc'
     | '/feedback'
     | '/ia'
+    | '/pl'
     | '/privacy'
     | '/support'
     | '/terms'
@@ -584,6 +595,7 @@ export interface FileRouteTypes {
     | '/dc'
     | '/feedback'
     | '/ia'
+    | '/pl'
     | '/privacy'
     | '/support'
     | '/terms'
@@ -637,6 +649,7 @@ export interface RootRouteChildren {
   DcRoute: typeof DcRoute
   FeedbackRoute: typeof FeedbackRoute
   IaRoute: typeof IaRoute
+  PlRoute: typeof PlRoute
   PrivacyRoute: typeof PrivacyRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
@@ -708,6 +721,13 @@ declare module '@tanstack/react-router' {
       path: '/ia'
       fullPath: '/ia'
       preLoaderRoute: typeof IaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pl': {
+      id: '/pl'
+      path: '/pl'
+      fullPath: '/pl'
+      preLoaderRoute: typeof PlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1096,6 +1116,7 @@ const rootRouteChildren: RootRouteChildren = {
   DcRoute: DcRoute,
   FeedbackRoute: FeedbackRoute,
   IaRoute: IaRoute,
+  PlRoute: PlRoute,
   PrivacyRoute: PrivacyRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,

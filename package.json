@@ -31,6 +31,7 @@
     "balance:idle-angler": "tsx tools/balance/idle-angler.ts",
     "balance:paper-lives": "tsx tools/balance/paper-lives.ts",
     "preview:idle-angler": "tsx tools/trmnl/preview-idle-angler.ts --inline-art",
+    "preview:paper-lives": "tsx tools/trmnl/preview-paper-lives.ts --inline-art",
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {

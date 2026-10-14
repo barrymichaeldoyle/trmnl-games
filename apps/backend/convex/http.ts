@@ -11,6 +11,7 @@ import { parseUtcOffset, screenMarkup } from '@trmnl-games/desk-crawler/template
 import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templates/screen'
 import { renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
+import { renderPaperLivesArt } from '@trmnl-games/paper-lives/art/route'
 import type { GameSlug } from '@trmnl-games/platform'
 
 /**
@@ -186,6 +187,12 @@ http.route({
     // D115: Idle Angler's scenes and codes live under their own prefix.
     if (path.startsWith('/art/ia/')) {
       const art = renderIdleAnglerArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
+      if (art === null) return new Response('Not found', { status: 404 })
+      return new Response(new Blob([art.png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': art.immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' } })
+    }
+    // D159: Paper Lives' portraits and code.
+    if (path.startsWith('/art/pl/')) {
+      const art = renderPaperLivesArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
       if (art === null) return new Response('Not found', { status: 404 })
       return new Response(new Blob([art.png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': art.immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' } })
     }

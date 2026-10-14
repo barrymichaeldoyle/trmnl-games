@@ -16,6 +16,9 @@ import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { previewScenarios } from '@trmnl-games/idle-angler/templates/previewScenarios'
 import { buildPayload } from '@trmnl-games/idle-angler/payload'
+import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templates/screen'
+import { previewScenarios as paperLivesScenarios } from '@trmnl-games/paper-lives/templates/previewScenarios'
+import { buildPayload as buildPaperLivesPayload } from '@trmnl-games/paper-lives/payload'
 import type { PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
 import { bundle, requireBundle, root } from './bundle'
 
@@ -42,6 +45,11 @@ try {
     ),
   )
 
+  // Paper Lives: every preview scenario, with its owner's offset for the close time (D42).
+  const paperLivesCases = Object.entries(paperLivesScenarios('https://local-art.invalid')).flatMap(([name, { utcOffset, ...input }]) =>
+    (Object.keys(paperLivesMarkup) as PreviewLayout[]).map((layout) => ({ id: `paper-lives ${name} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPaperLivesPayload(input), utc_offset: utcOffset })) as Record<string, unknown> })),
+  )
+
   // TRMNL renders in UTC; the preview's liquidjs and the Ruby process both use it.
   const renderRuby = (templates: Record<string, string>, set: typeof cases) => {
     const ruby = bundle(['exec', 'ruby', join(root, 'tools/trmnl/crosscheck.rb')], {
@@ -53,13 +61,13 @@ try {
     if (ruby.status !== 0) throw new Error('Ruby render failed')
     return JSON.parse(ruby.stdout.toString()) as Record<string, string>
   }
-  const rubyHtml = { ...renderRuby(screenMarkup, cases), ...renderRuby(idleAnglerMarkup, idleAnglerCases) }
+  const rubyHtml = { ...renderRuby(screenMarkup, cases), ...renderRuby(idleAnglerMarkup, idleAnglerCases), ...renderRuby(paperLivesMarkup, paperLivesCases) }
 
   const liquid = new Liquid({ timezoneOffset: 0 })
   const out = join(root, '.previews/crosscheck')
   rmSync(out, { recursive: true, force: true })
   let mismatches = 0
-  const allCases = [...cases.map((c) => ({ ...c, templates: screenMarkup as Record<string, string> })), ...idleAnglerCases.map((c) => ({ ...c, templates: idleAnglerMarkup as Record<string, string> }))]
+  const allCases = [...cases.map((c) => ({ ...c, templates: screenMarkup as Record<string, string> })), ...idleAnglerCases.map((c) => ({ ...c, templates: idleAnglerMarkup as Record<string, string> })), ...paperLivesCases.map((c) => ({ ...c, templates: paperLivesMarkup as Record<string, string> }))]
   for (const { id, layout, context, templates } of allCases) {
     const js = await liquid.parseAndRender(templates[layout]!, context)
     const rb = rubyHtml[id] ?? 'RUBY ERROR: no output'

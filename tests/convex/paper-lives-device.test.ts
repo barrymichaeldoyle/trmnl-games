@@ -22,12 +22,16 @@ describe('Paper Lives screen route (D159, L2)', () => {
   beforeEach(async () => {
     vi.useFakeTimers()
     vi.setSystemTime(Date.UTC(2026, 10, 2, 6, 10, 3))
+    vi.stubEnv('CONVEX_SITE_URL', 'https://art.example')
     t = convexTest(schema, modules)
     await seedWorld(t)
     await runPaperLivesTick(t)
     await t.mutation(internal.platform.setGameStatusInternal, { slug: 'paper-lives', status: 'live' })
   })
-  afterEach(() => vi.useRealTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllEnvs()
+  })
 
   it('serves the payload for an active installation and 404s for anything else', async () => {
     await link(t, 'Ana', 'pl-tok-ana')
@@ -43,7 +47,13 @@ describe('Paper Lives screen route (D159, L2)', () => {
     expect(body.merge_variables.status_label).toMatch(/, 6, at school, at home$/)
     expect(body.merge_variables.lines.length).toBeGreaterThan(0)
     expect(body.merge_variables.closes_at).toBeGreaterThan(Date.now() / 1000)
-    expect(body.merge_variables.board).toMatchObject({ label: 'Longest lives this week', rows: [], own_label: 'No finished life this week' })
+    expect(body.merge_variables.board).toMatchObject({ label: 'Longest this week', rows: [], own_label: 'No finished life this week' })
+    // The portrait and the code are served by the art route.
+    const art = await t.fetch(`${new URL(body.merge_variables.portrait_base).pathname}/2.png`)
+    expect(art.status).toBe(200)
+    expect(art.headers.get('Content-Type')).toBe('image/png')
+    expect((await t.fetch('/art/pl/qr/v1/app/2.png')).status).toBe(200)
+    expect((await t.fetch('/art/pl/portrait/v1/adult/0/g0/none/dragon/f0/2.png')).status).toBe(404)
     expect(await t.run(async (ctx) => (await ctx.db.query('users').first())!.trmnlUtcOffset)).toBe(3600)
     expect((await screen(t, 'pl-tok-ana', UUID_B)).status).toBe(404)
     expect((await screen(t, 'wrong-token', UUID_A)).status).toBe(404)

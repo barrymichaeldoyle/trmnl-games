@@ -8,7 +8,8 @@
     "./sim": "./src/sim/index.ts",
     "./sim/*": "./src/sim/*.ts",
     "./payload": "./src/payload.ts",
-    "./templates/*": "./src/templates/*.ts"
+    "./templates/*": "./src/templates/*.ts",
+    "./art/*": "./src/art/*.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

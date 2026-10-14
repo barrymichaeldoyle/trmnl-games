@@ -1,4 +1,5 @@
-import type { Glyph, LifeState, PaperLivesCatalog } from './sim/types'
+import { portraitBase, portraitKey, qrBase as qrPath } from './art/route'
+import type { Glyph, LifeState, PaperLivesCatalog, StatId } from './sim/types'
 
 /**
  * Paper Lives device payload v1 (paper-lives.md "Device"): the flat merge variables the screen templates read.
@@ -57,20 +58,24 @@ export function generationLabel(generation: number, surname: string): string {
   return `${nth} of the ${plural}`
 }
 
-/** "Maud Okafor, 34, nurse, renting": name, age, the job or the stage of life, the home. */
-export function statusLine(life: LifeState, content: PaperLivesCatalog): string {
+/** "nurse, renting": the job or the stage of life, then the home. */
+export function statusDetail(life: LifeState, content: PaperLivesCatalog): string {
   const job = life.job ? content.jobs.find((j) => j.id === life.job)?.name.toLowerCase() : undefined
   const role = job ?? (life.retired ? 'retired' : life.stage === 'infant' ? 'little' : life.stage === 'child' || life.stage === 'teen' ? 'at school' : life.education === 'university' ? 'studying' : 'between jobs')
   const home = life.home === 'family' ? 'at home' : life.home
-  return `${life.first} ${life.last}, ${life.age}, ${role}, ${home}`
+  return `${role}, ${home}`
+}
+
+/** "Maud Okafor, 34, nurse, renting": name, age, the job or the stage of life, the home. */
+export function statusLine(life: LifeState, content: PaperLivesCatalog): string {
+  return `${life.first} ${life.last}, ${life.age}, ${statusDetail(life, content)}`
 }
 
 export function buildPayload(input: PaperLivesPayloadInput) {
   const { content, now, world, life } = input
   const servicePaused = world?.paused ?? false
   const stale = world !== null && now - (world.lastCompletedAt ?? world.createdAt) > STALE_AFTER_MS
-  // The QR art route arrives with the device art (L3); until then the templates leave the code out.
-  const qrBase = ''
+  const qrBase = input.artBaseUrl && !servicePaused ? `${input.artBaseUrl}${qrPath()}` : ''
   if (life === null || life.activationState !== 'active') {
     return {
       v: PAYLOAD_VERSION,
@@ -99,20 +104,28 @@ export function buildPayload(input: PaperLivesPayloadInput) {
   else if (stale) attention = 'Updates are delayed.'
   const traits = state.traits.map((id) => content.traits.find((t) => t.id === id)?.name ?? id)
   const status = ended ? ('ended' as const) : state.status === 'paused' ? ('paused' as const) : ('living' as const)
+  const statRow = (k: StatId, label: string) => ({ k, label, value: state.stats[k], halves: Math.round(state.stats[k] / 10) })
   return {
     v: PAYLOAD_VERSION,
     game: 'paper-lives' as const,
     data_state: life.quarantined || servicePaused ? ('service_paused' as const) : ('ready' as const),
     status,
     status_label: ended ? 'A life remembered' : state.status === 'paused' ? 'Life paused' : statusLine(state, content),
+    // Beside the name and age, the rest of the status line.
+    status_detail: ended ? 'A life remembered' : state.status === 'paused' ? 'Life paused' : statusDetail(state, content),
     name: `${state.first} ${state.last}`,
     age: state.age,
     stage: state.stage,
     generation: state.generation,
     generation_label: generationLabel(state.generation, state.last),
     traits,
+    traits_label: traits.join(' · '),
     stats: { health: state.stats.health, happiness: state.stats.happiness, smarts: state.stats.smarts, charm: state.stats.charm },
+    // Five ticks a stat, filled in half steps (ten halves for 100).
+    stat_rows: [statRow('health', 'Health'), statRow('happiness', 'Happiness'), statRow('smarts', 'Smarts'), statRow('charm', 'Charm')],
     money: state.gold,
+    money_label: state.gold.toLocaleString('en-GB'),
+    portrait_base: input.artBaseUrl ? `${input.artBaseUrl}${portraitBase(portraitKey(state))}` : '',
     lines,
     recap: state.recap ?? null,
     // The year's decision: the prompt on the device, taken in the companion. Major decisions are marked.
@@ -130,9 +143,10 @@ export function buildPayload(input: PaperLivesPayloadInput) {
       : null,
     board: input.board
       ? {
-          label: 'Longest lives this week',
+          label: 'Longest this week',
           rows: input.board.top.map((row) => ({ rank: row.rank, name: row.name, life: row.life, age: row.age, own: row.own })),
           own_label: input.board.own ? (input.board.own.rank === null ? `Your best ${input.board.own.age}` : `#${input.board.own.rank}, ${input.board.own.age} years`) : 'No finished life this week',
+          own_listed: input.board.top.some((row) => row.own),
         }
       : null,
     attention,

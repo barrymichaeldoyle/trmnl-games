@@ -1,0 +1,312 @@
+{
+  "lives": 1800,
+  "gates": [
+    {
+      "name": "Median life (years)",
+      "value": 79,
+      "target": "72 to 84",
+      "pass": true
+    },
+    {
+      "name": "Deaths under 18",
+      "value": 0,
+      "target": "below 2%",
+      "pass": true
+    },
+    {
+      "name": "Hourly player life (days)",
+      "value": 8.38,
+      "target": "5 to 9",
+      "pass": true
+    },
+    {
+      "name": "Never-visiting life (days)",
+      "value": 24.73,
+      "target": "24 to 32",
+      "pass": true
+    },
+    {
+      "name": "Lines a normal year (mean)",
+      "value": 3.55,
+      "target": "2 to 4",
+      "pass": true
+    },
+    {
+      "name": "Lines a normal year (p10)",
+      "value": 1,
+      "target": "at least 1",
+      "pass": true
+    },
+    {
+      "name": "Worst stage repeat rate",
+      "value": 0.06,
+      "target": "at most 10%",
+      "pass": true
+    },
+    {
+      "name": "Lowest money seen",
+      "value": -2000,
+      "target": "at or above -2000",
+      "pass": true
+    },
+    {
+      "name": "Widest option spread (yg_family)",
+      "value": 0.12,
+      "target": "within 15%",
+      "pass": true
+    },
+    {
+      "name": "Lives with a remarkable event",
+      "value": 0.86,
+      "target": "at least 80%",
+      "pass": true
+    },
+    {
+      "name": "Lives with a pet",
+      "value": 1,
+      "target": "at least 70%",
+      "pass": true
+    },
+    {
+      "name": "Lives with a hobby",
+      "value": 0.99,
+      "target": "at least 80%",
+      "pass": true
+    },
+    {
+      "name": "Every trait moves an outcome 5 to 25%",
+      "value": 1,
+      "target": "all traits",
+      "pass": true
+    }
+  ],
+  "stats": {
+    "livesEnded": 1800,
+    "livesRunning": 0,
+    "p10Age": 53,
+    "p90Age": 90,
+    "dailyDays": 24.46,
+    "meanYearTicksHourly": 10.67,
+    "p90Lines": 6,
+    "married": 0.95,
+    "withChildren": 0.71,
+    "medianPeakMoney": 378912,
+    "housesOwned": 0.27,
+    "willMade": 0.54,
+    "repeat.child": 0,
+    "repeat.teen": 0,
+    "repeat.young": 0,
+    "repeat.adult": 0.032,
+    "repeat.senior": 0.06
+  },
+  "traits": {
+    "curious": {
+      "ageAtDeath": -0.01,
+      "yearsPast70": -0.077,
+      "firstPartnerAge": -0.009,
+      "peakMoney": 0,
+      "happiness60": 0.003,
+      "health60": -0.012,
+      "smarts30": 0.233,
+      "charm30": -0.021,
+      "married": -0.006,
+      "children": 0.015,
+      "max": 0.233
+    },
+    "stubborn": {
+      "ageAtDeath": 0.029,
+      "yearsPast70": 0.166,
+      "firstPartnerAge": 0.002,
+      "peakMoney": 0.066,
+      "happiness60": 0.001,
+      "health60": -0.003,
+      "smarts30": -0.065,
+      "charm30": -0.008,
+      "married": -0.002,
+      "children": 0.019,
+      "max": 0.166
+    },
+    "bookish": {
+      "ageAtDeath": -0.012,
+      "yearsPast70": -0.044,
+      "firstPartnerAge": 0.001,
+      "peakMoney": 0.063,
+      "happiness60": 0.019,
+      "health60": -0.002,
+      "smarts30": 0.238,
+      "charm30": -0.033,
+      "married": -0.023,
+      "children": 0.103,
+      "max": 0.238
+    },
+    "sunny": {
+      "ageAtDeath": -0.027,
+      "yearsPast70": -0.042,
+      "firstPartnerAge": -0.01,
+      "peakMoney": 0.02,
+      "happiness60": 0.065,
+      "health60": 0.012,
+      "smarts30": -0.033,
+      "charm30": 0.011,
+      "married": -0.026,
+      "children": -0.13,
+      "max": 0.13
+    },
+    "shy": {
+      "ageAtDeath": 0.011,
+      "yearsPast70": 0.001,
+      "firstPartnerAge": 0.157,
+      "peakMoney": -0.008,
+      "happiness60": -0.011,
+      "health60": -0.001,
+      "smarts30": -0.039,
+      "charm30": 0.062,
+      "married": -0.019,
+      "children": -0.109,
+      "max": 0.157
+    },
+    "restless": {
+      "ageAtDeath": -0.006,
+      "yearsPast70": -0.082,
+      "firstPartnerAge": 0.012,
+      "peakMoney": 0.011,
+      "happiness60": -0.068,
+      "health60": -0.002,
+      "smarts30": -0.031,
+      "charm30": -0.009,
+      "married": 0.016,
+      "children": 0.052,
+      "max": 0.082
+    },
+    "thrifty": {
+      "ageAtDeath": 0.019,
+      "yearsPast70": 0.059,
+      "firstPartnerAge": 0.011,
+      "peakMoney": 0.155,
+      "happiness60": -0.007,
+      "health60": -0.008,
+      "smarts30": -0.041,
+      "charm30": -0.012,
+      "married": 0.011,
+      "children": -0.042,
+      "max": 0.155
+    },
+    "generous": {
+      "ageAtDeath": -0.016,
+      "yearsPast70": -0.066,
+      "firstPartnerAge": -0.01,
+      "peakMoney": -0.17,
+      "happiness60": -0.009,
+      "health60": -0.002,
+      "smarts30": -0.059,
+      "charm30": -0.046,
+      "married": -0.014,
+      "children": -0.043,
+      "max": 0.17
+    },
+    "hardy": {
+      "ageAtDeath": 0.011,
+      "yearsPast70": 0.055,
+      "firstPartnerAge": -0.031,
+      "peakMoney": -0.008,
+      "happiness60": -0.009,
+      "health60": 0.091,
+      "smarts30": -0.042,
+      "charm30": -0.01,
+      "married": 0.02,
+      "children": 0.009,
+      "max": 0.091
+    },
+    "delicate": {
+      "ageAtDeath": -0.014,
+      "yearsPast70": -0.1,
+      "firstPartnerAge": -0.008,
+      "peakMoney": -0.02,
+      "happiness60": -0.006,
+      "health60": -0.098,
+      "smarts30": -0.034,
+      "charm30": -0.018,
+      "married": 0.03,
+      "children": 0.034,
+      "max": 0.1
+    },
+    "tidy": {
+      "ageAtDeath": 0.026,
+      "yearsPast70": 0.049,
+      "firstPartnerAge": -0.031,
+      "peakMoney": -0.024,
+      "happiness60": -0.013,
+      "health60": 0.054,
+      "smarts30": -0.041,
+      "charm30": -0.025,
+      "married": -0.017,
+      "children": 0.005,
+      "max": 0.054
+    },
+    "dreamy": {
+      "ageAtDeath": 0.02,
+      "yearsPast70": 0.079,
+      "firstPartnerAge": -0.003,
+      "peakMoney": -0.198,
+      "happiness60": 0,
+      "health60": 0,
+      "smarts30": 0.026,
+      "charm30": -0.002,
+      "married": -0.007,
+      "children": -0.027,
+      "max": 0.198
+    },
+    "sharp": {
+      "ageAtDeath": -0.033,
+      "yearsPast70": -0.131,
+      "firstPartnerAge": -0.018,
+      "peakMoney": 0.148,
+      "happiness60": 0.001,
+      "health60": -0.008,
+      "smarts30": 0.012,
+      "charm30": -0.025,
+      "married": 0.01,
+      "children": 0.134,
+      "max": 0.148
+    },
+    "gentle": {
+      "ageAtDeath": -0.022,
+      "yearsPast70": -0.045,
+      "firstPartnerAge": -0.02,
+      "peakMoney": -0.132,
+      "happiness60": 0.003,
+      "health60": -0.007,
+      "smarts30": -0.035,
+      "charm30": 0.216,
+      "married": -0.008,
+      "children": 0.024,
+      "max": 0.216
+    },
+    "lucky": {
+      "ageAtDeath": 0.022,
+      "yearsPast70": 0.192,
+      "firstPartnerAge": -0.009,
+      "peakMoney": 0.088,
+      "happiness60": -0.003,
+      "health60": -0.003,
+      "smarts30": -0.021,
+      "charm30": -0.051,
+      "married": -0.005,
+      "children": 0.01,
+      "max": 0.192
+    },
+    "loyal": {
+      "ageAtDeath": -0.002,
+      "yearsPast70": -0.01,
+      "firstPartnerAge": -0.027,
+      "peakMoney": -0.007,
+      "happiness60": 0.051,
+      "health60": -0.015,
+      "smarts30": -0.031,
+      "charm30": -0.021,
+      "married": 0.031,
+      "children": -0.061,
+      "max": 0.061
+    }
+  }
+}
