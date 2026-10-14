@@ -1,5 +1,5 @@
 import { speciesLogged } from './titles'
-import type { AnglerState, FeatureId, GoalDef, GoalPredicate, IdleAnglerCatalog, TickEvent } from './types'
+import type { AnglerState, FeatureId, GoalDef, GoalPredicate, IdleAnglerCatalog, TickEvent, UnclaimedGoal } from './types'
 
 /**
  * Goals and unlocks (D162, idle-angler-full.md "Goals and unlocks"): Desk Crawler's career ladder (D128) in Idle
@@ -88,15 +88,39 @@ export function evaluateGoal(content: IdleAnglerCatalog, angler: AnglerState): {
   const goal = currentGoal(content, angler)
   if (!goal || !goalMet(content, angler, goal.predicate)) return { angler }
   const rung = firstUnmet(content, angler, angler.goal.rung + 1)
+  // v3 sets the coins aside until the player claims them (D129's shape); earlier catalogs pay on the spot.
+  const waiting: UnclaimedGoal[] = content.claimGoals && goal.coins > 0 ? [...(angler.goal.unclaimed ?? []), { id: goal.id, coins: goal.coins }] : (angler.goal.unclaimed ?? [])
   const next: AnglerState = {
     ...angler,
-    gold: angler.gold + goal.coins,
-    goal: { rung, castsAtStart: angler.counters.casts },
+    gold: content.claimGoals ? angler.gold : angler.gold + goal.coins,
+    goal: { rung, castsAtStart: angler.counters.casts, ...(waiting.length > 0 ? { unclaimed: waiting } : {}) },
     counters: { ...angler.counters, goalsReached: (angler.counters.goalsReached ?? 0) + 1 },
   }
   const following = goalLine(content, next)
-  const event: TickEvent = { kind: 'goal', summary: `Goal reached: ${goal.title}. Next: ${following}.`, detail: { goalId: goal.id }, deltas: { gold: goal.coins } }
+  const event: TickEvent = { kind: 'goal', summary: `Goal reached: ${goal.title}. Next: ${following}.`, detail: { goalId: goal.id }, deltas: { gold: content.claimGoals ? 0 : goal.coins } }
   return { angler: next, event }
+}
+
+/**
+ * Claim one waiting goal reward (v3), the oldest unless an id is named: its coins are paid and counted as earned.
+ * Nothing waiting, or no such reward, is a refusal.
+ */
+export function claimGoalReward(content: IdleAnglerCatalog, angler: AnglerState, id?: string): { ok: true; angler: AnglerState; reward: UnclaimedGoal } | { ok: false } {
+  const waiting = angler.goal?.unclaimed ?? []
+  const reward = id === undefined ? waiting[0] : waiting.find((entry) => entry.id === id)
+  if (!angler.goal || !reward || !content.goals) return { ok: false }
+  const rest = waiting.filter((entry) => entry !== reward)
+  const { unclaimed: _gone, ...goal } = angler.goal
+  return {
+    ok: true,
+    reward,
+    angler: {
+      ...angler,
+      gold: angler.gold + reward.coins,
+      goal: rest.length > 0 ? { ...goal, unclaimed: rest } : goal,
+      counters: { ...angler.counters, goldEarned: angler.counters.goldEarned + reward.coins },
+    },
+  }
 }
 
 /** Whether the current goal's guarantee forces this cast's bite. */

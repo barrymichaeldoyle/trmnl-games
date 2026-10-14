@@ -282,6 +282,23 @@
   100% { transform: translate(calc(var(--dx) * 1.2), calc(var(--dy) * 0.4)) rotate(calc(var(--spin) * 2)); opacity: 0; }
 }
 
+/* A goal ready to claim: its card glows gold and breathes, and the tab's dot pulses, until the reward is taken. */
+.goal-ready {
+  border-color: var(--color-gold);
+  animation: goal-ready 1800ms ease-in-out infinite;
+}
+@keyframes goal-ready {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(255 209 102 / 0); }
+  50% { box-shadow: 0 0 0 4px rgb(255 209 102 / 0.55); }
+}
+.notify-dot {
+  animation: notify-dot 1800ms ease-in-out infinite;
+}
+@keyframes notify-dot {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+
 @keyframes coin-hop {
   0% { transform: translateY(0); }
   25% { transform: translateY(-4px); }

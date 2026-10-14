@@ -2,7 +2,7 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
-import { Card, CountBadge, LoadingState } from '../../lib/ui'
+import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
 import { seo } from '../../lib/seo'
 import { NameRepair } from './desk-crawler/-nameRepair'
 import { preload } from '../../lib/preload'
@@ -43,6 +43,9 @@ function SignedInApp() {
   // The Bag tab shows how full the bag is, so a new find is visible from any tab.
   const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
   const bagUsed = (bag as { used: number } | null | undefined)?.used
+  // The Hero tab shows a dot while a goal reward waits for its Claim button, so it is seen from any tab.
+  const { data: heroView } = useQuery(convexQuery(api.heroes.mine, {}))
+  const rewardWaiting = ((heroView as { career?: { unclaimed?: unknown[] } | null } | null | undefined)?.career?.unclaimed?.length ?? 0) > 0
   const setupState = !me?.hero ? (me?.hasActiveInstallation ? 'installation_without_hero' : 'not_enrolled') : me.hero.activationState === 'pending_trmnl' ? 'waiting_for_save' : 'active'
   useAnalyticsView(setupState === 'active' ? 'companion ready' : 'setup screen shown', { setup_state: setupState, has_active_installation: me?.hasActiveInstallation ?? false }, !isPending && me?.user?.state !== 'deleting' && me?.gameState !== 'deleting')
   // P33: an alert's tap lands here with ?alert=<kind>; counted once identity is known.
@@ -92,6 +95,7 @@ function SignedInApp() {
           {NAV.map((item) => {
             // The Bag tab carries how many slots are used as a badge, like a notification count.
             const count = item.to === '/app/desk-crawler/inventory' ? bagUsed : undefined
+            const dot = item.to === '/app/desk-crawler' && rewardWaiting
             return (
               <li key={item.to} className="flex-1">
                 <Link
@@ -104,10 +108,12 @@ function SignedInApp() {
                   <span className="relative sm:hidden lg:block">
                     <Glyph name={item.glyph} />
                     {count !== undefined ? <CountBadge count={count} className="absolute -top-2 left-3.5 flex sm:hidden" /> : null}
+                    {dot ? <NotifyDot className="absolute -top-1 left-4 sm:hidden" /> : null}
                   </span>
                   <span className="flex items-center">
                     {item.label}
                     {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">, {count} slots used</span></> : null}
+                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">, a goal reward is ready to claim</span></> : null}
                   </span>
                 </Link>
               </li>

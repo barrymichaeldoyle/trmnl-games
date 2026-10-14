@@ -38,7 +38,15 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
       .slice(0, order.count)
   const features = Object.fromEntries((Object.keys(FEATURE_NAMES) as Array<keyof typeof FEATURE_NAMES>).map((f) => [f, unlocked(content, state, f)]))
   return {
-    goal: { line: goalLine(content, state), coins: goal?.coins ?? 0, page: goal?.page ?? null, rung: angler.goal?.rung ?? 0, of: content.goals.length },
+    goal: {
+      line: goalLine(content, state),
+      coins: goal?.coins ?? 0,
+      page: goal?.page ?? null,
+      rung: angler.goal?.rung ?? 0,
+      of: content.goals.length,
+      // v3: reached goals whose coins wait for the Claim button, oldest first.
+      unclaimed: (angler.goal?.unclaimed ?? []).map((reward) => ({ id: reward.id, title: content.goals?.find((g) => g.id === reward.id)?.title ?? reward.id, coins: reward.coins })),
+    },
     comingUp: locked ? { feature: locked[0], name: FEATURE_NAMES[locked[0]], species: locked[1], logged } : null,
     features,
     orders: (angler.orders ?? []).map((o) => {

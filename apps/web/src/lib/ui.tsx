@@ -165,6 +165,11 @@ export function ErrorNote({ message, id }: { message: string | null; id?: string
 }
 
 /** A small count on a tab, drawn as a notification badge: night digits on a gold square, hidden from screen readers. */
+/** A tab's "something is waiting for you" dot (a goal reward to claim). Pair it with sr-only text where it sits. */
+export function NotifyDot({ className = '' }: { className?: string }) {
+  return <span aria-hidden="true" className={`notify-dot size-3 rounded-full bg-hp shadow-[0_0_0_2px_var(--color-night)] ${className}`} />
+}
+
 export function CountBadge({ count, className = '' }: { count: number; className?: string }) {
   return <span aria-hidden="true" className={`h-4 min-w-4 items-center justify-center bg-gold px-1 label-px leading-none tabular-nums text-night shadow-[0_0_0_2px_var(--color-night)] ${className}`}>{count}</span>
 }

@@ -57,6 +57,21 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(lines.map((l) => l.summary)).toContain('Goal reached: Sell a fish. Next: Buy a tub of bread.')
   })
 
+  it('holds a reached goal\'s coins for the Claim button under content v3, then pays them once', async () => {
+    await t.mutation(internal.idleAngler.operations.setActiveContentVersion, { contentVersion: 'v3' })
+    const id = await seedAngler(t, { goal: { rung: 1, castsAtStart: 0 }, counters: { ...(await seedCounters()), fishCaught: 1 } }, 'Pat')
+    const [fish] = await addFish(id, [['roach', 200, 10]])
+    await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'sell-goal-v3', catchIds: [fish!] })
+    expect(await angler(id)).toMatchObject({ gold: 10, goal: { rung: 2, unclaimed: [{ id: 'first_sale', coins: 10 }] } })
+    const dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
+    expect(dock.full.goal.unclaimed).toEqual([{ id: 'first_sale', title: 'Sell a fish', coins: 10 }])
+    const claimed = await as('Pat').mutation(api.idleAngler.full.claimGoal, { operationId: 'claim-goal-1' })
+    expect(claimed).toMatchObject({ changed: true, gold: 20 })
+    expect(await as('Pat').mutation(api.idleAngler.full.claimGoal, { operationId: 'claim-goal-1' })).toEqual(claimed)
+    expect(await angler(id)).toMatchObject({ gold: 20, goal: { rung: 2 } })
+    await expect(as('Pat').mutation(api.idleAngler.full.claimGoal, { operationId: 'claim-goal-2' })).rejects.toThrow(/No goal reward/)
+  })
+
   it('pays an order once for exactly the right fish, the receipt answering a retry', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(['minnow', 'roach', 'rudd', 'perch']), orders: [{ id: 'o1', kind: 'species', speciesId: 'roach', count: 2, bonus: 20 }] }, 'Pat')
     const [a, b, c] = await addFish(id, [['roach', 200, 10], ['roach', 300, 14], ['perch', 400, 18]])

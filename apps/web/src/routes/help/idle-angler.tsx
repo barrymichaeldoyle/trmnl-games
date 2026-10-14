@@ -40,7 +40,7 @@ export const Route = createFileRoute('/help/idle-angler')({
         <li>Add the plugin to a playlist or a mashup. All four layout sizes are supported in both orientations.</li>
       </ul>
       <h2 id="goals">Goals and what opens when</h2>
-      <p>The Dock always shows one goal, such as "Sell a fish" or "Catch a fish at dawn or dusk". Reaching it pays a few coins and names the next one. Goals never expire, and your angler reaches about half of them without you.</p>
+      <p>The Dock always shows one goal, such as "Sell a fish" or "Catch a fish at dawn or dusk". Reaching it sets a few coins aside: press Claim on the Dock to collect them, and the next goal appears. A dot on the Dock tab tells you one is waiting. Goals never expire, and your angler reaches about half of them without you.</p>
       <p>The game opens up as your logbook fills: rod and cooler upgrades at {unlockAt('shop_upgrades')} species, fishmonger orders at {unlockAt('orders')}, the weekend Opens at {unlockAt('opens')}, the trophy wall at {unlockAt('trophies')} and deadbait at {unlockAt('deadbait')}. The Dock says what is coming up next.</p>
       <h2 id="how-fishing-works">How fishing works</h2>
       <p>Every fifteen minutes, day and night, your angler casts once. Sometimes a fish bites. Which fish depends on the water, the bait, the time of day and the weather. Its weight decides its price, whether it is a personal best and where it lands on the boards. Your TRMNL shows the scene, the latest stories and this week's board for your water. Open the companion to sell your catch, buy bait or move to another water.</p>

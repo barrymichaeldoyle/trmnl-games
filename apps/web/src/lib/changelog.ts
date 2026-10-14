@@ -14,8 +14,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-14',
     changes: [
       {
+        title: 'A dot on the Hero tab when a goal reward is waiting',
+        body: 'When your hero reaches a goal, the Hero tab now shows a dot from any page, and the goal card glows with a full-width Claim button. Claiming pops the confetti and the card turns straight into your next goal.',
+      },
+      {
         title: 'Stories on your TRMNL show icons for what changed',
-        body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. With a larger display scale or text size on a TRMNL X, the numbers no longer spill out of their columns, and a purchase no longer squeezes its story into a narrow column.',
+        body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. With a larger display scale or text size on a TRMNL X, the numbers no longer spill out of their columns, and a purchase no longer squeezes its story into a narrow column. At the largest sizes, the weekly board and then the scene make room so your latest story still shows.',
       },
       {
         title: 'Elites can dig in',

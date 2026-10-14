@@ -7,10 +7,11 @@ import { poseFor, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { sceneKeyFromUrl } from '@trmnl-games/idle-angler/art/sceneColour'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
-import { BAIT_LABEL, BAND_LABEL, GOAL_PAGE, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/idleAngler'
+import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishIcon, Scene } from './-art'
 import { FishName, FishText, WaterName } from './-fish'
+import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
 import { LocalTime } from '../../../lib/localTime'
 
@@ -91,12 +92,7 @@ function DockPage() {
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="underline underline-offset-4">Sell {catches.length} fish for {coolerValue} coins</Link></p>
         ) : null}
         {goal ? <p className="text-sm"><span className="text-muted">Next goal:</span> <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
-        {full?.goal.line ? (
-          <div className="flex flex-col gap-1 border-l-4 border-gold pl-3">
-            <p><span className="text-muted">Goal:</span> {full.goal.page ? <Link to={GOAL_PAGE[full.goal.page]!} className="font-semibold underline underline-offset-4">{full.goal.line}</Link> : <strong>{full.goal.line}</strong>}{full.goal.coins > 0 ? <span className="text-sm text-gold-ink"> · {full.goal.coins} coins</span> : null}</p>
-            {full.comingUp ? <p className="text-sm text-muted">Coming up: {full.comingUp.name}, at {full.comingUp.species} species ({full.comingUp.logged} so far).</p> : null}
-          </div>
-        ) : null}
+        {full ? <GoalCard full={full} notify={notify} /> : null}
         {full?.runs.length ? <ul className="flex flex-col gap-1 text-sm">{full.runs.map((run) => <li key={run.id} className="font-semibold text-sky-ink">{run.line}</li>)}</ul> : null}
         {coolerFull ? (
           <p className="font-semibold text-hp-ink">

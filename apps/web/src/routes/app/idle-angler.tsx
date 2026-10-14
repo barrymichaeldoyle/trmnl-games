@@ -7,7 +7,7 @@ import { requireOpenGame, useGames } from '../../lib/gameAccess'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { preload } from '../../lib/preload'
 import { seo } from '../../lib/seo'
-import { Card, CountBadge, LoadingState } from '../../lib/ui'
+import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
 import type { Dock } from '../../lib/idleAngler'
 import { useAlertOpened } from './desk-crawler/-alerts'
 
@@ -65,6 +65,8 @@ function Shell() {
     )
   }
   const coolerUsed = dock.angler.cooler.used
+  // The Dock tab shows a dot while a goal reward waits for its Claim button, so it is seen from any tab.
+  const rewardWaiting = (dock.full?.goal.unclaimed?.length ?? 0) > 0
   return (
     <>
       <nav aria-label="Idle Angler" className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
@@ -76,6 +78,7 @@ function Shell() {
           {NAV.map((item) => {
             // The Cooler tab carries how many fish are in it as a badge, like Desk Crawler's Bag tab.
             const count = item.to === '/app/idle-angler/cooler' ? coolerUsed : undefined
+            const dot = item.to === '/app/idle-angler' && rewardWaiting
             return (
               <li key={item.to} className="flex-1">
                 <Link
@@ -87,10 +90,12 @@ function Shell() {
                   <span className="relative sm:hidden lg:block">
                     <Glyph name={item.glyph} />
                     {count !== undefined ? <CountBadge count={count} className="absolute -top-2 left-3.5 flex sm:hidden" /> : null}
+                    {dot ? <NotifyDot className="absolute -top-1 left-4 sm:hidden" /> : null}
                   </span>
                   <span className="flex items-center">
                     {item.label}
                     {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">, {count} fish</span></> : null}
+                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">, a goal reward is ready to claim</span></> : null}
                   </span>
                 </Link>
               </li>

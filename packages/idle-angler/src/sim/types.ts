@@ -131,6 +131,8 @@ export interface IdleAnglerCatalog {
   readonly charterTicket?: CharterRule
   readonly orders?: OrdersRule
   readonly goals?: readonly GoalDef[]
+  /** v3: a reached goal sets its coins aside for the Claim button instead of paying them on the spot (Desk Crawler's D129). */
+  readonly claimGoals?: boolean
   /** Species logged at which each feature opens. */
   readonly unlocks?: Readonly<Record<FeatureId, number>>
   readonly opens?: OpensRule
@@ -208,6 +210,12 @@ export type GoalPredicate =
   | { readonly kind: 'bought'; readonly bait: BaitClass }
   | { readonly kind: 'logged'; readonly anyOf: readonly string[] }
   | { readonly kind: 'seasons'; readonly at: number }
+
+/** A reached goal's coins waiting for the Claim button (v3). */
+export interface UnclaimedGoal {
+  readonly id: string
+  readonly coins: number
+}
 
 export interface GoalDef {
   readonly id: string
@@ -294,7 +302,7 @@ export interface AnglerState {
   /** Quiet ticks since the last bite or ambient line. */
   readonly quietTicks: number
   /** v2: the current goal (D128 shape) and the casts counter when it started, for its guarantee. */
-  readonly goal?: { readonly rung: number; readonly castsAtStart: number }
+  readonly goal?: { readonly rung: number; readonly castsAtStart: number; unclaimed?: UnclaimedGoal[] }
   /** v2: the fishmonger's slate, the refill day it was last filled for, and the day of the last swap. */
   readonly orders?: readonly Order[]
   readonly ordersDay?: number

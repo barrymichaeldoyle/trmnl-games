@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { contentV1, contentV2 } from '@trmnl-games/idle-angler/content'
+import { contentV1, contentV2, contentV3 } from '@trmnl-games/idle-angler/content'
 import {
   bitePermille,
+  claimGoalReward,
   candidates,
   catchMatches,
   entersOpen,
@@ -274,5 +275,37 @@ describe('the v2 harness', () => {
     const report = runHarness(4, 21)
     expect(report.gates.length).toBeGreaterThanOrEqual(15)
     expect(report.gates.filter((g) => g.name.startsWith('Millpond')).every((g) => g.value !== null)).toBe(true)
+  })
+})
+
+describe('claimable goals (content v3)', () => {
+  const reached = () => {
+    const backfilled = evaluateGoal(contentV3, starterAngler(contentV3, 0)).angler
+    return evaluateGoal(contentV3, { ...backfilled, counters: { ...backfilled.counters, fishCaught: 1 } })
+  }
+
+  it('sets the coins aside instead of paying them, and names the next goal', () => {
+    const { angler, event } = reached()
+    expect(event?.summary).toBe('Goal reached: Land your first fish. Next: Sell a fish.')
+    expect(event?.deltas.gold).toBe(0)
+    expect(angler).toMatchObject({ gold: 0, goal: { rung: 1, unclaimed: [{ id: 'first_fish', coins: 10 }] }, counters: { goalsReached: 1 } })
+  })
+
+  it('pays a claim once, oldest first, and counts the coins as earned', () => {
+    const { angler } = reached()
+    const claimed = claimGoalReward(contentV3, angler)
+    expect(claimed).toMatchObject({ ok: true, reward: { id: 'first_fish', coins: 10 } })
+    if (!claimed.ok) return
+    expect(claimed.angler).toMatchObject({ gold: 10, goal: { rung: 1 }, counters: { goldEarned: 10 } })
+    expect(claimed.angler.goal?.unclaimed).toBeUndefined()
+    expect(claimGoalReward(contentV3, claimed.angler)).toEqual({ ok: false })
+    expect(claimGoalReward(contentV3, angler, 'nope')).toEqual({ ok: false })
+  })
+
+  it('leaves v2 paying on the spot', () => {
+    const backfilled = evaluateGoal(contentV2, starterAngler(contentV2, 0)).angler
+    const paid = evaluateGoal(contentV2, { ...backfilled, counters: { ...backfilled.counters, fishCaught: 1 } })
+    expect(paid.angler).toMatchObject({ gold: 10 })
+    expect(paid.angler.goal?.unclaimed).toBeUndefined()
   })
 })

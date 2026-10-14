@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { fillOrder, formatWeight, openPeriod, openTarget, orderDay, swapOrder, waterOf, type WaterId } from '@trmnl-games/idle-angler/sim'
+import { claimGoalReward, fillOrder, formatWeight, openPeriod, openTarget, orderDay, swapOrder, waterOf, type WaterId } from '@trmnl-games/idle-angler/sim'
 import { baitFromCatch, buyCharter, buyPegs, mountFish, pegsOf } from '@trmnl-games/idle-angler/sim/shop'
 import { deriveStreamSeed } from '@trmnl-games/engine/seed'
 import type { Doc, Id } from '../_generated/dataModel'
@@ -34,6 +34,26 @@ async function ownCatch(ctx: MutationCtx, angler: Doc<'anglers'>, id: Id<'catche
 async function mountedFish(ctx: MutationCtx, anglerId: Id<'anglers'>) {
   return await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', anglerId).eq('kind', 'fish')).take(MOUNTED_MAX + 1)
 }
+
+/** Claim one waiting goal reward (v3): the oldest unless a goal is named. A duplicate receipt finds nothing waiting. */
+export const claimGoal = mutation({
+  args: { operationId: v.string(), goalId: v.optional(v.string()) },
+  returns: intentResult,
+  handler: async (ctx, { operationId, goalId }) =>
+    strip(
+      await runIntent(ctx, operationId, 'idleAngler.claimGoal', { goalId: goalId ?? null }, async (user) => {
+        const angler = await playableAngler(ctx, user)
+        const { world, content } = await worldContentOf(ctx)
+        const claimed = claimGoalReward(content, toAnglerState(angler), goalId)
+        if (!claimed.ok) throw appError('INVALID_STATE', 'No goal reward is waiting.')
+        const title = content.goals?.find((g) => g.id === claimed.reward.id)?.title ?? claimed.reward.id
+        const sequence = await commandLog(ctx, angler, 'idleAngler.claimGoal', `Claimed ${claimed.reward.coins} coins for a goal: ${title}.`, claimed.reward.coins)
+        await ctx.db.patch(angler._id, { ...fromAnglerState(claimed.angler), logSequence: sequence })
+        await awardAfterAnglerIntent(ctx, angler, content, world?.currentTick ?? 0)
+        return { changed: true, gold: claimed.angler.gold }
+      }),
+    ),
+})
 
 /** Hand chosen fish to the fishmonger for an order: exactly its count, each matching, for its reward. */
 export const handOverOrder = mutation({

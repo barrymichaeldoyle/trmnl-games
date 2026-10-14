@@ -257,7 +257,7 @@ export default defineSchema({
     quarantineReasonCode: v.optional(v.string()),
     achievementsVersion: v.optional(v.number()),
     // D162 (content v2): the goal, the fishmonger's slate, a charter ticket, the wall's pegs and the last run announced.
-    goal: v.optional(v.object({ rung: v.number(), castsAtStart: v.number() })),
+    goal: v.optional(v.object({ rung: v.number(), castsAtStart: v.number(), unclaimed: v.optional(v.array(v.object({ id: v.string(), coins: v.number() }))) })),
     orders: v.optional(v.array(order)),
     ordersDay: v.optional(v.number()),
     swapDay: v.optional(v.number()),

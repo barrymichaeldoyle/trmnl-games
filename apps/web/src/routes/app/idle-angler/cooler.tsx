@@ -54,24 +54,36 @@ function CoolerPage() {
       </div>
       {full?.features.orders ? (
         <Card title="The fishmonger's orders">
+          <p className="mb-3 text-sm text-muted">The fishmonger pays more than the market for fish that fit his orders. Catch them, then hand them over here. Orders never expire.</p>
           {full.orders.length === 0 ? <p>No orders on the slate yet. New ones arrive at 07:00.</p> : (
             <ul className="flex flex-col gap-3">
-              {full.orders.map((order) => (
-                <li key={order.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
-                  <div className="min-w-0">
-                    <p className="font-semibold"><FishText text={order.line} /></p>
-                    {order.hint ? <p className="text-sm text-muted">Not in your logbook yet. Try {order.hint}.</p> : null}
-                    <p className="text-sm text-muted">{order.reward !== null ? <span className="text-gold-ink">Pays {order.reward} coins for the fish below</span> : <>Pays half as much again as the market, plus {order.bonus} coins</>}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {order.reward !== null ? <Button disabled={handOver.pending} onClick={() => void handOver.run({ orderId: order.id, catchIds: order.catchIds }, `Handed over for ${order.reward} coins.`)}>Hand over</Button> : null}
-                    <Button variant="secondary" disabled={full.swappedToday || swap.pending} onClick={() => void swap.run({ orderId: order.id }, 'The fishmonger asks for something else.')}>{full.swappedToday ? 'Swapped today' : 'Swap'}</Button>
-                  </div>
-                </li>
-              ))}
+              {full.orders.map((order) => {
+                // The fish a hand-over would take: the cheapest that fit, so the dearer ones stay for the market.
+                const going = order.catchIds.map((id) => catches.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => c !== undefined)
+                const ready = order.reward !== null && going.length === order.count
+                return (
+                  <li key={order.id} className={`flex flex-col gap-2 border-[3px] p-3 ${ready ? 'border-gold bg-panel' : 'border-dashed border-faint'}`}>
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                      <p className="text-lg font-semibold"><FishText text={order.line} /></p>
+                      <p className="text-sm font-semibold text-gold-ink">{ready ? `Pays ${order.reward} coins` : `Pays half again the market price, plus ${order.bonus} coins`}</p>
+                    </div>
+                    {ready ? (
+                      <>
+                        <p className="text-sm">In your cooler: {going.map((c) => `${c.name}, ${formatWeight(c.grams)}`).join(' and ')}. Handing over takes {going.length === 1 ? 'it' : 'them'} out of the cooler.</p>
+                        <Button className="w-full sm:w-auto sm:self-start" icon="coin" pending={handOver.pending} busyLabel="Handing over…" onClick={() => void handOver.run({ orderId: order.id, catchIds: order.catchIds }, `Handed over for ${order.reward} coins.`)}>Hand over +{order.reward} coins</Button>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted">
+                        {order.hint ? <>Not in your logbook yet. Try {order.hint}.</> : 'Nothing in your cooler fits yet. Keep fishing; the angler lands them as it goes.'}
+                      </p>
+                    )}
+                    <Button variant="quiet" className="self-start !px-0 text-sm" disabled={full.swappedToday || swap.pending} onClick={() => void swap.run({ orderId: order.id }, 'The fishmonger asks for something else.')}>{full.swappedToday ? 'Already asked for something else today' : 'Ask for a different order'}</Button>
+                  </li>
+                )
+              })}
             </ul>
           )}
-          <p className="mt-3 text-sm text-muted">Orders never expire. An empty slot refills at 07:00, and you can swap one order a day.</p>
+          <p className="mt-3 text-sm text-muted">Once a day you can ask for a different order in place of one you cannot fill. A filled order's slot refills at 07:00.</p>
         </Card>
       ) : null}
       {catches.length === 0 ? (
