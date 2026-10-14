@@ -334,7 +334,7 @@ Chunky arcade keys in the HUD voice.
 - **Dialogue strip:** cream with a 4px night top rule, a 16px glyph, the HUD Label sentence, an optional bezel-plum detail line, and a 5x3 night "more" arrow in the corner bobbing 2px in two steps (1.2s), the only idle motion.
 
 ### World Map Tile
-- A window tile, 16px padding; the world-number chip carries its biome band with a night numeral (D156: a filled tile read as a button); biome name in Title type; status line; Travel as the primary button. The current tile gains a 4px gold outline and a gold "You’re here" status; locked tiles keep a night chip with a faint numeral and muted text ("Locked until level 8"). Tiles join with 4px dashed gold connectors from 640px; on phones each world is one row (chip, name and status, Travel at the right) with no connectors.
+- A window tile, 16px padding; the world-number chip carries its biome band with a night numeral (D156: a filled tile read as a button); biome name in Title type; status line; Travel as the primary button. The current tile gains a 4px gold outline and a gold "You’re here" status; only the next locked floor shows (D157), with a night chip, a faint numeral and muted text ("Opens at level 8"); later floors are listed on the Career page. Tiles join with 4px dashed gold connectors from 640px; on phones each world is one row (chip, name and status, Travel at the right) with no connectors.
 
 ### Stance Row
 - The segmented-tab pattern as a radiogroup: three equal cells (Cautious, Balanced, Bold) in a 2px cream edge, the chosen one pressed in Raised Plum with gold text and the cursor arrow; one body-small line beneath names the chosen stance, its blurb and its thresholds.
@@ -376,7 +376,8 @@ Chunky arcade keys in the HUD voice.
 - **Do** mark the current choice with the gold pixel cursor arrow or a gold outline.
 - **Do** keep every control square, hard-edged and at least 44px tall.
 - **Do** draw icons, hearts, arrows, checks and chevrons as crisp SVG cell grids, and render pixel art pixelated at integer scale.
-- **Do** stamp disabled and locked states with a dashed edge and muted text.
+- **Do** show a price the player cannot pay yet as text, and the one feature that opens next as a quiet "Coming up" line (D157); keep the rest of what is locked on the Career page.
+- **Don't** draw a locked feature or an unaffordable purchase as a card or a button (D156, D157).
 - **Do** keep the device preview 1-bit inside its plum bezel.
 
 ### Don't:

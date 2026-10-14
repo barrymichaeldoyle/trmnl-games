@@ -4,7 +4,7 @@ import { Glyph } from '../../../lib/glyphs'
 type Summary = { unlockLevel: number; open: boolean; heroes: number; warriorLevel: number | null }
 
 /**
- * The roster on the Hero page (P37): a locked preview before the Warrior's unlock level, an invitation once it opens,
+ * The roster on the Hero page (P37): nothing before the Warrior's unlock level (D157), an invitation once it opens,
  * and a quiet link to switch once the account holds two heroes.
  */
 export function RosterCard({ roster, name, className }: { roster: Summary; name: string; className: string }) {
@@ -16,18 +16,8 @@ export function RosterCard({ roster, name, className }: { roster: Summary; name:
       </p>
     )
   }
-  if (!roster.open) {
-    return (
-      <section aria-label={`A second hero, unlocks at Warrior level ${roster.unlockLevel}`} className="flex min-w-0 flex-col gap-1 border-[3px] border-dashed border-faint px-3 py-3 text-muted min-[375px]:px-4">
-        <p className="flex items-center gap-3 font-display text-xl font-bold">
-          <Glyph name="hero" className="shrink-0" />
-          <span>A second hero</span>
-          <span className="hud ml-auto text-hud-sm">Level {roster.unlockLevel}</span>
-        </p>
-        <p className="text-sm">A Rogue joins the roster when your Warrior reaches level {roster.unlockLevel}. One hero adventures at a time; you choose which.</p>
-      </section>
-    )
-  }
+  // D157: before it opens, the second hero is only the Hero page's "Coming up" line when it is the next unlock.
+  if (!roster.open) return null
   return (
     <Link to="/app/desk-crawler/roster" className="flex min-w-0 flex-col gap-1 border-[3px] border-gold px-3 py-3 min-[375px]:px-4">
       <span className="flex items-center gap-3 font-display text-xl font-bold text-gold-ink">

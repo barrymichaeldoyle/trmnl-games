@@ -14,7 +14,7 @@ import { GameScreen } from './-gameScreen'
 import { latestLogQuery } from './-queries'
 import { KeepsakeCallout } from './-keepsakes'
 import { TodoCard, type TodoView } from './-todo'
-import { GoalCard, LockedCard, type CareerView, type UnlockView } from './-career'
+import { ComingUp, GoalCard, type CareerView, type UnlockView } from './-career'
 import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
@@ -231,9 +231,10 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         </section>
       ) : null}
 
-      {hero.todo ? <TodoCard todo={hero.todo} biomes={hero.biomes} healthy={healthy} notify={notify} /> : locked('todo') ? <LockedCard title="To-do list" glyph="todo" level={locked('todo')!.level} blurb="Three small jobs a day from the morning stand-up, which your hero ticks off by itself for a little gold." /> : null}
+      {hero.todo ? <TodoCard todo={hero.todo} biomes={hero.biomes} healthy={healthy} notify={notify} /> : null}
 
-      {hero.stances.length > 0 && locked('stances') ? <LockedCard title="Stance" glyph="shield" level={locked('stances')!.level} blurb="Cautious, Balanced or Bold: how far your hero pushes before it rests. Balanced until then." /> : null}
+      {/* D157: locked features are one line for the soonest, not a stack of cards. */}
+      <ComingUp unlocks={hero.unlocks} roster={hero.roster} />
       {hero.stances.length > 0 && !locked('stances') ? (
         <section aria-labelledby="stance-title" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4">
@@ -267,6 +268,8 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         {/* Phones get one row per world (number, name, status, Travel); from 640px the three tiles sit side by side on their dashed path. */}
         <ol className="mt-4 grid gap-2 sm:grid-cols-3 sm:gap-[15px]">
           {hero.biomes.map((biome, index) => {
+            // D157: the floors the hero can reach and the next one to open; the rest wait on the Career page.
+            if (!biome.unlocked && index !== hero.biomes.findIndex((b) => !b.unlocked)) return null
             const here = biome.id === hero.biomeId
             const onTheWay = biome.id === hero.targetBiomeId
             // D156: the floor's colour lives in its number chip, so a coloured row never passes for a button.
@@ -280,7 +283,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
                     <span aria-hidden="true" className={`hud hidden size-7 shrink-0 place-items-center border-[3px] border-night text-hud-sm sm:grid ${chip}`}>{index + 1}</span>
                     <span className="leading-tight [overflow-wrap:normal]">{biome.name}</span>
                   </span>
-                  <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? 'You’re here' : onTheWay ? 'Arriving next adventure' : 'Unlocked') : `Locked until level ${biome.unlockLevel}`}</span>
+                  <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? 'You’re here' : onTheWay ? 'Arriving next adventure' : 'Unlocked') : `Opens at level ${biome.unlockLevel}`}</span>
                 </span>
                 {biome.unlocked && !here && !onTheWay ? (
                   <Button icon="travel" className="shrink-0 sm:mt-2 sm:self-start" pending={travel.pending} busyLabel="Travelling…" aria-label={travel.pending ? undefined : `Travel to ${biome.name}`} disabled={!canAct} onClick={() => setAsk({ kind: 'travel', biomeId: biome.id })}>

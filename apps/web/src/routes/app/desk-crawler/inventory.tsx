@@ -20,7 +20,6 @@ import { EmptySlot, Gem, PotionSlot, Sheet, SheetTitle, Slot, SlotPreview } from
 import { useNow } from './-pulse'
 import { ConfirmButtons, ConfirmSheet, Consequences } from './-confirm'
 import { WithName } from './-withName'
-import { LockedCard } from './-career'
 
 export const Route = createFileRoute('/app/desk-crawler/inventory')({ head: () => seo({ title: 'Bag', index: false }), loader: ({ context }) => preload(context, convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.mine, {})), component: Inventory })
 
@@ -123,7 +122,6 @@ function Inventory() {
   const rareOf = (items: Gear[]) => items.filter((item) => item.rarity === 'rare' || item.rarity === 'epic').length
   const materials = bag.materials as Material[]
   const workbench = bag.workbench as WorkbenchRules | null
-  const workbenchLevel = bag.workbenchUnlockLevel as number | null
   const validReview = review === null || saleIsCurrent(review.items, gear)
   const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
@@ -247,7 +245,7 @@ function Inventory() {
         </ul>
       </section>
 
-      {workbench ? <Workbench rules={workbench} materials={materials} equipped={[equippedOf('weapon'), equippedOf('armor')]} hero={hero} disabled={!manageable || busy} intents={{ upgrade, chooseAffix }} /> : workbenchLevel !== null ? <LockedCard title="Workbench" glyph="components" level={workbenchLevel} blurb="Salvage spare gear for materials, then spend them with gold to improve what your hero wears. Until then, sell spares for gold." /> : null}
+      {workbench ? <Workbench rules={workbench} materials={materials} equipped={[equippedOf('weapon'), equippedOf('armor')]} hero={hero} disabled={!manageable || busy} intents={{ upgrade, chooseAffix }} /> : null}
       {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} discountPct={bag.ladder.merchantDiscountPct} disabled={!manageable || busy} intent={buyOffer} /> : null}
       <div className="grid gap-8 sm:grid-cols-2">
         <BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} />

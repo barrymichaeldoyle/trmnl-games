@@ -14,6 +14,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-14',
     changes: [
       {
+        title: 'Less on the Hero page until you need it',
+        body: 'Features you haven’t reached yet no longer stack up as locked cards. The Hero page names the next one to open and its level, and the world map shows the floors you can visit plus the next one. The Career page still lists everything that opens later.',
+      },
+      {
         title: 'Buttons are easier to spot',
         body: 'Only things you can tap look like buttons now. Something you can’t afford yet shows its price and how much more gold you need instead of a greyed-out button, Drink potion appears only when your hero is hurt, the world map marks where you are, and the quest log is a plain list.',
       },

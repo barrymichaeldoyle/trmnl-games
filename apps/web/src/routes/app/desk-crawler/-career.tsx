@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { Button } from '../../../lib/ui'
-import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
+import { Glyph, SectionTitle } from '../../../lib/glyphs'
 import { LocalTime } from '../../../lib/localTime'
 import { captureAnalytics } from '../../../lib/analytics'
 import { PixelIcon } from './-pixelIcon'
@@ -115,16 +115,37 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
   )
 }
 
-/** A feature the hero's level has not reached yet, in the place its card will take (P35). Never a control. */
-export function LockedCard({ title, glyph, level, blurb }: { title: string; glyph: 'todo' | GlyphName; level: number; blurb: string }) {
+/** D157: what each feature does, in one line for the Hero page's "Coming up". */
+const FEATURE_BLURB: Record<UnlockView[number]['feature'] | 'roster', string> = {
+  todo: 'Three small jobs a day from the morning stand-up, which your hero ticks off by itself for a little gold.',
+  meetings: 'Your hero bumps into other players’ heroes around the office.',
+  workbench: 'Salvage spare gear for materials, then spend them with gold to improve what your hero wears.',
+  stances: 'Cautious, Balanced or Bold: how far your hero pushes before it rests.',
+  choices: 'Now and then the office asks your hero to decide something, and you pick the answer here.',
+  merchant: 'A merchant passes through now and then, selling potions and bigger bags.',
+  raids: 'Your hero raids other players’ desks for gold, and they can raid yours.',
+  roster: 'A Rogue joins your roster. One hero adventures at a time, and you choose which.',
+}
+
+/**
+ * D157: the one locked feature that opens soonest, as a quiet line where the locked cards used to stack, with a link to
+ * the Career page's full list. Nothing locked is drawn as a card, so nothing locked looks like something to press.
+ */
+export function ComingUp({ unlocks, roster }: { unlocks?: UnlockView | null; roster?: { unlockLevel: number; open: boolean } | null }) {
+  const locked = [
+    ...(unlocks ?? []).filter((entry) => !entry.unlocked).map((entry) => ({ feature: entry.feature as keyof typeof FEATURE_BLURB, label: entry.label, level: entry.level })),
+    ...(roster && !roster.open ? [{ feature: 'roster' as const, label: 'a second hero', level: roster.unlockLevel }] : []),
+  ].sort((a, b) => a.level - b.level)
+  const next = locked[0]
+  if (!next) return null
   return (
-    <section aria-label={`${title}, unlocks at level ${level}`} className="flex min-w-0 flex-col gap-1 border-[3px] border-dashed border-faint px-3 py-3 text-muted min-[375px]:px-4">
-      <p className="flex items-center gap-3 font-display text-xl font-bold">
-        {glyph === 'todo' ? <PixelIcon kind="todoOpen" plain className="shrink-0" /> : <Glyph name={glyph} className="shrink-0" />}
-        <span>{title}</span>
-        <span className="hud ml-auto text-hud-sm">Level {level}</span>
+    <section aria-label="Coming up" className="flex min-w-0 items-start gap-3 text-sm">
+      <Glyph name="door" className="mt-0.5 text-sky-ink" />
+      <p className="min-w-0">
+        <span className="font-semibold">At level {next.level}: {next.label.charAt(0).toUpperCase() + next.label.slice(1)}.</span>{' '}
+        <span className="text-muted">{FEATURE_BLURB[next.feature]}</span>{' '}
+        <Link to="/app/desk-crawler/career" hash="unlocks-title" className="font-semibold underline underline-offset-4">What opens later</Link>
       </p>
-      <p className="text-sm">{blurb}</p>
     </section>
   )
 }
