@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { contentV1 } from '@trmnl-games/paper-lives/content'
-import { buildPayload, generationLabel, statusLine } from '@trmnl-games/paper-lives/payload'
+import { buildPayload, generationLabel, MAX_LINES, statusLine } from '@trmnl-games/paper-lives/payload'
 import { starterLife, type LifeState } from '@trmnl-games/paper-lives/sim'
 
 const base = starterLife(contentV1, 5).life
@@ -39,6 +39,14 @@ describe('Paper Lives payload v1', () => {
     )
     expect(payload).toMatchObject({ status: 'living', decision: { age: 18, prompt: 'Eighteen. University, a trade, or straight to work?', major: true } })
     expect(payload.lines).toEqual([{ age: 18, glyph: 'star', summary: 'Bought a fern.' }])
+  })
+
+  it('sends the newest twenty-four lines, each layout showing as many as fit (template v4)', () => {
+    const stories = Array.from({ length: 30 }, (_, i) => ({ kind: 'event', glyph: 'star' as const, age: 40 - i, summary: `Line ${i}.`, at, ordinal: 1 }))
+    const payload = input({ age: 40, stage: 'adult' }, { stories })
+    expect(payload.lines).toHaveLength(MAX_LINES)
+    expect(MAX_LINES).toBe(24)
+    expect(payload.lines.at(-1)).toMatchObject({ summary: 'Line 23.' })
   })
 
   it('turns an ended life into a memorial and flags a stalled world', () => {

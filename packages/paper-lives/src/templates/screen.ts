@@ -13,10 +13,13 @@
  *
  * Template v3: the close line reads "The year ends at 18:00" or "The year ends later today"; the winding-down sentence went,
  * since it pushed the time off the half-width line. The payload still carries `year_end`.
+ *
+ * Template v4 (2026-10-14) lets every layout show as many lines as fit, up to twenty-four, rather than a fixed count
+ * chosen for the smallest screen (`lines`), as Idle Angler's template v7 does for its stories.
  */
 import { markUri, STORY_GLYPHS, type PlMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 3
+export const TEMPLATE_VERSION = 4
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -45,9 +48,9 @@ const nameLine = (classes = 'title title--small') =>
   `<div class="flex flex--row flex--left flex--center-y gap--small stretch-x" data-name-row="true"><span class="${classes} grow w--min-0" data-clamp="2">{{ name | escape }}</span><span class="${LABEL} no-shrink">Age {{ age }}</span></div>`
 
 /** "nurse, renting" under the name and age: the rest of the status line, which never uses pronouns. */
-const statusLine = (clamp = 1) => `<span class="${LABEL} w--min-0" data-clamp="${clamp}">{{ status_detail | escape }}</span>`
+const statusLine = (clamp = 1) => `<span class="${LABEL} no-shrink w--min-0" data-clamp="${clamp}">{{ status_detail | escape }}</span>`
 
-const traits = `{% if traits_label %}<span class="${LABEL} w--min-0" data-clamp="2" data-traits="true">{{ traits_label | escape }}</span>{% endif %}`
+const traits = `{% if traits_label %}<span class="${LABEL} no-shrink w--min-0" data-clamp="2" data-traits="true">{{ traits_label | escape }}</span>{% endif %}`
 
 /** Four stats as five ticks each in half steps, behind their marks, then money behind the coin. */
 const stats = (withMoney = true) =>
@@ -70,12 +73,20 @@ const lineGlyph = `{% case line.glyph %}${STORY_GLYPHS.filter((g) => g !== 'none
   .map((g) => `{% when "${g}" %}{% assign m_line = m_${g} %}`)
   .join('')}{% else %}{% assign m_line = m_none %}{% endcase %}`
 
-/** The newest lines, each behind its glyph and marked with the age it happened at. */
-const lines = (limit: number, clamp = 1, classes = 'description lg:title--small') =>
-  `<div class="flex flex--col flex--left gap--xsmall stretch-x h--min-0" data-lines="true">{% for line in lines limit:${limit} %}${lineGlyph}<div class="flex flex--row flex--top gap--small stretch-x" data-line="{{ line.glyph }}"><img class="${ICON}" src="{{ m_line }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ line.age }}: {{ line.summary | escape }}</span></div>{% endfor %}</div>`
+/**
+ * The newest lines, each behind its glyph and marked with the age it happened at. Template v4: `limit` is the most a
+ * layout may show. On the OG the lines are a `data-overflow` list inside a `.columns > .column` pair, so the framework's
+ * overflow engine measures them in place and hides the trailing ones that do not fit, and a tall slot fills with lines
+ * instead of stopping at a fixed count; the list is `flex-auto`, so it takes exactly the space left. The engine misjudges
+ * heights on the X (it scales its content), so there each line is one line high, with a fixed count per layout measured
+ * to fill it (`xLimit`), as Idle Angler's stories (template v7).
+ */
+const lineList = (limit: number, clamp: number, classes: string, show: string, engine: boolean) =>
+  `<div class="columns ${show} flex-auto h--min-0 w--full" data-lines="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--xsmall w--full"${engine ? ' data-overflow="true"' : ''}>{% for line in lines limit:${limit} %}${lineGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-line="{{ line.glyph }}"><img class="${ICON}" src="{{ m_line }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ line.age }}: {{ line.summary | escape }}</span></div>{% endfor %}</div></div></div>`
+const lines = (limit: number, clamp = 1, classes = 'description lg:title--small', xLimit = 12) => lineList(limit, clamp, classes, 'lg:hidden', true) + lineList(xLimit, 1, classes, 'hidden lg:flex', false)
 
 /** The last year's recap under a rule, held at the foot of the layout. */
-const recap = `{% if recap %}<div class="grow"></div><div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div><span class="pt--2 ${LABEL} text--bold" data-clamp="1">{{ recap | escape }}</span></div>{% endif %}`
+const recap = `{% if recap %}<div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div><span class="pt--2 ${LABEL} text--bold" data-clamp="1">{{ recap | escape }}</span></div>{% endif %}`
 
 /** This week's longest lives: each row the life's name and age, the owner's own inverted; their best below when not listed. */
 const board = (rows: number) =>
@@ -145,7 +156,7 @@ const full = oriented(
       <div class="flex flex--col flex--left gap--small grow w--min-0 h--full">
         ${attention()}
         ${prompt(2)}
-        {% if decision or attention %}${lines(5, 2)}{% else %}${lines(6, 2)}{% endif %}
+        ${lines(24, 2, undefined, 24)}
         ${recap}
       </div>
       <div class="no-shrink flex flex--col flex--left flex--top gap--medium w--44 lg:w--56 h--full">
@@ -167,7 +178,7 @@ const full = oriented(
       ${stats()}
       ${attention(2)}
       ${prompt(3)}
-      ${lines(5, 2, 'label lg:title--small')}
+      ${lines(24, 2, 'label lg:title--small', 18)}
       ${board(5)}
       ${recap}
     </div>`,
@@ -188,7 +199,7 @@ const halfHorizontal = oriented(
       ${nameLine()}
       ${statusLine(1)}
       {% if attention %}${attention(1)}{% else %}${prompt(2)}{% endif %}
-      ${lines(2, 1)}
+      ${lines(24, 1, undefined, 9)}
     </div>
     ${qr(2, 4)}`,
     `${portrait(2, 3)}${memorialText(true)}${qr(2, 4)}`,
@@ -198,7 +209,7 @@ const halfHorizontal = oriented(
     `<div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
       <div class="flex flex--row flex--left flex--top gap--small stretch-x">${portrait(1, 2)}<div class="flex flex--col flex--left gap--xsmall grow w--min-0">${nameLine()}${statusLine(2)}</div>${qr(2, 4)}</div>
       {% if attention %}${attention(2)}{% else %}${prompt(2)}{% endif %}
-      ${lines(2, 2)}
+      ${lines(24, 2, undefined, 11)}
     </div>`,
     `<div class="flex flex--row flex--left flex--top gap--small stretch-x">${portrait(1, 2)}${memorialText(true)}${qr(2, 4)}</div>`,
   ),
@@ -211,7 +222,7 @@ const halfVertical = oriented(
     <div class="no-shrink flex flex--row flex--between flex--top stretch-x">${portrait(2, 3)}${qr(2, 4)}</div>
     ${statusLine(1)}
     {% if attention %}${attention(2)}{% else %}${prompt(3)}{% endif %}
-    ${lines(3, 2)}`,
+    ${lines(24, 2, undefined, 18)}`,
     `<div class="no-shrink flex flex--row flex--between flex--top stretch-x">${portrait(2, 3)}${qr(2, 4)}</div>${memorialText(false)}`,
   ),
   ready(
@@ -219,8 +230,7 @@ const halfVertical = oriented(
     ${portrait(2, 3)}
     ${statusLine(2)}
     {% if attention %}${attention(3)}{% else %}${prompt(3)}{% endif %}
-    ${lines(3, 3, 'description')}
-    <div class="grow"></div>
+    ${lines(24, 3, 'description', 23)}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     `${portrait(2, 3)}${memorialText(true)}<div class="grow"></div><div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
   ),
@@ -234,15 +244,14 @@ const quadrant = oriented(
       <div class="flex flex--col flex--left gap--xsmall grow w--min-0">${nameLine()}${statusLine(2)}</div>
       ${qr(2, 4)}
     </div>
-    {% if attention %}${attention(2)}{% elsif decision %}${prompt(2)}{% else %}${lines(1, 2)}{% endif %}`,
+    {% if attention %}${attention(2)}{% elsif decision %}${prompt(2)}{% else %}${lines(24, 2, undefined, 8)}{% endif %}`,
     `<div class="no-shrink flex flex--row flex--top gap--small stretch-x">${memorialText(true)}${qr(2, 4)}</div>`,
     true,
   ),
   ready(
     `${nameLine()}
     ${statusLine(1)}
-    {% if attention %}${attention(3)}{% elsif decision %}${prompt(3)}{% else %}${lines(2, 3, 'description')}{% endif %}
-    <div class="grow"></div>
+    {% if attention %}${attention(3)}<div class="grow"></div>{% elsif decision %}${prompt(3)}<div class="grow"></div>{% else %}${lines(24, 3, 'description', 11)}{% endif %}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     `${memorialText(true)}<div class="grow"></div><div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     true,

@@ -26,9 +26,28 @@ const ADULT_LINES: PayloadStory[] = [
   story(33, 'heart', 'An anniversary dinner with Sam at the place you had your first date.'),
   story(33, 'health', 'Flu over Christmas. Ate the leftovers in bed.'),
   story(33, 'star', 'Turned thirty. A quiet dinner and a new pair of slippers.', 'stage'),
+  // Template v4 shows as many lines as fit, so the matrix sends the payload's full twenty-four.
+  story(32, 'work', 'Passed the ward exams on the second go.'),
+  story(32, 'paw', 'Biscuit ate a whole birthday cake and was fine.'),
+  story(32, 'none', 'Rain on the skylight most of March.', 'ambient'),
+  story(31, 'heart', 'Moved in with Sam. Two kettles now.'),
+  story(31, 'money', 'Paid off the last of the student loan.'),
+  story(31, 'family', 'Sunday lunches at Mum’s, every other week.'),
+  story(30, 'paw', 'Brought Biscuit home from the shelter.'),
+  story(30, 'health', 'Took up running, then took up walking.'),
+  story(30, 'work', 'Started on the children’s ward.'),
+  story(29, 'heart', 'Met Sam at a pub quiz. Lost the quiz.'),
+  story(29, 'house', 'Rented a flat above the bakery. Warm floors.'),
+  story(29, 'none', 'Fog on the river most mornings.', 'ambient'),
+  story(28, 'book', 'Read every Agatha Christie in order.'),
+  story(28, 'work', 'Qualified as a nurse.'),
+  story(28, 'family', 'Taught a cousin to ride a bike.'),
+  story(27, 'health', 'Broke a wrist ice skating.'),
+  story(27, 'money', 'Saved for a year and bought a decent coat.'),
+  story(27, 'star', 'Ran a half marathon, slowly.'),
 ]
 
-const LONG_LINES: PayloadStory[] = Array.from({ length: 6 }, (_, i) => story(87, i % 2 ? 'family' : 'candle', 'Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer than planned.'))
+const LONG_LINES: PayloadStory[] = Array.from({ length: 24 }, (_, i) => story(87, i % 2 ? 'family' : 'candle', 'Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer than planned.'))
 
 const BOARD = {
   top: [

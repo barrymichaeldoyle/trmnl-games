@@ -8,10 +8,10 @@ import type { Glyph, LifeState, PaperLivesCatalog, StatId } from './sim/types'
  */
 export const PAYLOAD_VERSION = 1
 export const STALE_AFTER_MS = 30 * 60 * 1000
-/** Story lines on the full layout. */
-export const MAX_LINES = 6
+/** Story lines sent to the device; each layout shows as many as fit (template v4). */
+export const MAX_LINES = 24
 /** Log rows the backend reads for the device. */
-export const MAX_DEVICE_LOGS = 24
+export const MAX_DEVICE_LOGS = 32
 
 export interface PayloadStory {
   readonly kind: string
