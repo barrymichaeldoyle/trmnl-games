@@ -22,3 +22,11 @@ Barry noticed the X showed about five stories with most of the screen empty. The
 - **X:** the same engine misjudges heights on the X preview, so the X has one line a story (every row the same height) and a fixed count per layout, measured as the most that fits the tightest state: full 10 landscape and 9 portrait, half horizontal 4 and 4, half vertical 12 and 16, quadrant 8 and 11.
 - **Counts for the catch state** (before → now): OG full 5 → 6, OG portrait full 5 → 9, OG half vertical 3 → 5, X full 5 → 10, X portrait full 5 → 9, X half vertical 3 → 12 and 16, X quadrant 1 → 8 and 11.
 - **Checks:** a clip check (`.previews/clip-check.mjs`, every page: a story whose box runs past the list's box) finds none, because `.columns` hides its overflow and the sweep cannot see a clipped story; all 528 previews pass the sweep; the Ruby Liquid crosscheck matches 732 renders and the linter passes.
+
+## Template v8: the X fits its stories at any device scale (2026-10-14)
+
+v7's fixed X counts were measured at the default scale. A player can set `screen--scale-xlarge` or `screen--text-scale-xlarge`, and there the last two to five stories ran past the list and were cut in half: 130 of the X pages clipped at `scale-xlarge`. Template v8 replaces the counts with `fitStories`, a short script like Desk Crawler's: once the framework has laid out the view, it hides the trailing stories that end below their list.
+
+- **Default scale:** each X layout now shows what its own state fits instead of the tightest state's count, for example the X full view 10 to 12.
+- **`scale-xlarge` and `text-scale-xlarge`:** no story is clipped on any X page; the full view shows 6 to 8. The landscape half horizontal shows none at those scales, since the scene and the line above it fill the slot. Which part gives way there is still open (see D165's note on device scales).
+- **Checks:** the clip check at all three scales finds no clipped story; all 528 previews pass the sweep; the crosscheck matches 732 renders; the linter passes.

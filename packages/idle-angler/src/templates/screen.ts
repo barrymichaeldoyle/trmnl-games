@@ -19,10 +19,12 @@
  * Crawler's does (D138): it heads the stories' column, which gives up a story for it, so the board keeps its rows.
  * Template v7 (2026-10-14) lets every layout show as many stories as fit, up to sixteen, rather than a fixed count
  * chosen for the smallest screen: the framework's overflow engine on the OG, counts measured per layout on the X.
+ * Template v8 (2026-10-14) fits the X's stories to their list in place of those counts, so a device scale
+ * (`screen--scale-xlarge`) no longer cuts the last stories in half.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 7
+export const TEMPLATE_VERSION = 8
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -90,7 +92,7 @@ const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
-const oriented = (classes: string, landscape: string, portrait: string, narrowPortrait = false) => `${ASSIGNS}
+const oriented = (classes: string, landscape: string, portrait: string, narrowPortrait = false) => `${ASSIGNS}${fitStories}
 <div class="${classes} portrait:hidden">${landscape}
 </div>${titleBar('landscape')}
 <div class="${classes} landscape:hidden">${portrait}
@@ -132,14 +134,39 @@ const goal = () =>
  * against the space down to the end of the `.columns` box and hides the trailing ones that do not fit, so a tall slot such as the X's full view fills with stories instead of stopping at a fixed count (Barry,
  * 2026-10-14). The list and the full layouts' wrappers are `flex-auto`, so before the engine trims they shrink to
  * exactly the space left (siblings that are `stretch-x` keep their content height), and the column is top-aligned.
- * On the X the engine misjudged heights (the X scales its content), so the X's list is one line a story, every row the
- * same height, with a fixed count per layout measured to fill it (`xLimit`); the OG's keeps the engine and two or three
- * lines where the layout asks for them.
+ * On the X the engine misjudged heights (the X scales its content), so the X's list is one line a story and, since
+ * template v8, `fitStories` hides the trailing stories that end below the list, at whatever scale the device sets; the
+ * OG's keeps the engine and two or three lines where the layout asks for them.
  */
 const storyList = (limit: number, clamp: number, classes: string, show: string, engine = true) =>
-  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full"${engine ? ' data-overflow="true"' : ''}>{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span></div>{% endfor %}</div></div></div>`
+  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true"${engine ? '' : ' data-fit-stories="true"'}><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full"${engine ? ' data-overflow="true"' : ''}>{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span></div>{% endfor %}</div></div></div>`
 /** The OG's list keeps the layout's clamp; the X's is one line a story, the only clamp its engine pass keeps exactly. */
-const stories = (limit: number, clamp = 1, classes = 'description lg:title--small', xLimit = 12) => storyList(limit, clamp, classes, 'lg:hidden') + storyList(xLimit, 1, classes, 'hidden lg:flex', false)
+const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') => storyList(limit, clamp, classes, 'lg:hidden') + storyList(limit, 1, classes, 'hidden lg:flex', false)
+
+/**
+ * The X's story lists (`data-fit-stories`, template v8): once the framework has laid out the view, hide the trailing
+ * stories that end below their list, so the list keeps whole stories at any device scale (`screen--scale-*`,
+ * `screen--text-scale-*`). Only visibility changes, as Desk Crawler's `fitStories`; scoped to this view and to the
+ * orientation the framework is showing.
+ */
+const fitStories = `<script>
+(() => {
+  const view = document.currentScript.closest('.view');
+  if (!view) return;
+  const fit = () => view.querySelectorAll('[data-fit-stories]').forEach((list) => {
+    if (!list.getClientRects().length) return;
+    const items = Array.from(list.querySelectorAll('.item'));
+    items.forEach((item) => item.classList.remove('hidden'));
+    const bottom = list.getBoundingClientRect().bottom;
+    let count = items.length;
+    while (count && items[count - 1].getBoundingClientRect().bottom > bottom + 0.5) items[--count].classList.add('hidden');
+    list.dataset.storyCount = String(count);
+  });
+  window.addEventListener('trmnl:terminalize:stats', fit);
+  window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
+  if (window.TRMNL_PLUGINS_READY) fit();
+})();
+</script>`
 
 /**
  * This week's heaviest fish at the angler's water: the trophy and water, the angler's rank and best, then each row's
@@ -203,13 +230,13 @@ const full = oriented(
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
     <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${stories(16)}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
-      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2, undefined, 10)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
+      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
     ${recap()}`),
   ready(`${header(2, 4)}
     ${scene([153, 3], [152, 5])}
     ${attention(3)}
-    ${stories(16, 2, 'label', 9)}
+    ${stories(16, 2, 'label')}
     ${catchPanel(3, 8)}
     ${board(6)}
     ${recap()}`),
@@ -223,7 +250,7 @@ const halfHorizontal = oriented(
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
       ${statusRow()}
       ${counters('short')}
-      {% if attention %}${attention(1)}{% else %}${stories(16, 1, undefined, 4)}{% endif %}
+      {% if attention %}${attention(1)}{% else %}${stories(16, 1)}{% endif %}
     </div>
     ${qr(2, 4)}`, true),
   ready(`
@@ -232,7 +259,7 @@ const halfHorizontal = oriented(
       ${scene([220, 2], [185, 4])}
       ${statusRow()}
       ${counters()}
-      {% if attention %}${attention()}{% else %}${stories(16, 2, undefined, 4)}{% endif %}
+      {% if attention %}${attention()}{% else %}${stories(16, 2)}{% endif %}
     </div>`),
 )
 
@@ -245,7 +272,7 @@ const halfVertical = oriented(
     ${statusRow()}
     ${counters()}
     ${attention()}
-    ${stories(16, 2, undefined, 12)}
+    ${stories(16, 2)}
     ${recap()}`),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
@@ -254,7 +281,7 @@ const halfVertical = oriented(
     ${statusRow()}
     ${counters('short')}
     ${attention(3)}
-    ${stories(16, 3, 'description', 16)}
+    ${stories(16, 3, 'description')}
     ${board(5)}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`),
   true,
@@ -271,12 +298,12 @@ const quadrant = oriented(
       </div>
       ${qr(2, 4)}
     </div>
-    {% if attention %}${attention(2)}{% else %}${stories(16, 2, undefined, 8)}{% endif %}`, true),
+    {% if attention %}${attention(2)}{% else %}${stories(16, 2)}{% endif %}`, true),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${statusRow(false)}
     ${counters('compact')}
-    {% if attention %}${attention(3)}<div class="grow"></div>{% else %}${stories(16, 3, 'description', 11)}{% endif %}
+    {% if attention %}${attention(3)}<div class="grow"></div>{% else %}${stories(16, 3, 'description')}{% endif %}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, true),
   true,
 )
