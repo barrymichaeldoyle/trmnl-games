@@ -1,5 +1,7 @@
 /**
- * Four self-contained TRMNL layouts. Template v53 gives the X full landscape today's to-do tasks at the head of its
+ * Four self-contained TRMNL layouts. Template v54 makes the OG quarter say a pause, a knockout's return time or a set
+ * wake time, keeps the level beside a long name, gives its stories the width the QR column did not use, and shows the
+ * standing code at 2x in the OG portrait quarter; the X portrait quarter gains the status line (D160). Template v53 gives the X full landscape today's to-do tasks at the head of its
  * board column, the board fitted to what is left, and the current goal pinned under the stories (D138). Template v51 removes the desk drawer (D123): the bag count is "20/20" again and the
  * drawer glyph is gone. Template v50 adds the to-do list (D112): a checkbox glyph for tasks ticked off and
  * the morning stand-up, a "2 tasks" recap fact, and a stand-up (or several tasks ticked off) that says its count where a
@@ -41,7 +43,7 @@
 import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 
-export const TEMPLATE_VERSION = 53
+export const TEMPLATE_VERSION = 54
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -659,11 +661,11 @@ const oriented = (classes: string, landscape: string, portrait: string, bar: str
 <div class="${classes} landscape:hidden">${portrait}
 </div>${portraitBar.replace('class="title_bar"', 'class="title_bar landscape:hidden"')}`
 
-/** A standing companion QR beside its caption, for the narrow portrait columns. */
-const qrFooter = (scale = 3, largeScale = 4, classes = '') => `
+/** A standing companion QR beside its caption, for the narrow portrait columns; an urgent code keeps `scale`. */
+const qrFooter = (scale = 3, largeScale = 4, classes = '', standingScale = scale) => `
   {% if qr_base != "" or companion_qr_base != "" %}<div class="${classes}no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x" data-companion-qr="true">
     {% if qr_base != "" %}<div class="no-shrink">${qrImage(scale, largeScale)}</div><span class="label lg:title--small grow" data-clamp="3">{{ qr_label | escape }}</span>
-    {% else %}<div class="no-shrink">${qrImage(scale, largeScale, 'companion_qr_base')}</div><span class="label lg:title--small grow">Your bag</span>{% endif %}
+    {% else %}<div class="no-shrink">${qrImage(standingScale, largeScale, 'companion_qr_base')}</div><span class="label lg:title--small grow">Your bag</span>{% endif %}
   </div>{% endif %}`
 
 /**
@@ -836,7 +838,7 @@ const xSide = (portrait: boolean) => portrait
  */
 const xQuadrant = (portrait: boolean) => `
   ${xBlock(portrait
-    ? `<div class="flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x" data-hero-header="x">${xName(10, 'title--small')}${hearts(true)}${xpTicks()}</div>`
+    ? `<div class="flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x" data-hero-header="x">${xName(10, 'title--small')}${statusLine(2, 40)}${hearts(true)}${xpTicks()}</div>`
     : `<div class="flex flex--row flex--top gap--medium stretch-x"><div class="grow w--min-0 flex flex--col flex--left flex--stretch-x gap--xsmall" data-hero-header="x">${xName(14, 'title--small')}${statusLine(1, 40)}${hearts(true)}${xpTicks()}</div>${xCode}</div>`)}
   ${xBlock(`<div class="flex flex--col flex--stretch-x h--full stretch-x"><div class="grow w--min-0 h--full flex flex--col flex--left flex--top flex--stretch-x gap--xsmall" data-ledger="x">
       {% if attention %}${attention('title--small', 3)}{% else %}${attention('title--small', 3)}${portrait ? recapBlock(2) : ''}{% endif %}
@@ -860,19 +862,26 @@ const halfVerticalPortrait = `
   ${qrFooter(3, 4, 'lg:hidden ')}${xSide(true)}
   {% endif %}`
 
+/**
+ * The OG quarter's status line, only where the hearts and stories would mislead: paused, knocked out with its return
+ * time, or asleep until a set time. Exploring is the default, a journey leads the stories and a full bag has its
+ * attention line.
+ */
+const quarterStatus = `{% assign quarter_status = true %}{% if status == "exploring" or status == "resting" or status == "travelling" %}{% assign quarter_status = false %}{% endif %}{% if status == "sleeping" and attention %}{% assign quarter_status = false %}{% endif %}{% if quarter_status %}${statusLine(2, 40)}{% endif %}`
+
 /** Quarter, portrait: hero line, the stories, then the companion QR across the bottom. */
 const quadrantPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('narrowColumn')}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
-    <span class="label" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
-    ${hearts(false)}
+    <span class="label" data-clamp="1">{{ hero_name | truncate: 13 | escape }}, level {{ level }}</span>
+    ${hearts(false)}${quarterStatus}
   </div>
   <div class="lg:hidden grow h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x">
     {% if attention %}${attention('label lg:title--small', 3)}{% else %}${attention('label lg:title--small', 3)}${recapBlock(2)}{% endif %}
     ${storyList(3, 'label lg:title--small', 16, 24, true)}
   </div>
-  ${qrFooter(3, 4, 'lg:hidden ')}${xQuadrant(true)}
+  ${qrFooter(3, 4, 'lg:hidden ', 2)}${xQuadrant(true)}
   {% endif %}`
 
 /**
@@ -1000,15 +1009,15 @@ export const markupQuadrant = `${glyphAssigns([16])}${HUD_ASSIGNS}${oriented('la
   {% if status == "unlinked" or first_run %}${welcome('quadrant')}
   {% else %}
     <div class="lg:hidden no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">
-      <span class="label grow w--min-0" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
+      <span class="label grow w--min-0" data-clamp="1">{{ hero_name | truncate: 11 | escape }}, level {{ level }}</span>
       ${hearts(false)}
     </div>
-    <div class="lg:hidden grid grow h--full h--min-0 stretch-x gap--small">
-      <div class="col--span-8 h--full flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
-        {% if attention %}${attention('label lg:title--small', 3)}{% else %}${attention('label lg:title--small', 3)}${recapBlock(2)}{% endif %}
-        ${storyList(2, 'label lg:title--small', 16, 40)}
+    <div class="lg:hidden flex flex--row flex--top grow h--full h--min-0 stretch-x gap--small">
+      <div class="grow w--min-0 h--full flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
+        ${quarterStatus}{% if attention %}${attention('label lg:title--small', 3)}{% else %}${attention('label lg:title--small', 3)}${recapBlock(2)}{% endif %}
+        ${storyList(2, 'label lg:title--small', 16, 46)}
       </div>
-      <div class="col--span-4 flex flex--col flex--center-x flex--top gap--small">${bagQr()}</div>
+      <div class="no-shrink flex flex--col flex--center-x flex--top gap--small">${bagQr()}</div>
     </div>${xQuadrant(false)}
   {% endif %}
 `, quadrantPortrait, titleBar, titleBarNarrow)}${fitStories}`

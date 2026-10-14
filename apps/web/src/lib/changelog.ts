@@ -14,6 +14,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-14',
     changes: [
       {
+        title: 'The quarter-size TRMNL view says when your hero is paused or knocked out',
+        body: 'If Desk Crawler shares your TRMNL with other plugins in a quarter slot, it now says "Paused by you" while you have paused, and the time your hero is back after a knockout. A long hero name no longer hides your level, and the latest adventure gets more of the width.',
+      },
+      {
         title: 'Less on the Hero page until you need it',
         body: 'Features you haven’t reached yet no longer stack up as locked cards. The Hero page names the next one to open and its level, and the world map shows the floors you can visit plus the next one. The Career page still lists everything that opens later.',
       },
