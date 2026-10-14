@@ -15,10 +15,12 @@
  * the water reaches the slot's edges instead of floating in it, and lifts the OG's landscape half to 3x.
  * Template v5 (2026-10-13) lets the title ticks shrink to their column, so in the X's landscape half the count wraps
  * under the ticks instead of running under the QR code.
+ * Template v6 (D162) pins the current goal under content v2 on the X's full landscape, behind the star, as Desk
+ * Crawler's does (D138): it heads the stories' column, which gives up a story for it, so the board keeps its rows.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 5
+export const TEMPLATE_VERSION = 6
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -118,6 +120,10 @@ const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !=
   .map((kind) => `{% when "${kind}" %}{% assign m_story = m_${kind} %}`)
   .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% when "goal" %}{% assign m_story = m_star %}{% when "open" %}{% assign m_story = m_achievement %}{% when "run" %}{% assign m_story = m_catch %}{% else %}{% assign m_story = m_system %}{% endcase %}`
 
+/** D162: the current goal behind the star; under content v1 there is none and nothing renders. */
+const goal = () =>
+  `{% if goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">Goal: {{ goal_line | escape }}</span></div>{% endif %}`
+
 /** The newest stories, each behind its glyph. */
 const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') =>
   `<div class="flex flex--col flex--left gap--xsmall stretch-x h--min-0" data-stories="true">{% for story in stories limit:${limit} %}${storyGlyph}<div class="flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span></div>{% endfor %}</div>`
@@ -184,7 +190,7 @@ const full = oriented(
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
     <div class="lg:hidden flex flex--col flex--left flex--top gap--small stretch-x no-shrink">${attention(1)}{% if attention %}${stories(4)}{% else %}${stories(5)}{% endif %}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium stretch-x no-shrink">${scene([170, 6], [170, 6])}${attention(1)}
-      <div class="flex flex--row flex--top gap--large stretch-x"><div class="grow w--min-0">${stories(5, 2)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
+      <div class="flex flex--row flex--top gap--large stretch-x"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}{% if goal_line %}${stories(4, 2)}{% else %}${stories(5, 2)}{% endif %}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
     ${recap()}`),
   ready(`${header(2, 4)}
