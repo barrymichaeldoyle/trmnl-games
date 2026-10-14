@@ -26,6 +26,7 @@ Use current official platform documentation when local skills or older examples 
 - Treat TRMNL tokens as read-only installation credentials. Clerk authentication governs game mutations.
 - Add only fields used by the current release. Use additive migrations for future systems.
 - Update contracts, tests, and docs when behavior changes. Explain differences from proposals.
+- A change players can see gets a dated entry in `apps/web/src/lib/changelog.ts` (the public /whats-new page, D153) in the same commit, written for players.
 - Preserve player progress across continuous releases. Never reset production for a balance patch.
 
 ## Collaboration

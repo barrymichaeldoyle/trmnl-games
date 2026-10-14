@@ -143,6 +143,7 @@ export function SiteFooter() {
             </FooterGroup>
             <FooterGroup title="Help">
               <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>Setup and help</Link></li>
+              <li><Link to="/whats-new" className={FOOTER_LINK}>What’s new</Link></li>
               <li><Link to="/support" className={FOOTER_LINK}>Support</Link></li>
               <li><Link to="/feedback" className={FOOTER_LINK}>Feedback</Link></li>
               <Show when="signed-in"><li><Link to="/account" className={FOOTER_LINK}>Account</Link></li></Show>

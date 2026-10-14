@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ScRouteImport } from './routes/sc'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WhatsNewRouteImport } from './routes/whats-new'
 import { Route as AccountDeleteRouteImport } from './routes/account_.delete'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AppDeskCrawlerRouteImport } from './routes/app/desk-crawler'
@@ -104,6 +105,11 @@ const SupportRoute = SupportRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WhatsNewRoute = WhatsNewRouteImport.update({
+  id: '/whats-new',
+  path: '/whats-new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountDeleteRoute = AccountDeleteRouteImport.update({
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/sc': typeof ScRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/whats-new': typeof WhatsNewRoute
   '/account/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
   '/app/slow-cast': typeof AppSlowCastRouteWithChildren
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/sc': typeof ScRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/whats-new': typeof WhatsNewRoute
   '/account/delete': typeof AccountDeleteRoute
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
@@ -399,6 +407,7 @@ export interface FileRoutesById {
   '/sc': typeof ScRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/whats-new': typeof WhatsNewRoute
   '/account_/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
   '/app/slow-cast': typeof AppSlowCastRouteWithChildren
@@ -449,6 +458,7 @@ export interface FileRouteTypes {
     | '/sc'
     | '/support'
     | '/terms'
+    | '/whats-new'
     | '/account/delete'
     | '/app/desk-crawler'
     | '/app/slow-cast'
@@ -496,6 +506,7 @@ export interface FileRouteTypes {
     | '/sc'
     | '/support'
     | '/terms'
+    | '/whats-new'
     | '/account/delete'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
@@ -542,6 +553,7 @@ export interface FileRouteTypes {
     | '/sc'
     | '/support'
     | '/terms'
+    | '/whats-new'
     | '/account_/delete'
     | '/app/desk-crawler'
     | '/app/slow-cast'
@@ -591,6 +603,7 @@ export interface RootRouteChildren {
   ScRoute: typeof ScRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  WhatsNewRoute: typeof WhatsNewRoute
   AccountDeleteRoute: typeof AccountDeleteRoute
   DeskCrawlerUnsubscribeRoute: typeof DeskCrawlerUnsubscribeRoute
   DeskCrawlerWaitingListRoute: typeof DeskCrawlerWaitingListRoute
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/whats-new': {
+      id: '/whats-new'
+      path: '/whats-new'
+      fullPath: '/whats-new'
+      preLoaderRoute: typeof WhatsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account_/delete': {
@@ -1016,6 +1036,7 @@ const rootRouteChildren: RootRouteChildren = {
   ScRoute: ScRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  WhatsNewRoute: WhatsNewRoute,
   AccountDeleteRoute: AccountDeleteRoute,
   DeskCrawlerUnsubscribeRoute: DeskCrawlerUnsubscribeRoute,
   DeskCrawlerWaitingListRoute: DeskCrawlerWaitingListRoute,
