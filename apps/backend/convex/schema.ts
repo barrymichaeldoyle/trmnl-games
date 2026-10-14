@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
 import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
-import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, waterId } from './idleAngler/validators'
+import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, order, season, timeBand, waterId, weather } from './idleAngler/validators'
 import { glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind } from './paperLives/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
@@ -251,6 +251,14 @@ export default defineSchema({
     simulationState: v.union(v.literal('healthy'), v.literal('quarantined')),
     quarantineReasonCode: v.optional(v.string()),
     achievementsVersion: v.optional(v.number()),
+    // D162 (content v2): the goal, the fishmonger's slate, a charter ticket, the wall's pegs and the last run announced.
+    goal: v.optional(v.object({ rung: v.number(), castsAtStart: v.number() })),
+    orders: v.optional(v.array(order)),
+    ordersDay: v.optional(v.number()),
+    swapDay: v.optional(v.number()),
+    charterCasts: v.optional(v.number()),
+    pegs: v.optional(v.number()),
+    runSeen: v.optional(v.string()),
   })
     .index('by_userId_and_isActive', ['userId', 'isActive'])
     .index('by_createdAt', ['createdAt'])
@@ -285,6 +293,10 @@ export default defineSchema({
     caughtTick: v.number(),
     contentVersion: v.string(),
     createdAt: v.number(),
+    /** D162: when and how it was caught, for fishmonger orders (content v2). */
+    band: v.optional(timeBand),
+    weather: v.optional(weather),
+    season: v.optional(season),
   }).index('by_anglerId', ['anglerId']),
 
   /**
