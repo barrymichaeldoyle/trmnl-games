@@ -65,6 +65,8 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
     return () => clearTimeout(timer)
   }, [burst])
   const counted = goal !== null && goal.target > 1
+  // The ladder moves on the hero's next adventure, so a goal done here (an equip, a stance) waits up to one adventure.
+  const met = goal !== null && goal.value >= goal.target
   const pct = goal === null ? 0 : Math.max(0, Math.min(100, Math.round((Math.min(goal.value, goal.target) * 100) / Math.max(1, goal.target))))
   const reward = waiting[0]
   return (
@@ -91,11 +93,11 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
       ) : goal ? (
         <>
           <p className="font-display text-2xl leading-tight font-bold">{goal.title}</p>
-          <p className="text-sm">{goal.blurb}</p>
+          <p className="text-sm">{met ? 'Done. Your hero marks it off on its next adventure, within fifteen minutes, and the reward waits here.' : goal.blurb}</p>
           <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
             <span className="text-gold-ink">+{goal.gold.toLocaleString()} gold</span>
             {counted ? <span className="text-muted">{Math.min(goal.value, goal.target).toLocaleString()} of {goal.target.toLocaleString()}</span> : null}
-            {goal.companion ? <span className="text-muted">Done here in the companion</span> : <span className="text-muted">Your hero does this by itself</span>}
+            {met ? null : goal.companion ? <span className="text-muted">Done here in the companion</span> : <span className="text-muted">Your hero does this by itself</span>}
           </p>
           {counted ? (
             <div role="meter" aria-label="Progress" aria-valuemin={0} aria-valuemax={goal.target} aria-valuenow={Math.min(goal.value, goal.target)} className="h-3 overflow-hidden border-2 border-night bg-night">
