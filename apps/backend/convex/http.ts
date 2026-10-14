@@ -92,9 +92,6 @@ http.route({ path: '/trmnl/install/success', method: 'POST', handler: installSuc
 http.route({ path: '/trmnl/uninstall', method: 'POST', handler: uninstall('desk-crawler') })
 http.route({ path: '/trmnl/idle-angler/install/success', method: 'POST', handler: installSuccess('idle-angler') })
 http.route({ path: '/trmnl/idle-angler/uninstall', method: 'POST', handler: uninstall('idle-angler') })
-// D158: the plugin's URLs from before the rename, until the plugin settings on trmnl.com point at the new ones.
-http.route({ path: '/trmnl/slow-cast/install/success', method: 'POST', handler: installSuccess('idle-angler') })
-http.route({ path: '/trmnl/slow-cast/uninstall', method: 'POST', handler: uninstall('idle-angler') })
 
 /** Shared screen request parsing: bearer, form type and size, one `user_uuid`. */
 async function parseScreenRequest(request: Request): Promise<{ tokenHash: string; form: URLSearchParams; uuid: string } | Response> {
@@ -127,7 +124,6 @@ const idleAnglerScreen = httpAction(async (ctx, request) => {
   return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, utc_offset: utcOffset } })
 })
 http.route({ path: '/trmnl/idle-angler/v1/screen', method: 'POST', handler: idleAnglerScreen })
-http.route({ path: '/trmnl/slow-cast/v1/screen', method: 'POST', handler: idleAnglerScreen })
 
 http.route({
   path: '/trmnl/v1/screen',

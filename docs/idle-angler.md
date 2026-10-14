@@ -302,7 +302,7 @@ Progress preservation applies from the first public install, as every release.
 
 Each step is an outward-facing action, so none was taken overnight.
 
-0. **After D158** (Barry): production ran the legacy reset on 2026-10-14. In the plugin on trmnl.com, rename it Idle Angler and change its five URLs and the knowledge base to the `/idle-angler/` ones in step 1, then reinstall it. The old `/slow-cast/` URLs keep answering until a later deploy removes them.
+0. **After D158** (Barry): production ran the legacy reset and the plugin was renamed with its new URLs on 2026-10-14. Reinstall it on your TRMNL; the old install's token was revoked.
 
 1. **Create the plugin in TRMNL** as a new Third Party plugin with OAuth, private at first:
    - Installation URL: `https://trmnlgames.com/connect/trmnl/idle-angler/install`
@@ -377,3 +377,4 @@ Barry asked on 2026-10-09 for the best player experience on each open question a
 - 2026-10-13, template v5: in the X's landscape half the title ticks and their count ran under the QR code ("17/20" half hidden), because the tick block could not shrink in its narrow column. It now shrinks to the column, so the count wraps under the ticks; no other view changes (408 previews compared against v4 screenshots: only those 14 X half-landscape views differ). The preview sweep now fails any text under a scannable code.
 - 2026-10-14, D158: renamed from Slow Cast to Idle Angler, everywhere: names, slug, routes, package, module, art paths (`/art/ia/`), the `/ia` short link and the `ia` table prefix. The old tables stay in the schema, loosely typed, until `idleAngler/legacyReset:run` has emptied them on each deployment; the dev deployment ran it at 10:31 UTC (its `check` then listed nothing) and DevWalk was linked again as an Idle Angler install, whose first screen request through the old `/trmnl/slow-cast/v1/screen` path confirmed it. The old plugin URLs answer until the S7 plugin on trmnl.com is updated (step 1 below lists the new URLs). 408 previews pass the sweep with the longer name in the title bar.
 - 2026-10-14, D158 follow-up: production ran `idleAngler/legacyReset:run` and its check listed nothing, so the old tables, the `slow-cast` slug value and the reset itself left the schema and the code. The old plugin URLs stay until the plugin on trmnl.com points at the new ones.
+- 2026-10-14, D158 done: the S7 plugin on trmnl.com (568) is named Idle Angler and its six URLs point at the `/idle-angler/` routes, so the old `/slow-cast/` webhook, markup, install and manage paths are gone. TRMNL draws the plugin's featured image itself, so it changes once the plugin renders under the new name.

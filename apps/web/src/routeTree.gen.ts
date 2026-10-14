@@ -56,8 +56,6 @@ import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/con
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
 import { Route as ConnectTrmnlIdleAnglerInstallRouteImport } from './routes/connect/trmnl/idle-angler/install'
 import { Route as ConnectTrmnlIdleAnglerManageRouteImport } from './routes/connect/trmnl/idle-angler/manage'
-import { Route as ConnectTrmnlSlowCastInstallRouteImport } from './routes/connect/trmnl/slow-cast/install'
-import { Route as ConnectTrmnlSlowCastManageRouteImport } from './routes/connect/trmnl/slow-cast/manage'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -302,18 +300,6 @@ const ConnectTrmnlIdleAnglerManageRoute =
     path: '/connect/trmnl/idle-angler/manage',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ConnectTrmnlSlowCastInstallRoute =
-  ConnectTrmnlSlowCastInstallRouteImport.update({
-    id: '/connect/trmnl/slow-cast/install',
-    path: '/connect/trmnl/slow-cast/install',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ConnectTrmnlSlowCastManageRoute =
-  ConnectTrmnlSlowCastManageRouteImport.update({
-    id: '/connect/trmnl/slow-cast/manage',
-    path: '/connect/trmnl/slow-cast/manage',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -363,8 +349,6 @@ export interface FileRoutesByFullPath {
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
-  '/connect/trmnl/slow-cast/install': typeof ConnectTrmnlSlowCastInstallRoute
-  '/connect/trmnl/slow-cast/manage': typeof ConnectTrmnlSlowCastManageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -411,8 +395,6 @@ export interface FileRoutesByTo {
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
-  '/connect/trmnl/slow-cast/install': typeof ConnectTrmnlSlowCastInstallRoute
-  '/connect/trmnl/slow-cast/manage': typeof ConnectTrmnlSlowCastManageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -463,8 +445,6 @@ export interface FileRoutesById {
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
-  '/connect/trmnl/slow-cast/install': typeof ConnectTrmnlSlowCastInstallRoute
-  '/connect/trmnl/slow-cast/manage': typeof ConnectTrmnlSlowCastManageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -516,8 +496,6 @@ export interface FileRouteTypes {
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
-    | '/connect/trmnl/slow-cast/install'
-    | '/connect/trmnl/slow-cast/manage'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -564,8 +542,6 @@ export interface FileRouteTypes {
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
-    | '/connect/trmnl/slow-cast/install'
-    | '/connect/trmnl/slow-cast/manage'
   id:
     | '__root__'
     | '/'
@@ -615,8 +591,6 @@ export interface FileRouteTypes {
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
-    | '/connect/trmnl/slow-cast/install'
-    | '/connect/trmnl/slow-cast/manage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -646,8 +620,6 @@ export interface RootRouteChildren {
   ConnectTrmnlDeskCrawlerManageRoute: typeof ConnectTrmnlDeskCrawlerManageRoute
   ConnectTrmnlIdleAnglerInstallRoute: typeof ConnectTrmnlIdleAnglerInstallRoute
   ConnectTrmnlIdleAnglerManageRoute: typeof ConnectTrmnlIdleAnglerManageRoute
-  ConnectTrmnlSlowCastInstallRoute: typeof ConnectTrmnlSlowCastInstallRoute
-  ConnectTrmnlSlowCastManageRoute: typeof ConnectTrmnlSlowCastManageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -981,20 +953,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnectTrmnlIdleAnglerManageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/connect/trmnl/slow-cast/install': {
-      id: '/connect/trmnl/slow-cast/install'
-      path: '/connect/trmnl/slow-cast/install'
-      fullPath: '/connect/trmnl/slow-cast/install'
-      preLoaderRoute: typeof ConnectTrmnlSlowCastInstallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/connect/trmnl/slow-cast/manage': {
-      id: '/connect/trmnl/slow-cast/manage'
-      path: '/connect/trmnl/slow-cast/manage'
-      fullPath: '/connect/trmnl/slow-cast/manage'
-      preLoaderRoute: typeof ConnectTrmnlSlowCastManageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -1095,8 +1053,6 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectTrmnlDeskCrawlerManageRoute: ConnectTrmnlDeskCrawlerManageRoute,
   ConnectTrmnlIdleAnglerInstallRoute: ConnectTrmnlIdleAnglerInstallRoute,
   ConnectTrmnlIdleAnglerManageRoute: ConnectTrmnlIdleAnglerManageRoute,
-  ConnectTrmnlSlowCastInstallRoute: ConnectTrmnlSlowCastInstallRoute,
-  ConnectTrmnlSlowCastManageRoute: ConnectTrmnlSlowCastManageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
