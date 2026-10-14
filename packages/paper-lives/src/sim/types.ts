@@ -410,6 +410,8 @@ export interface LifeState {
   readonly home: Home
   readonly house?: number
   readonly hobby?: string
+  /** Every hobby this life has taken up, for the account's Pastimes. */
+  readonly hobbiesHad?: readonly string[]
   readonly pet?: Pet
   /** The character's age when the last pet died; a new one can follow a year later. */
   readonly petLostAt?: number

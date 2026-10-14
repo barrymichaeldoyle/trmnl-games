@@ -33,6 +33,7 @@ import { readEngineWorld } from '../lib/engine/world'
 import { fromLifeState, toLifeState } from './adapter'
 import { currentLife, paperLivesProfile } from './profile'
 import { recordOf } from './records'
+import { awardLife } from './achievements'
 import { PAPER_LIVES_RUNTIME, PAPER_LIVES_SCHEDULE } from './runtime'
 import { pronouns } from './validators'
 
@@ -204,6 +205,8 @@ export const begin = mutation({
         })
         await ctx.db.patch(record._id, { continuedBy: i.kind as 'child' | 'stranger' })
         await ctx.db.insert('plTickLogs', { lifeId: life._id, ordinal, source: 'lifecycle', sequence, at: now, kind: 'system', glyph: 'pram', age: next.life.age, summary: next.firstLog })
+        // A child's life can already meet a goal: a second generation, children of their own.
+        await awardLife(ctx, life._id, now, world?.currentTick ?? 0)
         return { changed: true }
       })(ctx, operationId, { kind, ...(personId === undefined ? {} : { personId }) }),
     ),

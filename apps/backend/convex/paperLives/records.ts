@@ -3,6 +3,7 @@ import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { weekKey } from '../idleAngler/records'
 import { pagePublic } from '../lib/publicPage'
+import { foldLife } from './achievements'
 import { currentLife } from './profile'
 
 /**
@@ -40,6 +41,9 @@ export async function endedLife(ctx: MutationCtx, life: Doc<'lives'>, record: Li
       else if (value > prior.value) await ctx.db.patch(prior._id, row)
     }
   }
+  // The oldest life on the all-time board earns its set piece; the career takes the life once, with the record.
+  const top = await ctx.db.query('plLifeBoards').withIndex('by_board_and_period_and_value', (q) => q.eq('board', 'longest').eq('period', 'all')).order('desc').first()
+  await foldLife(ctx, life, top?.recordId === recordId ? ['oldest_ever'] : [])
   return recordId
 }
 

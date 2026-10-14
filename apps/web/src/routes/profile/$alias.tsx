@@ -10,7 +10,7 @@ import { formatWeight } from '../../lib/idleAngler'
 import { FishIcon } from '../app/idle-angler/-art'
 import { FishName } from '../app/idle-angler/-fish'
 
-type Game = { slug: 'desk-crawler' | 'idle-angler'; name: string; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
+type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
 type Profile = { alias: string; games: Game[]; platform: Array<{ id: string; name: string; blurb: string; share: number | null }> } | null
 
 const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { alias })
@@ -44,13 +44,22 @@ function ProfilePage() {
             <h1 className="font-display text-4xl font-bold">{profile.alias}</h1>
             {profile.games.map((game) => (
               <Card key={game.slug} title={games[game.slug].name}>
-                <p className="text-lg">{game.slug === 'desk-crawler' ? `${game.name}, level ${game.level}` : `${game.title ?? 'Angler'}`}</p>
+                <p className="text-lg">{game.slug === 'desk-crawler' ? `${game.name}, level ${game.level}` : game.slug === 'paper-lives' ? (game.life?.status === 'ended' ? `${game.name}, remembered` : `${game.name}, ${game.life?.age}${game.life?.job ? `, ${game.life.job.toLowerCase()}` : ''}`) : `${game.title ?? 'Angler'}`}</p>
                 <p className="text-sm text-muted">
                   Playing since {since(game.since)}
                   {game.rank ? ` · #${game.rank.rank} of ${game.rank.totalPlayers} all time` : ''} · {game.achievements} achievements
                   {game.species !== undefined ? ` · ${game.species} species logged` : ''}
                   {game.medals ? ` · ${game.medals} ${game.medals === 1 ? 'medal' : 'medals'}` : ''}
+                  {game.life ? ` · ${game.life.lives} ${game.life.lives === 1 ? 'life' : 'lives'} lived${game.life.longest ? `, the longest ${game.life.longest} years` : ''}` : ''}
                 </p>
+                {game.life?.traits.length ? <p className="text-sm text-muted">{game.life.traits.join(' · ')}</p> : null}
+                {game.life && game.life.album.length > 0 ? (
+                  <ul className="mt-3 flex flex-col gap-1" aria-label="Album">
+                    {game.life.album.map((life) => (
+                      <li key={life.ordinal} className="text-sm"><Link to="/profile/$alias/lives/$n" params={{ alias: profile.alias, n: String(life.ordinal) }} className="underline underline-offset-4">{life.name}</Link> <span className="text-muted">· lived to {life.age}{life.generation > 1 ? `, generation ${life.generation}` : ''}</span></li>
+                    ))}
+                  </ul>
+                ) : null}
                 {game.wall && game.wall.length > 0 ? (
                   <ul className="mt-3 flex flex-wrap gap-3" aria-label="Trophy wall">
                     {game.wall.map((t, i) => <li key={i} className="flex items-center gap-2 text-sm"><FishIcon id={t.speciesId} scale={2} /><span><FishName id={t.speciesId} /> {formatWeight(t.grams)}</span></li>)}

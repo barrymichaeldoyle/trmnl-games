@@ -12,7 +12,7 @@ import type { LifeView } from '../../lib/paperLives'
 
 /**
  * Paper Lives companion shell (paper-lives.md "Companion", D159): the lifecycle gate (not-found for anyone who cannot
- * open the game yet), setup states and the tab bar for Life, People, Work and More.
+ * open the game yet), setup states and the tab bar for Life, People, Work, Album and More.
  */
 export const Route = createFileRoute('/app/paper-lives')({
   head: () => seo({ title: games['paper-lives'].name, index: false }),
@@ -27,6 +27,7 @@ const NAV = [
   { to: '/app/paper-lives', label: 'Life', glyph: 'hero' },
   { to: '/app/paper-lives/people', label: 'People', glyph: 'heart' },
   { to: '/app/paper-lives/work', label: 'Work', glyph: 'coin' },
+  { to: '/app/paper-lives/album', label: 'Album', glyph: 'star' },
   { to: '/app/paper-lives/settings', label: 'More', glyph: 'cog' },
 ] as const satisfies ReadonlyArray<{ to: string; label: string; glyph: GlyphName }>
 

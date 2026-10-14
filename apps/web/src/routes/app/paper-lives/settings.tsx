@@ -9,11 +9,17 @@ import type { LifeView } from '../../../lib/paperLives'
 import { ActionFeedback, Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet, Consequences } from '../desk-crawler/-confirm'
 
-/** The More tab: help, then settings (pause, public profile, deleting Paper Lives progress alone). */
+/** The More tab: rankings, achievements and help, then settings (pause, public profile, deleting Paper Lives progress alone). */
 export const Route = createFileRoute('/app/paper-lives/settings')({
   loader: ({ context }) => preload(context, convexQuery(api.paperLives.lives.view, {})),
   component: SettingsPage,
 })
+
+const MORE_LINKS = [
+  { to: '/app/paper-lives/rankings', label: 'Rankings', blurb: 'The longest lives and the biggest fortunes, this week and all time.' },
+  { to: '/app/paper-lives/achievements', label: 'Achievements', blurb: 'Every tier earned across your lives, and what comes next.' },
+  { to: '/help/paper-lives', label: 'How Paper Lives works', blurb: 'Years, decisions, the stats and the next life.' },
+] as const
 
 function SettingsPage() {
   const { notice, notify, dismiss } = useNotice()
@@ -32,10 +38,16 @@ function SettingsPage() {
     <>
       <h1 className="font-display text-3xl font-bold">More</h1>
       <Card>
-        <Link to="/help/paper-lives" className="flex min-h-12 flex-col justify-center py-2">
-          <span className="font-semibold underline underline-offset-4">How Paper Lives works</span>
-          <span className="text-sm text-muted">Years, decisions, the stats and the next life.</span>
-        </Link>
+        <ul className="flex flex-col">
+          {MORE_LINKS.map((link) => (
+            <li key={link.to} className="border-b border-rule last:border-b-0">
+              <Link to={link.to} className="flex min-h-12 flex-col justify-center py-2">
+                <span className="font-semibold underline underline-offset-4">{link.label}</span>
+                <span className="text-sm text-muted">{link.blurb}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </Card>
       <h2 className="font-display text-2xl font-bold">Settings</h2>
       {active && life.status !== 'ended' ? (

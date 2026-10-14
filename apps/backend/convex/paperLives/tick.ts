@@ -7,6 +7,7 @@ import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engin
 import { fromLifeState, toLifeState } from './adapter'
 import { currentLife } from './profile'
 import { endedLife } from './records'
+import { awardLife, tallyLifeUnlocks } from './achievements'
 import { PAPER_LIVES_RUNTIME } from './runtime'
 
 /**
@@ -57,6 +58,12 @@ async function writeLogs(ctx: MutationCtx, life: Doc<'lives'>, result: ReturnTyp
   return sequence
 }
 
+/** A publication run's share for one life: achievement rarity, published with the hourly set (D65). */
+async function publishInputs(ctx: MutationCtx, owner: Doc<'users'>, step: SubjectStep<PaperLivesCatalog>) {
+  await tallyLifeUnlocks(ctx, owner._id, step.tally.unlocks)
+  step.tally.population += 1
+}
+
 /** One life's share of a page: eligibility, dormant skip, quarantine, the pure tick, then its writes. */
 async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: SubjectStep<PaperLivesCatalog>): Promise<void> {
   const life = subject as unknown as Doc<'lives'>
@@ -75,7 +82,7 @@ async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
   if (life.simulationState === 'quarantined') {
     counts.quarantined += 1
     await ctx.db.patch(life._id, { lastTick: run.tick })
-    if (run.publishes) tally.population += 1
+    if (run.publishes) await publishInputs(ctx, owner, step)
     return
   }
 
@@ -96,7 +103,7 @@ async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
       message: error.message.slice(0, 500),
       createdAt: now,
     })
-    if (run.publishes) tally.population += 1
+    if (run.publishes) await publishInputs(ctx, owner, step)
     return
   }
 
@@ -108,7 +115,9 @@ async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
   }
   await ctx.db.patch(life._id, patch)
   if (result.record) await endedLife(ctx, (await ctx.db.get(life._id))!, result.record, now)
-  if (run.publishes) tally.population += 1
+  // Achievements: when a year or a life ends, never on a passive tick.
+  if (result.disposition === 'boundary' || result.disposition === 'died') await awardLife(ctx, life._id, now, run.tick)
+  if (run.publishes) await publishInputs(ctx, owner, step)
 
   counts.events += result.events.filter((e) => e.kind === 'event').length
   counts.years += result.disposition === 'boundary' ? 1 : 0

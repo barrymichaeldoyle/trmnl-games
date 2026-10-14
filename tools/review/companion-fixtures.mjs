@@ -332,6 +332,9 @@ const queries = {
   'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }, { slug: 'paper-lives', status: 'hidden', canOpen: true }] }),
   'paperLives/lives:view': () => (params.get('pl') === 'none' ? { gameState: null, life: null } : paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult),
   'paperLives/payload:preview': () => null,
+  'paperLives/album:view': () => (params.get('album') === '0' ? { ...paperLives.album, lives: [], tree: [], following: [] } : { ...paperLives.album, following: [{ alias: 'Quillfeather_Longname', name: 'Ottilie Achterberg', age: 52, job: 'Museum director', status: 'living' }, { alias: 'Mo', name: 'Sid Rook', age: 81, job: null, status: 'ended' }] }),
+  'paperLives/achievements:mine': () => paperLives.achievements,
+  'paperLives/album:board': (args = {}) => ({ ...(args.board === 'fortune' ? paperLives.boardFortuneAll : paperLives.boardLongestWeek), board: args.board ?? 'longest', period: args.period ?? 'week', entries: [['Quillfeather_Longname', 'Ottilie Achterberg-Cartwright', 101], ['Barry', 'Maud Okafor', 100], ['Mo', 'Sid Rook', 94], ['Hidden player', '', 91], ['Bea', 'Ada Moss', 88]].map(([name, life, age], i) => ({ rank: i + 1, name, life, value: args.board === 'fortune' ? 400000 - i * 50000 : age, age, own: name === 'Barry', profile: name === 'Mo' })), own: { rank: 2, value: 100, age: 100 } }),
   'paperLives/public:lifePage': () => (params.get('private') === '1' ? null : { alias: 'Barry', ordinal: 1, name: 'Maud Okafor', age: 101, generation: 'Third of the Okafors', traits: ['Curious', 'Loyal'], epitaph: paperLives.memorial.memorial.epitaph, highlights: paperLives.memorial.logs.filter((l) => l.kind !== 'recap').slice(0, 8).map((l) => l.age + ': ' + l.summary), endedAt: Date.now() - 864e5, portrait: paperLives.memorial.life.portrait, parent: { ordinal: 0, name: 'Hamish Okafor' }, child: null }),
   'idleAngler/anglers:dock': () => iaDock,
   'idleAngler/anglers:logbook': () => iaBook,
@@ -435,6 +438,9 @@ import { Route as PlLife } from '../../apps/web/src/routes/app/paper-lives/index
 import { Route as PlPeople } from '../../apps/web/src/routes/app/paper-lives/people';
 import { Route as PlWork } from '../../apps/web/src/routes/app/paper-lives/work';
 import { Route as PlSettings } from '../../apps/web/src/routes/app/paper-lives/settings';
+import { Route as PlAlbum } from '../../apps/web/src/routes/app/paper-lives/album';
+import { Route as PlRankings } from '../../apps/web/src/routes/app/paper-lives/rankings';
+import { Route as PlAchievements } from '../../apps/web/src/routes/app/paper-lives/achievements';
 import { Route as PlPublic } from '../../apps/web/src/routes/profile/$alias_.lives.$n';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
@@ -442,7 +448,7 @@ import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
   '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component,
-  '/app/paper-lives': PlLife.options.component, '/app/paper-lives/people': PlPeople.options.component, '/app/paper-lives/work': PlWork.options.component, '/app/paper-lives/settings': PlSettings.options.component };
+  '/app/paper-lives': PlLife.options.component, '/app/paper-lives/people': PlPeople.options.component, '/app/paper-lives/work': PlWork.options.component, '/app/paper-lives/settings': PlSettings.options.component, '/app/paper-lives/album': PlAlbum.options.component, '/app/paper-lives/rankings': PlRankings.options.component, '/app/paper-lives/achievements': PlAchievements.options.component };
 const lifePage = /^\\/profile\\/[^/]+\\/lives\\/\\d+/.test(location.pathname);
 const publicPage = location.pathname.startsWith('/desk-crawler/heroes/') || lifePage;
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);

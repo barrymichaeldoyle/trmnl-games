@@ -57,7 +57,10 @@ import { Route as AppIdleAnglerSettingsRouteImport } from './routes/app/idle-ang
 import { Route as AppIdleAnglerShopRouteImport } from './routes/app/idle-angler/shop'
 import { Route as AppIdleAnglerTrophiesRouteImport } from './routes/app/idle-angler/trophies'
 import { Route as AppPaperLivesIndexRouteImport } from './routes/app/paper-lives/index'
+import { Route as AppPaperLivesAchievementsRouteImport } from './routes/app/paper-lives/achievements'
+import { Route as AppPaperLivesAlbumRouteImport } from './routes/app/paper-lives/album'
 import { Route as AppPaperLivesPeopleRouteImport } from './routes/app/paper-lives/people'
+import { Route as AppPaperLivesRankingsRouteImport } from './routes/app/paper-lives/rankings'
 import { Route as AppPaperLivesSettingsRouteImport } from './routes/app/paper-lives/settings'
 import { Route as AppPaperLivesWorkRouteImport } from './routes/app/paper-lives/work'
 import { Route as DeskCrawlerHeroesAliasRouteImport } from './routes/desk-crawler/heroes.$alias'
@@ -311,9 +314,25 @@ const AppPaperLivesIndexRoute = AppPaperLivesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppPaperLivesRoute,
 } as any)
+const AppPaperLivesAchievementsRoute =
+  AppPaperLivesAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AppPaperLivesRoute,
+  } as any)
+const AppPaperLivesAlbumRoute = AppPaperLivesAlbumRouteImport.update({
+  id: '/album',
+  path: '/album',
+  getParentRoute: () => AppPaperLivesRoute,
+} as any)
 const AppPaperLivesPeopleRoute = AppPaperLivesPeopleRouteImport.update({
   id: '/people',
   path: '/people',
+  getParentRoute: () => AppPaperLivesRoute,
+} as any)
+const AppPaperLivesRankingsRoute = AppPaperLivesRankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
   getParentRoute: () => AppPaperLivesRoute,
 } as any)
 const AppPaperLivesSettingsRoute = AppPaperLivesSettingsRouteImport.update({
@@ -407,7 +426,10 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/paper-lives/achievements': typeof AppPaperLivesAchievementsRoute
+  '/app/paper-lives/album': typeof AppPaperLivesAlbumRoute
   '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
+  '/app/paper-lives/rankings': typeof AppPaperLivesRankingsRoute
   '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
   '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
@@ -462,7 +484,10 @@ export interface FileRoutesByTo {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/paper-lives/achievements': typeof AppPaperLivesAchievementsRoute
+  '/app/paper-lives/album': typeof AppPaperLivesAlbumRoute
   '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
+  '/app/paper-lives/rankings': typeof AppPaperLivesRankingsRoute
   '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
   '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
@@ -522,7 +547,10 @@ export interface FileRoutesById {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/paper-lives/achievements': typeof AppPaperLivesAchievementsRoute
+  '/app/paper-lives/album': typeof AppPaperLivesAlbumRoute
   '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
+  '/app/paper-lives/rankings': typeof AppPaperLivesRankingsRoute
   '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
   '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
@@ -583,7 +611,10 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/paper-lives/achievements'
+    | '/app/paper-lives/album'
     | '/app/paper-lives/people'
+    | '/app/paper-lives/rankings'
     | '/app/paper-lives/settings'
     | '/app/paper-lives/work'
     | '/desk-crawler/heroes/$alias'
@@ -638,7 +669,10 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/paper-lives/achievements'
+    | '/app/paper-lives/album'
     | '/app/paper-lives/people'
+    | '/app/paper-lives/rankings'
     | '/app/paper-lives/settings'
     | '/app/paper-lives/work'
     | '/desk-crawler/heroes/$alias'
@@ -697,7 +731,10 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/paper-lives/achievements'
+    | '/app/paper-lives/album'
     | '/app/paper-lives/people'
+    | '/app/paper-lives/rankings'
     | '/app/paper-lives/settings'
     | '/app/paper-lives/work'
     | '/desk-crawler/heroes/$alias'
@@ -1082,11 +1119,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPaperLivesIndexRouteImport
       parentRoute: typeof AppPaperLivesRoute
     }
+    '/app/paper-lives/achievements': {
+      id: '/app/paper-lives/achievements'
+      path: '/achievements'
+      fullPath: '/app/paper-lives/achievements'
+      preLoaderRoute: typeof AppPaperLivesAchievementsRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
+    '/app/paper-lives/album': {
+      id: '/app/paper-lives/album'
+      path: '/album'
+      fullPath: '/app/paper-lives/album'
+      preLoaderRoute: typeof AppPaperLivesAlbumRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
     '/app/paper-lives/people': {
       id: '/app/paper-lives/people'
       path: '/people'
       fullPath: '/app/paper-lives/people'
       preLoaderRoute: typeof AppPaperLivesPeopleRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
+    '/app/paper-lives/rankings': {
+      id: '/app/paper-lives/rankings'
+      path: '/rankings'
+      fullPath: '/app/paper-lives/rankings'
+      preLoaderRoute: typeof AppPaperLivesRankingsRouteImport
       parentRoute: typeof AppPaperLivesRoute
     }
     '/app/paper-lives/settings': {
@@ -1207,14 +1265,20 @@ const AppIdleAnglerRouteWithChildren = AppIdleAnglerRoute._addFileChildren(
 )
 
 interface AppPaperLivesRouteChildren {
+  AppPaperLivesAchievementsRoute: typeof AppPaperLivesAchievementsRoute
+  AppPaperLivesAlbumRoute: typeof AppPaperLivesAlbumRoute
   AppPaperLivesPeopleRoute: typeof AppPaperLivesPeopleRoute
+  AppPaperLivesRankingsRoute: typeof AppPaperLivesRankingsRoute
   AppPaperLivesSettingsRoute: typeof AppPaperLivesSettingsRoute
   AppPaperLivesWorkRoute: typeof AppPaperLivesWorkRoute
   AppPaperLivesIndexRoute: typeof AppPaperLivesIndexRoute
 }
 
 const AppPaperLivesRouteChildren: AppPaperLivesRouteChildren = {
+  AppPaperLivesAchievementsRoute: AppPaperLivesAchievementsRoute,
+  AppPaperLivesAlbumRoute: AppPaperLivesAlbumRoute,
   AppPaperLivesPeopleRoute: AppPaperLivesPeopleRoute,
+  AppPaperLivesRankingsRoute: AppPaperLivesRankingsRoute,
   AppPaperLivesSettingsRoute: AppPaperLivesSettingsRoute,
   AppPaperLivesWorkRoute: AppPaperLivesWorkRoute,
   AppPaperLivesIndexRoute: AppPaperLivesIndexRoute,

@@ -198,7 +198,7 @@ export function applyEffects(life: LifeState, effects: Effects | undefined, ctx:
   } else if (effects.hobby) {
     const hobby = content.hobbies.find((h) => h.id === effects.hobby)
     if (!hobby) throw new PaperLivesInvariantError('UNKNOWN_HOBBY', `unknown hobby ${effects.hobby}`)
-    if (life.hobby !== hobby.id) life = bump({ ...life, hobby: hobby.id }, { hobbiesTaken: 1 })
+    if (life.hobby !== hobby.id) life = bump({ ...life, hobby: hobby.id, hobbiesHad: [...new Set([...(life.hobbiesHad ?? []), hobby.id])] }, { hobbiesTaken: 1 })
     slots.hobby = hobby.noun
   }
   if (effects.pet === 'lose') {

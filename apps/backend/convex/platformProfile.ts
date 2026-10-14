@@ -16,6 +16,9 @@ import { adminRef } from './lib/adminAccess'
 import { gameStatusOf } from './platform'
 import { MAX_SW_UNLOCKS } from './idleAngler/achievements'
 import { currentAngler } from './idleAngler/profile'
+import { currentLife, paperLivesProfile } from './paperLives/profile'
+import { MAX_PL_UNLOCKS } from './paperLives/achievements'
+import { contentV1 as paperLivesContent } from '@trmnl-games/paper-lives/content'
 import type { EngineRuntime } from './lib/engine/runtime'
 
 /**
@@ -31,8 +34,11 @@ async function crossGame(ctx: QueryCtx, user: Doc<'users'>) {
   const angler = await currentAngler(ctx, user)
   const dcUnlocks = (await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_UNLOCK_ROWS)).length
   const iaUnlocks = (await ctx.db.query('iaAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_SW_UNLOCKS)).length
-  const games = (hero?.activationState === 'active' ? 1 : 0) + (angler?.activationState === 'active' ? 1 : 0)
-  return { hero, angler, dcUnlocks, iaUnlocks, games, collected: dcUnlocks + iaUnlocks }
+  // D159: Paper Lives counts like any game.
+  const life = await currentLife(ctx, user)
+  const plUnlocks = (await ctx.db.query('plAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_PL_UNLOCKS)).length
+  const games = (hero?.activationState === 'active' ? 1 : 0) + (angler?.activationState === 'active' ? 1 : 0) + (life?.activationState === 'active' ? 1 : 0)
+  return { hero, angler, life, dcUnlocks, iaUnlocks, plUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks }
 }
 
 /** All-time rank in a game's published set, or null. */
@@ -54,11 +60,12 @@ export const view = query({
     if (normalized.length < ALIAS_RULE.min || normalized.length > ALIAS_RULE.max) return null
     const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalized)).first()
     if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
-    const { hero, angler, dcUnlocks, iaUnlocks, games, collected } = await crossGame(ctx, user)
+    const { hero, angler, life, dcUnlocks, iaUnlocks, plUnlocks, games, collected } = await crossGame(ctx, user)
     const admin = (await adminRef(ctx)) !== null
     const showIdleAngler = angler !== null && angler.activationState === 'active' && pagePublic(angler) && ((await gameStatusOf(ctx, 'idle-angler')) === 'live' || admin)
     const showDesk = hero !== null && hero.activationState === 'active' && pagePublic(hero)
-    if (!showDesk && !showIdleAngler) return null
+    const showPaperLives = life !== null && life.activationState === 'active' && pagePublic(life) && ((await gameStatusOf(ctx, 'paper-lives')) === 'live' || admin)
+    if (!showDesk && !showIdleAngler && !showPaperLives) return null
     const current = await ctx.db.query('platformStats').withIndex('by_key', (q) => q.eq('key', 'current')).unique()
     return {
       alias: user.publicAlias,
@@ -72,11 +79,39 @@ export const view = query({
               medals: angler.counters.medals ?? 0,
             }]
           : []),
+        ...(showPaperLives ? [await paperLivesSection(ctx, user, life, plUnlocks)] : []),
       ],
       platform: platformAchievements({ games, collected }).map((a) => ({ id: a.id, name: a.name, blurb: a.blurb, family: a.family, tier: a.tier, share: current && current.totalPlayers > 0 ? Math.max(1, Math.round(((current.counts[a.id] ?? 0) * 100) / current.totalPlayers)) : null })),
     }
   },
 })
+
+/**
+ * D159: the profile's Paper Lives section: the current character (name, age, job, traits), lives lived, the longest,
+ * and the album's finished lives (at most 24, newest first), each linking to its public life page.
+ */
+async function paperLivesSection(ctx: QueryCtx, user: Doc<'users'>, life: Doc<'lives'>, achievements: number) {
+  const career = (await paperLivesProfile(ctx, user._id))?.career
+  const records = await ctx.db.query('lifeRecords').withIndex('by_userId_and_endedAt', (q) => q.eq('userId', user._id)).order('desc').take(24)
+  const job = life.life.job ? paperLivesContent.jobs.find((j) => j.id === life.life.job)?.name : undefined
+  return {
+    slug: 'paper-lives' as const,
+    name: `${life.life.first} ${life.life.last}`,
+    since: life.activatedAt ?? life.createdAt,
+    rank: null,
+    achievements,
+    page: null,
+    life: {
+      age: life.life.age,
+      status: life.life.status,
+      job: job ?? null,
+      traits: life.life.traits.map((id) => paperLivesContent.traits.find((t) => t.id === id)?.name ?? id),
+      lives: career?.livesEnded ?? 0,
+      longest: career?.oldestAge ?? 0,
+      album: records.map((r) => ({ ordinal: r.ordinal, name: `${r.first} ${r.last}`, age: r.age, generation: r.generation })),
+    },
+  }
+}
 
 const TALLY_PAGE = 100
 

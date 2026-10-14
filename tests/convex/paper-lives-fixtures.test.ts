@@ -53,6 +53,19 @@ describe.runIf(process.env.PL_FIXTURES)('Paper Lives companion fixtures', () => 
       out[name] = await t.withIdentity({ issuer: 'issuer', subject: alias }).query(api.paperLives.lives.view, {})
     }
     expect((out.memorial as { life: { status: string } }).life.status).toBe('ended')
+    // An account with two finished lives and a third under way: the album, the boards and the achievements.
+    const veteran = t.withIdentity({ issuer: 'issuer', subject: 'Fxmemorial' })
+    await veteran.mutation(api.paperLives.lives.begin, { operationId: 'operation-fixture-1', kind: 'child' })
+    const lives = await t.run(async (ctx) => await ctx.db.query('lives').collect())
+    const memorialLife = lives.find((l) => l.ordinal === 2)!
+    await t.run(async (ctx) => await ctx.db.patch(memorialLife._id, { life: { ...memorialLife.life, age: 96, stage: 'senior', stats: { ...memorialLife.life.stats, health: 0 } } }))
+    for (let i = 0; i < 400 && (await lifeOf(t, memorialLife._id)).life.status !== 'ended'; i += 1) await nextPaperLivesTick(t)
+    await veteran.mutation(api.paperLives.lives.begin, { operationId: 'operation-fixture-2', kind: 'stranger' })
+    for (let i = 0; i < 6; i += 1) await nextPaperLivesTick(t)
+    out.album = await veteran.query(api.paperLives.album.view, {})
+    out.achievements = await veteran.query(api.paperLives.achievements.mine, {})
+    out.boardLongestWeek = await veteran.query(api.paperLives.album.board, { board: 'longest', period: 'week' })
+    out.boardFortuneAll = await veteran.query(api.paperLives.album.board, { board: 'fortune', period: 'all' })
     writeFileSync('tools/review/fixtures/paper-lives.json', `${JSON.stringify(out, null, 1)}\n`)
     vi.useRealTimers()
   }, 120_000)

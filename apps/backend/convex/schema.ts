@@ -3,7 +3,7 @@ import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
 import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, order, season, timeBand, waterId, weather } from './idleAngler/validators'
-import { glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind } from './paperLives/validators'
+import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind } from './paperLives/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
@@ -330,8 +330,21 @@ export default defineSchema({
     userId: v.id('users'),
     state: v.union(v.literal('active'), v.literal('deleting')),
     lifeId: v.optional(v.id('lives')),
+    /** The totals of the account's finished lives, for achievements (D159, L5). */
+    career: v.optional(plCareer),
     createdAt: v.number(),
   }).index('by_userId', ['userId']),
+
+  /** One row per earned Paper Lives achievement, keyed by owner (D65 shape); bounded by the catalog. */
+  plAchievements: defineTable({
+    userId: v.id('users'),
+    achievementId: v.string(),
+    unlockedAt: v.number(),
+    tick: v.number(),
+    catalogVersion: v.number(),
+  })
+    .index('by_userId_and_achievementId', ['userId', 'achievementId'])
+    .index('by_userId_and_unlockedAt', ['userId', 'unlockedAt']),
 
   /**
    * The Paper Lives player character: the account's current life, the pure core's state stored whole in `life`

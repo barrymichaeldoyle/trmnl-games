@@ -543,6 +543,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 L4: the companion built ([build notes](paper-lives.md#l4-build-2026-10-14)): Life, People, Work and More pages with the decision, Age up, the first-year rename, the memorial and the next-life choice; help and game pages; the switcher line and My games tile; public life pages with not-found parity. Quiet lines no longer repeat within a year. The Rankings, Achievements and Following card move to L5 with the album.
 
+2026-10-14, D159 L5: album, boards and achievements built ([build notes](paper-lives.md#l5-build-2026-10-14)): catalog v1 with 126 achievements over the account's career across lives, the album and family tree, the Following card, the Rankings and Achievements pages, and the profile section. Long-haul tiers lowered from the spec to what an hourly player reaches in about three months (Lives to 20, Years to 900).
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.

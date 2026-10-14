@@ -82,6 +82,7 @@ export const lifeState = v.object({
   home,
   house: v.optional(v.number()),
   hobby: v.optional(v.string()),
+  hobbiesHad: v.optional(v.array(v.string())),
   pet: v.optional(pet),
   petLostAt: v.optional(v.number()),
   people: v.array(person),
@@ -115,6 +116,7 @@ export const plLogKind = v.union(
   v.literal('recap'),
   v.literal('death'),
   v.literal('infant'),
+  v.literal('achievement'),
   v.literal('system'),
 )
 
@@ -150,3 +152,25 @@ export const lifeRecordFields = {
 }
 
 export const lifeBoard = v.union(v.literal('longest'), v.literal('fortune'))
+
+/** The account's career across lives (packages/paper-lives content/achievements.ts), folded in once per finished life. */
+export const career = v.object({
+  livesEnded: v.number(),
+  yearsLived: v.number(),
+  oldestAge: v.number(),
+  highestGeneration: v.number(),
+  childrenRaised: v.number(),
+  grandchildren: v.number(),
+  marriages: v.number(),
+  peakMoney: v.number(),
+  housesOwned: v.number(),
+  petsKept: v.number(),
+  decisionsChosen: v.number(),
+  decisionsDefaulted: v.number(),
+  remarkableEvents: v.number(),
+  jobs: v.array(v.string()),
+  longJobs: v.array(v.string()),
+  hobbies: v.array(v.string()),
+  traits: v.array(v.string()),
+  setPieces: v.array(v.string()),
+})
