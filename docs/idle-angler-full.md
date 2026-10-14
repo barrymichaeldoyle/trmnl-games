@@ -1,6 +1,6 @@
 # Idle Angler, the full game (P44)
 
-Proposed 2026-10-14 for Barry's review. Barry said there was a lot he wanted in Idle Angler before submitting it, and that the MVP could grow because the game is hidden and has no players. He asked for goals that unlock the game slowly so new players are not overwhelmed, daily tasks, better UI everywhere and fish used as bait. He then asked to include more waters, seasons, tournaments and a trophy wall, and to write a full spec "for the new goal of having a fully fleshed out game". This document is that spec. The [MVP spec](idle-angler.md) stays the authority for everything it already covers; where this one changes a rule, it says so.
+Proposed 2026-10-14 and **approved as D162** the same day, when Barry handed the six open points over ("decide on each of those items on what is best"); [Decisions taken](#decisions-taken-2026-10-14) records them. Barry said there was a lot he wanted in Idle Angler before submitting it, and that the MVP could grow because the game is hidden and has no players. He asked for goals that unlock the game slowly so new players are not overwhelmed, daily tasks, better UI everywhere and fish used as bait. He then asked to include more waters, seasons, tournaments and a trophy wall, and to write a full spec "for the new goal of having a fully fleshed out game". This document is that spec. The [MVP spec](idle-angler.md) stays the authority for everything it already covers; where this one changes a rule, it says so.
 
 Settled with Barry before drafting (2026-10-14): Idle Angler keeps mechanics that differ from Desk Crawler's (his rule from 2026-10-10), so the to-do list returns as **fishmonger orders** filled from the cooler, not passive tasks. Fish become **deadbait**, not live bait. The goal ladder copies the shape of Desk Crawler's career ladder (D128) and its hidden locked content (D157). The cosy rules stay: no streaks, nothing that expires, nothing lost, no XP (D116).
 
@@ -264,13 +264,13 @@ Content and art are the long poles. F1's numbers decide every price above, so F1
 - Tackle accessories, a rotating merchant, found gear and cosmetic nods between games.
 - Spoilage, line breaks, lost gear and deaths: never.
 
-## Open points for Barry
+## Decisions taken (2026-10-14)
 
-Each has a recommendation; the spec above assumes it.
+Barry asked for the best option on each open point. Each is settled as recommended, with the reason.
 
-1. **Hemisphere seasons from the account's timezone** (recommended). The alternative, one northern calendar for everyone, keeps one forecast but puts snow on a South African summer.
-2. **The charter as a recurring ticket** (recommended), not a one-off pass. It is the only sink that never runs out. An angler is never stranded: it sails back to the Pier when the ticket is spent.
-3. **An Open at every water every weekend** (recommended), not one Open rotating between waters. One rotating Open would leave new players out most weekends.
-4. **Mounting costs coins and keeps the fish off the market** (recommended). A free mount would leave the wall with no cost, and the game needs places to spend coins.
-5. **Teaching orders may name a species the player has not caught yet** (recommended). They are the game's tutorial for bait and time of day.
-6. **Submit only when F1 to F6 are done** (recommended), so the reviewer sees the full game. The alternative is to submit the current game after the UI pass and ship the rest as updates.
+1. **Seasons follow the hemisphere of the account's timezone.** Seasons exist to feel true at the player's window, and a northern calendar would put snow on a South African summer, Barry's own case. The cost is two forecasts instead of one; desks in the same hemisphere still share the rain.
+2. **The charter is a recurring ticket of 96 casts.** It is the one sink that keeps a late-game player's coins meaningful, it stays optional, and counting casts rather than hours means a pause or a quiet night never wastes it. The angler always sails back to the Pier, so nobody is stranded.
+3. **An Open at every water every weekend.** With one rotating Open, a new player at the Millpond would sit out most weekends; with one per water, every angler is in one every week from the day Opens unlock.
+4. **Mounting costs the fish's value plus 100 coins.** The wall is a sink and a mounted fish should mean something; a free mount would fill the wall with no cost.
+5. **Teaching orders may name a species not yet caught.** They are the game's bait and timing tutorial and the fix for the logbook stall the harness measured. At most one of the three slots does it.
+6. **Submit for review after F6.** The reviewer and the first players see the full game, the listing's featured image shows it, and nothing needs migrating after launch. The game stays hidden while the slices land in production.
