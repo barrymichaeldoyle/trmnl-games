@@ -94,6 +94,7 @@ export const lifeState = v.object({
     pending: v.optional(v.object({ decisionId: v.string(), chosen: v.optional(v.string()), personId: v.optional(v.string()) })),
     notes: v.array(v.string()),
     lines: v.number(),
+    ambient: v.optional(v.number()),
   }),
   recap: v.optional(v.string()),
   will: v.optional(willKind),

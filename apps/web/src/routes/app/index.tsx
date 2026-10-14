@@ -8,7 +8,7 @@ import { preload } from '../../lib/preload'
 import { BUTTON_PRIMARY, LINK_BUTTON } from '../../lib/ui'
 import { games } from '@trmnl-games/platform'
 import { gamesQuery, useGames } from '../../lib/gameAccess'
-import { HERO_STATUS, anglerLine } from '../../lib/gameSwitcher'
+import { HERO_STATUS, anglerLine, lifeLine } from '../../lib/gameSwitcher'
 
 const dockQuery = convexQuery(api.idleAngler.anglers.dock, {})
 
@@ -41,6 +41,7 @@ function Library() {
         </section>
       )}
       <UpcomingGames />
+      <PaperLivesTile />
     </main>
   )
 }
@@ -66,3 +67,25 @@ function UpcomingGames() {
     </section>
   )
 }
+
+/** Paper Lives in the library (D159): the current life once started, a "Coming soon" tile in preview, and a hidden-status mark for admins. */
+function PaperLivesTile() {
+  const data = useGames()
+  const game = data?.games.find((g) => g.slug === 'paper-lives')
+  const { data: view, isPending } = useQuery({ ...convexQuery(api.paperLives.lives.view, {}), enabled: game?.canOpen === true })
+  if (!game) return null
+  const loading = game.canOpen && isPending
+  const life = (view as { life?: { first: string; last: string; age: number; activationState: string; status: string } | null } | undefined)?.life
+  return (
+    <section className="window flex flex-col gap-3 p-5" aria-labelledby="library-pl">
+      <div className="flex items-center gap-4">
+        <img src="/games/paper-lives/favicon.svg" alt="" width={64} height={64} className="h-16 w-16 [image-rendering:pixelated]" />
+        <h2 id="library-pl" className="font-display text-2xl font-bold text-gold-ink">{games['paper-lives'].name}</h2>
+      </div>
+      {loading ? null : <p className="text-muted">{life ? lifeLine(life) : games['paper-lives'].description}</p>}
+      {game.status !== 'live' ? <p className="label-px self-start">{game.status === 'hidden' ? 'Hidden: only admins can see this' : 'Coming soon'}</p> : null}
+      {game.canOpen && !loading ? <Link to={life ? '/app/paper-lives' : '/games/paper-lives'} className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{life ? 'Open Paper Lives' : 'About Paper Lives'}</Link> : null}
+    </section>
+  )
+}
+

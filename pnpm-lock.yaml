@@ -163,6 +163,9 @@ importers:
       '@trmnl-games/idle-angler':
         specifier: workspace:*
         version: link:../../packages/idle-angler
+      '@trmnl-games/paper-lives':
+        specifier: workspace:*
+        version: link:../../packages/paper-lives
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:../../packages/platform

@@ -14,6 +14,8 @@ import { Glyph } from './glyphs'
 export const HERO_STATUS: Record<string, string> = { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' }
 const heroLine = (hero: { name: string; activationState: string; status: string }) => `${hero.name} · ${hero.activationState === 'active' ? HERO_STATUS[hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}`
 export const anglerLine = (angler: { title: string; activationState: string; status: string }) => `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}`
+/** Paper Lives (D159): the life's name and age, or what it waits on. */
+export const lifeLine = (life: { first: string; last: string; age: number; activationState: string; status: string }) => `${life.first} ${life.last} · ${life.activationState !== 'active' ? 'Waiting for TRMNL Save' : life.status === 'ended' ? 'A life remembered' : life.status === 'paused' ? 'Paused' : `Age ${life.age}`}`
 
 /** The game whose companion the path is inside, if any. */
 export function currentGame(pathname: string): GameSlug | null {
@@ -71,9 +73,17 @@ function SwitcherMenu({ id, current, listing, close }: { id: string; current: Ga
   const idleAngler = listing.games.find((game) => game.slug === 'idle-angler')
   const { data: dock } = useQuery({ ...convexQuery(api.idleAngler.anglers.dock, {}), enabled: ready && idleAngler?.canOpen === true })
   const angler = (dock as { angler?: { title: string; activationState: string; status: string } | null } | undefined)?.angler
+  const paperLives = listing.games.find((game) => game.slug === 'paper-lives')
+  const { data: lifeView } = useQuery({ ...convexQuery(api.paperLives.lives.view, {}), enabled: ready && paperLives?.canOpen === true })
+  const life = (lifeView as { life?: { first: string; last: string; age: number; activationState: string; status: string } | null } | undefined)?.life
   const rows = listing.games.map((game) => {
     const entry = games[game.slug]
-    const played = game.slug === 'desk-crawler' ? (me ? (me.hero ? heroLine(me.hero) : me.gameState === 'deleting' ? 'Removing progress' : null) : undefined) : dock ? (angler ? anglerLine(angler) : null) : game.canOpen ? undefined : null
+    const played =
+      game.slug === 'desk-crawler'
+        ? me ? (me.hero ? heroLine(me.hero) : me.gameState === 'deleting' ? 'Removing progress' : null) : undefined
+        : game.slug === 'paper-lives'
+          ? lifeView ? (life ? lifeLine(life) : null) : game.canOpen ? undefined : null
+          : dock ? (angler ? anglerLine(angler) : null) : game.canOpen ? undefined : null
     return { slug: game.slug, name: entry.name, status: game.status, canOpen: game.canOpen, played, to: played ? entry.companionPath : entry.publicPath }
   })
   const switched = (to: GameSlug) => { captureAnalytics('game switched', { from: current, to }); close() }

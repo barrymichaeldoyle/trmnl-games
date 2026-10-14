@@ -367,6 +367,8 @@ export interface YearState {
   readonly notes: readonly string[]
   /** Story lines written this year (the harness's lines-a-year gate). */
   readonly lines: number
+  /** Ambient lines written this year, so the year walks its pool without repeats. */
+  readonly ambient?: number
 }
 
 export interface LifeCounters {

@@ -22,6 +22,7 @@ import {
   type PaperLivesCatalog,
 } from '@trmnl-games/paper-lives/sim'
 import { deriveLifeSeeds } from '@trmnl-games/paper-lives/sim/seed'
+import { portraitKey } from '@trmnl-games/paper-lives/art/route'
 import type { Doc } from '../_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from '../_generated/server'
 import { appError } from '../lib/errors'
@@ -259,6 +260,8 @@ export const view = query({
         gold: life.gold,
         publicProfile: pagePublic(doc),
         recap: life.recap ?? null,
+        // How the device draws the life; the companion draws the same portrait.
+        portrait: portraitKey(life),
       },
       year:
         life.status === 'ended' || life.stage === 'infant'

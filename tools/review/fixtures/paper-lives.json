@@ -1,0 +1,1687 @@
+{
+ "adult": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 34,
+   "canRename": false,
+   "first": "Maud",
+   "generation": 1,
+   "gold": 12400,
+   "id": "000000000000000000000010001lives",
+   "last": "Okafor",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": true,
+    "hair": 5,
+    "pet": "dog",
+    "stage": "adult"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "adult",
+   "stats": {
+    "charm": 37,
+    "happiness": 58,
+    "health": 74,
+    "smarts": 81
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Asks how things work. Smarts grow a little each year until 25.",
+     "id": "curious",
+     "name": "Curious"
+    },
+    {
+     "blurb": "Sticks by people. Relationships fade half as fast.",
+     "id": "loyal",
+     "name": "Loyal"
+    }
+   ]
+  },
+  "logs": [
+   {
+    "age": 34,
+    "at": 1793634003000,
+    "glyph": "none",
+    "id": "0000000000000000010091plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Looking back on the year over a cup of tea."
+   },
+   {
+    "age": 34,
+    "at": 1793630403000,
+    "glyph": "health",
+    "id": "0000000000000000010078plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Got the old bike out of the shed and pumped up the tyres."
+   },
+   {
+    "age": 34,
+    "at": 1793629503000,
+    "glyph": "none",
+    "id": "0000000000000000010075plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "The calendar on the fridge nearly full."
+   },
+   {
+    "age": 34,
+    "at": 1793625903000,
+    "glyph": "house",
+    "id": "0000000000000000010062plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Snowed in for three days. Built a snowman with a carrot nose."
+   },
+   {
+    "age": 34,
+    "at": 1793625003000,
+    "glyph": "house",
+    "id": "0000000000000000010059plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "New neighbours with a drum kit. Earplugs on the shopping list."
+   },
+   {
+    "age": 34,
+    "at": 1793624103000,
+    "glyph": "none",
+    "id": "0000000000000000010052plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Long evenings, early nights."
+   },
+   {
+    "age": 34,
+    "at": 1793620503000,
+    "glyph": "health",
+    "id": "0000000000000000010039plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A chest infection that hung on all winter."
+   },
+   {
+    "age": 34,
+    "at": 1793619603000,
+    "glyph": "none",
+    "id": "0000000000000000010036plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A year of small things, nearly done."
+   },
+   {
+    "age": 34,
+    "at": 1793616003000,
+    "glyph": "none",
+    "id": "0000000000000000010023plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Looking for the car keys, again."
+   },
+   {
+    "age": 34,
+    "at": 1793612403000,
+    "glyph": "health",
+    "id": "0000000000000000010011plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Ran a 10k in a fancy dress banana suit for charity."
+   }
+  ],
+  "memorial": null,
+  "nextTickAt": 1793636700000,
+  "people": [
+   {
+    "age": 64,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Lenny",
+    "relationship": 74,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 67,
+    "alive": false,
+    "history": [
+     "31: Lost Hamish. Kept the reading glasses on the hall table for a year."
+    ],
+    "id": "p2",
+    "name": "Hamish",
+    "relationship": 61,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 35,
+    "alive": true,
+    "history": [],
+    "id": "p3",
+    "name": "Sam",
+    "relationship": 82,
+    "role": "partner",
+    "step": "married"
+   },
+   {
+    "age": 3,
+    "alive": true,
+    "history": [],
+    "id": "p4",
+    "name": "Ida",
+    "relationship": 88,
+    "role": "child",
+    "step": null
+   },
+   {
+    "age": 33,
+    "alive": true,
+    "history": [
+     "8: Made a friend called Finn over a shared rubber.",
+     "20: A long weekend in a cottage with Finn and too much cheese."
+    ],
+    "id": "p5",
+    "name": "Finn",
+    "relationship": 66,
+    "role": "friend",
+    "step": null
+   }
+  ],
+  "pet": {
+   "age": 4,
+   "kind": "Dog",
+   "name": "Biscuit",
+   "relationship": 70
+  },
+  "work": {
+   "education": "degree",
+   "hobby": "Running",
+   "home": "renting",
+   "house": null,
+   "income": 28000,
+   "job": {
+    "id": "nurse",
+    "name": "Nurse",
+    "since": 26,
+    "tier": 3
+   },
+   "livingCost": 15000,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 28,
+  "year": {
+   "ageUpRequested": false,
+   "close": 32,
+   "closesAt": 1793639400000,
+   "decision": {
+    "chosen": null,
+    "default": "stay",
+    "id": "ad_career",
+    "major": true,
+    "options": [
+     {
+      "id": "change",
+      "label": "Retrain",
+      "open": true,
+      "reason": null
+     },
+     {
+      "id": "stay",
+      "label": "Stay where you are",
+      "open": true,
+      "reason": null
+     }
+    ],
+    "prompt": "Bored at work for a while. Change careers?"
+   },
+   "elapsed": 28,
+   "minimum": 8,
+   "minimumAt": 1793636700000,
+   "season": "winter",
+   "yearEnd": true
+  }
+ },
+ "child": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 9,
+   "canRename": true,
+   "first": "Pip",
+   "generation": 1,
+   "gold": 0,
+   "id": "000000000000000000000010101lives",
+   "last": "Moss",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 4,
+    "pet": "rabbit",
+    "stage": "child"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "child",
+   "stats": {
+    "charm": 65,
+    "happiness": 51,
+    "health": 42,
+    "smarts": 35
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Away with the clouds. Earns a little less.",
+     "id": "dreamy",
+     "name": "Dreamy"
+    },
+    {
+     "blurb": "Things tend to work out. Less risk of dying before 80.",
+     "id": "lucky",
+     "name": "Lucky"
+    }
+   ]
+  },
+  "logs": [
+   {
+    "age": 9,
+    "at": 1793661003000,
+    "glyph": "none",
+    "id": "0000000000000000010205plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Counting the days to a birthday."
+   },
+   {
+    "age": 9,
+    "at": 1793657403000,
+    "glyph": "none",
+    "id": "0000000000000000010191plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Bedtime stories, one more, then one more."
+   },
+   {
+    "age": 9,
+    "at": 1793653803000,
+    "glyph": "none",
+    "id": "0000000000000000010177plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Waiting for the year to turn."
+   },
+   {
+    "age": 9,
+    "at": 1793650203000,
+    "glyph": "none",
+    "id": "0000000000000000010163plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Marking height on the kitchen door frame."
+   },
+   {
+    "age": 9,
+    "at": 1793646603000,
+    "glyph": "none",
+    "id": "0000000000000000010149plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Growing out of the school shoes already."
+   },
+   {
+    "age": 9,
+    "at": 1793643003000,
+    "glyph": "health",
+    "id": "0000000000000000010134plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Lost a tooth in an apple. The fairy paid well."
+   },
+   {
+    "age": 9,
+    "at": 1793639403000,
+    "glyph": "none",
+    "id": "0000000000000000010118plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Lying in the grass watching clouds go over."
+   }
+  ],
+  "memorial": null,
+  "nextTickAt": 1793661900000,
+  "people": [
+   {
+    "age": 38,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Ada",
+    "relationship": 80,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 40,
+    "alive": true,
+    "history": [],
+    "id": "p2",
+    "name": "Cai",
+    "relationship": 75,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 12,
+    "alive": true,
+    "history": [],
+    "id": "p3",
+    "name": "Tess",
+    "relationship": 60,
+    "role": "sibling",
+    "step": null
+   }
+  ],
+  "pet": {
+   "age": 1,
+   "kind": "Rabbit",
+   "name": "Bobbin",
+   "relationship": 70
+  },
+  "work": {
+   "education": "school",
+   "hobby": null,
+   "home": "family",
+   "house": null,
+   "income": 0,
+   "job": null,
+   "livingCost": 0,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 56,
+  "year": {
+   "ageUpRequested": false,
+   "close": 32,
+   "closesAt": 1793664600000,
+   "decision": null,
+   "elapsed": 28,
+   "minimum": 8,
+   "minimumAt": 1793661900000,
+   "season": "winter",
+   "yearEnd": true
+  }
+ },
+ "first": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 0,
+   "canRename": true,
+   "first": "Robin",
+   "generation": 1,
+   "gold": 0,
+   "id": "000000000000000000000010207lives",
+   "last": "Hale",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 4,
+    "pet": null,
+    "stage": "infant"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "infant",
+   "stats": {
+    "charm": 65,
+    "happiness": 49,
+    "health": 42,
+    "smarts": 35
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Away with the clouds. Earns a little less.",
+     "id": "dreamy",
+     "name": "Dreamy"
+    },
+    {
+     "blurb": "Things tend to work out. Less risk of dying before 80.",
+     "id": "lucky",
+     "name": "Lucky"
+    }
+   ]
+  },
+  "logs": [],
+  "memorial": null,
+  "nextTickAt": 1793661900000,
+  "people": [
+   {
+    "age": 36,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Max",
+    "relationship": 73,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 24,
+    "alive": true,
+    "history": [],
+    "id": "p2",
+    "name": "Hal",
+    "relationship": 65,
+    "role": "parent",
+    "step": null
+   }
+  ],
+  "pet": null,
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "family",
+   "house": null,
+   "income": 0,
+   "job": null,
+   "livingCost": 0,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 56,
+  "year": null
+ },
+ "infant": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 3,
+   "canRename": false,
+   "first": "Robin",
+   "generation": 1,
+   "gold": 0,
+   "id": "000000000000000000000010210lives",
+   "last": "Hale",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 4,
+    "pet": null,
+    "stage": "infant"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "infant",
+   "stats": {
+    "charm": 65,
+    "happiness": 49,
+    "health": 42,
+    "smarts": 35
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Away with the clouds. Earns a little less.",
+     "id": "dreamy",
+     "name": "Dreamy"
+    },
+    {
+     "blurb": "Things tend to work out. Less risk of dying before 80.",
+     "id": "lucky",
+     "name": "Lucky"
+    }
+   ]
+  },
+  "logs": [],
+  "memorial": null,
+  "nextTickAt": 1793661900000,
+  "people": [
+   {
+    "age": 39,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Max",
+    "relationship": 73,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 27,
+    "alive": true,
+    "history": [],
+    "id": "p2",
+    "name": "Hal",
+    "relationship": 65,
+    "role": "parent",
+    "step": null
+   }
+  ],
+  "pet": null,
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "family",
+   "house": null,
+   "income": 0,
+   "job": null,
+   "livingCost": 0,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 56,
+  "year": null
+ },
+ "senior": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 78,
+   "canRename": true,
+   "first": "Dot",
+   "generation": 1,
+   "gold": 140500,
+   "id": "000000000000000000000010213lives",
+   "last": "Achterberg",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 1,
+    "pet": "cat",
+    "stage": "senior"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "senior",
+   "stats": {
+    "charm": 77,
+    "happiness": 91,
+    "health": 23,
+    "smarts": 60
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Will not be told. Hangs on longer in old age.",
+     "id": "stubborn",
+     "name": "Stubborn"
+    },
+    {
+     "blurb": "Finds the good in a wet week. Happiness settles higher.",
+     "id": "sunny",
+     "name": "Sunny"
+    }
+   ]
+  },
+  "logs": [
+   {
+    "age": 78,
+    "at": 1793686203000,
+    "glyph": "none",
+    "id": "0000000000000000010353plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Writing the date in a new diary."
+   },
+   {
+    "age": 78,
+    "at": 1793682603000,
+    "glyph": "none",
+    "id": "0000000000000000010336plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Another year nearly gone, and a good one."
+   },
+   {
+    "age": 78,
+    "at": 1793679003000,
+    "glyph": "none",
+    "id": "0000000000000000010319plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Turning the pages of an old photo album."
+   },
+   {
+    "age": 78,
+    "at": 1793675403000,
+    "glyph": "none",
+    "id": "0000000000000000010302plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday coming. Asked for nothing, as usual."
+   },
+   {
+    "age": 78,
+    "at": 1793671803000,
+    "glyph": "heart",
+    "id": "0000000000000000010285plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Met Leni at the bowls club. Holding hands at your age, imagine."
+   },
+   {
+    "age": 78,
+    "at": 1793668203000,
+    "glyph": "none",
+    "id": "0000000000000000010265plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Sorting through a drawer of old letters."
+   },
+   {
+    "age": 78,
+    "at": 1793664603000,
+    "glyph": "paw",
+    "id": "0000000000000000010244plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A cat called Fudge adopted the household and would not leave."
+   },
+   {
+    "age": 78,
+    "at": 1793663703000,
+    "glyph": "health",
+    "id": "0000000000000000010234plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A long illness, well managed. Good days and bad days."
+   }
+  ],
+  "memorial": null,
+  "nextTickAt": 1793687100000,
+  "people": [
+   {
+    "age": 48,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Kit",
+    "relationship": 70,
+    "role": "child",
+    "step": null
+   },
+   {
+    "age": 45,
+    "alive": true,
+    "history": [],
+    "id": "p2",
+    "name": "Bea",
+    "relationship": 55,
+    "role": "child",
+    "step": null
+   },
+   {
+    "age": 16,
+    "alive": true,
+    "history": [],
+    "id": "p3",
+    "name": "Ottilie",
+    "relationship": 90,
+    "role": "grandchild",
+    "step": null
+   },
+   {
+    "age": 75,
+    "alive": true,
+    "history": [],
+    "id": "p3",
+    "name": "Leni",
+    "relationship": 60,
+    "role": "partner",
+    "step": "dating"
+   }
+  ],
+  "pet": {
+   "age": 0,
+   "kind": "Cat",
+   "name": "Fudge",
+   "relationship": 70
+  },
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "owned",
+   "house": "a house with a garden",
+   "income": 9000,
+   "job": null,
+   "livingCost": 10000,
+   "retired": true,
+   "will": null
+  },
+  "worldTick": 84,
+  "year": {
+   "ageUpRequested": false,
+   "close": 32,
+   "closesAt": 1793689800000,
+   "decision": {
+    "chosen": null,
+    "default": "later",
+    "id": "sn_will",
+    "major": true,
+    "options": [
+     {
+      "id": "split",
+      "label": "Split it among the children",
+      "open": true,
+      "reason": null
+     },
+     {
+      "id": "one",
+      "label": "Leave it to one child",
+      "open": true,
+      "reason": null
+     },
+     {
+      "id": "partner",
+      "label": "Leave it to your partner",
+      "open": true,
+      "reason": null
+     },
+     {
+      "id": "cause",
+      "label": "Leave it to a good cause",
+      "open": true,
+      "reason": null
+     },
+     {
+      "id": "later",
+      "label": "Not this year",
+      "open": true,
+      "reason": null
+     }
+    ],
+    "prompt": "Time to write a will?"
+   },
+   "elapsed": 28,
+   "minimum": 8,
+   "minimumAt": 1793687100000,
+   "season": "winter",
+   "yearEnd": true
+  }
+ },
+ "paused": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 41,
+   "canRename": true,
+   "first": "Errol",
+   "generation": 1,
+   "gold": 0,
+   "id": "000000000000000000000010355lives",
+   "last": "Wade",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 3,
+    "pet": null,
+    "stage": "adult"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "adult",
+   "stats": {
+    "charm": 65,
+    "happiness": 49,
+    "health": 42,
+    "smarts": 35
+   },
+   "status": "paused",
+   "traits": [
+    {
+     "blurb": "Away with the clouds. Earns a little less.",
+     "id": "dreamy",
+     "name": "Dreamy"
+    },
+    {
+     "blurb": "Things tend to work out. Less risk of dying before 80.",
+     "id": "lucky",
+     "name": "Lucky"
+    }
+   ]
+  },
+  "logs": [],
+  "memorial": null,
+  "nextTickAt": 1793687100000,
+  "people": [
+   {
+    "age": 77,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Max",
+    "relationship": 73,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 65,
+    "alive": true,
+    "history": [],
+    "id": "p2",
+    "name": "Hal",
+    "relationship": 65,
+    "role": "parent",
+    "step": null
+   }
+  ],
+  "pet": null,
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "owned",
+   "house": "a terraced house",
+   "income": 0,
+   "job": {
+    "id": "architect",
+    "name": "Architect",
+    "since": null,
+    "tier": 4
+   },
+   "livingCost": 11000,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 84,
+  "year": {
+   "ageUpRequested": false,
+   "close": 32,
+   "closesAt": 1793715000000,
+   "decision": null,
+   "elapsed": 0,
+   "minimum": 8,
+   "minimumAt": 1793693400000,
+   "season": "spring",
+   "yearEnd": false
+  }
+ },
+ "memorial": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 102,
+   "canRename": false,
+   "first": "Maud",
+   "generation": 3,
+   "gold": 22000,
+   "id": "000000000000000000000010358lives",
+   "last": "Okafor",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "hat",
+    "frame": true,
+    "glasses": false,
+    "hair": 2,
+    "pet": "budgie",
+    "stage": "senior"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": "Age 101: a family party and a late degree.",
+   "stage": "senior",
+   "stats": {
+    "charm": 61,
+    "happiness": 86,
+    "health": 0,
+    "smarts": 67
+   },
+   "status": "ended",
+   "traits": [
+    {
+     "blurb": "Away with the clouds. Earns a little less.",
+     "id": "dreamy",
+     "name": "Dreamy"
+    },
+    {
+     "blurb": "Things tend to work out. Less risk of dying before 80.",
+     "id": "lucky",
+     "name": "Lucky"
+    }
+   ]
+  },
+  "logs": [
+   {
+    "age": 102,
+    "at": 1793772603000,
+    "glyph": "candle",
+    "id": "0000000000000000010859plTickLogs",
+    "kind": "death",
+    "major": false,
+    "remarkable": false,
+    "summary": "Died at 102 after a long illness, well looked after."
+   },
+   {
+    "age": 102,
+    "at": 1793772603000,
+    "glyph": "health",
+    "id": "0000000000000000010858plTickLogs",
+    "kind": "decision_resolved",
+    "major": false,
+    "remarkable": false,
+    "summary": "Stayed on dry land and watched from the cafe."
+   },
+   {
+    "age": 102,
+    "at": 1793771703000,
+    "glyph": "none",
+    "id": "0000000000000000010849plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday coming. Asked for nothing, as usual."
+   },
+   {
+    "age": 102,
+    "at": 1793768103000,
+    "glyph": "none",
+    "id": "0000000000000000010831plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Quiet days, and that is fine."
+   },
+   {
+    "age": 102,
+    "at": 1793764503000,
+    "glyph": "none",
+    "id": "0000000000000000010812plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Watching the light change across the garden."
+   },
+   {
+    "age": 102,
+    "at": 1793760903000,
+    "glyph": "none",
+    "id": "0000000000000000010794plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Writing the date in a new diary."
+   },
+   {
+    "age": 102,
+    "at": 1793757303000,
+    "glyph": "none",
+    "id": "0000000000000000010776plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Another year nearly gone, and a good one."
+   },
+   {
+    "age": 102,
+    "at": 1793753703000,
+    "glyph": "none",
+    "id": "0000000000000000010754plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Turning the pages of an old photo album."
+   },
+   {
+    "age": 102,
+    "at": 1793750103000,
+    "glyph": "money",
+    "id": "0000000000000000010731plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A big heating bill after a cold winter."
+   },
+   {
+    "age": 102,
+    "at": 1793747403000,
+    "glyph": "none",
+    "id": "0000000000000000010715plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A nap after lunch, unashamedly."
+   },
+   {
+    "age": 102,
+    "at": 1793743803000,
+    "glyph": "health",
+    "id": "0000000000000000010692plTickLogs",
+    "kind": "decision_offered",
+    "major": false,
+    "remarkable": false,
+    "summary": "Never learned to swim properly. Lessons at the leisure centre?"
+   },
+   {
+    "age": 101,
+    "at": 1793743803000,
+    "glyph": "none",
+    "id": "0000000000000000010691plTickLogs",
+    "kind": "recap",
+    "major": false,
+    "remarkable": false,
+    "summary": "Age 101: a family party and a late degree."
+   },
+   {
+    "age": 101,
+    "at": 1793742903000,
+    "glyph": "none",
+    "id": "0000000000000000010684plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Another year nearly gone, and a good one."
+   },
+   {
+    "age": 101,
+    "at": 1793739303000,
+    "glyph": "none",
+    "id": "0000000000000000010666plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Turning the pages of an old photo album."
+   },
+   {
+    "age": 101,
+    "at": 1793735703000,
+    "glyph": "none",
+    "id": "0000000000000000010646plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday coming. Asked for nothing, as usual."
+   },
+   {
+    "age": 101,
+    "at": 1793732103000,
+    "glyph": "none",
+    "id": "0000000000000000010625plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Quiet days, and that is fine."
+   },
+   {
+    "age": 101,
+    "at": 1793728503000,
+    "glyph": "none",
+    "id": "0000000000000000010606plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Watching the light change across the garden."
+   },
+   {
+    "age": 101,
+    "at": 1793724903000,
+    "glyph": "none",
+    "id": "0000000000000000010580plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Writing the date in a new diary."
+   },
+   {
+    "age": 101,
+    "at": 1793721303000,
+    "glyph": "health",
+    "id": "0000000000000000010558plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A long illness, well managed. Good days and bad days."
+   },
+   {
+    "age": 101,
+    "at": 1793720403000,
+    "glyph": "health",
+    "id": "0000000000000000010551plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "The stairs are harder these days. Fitted a second rail."
+   },
+   {
+    "age": 101,
+    "at": 1793717703000,
+    "glyph": "book",
+    "id": "0000000000000000010535plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Learned to make video calls. Mostly see the ceiling."
+   },
+   {
+    "age": 101,
+    "at": 1793716803000,
+    "glyph": "book",
+    "id": "0000000000000000010530plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": true,
+    "summary": "Earned a degree at last, by post, at an age that made the paper."
+   },
+   {
+    "age": 101,
+    "at": 1793715903000,
+    "glyph": "family",
+    "id": "0000000000000000010525plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "The whole family in one room for a birthday. Very loud."
+   },
+   {
+    "age": 100,
+    "at": 1793715003000,
+    "glyph": "none",
+    "id": "0000000000000000010521plTickLogs",
+    "kind": "recap",
+    "major": false,
+    "remarkable": false,
+    "summary": "Age 100: cards for buttons and a budgie."
+   },
+   {
+    "age": 100,
+    "at": 1793713203000,
+    "glyph": "none",
+    "id": "0000000000000000010510plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday coming. Asked for nothing, as usual."
+   },
+   {
+    "age": 100,
+    "at": 1793709603000,
+    "glyph": "none",
+    "id": "0000000000000000010492plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Quiet days, and that is fine."
+   },
+   {
+    "age": 100,
+    "at": 1793706003000,
+    "glyph": "none",
+    "id": "0000000000000000010474plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Watching the light change across the garden."
+   },
+   {
+    "age": 100,
+    "at": 1793702403000,
+    "glyph": "family",
+    "id": "0000000000000000010455plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A birthday with candles in the shape of the numbers. Easier to count."
+   },
+   {
+    "age": 100,
+    "at": 1793701503000,
+    "glyph": "none",
+    "id": "0000000000000000010449plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Writing the date in a new diary."
+   },
+   {
+    "age": 100,
+    "at": 1793697903000,
+    "glyph": "family",
+    "id": "0000000000000000010430plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Market day, with a chat at every stall and a pound of plums."
+   },
+   {
+    "age": 100,
+    "at": 1793697003000,
+    "glyph": "none",
+    "id": "0000000000000000010425plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Another year nearly gone, and a good one."
+   },
+   {
+    "age": 100,
+    "at": 1793693403000,
+    "glyph": "paw",
+    "id": "0000000000000000010401plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A budgie called Treacle, for company. Talks back on cue."
+   },
+   {
+    "age": 100,
+    "at": 1793689803000,
+    "glyph": "family",
+    "id": "0000000000000000010378plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Cards with neighbours on Wednesday afternoons, for buttons."
+   }
+  ],
+  "memorial": {
+   "epitaph": "Had one extraordinary year and hardly mentioned it.",
+   "heirs": [
+    {
+     "age": 71,
+     "id": "c1",
+     "name": "Ida"
+    },
+    {
+     "age": 68,
+     "id": "c2",
+     "name": "Jago"
+    }
+   ],
+   "line": "Died at 102 after a long illness, well looked after.",
+   "recorded": true
+  },
+  "nextTickAt": 1793773500000,
+  "people": [
+   {
+    "age": 71,
+    "alive": true,
+    "history": [],
+    "id": "c1",
+    "name": "Ida",
+    "relationship": 88,
+    "role": "child",
+    "step": null
+   },
+   {
+    "age": 68,
+    "alive": true,
+    "history": [],
+    "id": "c2",
+    "name": "Jago",
+    "relationship": 61,
+    "role": "child",
+    "step": null
+   }
+  ],
+  "pet": {
+   "age": 2,
+   "kind": "Budgie",
+   "name": "Treacle",
+   "relationship": 70
+  },
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "family",
+   "house": null,
+   "income": 0,
+   "job": null,
+   "livingCost": 2500,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 180,
+  "year": null
+ },
+ "long": {
+  "gameState": "active",
+  "life": {
+   "activationState": "active",
+   "age": 52,
+   "canRename": true,
+   "first": "Ottilie",
+   "generation": 1,
+   "gold": -2000,
+   "id": "000000000000000000000010866lives",
+   "last": "Achterberg",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 4,
+    "pet": "cat",
+    "stage": "adult"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "adult",
+   "stats": {
+    "charm": 0,
+    "happiness": 5,
+    "health": 98,
+    "smarts": 100
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Catches everything going. Health declines faster with age.",
+     "id": "delicate",
+     "name": "Delicate"
+    },
+    {
+     "blurb": "Gives the last biscuit away. Living costs a little more.",
+     "id": "generous",
+     "name": "Generous"
+    }
+   ]
+  },
+  "logs": [
+   {
+    "age": 52,
+    "at": 1793797803000,
+    "glyph": "paw",
+    "id": "0000000000000000011010plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A cat called Captain adopted the household and would not leave."
+   },
+   {
+    "age": 52,
+    "at": 1793796003000,
+    "glyph": "work",
+    "id": "0000000000000000010998plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Went on a training course in a hotel with a pool nobody used."
+   },
+   {
+    "age": 52,
+    "at": 1793795103000,
+    "glyph": "none",
+    "id": "0000000000000000010993plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "A year of small things, nearly done."
+   },
+   {
+    "age": 52,
+    "at": 1793791503000,
+    "glyph": "none",
+    "id": "0000000000000000010974plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Clearing out the junk drawer before the new year."
+   },
+   {
+    "age": 52,
+    "at": 1793787903000,
+    "glyph": "health",
+    "id": "0000000000000000010956plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Tired all year. Bought a better pillow, which helped a bit."
+   },
+   {
+    "age": 52,
+    "at": 1793785203000,
+    "glyph": "none",
+    "id": "0000000000000000010942plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Another birthday on the way."
+   },
+   {
+    "age": 52,
+    "at": 1793781603000,
+    "glyph": "book",
+    "id": "0000000000000000010920plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "Joined a book club. Mostly read the first half of each book."
+   },
+   {
+    "age": 52,
+    "at": 1793780703000,
+    "glyph": "none",
+    "id": "0000000000000000010916plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "Looking back on the year over a cup of tea."
+   },
+   {
+    "age": 52,
+    "at": 1793777103000,
+    "glyph": "house",
+    "id": "0000000000000000010893plTickLogs",
+    "kind": "event",
+    "major": false,
+    "remarkable": false,
+    "summary": "A power cut on a winter evening. Candles, cards and cold toast."
+   },
+   {
+    "age": 52,
+    "at": 1793776203000,
+    "glyph": "none",
+    "id": "0000000000000000010888plTickLogs",
+    "kind": "ambient",
+    "major": false,
+    "remarkable": false,
+    "summary": "The washing machine on its third load."
+   }
+  ],
+  "memorial": null,
+  "nextTickAt": 1793798700000,
+  "people": [
+   {
+    "age": 50,
+    "alive": true,
+    "history": [
+     "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer.",
+     "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer.",
+     "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer.",
+     "40: Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer."
+    ],
+    "id": "p1",
+    "name": "Wellington",
+    "relationship": 100,
+    "role": "friend",
+    "step": null
+   }
+  ],
+  "pet": {
+   "age": 0,
+   "kind": "Cat",
+   "name": "Captain",
+   "relationship": 70
+  },
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "renting",
+   "house": null,
+   "income": 0,
+   "job": {
+    "id": "museum_director",
+    "name": "Museum director",
+    "since": null,
+    "tier": 5
+   },
+   "livingCost": 16500,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 208,
+  "year": {
+   "ageUpRequested": false,
+   "close": 32,
+   "closesAt": 1793801400000,
+   "decision": {
+    "chosen": null,
+    "default": "call",
+    "id": "ad_old_friend",
+    "major": false,
+    "options": [
+     {
+      "id": "visit",
+      "label": "Go and stay",
+      "open": true,
+      "reason": null
+     },
+     {
+      "id": "call",
+      "label": "Call more often",
+      "open": true,
+      "reason": null
+     }
+    ],
+    "prompt": "Wellington is going through a hard time."
+   },
+   "elapsed": 28,
+   "minimum": 8,
+   "minimumAt": 1793798700000,
+   "season": "winter",
+   "yearEnd": true
+  }
+ },
+ "pending": {
+  "gameState": "active",
+  "life": {
+   "activationState": "pending_trmnl",
+   "age": 0,
+   "canRename": true,
+   "first": "Jude",
+   "generation": 1,
+   "gold": 0,
+   "id": "000000000000000000000011012lives",
+   "last": "Fenwick",
+   "ordinal": 1,
+   "portrait": {
+    "extra": "none",
+    "frame": false,
+    "glasses": false,
+    "hair": 1,
+    "pet": null,
+    "stage": "infant"
+   },
+   "pronouns": "they",
+   "publicProfile": true,
+   "recap": null,
+   "stage": "infant",
+   "stats": {
+    "charm": 65,
+    "happiness": 49,
+    "health": 42,
+    "smarts": 35
+   },
+   "status": "living",
+   "traits": [
+    {
+     "blurb": "Away with the clouds. Earns a little less.",
+     "id": "dreamy",
+     "name": "Dreamy"
+    },
+    {
+     "blurb": "Things tend to work out. Less risk of dying before 80.",
+     "id": "lucky",
+     "name": "Lucky"
+    }
+   ]
+  },
+  "logs": [],
+  "memorial": null,
+  "nextTickAt": 1793798700000,
+  "people": [
+   {
+    "age": 36,
+    "alive": true,
+    "history": [],
+    "id": "p1",
+    "name": "Max",
+    "relationship": 73,
+    "role": "parent",
+    "step": null
+   },
+   {
+    "age": 24,
+    "alive": true,
+    "history": [],
+    "id": "p2",
+    "name": "Hal",
+    "relationship": 65,
+    "role": "parent",
+    "step": null
+   }
+  ],
+  "pet": null,
+  "work": {
+   "education": "none",
+   "hobby": null,
+   "home": "family",
+   "house": null,
+   "income": 0,
+   "job": null,
+   "livingCost": 0,
+   "retired": false,
+   "will": null
+  },
+  "worldTick": 208,
+  "year": null
+ }
+}

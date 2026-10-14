@@ -541,6 +541,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 L3: the device built ([build notes](paper-lives.md#l3-build-2026-10-14), [evidence](evidence/paper-lives-device.md)): stage portraits with hair, glasses, cap or scarf and the pet, the memorial frame, marks, the art route under `/art/pl/` and the `/pl` short link, template v1 for four layouts in both orientations. 264 previews pass the sweep; lint and the Ruby crosscheck pass.
 
+2026-10-14, D159 L4: the companion built ([build notes](paper-lives.md#l4-build-2026-10-14)): Life, People, Work and More pages with the decision, Age up, the first-year rename, the memorial and the next-life choice; help and game pages; the switcher line and My games tile; public life pages with not-found parity. Quiet lines no longer repeat within a year. The Rankings, Achievements and Following card move to L5 with the album.
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.

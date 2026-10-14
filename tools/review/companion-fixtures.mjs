@@ -22,6 +22,9 @@
  * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies)   v2=new (a first-day angler with everything locked)
+ * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
+ *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
+ *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -33,6 +36,7 @@ const write = (name, body) => writeFileSync(resolve(directory, name), body)
 write('index.html', '<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Desk Crawler synthetic QA</title></head><body><div id="root"></div><script type="module" src="/main.jsx"></script></body></html>')
 write('styles.css', readFileSync(resolve(root, 'apps/web/src/styles.css'), 'utf8').replace('@import "tailwindcss";', '@import "tailwindcss";\n@source "../../apps/web/src";'))
 write('fixture.json', readFileSync(resolve(import.meta.dirname, 'fixtures/companion.json'), 'utf8'))
+write('paper-lives.json', readFileSync(resolve(import.meta.dirname, 'fixtures/paper-lives.json'), 'utf8'))
 
 // A pathname router with the handful of router APIs the companion uses.
 write('router.jsx', `import React, { useSyncExternalStore, createContext, useContext } from 'react';
@@ -41,7 +45,7 @@ const notify = () => listeners.forEach((l) => l());
 const subscribe = (l) => { listeners.add(l); window.addEventListener('popstate', notify); return () => { listeners.delete(l); window.removeEventListener('popstate', notify) } };
 const snapshot = () => location.pathname + location.search + location.hash;
 export const useLocation = (options) => { const key = useSyncExternalStore(subscribe, snapshot, snapshot); const loc = { pathname: location.pathname, search: location.search, hash: location.hash, href: key }; return options?.select ? options.select(loc) : loc };
-export const createFileRoute = () => (options) => ({ options, useParams: () => ({ alias: decodeURIComponent(location.pathname.replace(/\\/$/, '').split('/').pop()) }) });
+export const createFileRoute = () => (options) => ({ options, useParams: () => { const parts = location.pathname.replace(/\\/$/, '').split('/'); return parts[3] === 'lives' ? { alias: decodeURIComponent(parts[2]), n: parts[4] } : { alias: decodeURIComponent(parts.pop()) } } });
 export const createRootRouteWithContext = () => (options) => ({ options });
 export const notFound = () => new Error('not found');
 export const redirect = () => new Error('redirect');
@@ -60,6 +64,7 @@ export const Outlet = () => { const Page = useContext(OutletContext); return Pag
 
 // Queries from the fixture; mutations settle locally.
 write('data.js', `import fixture from './fixture.json';
+import paperLives from './paper-lives.json';
 import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
 import { contentV16 } from '../../packages/desk-crawler/src/content/v16';
 import { loreView } from '../../packages/desk-crawler/src/sim/core/biomes';
@@ -324,7 +329,10 @@ const iaBook = [
 ];
 const queries = {
   'users:me': () => data.me,
-  'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }] }),
+  'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }, { slug: 'paper-lives', status: 'hidden', canOpen: true }] }),
+  'paperLives/lives:view': () => (params.get('pl') === 'none' ? { gameState: null, life: null } : paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult),
+  'paperLives/payload:preview': () => null,
+  'paperLives/public:lifePage': () => (params.get('private') === '1' ? null : { alias: 'Barry', ordinal: 1, name: 'Maud Okafor', age: 101, generation: 'Third of the Okafors', traits: ['Curious', 'Loyal'], epitaph: paperLives.memorial.memorial.epitaph, highlights: paperLives.memorial.logs.filter((l) => l.kind !== 'recap').slice(0, 8).map((l) => l.age + ': ' + l.summary), endedAt: Date.now() - 864e5, portrait: paperLives.memorial.life.portrait, parent: { ordinal: 0, name: 'Hamish Okafor' }, child: null }),
   'idleAngler/anglers:dock': () => iaDock,
   'idleAngler/anglers:logbook': () => iaBook,
   'idleAngler/payload:preview': () => ({ scene_base: '' }),
@@ -422,21 +430,29 @@ import { Route as IaSettings } from '../../apps/web/src/routes/app/idle-angler/s
 import { Route as IaRankings } from '../../apps/web/src/routes/app/idle-angler/rankings';
 import { Route as IaAchievements } from '../../apps/web/src/routes/app/idle-angler/achievements';
 import { Route as IaTrophies } from '../../apps/web/src/routes/app/idle-angler/trophies';
+import { Route as PlShell } from '../../apps/web/src/routes/app/paper-lives';
+import { Route as PlLife } from '../../apps/web/src/routes/app/paper-lives/index';
+import { Route as PlPeople } from '../../apps/web/src/routes/app/paper-lives/people';
+import { Route as PlWork } from '../../apps/web/src/routes/app/paper-lives/work';
+import { Route as PlSettings } from '../../apps/web/src/routes/app/paper-lives/settings';
+import { Route as PlPublic } from '../../apps/web/src/routes/profile/$alias_.lives.$n';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
-  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component };
-const publicPage = location.pathname.startsWith('/desk-crawler/heroes/');
+  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component,
+  '/app/paper-lives': PlLife.options.component, '/app/paper-lives/people': PlPeople.options.component, '/app/paper-lives/work': PlWork.options.component, '/app/paper-lives/settings': PlSettings.options.component };
+const lifePage = /^\\/profile\\/[^/]+\\/lives\\/\\d+/.test(location.pathname);
+const publicPage = location.pathname.startsWith('/desk-crawler/heroes/') || lifePage;
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);
 function App() {
   const pathname = useLocation({ select: (l) => l.pathname.replace(/\\/$/, '') });
-  const AppShell = (pathname.startsWith('/app/idle-angler') ? IaShell : Shell).options.component;
+  const AppShell = (pathname.startsWith('/app/idle-angler') ? IaShell : pathname.startsWith('/app/paper-lives') ? PlShell : Shell).options.component;
   return <OutletContext.Provider value={pages[pathname] ?? pages['/app/desk-crawler']}><AuthShell><AppShell /></AuthShell></OutletContext.Provider>;
 }
 document.body.className = 'bg-ground text-ink';
-const ProfilePage = Profile.options.component;
+const ProfilePage = (lifePage ? PlPublic : Profile).options.component;
 createRoot(document.getElementById('root')).render(<NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider>);
 `)
 write('vite.config.mjs', `import { defineConfig, loadEnv } from 'vite';

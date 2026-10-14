@@ -126,6 +126,19 @@ describe('the year', () => {
     }
   })
 
+  it('never repeats a quiet line within a year until its pool runs out', () => {
+    let life = grown(45)
+    const seen: string[] = []
+    for (let n = 1; n < T.closeYearTicks; n += 1) {
+      const result = tick(life, n)
+      seen.push(...result.events.filter((e) => e.kind === 'ambient').map((e) => e.summary))
+      life = result.life
+    }
+    const pool = content.ambient.filter((a) => a.stage === 'adult').length
+    expect(seen.length).toBeGreaterThan(1)
+    if (seen.length <= pool) expect(new Set(seen).size).toBe(seen.length)
+  })
+
   it('pauses mid-year with the elapsed ticks kept', () => {
     const life = { ...grown(30), year: { ...grown(30).year, elapsed: 5 } }
     const paused = pause(life)

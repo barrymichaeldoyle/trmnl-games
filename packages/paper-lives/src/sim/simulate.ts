@@ -149,8 +149,18 @@ function passiveTick(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): T
   if (quietTicks % t.ambientEvery !== 0) return { life, events: [], disposition: 'year' }
   const pool = content.ambient.filter((a) => a.stage === life.stage && (yearEnd ? a.yearEnd === true : a.yearEnd !== true && (a.season === undefined || a.season === season)) && (a.trait === undefined || life.traits.includes(a.trait)))
   if (pool.length === 0) return { life, events: [], disposition: 'year' }
-  const ambient = pickOne(rngs.narrative, pool)
+  // Each year starts somewhere of its own in the pool and walks on, so no quiet line repeats until the pool runs out.
+  const used = life.year.ambient ?? 0
+  const ambient = pool[(yearOffset(life) + used) % pool.length]!
+  life = { ...life, year: { ...life.year, ambient: used + 1 } }
   return { life, events: [{ kind: 'ambient', glyph: 'none', age: life.age, summary: line(life, ambient.line, content, {}, season) }], disposition: 'year' }
+}
+
+/** A stable starting point in the ambient pool for this year of this life (FNV-1a of the name, generation and age). */
+function yearOffset(life: LifeState): number {
+  let h = 0x811c9dc5
+  for (const ch of `${life.last}|${life.generation}|${life.age}`) h = Math.imul(h ^ ch.codePointAt(0)!, 0x01000193) >>> 0
+  return h
 }
 
 /** A passive event: effects, one line, perhaps the year's decision. */

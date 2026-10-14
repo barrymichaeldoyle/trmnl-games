@@ -35,6 +35,7 @@ import { Route as GamesIdleAnglerRouteImport } from './routes/games/idle-angler'
 import { Route as GamesPaperLivesRouteImport } from './routes/games/paper-lives'
 import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
+import { Route as HelpPaperLivesRouteImport } from './routes/help/paper-lives'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
 import { Route as AppDeskCrawlerIndexRouteImport } from './routes/app/desk-crawler/index'
 import { Route as AppDeskCrawlerAchievementsRouteImport } from './routes/app/desk-crawler/achievements'
@@ -55,11 +56,16 @@ import { Route as AppIdleAnglerRankingsRouteImport } from './routes/app/idle-ang
 import { Route as AppIdleAnglerSettingsRouteImport } from './routes/app/idle-angler/settings'
 import { Route as AppIdleAnglerShopRouteImport } from './routes/app/idle-angler/shop'
 import { Route as AppIdleAnglerTrophiesRouteImport } from './routes/app/idle-angler/trophies'
+import { Route as AppPaperLivesIndexRouteImport } from './routes/app/paper-lives/index'
+import { Route as AppPaperLivesPeopleRouteImport } from './routes/app/paper-lives/people'
+import { Route as AppPaperLivesSettingsRouteImport } from './routes/app/paper-lives/settings'
+import { Route as AppPaperLivesWorkRouteImport } from './routes/app/paper-lives/work'
 import { Route as DeskCrawlerHeroesAliasRouteImport } from './routes/desk-crawler/heroes.$alias'
 import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/connect/trmnl/desk-crawler/install'
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
 import { Route as ConnectTrmnlIdleAnglerInstallRouteImport } from './routes/connect/trmnl/idle-angler/install'
 import { Route as ConnectTrmnlIdleAnglerManageRouteImport } from './routes/connect/trmnl/idle-angler/manage'
+import { Route as ProfileAliasLivesNRouteImport } from './routes/profile/$alias_.lives.$n'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -191,6 +197,11 @@ const HelpIdleAnglerRoute = HelpIdleAnglerRouteImport.update({
   path: '/help/idle-angler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HelpPaperLivesRoute = HelpPaperLivesRouteImport.update({
+  id: '/help/paper-lives',
+  path: '/help/paper-lives',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileAliasRoute = ProfileAliasRouteImport.update({
   id: '/profile/$alias',
   path: '/profile/$alias',
@@ -295,6 +306,26 @@ const AppIdleAnglerTrophiesRoute = AppIdleAnglerTrophiesRouteImport.update({
   path: '/trophies',
   getParentRoute: () => AppIdleAnglerRoute,
 } as any)
+const AppPaperLivesIndexRoute = AppPaperLivesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPaperLivesRoute,
+} as any)
+const AppPaperLivesPeopleRoute = AppPaperLivesPeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => AppPaperLivesRoute,
+} as any)
+const AppPaperLivesSettingsRoute = AppPaperLivesSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppPaperLivesRoute,
+} as any)
+const AppPaperLivesWorkRoute = AppPaperLivesWorkRouteImport.update({
+  id: '/work',
+  path: '/work',
+  getParentRoute: () => AppPaperLivesRoute,
+} as any)
 const DeskCrawlerHeroesAliasRoute = DeskCrawlerHeroesAliasRouteImport.update({
   id: '/desk-crawler/heroes/$alias',
   path: '/desk-crawler/heroes/$alias',
@@ -324,6 +355,11 @@ const ConnectTrmnlIdleAnglerManageRoute =
     path: '/connect/trmnl/idle-angler/manage',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ProfileAliasLivesNRoute = ProfileAliasLivesNRouteImport.update({
+  id: '/profile/$alias_/lives/$n',
+  path: '/profile/$alias/lives/$n',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -341,7 +377,7 @@ export interface FileRoutesByFullPath {
   '/account/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
   '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
-  '/app/paper-lives': typeof AppPaperLivesRoute
+  '/app/paper-lives': typeof AppPaperLivesRouteWithChildren
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
@@ -351,6 +387,7 @@ export interface FileRoutesByFullPath {
   '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
+  '/help/paper-lives': typeof HelpPaperLivesRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -370,13 +407,18 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
+  '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
+  '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
+  '/app/paper-lives/': typeof AppPaperLivesIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
+  '/profile/$alias/lives/$n': typeof ProfileAliasLivesNRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -391,7 +433,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
   '/account/delete': typeof AccountDeleteRoute
-  '/app/paper-lives': typeof AppPaperLivesRoute
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
@@ -401,6 +442,7 @@ export interface FileRoutesByTo {
   '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
+  '/help/paper-lives': typeof HelpPaperLivesRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -420,13 +462,18 @@ export interface FileRoutesByTo {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
+  '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
+  '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler': typeof AppIdleAnglerIndexRoute
+  '/app/paper-lives': typeof AppPaperLivesIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
+  '/profile/$alias/lives/$n': typeof ProfileAliasLivesNRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -445,7 +492,7 @@ export interface FileRoutesById {
   '/account_/delete': typeof AccountDeleteRoute
   '/app/desk-crawler': typeof AppDeskCrawlerRouteWithChildren
   '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
-  '/app/paper-lives': typeof AppPaperLivesRoute
+  '/app/paper-lives': typeof AppPaperLivesRouteWithChildren
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
@@ -455,6 +502,7 @@ export interface FileRoutesById {
   '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
+  '/help/paper-lives': typeof HelpPaperLivesRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -474,13 +522,18 @@ export interface FileRoutesById {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
+  '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
+  '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
+  '/app/paper-lives/': typeof AppPaperLivesIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
   '/connect/trmnl/idle-angler/manage': typeof ConnectTrmnlIdleAnglerManageRoute
+  '/profile/$alias_/lives/$n': typeof ProfileAliasLivesNRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -510,6 +563,7 @@ export interface FileRouteTypes {
     | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
+    | '/help/paper-lives'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -529,13 +583,18 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/paper-lives/people'
+    | '/app/paper-lives/settings'
+    | '/app/paper-lives/work'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
     | '/app/idle-angler/'
+    | '/app/paper-lives/'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
+    | '/profile/$alias/lives/$n'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -550,7 +609,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/whats-new'
     | '/account/delete'
-    | '/app/paper-lives'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
@@ -560,6 +618,7 @@ export interface FileRouteTypes {
     | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
+    | '/help/paper-lives'
     | '/profile/$alias'
     | '/app'
     | '/app/desk-crawler/achievements'
@@ -579,13 +638,18 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/paper-lives/people'
+    | '/app/paper-lives/settings'
+    | '/app/paper-lives/work'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler'
     | '/app/idle-angler'
+    | '/app/paper-lives'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
+    | '/profile/$alias/lives/$n'
   id:
     | '__root__'
     | '/'
@@ -613,6 +677,7 @@ export interface FileRouteTypes {
     | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
+    | '/help/paper-lives'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -632,13 +697,18 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/paper-lives/people'
+    | '/app/paper-lives/settings'
+    | '/app/paper-lives/work'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
     | '/app/idle-angler/'
+    | '/app/paper-lives/'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
     | '/connect/trmnl/idle-angler/manage'
+    | '/profile/$alias_/lives/$n'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -664,12 +734,14 @@ export interface RootRouteChildren {
   GamesPaperLivesRoute: typeof GamesPaperLivesRoute
   HelpDeskCrawlerRoute: typeof HelpDeskCrawlerRoute
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
+  HelpPaperLivesRoute: typeof HelpPaperLivesRoute
   ProfileAliasRoute: typeof ProfileAliasRoute
   DeskCrawlerHeroesAliasRoute: typeof DeskCrawlerHeroesAliasRoute
   ConnectTrmnlDeskCrawlerInstallRoute: typeof ConnectTrmnlDeskCrawlerInstallRoute
   ConnectTrmnlDeskCrawlerManageRoute: typeof ConnectTrmnlDeskCrawlerManageRoute
   ConnectTrmnlIdleAnglerInstallRoute: typeof ConnectTrmnlIdleAnglerInstallRoute
   ConnectTrmnlIdleAnglerManageRoute: typeof ConnectTrmnlIdleAnglerManageRoute
+  ProfileAliasLivesNRoute: typeof ProfileAliasLivesNRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -856,6 +928,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpIdleAnglerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/help/paper-lives': {
+      id: '/help/paper-lives'
+      path: '/help/paper-lives'
+      fullPath: '/help/paper-lives'
+      preLoaderRoute: typeof HelpPaperLivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile/$alias': {
       id: '/profile/$alias'
       path: '/profile/$alias'
@@ -996,6 +1075,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIdleAnglerTrophiesRouteImport
       parentRoute: typeof AppIdleAnglerRoute
     }
+    '/app/paper-lives/': {
+      id: '/app/paper-lives/'
+      path: '/'
+      fullPath: '/app/paper-lives/'
+      preLoaderRoute: typeof AppPaperLivesIndexRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
+    '/app/paper-lives/people': {
+      id: '/app/paper-lives/people'
+      path: '/people'
+      fullPath: '/app/paper-lives/people'
+      preLoaderRoute: typeof AppPaperLivesPeopleRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
+    '/app/paper-lives/settings': {
+      id: '/app/paper-lives/settings'
+      path: '/settings'
+      fullPath: '/app/paper-lives/settings'
+      preLoaderRoute: typeof AppPaperLivesSettingsRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
+    '/app/paper-lives/work': {
+      id: '/app/paper-lives/work'
+      path: '/work'
+      fullPath: '/app/paper-lives/work'
+      preLoaderRoute: typeof AppPaperLivesWorkRouteImport
+      parentRoute: typeof AppPaperLivesRoute
+    }
     '/desk-crawler/heroes/$alias': {
       id: '/desk-crawler/heroes/$alias'
       path: '/desk-crawler/heroes/$alias'
@@ -1029,6 +1136,13 @@ declare module '@tanstack/react-router' {
       path: '/connect/trmnl/idle-angler/manage'
       fullPath: '/connect/trmnl/idle-angler/manage'
       preLoaderRoute: typeof ConnectTrmnlIdleAnglerManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile/$alias_/lives/$n': {
+      id: '/profile/$alias_/lives/$n'
+      path: '/profile/$alias/lives/$n'
+      fullPath: '/profile/$alias/lives/$n'
+      preLoaderRoute: typeof ProfileAliasLivesNRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -1092,17 +1206,35 @@ const AppIdleAnglerRouteWithChildren = AppIdleAnglerRoute._addFileChildren(
   AppIdleAnglerRouteChildren,
 )
 
+interface AppPaperLivesRouteChildren {
+  AppPaperLivesPeopleRoute: typeof AppPaperLivesPeopleRoute
+  AppPaperLivesSettingsRoute: typeof AppPaperLivesSettingsRoute
+  AppPaperLivesWorkRoute: typeof AppPaperLivesWorkRoute
+  AppPaperLivesIndexRoute: typeof AppPaperLivesIndexRoute
+}
+
+const AppPaperLivesRouteChildren: AppPaperLivesRouteChildren = {
+  AppPaperLivesPeopleRoute: AppPaperLivesPeopleRoute,
+  AppPaperLivesSettingsRoute: AppPaperLivesSettingsRoute,
+  AppPaperLivesWorkRoute: AppPaperLivesWorkRoute,
+  AppPaperLivesIndexRoute: AppPaperLivesIndexRoute,
+}
+
+const AppPaperLivesRouteWithChildren = AppPaperLivesRoute._addFileChildren(
+  AppPaperLivesRouteChildren,
+)
+
 interface AppRouteChildren {
   AppDeskCrawlerRoute: typeof AppDeskCrawlerRouteWithChildren
   AppIdleAnglerRoute: typeof AppIdleAnglerRouteWithChildren
-  AppPaperLivesRoute: typeof AppPaperLivesRoute
+  AppPaperLivesRoute: typeof AppPaperLivesRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDeskCrawlerRoute: AppDeskCrawlerRouteWithChildren,
   AppIdleAnglerRoute: AppIdleAnglerRouteWithChildren,
-  AppPaperLivesRoute: AppPaperLivesRoute,
+  AppPaperLivesRoute: AppPaperLivesRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -1131,12 +1263,14 @@ const rootRouteChildren: RootRouteChildren = {
   GamesPaperLivesRoute: GamesPaperLivesRoute,
   HelpDeskCrawlerRoute: HelpDeskCrawlerRoute,
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
+  HelpPaperLivesRoute: HelpPaperLivesRoute,
   ProfileAliasRoute: ProfileAliasRoute,
   DeskCrawlerHeroesAliasRoute: DeskCrawlerHeroesAliasRoute,
   ConnectTrmnlDeskCrawlerInstallRoute: ConnectTrmnlDeskCrawlerInstallRoute,
   ConnectTrmnlDeskCrawlerManageRoute: ConnectTrmnlDeskCrawlerManageRoute,
   ConnectTrmnlIdleAnglerInstallRoute: ConnectTrmnlIdleAnglerInstallRoute,
   ConnectTrmnlIdleAnglerManageRoute: ConnectTrmnlIdleAnglerManageRoute,
+  ProfileAliasLivesNRoute: ProfileAliasLivesNRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
