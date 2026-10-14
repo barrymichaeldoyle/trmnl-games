@@ -320,6 +320,8 @@ Each step is an outward-facing action, so none was taken overnight.
 
 ## Not in the MVP
 
+P44 ([the full game](idle-angler-full.md), proposed 2026-10-14) brings further waters, seasons and runs, tournaments, daily orders and a trophy wall into the pre-launch scope if approved; this list then shrinks to what P44 keeps out.
+
 - Cosmetic nods between games (Barry, 2026-10-09: can be built later, not MVP).
 - A tackle accessory slot (floats, weights), a rotating merchant, found gear.
 - Further waters (Lake with a boat, Deep Sea charter, Frozen Lake with an ice auger), seasons and migratory runs, tournaments, a biggest-catch board.
