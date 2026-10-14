@@ -550,6 +550,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 L7 at Barry's request, everything but the submission ([notes](paper-lives.md#l7-2026-10-14)): the install and manage pages, the colour icon and listing image, and the private development plugin on trmnl.com (569) with its client ID in `wrangler.jsonc`. Installing on Barry's device, the status switch and the review submission are his.
 
+2026-10-14, D159 content v2 after Barry saw first steps at five ([notes](paper-lives.md#content-v2-2026-10-14)): age windows on milestones, no lines naming a dead parent, conditions for jobs, cars, homes and children, decisions about the event's person, nobody engaged before 20, and validator rules that keep these out. Family labels (Mother, Father, Sister, Son) from sorted name lists, at Barry's request, and names in bold in the companion's story. v1 is unchanged for replays; production switches with one command.
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.

@@ -8,7 +8,7 @@ import { captureAnalytics } from '../../../lib/analytics'
 import { useIntent } from '../../../lib/intent'
 import { LocalTime } from '../../../lib/localTime'
 import { preload } from '../../../lib/preload'
-import { money, Portrait, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
+import { money, Named, namesIn, Portrait, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
 import { ActionFeedback, Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 
 /** The Life page (paper-lives.md "Companion"): the character, the year card and its decision, the memorial and the next life, the recent story. */
@@ -36,6 +36,7 @@ function LifePage() {
   const year = view.year ?? null
   const decision = year?.decision ?? null
   const ended = life.status === 'ended'
+  const names = namesIn(view)
   const generation = `${ORDINALS[life.generation - 1] ?? `${life.generation}th`} generation`
   return (
     <>
@@ -83,7 +84,7 @@ function LifePage() {
         <Card title={`Age ${life.age}, ${year.yearEnd ? 'the year’s end' : SEASON[year.season].toLowerCase()}`}>
           {decision ? (
             <div className="flex flex-col gap-3">
-              <p className="text-lg font-semibold">{decision.prompt}{decision.major ? <span className="ml-2 align-middle text-sm font-normal text-gold-ink">A big decision</span> : null}</p>
+              <p className="text-lg font-semibold"><Named text={decision.prompt} names={names} />{decision.major ? <span className="ml-2 align-middle text-sm font-normal text-gold-ink">A big decision</span> : null}</p>
               <ul className="flex flex-col gap-2">
                 {decision.options.map((option) => {
                   const chosen = (decision.chosen ?? null) === option.id
@@ -125,7 +126,7 @@ function LifePage() {
         </Card>
       ) : null}
 
-      {life.recap && !ended ? <p className="text-sm"><span className="text-muted">Last year:</span> {life.recap.replace(/^Age \d+: /, '')}</p> : null}
+      {life.recap && !ended ? <p className="text-sm"><span className="text-muted">Last year:</span> <Named text={life.recap.replace(/^Age \d+: /, '')} names={names} /></p> : null}
 
       <Card title="The story so far">
         {(view.logs ?? []).every((log) => log.kind === 'decision_offered' || log.kind === 'ambient') ? <p className="text-muted">Nothing yet. The first lines arrive within fifteen minutes.</p> : null}
@@ -133,7 +134,7 @@ function LifePage() {
           {(view.logs ?? []).filter((log) => log.kind !== 'decision_offered' && log.kind !== 'ambient').slice(0, 20).map((log) => (
             <li key={log.id} className={`flex gap-3 text-sm ${log.kind === 'recap' ? 'text-muted' : ''}`}>
               <span className="w-8 shrink-0 text-right tabular-nums text-muted">{log.kind === 'recap' ? '' : log.age}</span>
-              <span className={`min-w-0 ${log.remarkable || log.major ? 'font-semibold' : ''}`}>{log.summary}</span>
+              <span className={`min-w-0 ${log.remarkable || log.major ? 'font-semibold' : ''}`}><Named text={log.summary} names={names} /></span>
             </li>
           ))}
         </ol>

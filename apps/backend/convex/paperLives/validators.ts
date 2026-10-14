@@ -36,6 +36,8 @@ export const person = v.object({
   step: v.optional(partnerStep),
   stepYears: v.optional(v.number()),
   parentId: v.optional(v.string()),
+  /** Content v2: set when the story knows it (the parent who was the last character). */
+  gender: v.optional(v.union(v.literal('female'), v.literal('male'))),
   history: v.array(v.string()),
 })
 

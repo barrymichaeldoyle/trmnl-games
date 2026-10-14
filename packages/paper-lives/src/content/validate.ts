@@ -95,10 +95,13 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
     }
   }
 
-  const always = ['first', 'last', 'age', 'parent']
+  // From content v2 a line names a parent only where one is alive: a life carried on by a child has lost one.
+  const strict = content.version >= 2
+  const always = strict ? ['first', 'last', 'age'] : ['first', 'last', 'age', 'parent']
   /** Which slots a line can rely on, from its conditions and effects. */
   const slotsFrom = (when: When | undefined, effects: Effects | undefined, extra: readonly string[] = []): Set<string> => {
     const slots = new Set<string>([...always, ...extra])
+    if (when?.parentAlive) slots.add('parent')
     if (when?.person || effects?.addPerson || (effects?.partner && effects.partner !== undefined)) slots.add('person')
     if ((when?.pet !== undefined && when.pet !== false) || (effects?.pet !== undefined && effects.pet !== 'lose')) {
       slots.add('pet')
@@ -108,6 +111,18 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
     if ((when?.hobby !== undefined && when.hobby !== false) || (effects?.hobby !== undefined && effects.hobby !== 'drop')) slots.add('hobby')
     if (effects?.house !== undefined || effects?.downsize) slots.add('house')
     return slots
+  }
+
+  const SPAN: Record<Stage, readonly [number, number]> = { infant: [0, 5], child: [6, 12], teen: [13, 17], young: [18, 29], adult: [30, 59], senior: [60, 120] }
+  /** An age window must sit inside the ages its stages cover. */
+  const checkAges = (where: string, stage: Stage | readonly Stage[], when: When | undefined) => {
+    if (when?.minAge === undefined && when?.maxAge === undefined) return
+    const ss = stagesOf(stage)
+    const lo = Math.min(...ss.map((x) => SPAN[x][0]))
+    const hi = Math.max(...ss.map((x) => SPAN[x][1]))
+    const min = when.minAge ?? lo
+    const max = when.maxAge ?? hi
+    if (min > max || max < lo || min > hi) problem(`${where}: ages ${min} to ${max} fall outside its stages (${lo} to ${hi})`)
   }
 
   const checkWhen = (where: string, when: When | undefined) => {
@@ -142,12 +157,21 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
       else if (!def.eventOnly) problem(`${where}: opens ${def.id}, which is not eventOnly`)
     }
     if (stagesOf(event.stage).includes('infant') && (event.opens || event.effects?.addPerson)) problem(`${where}: infant events add nobody and open nothing`)
+    if (strict) checkAges(where, event.stage, event.when)
+  }
+  // From v2 every early year has at least three events that fit its age, so a toddler never gets a five-year-old's line.
+  if (strict) {
+    for (let age = 0; age <= 5; age += 1) {
+      const fits = content.events.filter((e) => stagesOf(e.stage).includes('infant') && (e.when?.minAge ?? 0) <= age && (e.when?.maxAge ?? 5) >= age && !e.when?.person && !e.when?.parentAlive)
+      if (fits.length < 3) problem(`infant age ${age}: ${fits.length} events fit, want 3`)
+    }
   }
 
   // Decisions.
   for (const def of content.decisions) {
     const where = `decision ${def.id}`
     checkWhen(where, def.when)
+    if (strict) checkAges(where, def.stage, def.when)
     if (def.options.length < 2 || def.options.length > (def.id === 'sn_will' ? 5 : 4)) problem(`${where}: ${def.options.length} options`)
     unique(`${where} option`, def.options.map((o) => o.id))
     const fallback = def.options.find((o) => o.id === def.default)
@@ -162,8 +186,8 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
       checkEffects(at, option.effects)
       if (option.gate && !option.gateReason) problem(`${at}: gated without a reason`)
       if (option.effects?.relationship !== undefined && !def.when?.person) problem(`${at}: relationship change without a person`)
-      const slots = slotsFrom(def.when, option.effects)
-      checkLine(`${at} label`, option.label, slotsFrom(def.when, undefined), { maxLength: 32 })
+      const slots = slotsFrom({ ...def.when, ...option.gate }, option.effects)
+      checkLine(`${at} label`, option.label, slotsFrom({ ...def.when, ...option.gate }, undefined), { maxLength: 32 })
       checkLine(at, option.line, slots)
       checkLine(`${at} note`, option.note, slots, { maxLength: 40 })
       if (/ and /.test(option.note)) problem(`${at}: a note joins with "and", which the recap already does`)
@@ -197,9 +221,10 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
   const L = content.lines
   const sys = (name: string, list: readonly string[], slots: readonly string[], colon = false) => {
     if (list.length === 0) problem(`lines.${name}: empty`)
-    for (const [i, line] of list.entries()) checkLine(`lines.${name} ${i}`, line, new Set([...always, ...slots]), { colon })
+    // The core fills {parent} itself in these: the parent who named the newborn, or the grandchild's parent.
+    for (const [i, line] of list.entries()) checkLine(`lines.${name} ${i}`, line, new Set([...always, 'parent', ...slots]), { colon })
   }
-  checkLine('lines.firstLog', L.firstLog, new Set([...always, 'weekday', 'season']))
+  checkLine('lines.firstLog', L.firstLog, new Set([...always, 'parent', 'weekday', 'season']))
   sys('continues', L.continues, [])
   for (const [stat, list] of Object.entries(L.born)) sys(`born.${stat}`, list, [])
   for (const [stage, list] of Object.entries(L.stage)) sys(`stage.${stage}`, list, [])
@@ -223,6 +248,10 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
   if (t.closeYearTicks <= t.minYearTicks) problem('tuning: the close must come after the minimum')
   if (content.names.first.length < 160) problem(`names: ${content.names.first.length} first names, want 160`)
   if (content.names.last.length < 100) problem(`names: ${content.names.last.length} surnames, want 100`)
+  // Gendered name lists are drawn from the first names and never overlap.
+  const firsts = new Set(content.names.first)
+  for (const name of [...(content.names.female ?? []), ...(content.names.male ?? [])]) if (!firsts.has(name)) problem(`names: ${name} is sorted but not a first name`)
+  for (const name of content.names.female ?? []) if (content.names.male?.includes(name)) problem(`names: ${name} is both female and male`)
   if (content.names.pets.length < 48) problem(`names: ${content.names.pets.length} pet names, want 48`)
 
   const counts: Record<string, number> = {

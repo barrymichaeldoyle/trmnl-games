@@ -274,7 +274,8 @@ export interface PaperLivesCatalog {
   readonly causes: readonly CauseDef[]
   readonly epitaphs: readonly EpitaphDef[]
   readonly lines: SystemLines
-  readonly names: { readonly first: readonly string[]; readonly last: readonly string[]; readonly pets: readonly string[] }
+  /** `female` and `male` (content v2) sort some first names so the companion can say mother or father; the rest are either. */
+  readonly names: { readonly first: readonly string[]; readonly last: readonly string[]; readonly pets: readonly string[]; readonly female?: readonly string[]; readonly male?: readonly string[] }
   /** House bands: price and name ("a flat"). */
   readonly houses: readonly { readonly band: number; readonly name: string; readonly price: number }[]
   readonly rarityWeights: Readonly<Record<Rarity, number>>
@@ -283,6 +284,10 @@ export interface PaperLivesCatalog {
 
 /** Every number the harness tunes (paper-lives.md "Work slices", L1). */
 export interface Tuning {
+  /** Content v2: nobody is engaged before this age (v1 has no floor, so teenagers could marry at 18). */
+  readonly proposalMinAge?: number
+  /** Content v2: a decision an event opens is about the person the event named (v1 drew again). */
+  readonly openedKeepsPerson?: boolean
   readonly minYearTicks: number
   readonly closeYearTicks: number
   /** Event chance per tick, percent, inside the minimum. */
@@ -339,6 +344,8 @@ export interface Person {
   readonly stepYears?: number
   /** A grandchild's parent (one of the character's children). */
   readonly parentId?: string
+  /** Set where the story knows it (a parent who was the previous character); otherwise read from the name. */
+  readonly gender?: 'female' | 'male'
   /** Up to four lines of their own history. */
   readonly history: readonly string[]
 }

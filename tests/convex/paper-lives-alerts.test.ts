@@ -115,7 +115,7 @@ describe('Paper Lives alerts (D159, L6)', () => {
       await ctx.db.patch(lifeId, { life: { ...life.life, people: [...life.life.people, { id: 'p98', name: 'Wren', role: 'grandchild', bornAt: 30, metAt: 30, relationship: 80, alive: true, history: [] }] } })
     })
     const [birth] = await t.mutation(internal.alerts.claimDue, {})
-    expect(JSON.parse(birth!.payload)).toMatchObject({ title: `${first} has a grandchild`, body: `Wren was born today. ${first} is a grandparent now.`, url: '/app/paper-lives/people?alert=new_arrival' })
+    expect(JSON.parse(birth!.payload)).toMatchObject({ title: `${first} has a grandchild`, body: `Wren was born today, a grandchild for ${first}.`, url: '/app/paper-lives/people?alert=new_arrival' })
     await queue(lifeId, (life) => ({ ...life, status: 'ended' }))
     await queue(lifeId, (life) => ({ ...life, status: 'ended' }))
     await t.run(async (ctx) => { const life = (await ctx.db.get(lifeId))!; await ctx.db.patch(lifeId, { life: { ...life.life, status: 'ended' } }) })

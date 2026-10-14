@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { preload } from '../../../lib/preload'
-import { ROLE_LABEL, STEP_LABEL, type LifeView, type Role } from '../../../lib/paperLives'
+import { Named, namesIn, ROLE_LABEL, STEP_LABEL, type LifeView, type Role } from '../../../lib/paperLives'
 import { Card, Meter } from '../../../lib/ui'
 
 /** People (paper-lives.md "Companion"): each person with their relationship meter and history, the pet, and the dead under a rule. */
@@ -22,6 +22,8 @@ function PeoplePage() {
   const byOrder = (a: { role: Role }, b: { role: Role }) => ORDER.indexOf(a.role) - ORDER.indexOf(b.role)
   const living = people.filter((p) => p.alive).sort(byOrder)
   const dead = people.filter((p) => !p.alive).sort(byOrder)
+  const names = namesIn(view)
+  const label = (person: (typeof people)[number]) => person.label ?? (person.step ? STEP_LABEL[person.step] : ROLE_LABEL[person.role])
   return (
     <>
       <h1 className="font-display text-3xl font-bold">People</h1>
@@ -32,11 +34,11 @@ function PeoplePage() {
             <Card>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-display text-xl font-bold">{person.name}</h2>
-                <span className="text-sm text-muted">{person.step ? STEP_LABEL[person.step] : ROLE_LABEL[person.role]} · {person.age < 0 ? 'not born yet' : `age ${person.age}`}</span>
+                <span className="text-sm text-muted"><span className="font-semibold text-ink">{label(person)}</span> · {person.age < 0 ? 'not born yet' : `age ${person.age}`}</span>
               </div>
               <div className="mt-2"><Meter label="Relationship" value={person.relationship} max={100} tone="gold" /></div>
               {person.history.length > 0 ? (
-                <ul className="mt-3 flex flex-col gap-1 text-sm">{person.history.map((line, i) => <li key={i}>{line}</li>)}</ul>
+                <ul className="mt-3 flex flex-col gap-1 text-sm">{person.history.map((line, i) => <li key={i}><Named text={line} names={names} /></li>)}</ul>
               ) : null}
             </Card>
           </li>
@@ -53,7 +55,7 @@ function PeoplePage() {
           <h2 id="remembered" className="font-display text-xl font-bold">Remembered</h2>
           <ul className="flex flex-col gap-2 text-sm">
             {dead.map((person) => (
-              <li key={person.id}><strong>{person.name}</strong> <span className="text-muted">· {ROLE_LABEL[person.role]}</span>{person.history.at(-1) ? <span className="block text-muted">{person.history.at(-1)}</span> : null}</li>
+              <li key={person.id}><strong>{person.name}</strong> <span className="text-muted">· {label(person)}</span>{person.history.at(-1) ? <span className="block text-muted">{person.history.at(-1)}</span> : null}</li>
             ))}
           </ul>
         </section>

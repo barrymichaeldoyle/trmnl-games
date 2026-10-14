@@ -115,6 +115,8 @@ export function beginChild(record: LifeRecord, heirId: string, content: PaperLiv
   const people: Person[] = []
   const push = (name: string, role: Person['role'], bornAt: number, relationship: number, alive = true) => people.push({ id: `p${people.length + 1}`, name, role, bornAt, metAt: Math.max(0, bornAt), relationship, alive, history: [] })
   push(record.first, 'parent', -(record.age - age), heir.relationship, false)
+  // Content v2: the parent who was the last character is a mother or father by the pronouns that life chose.
+  if (content.version >= 2 && record.pronouns !== 'they') people[0] = { ...people[0]!, gender: record.pronouns === 'she' ? 'female' : 'male' }
   if (record.partner) push(record.partner.name, 'parent', -(record.partner.age - age), record.partner.relationship)
   for (const sibling of record.heirs.filter((h) => h.role === 'child' && h.id !== heir.id)) push(sibling.name, 'sibling', age - sibling.age, sibling.relationship)
   const own = record.heirs.filter((h) => h.role === 'grandchild' && h.parentId === heir.id)

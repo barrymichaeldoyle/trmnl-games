@@ -1,9 +1,10 @@
 import { v } from 'convex/values'
-import { contentV1 } from '@trmnl-games/paper-lives/content'
+import { contentV1, contentV2 } from '@trmnl-games/paper-lives/content'
 import {
   beginChild,
   choose as chooseOption,
   decisionOf,
+  familyLabel,
   fill,
   livingCost,
   optionOpen,
@@ -288,7 +289,8 @@ export const view = query({
                   }
                 : null,
             },
-      people: life.people.map((p) => ({ id: p.id, name: p.name, role: p.role, age: life.age - p.bornAt, relationship: p.relationship, alive: p.alive, step: p.step ?? null, history: p.history })),
+      // Labels read v2's name lists whatever catalog the world runs, so a v1 life still shows mother and father.
+      people: life.people.map((p) => ({ id: p.id, name: p.name, role: p.role, label: familyLabel(p, contentV2), age: life.age - p.bornAt, relationship: p.relationship, alive: p.alive, step: p.step ?? null, history: p.history })),
       pet: life.pet ? { name: life.pet.name, kind: content.pets.find((k) => k.id === life.pet!.kind)?.name ?? life.pet.kind, age: life.age - life.pet.bornAt, relationship: life.pet.relationship } : null,
       work: {
         education: life.education,

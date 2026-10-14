@@ -33,7 +33,8 @@ describe('Paper Lives content v1', () => {
   })
 
   it('pins every catalog a run may use', () => {
-    expect(Object.keys(catalogs)).toEqual(['v1'])
+    expect(Object.keys(catalogs)).toEqual(['v1', 'v2'])
     expect(catalogs.v1.version).toBe(1)
+    expect(catalogs.v2.version).toBe(2)
   })
 })

@@ -414,3 +414,21 @@ Barry asked for everything but the submission.
 
 Left for Barry: switch the game to preview or live from the admin page's Games card, and submit for review when you choose.
 
+## Content v2 (2026-10-14)
+
+Barry saw his character take their first steps at five. A review of every event, decision and quiet line against the ages and lives it can fire in, plus four simulated lives read in full, found these classes of mistake. Content v2 (`packages/paper-lives/src/content/v2`) fixes them by id on top of v1, which stays as it was for replays:
+
+- **Milestones at the wrong age.** The twelve infant events had no age windows, so a first word could come at five and nursery at nought. Each now has its window (first steps at 1, a first word at 1 or 2, nursery at 3 or 4), and five new infant events cover the newborn year and ages 4 and 5. A few child and senior events gained windows too (learning to ride a bike by 9, the parachute jump in the seventies).
+- **A parent who is not there.** A life carried on by a child has lost a parent, but `{parent}` fell back to the dead one. Lines that name a parent now need a living one; the quiet line and the trait reveal that used it were rewritten.
+- **Assumed circumstances.** Events and quiet lines that took a job, a car, a home of your own, a garden or young children for granted now say so in their conditions, or were rewritten to suit anyone (the car that "gave up" for someone who never bought one, a boiler for a renter, Sunday lunch "at home" for someone still living there, "the children want a dog" with grown-up children).
+- **Wrong person.** An event that opens a decision named one friend and the decision another; the decision now keeps the event's person. "A baby on the way. {Person} painted the spare room yellow" named the baby as the painter. A fourth grandchild was "a grandparent at last".
+- **Too young to marry.** Teenage sweethearts could be engaged at 17 and married at 18; nobody is engaged before 20 now.
+
+The two behaviour changes are tuning fields only v2 sets (`proposalMinAge`, `openedKeepsPerson`), so v1's simulation is unchanged. The validator gains rules for v2 and later: `{parent}` only where a living parent is required, age windows inside their stages, and at least three events that fit every infant year. All 13 harness gates pass over 2,700 lives (at 1,800 the trait gate can miss on Loyal, 4.8% against a 5% floor, which is sampling noise).
+
+Not changed, noted for later: years can be busy (up to six lines in an absent player's year), an epitaph can name a teenage Saturday job as the life's work when it was held longest, and job offers take no account of the kind of education (a trade apprentice can become a nurse).
+
+**Family labels.** Barry asked to see mother or father. Content v2 sorts the first names into female, male and either (`names.female`, `names.male`); the People page labels family by them (Mother, Brother, Daughter, Granddaughter, Wife), and names used either way keep the plain label. The parent who was the last character takes the label from that life's pronouns. Story lines stay name-based. The companion now sets the names of people and pets in bold in the story, the recap and people's histories.
+
+Production runs v1 until it is switched: `npx convex run --prod paperLives/operations:setActiveContentVersion '{"contentVersion":"v2"}'`. Lives keep their state; the next year draws from v2.
+

@@ -192,7 +192,7 @@ export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: s
   if (row.kind === 'life_ended') return { title: `${first}'s life has ended`, body: `${first}'s page is in the album now, and the next life is ready to begin.`, url: '/app/paper-lives?alert=life_ended' }
   const baby = arrival?.name ?? 'A baby'
   return arrival?.role === 'grandchild'
-    ? { title: `${first} has a grandchild`, body: `${baby} was born today. ${first} is a grandparent now.`, url: '/app/paper-lives/people?alert=new_arrival' }
+    ? { title: `${first} has a grandchild`, body: `${baby} was born today, a grandchild for ${first}.`, url: '/app/paper-lives/people?alert=new_arrival' }
     : { title: `A baby for ${first}`, body: `${baby} has joined the family.`, url: '/app/paper-lives/people?alert=new_arrival' }
 }
 

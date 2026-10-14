@@ -163,3 +163,32 @@ export function stepAt(table: readonly (readonly [number, number])[], age: numbe
   for (const [from, v] of table) if (age >= from) value = v
   return value
 }
+
+/** A person's gender where the story knows it or the name says it plainly (content v2's name lists); else none. */
+export function genderOf(person: Pick<Person, 'name' | 'gender'>, content: Pick<PaperLivesCatalog, 'names'>): 'female' | 'male' | undefined {
+  if (person.gender) return person.gender
+  if (content.names.female?.includes(person.name)) return 'female'
+  if (content.names.male?.includes(person.name)) return 'male'
+  return undefined
+}
+
+const FAMILY: Partial<Record<Role, readonly [female: string, male: string, either: string]>> = {
+  parent: ['Mother', 'Father', 'Parent'],
+  sibling: ['Sister', 'Brother', 'Sibling'],
+  child: ['Daughter', 'Son', 'Child'],
+  grandchild: ['Granddaughter', 'Grandson', 'Grandchild'],
+}
+const OTHER: Record<Role, string> = { parent: 'Parent', sibling: 'Sibling', partner: 'Partner', former_partner: 'Former partner', child: 'Child', grandchild: 'Grandchild', friend: 'Friend', colleague: 'Colleague' }
+
+/** How the companion names a person's place in the family: Mother, Brother, Wife, Friend. */
+export function familyLabel(person: Pick<Person, 'name' | 'gender' | 'role' | 'step'>, content: Pick<PaperLivesCatalog, 'names'>): string {
+  const gender = genderOf(person, content)
+  if (person.role === 'partner') {
+    if (person.step === 'married') return gender === 'female' ? 'Wife' : gender === 'male' ? 'Husband' : 'Spouse'
+    if (person.step === 'engaged') return 'Engaged'
+    return 'Partner'
+  }
+  const family = FAMILY[person.role]
+  if (family) return gender === 'female' ? family[0] : gender === 'male' ? family[1] : family[2]
+  return OTHER[person.role]
+}

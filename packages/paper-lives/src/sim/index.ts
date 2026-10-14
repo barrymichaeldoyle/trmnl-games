@@ -3,5 +3,5 @@ export { simulateLife, SIMULATION_VERSION, BOUNDARY_LINES, eligibleEvents, eligi
 export { starterLife, beginChild, zeroCounters } from './starter'
 export { bequests, longestJob } from './death'
 export { choose, requestAgeUp, rename, setPronouns, pause, resume, type ActionResult } from './actions'
-export { stageFor, seasonAt, moneyBand, holds, PaperLivesInvariantError } from './rules'
+export { stageFor, seasonAt, moneyBand, holds, genderOf, familyLabel, PaperLivesInvariantError } from './rules'
 export { fill } from './text'

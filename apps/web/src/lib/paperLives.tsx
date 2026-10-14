@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { composePortrait, type PortraitKey } from '@trmnl-games/paper-lives/art/portrait'
 import { LocalTime } from './localTime'
 
@@ -42,7 +42,7 @@ export interface LifeView {
       options: Array<{ id: string; label: string; open: boolean; reason: string | null }>
     } | null
   } | null
-  people?: Array<{ id: string; name: string; role: Role; age: number; relationship: number; alive: boolean; step: 'dating' | 'engaged' | 'married' | null; history: string[] }>
+  people?: Array<{ id: string; name: string; role: Role; label?: string; age: number; relationship: number; alive: boolean; step: 'dating' | 'engaged' | 'married' | null; history: string[] }>
   pet?: { name: string; kind: string; age: number; relationship: number } | null
   work?: {
     education: string
@@ -128,4 +128,20 @@ export function Photos({ photos, label }: { photos: readonly PhotoView[]; label:
       ))}
     </ul>
   )
+}
+
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/** The names a line may mention: the character, everyone in the life and the pet. Longest first, so "Ada" never splits "Adaeze". */
+export function namesIn(view: Pick<LifeView, 'life' | 'people' | 'pet'>): string[] {
+  const names = new Set<string>([view.life?.first ?? '', ...(view.people ?? []).map((p) => p.name), view.pet?.name ?? ''].filter(Boolean))
+  return [...names].sort((a, b) => b.length - a.length)
+}
+
+/** A story line with the people and the pet in it set in bold. */
+export function Named({ text, names }: { text: string; names: readonly string[] }): ReactNode {
+  if (names.length === 0) return text
+  const pattern = new RegExp(`(?<![\\p{L}])(${names.map(escape).join('|')})(?![\\p{L}])`, 'gu')
+  const parts = text.split(pattern)
+  return parts.map((part, i) => (i % 2 === 1 ? <strong key={i} className="font-semibold text-ink">{part}</strong> : part))
 }

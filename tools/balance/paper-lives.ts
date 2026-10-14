@@ -7,7 +7,9 @@
  *   pnpm balance:paper-lives -- --story  (print one hourly life's story)
  */
 import { createRng, type Rng } from '@trmnl-games/engine/rng'
-import { contentV1 } from '@trmnl-games/paper-lives/content'
+import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/paper-lives/content'
+
+const ACTIVE = catalogs[ACTIVE_CONTENT]
 import { beginChild, choose, decisionOf, optionOpen, requestAgeUp, simulateLife, starterLife, type LifeEvent, type LifeRecord, type LifeState, type PaperLivesCatalog, type StatId } from '@trmnl-games/paper-lives/sim'
 import { deriveLifeSeeds } from '@trmnl-games/paper-lives/sim/seed'
 
@@ -63,7 +65,7 @@ export interface LifeRun {
 const STORY = new Set<LifeEvent['kind']>(['event', 'decision_resolved', 'check', 'stage', 'death'])
 
 /** One life from birth (or from `start`) to death or the day limit. */
-export function simulateLifeRun(policy: Policy, index: number, maxDays = 60, content: PaperLivesCatalog = contentV1, start?: LifeState, keepStory = false): LifeRun {
+export function simulateLifeRun(policy: Policy, index: number, maxDays = 60, content: PaperLivesCatalog = ACTIVE, start?: LifeState, keepStory = false): LifeRun {
   const lifeId = `${policy.name}-${index}`
   let life = start ?? starterLife(content, deriveLifeSeeds(WORLD, lifeId, 0, 1).birth).life
   const choiceRng: Rng = createRng(index * 7919 + policy.name.length)
@@ -175,7 +177,7 @@ export interface HarnessReport {
   readonly traits: Record<string, Record<string, number>>
 }
 
-export function runHarness(livesPerPolicy = 400, maxDays = 60, content: PaperLivesCatalog = contentV1): HarnessReport {
+export function runHarness(livesPerPolicy = 400, maxDays = 60, content: PaperLivesCatalog = ACTIVE): HarnessReport {
   const runs: Record<string, LifeRun[]> = {}
   for (const policy of POLICIES) {
     runs[policy.name] = []
@@ -283,7 +285,7 @@ export function runHarness(livesPerPolicy = 400, maxDays = 60, content: PaperLiv
 }
 
 /** A child's life after an hourly parent's, for the next-life rules. */
-export function nextGeneration(run: LifeRun, content: PaperLivesCatalog = contentV1): LifeState | null {
+export function nextGeneration(run: LifeRun, content: PaperLivesCatalog = ACTIVE): LifeState | null {
   const heir = run.record?.heirs.find((h) => h.role === 'child')
   if (!run.record || !heir) return null
   return beginChild(run.record, heir.id, content, 1234).life
@@ -294,7 +296,7 @@ function main() {
   const livesArg = args.indexOf('--lives')
   const lives = livesArg >= 0 ? Number(args[livesArg + 1]) : 400
   if (args.includes('--story')) {
-    const run = simulateLifeRun(POLICIES[0]!, Number(args[args.indexOf('--story') + 1] ?? 0) || 0, 60, contentV1, undefined, true)
+    const run = simulateLifeRun(POLICIES[0]!, Number(args[args.indexOf('--story') + 1] ?? 0) || 0, 60, ACTIVE, undefined, true)
     for (const e of run.story) if (e.kind !== 'ambient') console.log(`${String(e.age).padStart(3)}  ${e.kind.padEnd(17)} ${e.summary}`)
     console.log(run.record ? `\n${run.record.first} ${run.record.last}, ${run.record.age}. ${run.record.epitaph}` : '\n(still living)')
     return

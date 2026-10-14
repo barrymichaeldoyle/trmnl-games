@@ -109,8 +109,8 @@ export function optionOpen(life: LifeState, option: OptionDef): boolean {
   return holds(option.gate, life)
 }
 
-function offer(life: LifeState, def: DecisionDef, rngs: Rngs): { life: LifeState; pending: PendingDecision } {
-  const person = def.when?.person ? drawPerson(rngs.people, life, def.when) : undefined
+function offer(life: LifeState, def: DecisionDef, rngs: Rngs, named?: Person): { life: LifeState; pending: PendingDecision } {
+  const person = def.when?.person ? (named?.role === def.when.person ? named : drawPerson(rngs.people, life, def.when)) : undefined
   return { life: markSeen(life, def.id), pending: { decisionId: def.id, ...(person ? { personId: person.id } : {}) } }
 }
 
@@ -178,7 +178,8 @@ function happen(life: LifeState, event: EventDef, content: PaperLivesCatalog, rn
   if (event.opens && !life.year.pending) {
     const def = decisionOf(content, event.opens)
     if (holds(def.when, life)) {
-      const offered = offer(life, def, rngs)
+      // Content v2: the decision is about the person the event named, not a fresh draw.
+      const offered = offer(life, def, rngs, content.tuning.openedKeepsPerson ? person : undefined)
       life = { ...offered.life, year: { ...offered.life.year, pending: offered.pending } }
       events.push(offeredEvent(life, def, offered.pending, content))
     }
@@ -306,7 +307,7 @@ function checks(life: LifeState, content: PaperLivesCatalog, cands: Candidate[],
         return { ...rest, role: 'former_partner' }
       })
       say(PRIORITY.family, 'heart', personLine(life, pickOne(rngs.narrative, L.separation), partner, content), 'a parting')
-    } else if (partner.step === 'dating' && years >= 2 && partner.relationship >= 55 && roll <= t.proposalPercent) {
+    } else if (partner.step === 'dating' && years >= 2 && partner.relationship >= 55 && life.age >= (t.proposalMinAge ?? 0) && roll <= t.proposalPercent) {
       life = updatePerson(life, partner.id, (p) => ({ ...p, step: 'engaged', stepYears: 0, relationship: clampStat(p.relationship + 5) }))
       say(PRIORITY.family, 'ring', personLine(life, pickOne(rngs.narrative, L.proposal), partner, content), 'an engagement')
     } else if (partner.step === 'engaged' && years >= 1) {

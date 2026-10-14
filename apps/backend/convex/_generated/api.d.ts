@@ -78,6 +78,7 @@ import type * as paperLives_adapter from "../paperLives/adapter.js";
 import type * as paperLives_album from "../paperLives/album.js";
 import type * as paperLives_lifecycle from "../paperLives/lifecycle.js";
 import type * as paperLives_lives from "../paperLives/lives.js";
+import type * as paperLives_operations from "../paperLives/operations.js";
 import type * as paperLives_payload from "../paperLives/payload.js";
 import type * as paperLives_photos from "../paperLives/photos.js";
 import type * as paperLives_profile from "../paperLives/profile.js";
@@ -177,6 +178,7 @@ declare const fullApi: ApiFromModules<{
   "paperLives/album": typeof paperLives_album;
   "paperLives/lifecycle": typeof paperLives_lifecycle;
   "paperLives/lives": typeof paperLives_lives;
+  "paperLives/operations": typeof paperLives_operations;
   "paperLives/payload": typeof paperLives_payload;
   "paperLives/photos": typeof paperLives_photos;
   "paperLives/profile": typeof paperLives_profile;
