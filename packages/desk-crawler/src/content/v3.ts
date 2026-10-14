@@ -13,8 +13,8 @@ export const contentV3: ContentCatalog = {
   ...contentV2,
   contentVersion: 'v3',
   stances: {
-    cautious: { id: 'cautious', name: 'Cautious', blurb: 'Drinks early, rests early, heals up before heading back out. Learns a little less from each win.', autoPotionBelowPct: 65, restBelowPct: 50, resumeExploringAtPct: 90, victoryXpPct: 90 },
+    cautious: { id: 'cautious', name: 'Cautious', blurb: 'Drinks and rests early, and heals up before heading back out. Learns a little less from each win.', autoPotionBelowPct: 65, restBelowPct: 50, resumeExploringAtPct: 90, victoryXpPct: 90 },
     balanced: { id: 'balanced', name: 'Balanced', blurb: 'The office standard.', autoPotionBelowPct: contentV2.constants.autoPotionBelowPct, restBelowPct: contentV2.constants.restBelowPct, resumeExploringAtPct: contentV2.constants.resumeExploringAtPct, victoryXpPct: 100 },
-    bold: { id: 'bold', name: 'Bold', blurb: 'Saves potions, keeps exploring on low health, back out the moment it can stand. Learns more from each win.', autoPotionBelowPct: 35, restBelowPct: 20, resumeExploringAtPct: 60, victoryXpPct: 115 },
+    bold: { id: 'bold', name: 'Bold', blurb: 'Saves potions and keeps exploring on low health, then heads back out as soon as it can stand. Learns more from each win.', autoPotionBelowPct: 35, restBelowPct: 20, resumeExploringAtPct: 60, victoryXpPct: 115 },
   },
 }

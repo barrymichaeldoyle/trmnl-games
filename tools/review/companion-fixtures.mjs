@@ -92,7 +92,7 @@ if (flag('recap')) data.recap = { ...data.recap, baseline: { at: Date.now() - 36
 // P37: the roster. The Heroes page reads roster:mine; the Hero page reads hero.roster.
 const rosterMode = params.get('roster');
 const rogueRule = { id: 'rogue', name: 'Rogue', blurb: 'Works the corridors. Hits a bit harder and pockets more, but takes hits worse.', passive: { name: 'Light fingers', blurb: 'More gold from every fight and find, and an edge in desk raids, raiding or defending.' }, hpPct: 93, modifiers: { attackPct: 10, defensePct: -10, goldPct: 20 }, raidEdgePct: 5 };
-const warriorRule = { id: 'warrior', name: 'Warrior', blurb: 'Holds the desk. The most health and the steadiest fights, and nothing fancy.', passive: { name: 'Steady', blurb: 'No trick and no weakness: full health and defense.' }, hpPct: 100, modifiers: {}, raidEdgePct: 0 };
+const warriorRule = { id: 'warrior', name: 'Warrior', blurb: 'Holds the desk, with the most health and the steadiest fights.', passive: { name: 'Steady', blurb: 'Full health and defense, with no special trick.' }, hpPct: 100, modifiers: {}, raidEdgePct: 0 };
 const two = rosterMode === 'two' || rosterMode === 'undo';
 if (rosterMode === 'locked') hero.level = 4;
 if (two) { hero.name = 'Vex'; hero.level = 3; hero.class = 'rogue'; hero.className = 'Rogue' } else { hero.class = 'warrior'; hero.className = 'Warrior' }

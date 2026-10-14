@@ -77,7 +77,7 @@ export function FloorGrid({ headingId, headingLevel: Heading = 'h2' }: { heading
 /** The loop by how often each part happens, which also gives the order; the adventure lines are from the sample screen. */
 const STEPS: ReadonlyArray<{ when: string; title: string; body: string; lines?: readonly string[] }> = [
   { when: 'Once', title: 'Install it on your TRMNL', body: 'Add Desk Crawler from the TRMNL marketplace, name your hero in the companion and press Save.' },
-  { when: 'Every 15 minutes', title: 'Your hero adventures', body: 'Fights, finds, traps and the odd knockout, day and night, whether or not your screen is awake.', lines: ['Untangled a Cable Serpent and zip-tied it.', 'Found gold under a raised floor tile.'] },
+  { when: 'Every 15 minutes', title: 'Your hero adventures', body: 'Your hero keeps fighting and finding loot day and night, whether or not your screen is awake.', lines: ['Untangled a Cable Serpent and zip-tied it.', 'Found gold under a raised floor tile.'] },
   { when: 'Every few days', title: 'You check in', body: 'Open the companion on your phone to sort the bag and pick the next floor.' },
 ]
 
@@ -113,7 +113,7 @@ const FEATURES: ReadonlyArray<{ glyph: GlyphName; tone: string; title: string; b
   { glyph: 'heart', tone: 'text-hp-ink', title: 'Meetings', body: 'Sometimes your hero bumps into another player’s hero on the same floor. They might split a sandwich or swap war stories, and both get a small boost for the next couple of hours.' },
   { glyph: 'tag', tone: 'text-gold-ink', title: 'Lost property', body: 'When a hero is knocked out, it drops a spare of its weapon or armour with the owner’s name on it in marker. If another player’s hero picks it up, the owner finds out who.' },
   { glyph: 'flag', tone: 'text-xp-ink', title: 'Office calendar', body: 'Halloween puts decorations in your hero’s scene, and so do seventeen other office occasions through the year. Most bring a small bonus for the day.' },
-  { glyph: 'quest', tone: 'text-xp-ink', title: 'A career to climb', body: 'One goal at a time, a daily to-do list from the morning stand-up, and new features as your hero levels up.' },
+  { glyph: 'quest', tone: 'text-xp-ink', title: 'A career to climb', body: 'Your hero works toward one goal at a time and gets a short to-do list at each morning stand-up. New features open as it levels up.' },
   { glyph: 'hero', tone: 'text-sky-ink', title: 'A second hero', body: `Everyone starts as a Warrior. At level ${UNLOCKS.roster} you can recruit a Rogue, who earns more gold and has an edge in desk raids.` },
   { glyph: 'keepsake', tone: 'text-rare-ink', title: 'Weekly keepsakes', body: 'A six-digit code appears on your screen each week. Enter it in the companion to collect an office souvenir.' },
   { glyph: 'bell', tone: 'text-hp-ink', title: 'Optional alerts', body: 'A phone notification when the bag is full or the merchant has a deal you can afford. Off until you turn it on.' },

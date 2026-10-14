@@ -141,7 +141,7 @@ const CONTENTS: ReadonlyArray<readonly [string, string]> = [
 ]
 
 export const Route = createFileRoute('/help/desk-crawler')({
-  head: () => seo({ title: 'Desk Crawler help and setup', path: '/help/desk-crawler', description: 'Install Desk Crawler on TRMNL, choose a stance, meet the merchant, answer decisions, understand refresh timing, and fix a screen that looks out of date.', image: DESK_CRAWLER_OG }),
+  head: () => seo({ title: 'Desk Crawler help and setup', path: '/help/desk-crawler', description: 'How to set up Desk Crawler on TRMNL and how each part of the game works, with fixes for a screen that looks out of date.', image: DESK_CRAWLER_OG }),
   component: () => (
     <ProsePage title="Desk Crawler on TRMNL" contents={CONTENTS}>
       <h2 id="getting-started">Getting started</h2>
@@ -188,7 +188,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <h2 id="heroes-and-classes">Heroes and classes</h2>
           <p>Everyone starts as a Warrior. When your Warrior reaches level {ROSTER_LEVEL}, your TRMNL says “Unlocked: a second hero”, and you can recruit a Rogue from the Heroes page under More. The Rogue starts at level 1 with its own name, gear, gold, potions and goals.</p>
           <ul>
-            <li>One hero adventures at a time, and that is the one your TRMNL shows and the one on the leaderboards. The other waits exactly where you left it: no adventures, no catch-up, and nothing runs out while it waits. A merchant visiting it leaves.</li>
+            <li>One hero adventures at a time, and that is the one your TRMNL shows and the one on the leaderboards. The other waits exactly where you left it. It doesn't adventure or catch up later, and nothing runs out while it waits, though a merchant visiting it leaves.</li>
             <li>You can switch once a day. Switching straight back within ten minutes does not count. A hero that is knocked out or on the road has to recover or arrive first.</li>
             <li>You can have one hero of each class. Achievements belong to you whichever hero earns them; a few belong to the Rogue alone.</li>
             <li><strong>Warrior</strong>: {CLASSES.warrior.blurb}</li>
@@ -211,7 +211,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li>How often your hero raids depends on stance too: Cautious about every other day of exploring, Balanced about once a day, Bold about twice a day.</li>
         <li>The loser hands over 5% of its gold to the winner, so gold only changes hands. Both lose health: the loser 30% of its maximum HP, the winner 10%. Thrifty gear takes its points off the gold loss.</li>
         <li>A raid can knock a hero out, exactly like a fight; in Office Cubicles your hero is rescued instead. Raids only find heroes who are exploring or resting, and a hero raided once is left alone for about six hours.</li>
-        <li>If you'd rather lose fewer raids, pick Cautious: it raids least and wins most.</li>
+        <li>If you'd rather lose fewer raids, pick Cautious, which raids least and wins most.</li>
       </ul>
       {MEETINGS !== undefined ? (
         <>
@@ -234,7 +234,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <ul>
             <li>Your hero can find other players' spares the same way. A spare is ordinary gear: equip it, sell it, salvage it or take it to the workbench. It comes at the plain stats for its kind and rarity, without the first owner's upgrades.</li>
             <li>The name stays on it. The Bag page and the Log tab's Lost property card show whose it was, and so does your hero page while you hold it.</li>
-            <li>Nothing is lost and nothing extra is found: a spare only ever takes the place of a find your hero was making anyway. Career goals and Christmas presents are always new.</li>
+            <li>A spare only ever takes the place of a find your hero was making anyway, so nobody gets extra gear and nothing is lost. Career goals and Christmas presents are always new.</li>
             <li>Only one spare of yours lies about at a time. If your hero is knocked out again before anyone finds it, the new spare replaces the old one.</li>
           </ul>
         </>
@@ -286,7 +286,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li><strong>Thrifty</strong> keeps more gold when things go wrong: a retreat costs nothing and a knockout costs 5% of gold instead of 10%.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
-      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. A full bag alone does not stop adventures: the next piece you find is held safely, then your hero sleeps until you make room. The held find is never automatically sold or discarded.</p>
+      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. A full bag alone does not stop adventures. The next piece you find is held safely, and then your hero sleeps until you make room. The held find is never automatically sold or discarded.</p>
       <h2 id="bigger-bags">Bigger bags</h2>
       <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements and no bag drops: save up and buy.{MERCHANT_LINE}</p>
       <ol className="[&_li]:list-decimal">
@@ -299,7 +299,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
         <p>{WORKBENCH_LEVEL !== undefined ? `From level ${WORKBENCH_LEVEL}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {MATERIALS_LINE}. Epic gear pays {WORKBENCH.epicYieldMultiplier} times as much. Materials sit beside your potions, take no bag space and are never sold. Nothing is salvaged unless you choose it.{WORKBENCH_LEVEL !== undefined ? ` Before level ${WORKBENCH_LEVEL}, sell your spares: the first upgrade needs level ${WORKBENCH_LEVEL} anyway.` : ''}</p>
         <p>The workbench spends materials and gold on the gear your hero wears, in place: the piece keeps its name and trait, and only its numbers change. Each piece has one next step. {TIER_STEPS.map((s, i) => `${i === 0 ? 'Raising a tier-1 piece to Mk II' : `Mk II to Mk III`} costs ${price(s)}`).join('; ')}; a piece can only be raised to a tier your hero’s level could equip. Once a piece is Mk III (or was found there), reinforcement adds one point a step: {REINFORCE_STEPS.map((s) => `+${s.to} for ${price(s)}`).join(', ')}. {REINFORCE_STEPS.length > 0 ? `After +${REINFORCE_STEPS.at(-1)!.to} the piece is finished.` : ''} Rare and epic gear can also have a trait of your choosing fitted for {price(WORKBENCH.affix)}, replacing the one it has.</p>
-        <p>Upgrades never fail, nothing is rolled, and the workbench never acts on its own. Salvaging an upgraded piece pays what it was found at, not what you spent on it, so build what you will wear.</p>
+        <p>Upgrades never fail and nothing is left to chance. The workbench only does what you ask it to. Salvaging an upgraded piece pays what it was found at, not what you spent on it, so build what you will wear.</p>
       </> : null}
       <h2 id="getting-knocked-out">Getting knocked out</h2>
       <p>Your hero revives automatically after about two hours and returns to Office Cubicles. You keep your XP and equipment; getting knocked out costs 10% of your current gold. You do not need to open the companion or press anything.</p>

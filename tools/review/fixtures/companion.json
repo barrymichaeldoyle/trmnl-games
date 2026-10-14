@@ -103,7 +103,7 @@
   "stance": "balanced",
   "stances": [
    {
-    "blurb": "Drinks early, rests early, heals up before heading back out. Learns a little less from each win.",
+    "blurb": "Drinks and rests early, and heals up before heading back out. Learns a little less from each win.",
     "id": "cautious",
     "name": "Cautious",
     "potionBelowPct": 65,
@@ -121,7 +121,7 @@
     "victoryXpPct": 100
    },
    {
-    "blurb": "Saves potions, keeps exploring on low health, back out the moment it can stand. Learns more from each win.",
+    "blurb": "Saves potions and keeps exploring on low health, then heads back out as soon as it can stand. Learns more from each win.",
     "id": "bold",
     "name": "Bold",
     "potionBelowPct": 35,

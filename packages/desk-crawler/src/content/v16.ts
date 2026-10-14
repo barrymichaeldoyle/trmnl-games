@@ -72,8 +72,8 @@ const archive: BiomeNarrative = {
     'Walked into a shelf end in the dark. -{damage} HP.',
     'The one working light went out mid-step. -{damage} HP.',
     'A bundle of blueprints unrolled underfoot. -{damage} HP.',
-    'Papercut from a 1983 memo. Still sharp. -{damage} HP.',
-    'Something fell off the top shelf. Nobody saw what. -{damage} HP.',
+    'A papercut from a 1983 memo. -{damage} HP.',
+    'Something unlabelled fell off the top shelf. -{damage} HP.',
     'A guillotine blade was left up. -{damage} HP.',
   ],
   trapHitCallbacks: { 'A rolling shelf rolled. -{damage} HP.': 'The same rolling shelf rolled back. -{damage} HP.' },
@@ -132,17 +132,17 @@ const garage: BiomeNarrative = {
     'A fluorescent tube dropped from its fitting. -{damage} HP.',
     'Clipped by a reversing van. -{damage} HP.',
     'Tripped over a wheel stop. -{damage} HP.',
-    'A dripping pipe, straight down the collar. -{damage} HP.',
+    'A pipe dripped down the collar. -{damage} HP.',
     'The ticket machine spat out a ticket, hard. -{damage} HP.',
     'A loose drain cover tipped. -{damage} HP.',
-    'A bike rack, shin height, unlit. -{damage} HP.',
+    'Kicked an unlit bike rack. -{damage} HP.',
     'A gust of wind off the ramp slammed a door. -{damage} HP.',
   ],
   rest: [
     'Sat on a wheel stop and waited for the echo to fade. +{heal} HP.',
     "Rested in the attendant's booth with the heater on. +{heal} HP.",
     'A nap in the back of an unlocked van. +{heal} HP.',
-    'Coffee from the machine by the lift. Surprisingly fine. +{heal} HP.',
+    'Drank a coffee from the machine by the lift. +{heal} HP.',
     'Found a dry corner on level B2. +{heal} HP.',
     'Sat in a parked car and listened to the radio. +{heal} HP.',
   ],
@@ -180,33 +180,33 @@ const monsters: Record<string, MonsterNarrative> = {
 const lore: LoreRule = {
   biomes: {
     office_cubicles:
-      'Where every hero starts and where every hero wakes up after a bad day. The printer is always jammed, the plant by the window is plastic, and nothing here can keep you down for long: someone always walks past with a first-aid kit.',
+      'Where every hero starts, and where every hero wakes up after a bad day. The printer is always jammed and the plant by the window is plastic. Nothing here keeps you down for long, because someone always walks past with a first-aid kit.',
     server_room:
-      'Cold on one side, hot on the other, loud everywhere. Badge access only, which has never stopped anything living in the cable trays. Nobody knows what half the racks do. Nobody is allowed to switch them off to find out.',
+      'One aisle is cold, the next is hot, and the fans never stop. The badge reader has never kept out anything living in the cable trays. Half the racks have no label, and switching one off to find out is against policy.',
     cafeteria_depths:
-      'The lunch counter is the top of it. Below the dish pit the stairs keep going, past the walk-in freezer, past a kitchen nobody remembers using, into stone arches lit by torches. The menu down there has not changed in years.',
+      'The lunch counter is the top of it. Below the dish pit the stairs keep going down past the walk-in freezer and an old kitchen, into stone arches lit by torches. The menu down there has not changed in years.',
     archive:
-      'Under the cafeteria, behind a door marked RECORDS. Rolling shelves, forty years of paper, one working light. Everything that was ever filed is still here, including a few things that were only ever meant to be filed.',
+      'Under the cafeteria, behind a door marked RECORDS, forty years of paper sit on rolling shelves under one working light. Everything that was ever filed is still here, and some of it has started to move.',
     parking_garage:
-      'Five levels of concrete below the archive, reached by a ramp that keeps turning. The lights hum, the puddles never dry, and the pay-and-display machine still takes coins. Nobody has found the bottom level, or admits to it.',
+      'Five levels of concrete below the archive, reached by a ramp that keeps turning. The puddles never dry, and the pay-and-display machine still takes coins. Nobody who drove down to the bottom level has come back up.',
   },
   monsters: {
     paper_imp:
-      'A memo that got up and walked. Light, quick, and mostly staples. It wants to be read and goes to pieces when it is not. Feed it to the shredder and it stops; put it in recycling and it may come back as a different memo.',
+      'A memo that got up and walked, held together mostly by staples. It wants to be read and goes to pieces when it is not. The shredder stops it for good. Put it in recycling and it may come back as a different memo.',
     rogue_roomba:
       'Facilities bought it to clean the floor. It cleans the floor of anything it can reach, ankles included. Flip it on its back and it beeps until the battery goes, which is about three hours longer than anyone can bear.',
     stapler_mimic:
-      'Looks like a stapler. Is a stapler, until a hand gets near it. The red ones are the worst and nobody has ever seen one being bought. Unjam it properly and it goes back to being office supplies for a while.',
+      'It is an ordinary stapler until a hand gets near it. The red ones are the worst, and nobody has ever seen one being bought. Unjam it properly and it goes back to being office supplies for a while.',
     dust_daemon:
-      'What lives behind the monitors when nobody dusts. It is not malicious, only dense, and it breathes out when you breathe in. A can of compressed air sends it to the vents, where it waits for the next quiet month.',
+      'It grows behind the monitors when nobody dusts, and it breathes out every time you breathe in. A can of compressed air sends it to the vents, where it waits for the next quiet month.',
     cable_serpent:
-      "Every cable in the Server Room, tied together over ten years by people who meant to label them later. It coils around ankles out of habit, not hunger. Zip ties and a label maker are the only things it respects.",
+      "Every cable in the Server Room, tied together over ten years by people who meant to label them later. It coils around any ankle that comes near. Zip ties and a label maker are the only things it respects.",
     overheated_rack:
-      'A rack whose fans gave up around the same time its owner left the company. It runs hot, it runs angry, and it is still serving something nobody can find. Talk it down to room temperature and it goes quiet for a bit.',
+      'A rack whose fans gave up around the time its owner left the company. It runs hot and is still serving something nobody can find. Talk it down to room temperature and it goes quiet for a bit.',
     firewall_gremlin:
-      'Lives in the rules nobody wrote down. It blocks the thing you need and lets through the thing you do not, then logs both. It can be got past on port 443, which it finds humiliating.',
+      'It lives in firewall rules nobody wrote down, blocks whatever you need and logs every attempt. It can be got past on port 443, which it finds humiliating.',
     legacy_mainframe:
-      'Older than the building, by some accounts. It knows every account, every invoice and every mistake, and it will not be migrated. Every few years someone announces its decommissioning. It has outlived four of them.',
+      'Older than the building, by some accounts. It holds every invoice since 1979 and will not be migrated. Four decommissioning projects have been announced, and it has outlived all of them.',
     coffee_slime:
       'The bottom of every pot left on the hotplate since the cafeteria opened, grown together. It moves slowly and smells of burnt Tuesday. A mop deals with it, though the mop is never the same afterwards.',
     crumb_golem:
@@ -214,23 +214,23 @@ const lore: LoreRule = {
     microwave_wraith:
       'Nobody cleaned the microwave and it noticed. It haunts the kitchen with the smell of fish curry and the sound of a ding that never quite finishes. Hit cancel and it fades; unplug it and it sulks for a week.',
     leftovers_hydra:
-      "Every unclaimed container in the fridge, grown heads. Cut one off and the Friday purge grows two. It is beaten by binning every head at once, which is also the only way the fridge has ever been cleared.",
+      "Every unclaimed container in the fridge, grown heads. Throw one out and two more turn up by Friday. It is beaten by binning every head at once, which is also the only way the fridge has ever been cleared.",
     box_file_beetle:
-      'A box file that learned to walk, then learned to bite. It carries the minutes of a meeting nobody attended and defends them to the last ring binder. Pressed flat and filed, it keeps for years.',
+      'A box file that learned to walk and bite. It carries the minutes of a meeting nobody attended and defends them to the last ring binder. Pressed flat and filed, it keeps for years.',
     shelf_lurker:
       'Lives between the rolling shelves and moves when they move. Nobody has seen all of it; the one working light only ever catches an arm or an eye. It does not like the shelves rolled shut and will tell you so.',
     microfilm_phantom:
       'The reader was left on in 1988 and something in the reel kept reading. It flickers through forty years of records looking for its own name. Wind it back to the start and it loses the thread for a while.',
     auditor:
-      'Came down to check the books in a year nobody can agree on and never came back up. Still asking for receipts. Still finding discrepancies. The only known defence is a receipt for everything, which is also impossible.',
+      'Came down to check the books in a year nobody can agree on and never went back up. It still asks for receipts and still finds discrepancies. The only known defence is a receipt for everything, which nobody has.',
     trolley_swarm:
-      'Shopping trolleys from a supermarket that closed, drawn to the garage by the slope. They move together and they move downhill. Chained up by the lift they rest, for a while, rattling softly to each other.',
+      'Shopping trolleys from a supermarket that closed, drawn to the garage by the slope. They move together, always downhill. Chained up by the lift they rest for a while, rattling against each other.',
     oil_slick:
-      'A patch that spread for a decade until it was big enough to have opinions. It wants your footing and it is patient. Sand takes the shine off it; the drain takes the rest, slowly.',
+      'An oil patch that spread for a decade until it started to move. It waits for someone to step on it. Sand takes the shine off it, and the drain takes the rest, slowly.',
     barrier_golem:
-      'The ticket barrier, after years of being driven at. It grew legs, an arm and a grievance. It wants a valid ticket and it does not take cards. An expired ticket confuses it long enough to walk under.',
+      'The ticket barrier, after years of being driven at, grew legs and a temper. It wants a valid ticket and does not take cards. An expired ticket confuses it long enough to walk under.',
     ghost_car:
-      'A car on the bottom level with no plates, no owner and no dust on it. Its lights come on when you look away. It has been clamped, towed and ticketed, and it is always back in the same bay by morning.',
+      'A car on the bottom level with no plates and no dust on it. Its lights come on when you look away. It has been towed more than once, and it is always back in the same bay by morning.',
   },
 }
 

@@ -51,7 +51,7 @@ const RosterRules = () => (
   <Consequences>
     <li>One hero adventures at a time. The others wait exactly where you left them, with no adventures and no catch-up.</li>
     <li>Each hero has its own gear, gold, potions and goals. Achievements belong to you, whichever hero earns them.</li>
-    <li>You can switch once a day. Changed your mind? Switching straight back within ten minutes does not count.</li>
+    <li>You can switch once a day. Switching straight back within ten minutes does not use it up.</li>
   </Consequences>
 )
 

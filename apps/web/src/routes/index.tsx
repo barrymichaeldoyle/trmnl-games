@@ -12,7 +12,7 @@ import { AfterListing, useGames } from '../lib/gameAccess'
 export const Route = createFileRoute('/')({
   head: () => seo({
     path: '/',
-    description: 'Games that play themselves on your TRMNL e-ink display. Desk Crawler is a free office RPG: every 15 minutes your hero fights, loots and levels up on the screen on your desk.',
+    description: 'Games that play themselves on your TRMNL e-ink display. Desk Crawler is a free office RPG where your hero takes on a new adventure every 15 minutes, on the screen on your desk.',
     jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, FAQ_JSON_LD].map(({ '@context': _, ...node }) => node) },
   }),
   // No loader: the page is static, and the games listing (only for the Slow Cast teaser) loads in the browser after it.

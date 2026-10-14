@@ -21,8 +21,8 @@ export const contentV18: ContentCatalog = {
     warrior: {
       id: 'warrior',
       name: 'Warrior',
-      blurb: 'Holds the desk. The most health and the steadiest fights, and nothing fancy.',
-      passive: { name: 'Steady', blurb: 'No trick and no weakness: full health and defense.' },
+      blurb: 'Holds the desk, with the most health and the steadiest fights.',
+      passive: { name: 'Steady', blurb: 'Full health and defense, with no special trick.' },
       hpPct: 100,
       modifiers: {},
       raidEdgePct: 0,

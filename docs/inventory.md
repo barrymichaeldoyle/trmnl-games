@@ -36,7 +36,7 @@ The desk drawer (D111, content v8 to v10, [spec](desk-drawer.md)) was a six-slot
 
 Selling many items one at a time is tedious on mobile and close to the intent rate limit. `inventory.sellMany` (and D129's `salvageMany`) takes up to 32 player-selected bag items in one atomic intent (`BATCH_ITEMS`, 30 before D146), so a full top bag clears in one sale; the validator keeps the top bag at or under it. Selection remains explicit: no automatic or rule-based disposal.
 
-Commands do not advance gameplay evaluation markers or XP. Pending wake shows “Adventures resume next tick.” No new find can appear while sleeping or waiting for wake. Owner/activation/quarantine checks remain mandatory.
+Commands do not advance gameplay evaluation markers or XP. Pending wake shows “Adventures resume within 15 minutes.” No new find can appear while sleeping or waiting for wake. Owner/activation/quarantine checks remain mandatory.
 
 ## State rules and display
 

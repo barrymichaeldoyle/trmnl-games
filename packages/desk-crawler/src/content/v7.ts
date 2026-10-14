@@ -40,7 +40,7 @@ export const contentV7: ContentCatalog = {
         'Caught {rival} at the drawers. They fled and dropped their loot.',
         'Found {rival} under the desk and showed them out.',
       ],
-      rescue: ['A narrow escape; resting now.', 'Barely made it out of the scuffle; resting now.'],
+      rescue: ['Got away and stopped to rest.', 'Got out of the scuffle and stopped to rest.'],
     },
   },
 }

@@ -12,7 +12,7 @@ import { DESK_CRAWLER_JSON_LD, DESK_CRAWLER_OG, seo } from '../../lib/seo'
  * The redirect is temporary (302) and the page below is kept: at the Slow Cast launch home becomes a two-game front page
  * and this becomes Desk Crawler's own page again, so remove the redirect then.
  */
-export const Route = createFileRoute('/games/desk-crawler')({ beforeLoad: () => { throw redirect({ to: '/', statusCode: 302 }) }, head: () => seo({ title: 'Desk Crawler', path: '/games/desk-crawler', description: 'Desk Crawler is a free office RPG that plays itself on your TRMNL e-ink display: your hero fights, loots and levels every 15 minutes across five floors, raids other desks and climbs the weekly rankings.', image: DESK_CRAWLER_OG, jsonLd: DESK_CRAWLER_JSON_LD }), component: Landing })
+export const Route = createFileRoute('/games/desk-crawler')({ beforeLoad: () => { throw redirect({ to: '/', statusCode: 302 }) }, head: () => seo({ title: 'Desk Crawler', path: '/games/desk-crawler', description: 'Desk Crawler is a free office RPG that plays itself on your TRMNL e-ink display. Every 15 minutes your hero takes on another adventure across five office floors, and it climbs the weekly rankings against other players.', image: DESK_CRAWLER_OG, jsonLd: DESK_CRAWLER_JSON_LD }), component: Landing })
 
 /** One topic of the game: a heading with its glyph, a few paragraphs, and a link into the matching help section. */
 function Topic({ id, glyph, tone, title, help, children }: { id: string; glyph: GlyphName; tone: string; title: string; help: string; children: ReactNode }) {
@@ -57,7 +57,7 @@ function Landing() {
             <p>When the bag fills, your hero naps until you make room. Sell spare gear for gold, or salvage it for materials and upgrade the pieces your hero wears. Bigger bags and potion pouches are bought with gold, and a wandering merchant sometimes sells items at a discount.</p>
           </Topic>
           <Topic id="players-heading" glyph="sword" tone="text-hp-ink" title="Other players" help="desk-raids">
-            <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. Nobody aims a raid and level never counts: it’s a coin toss tilted by stance, and the loser hands over 5% of its gold.</p>
+            <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. A raid is a coin toss tilted by stance, never by level, and nobody chooses who gets raided. The loser hands over 5% of its gold.</p>
             <p>Your screen shows the seven-day XP Top 5 for your level group, with your own row marked. You can also give your hero a public page with its level, rank and achievements, and share it with a picture card.</p>
           </Topic>
           <Topic id="career-heading" glyph="quest" tone="text-xp-ink" title="A career and a second hero" help="career">

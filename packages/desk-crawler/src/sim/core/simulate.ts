@@ -634,7 +634,7 @@ class TickRun {
         h.counters.rescues += 1
         this.metrics.rescues = 1
         primary = this.narrate(isCombat ? shared.rescue : shared.trapRescue, vars)
-        compact = 'A narrow escape; resting now.'
+        compact = 'Got away and stopped to rest.'
         outcome = { ...outcome, outcome: 'rescue' } as OutcomeDetail
       } else {
         goldPenalty = this.knockOut()

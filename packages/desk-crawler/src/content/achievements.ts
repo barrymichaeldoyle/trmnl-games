@@ -69,21 +69,21 @@ const counter = (id: string, name: string, category: string, key: NumericCounter
 // ---------------------------------------------------------------- monster families
 
 monster('paper_imp', 'Paper Imp', 'Office Cubicles', [
-  ['Shredder Duty', 'Fed a Paper Imp to the shredder. It was mostly staples.'],
-  ['Blue Bin Regular', 'Blue bin, not black bin.'],
+  ['Shredder Duty', 'Fed a Paper Imp to the shredder, staples and all.'],
+  ['Blue Bin Regular', 'Put one in the blue recycling bin.'],
   ['Imp Exterminator', 'The photocopier room is clear of imps.'],
   ['Paperless Office', 'Management sent a memo about it.'],
   ['Pulp Legend', 'A plaque hangs by the shredder.'],
 ])
 monster('rogue_roomba', 'Rogue Roomba', 'Office Cubicles', [
-  ['Flipped It', 'Like a turtle, but with more beeping.'],
+  ['Flipped It', 'Left one on its back, beeping.'],
   ['Bin Emptier', 'Emptied its dust bin.'],
   ['Roomba Wrangler', 'Twenty-five roombas flipped.'],
   ['Floor Supervisor', 'A hundred roombas flipped.'],
   ['Clean Sweep', 'The cleaners sent a thank-you card.'],
 ])
 monster('stapler_mimic', 'Stapler Mimic', 'Office Cubicles', [
-  ['Unjammed', 'Permanently this time.'],
+  ['Unjammed', 'Unjammed one for good.'],
   ['Staple Remover', 'Pulled the staples out.'],
   ['Mimic Spotter', 'You check every stapler twice.'],
   ['Supplies Auditor', 'You have opened every drawer on the floor.'],
@@ -91,21 +91,21 @@ monster('stapler_mimic', 'Stapler Mimic', 'Office Cubicles', [
 ])
 monster('dust_daemon', 'Dust Daemon', 'Office Cubicles', [
   ['Canned Air', 'Cleared one with a blast of canned air.'],
-  ['Dust Buster', 'Gesundheit.'],
+  ['Dust Buster', 'Blew five daemons into the vents.'],
   ['Allergy Season', 'Tissues on expenses.'],
   ['Spring Cleaning', 'Every vent dusted.'],
   ['Spotless', 'You can see your reflection in the keyboard.'],
 ])
 monster('cable_serpent', 'Cable Serpent', 'Server Room', [
-  ['Zip-Tied', 'Coiled, tied and labelled.'],
-  ['Cable Manager', 'Velcro, never tape.'],
-  ['Labelled Everything', 'Both ends of every cable.'],
+  ['Zip-Tied', 'Coiled one up and labelled it.'],
+  ['Cable Manager', 'Tied them up with velcro straps.'],
+  ['Labelled Everything', 'Labelled both ends of every cable.'],
   ['Patch Panel Pro', 'Colour-coded and alphabetical.'],
   ['Structured Cabling', 'The rack photo went viral internally.'],
 ])
 monster('overheated_rack', 'Overheated Rack', 'Server Room', [
   ['Room Temperature', 'Talked it down to 21 degrees.'],
-  ['Vented', 'Hot air out, cold air in.'],
+  ['Vented', 'Got the hot aisle venting properly.'],
   ['Thermal Throttler', 'Fans at a reasonable hum.'],
   ['Cold Aisle', 'Jumper required.'],
   ['Absolute Zero', 'The thermostat reads 18.'],
@@ -113,13 +113,13 @@ monster('overheated_rack', 'Overheated Rack', 'Server Room', [
 monster('firewall_gremlin', 'Firewall Gremlin', 'Server Room', [
   ['Port 443', 'Got through on HTTPS.'],
   ['Patch Tuesday', 'Reboot required.'],
-  ['Deny All', 'Then allow exactly what you mean.'],
+  ['Deny All', 'Started from a rule that blocks everything.'],
   ['Zero Trust', 'Every port closed by default.'],
   ['Air Gapped', 'Unplugged from every network.'],
 ])
 monster('legacy_mainframe', 'Legacy Mainframe', 'Server Room', [
-  ['Decommissioned', 'Finally.'],
-  ['Migration Lead', 'Moved to the cloud. The old box stays plugged in, just in case.'],
+  ['Decommissioned', 'Switched off a legacy mainframe at last.'],
+  ['Migration Lead', 'Moved it to the cloud and left the old box plugged in, just in case.'],
   ['Cloud Native', 'Nobody remembers the on-prem days.'],
   ['End of Life', 'Extended support declined.'],
   ['Last COBOL Standing', 'Somebody still has to maintain it.'],
@@ -127,7 +127,7 @@ monster('legacy_mainframe', 'Legacy Mainframe', 'Server Room', [
 monster('coffee_slime', 'Coffee Slime', 'Cafeteria Depths', [
   ['Mopped Up', 'Wet floor sign deployed.'],
   ['Down the Sink', 'With the rest of the morning.'],
-  ['Decaf Only', "For everyone's safety."],
+  ['Decaf Only', "The break room only stocks decaf now."],
   ['Barista', 'Latte art of a defeated slime.'],
   ['Cold Brew Master', 'Steeped for twelve hours.'],
 ])
@@ -135,14 +135,14 @@ monster('crumb_golem', 'Crumb Golem', 'Cafeteria Depths', [
   ['Dustpan', 'Swept into the bin.'],
   ['Crumb Collector', 'Not a crumb left for the pigeons.'],
   ['Table Wiper', 'Every table in the canteen.'],
-  ['Five-Second Rule', 'Not applicable to golems.'],
+  ['Five-Second Rule', 'Golems stay on the floor longer than five seconds.'],
   ['Breadwinner', 'You earned the loaf.'],
 ])
 monster('microwave_wraith', 'Microwave Wraith', 'Cafeteria Depths', [
-  ['Hit Cancel', 'Mid-ding.'],
+  ['Hit Cancel', 'Hit cancel before the ding.'],
   ['Unplugged', 'Try turning it off and leaving it off.'],
   ['Thirty Seconds More', 'It was still cold in the middle.'],
-  ['Fish Curry Day', 'You have smelled things.'],
+  ['Fish Curry Day', 'You have smelled every lunch in the microwave.'],
   ['Ding', 'The microwave is finally quiet.'],
 ])
 monster('leftovers_hydra', 'Leftovers Hydra', 'Cafeteria Depths', [
@@ -195,8 +195,8 @@ counter('finds', 'Finds', 'Lifetime', 'itemsFound', [10, 100, 1000, 5000], [
 ])
 counter('gold', 'Gold earned', 'Lifetime', 'goldEarned', [100, 1000, 10000, 100000], [
   ['Coins in the Couch', 'Lifetime gold, not current balance.'],
-  ['Expense Claim', 'Approved, eventually.'],
-  ['Bonus Season', 'Discretionary, apparently.'],
+  ['Expense Claim', 'A thousand gold earned, paid out after three reminders.'],
+  ['Bonus Season', 'Ten thousand gold earned, and the bonus is still discretionary.'],
   ['Golden Handshake', 'Enough gold to retire on.'],
 ])
 family('levels', 'Levels', 'Lifetime', [
@@ -218,7 +218,7 @@ counter('rescues', 'Rescues', 'Lifetime', 'rescues', [1, 5, 25], [
   ['Coworker of the Year', 'Awarded to whoever keeps rescuing you.'],
 ])
 counter('retreats', 'Retreats', 'Lifetime', 'retreats', [1, 5, 25, 100], [
-  ['Rain Check', 'Fight another day.'],
+  ['Rain Check', 'Backed out of a fight to try again later.'],
   ["Night Shift's Problem", 'Left five fights for the night shift.'],
   ['Strategic Withdrawal', 'Put it in the slide deck.'],
   ['Diary Full', 'Could not possibly fit the fight in.'],
@@ -227,7 +227,7 @@ counter('potions', 'Potions', 'Lifetime', 'potionsUsed', [1, 10, 100, 500], [
   ['First Aid', 'Tasted of strawberry.'],
   ['Kit Raider', 'Facilities put a lock on the first-aid box.'],
   ['Pharmacy', 'Prescriptions on request.'],
-  ['Self-Medicated', 'Not medical advice.'],
+  ['Self-Medicated', 'Five hundred potions drunk.'],
 ])
 counter('traps', 'Traps avoided', 'Lifetime', 'trapsAvoided', [1, 25, 100, 500], [
   ['Watch Your Step', 'Spotted the trap in time.'],
@@ -249,13 +249,13 @@ family('bags', 'Bag ladder', 'Lifetime', [
   ['Tote-ally Prepared', 'The Paper Bag is retired with honours.'],
   ['Backpacker', 'Padded straps and a laptop sleeve.'],
   ['Messenger', 'Worn across the body for maximum urgency.'],
-  ['Rolling Suitcase', 'It has wheels.'],
+  ['Rolling Suitcase', 'The bag with wheels.'],
 ], (i) => ({ kind: 'bag', atLeast: [10, 13, 16, 20][i]! }))
 counter('sales', 'Sales', 'Lifetime', 'itemsSold', [1, 25, 250, 1000], [
   ['Car Boot Sale', 'One careful owner.'],
   ['Declutter', 'Sold what you did not need.'],
   ['Procurement', 'A spreadsheet is involved.'],
-  ['Liquidation', 'Everything must go, and it did.'],
+  ['Liquidation', 'Sold a thousand pieces of gear.'],
 ])
 family('keepsakes', 'Keepsakes', 'Lifetime', [
   ['Desk Ornament', 'Your first keepsake, propped by the monitor.'],
@@ -318,80 +318,80 @@ counter('tasks_done', 'Tasks done', 'Lifetime', 'tasksCompleted', [1, 10, 50, 25
 
 counter('salvaged', 'Salvaged', 'Lifetime', 'itemsSalvaged', [1, 25, 100], [
   ['Recycling Bin', 'Stripped a piece of gear for parts instead of selling it.'],
-  ['Spare Parts Drawer', 'Twenty-five pieces broken down. The drawer rattles.'],
-  ['Scrapyard Foreman', 'A hundred pieces salvaged. Nothing leaves this office whole.'],
+  ['Spare Parts Drawer', 'Broke down twenty-five pieces of gear for parts.'],
+  ['Scrapyard Foreman', 'Salvaged a hundred pieces of gear.'],
 ])
 counter('workbench', 'Workbench', 'Lifetime', 'gearUpgraded', [1, 5, 15], [
   ['Tinkerer', 'Took a piece of gear to the workbench and made it better.'],
-  ['Shop Steward', 'Five workbench jobs. The bench has a dent now.'],
-  ['Master of the Works', 'Fifteen jobs, and a sign on the bench that says so.'],
+  ['Shop Steward', 'Finished five jobs at the workbench.'],
+  ['Master of the Works', 'Finished fifteen jobs at the workbench.'],
 ])
 
 // ---------------------------------------------------------------- v2.0 Potion strengths (catalog version 6, D131; appended, never edited)
 
 counter('mixing', 'Potion mixing', 'Lifetime', 'potionsCombined', [1, 10, 50], [
-  ['Kitchen Chemist', 'Three minor potions and a paperclip make a major. Tastes of pennies.'],
-  ['Tea Round', 'Ten majors mixed. The kettle has opinions.'],
-  ['Head of Pharmacy', 'Fifty majors. Facilities want the sink back.'],
+  ['Kitchen Chemist', 'Mixed three minor potions and some Scrap into a major one.'],
+  ['Tea Round', 'Mixed ten major potions.'],
+  ['Head of Pharmacy', 'Mixed fifty major potions in the break-room sink.'],
 ])
 
 // ---------------------------------------------------------------- v2.0 The Archive and the Parking Garage (catalog version 7, D133; appended, never edited)
 
 monster('box_file_beetle', 'Box File Beetle', 'Archive', [
   ['Pressed Flat', 'Filed under B, for beetle.'],
-  ['Ring Binder', 'Five beetles, one lever arch file.'],
-  ['Records Clerk', 'Twenty-five, in date order.'],
-  ['Head of Records', 'Nothing walks out of the Archive on your watch.'],
-  ['Deep Storage', 'Five hundred beetles. The basement is quiet now.'],
+  ['Ring Binder', 'Filed five beetles in one lever arch file.'],
+  ['Records Clerk', 'Filed twenty-five beetles in date order.'],
+  ['Head of Records', 'Filed a hundred beetles.'],
+  ['Deep Storage', 'Filed five hundred beetles.'],
 ])
 monster('shelf_lurker', 'Shelf Lurker', 'Archive', [
-  ['Shelves Shut', 'Rolled them closed and did not look back.'],
-  ['Aisle Monitor', 'Five lurkers, five aisles.'],
+  ['Shelves Shut', 'Rolled the shelves shut on a lurker.'],
+  ['Aisle Monitor', 'Shut five lurkers in the stacks.'],
   ['Night Librarian', 'You know which shelf it moved to.'],
-  ['Stack Supervisor', 'A hundred lurkers. The light stays on now.'],
-  ['Keeper of the Stacks', 'Five hundred. Nothing lurks here without asking.'],
+  ['Stack Supervisor', 'Shut a hundred lurkers in the stacks.'],
+  ['Keeper of the Stacks', 'Shut five hundred lurkers in the stacks.'],
 ])
 monster('microfilm_phantom', 'Microfilm Phantom', 'Archive', [
   ['Rewound', 'Back to the start of the reel.'],
-  ['Reel Change', 'Five phantoms, five reels.'],
+  ['Reel Change', 'Wound five phantoms back to the start.'],
   ['Microfilm Operator', 'Twenty-five reels and a very tired eye.'],
   ['Reading Room', 'A hundred reels, all catalogued.'],
-  ['Digitised', 'Five hundred. The reader has been switched off at the wall.'],
+  ['Digitised', 'Wound five hundred phantoms back to the start.'],
 ])
 monster('auditor', 'Auditor', 'Archive', [
   ['Receipt Found', 'For once, you had the paperwork.'],
   ['Books Balanced', 'Five audits with nothing to report.'],
-  ['Clean Audit', 'Twenty-five audits. Not a discrepancy among them.'],
-  ['Audit Committee', 'A hundred. The Auditor now asks you for receipts.'],
-  ['Signed Off', 'Five hundred audits. The books are closed for good.'],
+  ['Clean Audit', 'Passed twenty-five audits without a discrepancy.'],
+  ['Audit Committee', 'Passed a hundred audits.'],
+  ['Signed Off', 'Passed five hundred audits.'],
 ])
 monster('trolley_swarm', 'Trolley Swarm', 'Parking Garage', [
   ['Chained Up', 'A pound coin got them back.'],
   ['Trolley Return', 'Five swarms sent back up the ramp.'],
-  ['Bay Attendant', 'Twenty-five swarms. The lift is clear.'],
+  ['Bay Attendant', 'Chained up twenty-five swarms by the lift.'],
   ['Trolley Park', 'A hundred swarms, chained in rows.'],
-  ['Rolling Stock', 'Five hundred. The supermarket wants its trolleys back.'],
+  ['Rolling Stock', 'Chained up five hundred swarms of trolleys.'],
 ])
 monster('oil_slick', 'Oil Slick', 'Parking Garage', [
-  ['Sanded Over', 'Grit beats shine.'],
+  ['Sanded Over', 'Sanded the shine off an oil slick.'],
   ['Drain Cleared', 'Five slicks down the drain.'],
-  ['Spill Kit', 'Twenty-five slicks. The kit has a dent.'],
-  ['Dry Floor', 'A hundred slicks mopped. The sign came down.'],
-  ['Teflon', 'Five hundred. Nothing sticks to you.'],
+  ['Spill Kit', 'Mopped twenty-five slicks down the drain.'],
+  ['Dry Floor', 'Mopped a hundred slicks down the drain.'],
+  ['Teflon', 'Mopped five hundred slicks down the drain.'],
 ])
 monster('barrier_golem', 'Barrier Golem', 'Parking Garage', [
   ['Walked Under', 'An expired ticket does wonders.'],
   ['Season Ticket', 'Five golems lifted.'],
-  ['Permit Holder', 'Twenty-five. The barrier knows your face.'],
-  ['Free Parking', 'A hundred golems. The arm stays up for you.'],
-  ['Barrier Free', 'Five hundred. The garage gave up on tickets.'],
+  ['Permit Holder', 'Walked under twenty-five barrier golems.'],
+  ['Free Parking', 'Got past a hundred barrier golems.'],
+  ['Barrier Free', 'Got past five hundred barrier golems.'],
 ])
 monster('ghost_car', 'Ghost Car', 'Parking Garage', [
-  ['Clamped', 'It was back by morning. You knew it would be.'],
+  ['Clamped', 'Clamped a ghost car that was back in its bay by morning.'],
   ['Ticketed', 'Five tickets under one wiper.'],
-  ['Towed', 'Twenty-five tows. It keeps coming back.'],
-  ['Impounded', 'A hundred. The pound has a bay with its name on it.'],
-  ['Scrapped', 'Five hundred. The lights still come on in the yard.'],
+  ['Towed', 'Had a ghost car towed twenty-five times.'],
+  ['Impounded', 'Had a ghost car towed a hundred times.'],
+  ['Scrapped', 'Had a ghost car towed five hundred times.'],
 ])
 family('floor_cleared_4', 'Archive Cleared', 'Set piece', [['Archive Cleared', 'Twenty-five of each in the Archive.']], () => ({ kind: 'biomeMonsters', biomeId: 'archive', atLeast: 25 }))
 family('floor_cleared_5', 'Garage Cleared', 'Set piece', [['Garage Cleared', 'Twenty-five of each in the Parking Garage.']], () => ({ kind: 'biomeMonsters', biomeId: 'parking_garage', atLeast: 25 }))
@@ -399,20 +399,20 @@ family('floor_cleared_5', 'Garage Cleared', 'Set piece', [['Garage Cleared', 'Tw
 // ---------------------------------------------------------------- P37 Classes and the roster (catalog version 8, D136; appended, never edited)
 
 family('rogue', 'The Rogue', 'Roster', [
-  ['New Hire', 'Recruited a Rogue. The corridors have a new regular.'],
+  ['New Hire', 'Recruited a Rogue.'],
   ['Cutpurse', 'Your Rogue reached level 7, and the desk raids that come with it.'],
-  ['Stairwell Shadow', 'Your Rogue reached level 12. Nobody heard it come in.'],
-  ['Master of Keys', 'Your Rogue reached level 16. Every door in the building opens for it.'],
+  ['Stairwell Shadow', 'Your Rogue reached level 12.'],
+  ['Master of Keys', 'Your Rogue reached level 16.'],
 ], (i) => ({ kind: 'classLevel', heroClass: 'rogue', atLeast: [1, 7, 12, 16][i]! }))
 family('rogue_raids', 'Light Fingers', 'Roster', [
   ['Pickpocket', 'Your Rogue won a desk raid.'],
   ['Second-Storey Work', 'Ten raids won as a Rogue.'],
-  ['The Heist', 'Fifty raids won as a Rogue. The safe was never locked.'],
+  ['The Heist', 'Fifty raids won as a Rogue.'],
 ], (i) => ({ kind: 'classCounter', heroClass: 'rogue', counter: 'raidsWon', atLeast: [1, 10, 50][i]! }))
 family('rogue_gold', 'Deep Pockets', 'Roster', [
   ['Loose Change', 'Your Rogue has earned 1,000 gold.'],
   ['Petty Cash', 'Your Rogue has earned 10,000 gold.'],
-  ['Slush Fund', 'Your Rogue has earned 50,000 gold. Accounts are asking questions.'],
+  ['Slush Fund', 'Your Rogue has earned 50,000 gold.'],
 ], (i) => ({ kind: 'classCounter', heroClass: 'rogue', counter: 'goldEarned', atLeast: [1000, 10000, 50000][i]! }))
 
 // ---------------------------------------------------------------- D139 Office calendar (catalog version 9; appended, never edited)
@@ -420,7 +420,7 @@ family('rogue_gold', 'Deep Pockets', 'Roster', [
 counter('office_calendar', 'Office calendar', 'Office calendar', 'occasionsSeen', [1, 6, 12], [
   ['Signed the Card', 'On duty for an office occasion.'],
   ['Party Committee', 'Six office occasions at the desk.'],
-  ['Office Institution', 'Twelve occasions. Someone saves you cake now.'],
+  ['Office Institution', 'At the desk for twelve office occasions.'],
 ])
 family('thirteenth_floor', 'Thirteenth Floor', 'Raids', [['Thirteenth Floor', 'Caught in a Friday the 13th raid that went wrong for everyone.']], () => ({ kind: 'counter', counter: 'raidMishaps', atLeast: 1 }))
 
@@ -428,24 +428,24 @@ family('thirteenth_floor', 'Thirteenth Floor', 'Raids', [['Thirteenth Floor', 'C
 
 counter('networking', 'Networking', 'Coworkers', 'meetings', [1, 10, 50], [
   ['Water Cooler Moment', 'Met another hero on the floor.'],
-  ['Familiar Face', 'Ten meetings. People wave when you walk past.'],
-  ['Office Fixture', 'Fifty meetings. Nobody remembers the office before you.'],
+  ['Familiar Face', 'Met other heroes ten times.'],
+  ['Office Fixture', 'Met other heroes fifty times.'],
 ])
 
 // ---------------------------------------------------------------- D145 Lost property (catalog version 11; appended, never edited)
 
 counter('lost_and_found', 'Lost and found', 'Coworkers', 'lostPropertyFound', [1, 10, 25], [
   ['Lost and Found', "Found another hero's spare, name and all."],
-  ['Label Reader', "Ten spares found. You know everyone's handwriting."],
-  ['Head of Lost Property', 'Twenty-five spares found. People check with you first.'],
+  ['Label Reader', "Found ten other heroes' spares."],
+  ['Head of Lost Property', "Found twenty-five other heroes' spares."],
 ])
 
 // ---------------------------------------------------------------- D146 Bigger bags (catalog version 12; appended, never edited)
 
 family('big_bags', 'Bigger bags', 'Lifetime', [
-  ['Gym Duffel', 'Smells faintly of the gym. Holds 24.'],
+  ['Gym Duffel', 'A 24-slot bag that smells faintly of the gym.'],
   ['Steamer Trunk', 'Covered in stickers from places you have never been.'],
-  ['Stationery Cupboard', 'You have the only key. Facilities have stopped asking.'],
+  ['Stationery Cupboard', 'A 32-slot cupboard, and you have the only key.'],
 ], (i) => ({ kind: 'bag', atLeast: [24, 28, 32][i]! }))
 
 /** Families in display order. */

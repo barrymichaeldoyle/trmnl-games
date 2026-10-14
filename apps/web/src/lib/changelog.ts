@@ -23,11 +23,11 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       },
       {
         title: 'Rankings show the players around you',
-        body: 'The weekly board on your TRMNL now centres on your hero, so you see who is just ahead of you and who is just behind, not only the top of the board. In the app, Rankings opens with the two players either side of you once you are below fifth.',
+        body: 'The weekly board on your TRMNL now centres on your hero, so you see who is just ahead of you and who is just behind as well as the top of the board. In the app, Rankings opens with the two players either side of you once you are below fifth.',
       },
       {
         title: 'The workbench opens at level 4',
-        body: 'Salvage and the workbench used to be there from your first adventure, but the first upgrade needs level 4, so early materials had nothing to buy. They now open together at level 4. Your TRMNL says when, and your next goal is to salvage a piece of gear. Before that, sell your spares for gold, which pays for the first bags.',
+        body: 'Salvage and the workbench used to be there from your first adventure, but the first upgrade needs level 4, so early materials could not be spent. They now open together at level 4. Your TRMNL says when, and your next goal is to salvage a piece of gear. Before that, sell your spares for gold, which pays for the first bags.',
       },
       {
         title: 'Goals done in the app show as done straight away',

@@ -476,7 +476,7 @@ export const resumeAdventures = mutation({
       const wakeAtTick = hero.wakeAtTick ?? (world?.currentTick ?? 0) + 1
       if (hero.wakeAtTick !== undefined && hero.targetBiomeId === targetBiomeId) return { changed: false, tick: wakeAtTick }
       await ctx.db.patch(hero._id, { wakeAtTick, targetBiomeId })
-      await commandLog(ctx, hero, 'resume_adventures', 'Adventures resume next tick.')
+      await commandLog(ctx, hero, 'resume_adventures', 'Adventures resume within 15 minutes.')
       return { changed: true, tick: wakeAtTick }
     }),
 })

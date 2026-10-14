@@ -1,9 +1,9 @@
 /** Cosmetic desk souvenirs. Order is permanent: append new entries, never reorder earned ones. */
 export const DESK_KEEPSAKES = [
   { id: 'stapler', name: 'Heroic Stapler', description: 'Kept every report in one piece.', pixels: ['........', '.#####..', '.#...##.', '..#####.', '......#.', '.######.', '.######.', '........'] },
-  { id: 'mug', name: 'Survivor’s Mug', description: 'Chipped, stained and still in use.', pixels: ['........', '.#####..', '.#...###', '.#...#.#', '.#...###', '.#...#..', '..###...', '........'] },
+  { id: 'mug', name: 'Survivor’s Mug', description: 'Stained brown inside and still in use.', pixels: ['........', '.#####..', '.#...###', '.#...#.#', '.#...###', '.#...#..', '..###...', '........'] },
   { id: 'disk', name: 'Ancient Save Disk', description: 'Holds one spreadsheet from 1994.', pixels: ['.######.', '.#..#.#.', '.#..#.#.', '.######.', '.#....#.', '.#.##.#.', '.######.', '........'] },
-  { id: 'plant', name: 'Unkillable Fern', description: 'Nobody waters it. It grows anyway.', pixels: ['...#....', '.#.#.#..', '..###...', '.#.##.#.', '..###...', '..###...', '..#.#...', '...#....'] },
+  { id: 'plant', name: 'Unkillable Fern', description: 'Nobody waters it, and it keeps growing.', pixels: ['...#....', '.#.#.#..', '..###...', '.#.##.#.', '..###...', '..###...', '..#.#...', '...#....'] },
   { id: 'key', name: 'Mystery Cabinet Key', description: 'Nobody remembers which cabinet it opens.', pixels: ['..###...', '.#...#..', '.#.#.#..', '..###...', '...#....', '...###..', '...#....', '...##...'] },
   { id: 'duck', name: 'Debugging Duck', description: 'Explain the bug to it and you will spot the fix.', pixels: ['....##..', '...####.', '...#.###', '.#####..', '#######.', '#######.', '.#####..', '........'] },
   { id: 'clock', name: 'Five O’Clock Clock', description: 'Stuck at five past five.', pixels: ['..####..', '.#....#.', '#..#...#', '#..#...#', '#..###.#', '#......#', '.#....#.', '..####..'] },

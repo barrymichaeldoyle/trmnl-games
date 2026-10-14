@@ -18,7 +18,7 @@ export function LostProperty() {
   return (
     <section aria-labelledby="lost-property-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <SectionTitle id="lost-property-title" glyph="lost_property" tone="text-sky-ink">Lost property</SectionTitle>
-      <p className="text-sm text-muted">A hero knocked out on a floor drops a spare of something it wears, with its owner's name on it. Another player's hero may find it instead of an ordinary find. Nobody loses anything.</p>
+      <p className="text-sm text-muted">A hero knocked out on a floor drops a spare of something it wears, with its owner's name on it. Another player's hero may find it in place of an ordinary find.</p>
       <dl className="grid grid-cols-2 gap-x-4 min-[480px]:gap-x-6">
         <div className="flex min-w-0 items-baseline justify-between gap-2 border-t-2 border-dashed border-rule py-2">
           <dt className="label-px min-w-0 text-muted">Spares found</dt>
