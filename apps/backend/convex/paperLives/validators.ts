@@ -174,3 +174,13 @@ export const career = v.object({
   traits: v.array(v.string()),
   setPieces: v.array(v.string()),
 })
+
+/** How a photo draws its subject (packages/paper-lives art/portrait.ts `PortraitKey`), fixed when it was taken. */
+export const portraitKey = v.object({
+  stage,
+  hair: v.number(),
+  glasses: v.boolean(),
+  extra: v.union(v.literal('none'), v.literal('hat'), v.literal('scarf')),
+  pet: v.union(v.string(), v.null()),
+  frame: v.boolean(),
+})

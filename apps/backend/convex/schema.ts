@@ -3,7 +3,7 @@ import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
 import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, order, season, timeBand, waterId, weather } from './idleAngler/validators'
-import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind } from './paperLives/validators'
+import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind, portraitKey as plPortraitKey } from './paperLives/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
@@ -139,13 +139,17 @@ export const merchantOffer = v.object({
 export const merchantVisit = v.object({ offers: v.array(merchantOffer), expiresAtTick: v.number(), biomeId: v.string() })
 
 /** P33: the two alert kinds; a new kind needs its own decision row (alerts.md). */
-export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.literal('cooler_full'), v.literal('bait_out'))
+export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.literal('cooler_full'), v.literal('bait_out'), v.literal('major_decision'), v.literal('life_ended'), v.literal('new_arrival'))
 export const alertPreferences = v.object({
   asleep: v.boolean(),
   merchant: v.boolean(),
   /** D115: Idle Angler's kinds; absent means off. Devices and quiet hours are shared by both games. */
   coolerFull: v.optional(v.boolean()),
   baitOut: v.optional(v.boolean()),
+  /** D159: Paper Lives' kinds; absent means off. */
+  majorDecision: v.optional(v.boolean()),
+  lifeEnded: v.optional(v.boolean()),
+  newArrival: v.optional(v.boolean()),
   quietStart: v.number(),
   quietEnd: v.number(),
   /** Set when the last device's subscription went stale and both kinds turned off; Settings says why. */
@@ -332,8 +336,27 @@ export default defineSchema({
     lifeId: v.optional(v.id('lives')),
     /** The totals of the account's finished lives, for achievements (D159, L5). */
     career: v.optional(plCareer),
+    /** L6: photos claimed with the weekly device code, and the week of the newest. */
+    photosClaimed: v.optional(v.number()),
+    lastPhotoWeek: v.optional(v.number()),
     createdAt: v.number(),
   }).index('by_userId', ['userId']),
+
+  /**
+   * L6: a photo claimed with the weekly device code, one per account a week: the character as they were that week,
+   * kept with the life it was taken in (by ordinal) after that life ends.
+   */
+  plPhotos: defineTable({
+    userId: v.id('users'),
+    lifeId: v.id('lives'),
+    ordinal: v.number(),
+    week: v.number(),
+    takenAt: v.number(),
+    name: v.string(),
+    age: v.number(),
+    petName: v.optional(v.string()),
+    portrait: plPortraitKey,
+  }).index('by_userId_and_ordinal', ['userId', 'ordinal']),
 
   /** One row per earned Paper Lives achievement, keyed by owner (D65 shape); bounded by the catalog. */
   plAchievements: defineTable({
@@ -806,6 +829,10 @@ export default defineSchema({
     /** Desk Crawler rows carry the hero, Idle Angler rows the angler (D115). */
     heroId: v.optional(v.id('heroes')),
     anglerId: v.optional(v.id('anglers')),
+    /** Paper Lives rows carry the life, the age it was raised at and the decision or the newborn's id (D159). */
+    lifeId: v.optional(v.id('lives')),
+    lifeAge: v.optional(v.number()),
+    detail: v.optional(v.string()),
     kind: alertKind,
     /** `${heroId}:${kind}:${eventTick}`: one nap or one merchant visit is one alert. */
     key: v.string(),

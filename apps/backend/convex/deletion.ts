@@ -163,7 +163,8 @@ export const purgeGameStep = internalMutation({
       if (profile?.lifeId) await ctx.db.patch(profile._id, { lifeId: undefined })
       const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', 'paper-lives')).take(BATCH)
       if ((await deleteBatch(ctx, receipts)) + (await purgeGameAlertRows(ctx, job.userId, 'paper-lives', BATCH)) > 0) return await again()
-      if (profile) await ctx.db.patch(profile._id, { state: 'active' })
+      // The profile stays for a fresh start, without the career or photo totals its lives built up.
+      if (profile) await ctx.db.patch(profile._id, { state: 'active', career: undefined, photosClaimed: undefined, lastPhotoWeek: undefined })
       await ctx.db.patch(jobId, { state: 'completed', phase: 'done', completedAt: now, lastProgressAt: now })
       return null
     }
@@ -303,7 +304,7 @@ export const purgeStep = internalMutation({
           if ((await purgeAngler(ctx, ia.anglerId, BATCH)) > 0) return await again()
           await ctx.db.patch(ia._id, { anglerId: undefined })
         }
-        // D159: the account's lives, records and board rows.
+        // D159: the account's lives, records, board rows, achievements and photos.
         const pl = await paperLivesProfile(ctx, job.userId)
         if ((await purgeLives(ctx, job.userId, pl?.lifeId, BATCH)) > 0) return await again()
         if (pl?.lifeId) await ctx.db.patch(pl._id, { lifeId: undefined })

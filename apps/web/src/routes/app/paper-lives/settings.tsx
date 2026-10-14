@@ -7,13 +7,20 @@ import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import type { LifeView } from '../../../lib/paperLives'
 import { ActionFeedback, Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
+import { AlertsCard, type AlertKindCopy } from '../desk-crawler/-alerts'
 import { ConfirmSheet, Consequences } from '../desk-crawler/-confirm'
 
-/** The More tab: rankings, achievements and help, then settings (pause, public profile, deleting Paper Lives progress alone). */
+/** The More tab: rankings, achievements and help, then settings (pause, public profile, alerts, deleting Paper Lives progress alone). */
 export const Route = createFileRoute('/app/paper-lives/settings')({
   loader: ({ context }) => preload(context, convexQuery(api.paperLives.lives.view, {})),
   component: SettingsPage,
 })
+
+const PAPER_LIVES_ALERTS: readonly AlertKindCopy[] = [
+  { id: 'majorDecision', name: 'Big decision', blurb: 'A marriage, a move, a job or the will is waiting and the year can close. Once per decision.' },
+  { id: 'lifeEnded', name: 'Life ended', blurb: 'The character has died and the next life can begin. Waits until quiet hours end.' },
+  { id: 'newArrival', name: 'New baby', blurb: 'A child or grandchild joins the family. Skipped during quiet hours.' },
+]
 
 const MORE_LINKS = [
   { to: '/app/paper-lives/rankings', label: 'Rankings', blurb: 'The longest lives and the biggest fortunes, this week and all time.' },
@@ -72,8 +79,9 @@ function SettingsPage() {
           <ActionFeedback error={profile.error} message={profile.message} />
         </Card>
       ) : null}
+      {active ? <AlertsCard notify={notify} kinds={PAPER_LIVES_ALERTS} intro="Get a nudge on this phone when something big happens in the life." quietNote="A big decision and a death wait until quiet hours end, though a decision whose year closes overnight is dropped. A birth during quiet hours is skipped." /> : null}
       <Card title="Delete Paper Lives progress">
-        <p>This removes the current life, every finished life in the album and your Paper Lives connections. Your TRMNL Games account and your other games stay. It cannot be undone.</p>
+        <p>This removes the current life, every finished life in the album with its photos, your Paper Lives achievements and your Paper Lives connections. Your TRMNL Games account and your other games stay. It cannot be undone.</p>
         <label className="mt-3 flex flex-col gap-1">
           <span className="text-sm font-semibold">Type DELETE to confirm</span>
           <input value={confirm} onChange={(event) => setConfirm(event.target.value)} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" autoComplete="off" />

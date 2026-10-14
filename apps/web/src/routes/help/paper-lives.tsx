@@ -61,6 +61,10 @@ export const Route = createFileRoute('/help/paper-lives')({
       <p>After a death, your screen shows a memorial until you start the next life on the Life page. You can carry on as one of the children, at the age they are, with the family name and what the will left them. Or you can start again as a stranger at birth. Nothing starts by itself.</p>
       <h2 id="your-screen">Your screen</h2>
       <p>The full layout shows the portrait with the pet, the stats, the newest lines with their ages, the year's decision or the time it closes, last year's recap and this week's longest lives. Smaller layouts keep the name, the newest lines and the decision. The code in the corner opens the companion.</p>
+      <h2 id="photos">Photos</h2>
+      <p>Each week your TRMNL shows a Photo code in its title bar. Enter it on the Album page to take a photo of your character as they are that week, pet and all. One photo a week; last week's code still works if your screen was slow to refresh, and a missed week costs nothing. Photos change nothing in the life. They stay with the life they were taken in, in the album and on its public page, and count towards the Photos achievements.</p>
+      <h2 id="alerts">Alerts</h2>
+      <p>On the More page you can turn on alerts for this phone: a big decision waiting once the year can close, a life that has ended, and a new child or grandchild in the family. They are off until you turn them on, share quiet hours with your other games, and never come more than twice a day. Ordinary decisions never send an alert.</p>
       <h2 id="pausing-and-removing">Pausing and removing</h2>
       <p>Pause a life on the More page and no years pass until you resume. Uninstalling the plugin in TRMNL keeps the life with your account. Deleting Paper Lives progress on the More page removes every life and the album, and leaves your account and your other games.</p>
       <h2 id="help">Help</h2>

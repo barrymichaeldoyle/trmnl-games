@@ -8,11 +8,12 @@ import { adminRef } from '../lib/adminAccess'
 import { ALIAS_RULE, normalizeAlias } from '../lib/names'
 import { pagePublic } from '../lib/publicPage'
 import { gameStatusOf } from '../platform'
+import { photosOf } from './photos'
 import { currentLife } from './profile'
 
 /**
  * A finished life's public page (paper-lives.md "What a player sees"): `/profile/<public name>/lives/<n>`, with the
- * portrait, the age at death, the generation, the epitaph and the highlights. Missing, private, suspended and
+ * portrait, the age at death, the generation, the epitaph, the highlights and the photos taken in it. Missing, private, suspended and
  * name-repair names, a life that has not ended, and a game that is not live (to anyone but an admin) all read as
  * the same null, as D109.
  */
@@ -45,6 +46,7 @@ export const lifePage = query({
       portrait: portraitKey({ stage: stageFor(record.age), last: record.last, generation: record.generation, traits: [record.traits[0]!, record.traits[1]!], flags: [], status: 'ended' }),
       parent: parent ? { ordinal: parent.ordinal, name: `${parent.first} ${parent.last}` } : null,
       child: child && child.parentRecordId === record._id ? { ordinal: child.ordinal, name: `${child.first} ${child.last}` } : null,
+      photos: await photosOf(ctx, user._id, ordinal),
     }
   },
 })

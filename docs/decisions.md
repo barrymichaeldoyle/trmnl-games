@@ -545,6 +545,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 L5: album, boards and achievements built ([build notes](paper-lives.md#l5-build-2026-10-14)): catalog v1 with 126 achievements over the account's career across lives, the album and family tree, the Following card, the Rankings and Achievements pages, and the profile section. Long-haul tiers lowered from the spec to what an hourly player reaches in about three months (Lives to 20, Years to 900).
 
+2026-10-14, D159 L6: alerts, photos and analytics built ([build notes](paper-lives.md#l6-build-2026-10-14)): the three alert kinds on the shared push machinery, the weekly photo code on the device (template v2) with the album's photos and the Photos family (achievements v2), the analytics events, and the privacy and help sections. The alert switches live on `users.alerts` beside the other games' rather than in a separate block. Deleting Paper Lives progress now also removes its achievements and career totals, which L5 left behind. The MVP build is complete; L7 (plugin and listing) is Barry's.
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.

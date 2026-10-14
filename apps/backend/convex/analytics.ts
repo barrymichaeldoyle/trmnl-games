@@ -4,9 +4,12 @@ import { internalAction, internalQuery } from './_generated/server'
 import { currentCharacterOf } from './lib/gameHooks'
 import { gameSlug } from './schema'
 
-/** Re-check consent and account state at send time; no telemetry in simulation or polling. */
+/** Server-side events: activations, and one per finished Paper Lives life (D159, L6). */
+const serverEvent = v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started'), v.literal('life ended'))
+
+/** Re-check consent and account state at send time; no telemetry in simulation or polling beyond a life's end. */
 export const activationSubject = internalQuery({
-  args: { userId: v.id('users'), event: v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started')), game: v.optional(gameSlug) },
+  args: { userId: v.id('users'), event: serverEvent, game: v.optional(gameSlug) },
   returns: v.union(v.null(), v.object({ distinctId: v.string() })),
   handler: async (ctx, { userId, event, game }) => {
     const user = await ctx.db.get(userId)
@@ -18,9 +21,10 @@ export const activationSubject = internalQuery({
 })
 
 export const captureActivation = internalAction({
-  args: { userId: v.id('users'), event: v.optional(v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started'))), game: v.optional(gameSlug) },
+  // Properties are bands and catalog ids only, never names or story text.
+  args: { userId: v.id('users'), event: v.optional(serverEvent), game: v.optional(gameSlug), properties: v.optional(v.record(v.string(), v.string())) },
   returns: v.null(),
-  handler: async (ctx, { userId, event = 'hero activated', game = 'desk-crawler' }) => {
+  handler: async (ctx, { userId, event = 'hero activated', game = 'desk-crawler', properties = {} }) => {
     const token = process.env.POSTHOG_PROJECT_TOKEN
     if (!token) return null
     const subject = await ctx.runQuery(internal.analytics.activationSubject, { userId, event, game })
@@ -28,7 +32,7 @@ export const captureActivation = internalAction({
     try {
       const response = await fetch(`${process.env.POSTHOG_HOST ?? 'https://eu.i.posthog.com'}/i/v0/e/`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(5000),
-        body: JSON.stringify({ api_key: token, event, properties: { distinct_id: subject.distinctId, $process_person_profile: true, $ip: null, game, environment: process.env.POSTHOG_ENVIRONMENT ?? 'development', source: 'convex' } }),
+        body: JSON.stringify({ api_key: token, event, properties: { ...properties, distinct_id: subject.distinctId, $process_person_profile: true, $ip: null, game, environment: process.env.POSTHOG_ENVIRONMENT ?? 'development', source: 'convex' } }),
       })
       if (!response.ok) console.warn('POSTHOG_ACTIVATION_CAPTURE_FAILED', response.status)
     } catch { console.warn('POSTHOG_ACTIVATION_CAPTURE_FAILED') }

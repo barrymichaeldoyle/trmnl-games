@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import type { PortraitKey } from '@trmnl-games/paper-lives/art/portrait'
-import { Portrait } from '../../lib/paperLives'
+import { useAnalyticsView } from '../../lib/analyticsProvider'
+import { Photos, Portrait, type PhotoView } from '../../lib/paperLives'
 import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
@@ -19,13 +20,14 @@ type LifePage = {
   highlights: string[]
   endedAt: number
   portrait: PortraitKey
+  photos: PhotoView[]
   parent: { ordinal: number; name: string } | null
   child: { ordinal: number; name: string } | null
 } | null
 
 const pageQuery = (alias: string, n: string) => convexQuery(api.paperLives.public.lifePage, { alias, ordinal: Number(n) })
 
-/** A finished life's public page (D159): the portrait, the age and generation, the epitaph and the highlights. */
+/** A finished life's public page (D159): the portrait, the age and generation, the epitaph, the highlights and the photos. */
 export const Route = createFileRoute('/profile/$alias_/lives/$n')({
   loader: async ({ context, params }) => (await context.queryClient.ensureQueryData(pageQuery(params.alias, params.n))) as LifePage,
   head: ({ loaderData, params }) =>
@@ -39,6 +41,8 @@ function LifePublicPage() {
   const { alias, n } = Route.useParams()
   const { data } = useQuery(pageQuery(alias, n))
   const page = data as LifePage | undefined
+  // The public page sits outside the game's routes, so it names its game.
+  useAnalyticsView('life page viewed', { game: 'paper-lives' }, Boolean(page))
   return (
     <SiteShell>
       <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-6 px-4 py-10">
@@ -60,6 +64,11 @@ function LifePublicPage() {
             {page.highlights.length > 0 ? (
               <Card title="The moments that mattered">
                 <ol className="flex flex-col gap-2 text-sm">{page.highlights.map((line, i) => <li key={i}>{line}</li>)}</ol>
+              </Card>
+            ) : null}
+            {page.photos.length > 0 ? (
+              <Card title="Photos">
+                <Photos photos={page.photos} label={`Photos of ${page.name}`} />
               </Card>
             ) : null}
             <nav aria-label="Family" className="flex flex-wrap gap-4 text-sm">

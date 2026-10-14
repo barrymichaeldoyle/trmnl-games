@@ -8,10 +8,12 @@
  * Template v1 (D159, L3): the portrait with the pet, the name and age, the status line, the traits, four stat bars
  * and money, the newest lines with their ages, the decision prompt or the close time, the recap, this week's longest
  * lives and the code; a memorial swaps the column for the framed portrait and the epitaph.
+ *
+ * Template v2 (D159, L6): the weekly photo code in the title bar, as Idle Angler's fly code.
  */
 import { markUri, STORY_GLYPHS, type PlMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 1
+export const TEMPLATE_VERSION = 2
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -105,18 +107,23 @@ const welcome = (compact: boolean) => `
 /** The live screen, the memorial or the welcome. */
 const ready = (live: string, memorial: string, compact = false) => `{% if status == "unlinked" or status == "pending" %}${welcome(compact)}{% elsif status == "ended" %}${memorial}{% else %}${live}{% endif %}`
 
-const titleBar = (orientation: 'landscape' | 'portrait') => `
+/**
+ * The title bar with the weekly photo code. A narrow portrait column (side, quarter) cannot fit the name beside the
+ * code, so while a code shows it takes the name's place there with the short label, as Idle Angler's fly code does.
+ */
+const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
 <div class="title_bar ${orientation === 'landscape' ? 'portrait:hidden' : 'landscape:hidden'}">
   <img class="image image-stroke" src="${TITLE_ICON}" alt="">
-  <span class="title">Paper Lives</span>
+  <span class="title${narrow ? '{% if photo_code %} hidden lg:inline-block{% endif %}' : ''}">Paper Lives</span>
+  {% if photo_code %}<span class="instance">${narrow ? 'Photo' : 'Photo code'} {{ photo_code | escape }}</span>{% endif %}
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
-const oriented = (classes: string, landscape: string, portraitMarkup: string) => `${ASSIGNS}
+const oriented = (classes: string, landscape: string, portraitMarkup: string, narrowPortrait = false) => `${ASSIGNS}
 <div class="${classes} portrait:hidden">${landscape}
 </div>${titleBar('landscape')}
 <div class="${classes} landscape:hidden">${portraitMarkup}
-</div>${titleBar('portrait')}`
+</div>${titleBar('portrait', narrowPortrait)}`
 
 /** The left column of the full landscape: portrait, name, status, traits and the stats. */
 const card = (og: number, x: number) => `
@@ -214,6 +221,7 @@ const halfVertical = oriented(
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     `${portrait(2, 3)}${memorialText(true)}<div class="grow"></div><div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
   ),
+  true,
 )
 
 const quadrant = oriented(
@@ -236,6 +244,7 @@ const quadrant = oriented(
     `${memorialText(true)}<div class="grow"></div><div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     true,
   ),
+  true,
 )
 
 export const screenMarkup = {

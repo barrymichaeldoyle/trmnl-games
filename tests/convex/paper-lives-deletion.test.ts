@@ -51,6 +51,14 @@ describe('Paper Lives deletion (D159, L2)', () => {
   it('deletes Paper Lives progress alone and leaves Idle Angler playing', async () => {
     await twoGames(t)
     expect(await t.run(async (ctx) => (await ctx.db.query('lifeRecords').collect()).length)).toBe(1)
+    // L6: a photo, achievements, the folded career and a Paper Lives alert switch, all of which go with the progress.
+    await t.run(async (ctx) => {
+      const life = (await ctx.db.query('lives').first())!
+      await ctx.db.insert('plPhotos', { userId: life.userId, lifeId: life._id, ordinal: 1, week: 1, takenAt: Date.now(), name: 'A B', age: 3, portrait: { stage: 'child', hair: 0, glasses: false, extra: 'none', pet: null, frame: false } })
+    })
+    await ana().mutation(api.alerts.subscribe, { operationId: 'sub-ana-pl1', endpoint: 'https://push.example/ana', p256dh: 'BKey', auth: 'Auth', label: 'Phone' })
+    await ana().mutation(api.alerts.setPreferences, { operationId: 'pref-ana-pl', lifeEnded: true, coolerFull: true, quietStart: 21, quietEnd: 8, timezone: 'UTC' })
+    expect(await t.run(async (ctx) => (await ctx.db.query('plAchievements').collect()).length)).toBeGreaterThan(0)
     await ana().mutation(api.deletion.requestGameDeletion, { operationId: 'del-pl-0001', confirm: 'DELETE', gameSlug: 'paper-lives' })
     // Authority goes at once.
     expect((await screen(t, 'pl-token-ana', PL_UUID, '/trmnl/paper-lives/v1/screen')).status).toBe(404)
@@ -62,12 +70,16 @@ describe('Paper Lives deletion (D159, L2)', () => {
       records: await ctx.db.query('lifeRecords').collect(),
       boards: await ctx.db.query('plLifeBoards').collect(),
       profile: await ctx.db.query('paperLivesProfiles').first(),
+      photos: await ctx.db.query('plPhotos').collect(),
+      achievements: await ctx.db.query('plAchievements').collect(),
+      alerts: (await ctx.db.query('users').first())!.alerts,
       anglers: await ctx.db.query('anglers').collect(),
       grants: (await ctx.db.query('trmnlGrants').collect()).map((g) => g.gameSlug),
       revoked: (await ctx.db.query('revokedTrmnlCredentials').collect()).map((r) => r.tokenHash),
     }))
-    expect(state).toMatchObject({ lives: [], logs: [], records: [], boards: [], profile: { state: 'active' }, grants: ['idle-angler'], revoked: [sha256Hex('pl-token-ana')] })
+    expect(state).toMatchObject({ lives: [], logs: [], records: [], boards: [], photos: [], achievements: [], profile: { state: 'active' }, alerts: { lifeEnded: false, coolerFull: true }, grants: ['idle-angler'], revoked: [sha256Hex('pl-token-ana')] })
     expect(state.anglers).toHaveLength(1)
+    expect(state.profile!.career).toBeUndefined()
     expect((await screen(t, 'ia-token-ana', IA_UUID, '/trmnl/idle-angler/v1/screen')).status).toBe(200)
   })
 

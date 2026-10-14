@@ -4,6 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { HERO_NAME_RULE, validateName } from '@trmnl-games/platform'
+import { captureAnalytics } from '../../../lib/analytics'
 import { useIntent } from '../../../lib/intent'
 import { LocalTime } from '../../../lib/localTime'
 import { preload } from '../../../lib/preload'
@@ -20,6 +21,9 @@ const clock = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', min
 const time = (at: number) => <LocalTime at={at} format={clock} />
 const SEASON = { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' } as const
 const ORDINALS = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth']
+
+/** How far into the year Age up was pressed, in bands of the year's two-hour minimum (eight ticks). */
+const elapsedBand = (ticks: number) => (ticks < 8 ? 'under 2 hours' : ticks < 16 ? '2 to 4 hours' : ticks < 24 ? '4 to 6 hours' : '6 hours or more')
 
 function LifePage() {
   const { data } = useQuery(convexQuery(api.paperLives.lives.view, {}))
@@ -89,7 +93,7 @@ function LifePage() {
                         variant={chosen ? 'primary' : 'secondary'}
                         aria-pressed={chosen}
                         disabled={!option.open || choose.pending}
-                        onClick={() => { if (!chosen) void choose.run({ decisionId: decision.id, optionId: option.id }, `Choice saved. It happens when the year ends.`) }}
+                        onClick={() => { if (!chosen) void choose.run({ decisionId: decision.id, optionId: option.id }, `Choice saved. It happens when the year ends.`).then((done) => { if (done) captureAnalytics('decision chosen', { major: decision.major }) }) }}
                       >
                         {option.label}
                       </Button>
@@ -109,7 +113,7 @@ function LifePage() {
             ) : (
               <>
                 <div>
-                  <Button pending={ageUp.pending} onClick={() => void ageUp.run({}, year.elapsed >= year.minimum ? 'The year ends at the next tick.' : 'The year ends as soon as two hours have passed.')}>Age up</Button>
+                  <Button pending={ageUp.pending} onClick={() => void ageUp.run({}, year.elapsed >= year.minimum ? 'The year ends at the next tick.' : 'The year ends as soon as two hours have passed.').then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Age up</Button>
                 </div>
                 <p className="text-sm text-muted">
                   {year.elapsed >= year.minimum ? 'Ends the year at the next tick, within fifteen minutes.' : <>A year lasts at least two hours. Age up now and it ends at {time(year.minimumAt)}.</>} Otherwise it closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.

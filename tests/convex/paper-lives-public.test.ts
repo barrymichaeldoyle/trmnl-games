@@ -31,6 +31,14 @@ describe('Paper Lives public life pages (D159, L4)', () => {
     const record = await t.run(async (ctx) => await ctx.db.query('lifeRecords').first())
     expect(page).toMatchObject({ alias: 'Ana', ordinal: 1, age: record!.age, generation: 'First of the ' + page.name.split(' ')[1] + 's', child: null, portrait: { frame: true, stage: 'senior' } })
     expect(page.epitaph.length).toBeGreaterThan(0)
+    expect(page.photos).toEqual([])
+    // L6: a photo taken in that life shows on its page, and with its card in the owner's album.
+    await t.run(async (ctx) => {
+      const life = (await ctx.db.query('lives').first())!
+      await ctx.db.insert('plPhotos', { userId: life.userId, lifeId: life._id, ordinal: 1, week: 1, takenAt: 1, name: 'A B', age: 23, petName: 'Biscuit', portrait: { stage: 'young', hair: 0, glasses: false, extra: 'none', pet: 'dog', frame: false } })
+    })
+    expect((await t.query(api.paperLives.public.lifePage, { alias: 'Ana', ordinal: 1 })).photos).toEqual([{ name: 'A B', age: 23, petName: 'Biscuit', takenAt: 1, portrait: { stage: 'young', hair: 0, glasses: false, extra: 'none', pet: 'dog', frame: false } }])
+    expect((await t.withIdentity({ issuer: 'issuer', subject: 'Ana' }).query(api.paperLives.album.view, {})).lives[0].photos).toHaveLength(1)
     await t.withIdentity({ issuer: 'issuer', subject: 'Ana' }).mutation(api.paperLives.lives.begin, { operationId: 'operation-begin-1', kind: 'child' })
     expect(await t.query(api.paperLives.public.lifePage, { alias: 'Ana', ordinal: 1 })).toMatchObject({ child: null })
   })

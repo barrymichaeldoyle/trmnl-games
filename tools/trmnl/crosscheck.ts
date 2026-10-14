@@ -47,7 +47,9 @@ try {
 
   // Paper Lives: every preview scenario, with its owner's offset for the close time (D42).
   const paperLivesCases = Object.entries(paperLivesScenarios('https://local-art.invalid')).flatMap(([name, { utcOffset, ...input }]) =>
-    (Object.keys(paperLivesMarkup) as PreviewLayout[]).map((layout) => ({ id: `paper-lives ${name} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPaperLivesPayload(input), utc_offset: utcOffset })) as Record<string, unknown> })),
+    [null, '482 917'].flatMap((photoCode) =>
+      (Object.keys(paperLivesMarkup) as PreviewLayout[]).map((layout) => ({ id: `paper-lives ${name}${photoCode ? ' photo' : ''} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPaperLivesPayload(input), photo_code: photoCode, utc_offset: utcOffset })) as Record<string, unknown> })),
+    ),
   )
 
   // TRMNL renders in UTC; the preview's liquidjs and the Ruby process both use it.

@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'install link opened' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'makeover bought' | 'public name changed' | 'hero followed' | 'hero unfollowed' | 'rival set'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'install link opened' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'makeover bought' | 'public name changed' | 'hero followed' | 'hero unfollowed' | 'rival set' | 'decision chosen' | 'aged up' | 'next life started' | 'album viewed' | 'life page viewed' | 'rankings viewed' | 'photo taken'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {
@@ -144,8 +144,11 @@ export function captureAnalytics(event: AnalyticsEvent, properties: Record<strin
   }).catch(() => {})
 }
 
-/** The game a page belongs to, for every event's `game` property (D115); platform pages count as Desk Crawler's, as before. */
-const currentGame = () => (typeof window !== 'undefined' && /(^|\/)idle-angler(\/|$)/.test(window.location.pathname) ? 'idle-angler' : 'desk-crawler')
+/** The game a page belongs to, for every event's `game` property (D115, D159); platform pages count as Desk Crawler's, as before. */
+const currentGame = () => {
+  const path = typeof window === 'undefined' ? '' : window.location.pathname
+  return /(^|\/)idle-angler(\/|$)/.test(path) ? 'idle-angler' : /(^|\/)paper-lives(\/|$)/.test(path) ? 'paper-lives' : 'desk-crawler'
+}
 
 /** v1.1 choices worth measuring: intent → event and the one catalog id argument it may carry. */
 const INTENT_EVENTS: Record<string, [AnalyticsEvent, string, string]> = {
@@ -181,6 +184,8 @@ const SPECIAL_EVENTS: Record<string, (args: Record<string, unknown>) => [Analyti
   'follows:follow': () => ['hero followed', {}],
   'follows:unfollow': () => ['hero unfollowed', {}],
   'follows:setRival': (args) => ['rival set', { change: args.followId === null ? 'cleared' : 'set' }],
+  // D159: how the next life starts, as a child or a stranger; never who.
+  'paperLives/lives:begin': (args) => ['next life started', { kind: String(args.kind ?? '') }],
 }
 
 export function intentAnalytics(intent: string, args: Record<string, unknown>): [AnalyticsEvent, Record<string, string>] | null {

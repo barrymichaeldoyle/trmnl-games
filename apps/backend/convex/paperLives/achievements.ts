@@ -15,9 +15,12 @@ import { PAPER_LIVES_RUNTIME } from './runtime'
  */
 export const MAX_PL_UNLOCKS = ACHIEVEMENTS.length
 
+/** The folded career as stored, with the account's photo count beside it (photos are never folded from a life). */
+const storedCareer = (profile: Doc<'paperLivesProfiles'> | null): Career => ({ ...emptyCareer(), ...profile?.career, photosClaimed: profile?.photosClaimed ?? 0 })
+
 /** The account's career now: the folded finished lives, plus the current life while it is still being lived. */
 export function careerNow(profile: Doc<'paperLivesProfiles'> | null, life: Doc<'lives'> | null): Career {
-  const folded = profile?.career ?? emptyCareer()
+  const folded = storedCareer(profile)
   return life && life.life.status !== 'ended' && life.activationState === 'active' ? withLife(folded, toLifeState(life), false) : folded
 }
 
@@ -25,7 +28,7 @@ export function careerNow(profile: Doc<'paperLivesProfiles'> | null, life: Doc<'
 export async function foldLife(ctx: MutationCtx, life: Doc<'lives'>, extraPieces: readonly string[] = []): Promise<void> {
   const profile = await paperLivesProfile(ctx, life.userId)
   if (!profile) return
-  const folded = withLife(profile.career ?? emptyCareer(), toLifeState(life), true)
+  const { photosClaimed: _photos, ...folded } = withLife(storedCareer(profile), toLifeState(life), true)
   await ctx.db.patch(profile._id, {
     career: { ...folded, jobs: [...folded.jobs], longJobs: [...folded.longJobs], hobbies: [...folded.hobbies], traits: [...folded.traits], setPieces: [...new Set([...folded.setPieces, ...extraPieces])].sort() },
   })

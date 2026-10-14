@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { composePortrait, type PortraitKey } from '@trmnl-games/paper-lives/art/portrait'
+import { LocalTime } from './localTime'
 
 /** The Life view (`api.paperLives.lives.view`), as the companion reads it. */
 export interface LifeView {
@@ -101,4 +102,30 @@ export function Portrait({ portrait, scale = 4, label }: { portrait: PortraitKey
     for (let y = 0; y < art.height; y += 1) for (let x = 0; x < art.width; x += 1) if (art.ink[y * art.width + x]) context.fillRect(x * scale, y * scale, scale, scale)
   }, [art, scale])
   return <canvas ref={ref} width={art.width * scale} height={art.height * scale} role="img" aria-label={label} className="max-w-full text-ink [image-rendering:pixelated]" />
+}
+
+/** A photo taken with the weekly device code (L6): the character as they were that week. */
+export interface PhotoView {
+  name: string
+  age: number
+  petName: string | null
+  takenAt: number
+  portrait: PortraitKey
+}
+
+const photoDate = (date: Date) => date.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' })
+
+/** A row of photos with their captions: who, at what age, the pet beside them, and the week it was taken. */
+export function Photos({ photos, label }: { photos: readonly PhotoView[]; label: string }) {
+  return (
+    <ul aria-label={label} className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3">
+      {photos.map((photo) => (
+        <li key={photo.takenAt} className="flex flex-col items-center gap-1 border border-rule p-2 text-center text-sm">
+          <Portrait portrait={photo.portrait} scale={2} label={`${photo.name} at ${photo.age}${photo.petName ? `, with ${photo.petName}` : ''}`} />
+          <span className="font-semibold">{photo.age === 0 ? 'A baby' : `At ${photo.age}`}{photo.petName ? `, with ${photo.petName}` : ''}</span>
+          <LocalTime at={photo.takenAt} format={photoDate} className="text-xs text-muted" />
+        </li>
+      ))}
+    </ul>
+  )
 }

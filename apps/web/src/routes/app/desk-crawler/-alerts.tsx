@@ -9,7 +9,8 @@ import { currentSubscription, deviceLabel, endpointFingerprint, pushSupport, sub
 import { Button, Card, LoadingState } from '../../../lib/ui'
 
 /** The switches a game's card owns (D115: each game shows its own kinds; devices and quiet hours are shared). */
-type KindId = 'asleep' | 'merchant' | 'coolerFull' | 'baitOut'
+const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival'] as const
+type KindId = (typeof SWITCHES)[number]
 type Prefs = Partial<Record<KindId, boolean>> & { quietStart: number; quietEnd: number }
 export type AlertKindCopy = { readonly id: KindId; readonly name: string; readonly blurb: string }
 
@@ -33,19 +34,20 @@ export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this
   const subscribe = useIntent(api.alerts.subscribe, { onFeedback: notify })
   const save = useIntent(api.alerts.setPreferences, {
     onFeedback: notify,
-    optimisticUpdate: (store, { asleep, merchant, coolerFull, baitOut, quietStart, quietEnd }) => {
+    optimisticUpdate: (store, args) => {
       const current = store.getQuery(api.alerts.mine, {})
-      if (current) store.setQuery(api.alerts.mine, {}, { ...current, ...(asleep === undefined ? {} : { asleep }), ...(merchant === undefined ? {} : { merchant }), ...(coolerFull === undefined ? {} : { coolerFull }), ...(baitOut === undefined ? {} : { baitOut }), quietStart, quietEnd, offReason: null })
+      const changed = Object.fromEntries(SWITCHES.flatMap((id) => (args[id] === undefined ? [] : [[id, args[id]]])))
+      if (current) store.setQuery(api.alerts.mine, {}, { ...current, ...changed, quietStart: args.quietStart, quietEnd: args.quietEnd, offReason: null })
     },
   })
-  // Removing a device drops it from the list on the tap; the last one turns both kinds off, as the server does.
+  // Removing a device drops it from the list on the tap; the last one turns every kind off, as the server does.
   const remove = useIntent(api.alerts.removeDevice, {
     onFeedback: notify,
     optimisticUpdate: (store, { deviceId }) => {
       const current = store.getQuery(api.alerts.mine, {})
       if (!current) return
       const devices = current.devices.filter((device) => device.id !== deviceId)
-      store.setQuery(api.alerts.mine, {}, { ...current, devices, ...(devices.length === 0 ? { asleep: false, merchant: false, coolerFull: false, baitOut: false } : {}) })
+      store.setQuery(api.alerts.mine, {}, { ...current, devices, ...(devices.length === 0 ? Object.fromEntries(SWITCHES.map((id) => [id, false])) : {}) })
     },
   })
   // Switches and quiet hours show the player's choice at once (the draft) and save in order, latest wins;
@@ -180,6 +182,8 @@ export function AlertNudge() {
   return <p className="text-sm">Want a nudge next time? <Link to="/app/desk-crawler/settings" hash="alerts" className="underline underline-offset-4">Turn on alerts</Link></p>
 }
 
+const OPENED_KINDS = new Set(['asleep', 'merchant', 'cooler_full', 'bait_out', 'major_decision', 'life_ended', 'new_arrival'])
+
 /** `alert opened` with the kind from the alert's link parameter, once, then the parameter leaves the address bar. */
 export function useAlertOpened(ready: boolean) {
   const location = useLocation()
@@ -187,8 +191,8 @@ export function useAlertOpened(ready: boolean) {
     if (!ready) return
     const params = new URLSearchParams(window.location.search)
     const kind = params.get('alert')
-    // D115: Idle Angler's alert links carry cooler_full and bait_out.
-    if (kind !== 'asleep' && kind !== 'merchant' && kind !== 'cooler_full' && kind !== 'bait_out') return
+    // D115: Idle Angler's alert links carry cooler_full and bait_out; D159: Paper Lives' carry its three.
+    if (kind === null || !OPENED_KINDS.has(kind)) return
     captureAnalytics('alert opened', { kind })
     params.delete('alert')
     const query = params.toString()

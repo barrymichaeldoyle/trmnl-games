@@ -25,6 +25,7 @@
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
+ *   photos=done (L6: this week's photo taken)   photos=none (no photos, no TRMNL connected)   alerts=on also turns on Paper Lives' three kinds
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -71,6 +72,12 @@ import { loreView } from '../../packages/desk-crawler/src/sim/core/biomes';
 import { useCallback, useState } from 'react';
 const params = new URLSearchParams(location.search);
 const flag = (name) => params.get(name) === '1';
+/** Three photos of one life at different ages, the last with a pet of the longest name (L6). */
+const plPhotos = () => [
+  { name: 'Maud Okafor', age: 4, petName: null, takenAt: Date.now() - 20 * 864e5, portrait: { ...paperLives.adult.life.portrait, stage: 'child', extra: 'none', pet: null, frame: false } },
+  { name: 'Maud Okafor', age: 23, petName: 'Biscuit', takenAt: Date.now() - 13 * 864e5, portrait: { ...paperLives.adult.life.portrait, stage: 'young', extra: 'none', frame: false } },
+  { name: 'Maud Okafor', age: 34, petName: 'Sir Wigglesworth', takenAt: Date.now() - 6 * 864e5, portrait: { ...paperLives.adult.life.portrait, frame: false } },
+]
 const status = params.get('status');
 const held = flag('held');
 const many = Number(params.get('slots') || 0);
@@ -332,10 +339,11 @@ const queries = {
   'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }, { slug: 'paper-lives', status: 'hidden', canOpen: true }] }),
   'paperLives/lives:view': () => (params.get('pl') === 'none' ? { gameState: null, life: null } : paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult),
   'paperLives/payload:preview': () => null,
-  'paperLives/album:view': () => (params.get('album') === '0' ? { ...paperLives.album, lives: [], tree: [], following: [] } : { ...paperLives.album, following: [{ alias: 'Quillfeather_Longname', name: 'Ottilie Achterberg', age: 52, job: 'Museum director', status: 'living' }, { alias: 'Mo', name: 'Sid Rook', age: 81, job: null, status: 'ended' }] }),
+  'paperLives/album:view': () => (params.get('album') === '0' ? { ...paperLives.album, lives: [], tree: [], following: [] } : { ...paperLives.album, lives: paperLives.album.lives.map((life, i) => ({ ...life, photos: i === 0 ? plPhotos().slice(0, 2) : [] })), following: [{ alias: 'Quillfeather_Longname', name: 'Ottilie Achterberg', age: 52, job: 'Museum director', status: 'living' }, { alias: 'Mo', name: 'Sid Rook', age: 81, job: null, status: 'ended' }] }),
   'paperLives/achievements:mine': () => paperLives.achievements,
+  'paperLives/photos:mine': () => ({ totalCollected: params.get('photos') === 'none' ? 0 : 3, claimedThisWeek: params.get('photos') === 'done', nextAvailableAt: Date.now() + 3 * 864e5, connected: params.get('photos') !== 'none', living: (params.get('pl') ?? 'adult') !== 'memorial', photos: params.get('photos') === 'none' ? [] : plPhotos() }),
   'paperLives/album:board': (args = {}) => ({ ...(args.board === 'fortune' ? paperLives.boardFortuneAll : paperLives.boardLongestWeek), board: args.board ?? 'longest', period: args.period ?? 'week', entries: [['Quillfeather_Longname', 'Ottilie Achterberg-Cartwright', 101], ['Barry', 'Maud Okafor', 100], ['Mo', 'Sid Rook', 94], ['Hidden player', '', 91], ['Bea', 'Ada Moss', 88]].map(([name, life, age], i) => ({ rank: i + 1, name, life, value: args.board === 'fortune' ? 400000 - i * 50000 : age, age, own: name === 'Barry', profile: name === 'Mo' })), own: { rank: 2, value: 100, age: 100 } }),
-  'paperLives/public:lifePage': () => (params.get('private') === '1' ? null : { alias: 'Barry', ordinal: 1, name: 'Maud Okafor', age: 101, generation: 'Third of the Okafors', traits: ['Curious', 'Loyal'], epitaph: paperLives.memorial.memorial.epitaph, highlights: paperLives.memorial.logs.filter((l) => l.kind !== 'recap').slice(0, 8).map((l) => l.age + ': ' + l.summary), endedAt: Date.now() - 864e5, portrait: paperLives.memorial.life.portrait, parent: { ordinal: 0, name: 'Hamish Okafor' }, child: null }),
+  'paperLives/public:lifePage': () => (params.get('private') === '1' ? null : { alias: 'Barry', ordinal: 1, name: 'Maud Okafor', age: 101, generation: 'Third of the Okafors', traits: ['Curious', 'Loyal'], epitaph: paperLives.memorial.memorial.epitaph, highlights: paperLives.memorial.logs.filter((l) => l.kind !== 'recap').slice(0, 8).map((l) => l.age + ': ' + l.summary), endedAt: Date.now() - 864e5, portrait: paperLives.memorial.life.portrait, photos: plPhotos(), parent: { ordinal: 0, name: 'Hamish Okafor' }, child: null }),
   'idleAngler/anglers:dock': () => iaDock,
   'idleAngler/anglers:logbook': () => iaBook,
   'idleAngler/payload:preview': () => ({ scene_base: '' }),
@@ -362,7 +370,7 @@ const queries = {
   'keepsakes:mine': () => data.keepsakes,
   'connections:mine': () => data.connections,
   // P33: off with no device by default; alerts=on lists two devices with both kinds on, alerts=gone shows the stale-device note.
-  'alerts:mine': () => ({ vapidPublicKey: params.get('alerts') === 'none' ? null : 'BFixtureVapidKey', timezone: 'Europe/Dublin', asleep: params.get('alerts') === 'on', merchant: params.get('alerts') === 'on', quietStart: 21, quietEnd: 8, offReason: params.get('alerts') === 'gone' ? 'no_devices' : null, devices: params.get('alerts') === 'on' ? [{ id: 'd1', label: 'Chrome on Android', createdAt: Date.now() - 864e5, fingerprint: 'aaaa' }, { id: 'd2', label: 'Safari on iPhone', createdAt: Date.now() - 36e5, fingerprint: 'bbbb' }] : [] }),
+  'alerts:mine': () => ({ vapidPublicKey: params.get('alerts') === 'none' ? null : 'BFixtureVapidKey', timezone: 'Europe/Dublin', asleep: params.get('alerts') === 'on', merchant: params.get('alerts') === 'on', majorDecision: params.get('alerts') === 'on', lifeEnded: params.get('alerts') === 'on', newArrival: params.get('alerts') === 'on', quietStart: 21, quietEnd: 8, offReason: params.get('alerts') === 'gone' ? 'no_devices' : null, devices: params.get('alerts') === 'on' ? [{ id: 'd1', label: 'Chrome on Android', createdAt: Date.now() - 864e5, fingerprint: 'aaaa' }, { id: 'd2', label: 'Safari on iPhone', createdAt: Date.now() - 36e5, fingerprint: 'bbbb' }] : [] }),
   'leaderboard:view': (args) => { const board = data.leaderboard[args.board ?? 'recent_7d']; return args.cohortKey && args.cohortKey !== board.cohortKey ? { ...board, cohortKey: args.cohortKey, own: null, entries: board.entries.slice(0, 6), totalPlayers: 6 } : board },
   'heroes:recentLog': (args) => ({ page: data.log.slice(0, args.paginationOpts.numItems), isDone: true, continueCursor: '' }),
   'trmnlPayload:mine': () => undefined,

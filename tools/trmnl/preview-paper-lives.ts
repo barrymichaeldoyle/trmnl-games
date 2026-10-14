@@ -35,7 +35,9 @@ for (const [name, { utcOffset, ...input }] of Object.entries(previewScenarios(LO
   if (filter && !name.includes(filter)) continue
   const payload = buildPayload(input)
   for (const layout of Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]) {
-    const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, utc_offset: utcOffset }))
+    // The weekly photo code shows while a life is being lived (L6); `--no-photo` draws the title bar without it.
+    const photoCode = !process.argv.includes('--no-photo') && (payload.status === 'living' || payload.status === 'paused') ? '482 917' : null
+    const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, photo_code: photoCode, utc_offset: utcOffset }))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
       for (const portrait of [false, true]) {
         const file = `.previews/pl-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`

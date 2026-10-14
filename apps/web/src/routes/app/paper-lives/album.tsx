@@ -4,30 +4,39 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import type { PortraitKey } from '@trmnl-games/paper-lives/art/portrait'
 import { preload } from '../../../lib/preload'
-import { Portrait } from '../../../lib/paperLives'
+import { Photos, Portrait, type LifeView, type PhotoView } from '../../../lib/paperLives'
 import { Card } from '../../../lib/ui'
+import { useAnalyticsView } from '../../../lib/analyticsProvider'
+import { PhotoClaim } from './-photos'
 
-/** The Album (paper-lives.md "Companion"): finished lives newest first, the family tree, and the lives of players you follow. */
+/**
+ * The Album (paper-lives.md "Companion"): this week's photo, finished lives newest first with their photos, the family
+ * tree, and the lives of players you follow.
+ */
 export const Route = createFileRoute('/app/paper-lives/album')({
-  loader: ({ context }) => preload(context, convexQuery(api.paperLives.album.view, {})),
+  loader: ({ context }) => preload(context, convexQuery(api.paperLives.album.view, {}), convexQuery(api.paperLives.photos.mine, {})),
   component: AlbumPage,
 })
 
 type Album = {
   alias: string
   publicProfile: boolean
-  lives: Array<{ ordinal: number; name: string; age: number; generation: number; generationLabel: string; epitaph: string; highlights: string[]; traits: string[]; endedAt: number; portrait: PortraitKey; parentOrdinal: number | null }>
+  lives: Array<{ ordinal: number; name: string; age: number; generation: number; generationLabel: string; epitaph: string; highlights: string[]; traits: string[]; endedAt: number; portrait: PortraitKey; photos: PhotoView[]; parentOrdinal: number | null }>
   tree: Array<{ ordinal: number; name: string; age: number; depth: number; parentOrdinal: number | null }>
   following: Array<{ alias: string; name: string; age: number; job: string | null; status: string }>
 } | null
 
 function AlbumPage() {
   const { data } = useQuery(convexQuery(api.paperLives.album.view, {}))
+  const { data: lifeData } = useQuery(convexQuery(api.paperLives.lives.view, {}))
   const album = data as Album | undefined
+  const first = (lifeData as LifeView | undefined)?.life?.first
+  useAnalyticsView('album viewed', { lives: album?.lives.length ?? 0 }, Boolean(album))
   if (!album) return null
   return (
     <>
       <h1 className="font-display text-3xl font-bold">Album</h1>
+      {first ? <PhotoClaim name={first} /> : null}
       {album.lives.length === 0 ? <p className="text-muted">No finished lives yet. When a life ends, it becomes a page here with its epitaph and the moments that mattered.</p> : null}
       <ul className="flex flex-col gap-4">
         {album.lives.map((life) => (
@@ -48,6 +57,7 @@ function AlbumPage() {
                   <ol className="flex flex-col gap-1 text-sm">{life.highlights.map((line, i) => <li key={i}>{line}</li>)}</ol>
                 </details>
               ) : null}
+              {life.photos.length > 0 ? <div className="mt-3"><Photos photos={life.photos} label={`Photos of ${life.name}`} /></div> : null}
               {album.publicProfile ? <Link to="/profile/$alias/lives/$n" params={{ alias: album.alias, n: String(life.ordinal) }} className="mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4">Public page</Link> : null}
             </Card>
           </li>

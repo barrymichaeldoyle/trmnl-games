@@ -2,12 +2,14 @@ import { v } from 'convex/values'
 import { PaperLivesInvariantError, simulateLife, type PaperLivesCatalog } from '@trmnl-games/paper-lives/sim'
 import { deriveLifeSeeds } from '@trmnl-games/paper-lives/sim/seed'
 import type { Doc, Id } from '../_generated/dataModel'
+import { internal } from '../_generated/api'
 import { internalMutation, type MutationCtx } from '../_generated/server'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engine/runner'
 import { fromLifeState, toLifeState } from './adapter'
 import { currentLife } from './profile'
 import { endedLife } from './records'
 import { awardLife, tallyLifeUnlocks } from './achievements'
+import { queuePaperLivesAlerts } from '../lib/alerts'
 import { PAPER_LIVES_RUNTIME } from './runtime'
 
 /**
@@ -33,6 +35,9 @@ export const watchdog = internalMutation({
   returns: v.null(),
   handler: async (ctx) => await watchdogStep(ctx, PAPER_LIVES_RUNTIME),
 })
+
+/** A finished life's age for analytics, in bands rather than the exact age. */
+const ageBand = (age: number) => (age < 18 ? 'under 18' : age < 60 ? '18 to 59' : age < 80 ? '60 to 79' : age < 100 ? '80 to 99' : '100 and over')
 
 /** Story lines and recaps go to the log; prompts and ambient lines too, since the device shows the newest. */
 async function writeLogs(ctx: MutationCtx, life: Doc<'lives'>, result: ReturnType<typeof simulateLife>, run: SubjectStep<PaperLivesCatalog>['run'], now: number): Promise<number> {
@@ -86,9 +91,10 @@ async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
     return
   }
 
+  const before = toLifeState(life)
   let result
   try {
-    result = simulateLife({ life: toLifeState(life), content, streams: deriveLifeSeeds(world.worldSeed, life._id, run.tick, run.simulationVersion) })
+    result = simulateLife({ life: before, content, streams: deriveLifeSeeds(world.worldSeed, life._id, run.tick, run.simulationVersion) })
   } catch (error) {
     if (!(error instanceof PaperLivesInvariantError)) throw error
     counts.quarantined += 1
@@ -114,9 +120,14 @@ async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
     patch.lastAdvancedAt = now
   }
   await ctx.db.patch(life._id, patch)
-  if (result.record) await endedLife(ctx, (await ctx.db.get(life._id))!, result.record, now)
+  if (result.record) {
+    await endedLife(ctx, (await ctx.db.get(life._id))!, result.record, now)
+    // One analytics event per finished life, consent-gated (paper-lives.md "Analytics"): an age band and the cause id.
+    if (owner.analyticsConsent === true) await ctx.scheduler.runAfter(0, internal.analytics.captureActivation, { userId: owner._id, event: 'life ended', game: 'paper-lives', properties: { age_band: ageBand(result.record.age), cause: result.record.cause } })
+  }
   // Achievements: when a year or a life ends, never on a passive tick.
   if (result.disposition === 'boundary' || result.disposition === 'died') await awardLife(ctx, life._id, now, run.tick)
+  await queuePaperLivesAlerts(ctx, { owner, lifeId: life._id, before, after: result.life, content, tick: run.tick, now })
   if (run.publishes) await publishInputs(ctx, owner, step)
 
   counts.events += result.events.filter((e) => e.kind === 'event').length

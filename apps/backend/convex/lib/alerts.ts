@@ -1,7 +1,8 @@
 import { internal } from '../_generated/api'
-import type { Doc } from '../_generated/dataModel'
+import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx } from '../_generated/server'
 import type { SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { LifeState, PaperLivesCatalog } from '@trmnl-games/paper-lives/sim'
 
 /**
  * P33 hero alerts (alerts.md): an alert goes out only when the hero has stopped or is about to lose something the
@@ -26,12 +27,24 @@ export const ALERTS = {
 export type AlertKind = Doc<'alertOutbox'>['kind']
 export type AlertPreferences = NonNullable<Doc<'users'>['alerts']>
 
+/** Every kind's on/off switch on the owner's preferences, across the games. */
+export const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival'] as const
+export type AlertSwitch = (typeof SWITCHES)[number]
 /** The preference switch for each kind. */
-export const PREF_FOR: Readonly<Record<AlertKind, 'asleep' | 'merchant' | 'coolerFull' | 'baitOut'>> = { asleep: 'asleep', merchant: 'merchant', cooler_full: 'coolerFull', bait_out: 'baitOut' }
+export const PREF_FOR: Readonly<Record<AlertKind, AlertSwitch>> = {
+  asleep: 'asleep',
+  merchant: 'merchant',
+  cooler_full: 'coolerFull',
+  bait_out: 'baitOut',
+  major_decision: 'majorDecision',
+  life_ended: 'lifeEnded',
+  new_arrival: 'newArrival',
+}
 export const kindOn = (prefs: AlertPreferences | undefined, kind: AlertKind) => prefs?.[PREF_FOR[kind]] === true
-/** Desk Crawler's kinds and Idle Angler's (D115). */
+/** Desk Crawler's kinds, Idle Angler's (D115) and Paper Lives' (D159). */
 export const DESK_CRAWLER_KINDS: readonly AlertKind[] = ['asleep', 'merchant']
 export const IDLE_ANGLER_KINDS: readonly AlertKind[] = ['cooler_full', 'bait_out']
+export const PAPER_LIVES_KINDS: readonly AlertKind[] = ['major_decision', 'life_ended', 'new_arrival']
 
 const STEP_MS = 15 * 60_000
 
@@ -137,6 +150,50 @@ export async function queueIdleAnglerAlerts(ctx: MutationCtx, args: { owner: Doc
     await ctx.db.insert('alertOutbox', { userId: owner._id, anglerId, key, eventTick: tick, state: 'pending', attempts: 0, createdAt: now, updatedAt: now, ...row })
     await ensureSender(ctx, row.notBefore)
   }
+}
+
+/**
+ * Paper Lives tick hook (D159): a major decision still open once the year's minimum has passed (once per decision), a
+ * life that ended, and a child or grandchild born on this tick. Reads nothing unless the owner turned a kind on.
+ */
+export async function queuePaperLivesAlerts(ctx: MutationCtx, args: { owner: Doc<'users'>; lifeId: Id<'lives'>; before: LifeState; after: LifeState; content: PaperLivesCatalog; tick: number; now: number }): Promise<void> {
+  const { owner, lifeId, before, after, content, tick, now } = args
+  const prefs = owner.alerts
+  if (prefs === undefined) return
+  const rows: Array<{ kind: AlertKind; key: string; lifeAge: number; detail?: string }> = []
+  if (prefs.majorDecision) {
+    const open = (life: LifeState) => {
+      const pending = life.status === 'living' ? life.year.pending : undefined
+      if (pending === undefined || pending.chosen !== undefined || life.year.elapsed < content.tuning.minYearTicks) return undefined
+      return content.decisions.find((d) => d.id === pending.decisionId)?.major ? pending.decisionId : undefined
+    }
+    const id = open(after)
+    // Raised once: on the tick the decision first stands open past the minimum.
+    if (id !== undefined && !(open(before) === id && before.age === after.age)) rows.push({ kind: 'major_decision', key: `${lifeId}:major_decision:${after.age}:${id}`, lifeAge: after.age, detail: id })
+  }
+  if (prefs.lifeEnded && before.status !== 'ended' && after.status === 'ended') rows.push({ kind: 'life_ended', key: `${lifeId}:life_ended`, lifeAge: after.age })
+  if (prefs.newArrival) {
+    const known = new Set(before.people.map((p) => p.id))
+    for (const person of after.people) {
+      if (known.has(person.id) || (person.role !== 'child' && person.role !== 'grandchild') || person.bornAt < before.age) continue
+      rows.push({ kind: 'new_arrival', key: `${lifeId}:new_arrival:${person.id}`, lifeAge: after.age, detail: person.id })
+    }
+  }
+  for (const row of rows) {
+    if (await ctx.db.query('alertOutbox').withIndex('by_key', (q) => q.eq('key', row.key)).first()) continue
+    await ctx.db.insert('alertOutbox', { userId: owner._id, lifeId, eventTick: tick, state: 'pending', attempts: 0, notBefore: now, createdAt: now, updatedAt: now, ...row })
+    await ensureSender(ctx, now)
+  }
+}
+
+/** Paper Lives' lock-screen lines (D159): the character's first name and nothing from the story itself. */
+export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: string, arrival?: { name: string; role: 'child' | 'grandchild' }): { title: string; body: string; url: string } {
+  if (row.kind === 'major_decision') return { title: `A big decision for ${first}`, body: `${first} has a choice to make this year. Left alone, the year closes with the gentle option.`, url: '/app/paper-lives?alert=major_decision' }
+  if (row.kind === 'life_ended') return { title: `${first}'s life has ended`, body: `${first}'s page is in the album now, and the next life is ready to begin.`, url: '/app/paper-lives?alert=life_ended' }
+  const baby = arrival?.name ?? 'A baby'
+  return arrival?.role === 'grandchild'
+    ? { title: `${first} has a grandchild`, body: `${baby} was born today. ${first} is a grandparent now.`, url: '/app/paper-lives/people?alert=new_arrival' }
+    : { title: `A baby for ${first}`, body: `${baby} has joined the family.`, url: '/app/paper-lives/people?alert=new_arrival' }
 }
 
 /** One sentence in the game's voice, with nothing private on a lock screen, and the page it opens. */

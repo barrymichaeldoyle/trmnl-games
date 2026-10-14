@@ -6,7 +6,7 @@ import { contentV1 } from './v1'
  * predicate reads the account's career: the totals of its finished lives plus the current life, so an achievement is
  * earned whichever life it falls in. Tiers are set from the harness's life lengths (paper-lives.md "L5 build").
  */
-export const ACHIEVEMENTS_VERSION = 1
+export const ACHIEVEMENTS_VERSION = 2
 
 export type AchievementCategory = 'Lives' | 'Family' | 'Work and money' | 'Choices' | 'Jobs' | 'Set pieces'
 
@@ -25,6 +25,8 @@ export interface Career {
   readonly decisionsChosen: number
   readonly decisionsDefaulted: number
   readonly remarkableEvents: number
+  /** Photos claimed with the weekly device code (L6); an account total, never folded from a life. */
+  readonly photosClaimed: number
   readonly jobs: readonly string[]
   /** Jobs held for twenty years within one life. */
   readonly longJobs: readonly string[]
@@ -48,6 +50,7 @@ export const emptyCareer = (): Career => ({
   decisionsChosen: 0,
   decisionsDefaulted: 0,
   remarkableEvents: 0,
+  photosClaimed: 0,
   jobs: [],
   longJobs: [],
   hobbies: [],
@@ -74,6 +77,7 @@ export function withLife(career: Career, life: LifeState, ended: boolean): Caree
     decisionsChosen: career.decisionsChosen + c.decisionsChosen,
     decisionsDefaulted: career.decisionsDefaulted + c.decisionsDefaulted,
     remarkableEvents: career.remarkableEvents + c.remarkableEvents,
+    photosClaimed: career.photosClaimed,
     jobs: union(career.jobs, Object.keys(life.jobYears)),
     longJobs: union(career.longJobs, Object.entries(life.jobYears).filter(([, years]) => years >= 20).map(([id]) => id)),
     hobbies: union(career.hobbies, life.hobbiesHad ?? (life.hobby ? [life.hobby] : [])),
@@ -215,6 +219,13 @@ const FAMILIES: AchievementDef[] = [
     [5, 'Stories to Tell', 'Five remarkable moments.'],
     [15, 'In the Paper', 'Fifteen remarkable moments.'],
     [30, 'Local Legend', 'Thirty remarkable moments.'],
+  ]),
+  ...family('photos', 'Photos', 'Lives', count('photosClaimed'), [
+    [1, 'Say Cheese', 'The first photo from the screen.'],
+    [6, 'Snapshots', 'Six photos in the album.'],
+    [12, 'Shoebox', 'Twelve photos in the album.'],
+    [24, 'Photo Wall', 'Twenty-four photos in the album.'],
+    [52, 'A Year in Pictures', 'Fifty-two photos, one for every week of a year.'],
   ]),
 ]
 

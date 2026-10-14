@@ -8,6 +8,7 @@ import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { preload } from '../../lib/preload'
 import { seo } from '../../lib/seo'
 import { Card, LoadingState } from '../../lib/ui'
+import { useAlertOpened } from './desk-crawler/-alerts'
 import type { LifeView } from '../../lib/paperLives'
 
 /**
@@ -36,6 +37,7 @@ function Shell() {
   const view = data as LifeView | undefined
   const listing = useGames()
   const status = listing?.games.find((game) => game.slug === 'paper-lives')?.status
+  useAlertOpened(!isPending)
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
   const banner = status && status !== 'live' ? <p className="mx-auto mt-3 w-full max-w-3xl px-4 text-sm font-semibold text-muted">{status === 'hidden' ? 'Hidden: only admins can see Paper Lives' : 'Preview: only admins can open Paper Lives'}</p> : null
   if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label="Loading Paper Lives…" /></main>

@@ -21,6 +21,20 @@ function IdleAnglerPrivacy() {
   )
 }
 
+/** Paper Lives' part of the policy (D159), listed the same way as Idle Angler's. */
+function PaperLivesPrivacy() {
+  const data = useGames()
+  if (!data?.games.some((game) => game.slug === 'paper-lives')) return null
+  return (
+    <>
+      <h2>Paper Lives</h2>
+      <p>Paper Lives stores your current life and your finished ones: each character's name, pronouns, traits, stats, money, job and home, the people in their life, their story and the choices you made, plus the album's records and photos and your achievements. Your longest lives and biggest fortunes appear under your public name on Paper Lives' boards and on other players' TRMNL screens. Unless you hide Paper Lives from your public profile in Paper Lives settings, anyone with the link sees your current character's name, age, job and traits, how many lives you have lived, your family tree and your finished lives, each with its epitaph, highlights and photos. Character names are public on those pages, so keep real people's details out of them.</p>
+      <p>If you turn on Paper Lives alerts, they use the same devices and quiet hours as your other games' alerts, and the alert shows your character's first name. The weekly photo code on your TRMNL is keyed to your installation and never shown in the companion.</p>
+      <p>In <Link to="/app/paper-lives/settings">Paper Lives settings</Link>, Delete Paper Lives progress removes your lives, the album and its photos, board records, achievements, Paper Lives connections and Paper Lives alert settings. Your account and other games stay. Deleting your TRMNL Games account removes Paper Lives with everything else.</p>
+    </>
+  )
+}
+
 export const Route = createFileRoute('/privacy')({
   head: () => seo({ title: 'Privacy', path: '/privacy', description: 'What TRMNL Games stores, what is public on leaderboards and TRMNL screens, and how to delete your account.' }),
   component: () => (
@@ -135,6 +149,7 @@ export const Route = createFileRoute('/privacy')({
       <h2>Changes</h2>
       <p>When this policy changes we update this page and the date at the top.</p>
       <AfterListing><IdleAnglerPrivacy /></AfterListing>
+      <AfterListing><PaperLivesPrivacy /></AfterListing>
     </ProsePage>
   ),
 })

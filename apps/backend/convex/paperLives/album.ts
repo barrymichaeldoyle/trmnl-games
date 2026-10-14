@@ -10,6 +10,7 @@ import { adminRef } from '../lib/adminAccess'
 import { currentUser } from '../lib/intent'
 import { pagePublic } from '../lib/publicPage'
 import { gameStatusOf } from '../platform'
+import { photoView } from './photos'
 import { currentLife } from './profile'
 import { BOARD_DEPTH, readBoard } from './records'
 import { lifeBoard } from './validators'
@@ -20,6 +21,8 @@ import { lifeBoard } from './validators'
  * Bounded: at most `ALBUM_LIVES` records and the account's 20 follows.
  */
 export const ALBUM_LIVES = 100
+/** Photos read for the album: a weekly code makes 52 a year, so ten years of them. */
+export const ALBUM_PHOTOS = 520
 
 const traitName = (id: string) => contentV1.traits.find((t) => t.id === id)?.name ?? id
 
@@ -78,10 +81,15 @@ export const view = query({
     if (user === null || life === null || life.activationState !== 'active') return null
     const records = await ctx.db.query('lifeRecords').withIndex('by_userId_and_endedAt', (q) => q.eq('userId', user._id)).order('desc').take(ALBUM_LIVES)
     const byId = new Map(records.map((r) => [r._id, r]))
+    // Photos sit with the life they were taken in; the current life's show on the claim card (photos.mine).
+    const photos = new Map<number, ReturnType<typeof photoView>[]>()
+    for (const photo of await ctx.db.query('plPhotos').withIndex('by_userId_and_ordinal', (q) => q.eq('userId', user._id)).take(ALBUM_PHOTOS)) {
+      photos.set(photo.ordinal, [...(photos.get(photo.ordinal) ?? []), photoView(photo)])
+    }
     return {
       alias: user.publicAlias,
       publicProfile: pagePublic(life),
-      lives: records.map((r) => ({ ...card(r), parentOrdinal: r.parentRecordId ? (byId.get(r.parentRecordId)?.ordinal ?? null) : null })),
+      lives: records.map((r) => ({ ...card(r), photos: photos.get(r.ordinal) ?? [], parentOrdinal: r.parentRecordId ? (byId.get(r.parentRecordId)?.ordinal ?? null) : null })),
       tree: familyTree(records),
       following: await following(ctx, user),
     }

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
+import { useAnalyticsView } from '../../../lib/analyticsProvider'
 import { LocalTime } from '../../../lib/localTime'
 import { money } from '../../../lib/paperLives'
 import { preload } from '../../../lib/preload'
@@ -26,6 +27,7 @@ function RankingsPage() {
   const [period, setPeriod] = useState<Period>('week')
   const { data } = useQuery(convexQuery(api.paperLives.album.board, { board, period }))
   const view = data as View | undefined
+  useAnalyticsView('rankings viewed', { board, period }, Boolean(view))
   return (
     <>
       <h1 className="font-display text-3xl font-bold">Rankings</h1>
