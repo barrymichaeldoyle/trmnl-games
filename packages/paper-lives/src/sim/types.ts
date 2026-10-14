@@ -77,6 +77,8 @@ export interface JobDef {
   readonly stages: readonly Stage[]
   /** A trait that lowers the floor by 15. */
   readonly easedBy?: string
+  /** Content v3: the training the job needs (absent: any). */
+  readonly needs?: readonly Education[]
   /** Lines when the job starts ("Started as a barista at the station cafe."), one is drawn. */
   readonly startLines: readonly string[]
 }
@@ -288,6 +290,10 @@ export interface Tuning {
   readonly proposalMinAge?: number
   /** Content v2: a decision an event opens is about the person the event named (v1 drew again). */
   readonly openedKeepsPerson?: boolean
+  /** Content v3: the most events a year holds (v1 and v2 had no cap, so a busy year could run to six or seven). */
+  readonly maxEventsPerYear?: number
+  /** Content v3: the job held longest, for the epitaph and the record, is a grown-up one when there was one. */
+  readonly adultJobsFirst?: boolean
   readonly minYearTicks: number
   readonly closeYearTicks: number
   /** Event chance per tick, percent, inside the minimum. */

@@ -172,7 +172,8 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
     const where = `decision ${def.id}`
     checkWhen(where, def.when)
     if (strict) checkAges(where, def.stage, def.when)
-    if (def.options.length < 2 || def.options.length > (def.id === 'sn_will' ? 5 : 4)) problem(`${where}: ${def.options.length} options`)
+    // A will decision may list every kind of will and a not-yet.
+    if (def.options.length < 2 || def.options.length > (def.options.some((o) => o.effects?.will) ? 5 : 4)) problem(`${where}: ${def.options.length} options`)
     unique(`${where} option`, def.options.map((o) => o.id))
     const fallback = def.options.find((o) => o.id === def.default)
     if (!fallback) problem(`${where}: default ${def.default} is not an option`)

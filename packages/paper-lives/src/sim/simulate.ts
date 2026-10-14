@@ -137,7 +137,9 @@ function passiveTick(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): T
   const { season, yearEnd } = seasonAt(life.year.elapsed, t.minYearTicks)
   const stage = life.stage as Exclude<typeof life.stage, 'infant'>
   const percent = yearEnd ? t.yearEndEventPercent : t.eventPercent[stage]
-  if (rngs.event.int(1, 100) <= percent) {
+  // Content v3: a year holds at most so many events, so a busy one never crowds out the device's story column.
+  const full = t.maxEventsPerYear !== undefined && life.year.lines >= t.maxEventsPerYear
+  if (rngs.event.int(1, 100) <= percent && !full) {
     const pool = eligibleEvents(life, content, yearEnd ? undefined : season)
     if (pool.length > 0) {
       const event = pickByRarity(rngs.event, pool, content.rarityWeights, eventWeight(life, content))

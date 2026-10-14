@@ -442,5 +442,15 @@ Barry chose a content pack as the first work after the MVP. Content v3 (`package
 - Once the minimum is reached, Age up ends the year on the spot. The intent runs the tick's own step (`applyStep` in `paperLives/tick.ts`) with seeds of its own, so the new age, the recap and the next decision appear at once. The next scheduled tick carries on from there.
 - Before the minimum, the button reads **Queue Age up** and says when the year will be ready, with a live countdown, and that nothing is skipped. Once the year is ready, the button reads **Age up to 35**. After the birthday, a card shows last year's lines.
 
+**Further v3 fixes, from reading eight full lives.** Before any life ran v3:
+
+- A year holds at most four events, so the busiest years stay readable on the device: the busiest tenth of years have five lines or fewer, down from six.
+- Fourteen jobs need the right training: a degree for the nurse, the teacher and the other professions, a trade for the electrician, plumber and carpenter. v1 only capped the tier, so a trade apprentice could qualify as a nurse.
+- An epitaph names the grown-up job held longest, not a teenage Saturday job.
+- Retirement and the will are asked once, with one reminder (at 65 and 72). Before, a player who let them be read "Kept working another year" every year from 60.
+- The lines the core writes itself have more versions: a falling out, making up, exam results, a tight year, a loss, a birth, a grandchild, a wedding and a proposal. Within a life, the most repeated line now comes up at most twice.
+
+All 13 gates still pass over 2,700 lives. Wills are made in 36% of harness lives, down from 54%. Without a will, the estate still goes to the partner and children.
+
 Switch production to v3: `npx convex run --prod paperLives/operations:setActiveContentVersion '{"contentVersion":"v3"}'`. Lives keep their state; the next year draws from v3.
 

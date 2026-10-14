@@ -4,16 +4,22 @@ import { fill } from './text'
 import type { Bequest, CauseDef, EpitaphDef, Heir, LifeRecord, LifeState, PaperLivesCatalog, StreamName } from './types'
 
 /** The job held longest, ties to the earlier job. */
-export function longestJob(life: Pick<LifeState, 'jobYears'>): string | undefined {
+export function longestJob(life: Pick<LifeState, 'jobYears'>, content?: Pick<PaperLivesCatalog, 'jobs' | 'tuning'>): string | undefined {
+  let entries = Object.entries(life.jobYears).filter(([, years]) => years > 0)
+  // Content v3: a grown-up job counts before a Saturday one, so an epitaph never calls the paper round a life's work.
+  if (content?.tuning.adultJobsFirst) {
+    const adult = entries.filter(([id]) => (content.jobs.find((j) => j.id === id)?.tier ?? 1) > 1)
+    if (adult.length > 0) entries = adult
+  }
   let best: [string, number] | undefined
-  for (const [id, years] of Object.entries(life.jobYears)) if (years > 0 && (!best || years > best[1])) best = [id, years]
+  for (const [id, years] of entries) if (!best || years > best[1]) best = [id, years]
   return best?.[0]
 }
 
 /** Which epitaph needs this life meets (paper-lives.md "The will, death and the next life"). */
-export function lifeTags(life: LifeState): Set<EpitaphDef['needs'][number]> {
+export function lifeTags(life: LifeState, content?: Pick<PaperLivesCatalog, 'jobs' | 'tuning'>): Set<EpitaphDef['needs'][number]> {
   const tags = new Set<EpitaphDef['needs'][number]>()
-  if (longestJob(life)) tags.add('job')
+  if (longestJob(life, content)) tags.add('job')
   if (life.counters.childrenRaised > 0) tags.add('children')
   if (life.counters.housesOwned > 0) tags.add('house')
   if (life.counters.petsKept > 0) tags.add('pet')
@@ -57,12 +63,12 @@ export function bequests(life: LifeState): Bequest[] {
 
 export function endLife(life: LifeState, content: PaperLivesCatalog, rngs: Readonly<Record<StreamName, Rng>>): { life: LifeState; record: LifeRecord } {
   const cause = chooseCause(life, content, rngs.mortality)
-  const job = longestJob(life)
+  const job = longestJob(life, content)
   const jobDef = job ? content.jobs.find((j) => j.id === job) : undefined
   const hobby = life.hobby ? content.hobbies.find((h) => h.id === life.hobby) : undefined
   const slots = { first: life.first, last: life.last, age: String(life.age), ...(jobDef ? { job: jobDef.name.toLowerCase() } : {}), ...(hobby ? { hobby: hobby.noun } : {}) }
   const deathLine = fill(cause.line, life.pronouns, slots)
-  const tags = lifeTags(life)
+  const tags = lifeTags(life, content)
   const epitaphs = content.epitaphs.filter((e) => e.needs.every((n) => tags.has(n)))
   // Prefer the most specific epitaph the life earns, so a long full life is not summed up by the plainest line.
   const most = Math.max(...epitaphs.map((e) => e.needs.length))

@@ -71,6 +71,8 @@ export function eligibleJobs(life: LifeState, content: PaperLivesCatalog): JobDe
   const stage = stageFor(life.age)
   return content.jobs.filter((job) => {
     if (job.id === life.job || job.tier > cap || !job.stages.includes(stage)) return false
+    // Content v3: some jobs need a particular training (a nurse a degree, an electrician a trade).
+    if (job.needs && !job.needs.includes(life.education)) return false
     if (!job.floor) return true
     const floor = job.floor.min - (job.easedBy && life.traits.includes(job.easedBy) ? 15 : 0)
     return life.stats[job.floor.stat] >= floor
