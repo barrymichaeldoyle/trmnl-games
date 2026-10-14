@@ -536,6 +536,8 @@ D24–D28 resolve final pacing/content/recap/incident/recovery-policy recommenda
 
 2026-10-14, D159 L1: content v1 (421 events, 90 decisions), the pure core, the validator and the harness built in `packages/paper-lives` ([build notes](paper-lives.md#l1-build-2026-10-14)). Every L1 gate passes over 1,800 lives. Changes from the spec, from the harness: Age up queues at any time and the year still ends no earlier than its minimum; health drifts toward an age target instead of only declining; rarity is drawn per tier; a seen list holds repeats down; Lucky cuts mortality by two fifths until 80; the will has five options; teen jobs end at 18. Nothing deployed; no backend yet.
 
+2026-10-14, D159 L2: the backend built on main (bfe1a3c, 9c8b54a; [build notes](paper-lives.md#l2-build-2026-10-14)): registry entry (hidden), `pl` tables, lives, story logs, life records and record boards, the tick ten minutes into each quarter-hour, intents and the Life query, payload v1 with the screen, install and uninstall routes and a placeholder template, both deletion levels. The TRMNL lifecycle now serves three games through game hooks. Four L1 rule changes (queued Age up, health target, Lucky at two fifths, five will options) kept at Barry's word ("Do what you think is best").
+
 2026-10-14, D160: quarter view review. The OG quarter now says paused, knocked out (with the return time) and timed sleep, keeps the level beside long names and gives the stories the spare width; the X portrait quarter gains its status line (template v54).
 
 2026-10-14, D161: What's new gets a row on the More tab and a three-change section on the front page.
