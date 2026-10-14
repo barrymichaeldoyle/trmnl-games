@@ -109,12 +109,6 @@ export const purgeGameStep = internalMutation({
     const job = await ctx.db.get(jobId)
     if (!job || job.state !== 'running') return null
     const now = Date.now()
-    // D158: a job from before the rename to Idle Angler; `idleAngler/legacyReset:run` clears what it would have.
-    if (job.gameSlug === 'slow-cast') {
-      await ctx.db.patch(jobId, { state: 'completed', phase: 'done', completedAt: now, lastProgressAt: now })
-      return null
-    }
-    const gameSlug = job.gameSlug
     const again = async (phase: 'connections' | 'gameplay' = job.phase === 'connections' ? 'connections' : 'gameplay') => {
       await ctx.db.patch(jobId, { phase, lastProgressAt: now })
       await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
@@ -123,7 +117,7 @@ export const purgeGameStep = internalMutation({
     if (job.phase === 'connections') {
       // D115: only this game's connections; the other game's installations keep working. A user has a
       // handful of connections, so a page of them always includes this game's remaining rows.
-      const ours = <R extends { gameSlug?: string }>(rows: R[]) => rows.filter((row) => isGame(row, gameSlug))
+      const ours = <R extends { gameSlug?: string }>(rows: R[]) => rows.filter((row) => isGame(row, job.gameSlug))
       const grants = ours(await ctx.db.query('trmnlGrants').withIndex('by_userId', (q) => q.eq('userId', job.userId)).take(CONNECTION_PAGE))
       for (const grant of grants) {
         const known = await ctx.db.query('revokedTrmnlCredentials').withIndex('by_tokenHash', (q) => q.eq('tokenHash', grant.tokenHash)).first()

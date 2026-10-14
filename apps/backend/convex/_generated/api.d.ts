@@ -26,7 +26,6 @@ import type * as idleAngler_adapter from "../idleAngler/adapter.js";
 import type * as idleAngler_anglers from "../idleAngler/anglers.js";
 import type * as idleAngler_flies from "../idleAngler/flies.js";
 import type * as idleAngler_leaderboard from "../idleAngler/leaderboard.js";
-import type * as idleAngler_legacyReset from "../idleAngler/legacyReset.js";
 import type * as idleAngler_lifecycle from "../idleAngler/lifecycle.js";
 import type * as idleAngler_operations from "../idleAngler/operations.js";
 import type * as idleAngler_payload from "../idleAngler/payload.js";
@@ -109,7 +108,6 @@ declare const fullApi: ApiFromModules<{
   "idleAngler/anglers": typeof idleAngler_anglers;
   "idleAngler/flies": typeof idleAngler_flies;
   "idleAngler/leaderboard": typeof idleAngler_leaderboard;
-  "idleAngler/legacyReset": typeof idleAngler_legacyReset;
   "idleAngler/lifecycle": typeof idleAngler_lifecycle;
   "idleAngler/operations": typeof idleAngler_operations;
   "idleAngler/payload": typeof idleAngler_payload;

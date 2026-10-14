@@ -170,11 +170,6 @@ export const logKind = v.union(
 
 /** Every registered game (packages/platform). Storage accepts any of them; each write path still names its own game. */
 export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'))
-/**
- * D158: rows written before the rename to Idle Angler still carry 'slow-cast' until `idleAngler/legacyReset:run`
- * clears them. The follow-up deploy narrows these fields back to `gameSlug`.
- */
-const storedGameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('slow-cast'))
 export const gameStatus = v.union(v.literal('hidden'), v.literal('preview'), v.literal('live'))
 
 /** D149: a hero's look; chosen free at creation, changed later with a makeover. */
@@ -195,7 +190,7 @@ export default defineSchema({
 
   /** Server-controlled game lifecycle (idle-angler.md "Architecture"): one row per game once an admin sets its status. */
   platformGames: defineTable({
-    slug: storedGameSlug,
+    slug: gameSlug,
     status: gameStatus,
     updatedAt: v.number(),
   }).index('by_slug', ['slug']),
@@ -322,20 +317,6 @@ export default defineSchema({
     .index('by_anglerId_and_at_and_sequence', ['anglerId', 'at', 'sequence'])
     .index('by_at', ['at']),
 
-  /**
-   * D158: the tables as named before the rename to Idle Angler (`sw` was the working title Still Waters). Kept, loosely
-   * typed, only until `idleAngler/legacyReset:run` empties them; the follow-up deploy drops them from the schema.
-   */
-  swWorldState: defineTable(v.any()),
-  swSimulationRuns: defineTable(v.any()),
-  swSimulationFailures: defineTable(v.any()),
-  swLeaderboardPublications: defineTable(v.any()),
-  swAchievementStats: defineTable(v.any()),
-  slowCastProfiles: defineTable(v.any()),
-  swAchievements: defineTable(v.any()),
-  swCatchRecords: defineTable(v.any()),
-  swTickLogs: defineTable(v.any()),
-
   users: defineTable({
     analyticsConsent: v.optional(v.boolean()),
     tokenIdentifier: v.string(),
@@ -400,7 +381,7 @@ export default defineSchema({
 
   gameDeletionJobs: defineTable({
     userId: v.id('users'),
-    gameSlug: storedGameSlug,
+    gameSlug: gameSlug,
     state: v.union(v.literal('running'), v.literal('completed')),
     phase: v.union(v.literal('connections'), v.literal('gameplay'), v.literal('done')),
     createdAt: v.number(),
@@ -647,7 +628,7 @@ export default defineSchema({
 
 
   operationReceipts: defineTable({
-    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('slow-cast'))),
+    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'))),
     userId: v.id('users'),
     operationId: v.string(),
     operation: v.string(),
@@ -784,7 +765,7 @@ export default defineSchema({
   operationalIncidents: defineTable({
     incidentKey: v.string(),
     /** A Desk Crawler or Idle Angler run (D115). */
-    runId: v.union(v.id('simulationRuns'), v.id('iaSimulationRuns'), v.id('swSimulationRuns')),
+    runId: v.union(v.id('simulationRuns'), v.id('iaSimulationRuns')),
     state: v.union(v.literal('open'), v.literal('recovered')),
     openedAt: v.number(),
     recoveredAt: v.optional(v.number()),
@@ -823,7 +804,7 @@ export default defineSchema({
     .index('by_at', ['at']),
 
   trmnlGrants: defineTable({
-    gameSlug: v.optional(storedGameSlug),
+    gameSlug: v.optional(gameSlug),
     userId: v.id('users'),
     tokenHash: v.string(),
     // Reused revoked credentials authorize only the freshly verified UUID.
@@ -853,7 +834,7 @@ export default defineSchema({
     .index('by_expiresAt', ['expiresAt']),
 
   trmnlInstallAttempts: defineTable({
-    gameSlug: v.optional(storedGameSlug),
+    gameSlug: v.optional(gameSlug),
     userId: v.id('users'),
     grantId: v.id('trmnlGrants'),
     state: v.union(v.literal('pending'), v.literal('completed'), v.literal('expired')),
@@ -866,7 +847,7 @@ export default defineSchema({
     .index('by_expiresAt', ['expiresAt']),
 
   trmnlInstances: defineTable({
-    gameSlug: v.optional(storedGameSlug),
+    gameSlug: v.optional(gameSlug),
     grantId: v.id('trmnlGrants'),
     userId: v.id('users'),
     uuid: v.string(),
