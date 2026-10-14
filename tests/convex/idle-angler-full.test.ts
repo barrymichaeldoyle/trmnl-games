@@ -10,6 +10,7 @@ import type { T } from './helpers'
 import { nextIdleAnglerTick, runIdleAnglerTick, seedAngler } from './idleAnglerHelpers'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
+const seedCounters = async () => (await import('@trmnl-games/idle-angler/sim')).zeroCounters()
 const logbookOf = (ids: readonly string[]) => Object.fromEntries(ids.map((id) => [id, { count: 1, bestGrams: 100, firstTick: 1 }]))
 const MILLPOND_EIGHT = ['minnow', 'roach', 'rudd', 'perch', 'bream', 'tench', 'crucian_carp', 'eel']
 const TEN = [...MILLPOND_EIGHT, 'gudgeon', 'dace']
@@ -44,6 +45,16 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(dock.full.orders).toHaveLength(3)
     expect(dock.full.features).toMatchObject({ orders: true, trophies: false, deadbait: false })
     expect(dock.full.season).toMatchObject({ id: 'spring', name: 'Spring' })
+  })
+
+  it('marks a companion goal off at once: selling a fish on the "Sell a fish" goal pays it and names the next', async () => {
+    const id = await seedAngler(t, { goal: { rung: 1, castsAtStart: 0 }, counters: { ...(await seedCounters()), fishCaught: 1 } }, 'Pat')
+    const [fish] = await addFish(id, [['roach', 200, 10]])
+    await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'sell-goal-1', catchIds: [fish!] })
+    const after = await angler(id)
+    expect(after).toMatchObject({ gold: 20, goal: { rung: 2 }, counters: { goalsReached: 1, fishSold: 1 } })
+    const lines = await t.run(async (ctx) => await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', id)).collect())
+    expect(lines.map((l) => l.summary)).toContain('Goal reached: Sell a fish. Next: Buy a tub of bread.')
   })
 
   it('pays an order once for exactly the right fish, the receipt answering a retry', async () => {

@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import { ACHIEVEMENTS_VERSION, allSatisfied, familyProgress, needsFullPass, newlyUnlocked, type AchievementDef, type AchievementState } from '@trmnl-games/idle-angler/content/achievements'
-import type { IdleAnglerCatalog } from '@trmnl-games/idle-angler/sim'
+import { evaluateGoal, type IdleAnglerCatalog } from '@trmnl-games/idle-angler/sim'
+import { storedDetail, toAnglerState } from './adapter'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
 import type { Doc, Id } from '../_generated/dataModel'
 import { query, type MutationCtx, type QueryCtx } from '../_generated/server'
@@ -37,12 +38,34 @@ export async function awardAngler(ctx: MutationCtx, angler: Doc<'anglers'>, befo
   return written
 }
 
-/** After an intent: compare the angler before it with its committed state. */
+/**
+ * After an intent: first the goal (D162), so a goal met in the companion (a sale, a purchase, an order, a mount) is
+ * marked off, paid and logged at once rather than on the next cast; then the achievements, comparing the angler
+ * before the intent with its committed state.
+ */
 export async function awardAfterAnglerIntent(ctx: MutationCtx, before: Doc<'anglers'>, content: IdleAnglerCatalog, tick: number): Promise<void> {
+  await settleGoal(ctx, before._id, content)
   const angler = await ctx.db.get(before._id)
   if (!angler) return
   const flies = (await ctx.db.query('flyBoxes').withIndex('by_userId', (q) => q.eq('userId', angler.userId)).unique())?.totalCollected ?? 0
   await awardAngler(ctx, angler, stateOf(before, flies), stateOf(angler, flies), content, Date.now(), tick)
+}
+
+/** The goal step outside a cast: the pure `evaluateGoal`, with its line written as a command story. */
+async function settleGoal(ctx: MutationCtx, anglerId: Id<'anglers'>, content: IdleAnglerCatalog): Promise<void> {
+  if (!content.goals) return
+  const angler = await ctx.db.get(anglerId)
+  if (!angler) return
+  const before = toAnglerState(angler)
+  const { angler: after, event } = evaluateGoal(content, before)
+  if (after === before) return
+  const patch: Partial<Doc<'anglers'>> = { gold: after.gold, goal: after.goal, counters: after.counters }
+  if (event) {
+    const sequence = angler.logSequence + 1
+    await ctx.db.insert('iaTickLogs', { anglerId, source: 'command', sequence, at: Date.now(), kind: 'goal', summary: event.summary, detail: storedDetail(event), deltas: event.deltas })
+    patch.logSequence = sequence
+  }
+  await ctx.db.patch(anglerId, patch)
 }
 
 /** Publication runs: add one owner's unlocks to the run's rarity tally. */
