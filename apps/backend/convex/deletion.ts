@@ -2,6 +2,8 @@ import { gameProfile, DESK_CRAWLER } from './lib/gameProfile'
 import { isGame } from './lib/gameHooks'
 import { idleAnglerProfile } from './idleAngler/profile'
 import { purgeAngler } from './idleAngler/purge'
+import { paperLivesProfile } from './paperLives/profile'
+import { purgeLives } from './paperLives/purge'
 import { gameSlug as gameSlugValidator } from './schema'
 import { purgeRaidRows } from './lib/raids'
 import { purgeMeetingRows } from './lib/meetings'
@@ -83,6 +85,20 @@ export const requestGameDeletion = mutation({
       })
       return { operationId: result.operationId, changed: result.changed }
     }
+    // D159: Paper Lives progress likewise, leaving the account and the other games.
+    if (args.gameSlug === 'paper-lives') {
+      const result = await runIntent(ctx, args.operationId, 'deletion.requestGameDeletion', { gameSlug: 'paper-lives' }, async (user) => {
+        const profile = await paperLivesProfile(ctx, user._id)
+        if (profile?.state === 'deleting') return { changed: false }
+        if (profile) await ctx.db.patch(profile._id, { state: 'deleting' })
+        else await ctx.db.insert('paperLivesProfiles', { userId: user._id, state: 'deleting', createdAt: Date.now() })
+        const now = Date.now()
+        const jobId = await ctx.db.insert('gameDeletionJobs', { userId: user._id, gameSlug: 'paper-lives', state: 'running', phase: 'connections', createdAt: now, lastProgressAt: now })
+        await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
+        return { changed: true }
+      })
+      return { operationId: result.operationId, changed: result.changed }
+    }
     const result = await runIntent(ctx, args.operationId, 'deletion.requestGameDeletion', {}, async (user) => {
       const reconnect = await ctx.db.query('trmnlReconnectAttempts').withIndex('by_tokenIdentifier', q => q.eq('tokenIdentifier', user.tokenIdentifier)).unique()
       if (reconnect) await ctx.db.delete(reconnect._id)
@@ -137,6 +153,16 @@ export const purgeGameStep = internalMutation({
       }
       const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', 'idle-angler')).take(BATCH)
       if ((await deleteBatch(ctx, receipts)) + (await purgeGameAlertRows(ctx, job.userId, 'idle-angler', BATCH)) > 0) return await again()
+      if (profile) await ctx.db.patch(profile._id, { state: 'active' })
+      await ctx.db.patch(jobId, { state: 'completed', phase: 'done', completedAt: now, lastProgressAt: now })
+      return null
+    }
+    if (job.gameSlug === 'paper-lives') {
+      const profile = await paperLivesProfile(ctx, job.userId)
+      if ((await purgeLives(ctx, job.userId, profile?.lifeId, BATCH)) > 0) return await again()
+      if (profile?.lifeId) await ctx.db.patch(profile._id, { lifeId: undefined })
+      const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_scope', (q) => q.eq('userId', job.userId).eq('scope', 'paper-lives')).take(BATCH)
+      if ((await deleteBatch(ctx, receipts)) + (await purgeGameAlertRows(ctx, job.userId, 'paper-lives', BATCH)) > 0) return await again()
       if (profile) await ctx.db.patch(profile._id, { state: 'active' })
       await ctx.db.patch(jobId, { state: 'completed', phase: 'done', completedAt: now, lastProgressAt: now })
       return null
@@ -277,6 +303,10 @@ export const purgeStep = internalMutation({
           if ((await purgeAngler(ctx, ia.anglerId, BATCH)) > 0) return await again()
           await ctx.db.patch(ia._id, { anglerId: undefined })
         }
+        // D159: the account's lives, records and board rows.
+        const pl = await paperLivesProfile(ctx, job.userId)
+        if ((await purgeLives(ctx, job.userId, pl?.lifeId, BATCH)) > 0) return await again()
+        if (pl?.lifeId) await ctx.db.patch(pl._id, { lifeId: undefined })
         const receipts = await ctx.db.query('operationReceipts').withIndex('by_userId_and_operationId', (q) => q.eq('userId', job.userId!)).take(BATCH)
         return (await deleteBatch(ctx, receipts)) > 0 ? await again() : await advance('provider')
       }
@@ -296,6 +326,8 @@ export const purgeStep = internalMutation({
         if (profile) await ctx.db.delete(profile._id)
         const iaProfile = await idleAnglerProfile(ctx, job.userId)
         if (iaProfile) await ctx.db.delete(iaProfile._id)
+        const plProfile = await paperLivesProfile(ctx, job.userId)
+        if (plProfile) await ctx.db.delete(plProfile._id)
         const gameJobs = await ctx.db.query('gameDeletionJobs').withIndex('by_userId_and_state', (q) => q.eq('userId', job.userId!)).take(BATCH)
         if (gameJobs.length > 0) { await deleteBatch(ctx, gameJobs); return await again() }
         if (user) await ctx.db.delete(user._id)

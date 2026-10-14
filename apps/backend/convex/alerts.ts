@@ -8,6 +8,8 @@ import { currentUser, runIntent } from './lib/intent'
 import { validateTimezone } from './lib/names'
 import { ALERTS, alertMessage, DESK_CRAWLER_KINDS, ensureSender, inQuietHours, kindOn, localDay, PREF_FOR, quietEndsAt, IDLE_ANGLER_KINDS, type AlertKind } from './lib/alerts'
 import { currentAngler } from './idleAngler/profile'
+import { currentLife } from './paperLives/profile'
+import type { GameSlug } from '@trmnl-games/platform'
 import { coolerOf } from '@trmnl-games/idle-angler/sim'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
 import { readWorld } from './world'
@@ -304,11 +306,16 @@ export const devicesForTest = internalQuery({
  * other game still has a character to alert about; otherwise everything goes, as D114 removed it with Desk Crawler.
  * Returns how many rows went.
  */
-export async function purgeGameAlertRows(ctx: MutationCtx, userId: Id<'users'>, game: 'desk-crawler' | 'idle-angler', batch: number): Promise<number> {
+export async function purgeGameAlertRows(ctx: MutationCtx, userId: Id<'users'>, game: GameSlug, batch: number): Promise<number> {
   const owner = await ctx.db.get(userId)
-  const otherGame = owner === null ? null : game === 'idle-angler' ? await currentHero(ctx, owner) : await currentAngler(ctx, owner)
-  if (otherGame === null) return await purgeAlertRows(ctx, userId, batch)
-  const kinds: readonly AlertKind[] = game === 'idle-angler' ? IDLE_ANGLER_KINDS : DESK_CRAWLER_KINDS
+  // Another game still has a character to alert about (D159: three games).
+  const otherGame =
+    owner === null
+      ? false
+      : (game !== 'desk-crawler' && (await currentHero(ctx, owner)) !== null) || (game !== 'idle-angler' && (await currentAngler(ctx, owner)) !== null) || (game !== 'paper-lives' && (await currentLife(ctx, owner)) !== null)
+  if (!otherGame) return await purgeAlertRows(ctx, userId, batch)
+  // Paper Lives has no alert kinds until L6.
+  const kinds: readonly AlertKind[] = game === 'idle-angler' ? IDLE_ANGLER_KINDS : game === 'paper-lives' ? [] : DESK_CRAWLER_KINDS
   const rows = (await ctx.db.query('alertOutbox').withIndex('by_userId_and_localDay', (q) => q.eq('userId', userId)).take(batch * 4)).filter((row) => kinds.includes(row.kind)).slice(0, batch)
   for (const row of rows) await ctx.db.delete(row._id)
   if (rows.length === 0) {

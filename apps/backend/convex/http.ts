@@ -9,6 +9,7 @@ import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { DEFAULT_COMPANION_ORIGIN, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
 import { parseUtcOffset, screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
+import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templates/screen'
 import { renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import type { GameSlug } from '@trmnl-games/platform'
 
@@ -92,6 +93,8 @@ http.route({ path: '/trmnl/install/success', method: 'POST', handler: installSuc
 http.route({ path: '/trmnl/uninstall', method: 'POST', handler: uninstall('desk-crawler') })
 http.route({ path: '/trmnl/idle-angler/install/success', method: 'POST', handler: installSuccess('idle-angler') })
 http.route({ path: '/trmnl/idle-angler/uninstall', method: 'POST', handler: uninstall('idle-angler') })
+http.route({ path: '/trmnl/paper-lives/install/success', method: 'POST', handler: installSuccess('paper-lives') })
+http.route({ path: '/trmnl/paper-lives/uninstall', method: 'POST', handler: uninstall('paper-lives') })
 
 /** Shared screen request parsing: bearer, form type and size, one `user_uuid`. */
 async function parseScreenRequest(request: Request): Promise<{ tokenHash: string; form: URLSearchParams; uuid: string } | Response> {
@@ -124,6 +127,25 @@ const idleAnglerScreen = httpAction(async (ctx, request) => {
   return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, utc_offset: utcOffset } })
 })
 http.route({ path: '/trmnl/idle-angler/v1/screen', method: 'POST', handler: idleAnglerScreen })
+
+/** Paper Lives' screen (D159): the same authorization and lost-callback recovery as Idle Angler's. */
+const paperLivesScreen = httpAction(async (ctx, request) => {
+  const parsed = await parseScreenRequest(request)
+  if (parsed instanceof Response) return parsed
+  const { tokenHash, form, uuid } = parsed
+  const now = Date.now()
+  const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
+  const args = { tokenHash, uuid, now, utcOffset }
+  let result = await ctx.runQuery(internal.paperLives.payload.forInstance, args)
+  if (result?.outcome === 'recoverable') {
+    await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'paper-lives', tokenHash, uuid, confirmedBy: 'screen_request' })
+    result = await ctx.runQuery(internal.paperLives.payload.forInstance, args)
+  }
+  if (result === null || result.outcome !== 'payload') return notFound()
+  if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
+  return json(200, { ...paperLivesMarkup, merge_variables: { ...result.payload, utc_offset: utcOffset } })
+})
+http.route({ path: '/trmnl/paper-lives/v1/screen', method: 'POST', handler: paperLivesScreen })
 
 http.route({
   path: '/trmnl/v1/screen',
