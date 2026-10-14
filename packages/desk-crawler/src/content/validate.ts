@@ -188,6 +188,34 @@ export function validateCatalog(content: ContentCatalog): string[] {
       if ([...filled].length > c.summaryMaxCodePoints) problems.push(`lost-property short line too long beside a 20-character name: ${line}`)
     }
   }
+  // D163: dug-in elites stay rare and bounded, every floor they can dig in on has its lines, and every short line
+  // fits beside the longest monster name with its longest consequence.
+  const standoff = content.standoff
+  if (standoff) {
+    if (!(standoff.digInPct >= 1 && standoff.digInPct <= 50)) problems.push('dig-in chance must be 1–50%')
+    if (!(standoff.durationTicks >= 4 && standoff.durationTicks <= 96)) problems.push('a standoff lasts 4 to 96 ticks')
+    if (!(standoff.hpMultiplierPct > c.elite.hpMultiplierPct)) problems.push('a dug-in elite needs more HP than a one-tick elite')
+    if (!(standoff.xpMultiplier >= 1 && standoff.goldMultiplier >= 1)) problems.push('standoff multipliers must be at least 1')
+    if (!content.rarities.some((rule) => rule.rarity === 'rare' || rule.rarity === 'epic')) problems.push('a standoff find needs a rare or epic rarity')
+    const lines = standoff.narrative
+    const floors = content.biomes.filter((b) => !b.safe && b.tier >= standoff.minBiomeTier)
+    if (floors.length === 0) problems.push('no floor where an elite can dig in')
+    for (const floor of floors) {
+      if ((lines.dugIn[floor.id]?.length ?? 0) < 3 || (lines.won[floor.id]?.length ?? 0) < 3) problems.push(`standoff lines for ${floor.id} need three each`)
+    }
+    if (lines.fighting.length < 3 || lines.slipped.length < 3) problems.push('standoff fighting and slipped lines need three each')
+    const pool = [...Object.values(lines.dugIn).flat(), ...Object.values(lines.won).flat(), ...lines.fighting, ...lines.slipped, lines.dugInCompact, lines.fightingCompact, lines.wonCompact, lines.slippedCompact, lines.waiting]
+    for (const line of pool) {
+      for (const [, name] of line.matchAll(/\{(\w+)\}/g)) if (name !== 'monster') problems.push(`standoff line uses {${name}}: ${line}`)
+      if (!line.includes('{monster}')) problems.push(`standoff line needs {monster}: ${line}`)
+    }
+    const longest = floors.flatMap((b) => b.monsterIds).map((id) => content.monsters.find((m) => m.id === id)?.name ?? '').reduce((a, b) => ([...b].length > [...a].length ? b : a), '')
+    const longestItem = content.gearTemplates.reduce((a, t) => ([...t.name].length > [...a].length ? t.name : a), '')
+    const fit = (line: string, tail: string) => [...line.replace('{monster}', longest)].length + [...tail].length <= c.summaryMaxCodePoints
+    if (!fit(lines.dugInCompact, ' Down to 100%.') || !fit(lines.fightingCompact, ' Down to 100%.')) problems.push('standoff short lines too long beside the longest name and its HP')
+    if (!fit(lines.wonCompact, ` Found an Epic ${longestItem}.`)) problems.push('standoff won line too long beside the longest name and find')
+    if (!fit(lines.slippedCompact, '')) problems.push('standoff slipped line too long')
+  }
   const todo = content.todo
   if (todo) {
     // P31: one template per kind, enough kinds to fill three slots at level 1, a target for every tier a task can name.

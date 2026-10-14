@@ -34,6 +34,7 @@ export function toHeroState(hero: Doc<'heroes'>): HeroState {
     ...(hero.todo === undefined ? {} : { todo: hero.todo }),
     ...(hero.career === undefined ? {} : { career: hero.career }),
     ...(hero.occasion === undefined ? {} : { occasion: hero.occasion }),
+    ...(hero.standoff === undefined ? {} : { standoff: hero.standoff }),
   }
 }
 
@@ -99,6 +100,8 @@ export async function applyResult(
     career: next.career === undefined ? undefined : { ...next.career, reached: next.career.reached.map((entry) => ({ ...entry })), unclaimed: next.career.unclaimed === undefined ? undefined : next.career.unclaimed.map((entry) => ({ ...entry })) },
     // D139: an earlier catalog carries the mark untouched, so this never clears one.
     occasion: next.occasion === undefined ? undefined : { ...next.occasion },
+    // D163: cleared by the core on a fall, knockout, travel or its clock; an earlier catalog drops it the same way.
+    standoff: next.standoff === undefined ? undefined : { ...next.standoff },
     lastLevelUpTick: next.lastLevelUpTick,
     counters: next.counters,
   }

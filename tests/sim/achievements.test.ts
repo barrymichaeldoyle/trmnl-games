@@ -19,9 +19,9 @@ const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<Achievement
 
 describe('achievement catalog (D65)', () => {
   it('holds the launch set with unique, catalog-backed ids', () => {
-    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3 + 3 + 3)
+    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3 + 3 + 3 + 3)
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1 + 1 + 1)
+    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1 + 1 + 1 + 1)
     for (const def of ACHIEVEMENTS) {
       expect(ACHIEVEMENT_FAMILIES.some((f) => f.id === def.family)).toBe(true)
       expect(def.name.length).toBeLessThanOrEqual(24)
@@ -197,5 +197,15 @@ describe('Bigger bags (D146, catalog version 12)', () => {
     expect(earned(24)).toEqual(['big_bags_1'])
     expect(earned(32)).toEqual(['big_bags_1', 'big_bags_2', 'big_bags_3'])
     expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'big_bags')).toMatchObject({ category: 'Lifetime' })
+  })
+})
+
+describe('Dug in (D163, catalog version 13)', () => {
+  it('counts dug-in elites beaten at 1, 10 and 50', () => {
+    const earned = (overrides: Partial<HeroCounters>) => allSatisfied(state(overrides), content).filter((a) => a.family === 'dug_in').map((a) => a.id)
+    expect(earned({})).toEqual([])
+    expect(earned({ standoffsWon: 1 })).toEqual(['dug_in_1'])
+    expect(earned({ standoffsWon: 50 })).toEqual(['dug_in_1', 'dug_in_2', 'dug_in_3'])
+    expect(ACHIEVEMENT_FAMILIES.find((f) => f.id === 'dug_in')).toMatchObject({ category: 'Lifetime' })
   })
 })

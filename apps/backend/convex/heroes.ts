@@ -105,6 +105,10 @@ export const mine = query({
       counters: withCounterDefaults(hero.counters),
       // D76: the chosen stance and every stance's thresholds, so the companion can show what each one does.
       merchantTicksLeft: hero.merchant && world && hero.merchant.expiresAtTick > world.currentTick ? hero.merchant.expiresAtTick - world.currentTick : null,
+      // D163: a dug-in elite: its name, HP and the adventures before it leaves.
+      standoff: hero.standoff
+        ? { monsterId: hero.standoff.monsterId, name: content.monsters.find((m) => m.id === hero.standoff!.monsterId)?.name ?? 'elite', hp: hero.standoff.hp, maxHp: hero.standoff.maxHp, hpPct: Math.max(1, Math.ceil((hero.standoff.hp * 100) / hero.standoff.maxHp)), ticksLeft: Math.max(1, hero.standoff.untilTick - (world?.currentTick ?? hero.lastTick)) }
+        : null,
       // D79: the pending choice with its options and what each one would do to this hero right now.
       choice: choiceView(content, hero, potionsHeld(items), world?.currentTick ?? 0),
       stance: hero.stance ?? 'balanced',
@@ -163,10 +167,11 @@ export const recentLog = query({
 
 /** One-tick travel to an unlocked biome (gameplay.md "Travel"). */
 export const changeBiome = mutation({
-  args: { operationId: v.string(), biomeId: v.string() },
+  /** D163: `leaveStandoff` confirms leaving a dug-in elite behind; without it travel is refused while one is running. */
+  args: { operationId: v.string(), biomeId: v.string(), leaveStandoff: v.optional(v.boolean()) },
   returns: intentResult,
   handler: async (ctx, args) =>
-    await runIntent(ctx, args.operationId, 'heroes.changeBiome', { biomeId: args.biomeId }, async (user) => {
+    await runIntent(ctx, args.operationId, 'heroes.changeBiome', { biomeId: args.biomeId, ...(args.leaveStandoff === undefined ? {} : { leaveStandoff: args.leaveStandoff }) }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
       // D133: validated against the world's pinned catalog, never the code's, so travel cannot name a floor the simulator does not know yet.
       const biome = worldContent(await readWorld(ctx)).biomes.find((b) => b.id === args.biomeId)
@@ -174,9 +179,11 @@ export const changeBiome = mutation({
       if (hero.status !== 'exploring' && hero.status !== 'resting') throw appError('INVALID_STATE', 'Your hero cannot travel right now.')
       if (biome.unlockLevel > hero.level) throw appError('BIOME_LOCKED', `${biome.name} unlocks at level ${biome.unlockLevel}.`)
       if (biome.id === hero.biomeId) return { changed: false }
+      if (hero.standoff !== undefined && args.leaveStandoff !== true) throw appError('STANDOFF_RUNNING', 'Leave the dug-in elite behind first.')
       const world = await readWorld(ctx)
       const arriveAtTick = (world?.currentTick ?? 0) + 1
-      await ctx.db.patch(hero._id, { status: 'travelling', targetBiomeId: biome.id, arriveAtTick })
+      // D163: departing leaves a dug-in elite behind.
+      await ctx.db.patch(hero._id, { status: 'travelling', targetBiomeId: biome.id, arriveAtTick, standoff: undefined })
       await commandLog(ctx, hero, 'change_biome', `Set off for the ${biome.name}.`)
       return { changed: true, tick: arriveAtTick }
     }),
@@ -433,6 +440,25 @@ export const setPublicProfile = mutation({
 
 const stanceSummary = (content: ContentCatalog, from: (typeof STANCE_IDS)[number], to: (typeof STANCE_IDS)[number]) =>
   `Stance set to [[${content.stances?.[to]?.name ?? to}]] from ${(content.stances?.[from]?.name ?? from).toLowerCase()}.`
+
+/**
+ * D163: walk away from a dug-in elite. It leaves at once, with nothing lost but the time spent. A no-op without one,
+ * so a repeat or a stale page is harmless. Allowed while exploring, resting or paused.
+ */
+export const walkAway = mutation({
+  args: { operationId: v.string() },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'heroes.walkAway', {}, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      const standoff = hero.standoff
+      if (standoff === undefined) return { changed: false }
+      const monster = worldContent(await readWorld(ctx)).monsters.find((m) => m.id === standoff.monsterId)?.name ?? 'elite'
+      await ctx.db.patch(hero._id, { standoff: undefined })
+      await commandLog(ctx, hero, 'walk_away', `Walked away from the elite [[${monster}]].`)
+      return { changed: true }
+    }),
+})
 
 /** Voluntary pause: no rewards or catch-up while paused (D13). */
 export const pause = mutation({

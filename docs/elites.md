@@ -1,6 +1,6 @@
 # Dug-in elites (persistent elite encounters, P42)
 
-Proposed 2026-10-13. This is the v2.0 Depth row "persistent elite encounters with explicit intervention/retreat rules" ([roadmap](roadmap.md)). Barry asked for a spec after bigger bags (D146). Nothing is built yet. [Settled points](#settled-points) lists each choice with the recommended option first, for Barry to approve or change.
+Proposed 2026-10-13; approved and built as D163 on 2026-10-14 as content v24 (not v23, which D155 took). This is the v2.0 Depth row "persistent elite encounters with explicit intervention/retreat rules" ([roadmap](roadmap.md)). Every settled point went with its recommendation. [Build notes](#build-notes-d163-2026-10-14) lists where the build differs from the text below.
 
 Companions: [gameplay](gameplay.md) (combat, luck and the 3% elite, death and safe-biome protection), [simulation](simulation.md) (streams, one evaluation per tick), [inventory](inventory.md) (finds, held gear and sleep), [biomes](biomes.md) (the five floors and their tiers), [raids](raids.md) and [meetings](meetings.md) (what else can take a tick's encounter slot), [objectives](objectives.md) (career guarantees) and [quality](quality.md).
 
@@ -127,3 +127,17 @@ These are proposals with the recommended option first. Barry approves or changes
 6. **Reward.** (a) Big XP and gold plus one guaranteed rare-or-better find from the floor. (b) XP and gold only. (c) Workbench materials. Recommend (a): a named find is the memorable part, and gold-only would add to the gold glut that D146 is meant to soak up. (c) isn't scarce: daily managers hold 60+ Components by day 90.
 7. **Player control.** (a) Walk away plus the existing potion and stance controls. (b) A "push on" toggle that ignores the rest line. Recommend (a): (b) is a death button in a passive game.
 8. **Player-facing name.** "Dug in" (an elite that has dug in). Not "boss", which suggests something unique and authored, and not "persistent", which is jargon.
+
+## Build notes (D163, 2026-10-14)
+
+Built in one pass, E1 to E5, as content v24 with template v55 and achievement catalog version 13. Where the build differs from the spec above:
+
+- **The hero steps back at its rest line.** Inside a fight tick the hero stops after any round that leaves it below its stance's rest line, and the elite keeps its HP. Six full rounds every tick raised knockouts at level 12+ by 26–50% in the first harness pass; the spec's settled point 3 already gives the rest decision to sustain. Nothing is lost for stepping back.
+- **Numbers.** 800% HP (spec 600%), ×10 XP (spec ×12), ×6 gold (spec ×8). At ×8 the daily cohort's gold rose 5.3%, past the 5% limit.
+- **Slipping away is the tick's whole event.** When the clock runs out while the hero explores, "The elite X slipped away." is that tick's story and nothing else happens; it is a combat log with the `standoff_left` outcome.
+- **A fall on the dig-in tick counts.** An elite beaten in the tick it dug in pays the standoff reward and counts as a start and a win.
+- **Travel confirmation** is the `leaveStandoff` argument on `heroes.changeBiome`; without it travel is refused with `STANDOFF_RUNNING` while a standoff runs. The harness player stays to finish a standoff instead of travelling.
+- **Parking** a hero (D136) shifts the standoff's clock by the parked gap, like effects and pending choices.
+- **Device.** The bar sits in the attention slot every layout already has, so an attention line (a knockout, a full bag) takes its place; the full layouts add "leaves HH:MM". The scene already crowns the monster from the latest combat log, so no art changed.
+
+Evidence: [standoffs](evidence/standoffs.md).

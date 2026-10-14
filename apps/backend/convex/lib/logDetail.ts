@@ -48,7 +48,12 @@ const outcome = v.union(
     goldGranted: v.number(),
     gearDropped: v.boolean(),
     gearRarity: v.optional(rarity),
+    /** D163: a dug-in elite's tick, and its full HP. */
+    standoff: v.optional(v.union(v.literal('dug_in'), v.literal('fighting'), v.literal('won'))),
+    monsterHpMax: v.optional(v.number()),
   }),
+  /** D163: a dug-in elite's clock ran out. */
+  v.object({ variant: v.literal('standoff_left'), monsterId: v.string(), startedTick: v.number() }),
   v.object({
     variant: v.literal('loot'),
     found: v.union(v.literal('gear'), v.literal('potion'), v.literal('gold'), v.literal('bag'), v.literal('pouch')),

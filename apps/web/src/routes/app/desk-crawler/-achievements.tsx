@@ -48,7 +48,7 @@ const FAMILY_GLYPH: Record<string, GlyphName> = {
   elites: 'star', jackpots: 'coin', rare_finds: 'loot', epics: 'loot', finds: 'loot', adventures: 'travel', trips: 'travel', gold: 'coin',
   levels: 'levelup', knockouts: 'death', rescues: 'revive', retreats: 'flag', potions: 'potion', traps: 'trap', breaks: 'rest',
   bags: 'bag', big_bags: 'bag', sales: 'tag', keepsakes: 'keepsake', purchases: 'coin', merchants: 'merchant', stances: 'shield', choices: 'choice',
-  office_raider: 'raid', desk_defender: 'raid', tasks_done: 'todo', networking: 'meeting', lost_and_found: 'lost_property',
+  office_raider: 'raid', desk_defender: 'raid', tasks_done: 'todo', networking: 'meeting', lost_and_found: 'lost_property', dug_in: 'star',
 }
 const familyGlyph = (family: Family): GlyphName => FAMILY_GLYPH[family.family] ?? (family.family.startsWith('slay_') ? 'combat' : 'trophy')
 

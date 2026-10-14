@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
 import { useIntent } from '../../../lib/intent'
-import { BUTTON_PRIMARY, Button, LoadingState, NoticeBar, useFocusWithin, useNotice } from '../../../lib/ui'
+import { BUTTON_PRIMARY, Button, LoadingState, Meter, NoticeBar, useFocusWithin, useNotice } from '../../../lib/ui'
 import { BIOME_SWATCH } from '../../../lib/palette'
 import { preload } from '../../../lib/preload'
 import { Glyph, SectionTitle } from '../../../lib/glyphs'
@@ -103,6 +103,8 @@ type HeroView = {
   career?: CareerView | null
   unlocks?: UnlockView | null
   merchantTicksLeft: number | null
+  /** D163: a dug-in elite, while one lasts. */
+  standoff?: Standoff | null
   wakeAtTick: number | null
   choice: Choice | null
   effects: Array<{ id: string; name: string; blurb: string; kind: 'boon' | 'bane'; ticksLeft: number }>
@@ -114,6 +116,10 @@ type HeroView = {
 }
 
 type Occasion = { id: string; name: string; effect: string | null; daysLeft: number }
+type Standoff = { monsterId: string; name: string; hp: number; maxHp: number; hpPct: number; ticksLeft: number }
+
+/** "about 3 hours", "about 45 minutes": a number of quarter-hour adventures as wall time. */
+const aboutTime = (ticks: number) => (ticks >= 4 ? `about ${Math.round(ticks / 4)} ${Math.round(ticks / 4) === 1 ? 'hour' : 'hours'}` : `about ${ticks * 15} minutes`)
 
 const inDays = (days: number) => (days === 1 ? 'tomorrow' : `in ${days} days`)
 
@@ -142,6 +148,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
     },
   })
   const choose = useIntent(api.heroes.choose, { onFeedback: notify })
+  const walkAway = useIntent(api.heroes.walkAway, { onFeedback: notify })
   const healthy = hero.simulationState !== 'quarantined'
   const canAct = healthy && (hero.status === 'exploring' || hero.status === 'resting')
   // D118: a travelling hero can drink too, so it arrives ready.
@@ -211,6 +218,8 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>A merchant is visiting.</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">See the offers in your bag</Link> within {hero.merchantTicksLeft === 1 ? 'one adventure' : `${hero.merchantTicksLeft} adventures`}.</p> : null}
         {!healthy ? <p className="text-sm">Paused for a service check. <Link to="/support" className="underline underline-offset-4">Contact support</Link> if it lasts.</p> : null}
       </section>
+
+      {hero.standoff ? <StandoffCard standoff={hero.standoff} status={hero.status} healthy={healthy} pending={walkAway.pending} onWalkAway={() => setAsk({ kind: 'walkAway' })} /> : null}
 
       {hero.choice ? (
         <section aria-labelledby="choice-title" className="flex flex-col gap-3 border-[3px] border-night bg-panel p-4">
@@ -297,14 +306,14 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         {!canAct && hero.status !== 'travelling' && stopNote ? <p className="mt-3 text-sm text-muted">{stopNote}</p> : null}
       </section>
 
-      <AskSheets ask={ask} hero={hero} close={close} intents={{ pause, travel, stance, choose, potion }} strengths={strengths} />
+      <AskSheets ask={ask} hero={hero} close={close} intents={{ pause, travel, stance, choose, potion, walkAway }} strengths={strengths} />
 
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </div>
   )
 }
 
-type Ask = { kind: 'pause' } | { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string } | { kind: 'potion' }
+type Ask = { kind: 'pause' } | { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string } | { kind: 'potion' } | { kind: 'walkAway' }
 type Run<A> = { pending: boolean; run: (args: A, message?: string) => Promise<boolean> }
 /** D131: one potion strength in the pouch, with the HP one drink restores for this hero. */
 type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
@@ -316,7 +325,7 @@ const pct = (value: number) => `${value}%`
  * The confirmations for the Hero page's commands that could cost progress or pace. Each says what the action costs and
  * whether it can be undone; only its confirm button commits.
  */
-function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { pause: Run<Record<string, never>>; travel: Run<{ biomeId: string }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }> }; strengths: readonly PotionRow[] }) {
+function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { pause: Run<Record<string, never>>; travel: Run<{ biomeId: string; leaveStandoff?: boolean }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }>; walkAway: Run<Record<string, never>> }; strengths: readonly PotionRow[] }) {
   const healthy = hero.simulationState !== 'quarantined'
   const here = hero.biomes.findIndex((b) => b.id === hero.biomeId)
   const common = { onClose: close, disabled: !healthy }
@@ -334,8 +343,10 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
     const waiting = (hero.todo?.tasks ?? []).filter((task) => !task.done && task.biomeId === hero.biomeId)
     if (!destination) return null
     return (
-      <ConfirmSheet open title={`Travel to the ${destination.name}?`} confirmLabel="Travel" busyLabel="Travelling…" cancelLabel="Stay here" pending={intents.travel.pending} {...common} onConfirm={async () => { if (await intents.travel.run({ biomeId: destination.id }, `Travelling to ${destination.name}. Arrive on the next adventure.`)) close() }}>
+      <ConfirmSheet open title={`Travel to the ${destination.name}?`} confirmLabel="Travel" busyLabel="Travelling…" cancelLabel="Stay here" pending={intents.travel.pending} {...common} onConfirm={async () => { if (await intents.travel.run({ biomeId: destination.id, ...(hero.standoff ? { leaveStandoff: true } : {}) }, `Travelling to ${destination.name}. Arrive on the next adventure.`)) close() }}>
         <Consequences>
+          {/* D163: travel leaves a dug-in elite behind for good. */}
+          {hero.standoff ? <li>The elite <strong>{hero.standoff.name}</strong> is left behind, with {hero.standoff.hpPct}% of its HP left. It won't be there when your hero comes back.</li> : null}
           <li>The trip takes one adventure (about 15 minutes) with no encounter.</li>
           {index < here ? <li>It is an easier floor than the {current?.name}: fights pay less XP and gold there.</li> : null}
           {/* Office Cubicles (the first floor) is safe; anywhere else a knockout can happen. */}
@@ -381,6 +392,17 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
       </Sheet>
     )
   }
+  if (ask?.kind === 'walkAway' && hero.standoff) {
+    const standoff = hero.standoff
+    return (
+      <ConfirmSheet open title={`Walk away from the elite ${standoff.name}?`} confirmLabel="Walk away" busyLabel="Walking away…" cancelLabel="Keep at it" pending={intents.walkAway.pending} {...common} onConfirm={async () => { if (await intents.walkAway.run({}, `Walked away from the elite ${standoff.name}.`)) close() }}>
+        <Consequences>
+          <li>It leaves now, with {standoff.hpPct}% of its HP left, and its reward goes with it.</li>
+          <li>Your hero keeps everything it has, and the next adventure is an ordinary one. This can't be undone.</li>
+        </Consequences>
+      </ConfirmSheet>
+    )
+  }
   if (ask?.kind === 'choice' && hero.choice) {
     const option = hero.choice.options.find((o) => o.id === ask.optionId)
     if (!option) return null
@@ -396,4 +418,25 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
     )
   }
   return null
+}
+
+/**
+ * D163: a dug-in elite on the Hero page: its HP going down, when it leaves, and Walk away. Drinking stays with the
+ * commands above; the stance decides when the hero rests between rounds.
+ */
+function StandoffCard({ standoff, status, healthy, pending, onWalkAway }: { standoff: Standoff; status: string; healthy: boolean; pending: boolean; onWalkAway: () => void }) {
+  const fighting = status === 'exploring'
+  return (
+    <section aria-labelledby="standoff-title" className="flex flex-col gap-3 border-[3px] border-night bg-panel p-4">
+      <SectionTitle id="standoff-title" glyph="combat" tone="text-hp-ink" size="text-2xl">An elite {standoff.name} has dug in</SectionTitle>
+      <div className="flex flex-col gap-1">
+        <Meter label={`Elite ${standoff.name} HP`} value={standoff.hp} max={standoff.maxHp} tone="hp" />
+        <p className="text-sm">Leaves in {standoff.ticksLeft === 1 ? 'one adventure' : `${standoff.ticksLeft} adventures`} ({aboutTime(standoff.ticksLeft)}).</p>
+      </div>
+      <p className="text-sm">{fighting ? 'Your hero fights it every adventure and steps back to rest when its stance says so.' : 'Your hero is resting and goes back to it once its health is up.'} When it falls it pays several times an elite's XP and gold, and a rare or epic find from this floor.</p>
+      <Button variant="secondary" icon="door" className="self-start" disabled={!healthy} pending={pending} busyLabel="Walking away…" onClick={onWalkAway}>
+        Walk away
+      </Button>
+    </section>
+  )
 }

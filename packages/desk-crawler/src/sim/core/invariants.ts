@@ -56,6 +56,13 @@ export function assertHeroInvariants(hero: HeroState, inventory: readonly ItemSn
   if (hero.potionCap !== undefined && !isCount(hero.potionCap)) fail('POUCH', 'invalid potion cap')
   if (hero.effects !== undefined && (hero.effects.length > 3 || hero.effects.some((effect) => typeof effect.id !== 'string' || !Number.isSafeInteger(effect.untilTick)))) fail('EFFECTS', 'invalid effects')
   if (hero.choice !== undefined && content.choices !== undefined && !content.choices.events.some((event) => event.id === hero.choice?.eventId)) fail('CHOICE', `unknown event ${hero.choice.eventId}`)
+  // D163: the shape only; whether the pinned catalog can still fight it is the simulator's call (it drops it quietly).
+  const standoff = hero.standoff
+  if (standoff !== undefined) {
+    if (!isCount(standoff.hp) || !isCount(standoff.maxHp) || standoff.hp < 1 || standoff.hp > standoff.maxHp) fail('STANDOFF', 'standoff HP must be 1 to its maximum')
+    if (!isCount(standoff.startedTick) || !Number.isSafeInteger(standoff.untilTick) || standoff.startedTick >= standoff.untilTick) fail('STANDOFF', 'a standoff must start before it ends')
+    if ((hero.status === 'exploring' || hero.status === 'resting') && standoff.biomeId !== hero.biomeId) fail('STANDOFF', 'a standoff stays on the hero\'s floor')
+  }
   // P31: a stored list is checked only under a catalog that knows to-do rules; an earlier catalog carries it untouched.
   if (hero.todo !== undefined && content.todo !== undefined) {
     const problem = todoProblems(hero.todo, content)

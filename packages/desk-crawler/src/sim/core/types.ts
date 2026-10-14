@@ -731,6 +731,48 @@ export interface LoreRule {
   readonly monsters: Readonly<Record<string, string>>
 }
 
+/**
+ * P42 dug-in elites (D163): from `minLevel`, on a floor of `minBiomeTier` or deeper, `digInPct` of ordinary elite
+ * draws dig in. The elite's HP carries over between ticks until it falls, the hero is knocked out or travels, the
+ * player walks away, or `durationTicks` pass. Lines name only `{monster}`.
+ */
+export interface StandoffRule {
+  readonly digInPct: number
+  readonly minLevel: number
+  readonly minBiomeTier: number
+  /** The dug-in elite's HP as a share of the monster's. */
+  readonly hpMultiplierPct: number
+  readonly durationTicks: number
+  readonly xpMultiplier: number
+  readonly goldMultiplier: number
+  readonly narrative: {
+    /** Per floor id: where it dug in, and how it fell. */
+    readonly dugIn: Readonly<Record<string, readonly string[]>>
+    readonly won: Readonly<Record<string, readonly string[]>>
+    /** Every later fight tick. */
+    readonly fighting: readonly string[]
+    /** The clock ran out. */
+    readonly slipped: readonly string[]
+    readonly dugInCompact: string
+    readonly fightingCompact: string
+    readonly wonCompact: string
+    readonly slippedCompact: string
+    /** A consequence on a rest line while the elite waits. */
+    readonly waiting: string
+  }
+}
+
+/** P42: the elite this hero has dug in against, saved between ticks. */
+export interface Standoff {
+  readonly monsterId: string
+  readonly biomeId: string
+  readonly hp: number
+  readonly maxHp: number
+  readonly startedTick: number
+  /** The first tick it is gone: `startedTick + durationTicks`. */
+  readonly untilTick: number
+}
+
 export interface ContentCatalog {
   readonly contentVersion: string
   readonly constants: SimulationConstants
@@ -765,6 +807,8 @@ export interface ContentCatalog {
   readonly meetings?: MeetingRule
   /** Absent before v21 (D145): no spares, and no `graveyard` draw. */
   readonly lostProperty?: LostPropertyRule
+  /** Absent before v24 (D163): elites never dig in, and no dig-in draw. */
+  readonly standoff?: StandoffRule
   /** Absent before v9 (P31): without it a hero has no to-do list and draws nothing from the `quest` stream. */
   readonly todo?: TodoRule
   /** Absent before v12 (P35): every feature is on from level 1. */
@@ -847,6 +891,8 @@ export interface HeroCounters {
   readonly meetings: number
   /** D145: other players' spares this hero found. */
   readonly lostPropertyFound: number
+  /** D163: dug-in elites beaten. */
+  readonly standoffsWon: number
   /** D133: arrivals per biome id, written by the simulator from content v16's deploy on; absent on heroes that have not travelled since. */
   readonly biomesVisited?: Readonly<Record<string, number>>
 }
@@ -893,6 +939,8 @@ export interface HeroState {
   readonly career?: CareerState
   /** D139: the last occurrence the hero was announced (`<id>@<start date>`), and whether its gift was found. */
   readonly occasion?: OccasionMark
+  /** D163: a dug-in elite, at most one; cleared by its fall, a knockout, travel, Walk away or its clock. */
+  readonly standoff?: Standoff
 }
 
 export interface OccasionMark {
@@ -1042,6 +1090,15 @@ export type OutcomeDetail =
       readonly gearDropped: boolean
       /** Adapter annotation from the awarded item; present only when gear dropped. */
       readonly gearRarity?: Rarity
+      /** D163: a dug-in elite's tick: the dig-in, a later fight, or the fall. `monsterHpMax` is its full HP. */
+      readonly standoff?: 'dug_in' | 'fighting' | 'won'
+      readonly monsterHpMax?: number
+    }
+  | {
+      /** D163: a dug-in elite's clock ran out while the hero explored. */
+      readonly variant: 'standoff_left'
+      readonly monsterId: string
+      readonly startedTick: number
     }
   | {
       readonly variant: 'loot'
@@ -1191,6 +1248,10 @@ export interface TickMetrics {
   readonly careerRungs: number
   readonly unlocks: number
   readonly guarantees: number
+  /** D163: an elite dug in, one fell, or one left without falling (clock, knockout or travel). */
+  readonly standoffStarts: number
+  readonly standoffWins: number
+  readonly standoffEnds: number
 }
 
 export interface SimulationResult {

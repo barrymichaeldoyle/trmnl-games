@@ -14,7 +14,7 @@ import { topGearTier } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { cumulativeXpToReach } from '@trmnl-games/desk-crawler/sim/core/stats'
-import type { ContentCatalog, HeroState, ItemSnapshot, HeroClass, MaterialCount, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog, HeroState, ItemSnapshot, HeroClass, MaterialCount, SimulationResult, StanceId, TodoKind, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
 import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
 import { nextEarlyPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
 import { currentRung, FEATURES, unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
@@ -339,7 +339,8 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   if (h.status === 'sleeping') {
     h.wakeAtTick = tick + 1
     if (hardest.id !== h.biomeId) h.targetBiomeId = hardest.id
-  } else if (hardest.id !== h.biomeId) {
+  } else if (hardest.id !== h.biomeId && h.standoff === undefined) {
+    // D163: the companion asks before leaving a dug-in elite behind; the harness player stays to finish it.
     h.status = 'travelling'
     h.targetBiomeId = hardest.id
     h.arriveAtTick = tick + 1
@@ -373,7 +374,10 @@ function withMaterials(content: ContentCatalog, inventory: ItemSnapshot[], delta
   return rows.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 }
 
-export function simulateCohort(policy: Policy, heroes: number, days: number, content: ContentCatalog, ticks = days * TICKS_PER_DAY, stance?: StanceId, heroClass: HeroClass = 'warrior'): HeroLog[] {
+/** Called after every simulated tick with the hero it started from (D163's harness reads standoffs this way). */
+export type TickObserver = (heroIndex: number, tick: number, before: HeroState, result: SimulationResult) => void
+
+export function simulateCohort(policy: Policy, heroes: number, days: number, content: ContentCatalog, ticks = days * TICKS_PER_DAY, stance?: StanceId, heroClass: HeroClass = 'warrior', onTick?: TickObserver): HeroLog[] {
   const logs: HeroLog[] = []
   const bis = bestInSlot(content)
   const kit = starterKit(content)
@@ -475,6 +479,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       // can be measured; being raided needs the pool, which only tools/balance/raids.ts models. Added 2026-10-12: earlier
       // evidence files were produced without raids in this harness.
       const result = simulateHero({ hero, inventory, tick, content, simulationVersion: SIMULATION_VERSION, streams: streams(index, tick), recentSummaries, tickAt: HARNESS_EPOCH + tick * SLOT_MS, utcOffsetSeconds, ...(content.raids === undefined ? {} : { raidTarget: { heroId: 'coworker', name: 'A coworker', gold: 200 } }) })
+      onTick?.(index, tick, hero, result)
       if (hero.status === 'sleeping') daySleep += 1
       for (const extra of result.extraEvents ?? []) {
         const outcome = extra.detail.outcome

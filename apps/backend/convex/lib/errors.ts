@@ -54,6 +54,8 @@ export type ErrorCode =
   | 'PLAYER_NOT_FOUND'
   | 'FOLLOW_LIMIT'
   | 'RECAP_CHANGED'
+  /** D163: travelling would leave a dug-in elite behind; the companion asks first. */
+  | 'STANDOFF_RUNNING'
   | 'DELETION_CONFIRMATION_REQUIRED'
   | 'DELETION_LINK_EXPIRED'
   | 'EMAIL_UNAVAILABLE'

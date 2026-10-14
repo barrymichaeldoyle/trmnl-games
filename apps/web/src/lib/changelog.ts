@@ -14,6 +14,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-14',
     changes: [
       {
+        title: 'Elites can dig in',
+        body: 'From level 12, on the Cafeteria Depths and deeper, an elite sometimes digs in and takes a few adventures to beat. Your TRMNL shows its health going down, and your hero comes back to it between rests. When it falls it pays several times an elite’s XP and gold and a rare or epic find. It leaves after six hours. You can walk away from it on the Hero page.',
+      },
+      {
         title: 'What’s new has a home in More',
         body: 'Hiding the What’s new card on the Hero tab used to leave no easy way back to the list of changes. It now has its own row on the More tab, with the day of the latest update.',
       },

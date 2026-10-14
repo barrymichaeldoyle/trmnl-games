@@ -59,6 +59,8 @@ export interface PayloadHero {
   readonly class?: HeroClass
   /** D149: absent means male. */
   readonly gender?: HeroGender
+  /** D163: a dug-in elite: its monster, HP and the tick it leaves. */
+  readonly standoff?: { readonly monsterId: string; readonly hp: number; readonly maxHp: number; readonly untilTick: number }
 }
 
 export interface PayloadInput {
@@ -331,6 +333,7 @@ export function buildPayload(input: PayloadInput) {
       log: [],
       todo_tasks: [],
       goal: null,
+      standoff: null,
       celebration: null,
       attention: servicePaused ? 'Desk Crawler is down for maintenance.' : 'Sign in to the companion, then save this plugin in TRMNL.',
       notice: null,
@@ -463,6 +466,8 @@ export function buildPayload(input: PayloadInput) {
     // D138: the X full landscape's to-do column and goal line. `p`/`n` are progress and target, capped so "5/5" never reads "6/5".
     todo_tasks: (input.todoTasks ?? []).map((task) => ({ t: task.label, p: Math.min(task.progress, task.target), n: task.target, done: task.done })),
     goal: input.goal ? { t: input.goal.title, v: Math.min(input.goal.value, input.goal.target), n: input.goal.target, g: input.goal.gold } : null,
+    // D163: a dug-in elite's name, its HP left (never 0 while it stands) and when it leaves (UTC seconds); null without one.
+    standoff: standoffField(hero, content, now),
     // The badge sits above the newest story, so it waits while the travel line leads.
     celebration: attention === null && travelLine === null && logs.length > 0 ? celebrationFor(input.newestEvent === undefined ? input.latestEvent : input.newestEvent, hero.level) : null,
     attention,
@@ -471,6 +476,15 @@ export function buildPayload(input: PayloadInput) {
 }
 
 export type CanonicalPayload = ReturnType<typeof buildPayload>
+
+/** D163: the payload's standoff, or null when there is none the catalog can name. */
+function standoffField(hero: PayloadHero, content: ContentCatalog, now: number): { name: string; hp_pct: number; leaves_at: number } | null {
+  const standoff = hero.standoff
+  const monster = standoff === undefined ? undefined : content.monsters.find((m) => m.id === standoff.monsterId)
+  if (standoff === undefined || monster === undefined || standoff.maxHp <= 0) return null
+  const ticksLeft = Math.max(1, standoff.untilTick - hero.lastTick)
+  return { name: monster.name, hp_pct: Math.min(100, Math.max(1, Math.ceil((standoff.hp * 100) / standoff.maxHp))), leaves_at: Math.floor(slotEta(now, ticksLeft) / 1000) }
+}
 
 /** D139: the occasion a scene dresses for at `now` in an offset, when the catalog has one live and there is art for it. */
 export function sceneOccasion(content: ContentCatalog, now: number, utcOffsetSeconds: number | undefined): OccasionArt | undefined {

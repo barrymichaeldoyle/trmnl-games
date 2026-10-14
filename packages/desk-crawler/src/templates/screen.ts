@@ -1,5 +1,6 @@
 /**
- * Four self-contained TRMNL layouts. Template v54 makes the OG quarter say a pause, a knockout's return time or a set
+ * Four self-contained TRMNL layouts. Template v55 shows a dug-in elite in the attention slot of every layout: its name,
+ * ten HP ticks and the share left, and in the full layouts when it leaves (D163). Template v54 makes the OG quarter say a pause, a knockout's return time or a set
  * wake time, keeps the level beside a long name, gives its stories the width the QR column did not use, and shows the
  * standing code at 2x in the OG portrait quarter; the X portrait quarter gains the status line (D160). Template v53 gives the X full landscape today's to-do tasks at the head of its
  * board column, the board fitted to what is left, and the current goal pinned under the stories (D138). Template v51 removes the desk drawer (D123): the bag count is "20/20" again and the
@@ -43,7 +44,7 @@
 import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 
-export const TEMPLATE_VERSION = 54
+export const TEMPLATE_VERSION = 55
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -542,8 +543,19 @@ const rankPanel = (heading: boolean) => `
  * The one quiet attention message (service, delay, death, inventory sleep): never clipped, shown in every size. A
  * notice (D78: the merchant) takes the same slot as an outlined chip but leaves the stories and recap alone.
  */
-const attention = (classes: string, clamp: number) => `
-      {% if attention %}<span class="${classes} label--underline ${ink('text', 'red')} no-shrink" data-clamp="${clamp}">{{ attention | escape }}</span>{% elsif notice %}<div class="no-shrink pt--1"><span class="${classes} label--outline" data-clamp="${clamp}">{{ notice | escape }}</span></div>{% endif %}`
+const attention = (classes: string, clamp: number, leaves = false) => `
+      {% if attention %}<span class="${classes} label--underline ${ink('text', 'red')} no-shrink" data-clamp="${clamp}">{{ attention | escape }}</span>{% else %}${standoffRow(classes, leaves)}{% if notice %}<div class="no-shrink pt--1"><span class="${classes} label--outline" data-clamp="${clamp}">{{ notice | escape }}</span></div>{% endif %}{% endif %}`
+
+/**
+ * D163: a dug-in elite in every layout: its name, its HP as ten half-step ticks (rounded up, so a standing elite never
+ * shows empty) and the share left; the full layouts add when it leaves. It sits in the attention slot, so an attention
+ * line (a knockout, a full bag) takes its place.
+ */
+const standoffRow = (classes: string, leaves: boolean) =>
+  `{% if standoff %}{% assign standoff_halves = standoff.hp_pct | times: 20 | plus: 99 | divided_by: 100 | floor %}<div class="no-shrink flex flex--row flex--wrap flex--left flex--center-y gap--xsmall stretch-x" data-standoff="{{ standoff_halves }}">` +
+  `<span class="${classes} text--bold">Elite {{ standoff.name | escape }}</span>` +
+  `<div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="${TICK_CLASSES}" src="{% if standoff_halves >= tick_right %}{{ hud_tick_full }}{% elsif standoff_halves >= tick_left %}{{ hud_tick_half }}{% else %}{{ hud_tick_empty }}{% endif %}" alt="">{% endfor %}</div>` +
+  `<span class="${classes} no-shrink">{{ standoff.hp_pct }}%${leaves ? '{% if utc_offset != nil %} · leaves {{ standoff.leaves_at | plus: utc_offset | date: "%H:%M" }}{% endif %}' : ''}</span></div>{% endif %}`
 
 /** Integer-scaled assets keep every QR module crisp on monochrome displays. */
 const qrImage = (scale: number, largeScale: number, field = 'qr_base') =>
@@ -712,7 +724,7 @@ const fullPortrait = `
   {% if qr_base != "" %}${bagFullPanel(true)}
   {% else %}
   <div class="grow h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall lg:gap--small stretch-x">
-    ${attention('label lg:title--small', 3)}
+    ${attention('label lg:title--small', 3, true)}
     {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 40, false, 'lg')}
   </div>
   <div class="no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall lg:gap--small stretch-x pt--1 lg:pt--2" data-rank-panel="true">${rankPanel(true)}</div>
@@ -773,7 +785,7 @@ const xBoard = (limit: number, fit = false) => `<div class="flex flex--col flex-
  * story on one line with stat columns.
  */
 const xLedger = (inline: boolean, recapLines: number) => `<div class="grow w--min-0 h--full flex flex--col flex--left flex--top flex--stretch-x gap--small" data-ledger="x">
-      {% if attention %}${attention('title--small', 3)}{% else %}${attention('title--small', 3)}${recapLines ? recapBlock(recapLines) : ''}{% endif %}
+      {% if attention %}${attention('title--small', 3, true)}{% else %}${attention('title--small', 3, true)}${recapLines ? recapBlock(recapLines) : ''}{% endif %}
       {% unless recap %}${celebrationBadge('title--small')}{% endunless %}${inline ? storyList(2, 'title', 24, 64, false, 'lg') : storyList(2, 'title', 24, 50)}
     </div>`
 
@@ -968,7 +980,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   {% else %}
   <div class="grid grow h--full h--min-0 stretch-x gap--small lg:gap--large pt--1 lg:pt--2" data-story-columns="true">
     <div class="col--span-12 lg:col--span-8 flex flex--col flex--left flex--top gap--xsmall lg:gap--small h--full">
-      ${attention('label lg:title--small', 2)}
+      ${attention('label lg:title--small', 2, true)}
       {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 64, false, 'all', 74)}
       ${goalLine}
     </div>

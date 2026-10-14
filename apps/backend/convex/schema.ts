@@ -93,6 +93,7 @@ export const heroCounters = v.object({
   meetings: v.optional(v.number()),
   /** D145: other players' spares this hero found. */
   lostPropertyFound: v.optional(v.number()),
+  standoffsWon: v.optional(v.number()),
 })
 
 /** P35: the hero's place on the career ladder, written by the simulator. */
@@ -570,6 +571,8 @@ export default defineSchema({
     career: v.optional(careerState),
     /** D139: the last occasion occurrence announced (`<id>@<start date>`) and whether its gift was found. */
     occasion: v.optional(v.object({ key: v.string(), gifted: v.optional(v.literal(true)) })),
+    /** D163: a dug-in elite, cleared by its fall, a knockout, travel, Walk away or its clock. */
+    standoff: v.optional(v.object({ monsterId: v.string(), biomeId: v.string(), hp: v.number(), maxHp: v.number(), startedTick: v.number(), untilTick: v.number() })),
     eligibleFromTick: v.number(),
     lastTick: v.number(),
     lastProgressTick: v.number(),

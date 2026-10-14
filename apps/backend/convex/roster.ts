@@ -66,6 +66,8 @@ async function unpark(ctx: MutationCtx, hero: Doc<'heroes'>, tick: number) {
     ...(hero.wakeAtTick === undefined ? {} : { wakeAtTick: hero.wakeAtTick + gap }),
     ...(hero.choice === undefined ? {} : { choice: { ...hero.choice, offeredAtTick: hero.choice.offeredAtTick + gap, expiresAtTick: hero.choice.expiresAtTick + gap } }),
     ...(hero.effects === undefined ? {} : { effects: hero.effects.map((effect) => ({ id: effect.id, untilTick: effect.untilTick + gap })) }),
+    // D163: a dug-in elite waits for the hero too.
+    ...(hero.standoff === undefined ? {} : { standoff: { ...hero.standoff, startedTick: hero.standoff.startedTick + gap, untilTick: hero.standoff.untilTick + gap } }),
   })
   await commandLog(ctx, hero, 'unpark_hero', 'Back at the desk, right where you left off.')
 }

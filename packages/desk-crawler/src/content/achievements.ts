@@ -8,7 +8,7 @@ import type { HeroClass, NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 12
+export const ACHIEVEMENTS_VERSION = 13
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -447,6 +447,14 @@ family('big_bags', 'Bigger bags', 'Lifetime', [
   ['Steamer Trunk', 'Covered in stickers from places you have never been.'],
   ['Stationery Cupboard', 'A 32-slot cupboard, and you have the only key.'],
 ], (i) => ({ kind: 'bag', atLeast: [24, 28, 32][i]! }))
+
+// ---------------------------------------------------------------- D163 Dug-in elites (catalog version 13; appended, never edited)
+
+counter('dug_in', 'Dug in', 'Lifetime', 'standoffsWon', [1, 10, 50], [
+  ['Eviction Notice', 'Beat an elite that had dug in.'],
+  ['Pest Control', 'Beat ten elites that had dug in.'],
+  ['Building Management', 'Beat fifty elites that had dug in.'],
+])
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

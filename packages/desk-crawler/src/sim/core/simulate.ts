@@ -46,9 +46,14 @@ import type {
   PotionStrength,
   PouchTier,
   RaidLaunch,
+  Rarity,
+  Standoff,
 } from './types'
 
 export const SIMULATION_VERSION = 1
+
+/** D163: a dug-in elite's fall pays one of these, by the catalog's weights renormalised over them. */
+const STANDOFF_RARITIES: readonly Rarity[] = ['rare', 'epic']
 
 type Mutable<T> = { -readonly [K in keyof T]: T[K] }
 type WorkingHero = Mutable<Omit<HeroState, 'counters'>> & { counters: Mutable<Omit<HeroCounters, 'monsterWins' | 'biomesVisited'>> & { monsterWins: Record<string, number>; biomesVisited?: Record<string, number> } }
@@ -84,6 +89,9 @@ const ZERO_METRICS: TickMetrics = {
   careerRungs: 0,
   unlocks: 0,
   guarantees: 0,
+  standoffStarts: 0,
+  standoffWins: 0,
+  standoffEnds: 0,
 }
 
 interface Streams {
@@ -123,6 +131,8 @@ class TickRun {
   private foundApplied = false
   /** D139: the occasion live on the hero's local date, if any. */
   private readonly occasion: LiveOccasion | undefined
+  /** D163: a dug-in elite whose clock ran out while the hero explored; told as this tick's event. */
+  private slipped: Standoff | undefined
 
   constructor(private readonly input: SimulationInput) {
     this.h = { ...input.hero, counters: { ...input.hero.counters, monsterWins: { ...input.hero.counters.monsterWins }, ...(input.hero.counters.biomesVisited === undefined ? {} : { biomesVisited: { ...input.hero.counters.biomesVisited } }) } }
@@ -170,6 +180,7 @@ class TickRun {
       if (live.length === 0) delete h.effects
       else if (live.length !== h.effects.length) h.effects = live
     }
+    this.dropStaleStandoff()
     switch (h.status) {
       case 'paused':
         return this.finish('paused')
@@ -201,6 +212,7 @@ class TickRun {
   private depart(destinationId: string): SimulationResult {
     const { h } = this
     const from = h.biomeId
+    this.endStandoff()
     h.status = 'travelling'
     h.arriveAtTick = this.input.tick + 1
     const destination = this.biome(destinationId).name
@@ -310,7 +322,7 @@ class TickRun {
     const text = this.narrate(content.narrative.shared.restingHeal, { heal: healing })
     return this.finish('rested', {
       kind: 'rest',
-      summary: text,
+      summary: composeSummary(text, text, this.waitingLine(), content.constants.summaryMaxCodePoints),
       outcome: { variant: 'rest', healing, automatic: true, resultingStatus: h.status },
     })
   }
@@ -319,6 +331,7 @@ class TickRun {
 
   private explore(): SimulationResult {
     const { h, content, input } = this
+    if (this.slipped !== undefined) return this.standoffLeft(this.slipped)
     const expired = this.resolveExpiredChoice() ?? this.applyIncomingRaid() ?? this.applyIncomingMeeting() ?? this.applyIncomingFound()
     if (expired !== undefined) return expired
     const c = content.constants
@@ -352,29 +365,37 @@ class TickRun {
       const text = this.narrate(content.narrative.shared.restingHeal, { heal: healing })
       return this.finish(
         'rested',
-        { kind: 'rest', summary: composeSummary(text, text, potionSuffix, c.summaryMaxCodePoints), outcome: { variant: 'rest', healing, automatic: true, resultingStatus: 'resting' } },
+        { kind: 'rest', summary: composeSummary(text, text, [...potionSuffix, ...this.waitingLine()], c.summaryMaxCodePoints), outcome: { variant: 'rest', healing, automatic: true, resultingStatus: 'resting' } },
         { potionsUsed, potionHealing },
       )
     }
 
-    // D110: after sustain and before the encounter roll, a raid can be the tick's whole event.
-    const raid = this.launchRaid()
-    if (raid !== undefined) return raid
-    // D141: when no raid is, a meeting can be; its draws come from its own stream.
-    const meeting = this.launchMeeting()
-    if (meeting !== undefined) return meeting
+    // D163: a dug-in elite takes the tick's encounter: no raid or meeting launches and nothing is rolled.
+    const standing = h.standoff
+    if (standing === undefined) {
+      // D110: after sustain and before the encounter roll, a raid can be the tick's whole event.
+      const raid = this.launchRaid()
+      if (raid !== undefined) return raid
+      // D141: when no raid is, a meeting can be; its draws come from its own stream.
+      const meeting = this.launchMeeting()
+      if (meeting !== undefined) return meeting
+    }
 
     const biome = this.biome(h.biomeId)
     // P35: a rung's guarantee replaces the rolled kind once its bound has passed; every draw is still taken in its place.
-    const forced = guaranteeDue(content, h)
-    const rolled = pickWeighted<EncounterKind>(this.rng.encounter, [
-      ['combat', biome.weights.combat],
-      ['loot', biome.weights.loot],
-      ['trap', biome.weights.trap],
-      ['rest', biome.weights.rest],
-    ])
+    // D163: one that comes due during a standoff waits for it to end.
+    const forced = standing === undefined ? guaranteeDue(content, h) : undefined
+    const rolled =
+      standing !== undefined
+        ? 'combat'
+        : pickWeighted<EncounterKind>(this.rng.encounter, [
+            ['combat', biome.weights.combat],
+            ['loot', biome.weights.loot],
+            ['trap', biome.weights.trap],
+            ['rest', biome.weights.rest],
+          ])
     // D139 Christmas: the occurrence's gift turns the first free adventure into a gear find; a career guarantee goes first.
-    const gift = forced === undefined && this.giftDue()
+    const gift = standing === undefined && forced === undefined && this.giftDue()
     const kind: EncounterKind = gift ? 'loot' : forced === undefined ? rolled : forced === 'combat' || forced === 'elite' ? 'combat' : 'loot'
     if (forced !== undefined) {
       this.metrics.guarantees = 1
@@ -394,6 +415,8 @@ class TickRun {
     let upgrade: BagUpgrade | undefined
     let pouchUpgrade: BagUpgrade | undefined
     let effectGained: EffectRule | undefined
+    /** D163: "Down to 31%." on a standoff tick the elite survives. */
+    let standoffLine: string | undefined
     let outcome: OutcomeDetail
     let primary: string
     let compact: string
@@ -403,11 +426,18 @@ class TickRun {
 
     switch (kind) {
       case 'combat': {
-        const monster = this.monster(pickOne(this.rng.encounter, biome.monsterIds))
-        const elite = this.rng.encounter.chance(c.elite.chancePct) || forced === 'elite'
+        const monster = this.monster(standing?.monsterId ?? pickOne(this.rng.encounter, biome.monsterIds))
+        const elite = standing !== undefined || this.rng.encounter.chance(c.elite.chancePct) || forced === 'elite'
+        // D163: one more encounter draw on every new elite combat under a catalog with the rule, used or not, then the
+        // conditions. A guaranteed elite stays a one-tick fight, so the guarantee pays out this tick.
+        const rule = content.standoff
+        const digIn = standing === undefined && elite && rule !== undefined && this.rng.encounter.chance(rule.digInPct) && forced === undefined && h.level >= rule.minLevel && biome.tier >= rule.minBiomeTier && !biome.safe
+        const phase: 'dug_in' | 'fighting' | undefined = standing !== undefined ? 'fighting' : digIn ? 'dug_in' : undefined
+        if (phase === 'dug_in') this.metrics.standoffStarts = 1
         const stats = this.stats()
         const mods = stats.modifiers
-        let monsterHp = elite ? Math.floor((monster.hp * c.elite.hpMultiplierPct) / 100) : monster.hp
+        const monsterHpMax = standing?.maxHp ?? (digIn ? Math.floor((monster.hp * rule!.hpMultiplierPct) / 100) : elite ? Math.floor((monster.hp * c.elite.hpMultiplierPct) / 100) : monster.hp)
+        let monsterHp = standing?.hp ?? monsterHpMax
         const monsterHpStart = monsterHp
         const rounds: CombatRound[] = []
         let result: 'victory' | 'retreat' | 'lethal' = 'retreat'
@@ -426,15 +456,28 @@ class TickRun {
             result = 'lethal'
             break
           }
+          // D163: against a dug-in elite the hero steps back below its stance's rest line; the elite keeps its HP.
+          if (phase !== undefined && h.hp * 100 < max * sustain.restBelowPct) break
         }
         vars.monster = monster.name
         let gearDropped = false
         if (result === 'victory') {
           // Rolled exactly as before; the stance and the modifiers scale the roll afterwards, so the reward stream is unchanged (D76, D80).
-          xpGranted = scaled(Math.max(1, Math.floor((this.rng.reward.int(monster.xp.min, monster.xp.max) * (elite ? c.elite.xpMultiplier : 1) * this.sustain().victoryXpPct) / 100)), mods.xpPct)
-          goldGranted = scaled(this.rng.reward.int(monster.gold.min, monster.gold.max) * (elite ? c.elite.goldMultiplier : 1), mods.goldPct)
-          gearDropped = this.rng.reward.chance(c.combatGearDropPct)
-          if (gearDropped) gear = this.generateGear(gearTierOf(biome))
+          const xpMultiplier = phase !== undefined ? rule!.xpMultiplier : elite ? c.elite.xpMultiplier : 1
+          const goldMultiplier = phase !== undefined ? rule!.goldMultiplier : elite ? c.elite.goldMultiplier : 1
+          xpGranted = scaled(Math.max(1, Math.floor((this.rng.reward.int(monster.xp.min, monster.xp.max) * xpMultiplier * this.sustain().victoryXpPct) / 100)), mods.xpPct)
+          goldGranted = scaled(this.rng.reward.int(monster.gold.min, monster.gold.max) * goldMultiplier, mods.goldPct)
+          if (phase !== undefined) {
+            // D163: the fall pays a find from the floor's tier, rare or better: a reward, not luck (D35 stands).
+            gearDropped = true
+            gear = this.generateGear(gearTierOf(biome), STANDOFF_RARITIES)
+            h.counters.standoffsWon += 1
+            this.metrics.standoffWins = 1
+            delete h.standoff
+          } else {
+            gearDropped = this.rng.reward.chance(c.combatGearDropPct)
+            if (gearDropped) gear = this.generateGear(gearTierOf(biome))
+          }
           h.counters.combatWins += 1
           h.counters.monsterWins[monster.id] = (h.counters.monsterWins[monster.id] ?? 0) + 1
           if (elite) h.counters.eliteWins += 1
@@ -445,8 +488,20 @@ class TickRun {
           if (elite) effectGained = this.grantEffect(content.effectSources?.eliteVictory)
           Object.assign(vars, { xp: xpGranted, gold: goldGranted })
           const victories = [...narrative.victory, ...(content.narrative.monsters[monster.id]?.victory ?? [])]
-          primary = this.narrate(elite ? narrative.eliteVictory : victories, vars)
-          compact = fill('Beat {monster}. +{xp} XP, +{gold} gold.', vars)
+          if (phase !== undefined) {
+            primary = this.narrate(rule!.narrative.won[biome.id]!, vars)
+            compact = fill(rule!.narrative.wonCompact, vars)
+          } else {
+            primary = this.narrate(elite ? narrative.eliteVictory : victories, vars)
+            compact = fill('Beat {monster}. +{xp} XP, +{gold} gold.', vars)
+          }
+        } else if (result === 'retreat' && phase !== undefined) {
+          // D163: no retreat and no gold lost; the elite keeps its HP for the next fight tick.
+          h.standoff = { monsterId: monster.id, biomeId: biome.id, hp: monsterHp, maxHp: monsterHpMax, startedTick: standing?.startedTick ?? input.tick, untilTick: standing?.untilTick ?? input.tick + rule!.durationTicks }
+          const lines = rule!.narrative
+          primary = this.narrate(phase === 'dug_in' ? lines.dugIn[biome.id]! : lines.fighting, vars)
+          compact = fill(phase === 'dug_in' ? lines.dugInCompact : lines.fightingCompact, vars)
+          standoffLine = `Down to ${Math.ceil((monsterHp * 100) / monsterHpMax)}%.`
         } else if (result === 'retreat') {
           goldPenalty = Math.floor((h.gold * Math.max(0, c.retreatGoldLossPct - mods.goldLossPct)) / 100)
           h.gold -= goldPenalty
@@ -458,6 +513,7 @@ class TickRun {
           lethal = true
           primary = ''
           compact = ''
+          if (phase !== undefined) this.metrics.standoffEnds = 1
         }
         outcome = {
           variant: 'combat',
@@ -470,6 +526,7 @@ class TickRun {
           xpGranted,
           goldGranted,
           gearDropped,
+          ...(phase === undefined ? {} : { standoff: result === 'victory' ? ('won' as const) : phase, monsterHpMax }),
         }
         break
       }
@@ -624,7 +681,7 @@ class TickRun {
 
     // Death and safe-biome protection come before level-up.
     let logKind: LogKind = outcome.variant === 'merchant' ? 'merchant' : outcome.variant === 'choice' ? 'choice' : kind
-    const consequences: string[] = []
+    const consequences: string[] = standoffLine === undefined ? [] : [standoffLine]
     if (lethal) {
       const ticks = c.reviveAfterTicks
       const isCombat = outcome.variant === 'combat'
@@ -740,6 +797,44 @@ class TickRun {
     )
   }
 
+  /**
+   * D163: a standoff past its clock, off the hero's floor, or one the pinned catalog cannot fight (no rule, monster or
+   * floor) is dropped at the start of every evaluation. Only the clock running out while the hero explores is told.
+   */
+  private dropStaleStandoff(): void {
+    const { h, content, input } = this
+    const standoff = h.standoff
+    if (standoff === undefined) return
+    const known = content.standoff !== undefined && content.monsters.some((m) => m.id === standoff.monsterId) && content.biomes.some((b) => b.id === standoff.biomeId)
+    if (known && standoff.biomeId === h.biomeId && input.tick < standoff.untilTick) return
+    this.endStandoff()
+    if (known && standoff.biomeId === h.biomeId && h.status === 'exploring') this.slipped = standoff
+  }
+
+  /** D163: the standoff ends without a fall (clock, knockout, travel); a no-op without one. */
+  private endStandoff(): void {
+    if (this.h.standoff === undefined) return
+    delete this.h.standoff
+    this.metrics.standoffEnds = 1
+  }
+
+  /** D163: the elite's clock ran out; this tick's whole event, before anything incoming. */
+  private standoffLeft(standoff: Standoff): SimulationResult {
+    const lines = this.content.standoff!.narrative
+    const vars = { monster: this.monster(standoff.monsterId).name }
+    return this.finish('advanced', {
+      kind: 'combat',
+      summary: composeSummary(this.narrate(lines.slipped, vars), fill(lines.slippedCompact, vars), [], this.content.constants.summaryMaxCodePoints),
+      outcome: { variant: 'standoff_left', monsterId: standoff.monsterId, startedTick: standoff.startedTick },
+    })
+  }
+
+  /** D163: a rest line's note that the dug-in elite is waiting. */
+  private waitingLine(): string[] {
+    const standoff = this.h.standoff
+    return standoff === undefined ? [] : [fill(this.content.standoff!.narrative.waiting, { monster: this.monster(standoff.monsterId).name })]
+  }
+
   /** D139: the live occasion has a gift this hero has not found in this occurrence. */
   private giftDue(): boolean {
     const live = this.occasion
@@ -755,6 +850,8 @@ class TickRun {
     h.status = 'dead'
     // D80 death ordering: a knockout clears every effect, boon or bane; revival starts clean.
     delete h.effects
+    // D163: revival is in the Office, so a dug-in elite is left behind.
+    this.endStandoff()
     h.reviveAtTick = input.tick + c.reviveAfterTicks
     delete h.targetBiomeId
     delete h.arriveAtTick
@@ -1050,10 +1147,11 @@ class TickRun {
     this.changes.push({ type: 'create', destination: 'potion_stack', item: potionItem(content, strength, 1) })
   }
 
-  private generateGear(tier: number): NewItem {
+  /** `only` limits the rarity draw to those rarities, by their weights (D163's guaranteed find). */
+  private generateGear(tier: number, only?: readonly Rarity[]): NewItem {
     const { content } = this
     const rng = this.rng.reward
-    const rarity = pickWeighted(rng, content.rarities.map((rule) => [rule, rule.weight] as const))
+    const rarity = pickWeighted(rng, content.rarities.filter((rule) => only === undefined || only.includes(rule.rarity)).map((rule) => [rule, rule.weight] as const))
     const kind = rng.int(0, 1) === 0 ? 'weapon' : 'armor'
     const template = pickOne(rng, content.gearTemplates.filter((t) => t.tier === tier && t.kind === kind))
     const stats = content.gearTiers[tier]
@@ -1179,6 +1277,10 @@ function validateOutput(input: SimulationInput, result: SimulationResult): void 
   const ticked = todoLines.reduce((sum, extra) => sum + (extra.detail.outcome.variant === 'todo' && extra.detail.outcome.phase === 'done' ? extra.detail.outcome.tasks.length : 0), 0)
   if (out.counters.tasksCompleted - hero.counters.tasksCompleted !== ticked) fail('TODO_COUNT', 'tasks completed must match the tasks ticked off this tick')
   if (taskGold < 0) fail('TODO_GOLD', 'task rewards cannot take gold')
+  // D163: one standoff, on the hero's floor, only while it can fight, and a fall counted once.
+  const standoff = out.standoff
+  if (standoff !== undefined && (out.status === 'dead' || out.status === 'travelling' || out.status === 'sleeping' || input.content.standoff === undefined)) fail('STANDOFF', 'a standoff needs a hero who can fight it under a catalog with the rule')
+  if ((out.counters.standoffsWon ?? 0) - (hero.counters.standoffsWon ?? 0) !== result.metrics.standoffWins) fail('STANDOFF_COUNT', 'a fall is counted once and only by a fall')
   if (out.status === 'sleeping' && hero.status !== 'sleeping' && applied.hero.heldItemId === undefined) {
     fail('SLEEP_WITHOUT_FIND', 'inventory sleep requires a held find')
   }

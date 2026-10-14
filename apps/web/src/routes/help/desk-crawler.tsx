@@ -5,6 +5,9 @@ import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 
 /** D112: the to-do list section appears once the active catalog has one. */
 const TODO = catalogs[ACTIVE_CONTENT].todo
+/** D163: dug-in elites, under a catalog with the rule. */
+const STANDOFF = catalogs[ACTIVE_CONTENT].standoff
+const DIG_IN_FLOOR = STANDOFF === undefined ? undefined : catalogs[ACTIVE_CONTENT].biomes.find((b) => !b.safe && b.tier >= STANDOFF.minBiomeTier)
 const STANDUP = TODO === undefined ? '' : `${String(TODO.refillHour).padStart(2, '0')}:00`
 /** D122: the bag and pouch ladders are read from the active catalog, so the help page names the real rungs and prices. */
 const BAGS = catalogs[ACTIVE_CONTENT].bagLadder.tiers
@@ -266,6 +269,18 @@ export const Route = createFileRoute('/help/desk-crawler')({
       <p>Sometimes the office asks your hero something small, like chipping in for a cake or staying late. Your screen says “A decision is waiting in the companion.” and the Hero page shows both options with exactly what each one changes. If you don't answer within about a day, the option marked as the default happens by itself, so adventures never wait for you.</p>
       <h2 id="effects">Effects</h2>
       <p>Some moments leave your hero with a short effect, listed on the Hero page with the adventures it has left. Beating an elite makes your hero Fired up (+10% attack for eight adventures). Chipping in for cake makes your hero Well fed (+10% XP for eight adventures). A trap leaves your hero Bruised (−15% defense for four adventures). Your hero holds at most three effects. Any rest shakes off bad effects, and a knockout clears them all.</p>
+      {STANDOFF !== undefined && DIG_IN_FLOOR !== undefined ? (
+        <>
+          <h2 id="dug-in-elites">Dug-in elites</h2>
+          <p>From level {STANDOFF.minLevel}, on the {DIG_IN_FLOOR.name} and deeper floors, an elite sometimes digs in instead of falling in one fight. Your TRMNL shows it with its health bar, and your hero comes back to it every adventure until it falls.</p>
+          <ul>
+            <li>Each adventure your hero fights it for up to six rounds. Its health carries over, and your hero steps back to rest whenever its stance says so. No gold is lost for breaking off.</li>
+            <li>When it falls, it pays {STANDOFF.xpMultiplier} times the monster's XP and {STANDOFF.goldMultiplier} times its gold, plus a rare or epic find from that floor.</li>
+            <li>It leaves after {Math.round(STANDOFF.durationTicks / 4)} hours, or sooner if your hero is knocked out or travels. A pause doesn't stop the clock.</li>
+            <li>The Hero page shows its health and when it leaves. You can walk away from it there, and travel asks before leaving it behind.</li>
+          </ul>
+        </>
+      ) : null}
       {OCCASIONS !== undefined ? (
         <>
           <h2 id="office-calendar">Office calendar</h2>

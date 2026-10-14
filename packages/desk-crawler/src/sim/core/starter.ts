@@ -63,6 +63,7 @@ export function zeroCounters(): HeroCounters {
     raidMishaps: 0,
     meetings: 0,
     lostPropertyFound: 0,
+    standoffsWon: 0,
   }
 }
 

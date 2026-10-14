@@ -99,6 +99,8 @@ export const engagement = internalQuery({
       meetings: { sides: sum((c) => c.meetings), heroes: reached((c) => c.meetings) },
       // D145: other players' spares found, and how many heroes have found one.
       lostProperty: { found: sum((c) => c.lostPropertyFound), heroes: reached((c) => c.lostPropertyFound) },
+      // D163: dug-in elites beaten, how many heroes have beaten one, and how many are dug in now.
+      standoffs: { won: sum((c) => c.standoffsWon), heroes: reached((c) => c.standoffsWon), open: heroes.filter((h) => h.standoff).length },
       analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
     }
   },
