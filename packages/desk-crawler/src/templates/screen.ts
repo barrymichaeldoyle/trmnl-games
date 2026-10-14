@@ -309,8 +309,11 @@ const chip = (text: string) =>
   `{% if change_unit contains "potion" %}{% assign change_icon = hud_potion %}{% endif %}` +
   `{% if change_icon != "" %}{% assign change_text = change_parts | first %}{% if change_unit == "HP from potion" %}{% assign change_text = change_text | append: "\u00a0HP" %}{% endif %}{% endif %}{% endif %}` +
   `<span class="flex flex--row flex--center-y gap--[3px] no-shrink" data-change="true">{% if change_icon != "" %}<img class="{{ change_size }}" src="{{ change_icon }}" alt="">{% endif %}<span class="label lg:title--small${chipInk(text)}">{{ change_text | escape }}</span></span>`
-/** A fixed-width, right-aligned cell, so the same stat sits in the same place on every line. */
-const chipCell = (field: string, kind: string, width: string) => `<span class="flex flex--row flex--left no-shrink ${width}" data-chip-cell="${kind}">{% if ${field} != "" %}${chip(field)}{% endif %}</span>`
+/**
+ * A fixed-width cell, its mark at the left, so the same stat sits in the same place on every line. A device text scale
+ * grows the numbers but not pixel widths, so the fitter widens a column's cells together past `px` when they overflow.
+ */
+const chipCell = (field: string, kind: string, px: number) => `<span class="flex flex--row flex--left no-shrink w--[${px}px]" data-chip-cell="${kind}" data-chip-width="${px}">{% if ${field} != "" %}${chip(field)}{% endif %}</span>`
 /**
  * The X full layouts' changes on the story's line (D89): XP, gold and HP each in their own fixed column before the
  * time, so their marks line up down the ledger, and any other marked change (potions, bag slots) just before them.
@@ -319,7 +322,7 @@ const chipCell = (field: string, kind: string, width: string) => `<span class="f
  * Units arrive joined by a no-break space, so the words after it name the stat.
  */
 const chipSort = `{% assign chip_xp = "" %}{% assign chip_gold = "" %}{% assign chip_hp = "" %}{% assign chip_marked = "" %}{% assign chip_words = "" %}{% for change in line_changes %}{% assign chip_unit = change | split: "\u00a0" | last %}{% if chip_unit == "XP" %}{% assign chip_xp = change %}{% elsif chip_unit == "gold" %}{% assign chip_gold = change %}{% elsif chip_unit == "HP" %}{% assign chip_hp = change %}{% elsif change contains "\u00a0" and chip_unit contains "potion" or change contains "\u00a0" and chip_unit contains "bag slot" %}{% capture chip_marked %}{{ chip_marked }}${chip('change')}{% endcapture %}{% else %}{% capture chip_words %}{{ chip_words }}${chip('change')}{% endcapture %}{% endif %}{% endfor %}`
-const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSort}<span class="${visibility} flex--row flex--center-y flex--right gap--small no-shrink" data-story-chips-inline="true">{{ chip_marked }}${others ? '{{ chip_words }}' : ''}{% if chip_xp != "" or chip_gold != "" or chip_hp != "" %}${chipCell('chip_xp', 'xp', 'w--[78px]')}${chipCell('chip_gold', 'gold', 'w--[74px]')}${chipCell('chip_hp', 'hp', 'w--[66px]')}{% endif %}</span>`
+const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSort}<span class="${visibility} flex--row flex--center-y flex--right gap--small no-shrink" data-story-chips-inline="true">${others ? '{{ chip_marked }}{{ chip_words }}' : '{% if chip_marked != "" %}<span class="flex flex--row flex--center-y gap--small" data-marked-inline="true">{{ chip_marked }}</span>{% endif %}'}{% if chip_xp != "" or chip_gold != "" or chip_hp != "" %}${chipCell('chip_xp', 'xp', 78)}${chipCell('chip_gold', 'gold', 74)}${chipCell('chip_hp', 'hp', 66)}{% endif %}</span>`
 
 /**
  * One story as a ledger line: the glyph, the story, and its HH:MM at the end of the line; the stat changes follow as
@@ -348,7 +351,8 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   const hasChanges = `${entry}.d != nil and ${entry}.d != ""`
   const columns = chipColumns(shown)
   // The portrait ledger (`'lg'`) is too narrow for a story, a change in words ("Pouch holds 6") and three stat columns
-  // on one line once a device scale enlarges them, so those changes take a line under the story there instead.
+  // on one line once a device scale enlarges them, so those changes take a line under the story there instead; the
+  // fitter moves the potion and bag marks there too when a text scale leaves the story too narrow.
   const othersBelow = inline === 'lg' && !lead
   const lineFit = Math.max(0, fit - (timeBelow ? 0 : 14))
   // D112: on the OG, a to-do line too long for this row's fit says its count instead ("Stand-up: 3 new tasks."), so it
@@ -357,12 +361,12 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   const inlineChips = inline && !lead ? `{% if ${hasChanges} %}${othersBelow ? chipColumns(shown, false) : columns}{% endif %}` : ''
   const storySpan = `<span class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
   // Sorted before the row opens, so a row with changes under its story aligns to the story's first line, not its middle.
-  const sortFirst = othersBelow ? `{% assign chip_words = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
-  const story = othersBelow ? `<div class="grow w--min-0">${storySpan}{% if chip_words != "" %}<div class="hidden lg:flex flex--row flex--wrap flex--left flex--center-y gap--small pt--1" data-story-chips-other="true">{{ chip_words }}</div>{% endif %}</div>` : storySpan
+  const sortFirst = othersBelow ? `{% assign chip_words = "" %}{% assign chip_marked = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
+  const story = othersBelow ? `<div class="grow w--min-0">${storySpan.replace('<span ', '<span data-story-text="true" ')}{% if chip_words != "" or chip_marked != "" %}<div class="hidden{% if chip_words != "" %} lg:flex{% endif %} flex--row flex--wrap flex--left flex--center-y gap--small pt--1" data-story-chips-other="true"{% if chip_words != "" %} data-words="true"{% endif %}>{% if chip_marked != "" %}<span class="hidden flex--row flex--wrap flex--center-y gap--small" data-marked-below="true">{{ chip_marked }}</span>{% endif %}{{ chip_words }}</div>{% endif %}</div>` : storySpan
   const centred = inline && !lead ? (othersBelow ? '{% if chip_words == "" %} lg:flex--center-y{% endif %}' : ` ${onlyX('lg:')}flex--center-y`) : ''
   const leadRow = lead ? `{% if line_timed or ${hasChanges} %}<div class="${shown} flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true">{% if ${hasChanges} %}${columns}{% endif %}${timeSpan()}</div>{% endif %}` : ''
   const stacked = `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
-  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none">${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"><div class="no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
+  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none">${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"${othersBelow ? ' data-ledger-row="true"' : ''}><div class="no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
 }
 
 /** The status line, its clamp fitted like log lines. */
@@ -389,7 +393,8 @@ const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelo
 /**
  * Pinned framework 3.4 emits its final stats before signalling readiness. Fit the
  * actual rich-text boxes at that point, reserving the footer and following rank
- * line, and trim boards marked `data-fit-rows` to their slot. Only visibility changes; there are no styles, network calls or writes.
+ * line, and trim boards marked `data-fit-rows` to their slot. First, widen any stat column a device text scale has
+ * outgrown, by swapping its framework width class. Only classes change; there are no styles, network calls or writes.
  * Scope to this view so another Desk Crawler slot has its own height budget, and
  * to the orientation layout the framework is showing (the other is display: none).
  */
@@ -401,6 +406,37 @@ const fitStories = `<script>
     const layout = Array.from(view.querySelectorAll('.layout')).find(el => el.getClientRects().length > 0);
     const footer = Array.from(view.querySelectorAll('.title_bar')).find(el => el.getClientRects().length > 0);
     if (!layout || !footer) return;
+    // Stat columns (D165): a text scale grows the numbers but not the cells' pixel widths, so give every cell of a
+    // column the framework width class its widest change needs (the classes run to 128 pixels).
+    ['xp', 'gold', 'hp'].forEach(kind => {
+      const cells = Array.from(view.querySelectorAll('[data-chip-cell="' + kind + '"]')).filter(cell => cell.getClientRects().length > 0);
+      if (!cells.length) return;
+      const base = Number(cells[0].dataset.chipWidth);
+      cells.forEach(cell => { cell.classList.remove('w--[' + cell.dataset.chipFitted + 'px]'); cell.classList.add('w--[' + base + 'px]'); delete cell.dataset.chipFitted; });
+      const perPixel = cells[0].getBoundingClientRect().width / base;
+      const need = Math.max(...cells.map(cell => cell.firstElementChild ? cell.firstElementChild.getBoundingClientRect().width : 0));
+      if (!perPixel || need <= base * perPixel + 0.5) return;
+      const fitted = Math.min(128, Math.ceil(need / perPixel) + 1);
+      cells.forEach(cell => { cell.classList.remove('w--[' + base + 'px]'); cell.classList.add('w--[' + fitted + 'px]'); cell.dataset.chipFitted = String(fitted); });
+    });
+    // Portrait ledger rows: where the widened columns leave a story narrower than about 24 ems, its potion and
+    // bag marks join the changes in words on the line under it, and the row aligns to its first line.
+    view.querySelectorAll('[data-ledger-row]').forEach(row => {
+      const inline = row.querySelector('[data-marked-inline]');
+      const below = row.querySelector('[data-marked-below]');
+      const box = row.querySelector('[data-story-chips-other]');
+      const text = row.querySelector('[data-story-text]');
+      if (!inline || !below || !box || !text || !row.getClientRects().length) return;
+      const words = box.dataset.words === 'true';
+      const move = on => {
+        inline.classList.toggle('hidden', on); inline.classList.toggle('flex', !on);
+        below.classList.toggle('hidden', !on); below.classList.toggle('flex', on);
+        if (!words) box.classList.toggle('lg:flex', on);
+        row.classList.toggle('lg:flex--center-y', !on && !words);
+      };
+      move(false);
+      if (text.getBoundingClientRect().width < 24 * (parseFloat(getComputedStyle(text).fontSize) || 16)) move(true);
+    });
     // Recap rows first, since the story budget subtracts their height: drop trailing facts past the row's line cap.
     view.querySelectorAll('[data-recap-items]').forEach(row => {
       if (!row.getClientRects().length) return;

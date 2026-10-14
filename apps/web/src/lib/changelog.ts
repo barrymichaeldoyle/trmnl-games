@@ -15,7 +15,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     changes: [
       {
         title: 'Stories on your TRMNL show icons for what changed',
-        body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. On a portrait TRMNL X with a larger display scale, a purchase no longer squeezes its story into a narrow column.',
+        body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. With a larger display scale or text size on a TRMNL X, the numbers no longer spill out of their columns, and a purchase no longer squeezes its story into a narrow column.',
       },
       {
         title: 'Elites can dig in',

@@ -430,7 +430,7 @@ describe('log lines (D44)', () => {
     // Portrait, on the X: no chips on the story's line, a meta row with the stat columns and the time; on the OG: the time stays on the line.
     const lead = portrait!.split('The floor heard it.')[1]!.split('border--h-30')[0]!
     expect(lead).toMatch(/<span class="lg:hidden label lg:title--small no-shrink" data-story-time="true">10:19<\/span>/)
-    expect(lead).toMatch(/<div class="hidden lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="hidden lg:flex[^"]*" data-story-chips-inline="true">.*data-chip-cell="xp">.*<span class="label lg:title--small no-shrink" data-story-time="true">10:19<\/span><\/div>/)
+    expect(lead).toMatch(/<div class="hidden lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="hidden lg:flex[^"]*" data-story-chips-inline="true">.*data-chip-cell="xp" data-chip-width="78">.*<span class="label lg:title--small no-shrink" data-story-time="true">10:19<\/span><\/div>/)
     // Landscape: the screen-wide ledger uses the meta row on every device, and the OG's stacked chips are gone.
     const wide = landscape!.split('The floor heard it.')[1]!.split('border--h-30')[0]!
     expect(wide).toMatch(/<div class="flex lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="flex lg:flex flex--row[^"]*" data-story-chips-inline="true">/)
@@ -441,7 +441,7 @@ describe('log lines (D44)', () => {
   it('puts the changes on the story line on the X in the full layout, in fixed XP, gold and HP columns', async () => {
     const vars = payload() as { log: Array<Record<string, unknown>> } & Record<string, unknown>
     const html = await render({ ...vars, utc_offset: 7200, log: [{ ...vars.log[0], d: '+1\u00a0healing potion · +14\u00a0XP · −12\u00a0HP' }, { ...vars.log[0], d: '' }] })
-    const cells = (kind: string) => html.split(`data-chip-cell="${kind}">`).slice(1).map((cell: string) => changeText(cell.split(/data-chip-cell|data-story-time/)[0]!).join(' '))
+    const cells = (kind: string) => html.split(new RegExp(`data-chip-cell="${kind}"[^>]*>`)).slice(1).map((cell: string) => changeText(cell.split(/data-chip-cell|data-story-time/)[0]!).join(' '))
     // The first entry: XP and HP marks in their columns, gold empty, the potion just before them; landscape and portrait each draw it once.
     expect(cells('xp')).toEqual(['xp:+14', 'xp:+14'])
     expect(cells('gold')).toEqual(['', ''])
@@ -462,12 +462,16 @@ describe('log lines (D44)', () => {
     const [landscape, portrait] = html.split('landscape:hidden')
     const row = portrait!.split('Bag holds 13.')[1]!.split('border--h-30')[0]!
     // A device scale leaves the story a word wide if words share its line, so they take a line under the story.
-    const below = row.split('data-story-chips-other="true">')[1]!.split('</div>')[0]!
-    expect(changeText(below)).toEqual([':Pouch holds 6'])
+    const below = row.split('data-story-chips-other="true" data-words="true">')[1]!.split('</div>')[0]!
+    expect(changeText(below)).toEqual(['bag:+3', ':Pouch holds 6'])
+    // The marks stay on the line, with a hidden copy under the story for the fitter to swap in when a text scale
+    // leaves the story too narrow.
+    expect(below).toMatch(/^<span class="hidden flex--row[^"]*" data-marked-below="true">/)
     const inline = row.split('data-story-chips-inline="true">')[1]!.split('data-story-time')[0]!
+    expect(inline).toMatch(/^<span class="flex flex--row[^"]*" data-marked-inline="true">/)
     expect(changeText(inline)).toEqual(['bag:+3', 'gold:−100'])
     // The row aligns to the story's first line rather than centring between it and the words.
-    expect(portrait!.split('Bag holds 13.')[0]!.split('border--h-30').at(-1)).toMatch(/<div class="flex flex--row flex--left flex--top gap--xsmall">/)
+    expect(portrait!.split('Bag holds 13.')[0]!.split('border--h-30').at(-1)).toMatch(/<div class="flex flex--row flex--left flex--top gap--xsmall" data-ledger-row="true">/)
     // The screen-wide landscape ledger keeps everything on the line.
     expect(landscape).not.toContain('data-story-chips-other')
     expect(changeText(landscape!.split('Bag holds 13.')[1]!.split('data-story-time')[0]!)).toEqual(['bag:+3', ':Pouch holds 6', 'gold:−100'])
