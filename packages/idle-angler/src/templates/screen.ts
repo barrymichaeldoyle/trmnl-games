@@ -21,10 +21,12 @@
  * chosen for the smallest screen: the framework's overflow engine on the OG, counts measured per layout on the X.
  * Template v8 (2026-10-14) fits the X's stories to their list in place of those counts, so a device scale
  * (`screen--scale-xlarge`) no longer cuts the last stories in half.
+ * Template v9 (2026-10-14): where a large device scale leaves no room for a single story, the lesser counters give way
+ * (`data-give-way`) so the newest story still shows.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 8
+export const TEMPLATE_VERSION = 9
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -52,7 +54,7 @@ const row = (inner: string, data: string) => `<div class="flex flex--row flex--w
 const conditionMarks =
   `{% if band %}{% case band %}{% when "dawn" %}{% assign m_band = m_dawn %}{% when "dusk" %}{% assign m_band = m_dusk %}{% when "night" %}{% assign m_band = m_night %}{% else %}{% assign m_band = m_day %}{% endcase %}` +
   `{% case weather %}{% when "overcast" %}{% assign m_weather = m_overcast %}{% when "rain" %}{% assign m_weather = m_rain %}{% when "wind" %}{% assign m_weather = m_wind %}{% when "fog" %}{% assign m_weather = m_fog %}{% else %}{% assign m_weather = m_clear %}{% endcase %}` +
-  `${counter('m_band', '{{ band | capitalize }}', ' data-band="{{ band }}"')}${counter('m_weather', '{{ weather | capitalize }}', ' data-weather="{{ weather }}"')}{% endif %}`
+  `${counter('m_band', '{{ band | capitalize }}', ' data-band="{{ band }}" data-give-way="2"')}${counter('m_weather', '{{ weather | capitalize }}', ' data-weather="{{ weather }}" data-give-way="1"')}{% endif %}`
 
 /** Where the angler is: the one counter that can be long ("Heading to the Harbour Pier"), so it may wrap to two lines. */
 const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0" data-place="true"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
@@ -66,10 +68,10 @@ const statusRow = (withConditions = true) => row(`${place}${withConditions ? con
  */
 const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
   `{% if cooler_label %}${row(
-    counter('m_cooler', '{{ cooler_label }}', ' data-cooler="{{ cooler_label }}"') +
-      (fit === 'compact' ? '' : counter('m_hook', '{% if bait_count %}{{ bait_name | escape }} {{ bait_count }}{% else %}Bare hook{% endif %}', ' data-bait="true"')) +
-      counter('m_coin', '{{ gold }}') +
-      (fit === 'all' ? counter('m_book', '{{ species_logged }}/{{ species_total }}', ' data-logbook="true"') : ''),
+    counter('m_cooler', '{{ cooler_label }}', ' data-cooler="{{ cooler_label }}" data-give-way="5"') +
+      (fit === 'compact' ? '' : counter('m_hook', '{% if bait_count %}{{ bait_name | escape }} {{ bait_count }}{% else %}Bare hook{% endif %}', ' data-bait="true" data-give-way="4"')) +
+      counter('m_coin', '{{ gold }}', ' data-give-way="6"') +
+      (fit === 'all' ? counter('m_book', '{{ species_logged }}/{{ species_total }}', ' data-logbook="true" data-give-way="3"') : ''),
     'data-counters="true"',
   )}{% endif %}`
 
@@ -147,7 +149,8 @@ const stories = (limit: number, clamp = 1, classes = 'description lg:title--smal
  * The X's story lists (`data-fit-stories`, template v8): once the framework has laid out the view, hide the trailing
  * stories that end below their list, so the list keeps whole stories at any device scale (`screen--scale-*`,
  * `screen--text-scale-*`). Only visibility changes, as Desk Crawler's `fitStories`; scoped to this view and to the
- * orientation the framework is showing.
+ * orientation the framework is showing. Template v9: where not one story fits (a large device scale), the counters marked
+ * `data-give-way` step aside, the lowest number first (weather, time of day, logbook, bait, cooler, gold), until one does.
  */
 const fitStories = `<script>
 (() => {
@@ -156,10 +159,21 @@ const fitStories = `<script>
   const fit = () => view.querySelectorAll('[data-fit-stories]').forEach((list) => {
     if (!list.getClientRects().length) return;
     const items = Array.from(list.querySelectorAll('.item'));
-    items.forEach((item) => item.classList.remove('hidden'));
-    const bottom = list.getBoundingClientRect().bottom;
-    let count = items.length;
-    while (count && items[count - 1].getBoundingClientRect().bottom > bottom + 0.5) items[--count].classList.add('hidden');
+    const extras = Array.from(list.closest('.layout').querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
+    extras.forEach((extra) => extra.classList.remove('hidden'));
+    const place = () => {
+      items.forEach((item) => item.classList.remove('hidden'));
+      const bottom = list.getBoundingClientRect().bottom;
+      let count = items.length;
+      while (count && items[count - 1].getBoundingClientRect().bottom > bottom + 0.5) items[--count].classList.add('hidden');
+      return count;
+    };
+    let count = place();
+    for (const extra of extras) {
+      if (count || !items.length) break;
+      extra.classList.add('hidden');
+      count = place();
+    }
     list.dataset.storyCount = String(count);
   });
   window.addEventListener('trmnl:terminalize:stats', fit);

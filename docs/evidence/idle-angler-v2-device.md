@@ -30,3 +30,7 @@ v7's fixed X counts were measured at the default scale. A player can set `screen
 - **Default scale:** each X layout now shows what its own state fits instead of the tightest state's count, for example the X full view 10 to 12.
 - **`scale-xlarge` and `text-scale-xlarge`:** no story is clipped on any X page; the full view shows 6 to 8. The landscape half horizontal shows none at those scales, since the scene and the line above it fill the slot. Which part gives way there is still open (see D165's note on device scales).
 - **Checks:** the clip check at all three scales finds no clipped story; all 528 previews pass the sweep; the crosscheck matches 732 renders; the linter passes.
+
+## Template v9: counters give way before the stories (2026-10-14)
+
+Barry left it to me what gives way where a large scale leaves no room for a story. The stories are what changes on the screen, so they win over the counters beside them. Where not one story fits, the fitter hides counters marked `data-give-way`, in order, until one does: weather, time of day (both are also drawn in the scene), logbook, bait, cooler, then gold. The name, place and title progress always stay. At the default scale nothing gives way and every count is as in v8; at `scale-xlarge` and `text-scale-xlarge` the X's landscape half horizontal shows 1 to 3 stories where it showed none. No story is clipped at any of the three scales; all 528 previews pass, the crosscheck matches 740 renders, and the linter passes.
