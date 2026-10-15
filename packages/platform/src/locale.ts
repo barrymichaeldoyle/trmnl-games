@@ -7,11 +7,10 @@ export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'en'
 
 /**
- * D169 rollout switch. While false, only an explicit `tg_locale` cookie changes the companion's language (for testing),
- * the picker stays hidden, browsers' languages are ignored and TRMNL screens stay English. Flip it once every page and
- * the device are translated.
+ * D169 rollout switch, on since 2026-10-15. Off, only an explicit `tg_locale` cookie changes the companion's language,
+ * the picker hides, browsers' languages are ignored and TRMNL screens and alerts stay English.
  */
-export const LANGUAGES_LIVE = false
+export const LANGUAGES_LIVE: boolean = true
 
 /** Each language named in itself, for the picker. */
 export const LOCALE_NAMES: Readonly<Record<Locale, string>> = { en: 'English', fr: 'Français', de: 'Deutsch' }

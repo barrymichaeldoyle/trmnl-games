@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-15',
     changes: [
       {
+        title: 'Desk Crawler speaks French and German',
+        body: 'The site, the companion and your TRMNL screen now come in French and German as well as English. Pages follow your browser’s language, and you can pick one at the bottom of any page or under Account. Your TRMNL follows the language of your TRMNL account, or the one you pick. Your hero, gear and history carry over, and older stories are translated too.',
+        fr: { title: 'Desk Crawler parle français et allemand', body: 'Le site, le compagnon et l’écran de votre TRMNL existent maintenant en français et en allemand, en plus de l’anglais. Les pages suivent la langue de votre navigateur, et vous pouvez en choisir une en bas de chaque page ou dans Compte. Votre TRMNL suit la langue de votre compte TRMNL, ou celle que vous choisissez. Votre héros, votre équipement et votre historique sont conservés, et les anciennes histoires sont traduites aussi.' },
+        de: { title: 'Desk Crawler spricht Französisch und Deutsch', body: 'Die Website, die Begleit-App und deinen TRMNL-Bildschirm gibt es jetzt auch auf Französisch und Deutsch. Seiten folgen der Sprache deines Browsers, und du kannst unten auf jeder Seite oder unter Konto eine wählen. Dein TRMNL folgt der Sprache deines TRMNL-Kontos oder der, die du wählst. Held, Ausrüstung und Verlauf bleiben erhalten, und auch ältere Geschichten werden übersetzt.' },
+      },
+      {
         title: 'A page that misses an update offers a reload',
         body: 'If the site updates while you have it open and a page can’t load its new parts, the page now says a new version just went live and gives you a Reload button. It used to ask you to check your connection, and Try again could not fix it.',
         fr: { title: 'Une page qui rate une mise à jour propose de la recharger', body: 'Si le site est mis à jour pendant que vous l’avez ouvert et qu’une page ne peut pas charger ses nouveaux éléments, elle indique maintenant qu’une nouvelle version vient d’arriver et propose un bouton Recharger. Avant, elle vous demandait de vérifier votre connexion, et Réessayer n’y changeait rien.' },

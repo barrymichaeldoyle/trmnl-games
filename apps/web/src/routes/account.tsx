@@ -27,6 +27,7 @@ function Account() {
   const [now, setNow] = useState(Date.now)
   const inFlight = useRef(false)
   const t = useT(accountMessages)
+  const pageLocale = useLocale()
   useEffect(() => {
     if (!emailStatus) return
     const timer = window.setTimeout(() => setNow(Date.now()), Math.max(0, emailStatus.expiresAt - Date.now()) + 10)
@@ -39,7 +40,7 @@ function Account() {
     inFlight.current = true
     setPending(true)
     setError(null)
-    try { await requestEmail({}); setNow(Date.now()) }
+    try { await requestEmail({ locale: pageLocale }); setNow(Date.now()) }
     catch (caught) { setError(errorMessage(caught)) }
     finally { inFlight.current = false; setPending(false) }
   }

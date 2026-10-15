@@ -886,6 +886,8 @@ export default defineSchema({
     emailId: v.string(),
     from: v.string(),
     origin: v.string(),
+    /** D169: the language of the page the request came from, for the email. */
+    locale: v.optional(locale),
     state: v.union(v.literal('pending'), v.literal('sent'), v.literal('failed'), v.literal('confirmed')),
     attempts: v.number(),
     createdAt: v.number(),

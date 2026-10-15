@@ -4,7 +4,8 @@ import { idleAnglerProfile } from './idleAngler/profile'
 import { purgeAngler } from './idleAngler/purge'
 import { paperLivesProfile } from './paperLives/profile'
 import { purgeLives } from './paperLives/purge'
-import { gameSlug as gameSlugValidator } from './schema'
+import { gameSlug as gameSlugValidator, locale as localeValidator } from './schema'
+import type { Locale } from '@trmnl-games/platform'
 import { purgeRaidRows } from './lib/raids'
 import { purgeMeetingRows } from './lib/meetings'
 import { purgeLostPropertyRows, scrubSpareLabels } from './lib/lostProperty'
@@ -429,8 +430,8 @@ export const getEmailRequest = internalQuery({
 
 /** No caller-supplied recipient; duplicates reuse the current 30-minute request. */
 export const requestDeletionEmail = action({
-  args: {}, returns: confirmationStatus,
-  handler: async (ctx): Promise<{ state: 'pending' | 'sent' | 'failed' | 'confirmed'; email: string; expiresAt: number }> => {
+  args: { locale: v.optional(localeValidator) }, returns: confirmationStatus,
+  handler: async (ctx, { locale }): Promise<{ state: 'pending' | 'sent' | 'failed' | 'confirmed'; email: string; expiresAt: number }> => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) throw appError('UNAUTHENTICATED', 'Sign in to continue.')
     const existing = await ctx.runQuery(internal.deletion.getEmailRequest, { tokenIdentifier: identity.tokenIdentifier })
@@ -445,12 +446,12 @@ export const requestDeletionEmail = action({
     } catch { /* Fail closed: no guessed or unverified recipient. */ }
     if (!email) throw appError('EMAIL_UNAVAILABLE', 'Add a verified primary email to your account before requesting deletion.')
     const origin = new URL(process.env.COMPANION_ORIGIN ?? 'https://trmnlgames.com').origin
-    return await ctx.runMutation(internal.deletion.reserveDeletionEmail, { tokenIdentifier: identity.tokenIdentifier, email: email.address, emailId: email.id, origin, from: process.env.DELETION_EMAIL_FROM ?? 'TRMNL Games <alerts@trmnlgames.com>' })
+    return await ctx.runMutation(internal.deletion.reserveDeletionEmail, { tokenIdentifier: identity.tokenIdentifier, email: email.address, emailId: email.id, origin, from: process.env.DELETION_EMAIL_FROM ?? 'TRMNL Games <alerts@trmnlgames.com>', ...(locale === undefined ? {} : { locale }) })
   },
 })
 
 export const reserveDeletionEmail = internalMutation({
-  args: { tokenIdentifier: v.string(), email: v.string(), emailId: v.string(), from: v.string(), origin: v.string() }, returns: confirmationStatus,
+  args: { tokenIdentifier: v.string(), email: v.string(), emailId: v.string(), from: v.string(), origin: v.string(), locale: v.optional(localeValidator) }, returns: confirmationStatus,
   handler: async (ctx, args) => {
     const now = Date.now()
     assertNotRevoked(await ctx.db.query('revokedAuthIdentities').withIndex('by_identityHash', (q) => q.eq('identityHash', identityHash(args.tokenIdentifier))).first())
@@ -482,6 +483,13 @@ export const getDeletionEmail = internalQuery({
   },
 })
 
+/** The confirmation email in the language of the page it was asked from (D169). */
+function deletionEmail(locale: Locale, link: string): { subject: string; text: string } {
+  if (locale === 'fr') return { subject: 'Confirmez la suppression de votre compte TRMNL Games', text: `Vous avez demandé la suppression de votre compte TRMNL Games. Cela supprime la progression de chaque jeu, vos connexions et votre identifiant. C’est irréversible.\n\nPour continuer, ouvrez ce lien, connectez-vous au même compte et confirmez la suppression :\n${link}\n\nLe lien expire 30 minutes après votre demande. L’ouvrir ne supprime rien. Si vous n’avez rien demandé, ignorez cet e-mail ; votre compte reste actif.` }
+  if (locale === 'de') return { subject: 'Bestätige die Löschung deines TRMNL-Games-Kontos', text: `Du hast die Löschung deines TRMNL-Games-Kontos angefordert. Damit werden der Fortschritt in jedem Spiel, deine Verbindungen und deine Anmeldung entfernt. Das lässt sich nicht rückgängig machen.\n\nUm fortzufahren, öffne diesen Link, melde dich mit demselben Konto an und bestätige die Löschung:\n${link}\n\nDer Link läuft 30 Minuten nach deiner Anfrage ab. Ihn zu öffnen löscht nichts. Wenn du das nicht angefordert hast, ignoriere diese E-Mail; dein Konto bleibt aktiv.` }
+  return { subject: 'Confirm deletion of your TRMNL Games account', text: `You requested deletion of your TRMNL Games account. This removes every game's progress, your connections and your sign-in. It cannot be undone.\n\nTo continue, open this link, sign in to the same account, and confirm deletion:\n${link}\n\nThe link expires 30 minutes after your request. Opening it does not delete anything. If you did not request this, ignore this email; your account stays active.` }
+}
+
 export const sendDeletionEmail = internalAction({
   args: { requestId: v.id('accountDeletionConfirmations') }, returns: v.null(),
   handler: async (ctx, { requestId }) => {
@@ -499,7 +507,7 @@ export const sendDeletionEmail = internalAction({
         const response = await fetch('https://api.resend.com/emails', {
           method: 'POST', signal: AbortSignal.timeout(10_000),
           headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json', 'Idempotency-Key': `account-deletion/${requestId}` },
-          body: JSON.stringify({ from: row.from, to: [row.email], subject: 'Confirm deletion of your TRMNL Games account', text: `You requested deletion of your TRMNL Games account. This removes every game's progress, your connections and your sign-in. It cannot be undone.\n\nTo continue, open this link, sign in to the same account, and confirm deletion:\n${link.toString()}\n\nThe link expires 30 minutes after your request. Opening it does not delete anything. If you did not request this, ignore this email; your account stays active.` }),
+          body: JSON.stringify({ from: row.from, to: [row.email], ...deletionEmail(row.locale ?? 'en', link.toString()) }),
         })
         ok = response.ok
       } catch { /* Retry exactly the same message and provider idempotency key. */ }
