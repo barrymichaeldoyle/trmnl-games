@@ -1,12 +1,14 @@
 import { ClerkProvider, useAuth } from '@clerk/tanstack-react-start'
 import { auth } from '@clerk/tanstack-react-start/server'
+import { getCookie, getRequestHeader } from '@tanstack/react-start/server'
+import { DEFAULT_LOCALE, LANGUAGES_LIVE, isLocale, localeFromAcceptLanguage, type Locale } from '@trmnl-games/platform'
 import type { ConvexQueryClient } from '@convex-dev/react-query'
 import type { QueryClient } from '@tanstack/react-query'
 import { HeadContent, Link, Outlet, Scripts, createRootRouteWithContext, useRouteContext } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import type { ConvexReactClient } from 'convex/react'
 import { ConvexProviderWithClerk } from 'convex/react-clerk'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ComponentProps, type ReactNode } from 'react'
 import { SiteShell } from '../lib/prose'
 import { OG_VERSION, SITE_NAME, SITE_ORIGIN, seo } from '../lib/seo'
 import appCss from '../styles.css?url'
@@ -15,12 +17,20 @@ import { AnalyticsProvider } from '../lib/analyticsProvider'
 import { useDeployWatch } from '../lib/deployWatch'
 import { queriesHeldForAuth } from '../lib/authHold'
 import { LazyClerkUI, clerkFrontendHost } from '../lib/clerkUi'
+import { LOCALE_COOKIE, LocaleProvider, documentLocale, messagesFor, useT } from '../lib/i18n'
+import { rootMessages } from '../i18n/root'
+import { LanguageSync } from '../lib/languageSync'
 
-/** Server-only: read the Clerk session and mint a Convex token from the "convex" JWT template. */
+/**
+ * Server-only: read the Clerk session and mint a Convex token from the "convex" JWT template, and pick the page's
+ * language (D169): the visitor's saved choice, else what their browser asks for.
+ */
 const fetchClerkAuth = createServerFn({ method: 'GET' }).handler(async () => {
   const { userId, getToken } = await auth()
   const token = userId ? await getToken({ template: 'convex' }) : null
-  return { userId, token }
+  const saved = getCookie(LOCALE_COOKIE)
+  const locale: Locale = isLocale(saved) ? saved : LANGUAGES_LIVE ? localeFromAcceptLanguage(getRequestHeader('accept-language')) : DEFAULT_LOCALE
+  return { userId, token, locale }
 })
 
 /**
@@ -35,18 +45,28 @@ export const Route = createRootRouteWithContext<{
   convexClient: ConvexReactClient
   convexQueryClient: ConvexQueryClient
 }>()({
+  beforeLoad: async (ctx) => {
+    // The session only matters for SSR, where it authenticates this request's Convex HTTP client.
+    // In the browser the Convex socket is already signed in through Clerk, so client-side
+    // navigations skip the server round trip that would otherwise delay every tab change.
+    // The page's language travels in `<html lang>`, which the server set, so the browser reads it back rather than asking.
+    if (!import.meta.env.SSR) return { userId: null, token: null, locale: documentLocale() }
+    const { userId, token, locale } = await fetchClerkAuth()
+    if (token) ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
+    return { userId, token, locale }
+  },
   // Only the root matching means no page exists at this address: the 404 gets its own title and stays out of search.
-  head: ({ matches }: { matches: readonly unknown[] }) => ({
+  head: ({ matches, match }) => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      ...seo(matches.length > 1 ? {} : { title: 'Page not found', index: false }).meta,
+      ...seo(matches.length > 1 ? { locale: match.context.locale } : { title: messagesFor(rootMessages, match.context.locale).notFoundTitle, index: false, locale: match.context.locale }).meta,
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: SITE_NAME },
       { property: 'og:image', content: `${SITE_ORIGIN}/og.png?v=${OG_VERSION}` },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
-      { property: 'og:image:alt', content: 'TRMNL Games: Pip the office warrior squares up to a Cable Serpent in the Server Room' },
+      { property: 'og:image:alt', content: messagesFor(rootMessages, match.context.locale).ogImageAlt },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
     links: [
@@ -62,29 +82,21 @@ export const Route = createRootRouteWithContext<{
       { rel: 'manifest', href: '/manifest.webmanifest' },
     ],
   }),
-  beforeLoad: async (ctx) => {
-    // The session only matters for SSR, where it authenticates this request's Convex HTTP client.
-    // In the browser the Convex socket is already signed in through Clerk, so client-side
-    // navigations skip the server round trip that would otherwise delay every tab change.
-    if (!import.meta.env.SSR) return { userId: null, token: null }
-    const { userId, token } = await fetchClerkAuth()
-    if (token) ctx.context.convexQueryClient.serverHttpClient?.setAuth(token)
-    return { userId, token }
-  },
   component: RootComponent,
   shellComponent: RootDocument,
   notFoundComponent: NotFound,
 })
 
 function NotFound() {
+  const t = useT(rootMessages)
   return (
     <SiteShell>
       <main id="main" className="mx-auto flex w-full max-w-2xl flex-col gap-4 px-4 py-16">
-        <h1 className="font-display text-3xl font-bold">Page not found</h1>
-        <p>There's no page at this address. It may have moved, or the link may be mistyped.</p>
+        <h1 className="font-display text-3xl font-bold">{t.notFoundTitle}</h1>
+        <p>{t.notFoundBody}</p>
         <p>
           <Link to="/" className="underline underline-offset-4">
-            Back to the home page
+            {t.backHome}
           </Link>
         </p>
       </main>
@@ -92,14 +104,31 @@ function NotFound() {
   )
 }
 
+type ClerkLocalization = ComponentProps<typeof ClerkProvider>['localization']
+
+/** Clerk's own French or German screens, downloaded only for a reader in that language; English is Clerk's default. */
+function useClerkLocalization(locale: Locale): ClerkLocalization {
+  const [loaded, setLoaded] = useState<{ locale: Locale; localization: ClerkLocalization } | null>(null)
+  useEffect(() => {
+    if (locale === 'en') return
+    let live = true
+    const load = locale === 'fr' ? import('@clerk/localizations/fr-FR').then((m) => m.frFR) : import('@clerk/localizations/de-DE').then((m) => m.deDE)
+    void load.then((localization) => { if (live) setLoaded({ locale, localization }) }).catch(() => {})
+    return () => { live = false }
+  }, [locale])
+  return loaded?.locale === locale ? loaded.localization : undefined
+}
+
 function RootComponent() {
   const context = useRouteContext({ from: Route.id })
   useDeployWatch()
+  const localization = useClerkLocalization(context.locale)
   return (
     // Clerk's UI downloads when a page first needs it, not on every page (lib/clerkUi).
-    <ClerkProvider ui={{ ClerkUI: LazyClerkUI }}>
+    <ClerkProvider ui={{ ClerkUI: LazyClerkUI }} localization={localization}>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <ReleaseSignedOutQueries client={context.convexClient} />
+        <LanguageSync />
         <NetworkProvider><Outlet /><AnalyticsProvider /></NetworkProvider>
       </ConvexProviderWithClerk>
     </ClerkProvider>
@@ -119,8 +148,10 @@ function ReleaseSignedOutQueries({ client }: { client: ConvexReactClient }) {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+  const { locale } = useRouteContext({ from: Route.id })
   return (
-    <html lang="en">
+    <LocaleProvider locale={locale}>
+    <html lang={locale}>
       <head>
         <HeadContent />
         {/* Outside route head: HeadContent keeps only one meta per name. */}
@@ -129,11 +160,12 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body className="antialiased">
         <a href="#main" className="sr-only border-2 border-night bg-gold px-4 py-3 font-semibold text-night focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50">
-          Skip to content
+          {messagesFor(rootMessages, locale).skipToContent}
         </a>
         {children}
         <Scripts />
       </body>
     </html>
+    </LocaleProvider>
   )
 }

@@ -1,4 +1,13 @@
+import type { Locale } from '@trmnl-games/platform'
 import { markedRuns } from '../sim/core/narrative'
+import { contentTranslator } from '../i18n'
+
+/** D169: the words a change chip uses, per language. English is the source the device template also keys its marks on. */
+const CHIP_WORDS: Readonly<Record<Locale, { gold: string; hp: string; xp: string; fromPotion: (hp: string) => string; bagSlots: (n: number) => string; pouch: (n: number) => string; offers: (n: number) => string; noEffect: string }>> = {
+  en: { gold: 'gold', hp: 'HP', xp: 'XP', fromPotion: (hp) => `${hp} from potion`, bagSlots: (n) => (n === 1 ? 'bag slot' : 'bag slots'), pouch: (n) => `Pouch holds ${n}`, offers: (n) => `${n} ${n === 1 ? 'offer' : 'offers'} open`, noEffect: 'No effect' },
+  fr: { gold: 'or', hp: 'PV', xp: 'XP', fromPotion: (hp) => `${hp} grâce à la potion`, bagSlots: (n) => (n === 1 ? 'place de sac' : 'places de sac'), pouch: (n) => `Pochette : ${n}`, offers: (n) => `${n} ${n === 1 ? 'offre ouverte' : 'offres ouvertes'}`, noEffect: 'Aucun effet' },
+  de: { gold: 'Gold', hp: 'LP', xp: 'XP', fromPotion: (hp) => `${hp} durch Trank`, bagSlots: (n) => (n === 1 ? 'Taschenplatz' : 'Taschenplätze'), pouch: (n) => `Beutel fasst ${n}`, offers: (n) => `${n} ${n === 1 ? 'Angebot' : 'Angebote'} offen`, noEffect: 'Keine Wirkung' },
+}
 
 export interface LogDeltas {
   readonly xpEarned: number
@@ -46,15 +55,38 @@ export function potionWordFor(templateId: string | undefined): string {
   return `${stem} potion`
 }
 
-/** Shared display copy. Persisted, versioned simulator summaries stay replayable. */
-export function logPresentation(entry: { readonly summary: string; readonly kind: string; readonly deltas?: LogDeltas }, options: { readonly compactGold?: boolean } = {}) {
+export interface PresentationOptions {
+  readonly compactGold?: boolean
+  /** D169: the reader's language for the story; English when absent. */
+  readonly locale?: Locale
+  /** The chips' language, when it differs from the story's: the device keys its marks on English units. */
+  readonly chipLocale?: Locale
+  readonly heroGender?: 'male' | 'female'
+}
+
+/**
+ * Shared display copy. Persisted, versioned simulator summaries stay replayable: another language translates the
+ * stored English summary as it is shown (D169), and falls back to the English narrative where nothing matches.
+ */
+export function logPresentation(entry: { readonly summary: string; readonly kind: string; readonly deltas?: LogDeltas }, options: PresentationOptions = {}) {
+  const locale = options.locale ?? 'en'
+  const translated = locale === 'en' ? null : contentTranslator(locale).story(entry.summary, options.heroGender === undefined ? {} : { heroGender: options.heroGender })
+  const english = englishPresentation(entry, options)
+  return translated === null ? english : { ...english, narrative: translated }
+}
+
+function englishPresentation(entry: { readonly summary: string; readonly kind: string; readonly deltas?: LogDeltas }, options: PresentationOptions) {
   if (!entry.deltas || entry.kind === 'achievement') return { narrative: entry.summary, changes: [] as string[] }
   const deltas = entry.deltas
-  const signed = (value: number, unit: string) => `${value > 0 ? '+' : '−'}${Math.abs(value)} ${unit}`
+  const chipLocale = options.chipLocale ?? options.locale ?? 'en'
+  const words = CHIP_WORDS[chipLocale]
+  const t = contentTranslator(chipLocale)
+  // English keeps bare digits, as the device's fixed chip columns expect; other languages group thousands their way.
+  const signed = (value: number, unit: string) => `${value > 0 ? '+' : '−'}${chipLocale === 'en' ? Math.abs(value) : t.number(Math.abs(value))} ${unit}`
   // D112: to-do labels carry targets ("Earn 50 gold adventuring"), never changes, so they keep every number; a
   // ticked-off line's reward is its gold chip and a stand-up changes nothing, so it stands alone.
   // P35: a goal line's bonus is its gold chip the same way; an unlock changes nothing and stands alone.
-  if (entry.kind === 'todo' || entry.kind === 'career') return { narrative: entry.summary, changes: deltas.gold ? [signed(deltas.gold, 'gold')] : [] }
+  if (entry.kind === 'todo' || entry.kind === 'career') return { narrative: entry.summary, changes: deltas.gold ? [signed(deltas.gold, words.gold)] : [] }
   // Transform only plain runs: numbers/units inside marked item names are names.
   let narrative = markedRuns(entry.summary).map((run) => run.bold ? `[[${run.text}]]` : run.text
     .replace(/[+−-]\d+ (?:XP|gold|HP)(?:,\s*[+−-]\d+ (?:XP|gold|HP))*\.?/g, '')
@@ -67,22 +99,23 @@ export function logPresentation(entry: { readonly summary: string; readonly kind
   ).join('').replace(/\s+/g, ' ').trim()
   if (!narrative) narrative = deltas.gold > 0 ? 'Found gold.' : 'Recovered.'
   // D110: a raid can swing five-figure gold; the device's gold column holds four digits, so it reads "12k" from 10,000.
-  const goldChange = (value: number) => (options.compactGold && Math.abs(value) >= 10_000 ? `${value > 0 ? '+' : '−'}${Math.floor(Math.abs(value) / 1000)}k gold` : signed(value, 'gold'))
+  const goldChange = (value: number) => (options.compactGold && Math.abs(value) >= 10_000 ? `${value > 0 ? '+' : '−'}${Math.floor(Math.abs(value) / 1000)}k ${words.gold}` : signed(value, words.gold))
+  const potionWord = (english: string, count: number) => (chipLocale === 'en' ? `${english}${count === 1 ? '' : 's'}` : t.name(count === 1 ? english : `${english}s`))
   const changes = [
-    deltas.xpEarned ? signed(deltas.xpEarned, 'XP') : null,
+    deltas.xpEarned ? signed(deltas.xpEarned, words.xp) : null,
     deltas.gold ? goldChange(deltas.gold) : null,
-    deltas.potionsFound ? signed(deltas.potionsFound, `${deltas.potionFound ?? 'healing potion'}${deltas.potionsFound === 1 ? '' : 's'}`) : null,
+    deltas.potionsFound ? signed(deltas.potionsFound, potionWord(deltas.potionFound ?? 'healing potion', deltas.potionsFound)) : null,
     // Net HP stays the single HP figure (D48); the potion chip names the part a potion restored.
-    deltas.hp ? signed(deltas.hp, 'HP') : null,
-    deltas.potionHealing && deltas.potionHealing !== deltas.hp ? `${signed(deltas.potionHealing, 'HP')} from potion` : null,
-    deltas.bagSlots ? signed(deltas.bagSlots, deltas.bagSlots === 1 ? 'bag slot' : 'bag slots') : null,
-    deltas.potionsBought ? signed(deltas.potionsBought, deltas.potionsBought === 1 ? 'healing potion' : 'healing potions') : null,
-    deltas.pouchCap ? `Pouch holds ${deltas.pouchCap}` : null,
-    deltas.offers ? `${deltas.offers} ${deltas.offers === 1 ? 'offer' : 'offers'} open` : null,
-    deltas.effectGained ? `${deltas.effectGained.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())}` : null,
+    deltas.hp ? signed(deltas.hp, words.hp) : null,
+    deltas.potionHealing && deltas.potionHealing !== deltas.hp ? words.fromPotion(signed(deltas.potionHealing, words.hp)) : null,
+    deltas.bagSlots ? signed(deltas.bagSlots, words.bagSlots(deltas.bagSlots)) : null,
+    deltas.potionsBought ? signed(deltas.potionsBought, potionWord('healing potion', deltas.potionsBought)) : null,
+    deltas.pouchCap ? words.pouch(deltas.pouchCap) : null,
+    deltas.offers ? words.offers(deltas.offers) : null,
+    deltas.effectGained ? t.text(deltas.effectGained.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())) : null,
   ].filter((part): part is string => part !== null)
   // "No effect" explains an adventure that changed nothing (a coffee break at full HP); travel and companion actions
   // (kind `system`) were never meant to change stats, so they stand alone.
   const quiet = entry.kind === 'travel' || entry.kind === 'system' || entry.kind === 'occasion'
-  return { narrative, changes: changes.length > 0 || quiet ? changes : ['No effect'] }
+  return { narrative, changes: changes.length > 0 || quiet ? changes : [words.noEffect] }
 }

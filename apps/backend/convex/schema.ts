@@ -21,6 +21,9 @@ const paperLivesEngine = engineTables(PAPER_LIVES_TABLES, ['events', 'years', 'd
 
 /** Where a launch-list signup came from: the share link, the signed-out QR pitch, the game page, the home page or a signed-in account. */
 
+/** D169: the languages the games speak (`@trmnl-games/platform` LOCALES). */
+export const locale = v.union(v.literal('en'), v.literal('fr'), v.literal('de'))
+
 export const heroStatus = v.union(
   v.literal('exploring'),
   v.literal('resting'),
@@ -499,6 +502,8 @@ export default defineSchema({
     trmnlUtcOffset: v.optional(v.number()),
     /** D168: the last locale a TRMNL screen request sent (`trmnl[user][locale]`, e.g. `fr-FR`), written only when it changes; sizes translation demand. */
     trmnlLocale: v.optional(v.string()),
+    /** D169: the language the owner picked in the companion; absent follows the browser there and `trmnlLocale` on the device. */
+    language: v.optional(locale),
     /** P33: opt-in push alerts; absent means every kind off. Quiet hours are whole hours in `timezone`. */
     alerts: v.optional(alertPreferences),
     /** D154: the key (YYYY-MM-DD.NN) of the newest What's new change the owner dismissed; absent means none since joining. */

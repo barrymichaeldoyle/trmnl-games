@@ -1,3 +1,4 @@
+import { localeFromTag, type Locale } from '@trmnl-games/platform'
 import type { Doc } from '../_generated/dataModel'
 
 /** BCP 47-shaped: a 2 or 3 letter language, then up to two script/region/variant subtags. */
@@ -18,4 +19,9 @@ export function parseTrmnlLocale(value: string | null): string | null {
 /** Whether a screen request carries an offset (P31) or locale (D168) that differs from the owner's stored one. */
 export function trmnlUserChanged(user: Doc<'users'>, utcOffset: number | null | undefined, locale: string | null | undefined): boolean {
   return (utcOffset !== undefined && utcOffset !== null && utcOffset !== user.trmnlUtcOffset) || (locale !== undefined && locale !== null && locale !== user.trmnlLocale)
+}
+
+/** D169: the language an owner's screens and alerts use: their companion choice, else their TRMNL's, else English. */
+export function ownerLocale(user: Pick<Doc<'users'>, 'language' | 'trmnlLocale'>): Locale {
+  return user.language ?? localeFromTag(user.trmnlLocale) ?? 'en'
 }

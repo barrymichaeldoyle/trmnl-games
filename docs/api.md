@@ -50,6 +50,7 @@ No unbounded public hero lists, arbitrary hero-ID reads, or public token lookup 
 | Function | Arguments (plus operation ID) | Behavior / result | Preconditions |
 | --- | --- | --- | --- |
 | `users.ensure` | `publicAlias`, `timezone` for first onboarding | Upsert server-derived identity; return user ID | Signed in; normalized alias unique |
+| `users.setLanguage` | `language` (`en`, `fr`, `de` or null) | D169: the owner's language for the companion, TRMNL screens and alerts; null clears it so the companion follows the browser and the device the TRMNL account. Same value no-op; presentation only | Active signed-in owner; no game advancement |
 | `users.setTimezone` | `timezone` | Legacy compatibility endpoint; validate IANA timezone, same value no-op; absent from current UI (D39) | Active signed-in owner; no game advancement |
 | `heroes.create` | `name`, `installAttemptId` | Prepare pending Warrior + starter kit/welcome; return hero ID and activation state | Active user; no current hero; owned unexpired server-verified TRMNL attempt and active grant |
 | `heroes.recordCompanionVisit` | `expectedLogSequence` | Capture current server level/lifetime XP/sequence/time; receipt replay idempotent | Active signed-in owner and activated hero; guarded sequence; no game advancement |

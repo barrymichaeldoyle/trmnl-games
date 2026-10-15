@@ -3,6 +3,9 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from 'react'
 import { analyticsConfigured, captureAnalytics, openAnalyticsPreferences } from './analytics'
 import { PlatformHeader, SITE_FRAME } from './platformHeader'
+import { useT } from './i18n'
+import { LanguagePicker } from './languagePicker'
+import { shellMessages } from '../i18n/shell'
 
 /** Prose styling for a reading page's body: section headings, lists and underlined links. */
 const PROSE = 'leading-relaxed [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-gold-ink [&_h3]:mt-4 [&_h3]:font-semibold [&_h3]:text-lg [&_li]:ml-5 [&_li]:list-disc [&_a]:underline'
@@ -13,10 +16,11 @@ const PROSE = 'leading-relaxed [&_h2]:mt-6 [&_h2]:font-display [&_h2]:text-2xl [
  * it is a sidebar that stays in view and marks the section being read.
  */
 export function ProsePage({ title, updated, contents, children }: { title: string; updated?: string; contents?: ReadonlyArray<readonly [string, string]>; children: ReactNode }) {
+  const t = useT(shellMessages)
   const heading = (
     <header className="flex flex-col gap-4 lg:col-start-2">
       <h1 className="font-display text-4xl font-bold">{title}</h1>
-      {updated ? <p className="text-sm text-muted">Last updated {updated}</p> : null}
+      {updated ? <p className="text-sm text-muted">{t.lastUpdated(updated)}</p> : null}
     </header>
   )
   if (!contents) {
@@ -82,10 +86,11 @@ function Contents({ contents }: { contents: ReadonlyArray<readonly [string, stri
   const ids = useMemo(() => contents.map(([id]) => id), [contents])
   const current = useCurrentSection(ids)
   const jumpTo = useJumpTo()
+  const t = useT(shellMessages)
   return (
     <nav aria-labelledby="contents-title" className="mt-4 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:mt-0">
       <div className="window px-3 pt-3 pb-2 min-[375px]:px-4 sm:px-5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:px-4">
-        <h2 id="contents-title" className="font-display text-xl font-semibold text-gold-ink">On this page</h2>
+        <h2 id="contents-title" className="font-display text-xl font-semibold text-gold-ink">{t.onThisPage}</h2>
         {/* Two columns on phones, so twenty sections stay about half a screen, with 44px rows for an easy tap; one tighter column in the sidebar. */}
         <ul className="mt-1 grid grid-cols-2 gap-x-4 sm:gap-x-6 lg:grid-cols-1">
           {contents.map(([id, label]) => (
@@ -127,44 +132,46 @@ function FooterGroup({ title, children }: { title: string; children: ReactNode }
  * then the unofficial-status line and the author credit.
  */
 export function SiteFooter() {
+  const t = useT(shellMessages)
   return (
     <footer className="mt-auto border-t border-rule bg-night/40 text-sm">
       <div className={`flex flex-col gap-8 py-10 ${SITE_FRAME}`}>
         <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-[1.4fr_repeat(4,1fr)]">
           <div className="col-span-2 flex flex-col gap-3 md:col-span-1">
             <Link to="/" className="flex min-h-11 items-center gap-2 self-start font-display text-lg font-semibold"><img src="/favicon.svg" alt="" width={24} height={24} className="[image-rendering:pixelated]" />TRMNL Games</Link>
-            <p className="max-w-xs text-muted">Games that play themselves on a TRMNL e-ink display.</p>
+            <p className="max-w-xs text-muted">{t.tagline}</p>
+            <LanguagePicker className="text-sm" />
           </div>
-          <nav aria-label="Site" className="col-span-2 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 md:col-span-4">
-            <FooterGroup title="Games">
+          <nav aria-label={t.siteNav} className="col-span-2 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 md:col-span-4">
+            <FooterGroup title={t.footerGames}>
               <li><Link to="/" className={FOOTER_LINK}>Desk Crawler</Link></li>
-              <li><a href={DESK_CRAWLER_INSTALL_URL} className={FOOTER_LINK} onClick={() => captureAnalytics('install link opened', { place: 'footer' })}>Install on TRMNL</a></li>
-              <Show when="signed-in"><li><Link to="/app" className={FOOTER_LINK}>My games</Link></li></Show>
+              <li><a href={DESK_CRAWLER_INSTALL_URL} className={FOOTER_LINK} onClick={() => captureAnalytics('install link opened', { place: 'footer' })}>{t.installOnTrmnl}</a></li>
+              <Show when="signed-in"><li><Link to="/app" className={FOOTER_LINK}>{t.myGames}</Link></li></Show>
             </FooterGroup>
-            <FooterGroup title="Help">
-              <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>Setup and help</Link></li>
-              <li><Link to="/whats-new" className={FOOTER_LINK}>What’s new</Link></li>
-              <li><Link to="/support" className={FOOTER_LINK}>Support</Link></li>
-              <li><Link to="/feedback" className={FOOTER_LINK}>Feedback</Link></li>
-              <Show when="signed-in"><li><Link to="/account" className={FOOTER_LINK}>Account</Link></li></Show>
+            <FooterGroup title={t.footerHelp}>
+              <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>{t.setupAndHelp}</Link></li>
+              <li><Link to="/whats-new" className={FOOTER_LINK}>{t.whatsNew}</Link></li>
+              <li><Link to="/support" className={FOOTER_LINK}>{t.support}</Link></li>
+              <li><Link to="/feedback" className={FOOTER_LINK}>{t.feedback}</Link></li>
+              <Show when="signed-in"><li><Link to="/account" className={FOOTER_LINK}>{t.account}</Link></li></Show>
             </FooterGroup>
-            <FooterGroup title="Project">
-              <li><a href="https://github.com/barrymichaeldoyle/trmnl-games" className={FOOTER_LINK}>Source on GitHub</a></li>
-              <li><a href={SPONSOR_URL} className={FOOTER_LINK} onClick={() => captureAnalytics('sponsor link opened', { place: 'footer' })}>Sponsor on GitHub</a></li>
+            <FooterGroup title={t.footerProject}>
+              <li><a href="https://github.com/barrymichaeldoyle/trmnl-games" className={FOOTER_LINK}>{t.sourceOnGitHub}</a></li>
+              <li><a href={SPONSOR_URL} className={FOOTER_LINK} onClick={() => captureAnalytics('sponsor link opened', { place: 'footer' })}>{t.sponsorOnGitHub}</a></li>
               <li><a href="https://trmnl.com/recipes/485545" className={FOOTER_LINK}>F1 Race Weekend</a></li>
               <li><a href="https://grandprixpicks.com" className={FOOTER_LINK}>GrandPrixPicks.com</a></li>
             </FooterGroup>
-            <FooterGroup title="Legal">
-              <li><Link to="/privacy" className={FOOTER_LINK}>Privacy</Link></li>
-              <li><Link to="/terms" className={FOOTER_LINK}>Terms</Link></li>
+            <FooterGroup title={t.footerLegal}>
+              <li><Link to="/privacy" className={FOOTER_LINK}>{t.privacy}</Link></li>
+              <li><Link to="/terms" className={FOOTER_LINK}>{t.terms}</Link></li>
               <AnalyticsLink />
             </FooterGroup>
           </nav>
         </div>
         <div className="flex flex-col gap-2 border-t border-rule pt-6 text-muted sm:flex-row sm:flex-wrap sm:justify-between sm:gap-x-8">
-          <p>Unofficial companion site. Not operated by <a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">TRMNL</a>.</p>
+          <p>{t.unofficialBefore}<a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">TRMNL</a>{t.unofficialAfter}</p>
           <p>
-            Built by <a href="https://barrymichaeldoyle.com" className="underline underline-offset-4 hover:text-ink">Barry Michael Doyle</a>{' · '}
+            {t.builtBy}<a href="https://barrymichaeldoyle.com" className="underline underline-offset-4 hover:text-ink">Barry Michael Doyle</a>{' · '}
             <a href="https://www.linkedin.com/in/barry-michael-doyle-11369683/" className="underline underline-offset-4 hover:text-ink">LinkedIn</a>{' · '}
             <a href="https://x.com/barrymdoyle" className="underline underline-offset-4 hover:text-ink">X</a>
           </p>
@@ -180,15 +187,17 @@ export function SiteFooter() {
  */
 export function AppFooter() {
   const link = 'inline-flex min-h-11 items-center underline-offset-4 hover:text-ink hover:underline'
+  const t = useT(shellMessages)
   return (
     <footer className="mt-auto border-t border-rule text-sm text-muted">
       <ul className={`flex flex-wrap gap-x-5 py-4 ${SITE_FRAME}`}>
-        <li><Link to="/whats-new" className={link}>What’s new</Link></li>
-        <li><Link to="/help/desk-crawler" className={link}>Help</Link></li>
-        <li><Link to="/support" className={link}>Support</Link></li>
-        <li><Link to="/privacy" className={link}>Privacy</Link></li>
-        <li><Link to="/terms" className={link}>Terms</Link></li>
+        <li><Link to="/whats-new" className={link}>{t.whatsNew}</Link></li>
+        <li><Link to="/help/desk-crawler" className={link}>{t.help}</Link></li>
+        <li><Link to="/support" className={link}>{t.support}</Link></li>
+        <li><Link to="/privacy" className={link}>{t.privacy}</Link></li>
+        <li><Link to="/terms" className={link}>{t.terms}</Link></li>
         <AnalyticsLink className={link} />
+        <li className="ml-auto"><LanguagePicker /></li>
       </ul>
     </footer>
   )
@@ -197,8 +206,9 @@ export function AppFooter() {
 /** Reopens the analytics consent panel; shown only where analytics can run, after hydration so SSR markup matches. */
 function AnalyticsLink({ className = FOOTER_LINK }: { className?: string }) {
   const [shown, setShown] = useState(false)
+  const t = useT(shellMessages)
   useEffect(() => setShown(analyticsConfigured()), [])
-  return shown ? <li><button type="button" className={className} onClick={openAnalyticsPreferences}>Analytics preferences</button></li> : null
+  return shown ? <li><button type="button" className={className} onClick={openAnalyticsPreferences}>{t.analyticsPreferences}</button></li> : null
 }
 
 export const SUPPORT_EMAIL = 'barry@barrymichaeldoyle.com'

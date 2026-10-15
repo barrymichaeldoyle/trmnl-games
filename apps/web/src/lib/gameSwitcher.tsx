@@ -9,13 +9,9 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { captureAnalytics } from './analytics'
 import { useGames } from './gameAccess'
 import { Glyph } from './glyphs'
+import { useT } from './i18n'
+import { shellMessages } from '../i18n/shell'
 
-/** Short status words for a character, shared by the library tiles and the switcher. */
-export const HERO_STATUS: Record<string, string> = { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' }
-const heroLine = (hero: { name: string; activationState: string; status: string }) => `${hero.name} · ${hero.activationState === 'active' ? HERO_STATUS[hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}`
-export const anglerLine = (angler: { title: string; activationState: string; status: string }) => `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}`
-/** Paper Lives (D159): the life's name and age, or what it waits on. */
-export const lifeLine = (life: { first: string; last: string; age: number; activationState: string; status: string }) => `${life.first} ${life.last} · ${life.activationState !== 'active' ? 'Waiting for TRMNL Save' : life.status === 'ended' ? 'A life remembered' : life.status === 'paused' ? 'Paused' : `Age ${life.age}`}`
 
 /** The game whose companion the path is inside, if any. */
 export function currentGame(pathname: string): GameSlug | null {
@@ -36,6 +32,7 @@ function GameSwitcher({ slug }: { slug: GameSlug }) {
   const root = useRef<HTMLDivElement>(null)
   const button = useRef<HTMLButtonElement>(null)
   const menuId = useId()
+  const t = useT(shellMessages)
   const game = games[slug]
   const icon = <img src={`/games/${slug}/favicon.svg`} alt="" width={20} height={20} className="shrink-0 [image-rendering:pixelated]" />
 
@@ -53,7 +50,7 @@ function GameSwitcher({ slug }: { slug: GameSlug }) {
   }
   return (
     <div ref={root}>
-      <button ref={button} type="button" aria-expanded={open} aria-controls={menuId} aria-label={`${game.name}: switch game`} onClick={() => setOpen((value) => !value)} className="inline-flex min-h-11 items-center gap-2 underline underline-offset-4">
+      <button ref={button} type="button" aria-expanded={open} aria-controls={menuId} aria-label={t.switchGame(game.name)} onClick={() => setOpen((value) => !value)} className="inline-flex min-h-11 items-center gap-2 underline underline-offset-4">
         {icon}<span className="whitespace-nowrap">{game.name}</span><Glyph name="down" size={10} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open ? <SwitcherMenu id={menuId} current={slug} listing={listing!} close={() => setOpen(false)} /> : null}
@@ -68,6 +65,7 @@ function SwitcherMenu({ id, current, listing, close }: { id: string; current: Ga
   // socket is signed in; until then a row says "Loading" rather than guessing "Not started".
   const { isAuthenticated } = useConvexAuth()
   const { isSignedIn } = useAuth()
+  const t = useT(shellMessages)
   const ready = isAuthenticated && isSignedIn === true
   const { data: me } = useQuery({ ...convexQuery(api.users.me, {}), enabled: ready })
   const idleAngler = listing.games.find((game) => game.slug === 'idle-angler')
@@ -80,34 +78,34 @@ function SwitcherMenu({ id, current, listing, close }: { id: string; current: Ga
     const entry = games[game.slug]
     const played =
       game.slug === 'desk-crawler'
-        ? me ? (me.hero ? heroLine(me.hero) : me.gameState === 'deleting' ? 'Removing progress' : null) : undefined
+        ? me ? (me.hero ? t.heroLine(me.hero) : me.gameState === 'deleting' ? t.removingProgress : null) : undefined
         : game.slug === 'paper-lives'
-          ? lifeView ? (life ? lifeLine(life) : null) : game.canOpen ? undefined : null
-          : dock ? (angler ? anglerLine(angler) : null) : game.canOpen ? undefined : null
+          ? lifeView ? (life ? t.lifeLine(life) : null) : game.canOpen ? undefined : null
+          : dock ? (angler ? t.anglerLine(angler) : null) : game.canOpen ? undefined : null
     return { slug: game.slug, name: entry.name, status: game.status, canOpen: game.canOpen, played, to: played ? entry.companionPath : entry.publicPath }
   })
   const switched = (to: GameSlug) => { captureAnalytics('game switched', { from: current, to }); close() }
   return (
-    <ul id={id} aria-label="Your games" className="absolute top-full right-3 z-40 mt-1 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col border-[3px] border-night bg-panel shadow-[4px_4px_0_var(--color-night)] min-[375px]:right-4">
+    <ul id={id} aria-label={t.yourGames} className="absolute top-full right-3 z-40 mt-1 flex w-72 max-w-[calc(100vw-1.5rem)] flex-col border-[3px] border-night bg-panel shadow-[4px_4px_0_var(--color-night)] min-[375px]:right-4">
       {rows.map((row) => (
         <li key={row.slug} className="border-b-2 border-rule">
           {row.status === 'preview' && !row.canOpen ? (
             <span className="flex min-h-12 items-center gap-3 px-3 py-2 text-muted">
               <img src={`/games/${row.slug}/favicon.svg`} alt="" width={24} height={24} className="shrink-0 opacity-60 [image-rendering:pixelated]" />
-              <span className="flex min-w-0 flex-col"><span className="font-semibold">{row.name}</span><span className="text-sm">Coming soon</span></span>
+              <span className="flex min-w-0 flex-col"><span className="font-semibold">{row.name}</span><span className="text-sm">{t.comingSoon}</span></span>
             </span>
           ) : (
             <Link to={row.to} aria-current={row.slug === current ? 'page' : undefined} onClick={() => switched(row.slug)} className={`flex min-h-12 items-center gap-3 px-3 py-2 no-underline hover:bg-rule ${row.slug === current ? 'text-gold-ink' : ''}`}>
               <img src={`/games/${row.slug}/favicon.svg`} alt="" width={24} height={24} className="shrink-0 [image-rendering:pixelated]" />
               <span className="flex min-w-0 flex-col">
-                <span className="font-semibold">{row.name}{row.slug === current ? <span className="sr-only"> (this game)</span> : null}</span>
-                <span className="truncate text-sm text-muted">{row.played === undefined ? 'Loading…' : row.played ?? (row.status === 'hidden' ? 'Hidden · not started' : 'Not started · about the game')}</span>
+                <span className="font-semibold">{row.name}{row.slug === current ? <span className="sr-only">{t.thisGame}</span> : null}</span>
+                <span className="truncate text-sm text-muted">{row.played === undefined ? t.loading : row.played ?? (row.status === 'hidden' ? t.hiddenNotStarted : t.notStarted)}</span>
               </span>
             </Link>
           )}
         </li>
       ))}
-      <li><Link to="/app" onClick={close} className="flex min-h-12 items-center gap-3 px-3 py-2 font-semibold no-underline hover:bg-rule"><Glyph name="screen" size={16} className="text-gold-ink" />All my games</Link></li>
+      <li><Link to="/app" onClick={close} className="flex min-h-12 items-center gap-3 px-3 py-2 font-semibold no-underline hover:bg-rule"><Glyph name="screen" size={16} className="text-gold-ink" />{t.allMyGames}</Link></li>
     </ul>
   )
 }
@@ -116,6 +114,7 @@ function SwitcherMenu({ id, current, listing, close }: { id: string; current: Ga
 export function GamesLink() {
   const pathname = useLocation({ select: (location) => location.pathname.replace(/\/$/, '') })
   const slug = currentGame(pathname)
+  const t = useT(shellMessages)
   if (slug) return <GameSwitcher slug={slug} />
-  return <Link to="/app" className="inline-flex min-h-11 items-center underline underline-offset-4">My games</Link>
+  return <Link to="/app" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.myGames}</Link>
 }

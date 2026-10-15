@@ -1,5 +1,5 @@
 import { currentHero, gameProfile } from './lib/gameProfile'
-import { heroStatus } from './schema'
+import { heroStatus, locale } from './schema'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { currentUser, runIntent } from './lib/intent'
@@ -28,7 +28,7 @@ export const me = query({
       hasActiveInstallation: v.boolean(),
       user: v.union(
         v.null(),
-        v.object({ publicAlias: v.string(), timezone: v.string(), state: v.string(), nameRepairRequired: v.boolean(), analyticsConsent: v.boolean(), publicNameChangeAt: v.union(v.number(), v.null()), whatsNewSince: v.string() }),
+        v.object({ publicAlias: v.string(), timezone: v.string(), state: v.string(), nameRepairRequired: v.boolean(), analyticsConsent: v.boolean(), publicNameChangeAt: v.union(v.number(), v.null()), whatsNewSince: v.string(), language: v.union(locale, v.null()) }),
       ),
       hero: v.union(
         v.null(),
@@ -50,7 +50,7 @@ export const me = query({
       signedIn: true as const,
       hasActiveInstallation: installation !== null,
       gameState: user ? (await gameProfile(ctx, user._id))?.state ?? (hero ? 'active' as const : null) : null,
-      user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false, publicNameChangeAt: user.publicNameChangedAt === undefined ? null : user.publicNameChangedAt + PUBLIC_NAME_GAP_MS, whatsNewSince: user.whatsNewSeen ?? utcDate(user.createdAt) },
+      user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false, publicNameChangeAt: user.publicNameChangedAt === undefined ? null : user.publicNameChangedAt + PUBLIC_NAME_GAP_MS, whatsNewSince: user.whatsNewSeen ?? utcDate(user.createdAt), language: user.language ?? null },
       hero: hero === null ? null : { name: hero.name, activationState: hero.activationState, status: hero.status },
     }
   },
@@ -78,6 +78,21 @@ export const dismissWhatsNew = mutation({
     if (!/^\d{4}-\d{2}-\d{2}(\.\d{2})?$/.test(seen)) throw appError('INVALID_INPUT', 'Not a What’s new key.')
     const user = await currentUser(ctx)
     if (user?.state === 'active' && seen > (user.whatsNewSeen ?? '')) await ctx.db.patch(user._id, { whatsNewSeen: seen })
+    return null
+  },
+})
+
+/**
+ * D169: the owner's language for the companion, TRMNL screens and alerts; null clears it, so the companion follows the
+ * browser and the device follows TRMNL again. Presentation only, never game state.
+ */
+export const setLanguage = mutation({
+  args: { language: v.union(locale, v.null()) },
+  returns: v.null(),
+  handler: async (ctx, { language }) => {
+    const user = await currentUser(ctx)
+    if (user?.state !== 'active' || (user.language ?? null) === language) return null
+    await ctx.db.patch(user._id, { language: language ?? undefined })
     return null
   },
 })

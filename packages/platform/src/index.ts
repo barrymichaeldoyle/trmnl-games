@@ -104,3 +104,5 @@ export function platformAchievements(stats: { games: number; collected: number }
 }
 
 export * from './names'
+
+export * from './locale'

@@ -1,4 +1,6 @@
-import { PLATFORM_ORIGIN, PLATFORM_NAME } from '@trmnl-games/platform'
+import { INTL_TAG, PLATFORM_ORIGIN, PLATFORM_NAME, type Locale } from '@trmnl-games/platform'
+import { messagesFor } from './i18n'
+import { rootMessages } from '../i18n/root'
 
 export const SITE_ORIGIN = PLATFORM_ORIGIN
 export const SITE_NAME = PLATFORM_NAME
@@ -31,14 +33,17 @@ export const DESK_CRAWLER_JSON_LD = {
  * Per-route head tags. Child meta with the same name/property replaces the
  * root defaults; private and handoff pages pass `index: false`.
  */
-export function seo({ title, description = SITE_DESCRIPTION, path, index = true, image, jsonLd }: { title?: string; description?: string; path?: string; index?: boolean; image?: { path: string; alt: string } | { url: string; alt: string; width: number; height: number }; jsonLd?: object }) {
-  const fullTitle = title ? `${title} · ${SITE_NAME}` : `${SITE_NAME}: games for your e-ink display`
+export function seo({ title, description, path, index = true, image, jsonLd, locale = 'en' }: { title?: string; description?: string; path?: string; index?: boolean; image?: { path: string; alt: string } | { url: string; alt: string; width: number; height: number }; jsonLd?: object; locale?: Locale }) {
+  const site = messagesFor(rootMessages, locale)
+  const fullTitle = title ? `${title} · ${SITE_NAME}` : site.siteTitle
+  description ??= site.siteDescription
   return {
     meta: [
       { title: fullTitle },
       { name: 'description', content: description },
       { property: 'og:title', content: fullTitle },
       { property: 'og:description', content: description },
+      { property: 'og:locale', content: INTL_TAG[locale].replace('-', '_') },
       ...(path ? [{ property: 'og:url', content: `${SITE_ORIGIN}${path}` }] : []),
       // A site image by path, or one served elsewhere (a hero's social card comes from the art route, D109) by absolute URL with its size.
       ...(image ? [{ property: 'og:image', content: 'url' in image ? image.url : `${SITE_ORIGIN}${image.path}` }, { property: 'og:image:alt', content: image.alt }, ...('url' in image ? [{ property: 'og:image:width', content: String(image.width) }, { property: 'og:image:height', content: String(image.height) }] : [])] : []),
