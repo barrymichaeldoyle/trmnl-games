@@ -56,7 +56,7 @@ function Account() {
             <details data-analytics-private className="border-t-2 border-hp pt-4">
               <summary className="min-h-11 cursor-pointer font-semibold text-hp-ink">Delete TRMNL Games account…</summary>
               <p>We first send a confirmation link to your verified primary email. Sign in from that link and type DELETE on the final confirmation page. This permanently removes your progress and connections from every game and deletes your sign-in. To remove only Desk Crawler progress, use <Link to="/app/desk-crawler/settings" className="underline underline-offset-4">Desk Crawler settings</Link>.</p>
-              <p className="mt-3 text-sm">Your account stays active until you confirm. The link expires after 30 minutes; we send one email per request, even if you click again.</p>
+              <p className="mt-3 text-sm">Your account stays active until you confirm. The link expires after 30 minutes.</p>
               {activeRequest ? <p role="status" className="mt-3">{emailStatus.state === 'pending' ? `Sending a link to ${emailStatus.email}…` : emailStatus.state === 'sent' ? `Check ${emailStatus.email} for your confirmation link.` : emailStatus.state === 'failed' ? 'We couldn’t deliver the email. Your account is still active. Contact support, or request a new link after this one expires.' : 'Account deletion is underway.'}</p> : emailStatus ? <p className="mt-3">Your previous link expired. You can request a new one.</p> : null}
               <Button className="mt-4" variant="danger" pending={pending} busyLabel="Requesting email…" disabled={Boolean(activeRequest) || emailStatus === undefined} onClick={sendLink}>Email me a deletion link</Button>
               <ErrorNote message={error} />

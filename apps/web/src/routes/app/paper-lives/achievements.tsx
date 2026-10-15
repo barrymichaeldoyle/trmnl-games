@@ -30,7 +30,7 @@ function AchievementsPage() {
         <h1 className="font-display text-3xl font-bold">Achievements</h1>
         <span className="text-sm text-muted">{mine.earnedCount} of {mine.total} earned</span>
       </div>
-      <p className="text-sm text-muted">They count across every life, so a second life picks up where the first left off.</p>
+      <p className="text-sm text-muted">Progress counts across every life.</p>
       {CATEGORIES.map((category) => {
         const families = mine.families.filter((f) => f.category === category)
         if (category === 'Jobs' || category === 'Set pieces') {

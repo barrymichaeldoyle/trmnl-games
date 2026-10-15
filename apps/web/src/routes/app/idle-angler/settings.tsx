@@ -17,7 +17,7 @@ export const Route = createFileRoute('/app/idle-angler/settings')({
 })
 
 const IDLE_ANGLER_ALERTS: readonly AlertKindCopy[] = [
-  { id: 'coolerFull', name: 'Cooler full', blurb: 'New catches are being released. Sent half an hour after the cooler fills, once each time.' },
+  { id: 'coolerFull', name: 'Cooler full', blurb: 'Your cooler is full and new catches are released. Sent 30 minutes after it fills.' },
   { id: 'baitOut', name: 'Out of bait', blurb: 'Your angler used up the bait they were fishing with and is on a bare hook.' },
 ]
 
@@ -80,7 +80,7 @@ function SettingsPage() {
           <ActionFeedback error={profile.error} message={profile.message} />
         </Card>
       ) : null}
-      {active ? <AlertsCard notify={notify} kinds={IDLE_ANGLER_ALERTS} intro="Get a nudge on this phone when your angler needs you." quietNote="A cooler alert waits until quiet hours end; an out-of-bait alert during quiet hours is skipped." /> : null}
+      {active ? <AlertsCard notify={notify} kinds={IDLE_ANGLER_ALERTS} intro="Get a nudge on this phone when your angler needs you." quietNote="During quiet hours, cooler alerts wait until morning and out-of-bait alerts are skipped." /> : null}
       <Card title="Delete Idle Angler progress">
         <p>This removes your angler, cooler, logbook and Idle Angler connections. Your TRMNL Games account and your other games stay. It cannot be undone.</p>
         <label className="mt-3 flex flex-col gap-1">
@@ -108,7 +108,7 @@ function SettingsPage() {
         }}
       >
         <Consequences>
-          <li>No casts or fish until you resume, and missed casts are not made up later.</li>
+          <li>No casts until you resume, and missed casts aren't made up.</li>
           <li>Your fish stay on the boards, but you can't add to this week's while paused.</li>
           <li>Your cooler, bait and coins stay as they are. Resume any time.</li>
         </Consequences>

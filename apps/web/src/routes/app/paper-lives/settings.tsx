@@ -59,7 +59,7 @@ function SettingsPage() {
       <h2 className="font-display text-2xl font-bold">Settings</h2>
       {active && life.status !== 'ended' ? (
         <Card title="Pause">
-          <p>{life.status === 'paused' ? 'The life is paused. No years pass until you resume, and the year picks up where it stopped.' : 'Years pass every few hours, day and night, whether or not you look in.'}</p>
+          <p>{life.status === 'paused' ? 'The life is paused. No years pass until you resume, and the year picks up where it stopped.' : 'A year passes every few hours, day and night.'}</p>
           <div className="mt-3">
             {life.status === 'paused'
               ? <Button pending={resume.pending} onClick={() => void resume.run({}, 'The life goes on.')}>Resume</Button>
@@ -79,7 +79,7 @@ function SettingsPage() {
           <ActionFeedback error={profile.error} message={profile.message} />
         </Card>
       ) : null}
-      {active ? <AlertsCard notify={notify} kinds={PAPER_LIVES_ALERTS} intro="Get a nudge on this phone when something big happens in the life." quietNote="A big decision and a death wait until quiet hours end, though a decision whose year closes overnight is dropped. A birth during quiet hours is skipped." /> : null}
+      {active ? <AlertsCard notify={notify} kinds={PAPER_LIVES_ALERTS} intro="Get a nudge on this phone when something big happens in the life." quietNote="During quiet hours, decisions and deaths wait until morning and births are skipped. A decision that closes overnight is dropped." /> : null}
       <Card title="Delete Paper Lives progress">
         <p>This removes the current life, every finished life in the album with its photos, your Paper Lives achievements and your Paper Lives connections. Your TRMNL Games account and your other games stay. It cannot be undone.</p>
         <label className="mt-3 flex flex-col gap-1">

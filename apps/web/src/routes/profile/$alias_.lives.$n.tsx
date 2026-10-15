@@ -62,7 +62,7 @@ function LifePublicPage() {
             <p className="font-display text-xl">{page.epitaph}</p>
             <p className="text-sm text-muted">{page.traits.join(' · ')}</p>
             {page.highlights.length > 0 ? (
-              <Card title="The moments that mattered">
+              <Card title="Key moments">
                 <ol className="flex flex-col gap-2 text-sm">{page.highlights.map((line, i) => <li key={i}>{line}</li>)}</ol>
               </Card>
             ) : null}

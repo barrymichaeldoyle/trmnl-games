@@ -94,7 +94,7 @@ function Ledger({ summary }: { summary: Summary }) {
         <h2 id="ledger-title" className="hud text-sm text-gold-ink">
           Your first visit
         </h2>
-        <p className="mt-2 max-w-prose">Your hero adventures every 15 minutes, even with this page closed. From your next visit, this box sums up what happened while you were away.</p>
+        <p className="mt-2 max-w-prose">Your hero adventures every 15 minutes. Next time you visit, this box shows what happened while you were away.</p>
         {bag}
       </section>
     )

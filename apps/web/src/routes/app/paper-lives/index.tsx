@@ -173,7 +173,7 @@ function LifePage() {
                 <p className="text-sm text-muted">Everything this year had in store has happened. Age up now, or the year closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.</p>
               </>
             ) : year.ageUpRequested ? (
-              <p className="text-sm"><span className="font-semibold">Age up is queued for {time(year.minimumAt)}</span> <Until at={year.minimumAt} />. The rest of the year happens first, so nothing is skipped.</p>
+              <p className="text-sm"><span className="font-semibold">Age up is queued for {time(year.minimumAt)}</span> <Until at={year.minimumAt} />. The rest of the year plays out first.</p>
             ) : (
               <>
                 <div>

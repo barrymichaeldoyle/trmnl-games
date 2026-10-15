@@ -37,7 +37,7 @@ function AlbumPage() {
     <>
       <h1 className="font-display text-3xl font-bold">Album</h1>
       {first ? <PhotoClaim name={first} /> : null}
-      {album.lives.length === 0 ? <p className="text-muted">No finished lives yet. When a life ends, it becomes a page here with its epitaph and the moments that mattered.</p> : null}
+      {album.lives.length === 0 ? <p className="text-muted">No finished lives yet. When a life ends, it becomes a page here with its epitaph and key moments.</p> : null}
       <ul className="flex flex-col gap-4">
         {album.lives.map((life) => (
           <li key={life.ordinal}>
@@ -53,7 +53,7 @@ function AlbumPage() {
               </div>
               {life.highlights.length > 0 ? (
                 <details className="mt-3">
-                  <summary className="min-h-11 cursor-pointer py-2 font-semibold">The moments that mattered</summary>
+                  <summary className="min-h-11 cursor-pointer py-2 font-semibold">Key moments</summary>
                   <ol className="flex flex-col gap-1 text-sm">{life.highlights.map((line, i) => <li key={i}>{line}</li>)}</ol>
                 </details>
               ) : null}

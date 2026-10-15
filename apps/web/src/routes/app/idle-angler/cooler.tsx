@@ -125,7 +125,7 @@ function CoolerPage() {
             <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={sell.pending} onClick={() => setAskingAll(true)}>Sell all <Coins n={total(catches)} sign /></Button>
             {picked.length === 0 ? <span className="text-sm text-muted">Or tick fish to sell some.</span> : null}
           </div>
-          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to ×2'], ['Cooler full', 'New catches are released: logged, but no coins']]} />
+          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to ×2'], ['Cooler full', 'New catches are logged and released for no coins']]} />
         </Card>
       )}
       <ConfirmSheet

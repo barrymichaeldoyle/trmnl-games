@@ -27,7 +27,6 @@ export function GoalCard({ full, fishmonger, notify }: { full: FullDock; fishmon
       {reward ? (
         <>
           <p className="font-display text-2xl leading-tight font-bold">{reward.title}</p>
-          <p className="text-sm">Your angler got there. The coins are yours to collect.</p>
           <div className="flex flex-wrap items-center gap-3">
             <Button className="inline-flex w-full items-center justify-center gap-2 sm:w-auto" pending={claim.pending} busyLabel="Claiming…" onClick={async () => { if (await claim.run({ goalId: reward.id }, `+${reward.coins} coins claimed.`)) { fireBurst(); captureAnalytics('goal claimed', { goal: reward.id }) } }}>
               Claim <Coins n={reward.coins} sign />

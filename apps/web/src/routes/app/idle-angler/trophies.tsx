@@ -113,7 +113,7 @@ function TrophiesPage() {
           setAsking(null)
         }}
       >
-        <p>The peg becomes free for another fish. Mounting is not refunded, and the fish does not go back to the cooler.</p>
+        <p>Frees the peg. The fish is gone and the mounting cost isn't refunded.</p>
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>
