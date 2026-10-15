@@ -33,6 +33,8 @@ export interface ContentTranslator {
   text(english: string, context?: StoryContext): string
   /** A name on its own (a list row, a heading): the bare French name or the German nominative, without an article. */
   name(english: string): string
+  /** A name with an article form, for prose: `nameWith('Server Room', 'le')` is "la Salle des serveurs". */
+  nameWith(english: string, form: string): string
   /** A stored log summary, as the displays show it (without the numbers the chips carry); null when unmatched. */
   story(summary: string, context?: StoryContext): string | null
   /** A whole number in the locale's grouping. */
@@ -240,13 +242,17 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
       const phrase = phraseOf(english)
       return phrase ? renderPhrase(locale, phrase, undefined, false) : translateText(english)
     },
+    nameWith: (english, form) => {
+      const phrase = phraseOf(english)
+      return phrase ? renderPhrase(locale, phrase, form, false) : english
+    },
     story,
     number: (value) => numbers.format(value),
   }
 }
 
 const englishNumbers = new Intl.NumberFormat(INTL_TAG.en, { maximumFractionDigits: 0 })
-const english: ContentTranslator = { locale: 'en', text: (text) => text, name: (name) => name, story: () => null, number: (value) => englishNumbers.format(value) }
+const english: ContentTranslator = { locale: 'en', text: (text) => text, name: (name) => name, nameWith: (name) => name, story: () => null, number: (value) => englishNumbers.format(value) }
 
 const cache = new Map<Locale, ContentTranslator>()
 
