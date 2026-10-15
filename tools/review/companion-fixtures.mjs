@@ -22,7 +22,7 @@
  * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   goal=ready (D166, with v2=1: two reached goals waiting on the Dock's Claim button and a dot on the Dock tab)
- *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
+ *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) goal=count (a counted goal with its progress bar) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
@@ -314,7 +314,7 @@ if (v2 && iaDock.angler) {
   iaDock.angler.bait.push(bait('boilies', 'Boilies', 24, 12, 45), bait('deadbait', 'Deadbait', 6, 3, 0));
   const ids = iaDock.catches.map((c) => c.id);
   iaDock.full = {
-    goal: { ...(fresh ? { line: 'Land your first fish', coins: 10, page: null, rung: 0, of: 26 } : params.get('goal') === 'orders' ? { line: 'Fill an order for the fishmonger', coins: 20, page: 'cooler', orders: true, rung: 5, of: 26 } : { line: 'Mount a fish on the wall', coins: 30, page: 'cooler', rung: 13, of: 26 }), ...(params.get('goal') === 'ready' ? { unclaimed: [{ id: 'first_order', title: 'Fill an order for the fishmonger', coins: 20 }, { id: 'ten_species', title: 'Log ten species', coins: 30 }] } : {}) },
+    goal: { ...(fresh ? { line: 'Land your first fish', coins: 10, page: null, rung: 0, of: 26 } : params.get('goal') === 'count' ? { line: 'Log eight species', coins: 30, page: null, progress: { value: 5, target: 8 }, rung: 12, of: 26 } : params.get('goal') === 'orders' ? { line: 'Fill an order for the fishmonger', coins: 20, page: 'cooler', orders: true, rung: 5, of: 26 } : { line: 'Mount a fish on the wall', coins: 30, page: 'cooler', rung: 13, of: 26 }), ...(params.get('goal') === 'ready' ? { unclaimed: [{ id: 'first_order', title: 'Fill an order for the fishmonger', coins: 20 }, { id: 'ten_species', title: 'Log ten species', coins: 30 }] } : {}) },
     comingUp: fresh ? { feature: 'shop_upgrades', name: 'Rod and cooler upgrades', species: 2, logged: 0 } : { feature: 'deadbait', name: 'Deadbait', species: 10, logged: 9 },
     features: { shop_upgrades: !fresh, orders: !fresh, opens: !fresh, trophies: !fresh, deadbait: !fresh },
     orders: fresh ? [] : [

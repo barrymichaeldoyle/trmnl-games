@@ -7,6 +7,7 @@ import {
   catchMatches,
   entersOpen,
   evaluateGoal,
+  goalProgress,
   fillOrder,
   openPeriod,
   openTarget,
@@ -203,6 +204,14 @@ describe('goals and unlocks', () => {
     expect(reached.event?.summary).toBe('Goal reached: Land your first fish. Next: Sell a fish.')
     expect(reached.angler).toMatchObject({ gold: 10, goal: { rung: 1 }, counters: { goalsReached: 1 } })
     expect(evaluateGoal(content, reached.angler).event).toBeUndefined()
+  })
+
+  it('counts a counted goal for the progress bar and leaves one-step goals without one', () => {
+    const angler = { ...starterAngler(content, 0), logbook: logbookOf(['minnow', 'roach', 'rudd', 'perch', 'tench']), counters: { ...starterAngler(content, 0).counters, ordersFilled: 12 } }
+    expect(goalProgress(content, angler, { kind: 'species', at: 8 })).toEqual({ value: 5, target: 8 })
+    expect(goalProgress(content, angler, { kind: 'counter', counter: 'ordersFilled', at: 10 })).toEqual({ value: 10, target: 10 })
+    expect(goalProgress(content, angler, { kind: 'counter', counter: 'fishCaught', at: 1 })).toBeNull()
+    expect(goalProgress(content, angler, { kind: 'rod', at: 2 })).toBeNull()
   })
 
   it('forces a bite once the first goal has waited eight casts', () => {

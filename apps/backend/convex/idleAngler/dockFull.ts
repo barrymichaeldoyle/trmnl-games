@@ -1,4 +1,4 @@
-import { catchMatches, currentGoal, describeOrder, goalLine, orderDay, orderReward, runsAt, SEASON_NAME, seasonAt, seasonEndsAt, speciesLogged, teachingHint, unlocked, type CatchRecord, type IdleAnglerCatalog, type Order } from '@trmnl-games/idle-angler/sim'
+import { catchMatches, currentGoal, describeOrder, goalLine, goalProgress, orderDay, orderReward, runsAt, SEASON_NAME, seasonAt, seasonEndsAt, speciesLogged, teachingHint, unlocked, type CatchRecord, type IdleAnglerCatalog, type Order } from '@trmnl-games/idle-angler/sim'
 import { canFish, mountCost, nextPegs, pegsOf } from '@trmnl-games/idle-angler/sim/shop'
 import type { Doc } from '../_generated/dataModel'
 import { toAnglerState } from './adapter'
@@ -44,6 +44,8 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
       line: goalLine(content, state),
       coins: goal?.coins ?? 0,
       page: goal?.page ?? null,
+      // A counted goal's progress ("Log eight species" at 5 of 8) for the goal card's bar; null for one-step goals.
+      progress: goal ? goalProgress(content, state, goal.predicate) : null,
       rung: angler.goal?.rung ?? 0,
       of: content.goals.length,
       // v3: reached goals whose coins wait for the Claim button, oldest first.

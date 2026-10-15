@@ -40,7 +40,7 @@ export interface Dock {
 type Feature = 'shop_upgrades' | 'orders' | 'opens' | 'trophies' | 'deadbait'
 
 interface FullDock {
-  readonly goal: { orders?: boolean; line: string | null; coins: number; page: 'cooler' | 'shop' | 'dock' | 'log' | null; rung: number; of: number; unclaimed?: ReadonlyArray<{ id: string; title: string; coins: number }> }
+  readonly goal: { orders?: boolean; line: string | null; coins: number; page: 'cooler' | 'shop' | 'dock' | 'log' | null; progress?: { value: number; target: number } | null; rung: number; of: number; unclaimed?: ReadonlyArray<{ id: string; title: string; coins: number }> }
   readonly comingUp: { feature: Feature; name: string; species: number; logged: number } | null
   readonly features: Readonly<Record<Feature, boolean>>
   readonly orders: ReadonlyArray<{ id: string; kind: string; line: string; hint: string | null; count: number; catchIds: Id<'catches'>[]; reward: number | null; bonus: number }>

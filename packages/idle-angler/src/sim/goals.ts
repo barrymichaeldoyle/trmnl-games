@@ -69,6 +69,24 @@ export function currentGoal(content: IdleAnglerCatalog, angler: AnglerState): Go
   return angler.goal ? content.goals?.[angler.goal.rung] : undefined
 }
 
+/**
+ * How far along a counted goal is, for the companion's progress bar: "Log eight species" at 5 of 8. Null for a goal
+ * that is one step (buy, fish, catch once), where a bar would only ever read 0 of 1.
+ */
+export function goalProgress(content: IdleAnglerCatalog, angler: AnglerState, predicate: GoalPredicate): { value: number; target: number } | null {
+  const of = (value: number, target: number) => (target > 1 ? { value: Math.min(value, target), target } : null)
+  switch (predicate.kind) {
+    case 'counter':
+      return of(angler.counters[predicate.counter] ?? 0, predicate.at)
+    case 'species':
+      return of(speciesLogged(content, angler.logbook, predicate.water), predicate.at)
+    case 'seasons':
+      return of(popcount(angler.counters.seasonsFished ?? 0), predicate.at)
+    default:
+      return null
+  }
+}
+
 /** After the ladder: "Log 27 species", counting on with no coins. */
 export function goalLine(content: IdleAnglerCatalog, angler: AnglerState): string | null {
   if (!content.goals) return null

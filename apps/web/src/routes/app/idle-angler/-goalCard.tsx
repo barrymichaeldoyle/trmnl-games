@@ -4,7 +4,7 @@ import { captureAnalytics } from '../../../lib/analytics'
 import { Confetti, useBurst } from '../../../lib/confetti'
 import { GOAL_PAGE, type Dock } from '../../../lib/idleAngler'
 import { useIntent } from '../../../lib/intent'
-import { Button } from '../../../lib/ui'
+import { Button, Meter } from '../../../lib/ui'
 import { Coins } from './-coins'
 
 type FullDock = NonNullable<Dock['full']>
@@ -42,6 +42,7 @@ export function GoalCard({ full, fishmonger, notify }: { full: FullDock; fishmon
           {full.goal.coins > 0 ? <> · <Coins n={full.goal.coins} sign className="text-sm text-gold-ink" /></> : null}
         </p>
       )}
+      {!reward && full.goal.progress ? <Meter label="Progress" value={full.goal.progress.value} max={full.goal.progress.target} tone="gold" /> : null}
       {!reward && full.goal.orders && !fishmonger ? <p className="text-sm text-muted">The fishmonger turns up on the Cooler page when a catch fits one of his orders.</p> : null}
       {!reward && full.comingUp ? <p className="text-sm text-muted">Coming up: {full.comingUp.name}, at {full.comingUp.species} species ({full.comingUp.logged} so far).</p> : null}
     </section>
