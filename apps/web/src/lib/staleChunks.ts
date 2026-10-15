@@ -4,6 +4,17 @@ let reloading = false
 export const reloadingForNewBuild = () => reloading
 
 /**
+ * A route chunk or its stylesheet failed to load: almost always a tab still on the build a deploy just replaced
+ * (Chrome, Firefox and Safari word it differently). A deploy takes a while to reach every edge, so the one automatic
+ * reload can land on the old build again and the next click fails inside the reload guard. The browser keeps the
+ * failed import, so only a full reload recovers.
+ */
+export const isStaleChunkError = (error: unknown) => {
+  const message = error instanceof Error ? error.message : ''
+  return /^(Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed|Unable to preload CSS)/.test(message)
+}
+
+/**
  * A deploy replaces the hashed asset files, so a tab opened before it fails to
  * load the next route's chunk and the click silently does nothing. Vite reports
  * that as `vite:preloadError`; one full reload picks up the new build.

@@ -15,6 +15,10 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-15',
     changes: [
       {
+        title: 'A page that misses an update offers a reload',
+        body: 'If the site updates while you have it open and a page can’t load its new parts, the page now says a new version just went live and gives you a Reload button. It used to ask you to check your connection, and Try again could not fix it.',
+      },
+      {
         title: 'Your TRMNL fits at any display scale or text size',
         body: 'If you set a larger display scale or text size on your TRMNL, every layout now keeps inside the screen. Where the header gets too wide, the row of hearts and the XP bar leave their numbers, and smaller details like the stance and gear make way. A very long hero name shortens, and a full bag keeps its code on screen. At the normal size nothing changes.',
       },
