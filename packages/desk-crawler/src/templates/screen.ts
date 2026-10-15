@@ -94,7 +94,7 @@ const runeRuleV = `<div class="no-shrink flex flex--col flex--center-x gap--none
  * passer-by it is something to enter; the narrow portrait bars drop the word to fit.
  */
 const KEEPSAKE_LABEL = 'Keepsake code'
-const keepsakeFooter = `{% if desk_keepsake_code %}<span class="instance">${KEEPSAKE_LABEL} {{ desk_keepsake_code | escape }}</span>{% endif %}`
+const keepsakeFooter = `{% if desk_keepsake_code %}<span class="instance">${KEEPSAKE_LABEL.replace(' code', '<span data-keepsake-word="true"> code</span>')} {{ desk_keepsake_code | escape }}</span>{% endif %}`
 
 const titleBar = `
 <div class="title_bar">
@@ -109,7 +109,7 @@ const titleBar = `
  */
 const titleBarNarrow = titleBar
   .replace('<span class="title">', '<span class="title{% if desk_keepsake_code %} hidden lg:inline-block{% endif %}">')
-  .replace(`${KEEPSAKE_LABEL} {{`, 'Keepsake {{')
+  .replace('<span data-keepsake-word="true"> code</span>', '')
 
 
 type SceneField = 'scene_url' | 'scene_url_small' | 'scene_url_medium'
@@ -413,6 +413,72 @@ const fitStories = `<script>
       el.dataset.gaveWay.split(' ').filter(Boolean).forEach(cls => el.classList.add(cls));
       delete el.dataset.gaveWay;
     });
+    view.querySelectorAll('[data-revealed]').forEach(el => { el.classList.add('hidden'); delete el.dataset.revealed; });
+    // Hiding: an element shown by a breakpoint or bit-depth display class drops it too, since that outranks hidden.
+    const giveWay = el => {
+      const shownBy = Array.from(el.classList).filter(cls => /^(sm|md|lg|1bit|2bit|4bit):(block|flex|inline-block|inline|grid)$/.test(cls));
+      shownBy.forEach(cls => el.classList.remove(cls));
+      el.classList.add('hidden');
+      el.dataset.gaveWay = shownBy.join(' ') || ' ';
+    };
+    const restore = el => {
+      el.classList.remove('hidden');
+      el.dataset.gaveWay.split(' ').filter(Boolean).forEach(cls => el.classList.add(cls));
+      delete el.dataset.gaveWay;
+    };
+    // The giving way below is for a device display scale or text size (D165): at the normal scale every layout is
+    // fitted by hand, and a narrow slot may leave out its stories on purpose (a recap in their place).
+    const screenStyle = getComputedStyle(view);
+    const scaled = ['--modifier-scale', '--modifier-text-scale'].some(name => Math.abs((parseFloat(screenStyle.getPropertyValue(name)) || 1) - 1) > 0.01);
+    // Width (D165): at a large device scale parts of the header run past the view's edge or under a scannable code.
+    // Each part that does takes its narrower form in turn: the hearts and XP ticks leave their counts, attack and
+    // defense leave the name row, then the stance, the gear line, the recap's hours and facts, and single counters.
+    // If text still sits under the standing code, the code gives way; the urgent one never does.
+    const viewBox = view.getBoundingClientRect();
+    const codeBoxes = () => Array.from(view.querySelectorAll('[data-companion-qr] img, [data-home-qr] img')).filter(img => img.getClientRects().length > 0).map(img => img.getBoundingClientRect());
+    const crowded = (el, codes) => [el, ...el.querySelectorAll('span, img')].some(part => {
+      if (!part.getClientRects().length || part.closest('[data-companion-qr], [data-home-qr]')) return false;
+      const box = part.getBoundingClientRect();
+      if (!box.width || !box.height) return false;
+      if (box.right > viewBox.right + 1 || box.left < viewBox.left - 1) return true;
+      const marks = part.tagName === 'IMG' || (!part.querySelector('span') && part.innerText.trim() !== '');
+      return marks && codes.some(code => box.left < code.right - 1 && box.right > code.left + 1 && box.top < code.bottom - 1 && box.bottom > code.top + 1);
+    });
+    const narrowings = ['[data-hearts] > div:not([data-hp-count])', '[data-xp-ticks] > div:first-child', '[data-attack-defense]', '[data-stance]', '[data-gear-line]', '[data-recap-span]', '[data-recap-item]', '[data-counters] > *'];
+    if (scaled) narrowings.forEach(selector => {
+      const codes = codeBoxes();
+      view.querySelectorAll(selector).forEach(el => {
+        // Recap facts and single counters answer for themselves, other parts for their row; and anything in the header
+        // gives way while the HUD column (padded clear of a corner code) runs past the view's edge.
+        const own = el.matches('[data-recap-item], [data-counters] > *');
+        const row = own ? el : el.closest('[data-hearts], [data-xp-ticks], [data-name-row], [data-counters], [data-recap-items]') || el;
+        const hud = Array.from(view.querySelectorAll('[data-hud-block]')).find(block => block.getClientRects().length > 0);
+        const hudRight = hud ? Math.max(...[hud, ...hud.querySelectorAll('div, span, img')].filter(part => part.getClientRects().length > 0).map(part => part.getBoundingClientRect().right)) : 0;
+        const wide = hudRight > viewBox.right + 1 && !!el.closest('[data-hud-block], [data-hero-header]');
+        if (el.getClientRects().length && (wide || crowded(row, codes))) giveWay(el);
+      });
+    });
+    // A name still too wide (the longest names at 1.5x on the OG) swaps for its eight-character form.
+    if (scaled) view.querySelectorAll('[data-name-row]').forEach(row => {
+      const long = row.querySelector('[data-name-long]');
+      const short = row.querySelector('[data-name-short]');
+      if (!long || !short || !long.getClientRects().length || !crowded(row, codeBoxes())) return;
+      giveWay(long);
+      short.classList.remove('hidden');
+      short.dataset.revealed = 'true';
+    });
+    const codes = codeBoxes();
+    if (scaled && codes.length && Array.from(view.querySelectorAll('.layout span')).some(span => crowded(span, codes))) {
+      view.querySelectorAll('[data-home-qr], [data-companion-qr]:not([data-urgent])').forEach(code => { if (code.getClientRects().length) giveWay(code); });
+    }
+    // The title bar: a keepsake code the bar truncates takes the title's place, then drops the word "code".
+    const instance = footer.querySelector('.instance');
+    if (scaled && instance && instance.scrollWidth > instance.clientWidth + 1) {
+      const title = footer.querySelector('.title');
+      if (title) giveWay(title);
+      const word = instance.querySelector('[data-keepsake-word]');
+      if (word && instance.scrollWidth > instance.clientWidth + 1) giveWay(word);
+    }
     // Stat columns (D165): a text scale grows the numbers but not the cells' pixel widths, so give every cell of a
     // column the framework width class its widest change needs (the classes run to 128 pixels).
     ['xp', 'gold', 'hp'].forEach(kind => {
@@ -447,7 +513,7 @@ const fitStories = `<script>
     // Recap rows first, since the story budget subtracts their height: drop trailing facts past the row's line cap.
     view.querySelectorAll('[data-recap-items]').forEach(row => {
       if (!row.getClientRects().length) return;
-      const items = Array.from(row.querySelectorAll('[data-recap-item]'));
+      const items = Array.from(row.querySelectorAll('[data-recap-item]')).filter(item => !item.dataset.gaveWay);
       items.forEach(item => item.classList.remove('hidden'));
       const lines = Number(row.dataset.recapItems) || 1;
       const lineHeight = (items[0] || row.firstElementChild).getBoundingClientRect().height;
@@ -510,19 +576,7 @@ const fitStories = `<script>
     // things give way in turn until it fits: the board a row at a time from the end farther from the hero, the scene
     // (with the code hung in its corner), the rest of the board, the standing bag code (never the urgent one), the
     // gear line, the stance, the counters, the XP ticks and the HP counter. The name, status and hearts stay. Each
-    // stays hidden only if it gave a starved list more room, so nothing in another column goes for nothing. An
-    // X-only element drops its lg: display class too, since that outranks hidden.
-    const giveWay = el => {
-      const lg = Array.from(el.classList).filter(cls => /^lg:(block|flex|inline-block|grid)$/.test(cls));
-      lg.forEach(cls => el.classList.remove(cls));
-      el.classList.add('hidden');
-      el.dataset.gaveWay = lg.join(' ') || ' ';
-    };
-    const restore = el => {
-      el.classList.remove('hidden');
-      el.dataset.gaveWay.split(' ').filter(Boolean).forEach(cls => el.classList.add(cls));
-      delete el.dataset.gaveWay;
-    };
+    // stays hidden only if it gave a starved list more room, so nothing in another column goes for nothing.
     const room = lists => lists.reduce((sum, list) => sum + Number(list.dataset.storyBottom) - list.getBoundingClientRect().top + list.getBoundingClientRect().width, 0);
     // Hide the elements together; keep them hidden if that helped, and say whether it did.
     const tryGiving = els => {
@@ -537,7 +591,7 @@ const fitStories = `<script>
     };
     const shown = el => el.getClientRects().length > 0 && !starved.some(list => list.contains(el) || el.contains(list));
     let starved = fitLists();
-    while (starved.length) {
+    while (scaled && starved.length) {
       const rows = Array.from(view.querySelectorAll('[data-rank-row]')).filter(shown);
       if (rows.length < 2) break;
       const own = rows.findIndex(row => row.classList.contains('label--inverted'));
@@ -546,10 +600,31 @@ const fitStories = `<script>
       if (!tryGiving(rule && rule.getClientRects().length ? [drop, rule] : [drop])) break;
     }
     const stages = ['[data-scene-art]', '[data-rank-panel], [data-board-column="og"], [data-board-column="x"], [data-board-columns]', '[data-home-qr], [data-companion-qr]:not([data-urgent])', '[data-gear-line]', '[data-stance]', '[data-counters="2"], [data-counters="words"]', '[data-xp-ticks]', '[data-counters="true"]'];
-    for (const stage of stages) {
+    for (const stage of scaled ? stages : []) {
       if (!starved.length) break;
       Array.from(view.querySelectorAll(stage)).filter(shown).forEach(el => { if (starved.length) tryGiving([el.matches('[data-scene-art]') && el.closest('[data-scene-row]') || el]); });
     }
+    // The same parts give way, in the same order, while anything still runs below the title bar or into the recap
+    // ribbon (a header taller than its slot, beside stories that fit): each stays hidden only if the spill shrank. Last
+    // of all, the urgent code's caption and then the hearts may go too, so a bag-full panel keeps its code on the screen.
+    const ribbon = Array.from(view.querySelectorAll('[data-recap-ribbon]')).find(el => el.getClientRects().length > 0);
+    const spill = () => {
+      const floor = Math.min(footer.getBoundingClientRect().top, viewBox.bottom);
+      const ribbonTop = ribbon ? ribbon.getBoundingClientRect().top : Infinity;
+      return Array.from(layout.querySelectorAll('span, img, div')).filter(el => el.getClientRects().length > 0 && el.getBoundingClientRect().height > 0 && !el.closest('[data-story-list]') && !el.querySelector('[data-story-list]')).reduce((sum, el) => sum + Math.max(0, el.getBoundingClientRect().bottom - (ribbon && !ribbon.contains(el) ? Math.min(floor, ribbonTop) : floor)), 0);
+    };
+    let spilled = scaled ? spill() : 0;
+    for (const stage of ['[data-rank-row]', stages[0], '[data-recap-item]', '[data-recap-span]', ...stages.slice(1), '[data-bag-full] span', '[data-companion-qr][data-urgent] span', '[data-hearts]']) {
+      if (spilled <= 1) break;
+      Array.from(view.querySelectorAll(stage)).filter(el => el.getClientRects().length > 0).reverse().forEach(el => {
+        if (spilled <= 1 || el.classList.contains('label--inverted')) return;
+        const target = el.matches('[data-scene-art]') && el.closest('[data-scene-row]') || el;
+        giveWay(target);
+        const after = spill();
+        if (after < spilled - 0.5) spilled = after; else restore(target);
+      });
+    }
+    if (spilled < Infinity) fitLists();
   };
   window.addEventListener('trmnl:terminalize:stats', fit);
   window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
@@ -817,7 +892,7 @@ const fullPortrait = `
   {% else %}
   <div class="no-shrink stretch-x"><div class="flex flex--col lg:flex--row lg:flex--wrap flex--top flex--left lg:flex--between gap--small lg:gap--large" data-hero-header="true">
     <div class="no-shrink flex flex--col flex--left gap--xsmall">
-      ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1">{{ hero_name | truncate: 16 | escape }}, level {{ level }}</span>
+      ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 16 | escape }}, level {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, level {{ level }}</span>
       <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, level {{ level }}</span>`)}
       ${statusLine(2, 40)}
       ${heroCounters}
@@ -1066,7 +1141,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   <div class="relative no-shrink flex flex--row flex--top gap--medium stretch-x">
     <div class="grow w--min-0 flex flex--row flex--top flex--between gap--medium lg:gap--large" data-hero-header="true">
       <div class="no-shrink flex flex--col flex--left gap--xsmall">
-        ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1">{{ hero_name | truncate: 12 | escape }}, level {{ level }}</span>
+        ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 12 | escape }}, level {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, level {{ level }}</span>
         <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, level {{ level }}</span>`)}
         ${statusLine(2, 56)}
         ${heroCounters}

@@ -46,9 +46,17 @@ describe('keepsake footer', () => {
   it('shows the supplied device code in all four layouts and omits it from companion previews', async () => {
     for (const markup of Object.values(screenMarkup)) {
       const liquid = new Liquid({ timezoneOffset: 0 })
-      expect(await liquid.parseAndRender(markup, { ...payload(), desk_keepsake_code: '482 917' })).toContain('Keepsake code 482 917')
-      expect(await liquid.parseAndRender(markup, payload())).not.toContain('Keepsake')
+      // " code" is its own span, so the fitter can drop the word where a scaled bar would cut the digits (D165).
+      expect(await liquid.parseAndRender(markup, { ...payload(), desk_keepsake_code: '482 917' })).toContain('Keepsake<span data-keepsake-word="true"> code</span> 482 917')
+      expect(markupOnly(await liquid.parseAndRender(markup, payload()))).not.toContain('Keepsake')
     }
+  })
+
+  it('carries a hidden eight-character name the fitter swaps in when a scaled OG name runs off the screen (D165)', async () => {
+    const html = markupOnly(await new Liquid({ timezoneOffset: 0 }).parseAndRender(screenMarkup.markup, { ...payload(), hero_name: 'Maximilian_Wolfgangs' }))
+    // The landscape and portrait full layouts each pair their usual cut with the eight-character one.
+    expect(html.match(/data-name-(?:long|short)="true">[^<]*/g)).toEqual(['data-name-long="true">Maximilia..., level 5', 'data-name-short="true">Maxim..., level 5', 'data-name-long="true">Maximilian_Wo..., level 5', 'data-name-short="true">Maxim..., level 5'])
+    expect(html).toContain('<span class="title hidden w--min-0" data-name-short="true">')
   })
 
   it('uses the short label in the narrow side and quarter portrait bars', async () => {
@@ -110,7 +118,7 @@ describe('companion QR in every view', () => {
     expect(corner).toMatch(new RegExp(`class="lg:hidden absolute top--0 right--0" data-home-qr="corner"><img class="image" src="${base}/corner/2.png"`))
     expect(corner).toContain(`src="${base}/home/3.png"`)
     expect(standing).not.toContain('Your bag')
-    expect(standing).not.toContain('data-bag-full')
+    expect(markupOnly(standing)).not.toContain('data-bag-full')
     const full = await liquid.parseAndRender(screenMarkup.markup, { ...payload(), companion_qr_base: `${base}/bag`, home_qr_base: `${base}/app`, qr_base: `${base}/bag`, qr_label: 'Scan to open your bag', attention: 'Make room in your bag in the companion, then resume.' })
     expect(full).toContain('data-bag-full="true"')
     expect(full).toContain('Adventures are paused until you make room.')

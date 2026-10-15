@@ -11,6 +11,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-15',
+    changes: [
+      {
+        title: 'Your TRMNL fits at any display scale or text size',
+        body: 'If you set a larger display scale or text size on your TRMNL, every layout now keeps inside the screen. Where the header gets too wide, the row of hearts and the XP bar leave their numbers, and smaller details like the stance and gear make way. A very long hero name shortens, and a full bag keeps its code on screen. At the normal size nothing changes.',
+      },
+    ],
+  },
+  {
     date: '2026-10-14',
     changes: [
       {
