@@ -9,6 +9,8 @@ import { hudMarkUri } from '@trmnl-games/desk-crawler/art/hud'
 const MARK_NAMES: Record<string, string> = { [hudMarkUri('xp', 48, 32)]: 'xp', [hudMarkUri('coin', 24, 24)]: 'gold', [hudMarkUri('heartFull', 36, 32)]: 'hp', [hudMarkUri('potion', 24, 24)]: 'potion', [hudMarkUri('bag', 24, 24)]: 'bag' }
 const drawnChanges = (html: string) =>
   [...html.matchAll(/data-change="true">(?:<img class="[^"]*" src="([^"]*)" alt="">)?<span class="([^"]*)">([^<]*)<\/span><\/span>/g)].map(([, src, classes, text]) => ({ mark: src === undefined ? '' : MARK_NAMES[src] ?? '?', classes: classes!, text: text! }))
+/** The markup without the fitter script, whose selectors name the markers some tests expect to be absent. */
+const markupOnly = (html: string) => html.replace(/<script>[\s\S]*?<\/script>/g, '')
 const changeText = (html: string) => drawnChanges(html).map((c) => `${c.mark}:${c.text}`)
 
 const NOW = Date.UTC(2026, 9, 4, 8, 20)
@@ -160,7 +162,7 @@ describe('companion QR in every view', () => {
     for (const markup of Object.values(screenMarkup)) {
       const html = await liquid.parseAndRender(markup, payload())
       expect(html).not.toMatch(/src="\/\d\.png"/)
-      expect(html).not.toContain('data-companion-qr')
+      expect(markupOnly(html)).not.toContain('data-companion-qr')
     }
   })
 })
@@ -301,11 +303,11 @@ describe('full layout', () => {
     expect(standing).toContain('data-board-column="true"')
     expect(standing).toContain('data-rank-panel="true"')
     const action = await render({ ...payload(), companion_qr_base: `${base}/bag`, home_qr_base: `${base}/app`, qr_base: `${base}/bag`, qr_url: `${base}/bag/3.png`, qr_url_large: `${base}/bag/5.png`, qr_label: 'Scan to open your bag' })
-    expect(action).not.toContain('data-home-qr')
+    expect(markupOnly(action)).not.toContain('data-home-qr')
     // The stories and their ranking give way to the panel; the OG landscape keeps its board beside the scene.
-    expect(action).not.toContain('data-board-column="true"')
-    expect(action).not.toContain('data-rank-panel')
-    expect(action).toContain('data-board-column="og"')
+    expect(markupOnly(action)).not.toContain('data-board-column="true"')
+    expect(markupOnly(action)).not.toContain('data-rank-panel')
+    expect(markupOnly(action)).toContain('data-board-column="og"')
     expect(action).toContain('Bag full')
   })
 })
@@ -644,7 +646,7 @@ describe('HUD hearts and counters (D72)', () => {
     // Unlinked payloads carry no bag, so no count is drawn.
     expect(await render({ ...vars, bag_capacity: null })).not.toContain('data-bag-count')
     // D103: the stance follows the bag under its own gauge, in the full header and the narrow counter rows; none without stances.
-    expect(await render(vars)).not.toContain('data-stance')
+    expect(markupOnly(await render(vars))).not.toContain('data-stance')
     for (const markup of [screenMarkup.markup, screenMarkup.markup_half_vertical, screenMarkup.markup_half_horizontal]) {
       const stanced = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...vars, stance: 'bold', stance_name: 'Bold' })
       expect(stanced).toMatch(new RegExp(`data-stance="bold"[^>]*><img[^>]*src="${escape(hudMarkUri('stanceBold', 24, 24))}" alt=""><span class="label lg:title--small">Bold</span>`))

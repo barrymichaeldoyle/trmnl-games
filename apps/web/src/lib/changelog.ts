@@ -19,7 +19,7 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
       },
       {
         title: 'Stories on your TRMNL show icons for what changed',
-        body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. With a larger display scale or text size on a TRMNL X, the numbers no longer spill out of their columns, and a purchase no longer squeezes its story into a narrow column. At the largest sizes, the weekly board and then the scene make room so your latest story still shows.',
+        body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. With a larger display scale or text size on a TRMNL X, the numbers no longer spill out of their columns, and a purchase no longer squeezes its story into a narrow column. At the largest sizes, the weekly board, then the scene, then smaller details make room so your latest story still shows.',
       },
       {
         title: 'Elites can dig in',
