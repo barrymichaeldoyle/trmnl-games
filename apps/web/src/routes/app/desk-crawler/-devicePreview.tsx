@@ -134,7 +134,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
         </div>
         <p className="mt-3">
           {failed || payloadError
-            ? 'Preview unavailable, so this is the current scene instead.'
+            ? 'Preview unavailable. Showing the current scene.'
             : choice.layout === 'markup'
               ? 'A live render of your TRMNL screen.'
               : 'A live render of your TRMNL screen. Shaded areas are your other plugins.'}

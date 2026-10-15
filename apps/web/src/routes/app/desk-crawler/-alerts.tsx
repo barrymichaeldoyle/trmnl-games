@@ -29,7 +29,7 @@ const KINDS: readonly AlertKindCopy[] = [
  * Settings → Alerts (P33): off by default, the browser prompt only after a tap, a device list and two switches with
  * quiet hours. The device remains the surface that always works, and the card says so.
  */
-export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this phone when your hero needs you.', quietNote = 'A nap alert waits until quiet hours end; a merchant deal during quiet hours is skipped, because it ends before morning.' }: { notify: Notify; kinds?: readonly AlertKindCopy[]; intro?: string; quietNote?: string }) {
+export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this phone when your hero needs you.', quietNote = 'During quiet hours, nap alerts wait until morning and merchant deals are skipped.' }: { notify: Notify; kinds?: readonly AlertKindCopy[]; intro?: string; quietNote?: string }) {
   const { data: alerts } = useQuery(convexQuery(api.alerts.mine, {}))
   const subscribe = useIntent(api.alerts.subscribe, { onFeedback: notify })
   const save = useIntent(api.alerts.setPreferences, {

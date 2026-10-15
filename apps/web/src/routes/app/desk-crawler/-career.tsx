@@ -74,7 +74,7 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
       ) : goal ? (
         <>
           <p className="font-display text-2xl leading-tight font-bold">{goal.title}</p>
-          <p className="text-sm">{met ? 'Done. Your hero marks it off on its next adventure, within fifteen minutes, and the reward waits here.' : goal.blurb}</p>
+          <p className="text-sm">{met ? 'Done. Your hero marks it off within 15 minutes, and the reward waits here.' : goal.blurb}</p>
           <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
             <span className="text-gold-ink">+{goal.gold.toLocaleString()} gold</span>
             {counted ? <span className="text-muted">{Math.min(goal.value, goal.target).toLocaleString()} of {goal.target.toLocaleString()}</span> : null}

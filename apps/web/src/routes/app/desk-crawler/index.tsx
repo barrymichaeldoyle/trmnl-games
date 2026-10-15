@@ -398,7 +398,7 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
       <ConfirmSheet open title={`Walk away from the elite ${standoff.name}?`} confirmLabel="Walk away" busyLabel="Walking away…" cancelLabel="Keep at it" pending={intents.walkAway.pending} {...common} onConfirm={async () => { if (await intents.walkAway.run({}, `Walked away from the elite ${standoff.name}.`)) close() }}>
         <Consequences>
           <li>It leaves now, with {standoff.hpPct}% of its HP left, and its reward goes with it.</li>
-          <li>Your hero keeps everything it has, and the next adventure is an ordinary one. This can't be undone.</li>
+          <li>Your hero keeps everything, and the next adventure is an ordinary one. This can't be undone.</li>
         </Consequences>
       </ConfirmSheet>
     )

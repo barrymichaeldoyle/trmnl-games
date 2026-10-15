@@ -69,7 +69,7 @@ export function FieldNotes({ lore, level }: { lore: LoreView; level: number }) {
           <SectionTitle id="notes-title" glyph="quest" as="h1">Field notes</SectionTitle>
           <p className="text-sm text-muted tabular-nums">{lore.open} of {lore.total} notes</p>
         </div>
-        <p className="text-sm">What your hero has written down about the building. A floor's note opens the first time your hero stands on it; a monster's note opens with the first win over it. Notes don't affect play.</p>
+        <p className="text-sm">Your hero's notes on each floor and monster. A floor's note opens on the first visit, a monster's on the first win. Notes don't affect play.</p>
       </section>
 
       {lore.biomes.map((biome) => {

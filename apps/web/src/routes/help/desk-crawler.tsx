@@ -247,7 +247,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <p>Your hero keeps an office to-do list of three small tasks, such as “Defeat 4 Paper Imps”, “Find 2 pieces of gear” or “Explore the Server Room for 16 adventures”.{arrives('todo')} It works through them while exploring, and the Hero page shows each task's progress. When a task is done, your screen says “Ticked off” and your hero gets a little gold: {TASK_PAY} depending on the floor. Tasks give no XP, so they don't affect rankings.</p>
           <ul>
             <li>Every morning at {STANDUP} your TRMNL's local time, the stand-up gives new tasks for the ones that are done. Your screen lists them.</li>
-            <li>Tasks never expire. A task your hero can't get on with is swapped automatically after two stand-ups.</li>
+            <li>Tasks never expire. A stuck task is swapped automatically after two stand-ups.</li>
             <li>At least two of the three tasks can be done where your hero is. At most one asks for a trip to another area, if you want to send your hero there.</li>
             <li>Once between stand-ups you can swap one unfinished task for a different one on the Hero page.</li>
           </ul>

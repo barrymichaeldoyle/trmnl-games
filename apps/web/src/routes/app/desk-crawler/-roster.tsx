@@ -49,9 +49,9 @@ const clock = (at: number) => new Date(at).toLocaleString(undefined, { weekday: 
 /** How the roster works, in three lines: shown above the heroes and in the recruit sheet. */
 const RosterRules = () => (
   <Consequences>
-    <li>One hero adventures at a time. The others wait exactly where you left them, with no adventures and no catch-up.</li>
+    <li>One hero adventures at a time. The others wait where you left them and don't catch up.</li>
     <li>Each hero has its own gear, gold, potions and goals. Achievements belong to you, whichever hero earns them.</li>
-    <li>You can switch once a day. Switching straight back within ten minutes does not use it up.</li>
+    <li>You can switch once a day. Switching back within ten minutes is free.</li>
   </Consequences>
 )
 
@@ -128,9 +128,9 @@ function ParkedHero({ hero, current, roster, notify }: { hero: RosterView['heroe
       </div>
       <ConfirmSheet open={asking} title={`Switch to ${hero.name}?`} confirmLabel={`Switch to ${hero.name}`} busyLabel="Switching…" cancelLabel={`Keep ${current?.name ?? 'your hero'}`} pending={switchHero.pending} onClose={() => setAsking(false)} onConfirm={() => { setAsking(false); void switchHero.run({ heroId: hero.id as never }, `${hero.name} takes the desk from the next adventure.`) }}>
         <Consequences>
-          <li>{current?.name ?? 'Your hero'} stops adventuring and waits exactly where they are.</li>
-          <li>{hero.name} picks up from the next adventure, with nothing lost while they waited.</li>
-          {undo ? <li>Switching straight back does not use up the day's switch.</li> : <li>This is the day's switch; you can undo it within ten minutes.</li>}
+          <li>{current?.name ?? 'Your hero'} stops adventuring and waits where they are.</li>
+          <li>{hero.name} picks up from the next adventure.</li>
+          {undo ? <li>Switching back is free.</li> : <li>This is the day's switch; you can undo it within ten minutes.</li>}
         </Consequences>
       </ConfirmSheet>
     </HeroRow>

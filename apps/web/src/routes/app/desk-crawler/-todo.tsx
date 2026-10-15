@@ -96,7 +96,7 @@ export function TodoCard({ todo, biomes, healthy, notify }: { todo: TodoView; bi
               <li>You get <strong>one swap between stand-ups</strong>. The next one comes with the {clock(todo.refillHour)} stand-up.</li>
               <li>The new task is a different kind, picked at random{askingTask.local ? '' : ', and it can be done where your hero is'}.</li>
               {askingTask.progress > 0 ? <li>Progress on this task ({askingTask.progress.toLocaleString()}/{askingTask.target.toLocaleString()}) is lost.</li> : null}
-              <li>A task your hero can't get on with is swapped automatically after two stand-ups.</li>
+              <li>A stuck task is swapped automatically after two stand-ups.</li>
             </Consequences>
           </>
         ) : null}
