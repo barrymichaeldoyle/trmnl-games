@@ -79,7 +79,7 @@ describe('story translation (D169)', () => {
 
   it.each(['v1', 'v9', 'v14', 'v19', 'v24'] as CatalogId[])('translates every story the %s simulator writes', (version) => {
     const summaries = new Set<string>()
-    simulateCohort(POLICIES[0]!, 4, 6, catalogs[version], undefined, undefined, 'warrior', (_hero, _tick, _before, result) => {
+    simulateCohort(POLICIES[0]!, 6, 25, catalogs[version], undefined, undefined, 'warrior', (_hero, _tick, _before, result) => {
       if (result.event) summaries.add(result.event.summary)
       for (const extra of result.extraEvents ?? []) summaries.add(extra.summary)
     })

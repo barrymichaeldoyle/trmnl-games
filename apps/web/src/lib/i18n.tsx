@@ -51,3 +51,10 @@ export function readLocaleCookie(): Locale | null {
 /** A date in the reader's language ("16 October", "16 octobre", "16. Oktober"). */
 export const formatDate = (locale: Locale, at: number | Date, options: Intl.DateTimeFormatOptions) => new Date(at).toLocaleDateString(INTL_TAG[locale], options)
 
+
+
+/** A whole number in the reader's language ("12,345", "12 345", "12.345"). */
+export const formatNumber = (locale: Locale, value: number) => value.toLocaleString(INTL_TAG[locale], { maximumFractionDigits: 0 })
+
+/** A clock time in the reader's language, in their browser's zone. */
+export const formatTime = (locale: Locale, at: number | Date) => new Date(at).toLocaleTimeString(INTL_TAG[locale], { hour: '2-digit', minute: '2-digit' })

@@ -95,6 +95,15 @@ export const de: DeDictionary = {
     "Thrifty": "sparsam",
   },
   text: {
+    // D169: the unlock labels (career.ts FEATURE_LABEL), shown in "Unlocked:" lines and the Career page.
+    "the to-do list": "die To-do-Liste",
+    "stances": "Haltungen",
+    "office decisions": "Büro-Entscheidungen",
+    "the wandering merchant": "der fahrende Händler",
+    "desk raids": "Schreibtisch-Überfälle",
+    "meetings with coworkers": "Begegnungen mit Kollegen",
+    "the workbench": "die Werkbank",
+    "a second hero": "ein zweiter Held",
     "Defeated a {monster} by the printer. +{xp} XP, +{gold} gold.": "Am Drucker {einen:monster} besiegt.",
     "A {monster} fell behind the cubicle wall. +{xp} XP, +{gold} gold.": "{Ein:monster} ist hinter der Trennwand gefallen.",
     "Filed a {monster} under 'defeated'. +{xp} XP, +{gold} gold.": "{Einen:monster} unter „besiegt“ abgelegt.",

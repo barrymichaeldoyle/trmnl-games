@@ -4,6 +4,8 @@ import { logPresentation, type LogDeltas } from '@trmnl-games/desk-crawler/log'
 import { PixelIcon } from './-pixelIcon'
 import { KIND_BADGE } from '../../../lib/palette'
 import { Glyph, type GlyphName } from '../../../lib/glyphs'
+import { formatTime, useLocale } from '../../../lib/i18n'
+import type { PresentationOptions } from '@trmnl-games/desk-crawler/log'
 
 /**
  * Companion commands all log as `system`; their own glyph says which command it was, read from the summary the backend
@@ -28,10 +30,13 @@ const glyphFor = (entry: { kind: string; summary: string }): GlyphName =>
   entry.kind === 'system' ? (SYSTEM_GLYPHS.find(([pattern]) => pattern.test(entry.summary))?.[1] ?? 'system') : (entry.kind as GlyphName)
 
 /** Change chips take their stat's colour; losses keep the stat colour too, the sign carries direction. */
-export const changeTone = (part: string) => (/\bXP\b/.test(part) ? 'text-xp-ink' : /\bHP\b/.test(part) ? 'text-hp-ink' : /\bgold\b/.test(part) ? 'text-gold-ink' : /potion/i.test(part) ? 'text-rare-ink' : 'text-muted')
+export const changeTone = (part: string) => (/\bXP\b/.test(part) ? 'text-xp-ink' : /\b(?:HP|PV|LP)\b/.test(part) ? 'text-hp-ink' : /\b(?:gold|or|Gold)\b/.test(part) ? 'text-gold-ink' : /potion|trank|tränke/i.test(part) ? 'text-rare-ink' : 'text-muted')
 
-export function LogStory({ entry }: { entry: { at: number; summary: string; kind: string; deltas: LogDeltas } }) {
-  const { narrative, changes } = logPresentation(entry)
+/** `story` tells it in the reader's language (D169); the page passes the hero's gender with it for French. */
+export function LogStory({ entry, story: given }: { entry: { at: number; summary: string; kind: string; deltas: LogDeltas }; story?: PresentationOptions }) {
+  const locale = useLocale()
+  const story = given ?? { locale }
+  const { narrative, changes } = logPresentation(entry, story)
   return (
     <div className="min-w-0 space-y-1">
       <div className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3">
@@ -40,7 +45,7 @@ export function LogStory({ entry }: { entry: { at: number; summary: string; kind
       </div>
       <div className="flex items-baseline gap-x-3 pl-11">
         <time className="shrink-0 whitespace-nowrap text-xs tabular-nums text-muted" dateTime={new Date(entry.at).toISOString()}>
-          {new Date(entry.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+          {formatTime(story.locale ?? 'en', entry.at)}
         </time>
         {changes.length > 0 ? (
           <ul className="flex min-w-0 flex-wrap gap-x-3 gap-y-1 text-xs font-semibold tabular-nums">

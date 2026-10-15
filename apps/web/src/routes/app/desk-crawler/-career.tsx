@@ -7,6 +7,9 @@ import { LocalTime } from '../../../lib/localTime'
 import { captureAnalytics } from '../../../lib/analytics'
 import { Confetti, useBurst } from '../../../lib/confetti'
 import { PixelIcon } from './-pixelIcon'
+import { formatNumber, useLocale, useT } from '../../../lib/i18n'
+import { useContent } from '../../../lib/useContent'
+import { dcCareerMessages } from '../../../i18n/dcCareer'
 
 /** heroes.mine's `career` (P35): the current rung with its progress, and every rung's state for the Career page. */
 export type CareerView = {
@@ -21,18 +24,12 @@ export type CareerView = {
 /** heroes.mine's `unlocks` (P35): each gated feature, its level and whether this hero has it. */
 export type UnlockView = Array<{ feature: 'todo' | 'meetings' | 'workbench' | 'stances' | 'choices' | 'merchant' | 'raids'; label: string; level: number; unlocked: boolean }>
 
-/** " The Server Room opens at level 4, the Cafeteria Depths at level 8, the Archive at level 12 and the Parking Garage at level 16." */
-function floorsLine(floors: ReadonlyArray<{ name: string; unlockLevel: number }>): string {
-  const later = floors.filter((floor) => floor.unlockLevel > 1).map((floor, i) => `${i === 0 ? 'The' : 'the'} ${floor.name} at level ${floor.unlockLevel}`)
-  if (later.length === 0) return ''
-  const list = later.length === 1 ? later[0]! : `${later.slice(0, -1).join(', ')} and ${later.at(-1)}`
-  return ` ${list.replace(/^The (.*?) at level (\d+)/, 'The $1 opens at level $2')}.`
-}
 
 /** How many rungs the Career page previews past the current one; the rest stay a "?" like unearned achievements. */
 const PREVIEW = 2
 
-const reachedOn = (date: Date) => date.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+const reachedOn = (tag: string) => (date: Date) => date.toLocaleDateString(tag, { day: 'numeric', month: 'short' })
+const TAGS = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' } as const
 
 /**
  * The hero page's goal card (P35, D129): rewards waiting to be claimed come first, one at a time with a Claim button
@@ -50,82 +47,76 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
   const met = goal !== null && goal.value >= goal.target
   const pct = goal === null ? 0 : Math.max(0, Math.min(100, Math.round((Math.min(goal.value, goal.target) * 100) / Math.max(1, goal.target))))
   const reward = waiting[0]
+  const t = useT(dcCareerMessages)
+  const c = useContent()
+  const locale = useLocale()
+  const n = (value: number) => formatNumber(locale, value)
   return (
     <section aria-labelledby="goal-title" className={`window relative flex min-w-0 flex-col gap-2 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5 ${reward ? 'goal-ready' : ''}`}>
       {burst > 0 ? <Confetti key={burst} /> : null}
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <SectionTitle id="goal-title" glyph="career">{reward ? 'Goal reached!' : 'Goal'}</SectionTitle>
+        <SectionTitle id="goal-title" glyph="career">{reward ? t.goalReached : t.goal}</SectionTitle>
         <Link to="/app/desk-crawler/career" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
-          Career{career.rung > 0 ? ` · ${Math.min(career.rung, career.total)} of ${career.total}` : ''}
+          {t.career}{career.rung > 0 ? t.rungOf(Math.min(career.rung, career.total), career.total) : ''}
         </Link>
       </div>
       {reward ? (
         <>
-          <p className="font-display text-2xl leading-tight font-bold">{reward.title}</p>
-          <p className="text-sm">Your hero got there{reward.at !== null ? <> on <LocalTime at={reward.at} format={reachedOn} /></> : ''}. The reward is yours to collect.</p>
+          <p className="font-display text-2xl leading-tight font-bold">{c.text(reward.title)}</p>
+          <p className="text-sm">{t.gotThereOn}{reward.at !== null ? <>{t.on}<LocalTime at={reward.at} format={reachedOn(TAGS[locale])} /></> : ''}{t.rewardYours}</p>
           <div className="flex flex-wrap items-center gap-3">
-            <Button className="w-full sm:w-auto" icon="coin" pending={claim.pending} busyLabel="Claiming…" onClick={async () => { if (await claim.run({ rungId: reward.id }, `+${reward.gold} gold claimed.`)) { fireBurst(); captureAnalytics('goal claimed', { rung: reward.id }) } }}>
-              Claim +{reward.gold.toLocaleString()} gold
+            <Button className="w-full sm:w-auto" icon="coin" pending={claim.pending} busyLabel={t.claiming} onClick={async () => { if (await claim.run({ rungId: reward.id }, t.claimed(n(reward.gold)))) { fireBurst(); captureAnalytics('goal claimed', { rung: reward.id }) } }}>
+              {t.claim(n(reward.gold))}
             </Button>
-            {waiting.length > 1 ? <span className="text-xs font-semibold text-muted">{waiting.length - 1} more waiting</span> : null}
+            {waiting.length > 1 ? <span className="text-xs font-semibold text-muted">{t.moreWaiting(waiting.length - 1)}</span> : null}
           </div>
-          {goal ? <p className="border-t-2 border-dashed border-rule pt-2 text-xs font-semibold text-muted">Next goal: {goal.title}</p> : null}
+          {goal ? <p className="border-t-2 border-dashed border-rule pt-2 text-xs font-semibold text-muted">{t.nextGoal(goal.title)}</p> : null}
         </>
       ) : goal ? (
         <>
-          <p className="font-display text-2xl leading-tight font-bold">{goal.title}</p>
-          <p className="text-sm">{met ? 'Done. Your hero marks it off within 15 minutes, and the reward waits here.' : goal.blurb}</p>
+          <p className="font-display text-2xl leading-tight font-bold">{c.text(goal.title)}</p>
+          <p className="text-sm">{met ? t.marked : c.text(goal.blurb)}</p>
           <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
-            <span className="text-gold-ink">+{goal.gold.toLocaleString()} gold</span>
-            {counted ? <span className="text-muted">{Math.min(goal.value, goal.target).toLocaleString()} of {goal.target.toLocaleString()}</span> : null}
-            {met ? null : goal.companion ? <span className="text-muted">Done here in the companion</span> : <span className="text-muted">Your hero does this while adventuring</span>}
+            <span className="text-gold-ink">{t.gold(n(goal.gold))}</span>
+            {counted ? <span className="text-muted">{t.of(n(Math.min(goal.value, goal.target)), n(goal.target))}</span> : null}
+            {met ? null : goal.companion ? <span className="text-muted">{t.doneHere}</span> : <span className="text-muted">{t.whileAdventuring}</span>}
           </p>
           {counted ? (
-            <div role="meter" aria-label="Progress" aria-valuemin={0} aria-valuemax={goal.target} aria-valuenow={Math.min(goal.value, goal.target)} className="h-3 overflow-hidden border-2 border-night bg-night">
+            <div role="meter" aria-label={t.progress} aria-valuemin={0} aria-valuemax={goal.target} aria-valuenow={Math.min(goal.value, goal.target)} className="h-3 overflow-hidden border-2 border-night bg-night">
               <div className="h-full bg-gold shadow-[inset_0_2px_0_rgb(255_255_255/0.35)]" style={{ width: `${pct}%` }} />
             </div>
           ) : null}
         </>
       ) : (
         <>
-          <p className="font-display text-2xl leading-tight font-bold">Reach level {level + 1}</p>
-          <p className="text-sm">You've reached every goal for now. From here, each new level is a goal.</p>
+          <p className="font-display text-2xl leading-tight font-bold">{t.reachLevel(level + 1)}</p>
+          <p className="text-sm">{t.everyGoal}</p>
         </>
       )}
     </section>
   )
 }
 
-/** D157: what each feature does, in one line for the Hero page's "Coming up". */
-const FEATURE_BLURB: Record<UnlockView[number]['feature'] | 'roster', string> = {
-  todo: 'Three small jobs a day from the morning stand-up. Your hero works through them for a little gold.',
-  meetings: 'Your hero bumps into other players’ heroes around the office.',
-  workbench: 'Salvage spare gear for materials, then spend them with gold to improve what your hero wears.',
-  stances: 'Cautious, Balanced or Bold: how far your hero pushes before it rests.',
-  choices: 'Now and then the office asks your hero to decide something, and you pick the answer here.',
-  merchant: 'A merchant passes through now and then, selling potions and bigger bags.',
-  raids: 'Your hero raids other players’ desks for gold, and they can raid yours.',
-  roster: 'A Rogue joins your roster. One hero adventures at a time, and you choose which.',
-}
 
 /**
  * D157: the one locked feature that opens soonest, as a quiet line where the locked cards used to stack, with a link to
  * the Career page's full list. Nothing locked is drawn as a card, so nothing locked looks like something to press.
  */
 export function ComingUp({ unlocks, roster }: { unlocks?: UnlockView | null; roster?: { unlockLevel: number; open: boolean } | null }) {
+  const t = useT(dcCareerMessages)
   const locked = [
-    ...(unlocks ?? []).filter((entry) => !entry.unlocked).map((entry) => ({ feature: entry.feature as keyof typeof FEATURE_BLURB, label: entry.label, level: entry.level })),
+    ...(unlocks ?? []).filter((entry) => !entry.unlocked).map((entry) => ({ feature: entry.feature as keyof typeof t.features, label: entry.label, level: entry.level })),
     ...(roster && !roster.open ? [{ feature: 'roster' as const, label: 'a second hero', level: roster.unlockLevel }] : []),
   ].sort((a, b) => a.level - b.level)
   const next = locked[0]
   if (!next) return null
   return (
-    <section aria-label="Coming up" className="flex min-w-0 items-start gap-3 text-sm">
+    <section aria-label={t.comingUp} className="flex min-w-0 items-start gap-3 text-sm">
       <Glyph name="door" className="mt-0.5 text-sky-ink" />
       <p className="min-w-0">
-        <span className="font-semibold">At level {next.level}: {next.label.charAt(0).toUpperCase() + next.label.slice(1)}.</span>{' '}
-        <span className="text-muted">{FEATURE_BLURB[next.feature]}</span>{' '}
-        <Link to="/app/desk-crawler/career" hash="unlocks-title" className="font-semibold underline underline-offset-4">What opens later</Link>
+        <span className="font-semibold">{t.atLevel(next.level, next.label)}</span>{' '}
+        <span className="text-muted">{t.features[next.feature]}</span>{' '}
+        <Link to="/app/desk-crawler/career" hash="unlocks-title" className="font-semibold underline underline-offset-4">{t.whatOpensLater}</Link>
       </p>
     </section>
   )
@@ -138,14 +129,17 @@ export function ComingUp({ unlocks, roster }: { unlocks?: UnlockView | null; ros
  */
 export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerView; unlocks: UnlockView | null; floors?: ReadonlyArray<{ name: string; unlockLevel: number }> }) {
   const reached = career.rungs.filter((rung) => rung.state === 'done').length
+  const t = useT(dcCareerMessages)
+  const c = useContent()
+  const locale = useLocale()
   return (
     <div className="flex min-w-0 flex-col gap-8">
       <section aria-labelledby="career-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-          <SectionTitle id="career-title" glyph="career" as="h1">Career</SectionTitle>
-          <p className="text-sm text-muted">{reached} of {career.total} reached</p>
+          <SectionTitle id="career-title" glyph="career" as="h1">{t.career}</SectionTitle>
+          <p className="text-sm text-muted">{t.reached(reached, career.total)}</p>
         </div>
-        <p className="text-sm">One goal at a time. Your hero reaches some by adventuring; the rest are done here in the companion. Each pays a little gold.</p>
+        <p className="text-sm">{t.ladderIntro}</p>
         <ol className="flex flex-col">
           {career.rungs.map((rung, index) => {
             const hidden = rung.state === 'ahead' && index > career.rung + PREVIEW
@@ -155,18 +149,18 @@ export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerV
                   {rung.state === 'done' ? <PixelIcon kind="todo" plain /> : <span className="hud text-hud-sm">{hidden ? '?' : index + 1}</span>}
                 </span>
                 {hidden ? (
-                  <p className="pt-1.5 text-sm"><span className="sr-only">Rung {index + 1}: </span>Not yet</p>
+                  <p className="pt-1.5 text-sm"><span className="sr-only">{t.rung(index + 1)}</span>{t.notYet}</p>
                 ) : (
                   <div className="flex min-w-0 flex-col gap-1">
                     <p className="pt-1 font-semibold">
-                      <span className="sr-only">{rung.state === 'done' ? 'Reached: ' : rung.state === 'current' ? 'Current goal: ' : 'Ahead: '}</span>
-                      {rung.title}
+                      <span className="sr-only">{rung.state === 'done' ? t.reachedLabel : rung.state === 'current' ? t.currentGoal : t.ahead}</span>
+                      {c.text(rung.title)}
                     </p>
-                    <p className="text-sm">{rung.blurb}</p>
+                    <p className="text-sm">{c.text(rung.blurb)}</p>
                     <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
-                      <span className={rung.state === 'ahead' ? '' : 'text-gold-ink'}>+{rung.gold.toLocaleString()} gold</span>
-                      {rung.companion ? <span className="text-muted">In the companion</span> : null}
-                      {rung.state === 'done' ? rung.reachedAt !== null ? <LocalTime at={rung.reachedAt} format={reachedOn} className="text-xp-ink" /> : <span className="text-muted">Done before the ladder</span> : null}
+                      <span className={rung.state === 'ahead' ? '' : 'text-gold-ink'}>{t.gold(formatNumber(locale, rung.gold))}</span>
+                      {rung.companion ? <span className="text-muted">{t.inCompanion}</span> : null}
+                      {rung.state === 'done' ? rung.reachedAt !== null ? <LocalTime at={rung.reachedAt} format={reachedOn(TAGS[locale])} className="text-xp-ink" /> : <span className="text-muted">{t.beforeLadder}</span> : null}
                     </p>
                   </div>
                 )}
@@ -178,15 +172,15 @@ export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerV
 
       {unlocks ? (
         <section aria-labelledby="unlocks-title" className="flex min-w-0 flex-col gap-3">
-          <SectionTitle id="unlocks-title" glyph="door" tone="text-sky-ink">What opens when</SectionTitle>
-          <p className="text-sm text-muted">Features arrive by level, whether or not you visit.{floorsLine(floors)}</p>
+          <SectionTitle id="unlocks-title" glyph="door" tone="text-sky-ink">{t.whatOpensWhen}</SectionTitle>
+          <p className="text-sm text-muted">{t.featuresArrive}{t.floorsLine(floors)}</p>
           <ul className="grid gap-2 sm:grid-cols-2">
             {unlocks.map((entry) => (
               <li key={entry.feature} className={`flex items-center gap-3 border-[3px] px-3 py-2 ${entry.unlocked ? 'border-night bg-panel' : 'border-dashed border-faint text-muted'}`}>
                 <span aria-hidden="true" className={`hud grid size-7 shrink-0 place-items-center border-[3px] text-hud-sm ${entry.unlocked ? 'border-night bg-night text-gold-ink' : 'border-dashed border-faint'}`}>{entry.level}</span>
                 <span className="flex min-w-0 flex-col">
-                  <span className="font-semibold capitalize-first">{entry.label.charAt(0).toUpperCase() + entry.label.slice(1)}</span>
-                  <span className="text-sm">{entry.unlocked ? 'Unlocked' : `Unlocks at level ${entry.level}`}</span>
+                  <span className="font-semibold capitalize-first">{c.text(entry.label).charAt(0).toUpperCase() + c.text(entry.label).slice(1)}</span>
+                  <span className="text-sm">{entry.unlocked ? t.unlocked : t.unlocksAt(entry.level)}</span>
                 </span>
               </li>
             ))}

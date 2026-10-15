@@ -13,10 +13,12 @@ import { InstallLink } from '../../lib/deskCrawlerPitch'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import { gamesQuery } from '../../lib/gameAccess'
+import { messagesFor, useT } from '../../lib/i18n'
+import { dcShellMessages } from '../../i18n/dcShell'
 
 /** Companion shell: auth gate, setup states and mobile-first navigation (companion.md). */
 export const Route = createFileRoute('/app/desk-crawler')({
-  head: () => seo({ title: 'Companion', index: false }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcShellMessages, locale).title, index: false, locale }),
   // The listing feeds the header's game switcher, so it is in the server render too.
   loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), gamesQuery),
   component: AppShell,
@@ -27,12 +29,12 @@ export const Route = createFileRoute('/app/desk-crawler')({
  * everything else behind More. Five share a phone's width, so the last three take short names.
  */
 const NAV = [
-  { to: '/app/desk-crawler', label: 'Hero', glyph: 'hero' },
-  { to: '/app/desk-crawler/inventory', label: 'Bag', glyph: 'bag' },
-  { to: '/app/desk-crawler/log', label: 'Log', glyph: 'quest' },
-  { to: '/app/desk-crawler/leaderboard', label: 'Ranks', glyph: 'trophy' },
-  { to: '/app/desk-crawler/settings', label: 'More', glyph: 'cog' },
-] as const satisfies ReadonlyArray<{ to: string; label: string; glyph: GlyphName }>
+  { to: '/app/desk-crawler', label: 'hero', glyph: 'hero' },
+  { to: '/app/desk-crawler/inventory', label: 'bag', glyph: 'bag' },
+  { to: '/app/desk-crawler/log', label: 'log', glyph: 'quest' },
+  { to: '/app/desk-crawler/leaderboard', label: 'ranks', glyph: 'trophy' },
+  { to: '/app/desk-crawler/settings', label: 'more', glyph: 'cog' },
+] as const satisfies ReadonlyArray<{ to: string; label: keyof (typeof dcShellMessages)['en']['nav']; glyph: GlyphName }>
 
 function AppShell() {
   return <SignedInApp />
@@ -51,21 +53,22 @@ function SignedInApp() {
   // P33: an alert's tap lands here with ?alert=<kind>; counted once identity is known.
   useAlertOpened(!isPending)
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
-  if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label="Loading Desk Crawler…" /></main>
-  if (me?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title="Removing Desk Crawler progress"><p>Your account stays available. You can start again from TRMNL once removal finishes.</p></Card></main>
+  const t = useT(dcShellMessages)
+  if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label={t.loading} /></main>
+  if (me?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title={t.removingTitle}><p>{t.removingBody}</p></Card></main>
   if (!me?.hero) {
     return (
       <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
-        <Card title={me?.hasActiveInstallation ? 'Reconnect Desk Crawler' : 'Start on TRMNL'}>
+        <Card title={me?.hasActiveInstallation ? t.reconnectTitle : t.startTitle}>
           {me?.hasActiveInstallation ? <>
-            <p>Your TRMNL installation is connected, but this account has no hero. Start a fresh installation of Desk Crawler in TRMNL, connect it using this account, choose a hero name, then click Save in TRMNL.</p>
-            <p className="mt-3 text-sm text-muted">Scanning this QR opens the companion. Creating a hero starts from the plugin’s Install button in TRMNL.</p>
+            <p>{t.reconnectBody}</p>
+            <p className="mt-3 text-sm text-muted">{t.reconnectQr}</p>
           </> : <>
-            <p>Install Desk Crawler from the TRMNL marketplace, connect it here, then click Save. Your hero sets out from there.</p>
+            <p>{t.startBody}</p>
             <InstallLink place="start card" className="mt-3" />
           </>}
           <div className="mt-3"><SwitchAccount returnTo="/app/desk-crawler" /></div>
-          <Link to="/help/desk-crawler" onClick={() => captureAnalytics('setup help opened', { setup_state: setupState })} className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">How to connect Desk Crawler</Link>
+          <Link to="/help/desk-crawler" onClick={() => captureAnalytics('setup help opened', { setup_state: setupState })} className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.howToConnect}</Link>
         </Card>
       </main>
     )
@@ -73,19 +76,19 @@ function SignedInApp() {
   if (me.hero.activationState === 'pending_trmnl' && !settings) {
     return (
       <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
-        <Card title="Save in TRMNL to start">
+        <Card title={t.saveTitle}>
           <p>
-            <strong>{me.hero.name}</strong> is ready. Back in TRMNL, click <strong>Save</strong> on the Desk Crawler plugin and the first adventure follows.
+            <strong>{me.hero.name}</strong>{t.readyAfter}<strong>{t.save}</strong>{t.readyEnd}
           </p>
-          <Link to="/help/desk-crawler" onClick={() => captureAnalytics('setup help opened', { setup_state: setupState })} className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Help with setup</Link>
-          <Link to="/app/desk-crawler/settings" className="ml-4 inline-flex min-h-11 items-center underline underline-offset-4">Desk Crawler settings</Link>
+          <Link to="/help/desk-crawler" onClick={() => captureAnalytics('setup help opened', { setup_state: setupState })} className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.helpWithSetup}</Link>
+          <Link to="/app/desk-crawler/settings" className="ml-4 inline-flex min-h-11 items-center underline underline-offset-4">{t.settings}</Link>
         </Card>
       </main>
     )
   }
   return (
     <>
-      <nav aria-label="Desk Crawler" className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
+      <nav aria-label={t.navLabel} className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
         {/* One width on every tab: following the page width made the tabs resize and jump when switching. */}
         <ul className="mx-auto flex min-h-13 max-w-3xl items-stretch">
           <li className="hidden items-center pr-4 pl-2 sm:flex">
@@ -111,9 +114,9 @@ function SignedInApp() {
                     {dot ? <NotifyDot className="absolute -top-1 left-4 sm:hidden" /> : null}
                   </span>
                   <span className="flex items-center">
-                    {item.label}
-                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">, {count} slots used</span></> : null}
-                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">, a goal reward is ready to claim</span></> : null}
+                    {t.nav[item.label]}
+                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">{t.slotsUsed(count)}</span></> : null}
+                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{t.rewardReady}</span></> : null}
                   </span>
                 </Link>
               </li>

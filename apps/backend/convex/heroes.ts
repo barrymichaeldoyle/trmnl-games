@@ -126,6 +126,8 @@ export const mine = query({
       // P37: the hero's class, and the roster in brief: the level it opens at under the world's catalog (null before
       // v18), whether this account's Warrior has reached it, and how many heroes the account holds.
       class: hero.class,
+      // D169: French stories agree participles with the hero.
+      gender: hero.gender ?? 'male',
       className: worldContent(world).classes?.[hero.class]?.name ?? 'Warrior',
       roster: await rosterSummary(ctx, worldContent(world), hero),
       // D139: today's occasion and its effect, and the next one on the calendar; null before v19.

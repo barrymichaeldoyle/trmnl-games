@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { Button } from '../../../lib/ui'
 import { Sheet, SheetTitle } from './-bagSlots'
+import { useT } from '../../../lib/i18n'
+import { dcScreenMessages } from '../../../i18n/dcScreen'
 
 type Choice = { confirmLabel: string; busyLabel: string; cancelLabel: string; pending: boolean; disabled?: boolean; onConfirm: () => void; onCancel: () => void }
 
@@ -20,8 +22,9 @@ export function ConfirmButtons({ confirmLabel, busyLabel, cancelLabel, pending, 
  */
 export function ConfirmSheet({ open, title, children, ...choice }: Omit<Choice, 'onCancel'> & { open: boolean; title: ReactNode; children: ReactNode; onClose: () => void }) {
   const { onClose, ...rest } = choice
+  const t = useT(dcScreenMessages)
   return (
-    <Sheet open={open} onClose={() => { if (!choice.pending) onClose() }} label={typeof title === 'string' ? title : 'Confirm'}>
+    <Sheet open={open} onClose={() => { if (!choice.pending) onClose() }} label={typeof title === 'string' ? title : t.confirm}>
       {open ? (
         <div className="flex flex-col gap-3">
           <SheetTitle>{title}</SheetTitle>
@@ -37,10 +40,13 @@ export function ConfirmSheet({ open, title, children, ...choice }: Omit<Choice, 
 export const Consequences = ({ children }: { children: ReactNode }) => <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">{children}</ul>
 
 /** What pausing costs, the same on the Hero page and in Settings. */
-export const PauseConsequences = () => (
-  <Consequences>
-    <li>Your hero stops until you resume: <strong>no XP, gold, finds or to-do progress</strong> while paused, and nothing is caught up later.</li>
-    <li>Recent XP keeps ageing out, so your hero can drop down or off the daily and weekly boards.</li>
-    <li>You can resume any time; your hero rejoins on the next adventure.</li>
-  </Consequences>
-)
+export function PauseConsequences() {
+  const t = useT(dcScreenMessages)
+  return (
+    <Consequences>
+      <li>{t.pauseStops}<strong>{t.pauseStopsStrong}</strong>{t.pauseStopsAfter}</li>
+      <li>{t.pauseAges}</li>
+      <li>{t.pauseResume}</li>
+    </Consequences>
+  )
+}

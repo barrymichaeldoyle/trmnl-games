@@ -95,6 +95,15 @@ export const fr: FrDictionary = {
     "Thrifty": ["économe", "économe"],
   },
   text: {
+    // D169: the unlock labels (career.ts FEATURE_LABEL), shown in "Unlocked:" lines and the Career page.
+    "the to-do list": "la liste de tâches",
+    "stances": "les postures",
+    "office decisions": "les décisions du bureau",
+    "the wandering merchant": "le marchand ambulant",
+    "desk raids": "les raids de bureau",
+    "meetings with coworkers": "les rencontres entre collègues",
+    "the workbench": "l’établi",
+    "a second hero": "un second héros",
     "Defeated a {monster} by the printer. +{xp} XP, +{gold} gold.": "A vaincu {un:monster} près de l’imprimante.",
     "A {monster} fell behind the cubicle wall. +{xp} XP, +{gold} gold.": "{Un:monster} est tombé{e:monster} derrière la cloison du bureau.",
     "Filed a {monster} under 'defeated'. +{xp} XP, +{gold} gold.": "A classé {un:monster} dans « vaincus ».",

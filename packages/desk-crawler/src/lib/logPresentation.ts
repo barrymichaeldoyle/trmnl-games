@@ -55,6 +55,9 @@ export function potionWordFor(templateId: string | undefined): string {
   return `${stem} potion`
 }
 
+/** The chip a change-free adventure shows ("No effect"), per language, for displays that leave it out. */
+export const noEffectChip = (locale: Locale = 'en'): string => CHIP_WORDS[locale].noEffect
+
 export interface PresentationOptions {
   readonly compactGold?: boolean
   /** D169: the reader's language for the story; English when absent. */

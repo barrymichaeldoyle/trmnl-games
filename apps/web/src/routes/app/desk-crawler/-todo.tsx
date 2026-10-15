@@ -7,6 +7,9 @@ import { captureAnalytics } from '../../../lib/analytics'
 import { PixelIcon } from './-pixelIcon'
 import { useGains } from '../../../lib/ui'
 import { SectionTitle } from '../../../lib/glyphs'
+import { formatNumber, useLocale, useT } from '../../../lib/i18n'
+import { dcRecapMessages } from '../../../i18n/dcRecap'
+import { useContent } from '../../../lib/useContent'
 
 export type TodoView = {
   tasks: Array<{ slot: number; templateId: string; label: string; progress: number; target: number; reward: number; done: boolean; biomeId: string | null; local: boolean }>
@@ -33,13 +36,17 @@ export function TodoCard({ todo, biomes, healthy, notify }: { todo: TodoView; bi
   const askingTask = todo.tasks.find((task) => task.slot === asking) ?? null
   const done = todo.tasks.filter((task) => task.done).length
   const biomeName = (id: string | null) => biomes.find((biome) => biome.id === id)?.name ?? ''
+  const t = useT(dcRecapMessages)
+  const c = useContent()
+  const locale = useLocale()
+  const n = (value: number) => formatNumber(locale, value)
   return (
     <section aria-labelledby="todo-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <SectionTitle id="todo-title" glyph="todo" tone="text-xp-ink">To-do</SectionTitle>
-        <p className="text-sm text-muted">{done === 0 ? `Finished tasks get new ones at the ${clock(todo.refillHour)} stand-up.` : `New tasks at the ${clock(todo.refillHour)} stand-up.`}</p>
+        <SectionTitle id="todo-title" glyph="todo" tone="text-xp-ink">{t.todo}</SectionTitle>
+        <p className="text-sm text-muted">{done === 0 ? t.finishedGetNew(clock(todo.refillHour)) : t.newAtStandup(clock(todo.refillHour))}</p>
       </div>
-      <ol aria-label="Tasks" className="flex flex-col gap-3">
+      <ol aria-label={t.tasks} className="flex flex-col gap-3">
         {todo.tasks.map((task) => {
           const pct = Math.max(0, Math.min(100, Math.round((task.progress * 100) / task.target)))
           return (
@@ -47,23 +54,23 @@ export function TodoCard({ todo, biomes, healthy, notify }: { todo: TodoView; bi
               <TaskBox done={task.done} />
               <div className="flex min-w-0 flex-col gap-1">
                 <p className="pt-1">
-                  <span className="sr-only">{task.done ? 'Done: ' : ''}</span>
-                  <Label text={task.label} />
+                  <span className="sr-only">{task.done ? t.done : ''}</span>
+                  <Label text={c.text(task.label)} />
                 </p>
                 <div className="flex min-w-0 items-center gap-2">
                   {/* The stat bar's track and fill (Meter), at task size. */}
-                  <div role="meter" aria-label="Progress" aria-valuemin={0} aria-valuemax={task.target} aria-valuenow={task.progress} aria-valuetext={`${task.progress} of ${task.target}`} className="h-3 min-w-0 flex-1 overflow-hidden border-2 border-night bg-night">
+                  <div role="meter" aria-label={t.progress} aria-valuemin={0} aria-valuemax={task.target} aria-valuenow={task.progress} aria-valuetext={t.progressOf(task.progress, task.target)} className="h-3 min-w-0 flex-1 overflow-hidden border-2 border-night bg-night">
                     <div className={`h-full ${task.done ? 'bg-xp' : 'bg-gold'} shadow-[inset_0_2px_0_rgb(255_255_255/0.35)]`} style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="shrink-0 text-xs font-semibold tabular-nums">{task.progress.toLocaleString()}/{task.target.toLocaleString()}</span>
+                  <span className="shrink-0 text-xs font-semibold tabular-nums">{n(task.progress)}/{n(task.target)}</span>
                 </div>
                 <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
-                  <span className="text-gold-ink">+{task.reward.toLocaleString()} gold</span>
-                  {task.done ? <span className="text-xp-ink">Done · new task at the stand-up</span> : null}
-                  {!task.done && !task.local ? <span className="text-muted">Needs a trip to the {biomeName(task.biomeId)}</span> : null}
+                  <span className="text-gold-ink">{t.reward(n(task.reward))}</span>
+                  {task.done ? <span className="text-xp-ink">{t.doneNewTask}</span> : null}
+                  {!task.done && !task.local ? <span className="text-muted">{t.needsTrip(c.name(biomeName(task.biomeId)))}</span> : null}
                   {!task.done && todo.swapAvailable ? (
                     <button type="button" disabled={!healthy} onClick={() => setAsking(task.slot)} className="inline-flex min-h-11 items-center font-semibold text-muted underline underline-offset-4 hover:text-ink active:text-ink disabled:no-underline">
-                      Swap<span className="sr-only"> this task</span>
+                      {t.swap}<span className="sr-only">{t.swapThis}</span>
                     </button>
                   ) : null}
                 </p>
@@ -72,31 +79,31 @@ export function TodoCard({ todo, biomes, healthy, notify }: { todo: TodoView; bi
           )
         })}
       </ol>
-      <p className="text-xs text-muted">Your hero works through these while exploring. Tasks never expire and pay only gold.</p>
+      <p className="text-xs text-muted">{t.worksThrough}</p>
       <ConfirmSheet
         open={askingTask !== null}
-        title="Swap this task?"
-        confirmLabel="Swap task"
-        busyLabel="Swapping…"
-        cancelLabel="Keep it"
+        title={t.swapTitle}
+        confirmLabel={t.swapConfirm}
+        busyLabel={t.swapping}
+        cancelLabel={t.keepIt}
         pending={swap.pending}
         disabled={!healthy}
         onClose={() => setAsking(null)}
         onConfirm={async () => {
           if (swap.pending || askingTask === null) return
           const task = askingTask
-          if (await swap.run({ slot: task.slot }, 'Task swapped. Your next swap comes with the stand-up.')) captureAnalytics('task swapped', { template_id: task.templateId })
+          if (await swap.run({ slot: task.slot }, t.swapped)) captureAnalytics('task swapped', { template_id: task.templateId })
           setAsking(null)
         }}
       >
         {askingTask ? (
           <>
-            <p><Label text={askingTask.label} /></p>
+            <p><Label text={c.text(askingTask.label)} /></p>
             <Consequences>
-              <li>You get <strong>one swap between stand-ups</strong>. The next one comes with the {clock(todo.refillHour)} stand-up.</li>
-              <li>The new task is a different kind, picked at random{askingTask.local ? '' : ', and it can be done where your hero is'}.</li>
-              {askingTask.progress > 0 ? <li>Progress on this task ({askingTask.progress.toLocaleString()}/{askingTask.target.toLocaleString()}) is lost.</li> : null}
-              <li>A stuck task is swapped automatically after two stand-ups.</li>
+              <li>{t.oneSwapBefore}<strong>{t.oneSwapStrong}</strong>{t.oneSwapAfter(clock(todo.refillHour))}</li>
+              <li>{t.newKind(askingTask.local)}</li>
+              {askingTask.progress > 0 ? <li>{t.progressLost(n(askingTask.progress), n(askingTask.target))}</li> : null}
+              <li>{t.stuckSwapped}</li>
             </Consequences>
           </>
         ) : null}

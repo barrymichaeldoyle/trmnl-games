@@ -33,8 +33,8 @@ export interface ContentTranslator {
   text(english: string, context?: StoryContext): string
   /** A name on its own (a list row, a heading): the bare French name or the German nominative, without an article. */
   name(english: string): string
-  /** A name with an article form, for prose: `nameWith('Server Room', 'le')` is "la Salle des serveurs". */
-  nameWith(english: string, form: string): string
+  /** A name with an article form, for prose: `nameWith('Server Room', 'le')` is "la Salle des serveurs"; `prefix` joins the head ("Elite-"). */
+  nameWith(english: string, form: string, prefix?: string): string
   /** A stored log summary, as the displays show it (without the numbers the chips carry); null when unmatched. */
   story(summary: string, context?: StoryContext): string | null
   /** A whole number in the locale's grouping. */
@@ -44,6 +44,8 @@ export interface ContentTranslator {
 /** What a sentence needs to know about its own hero: French participles agree with them ("Coincée"). */
 export interface StoryContext {
   readonly heroGender?: 'male' | 'female'
+  /** Set while filling a line when an inner phrase had no translation. */
+  missed?: boolean
 }
 
 const NUMBER_VARS = new Set(['xp', 'gold', 'damage', 'heal', 'ticks', 'capacity', 'target', 'hours', 'count', 'cap', 'level', 'pct', 'to', 'n', 'quantity', 'needed', 'made', 'price', 'coins'])
@@ -99,6 +101,8 @@ interface CompiledTemplate {
   readonly regex: RegExp
   /** The first literal character, lowercased, or '' when the template opens with a variable. */
   readonly lead: string
+  /** How much of the English is literal text: of two matches of the same length, the more specific one wins. */
+  readonly literal: number
 }
 
 const ITEM_SUFFIX = /(?: (Mk [IVX]+))?(?: (\+\d+))?$/
@@ -113,7 +117,7 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
   for (const [english, localized] of Object.entries(dictionary.text)) {
     if (!english.includes('{')) { plain.set(english, localized); continue }
     const { source, vars } = englishPattern(english)
-    templates.push({ english, localized, vars, regex: new RegExp(source, 'y'), lead: /^[^{]/.test(english) ? english[0]!.toLowerCase() : '' })
+    templates.push({ english, localized, vars, regex: new RegExp(source, 'y'), lead: /^[^{]/.test(english) ? english[0]!.toLowerCase() : '', literal: english.replace(/\{[^}]*\}/g, '').length })
   }
   // Plain lines also serve as segments of a composed summary ("Decided by itself.").
   const plainSegments = [...plain.entries()].map(([english, localized]) => ({ english, localized }))
@@ -169,12 +173,18 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
     }
     if (LIST_VARS.has(token.name)) return listOf(token.name, bare, context)
     const inner = translateText(bare, context)
+    // An inner line with no translation would leave English inside the sentence: the whole line stays English instead.
+    if (inner === bare && !plain.has(bare)) context.missed = true
     return bold ? `[[${inner}]]` : inner
   }
 
   /** "Defeat 4 [[Paper Imps]]. Win 3 fights" item by item; "3 Scrap, 2 Parts and 1 Components" as counted nouns. */
   function listOf(name: string, value: string, context: StoryContext): string {
-    if (name === 'tasks') return value.split('. ').map((label) => translateText(label, context)).join('. ')
+    if (name === 'tasks') return value.split('. ').map((label) => {
+      const shown = translateText(label, context)
+      if (shown === label && !plain.has(label)) context.missed = true
+      return shown
+    }).join('. ')
     const parts = value.split(/, | and /).map((part) => {
       const match = part.match(/^(\d+) (.+)$/)
       if (!match) return translateText(part, context)
@@ -193,7 +203,8 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
 
   /** The longest template or plain line matching at `start` and ending at a sentence boundary. */
   function segmentAt(text: string, start: number, context: StoryContext): { end: number; output: string } | null {
-    let best: { end: number; output: string } | null = null
+    // Each candidate fills with its own miss flag: only the chosen one's counts.
+    let best: { end: number; output: string; missed: boolean; literal: number } | null = null
     const lead = text[start]?.toLowerCase() ?? ''
     for (const template of templates) {
       if (template.lead !== '' && template.lead !== lead) continue
@@ -202,26 +213,35 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
       if (!match) continue
       const end = start + match[0].length
       if (end !== text.length && text[end] !== ' ') continue
-      if (!best || end > best.end) best = { end, output: fillTemplate(template, match.slice(1), context) }
+      if (best && end < best.end) continue
+      const candidate: StoryContext = { ...context, missed: false }
+      const output = fillTemplate(template, match.slice(1), candidate)
+      const missed = candidate.missed === true
+      // Longest first; of equal length, the one that translates fully, then the more specific template.
+      if (best && end === best.end && (missed && !best.missed || missed === best.missed && template.literal <= best.literal)) continue
+      best = { end, output, missed, literal: template.literal }
     }
     for (const { english, localized } of plainSegments) {
       if (english[0]?.toLowerCase() !== lead || !text.startsWith(english, start)) continue
       const end = start + english.length
-      if ((end === text.length || text[end] === ' ') && (!best || end > best.end)) best = { end, output: localized }
+      if ((end === text.length || text[end] === ' ') && (!best || end > best.end || end === best.end && best.missed)) best = { end, output: localized, missed: false, literal: english.length }
     }
+    if (best?.missed) context.missed = true
     return best
   }
 
-  function translateText(english: string, context: StoryContext = {}): string {
+  function translateText(english: string, given: StoryContext = {}): string {
     const exact = plain.get(english)
     if (exact !== undefined) return exact
+    const context: StoryContext = { ...given, missed: false }
     const segment = segmentAt(english, 0, context)
-    return segment && segment.end === english.length ? segment.output : english
+    return segment && segment.end === english.length && !context.missed ? segment.output : english
   }
 
-  function story(summary: string, context: StoryContext = {}): string | null {
+  function story(summary: string, given: StoryContext = {}): string | null {
     const exact = plain.get(summary)
     if (exact !== undefined) return exact
+    const context: StoryContext = { ...given, missed: false }
     const parts: string[] = []
     let at = 0
     while (at < summary.length) {
@@ -232,7 +252,7 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
       at = segment.end
       while (summary[at] === ' ') at += 1
     }
-    return parts.join(' ')
+    return context.missed ? null : parts.join(' ')
   }
 
   return {
@@ -242,9 +262,9 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
       const phrase = phraseOf(english)
       return phrase ? renderPhrase(locale, phrase, undefined, false) : translateText(english)
     },
-    nameWith: (english, form) => {
+    nameWith: (english, form, prefix) => {
       const phrase = phraseOf(english)
-      return phrase ? renderPhrase(locale, phrase, form, false) : english
+      return phrase ? renderPhrase(locale, phrase, form, false, prefix) : english
     },
     story,
     number: (value) => numbers.format(value),

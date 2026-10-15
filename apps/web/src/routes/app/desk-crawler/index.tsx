@@ -20,9 +20,12 @@ import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
 import { RosterCard } from './-rosterCard'
 import { WhatsNewCard } from './-whatsNew'
+import { messagesFor, useT } from '../../../lib/i18n'
+import { useContent } from '../../../lib/useContent'
+import { dcHeroMessages } from '../../../i18n/dcHero'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
-  head: () => seo({ title: 'Hero', index: false }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcHeroMessages, locale).title, index: false, locale }),
   loader: ({ context }) =>
     preload(context, convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.returnSummary, {}), convexQuery(api.keepsakes.mine, {}), latestLogQuery()),
   component: HeroHome,
@@ -39,14 +42,15 @@ type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number;
  */
 function HeroHome() {
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
-  if (!hero) return <LoadingState label="Loading your hero…" />
+  const t = useT(dcHeroMessages)
+  if (!hero) return <LoadingState label={t.loading} />
   const biomeName = hero.biomes.find((b: Biome) => b.id === hero.biomeId)?.name ?? ''
   const targetName = hero.biomes.find((b: Biome) => b.id === hero.targetBiomeId)?.name ?? ''
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
       {/* The page's title for assistive tech, ahead of the keepsake callout; the game screen's HUD names the hero visibly. */}
-      <h1 className="sr-only">{hero.name}, your hero</h1>
+      <h1 className="sr-only">{t.yourHero(hero.name)}</h1>
       <KeepsakeCallout />
       <PlaylistNudge activatedAt={hero.activatedAt} screenServed={hero.screenServed} />
       <GameScreen hero={{ ...hero, biomeName, targetName }} />
@@ -66,12 +70,13 @@ const PLAYLIST_NUDGE_MS = 48 * 3_600_000
  * the Hero page points at what to check.
  */
 function PlaylistNudge({ activatedAt, screenServed }: { activatedAt?: number | null; screenServed?: boolean }) {
+  const t = useT(dcHeroMessages)
   if (screenServed || !activatedAt || Date.now() - activatedAt > PLAYLIST_NUDGE_MS) return null
   return (
     <div className="border-[3px] border-sky px-3 py-2 text-sm">
-      <strong className="block text-sky-ink">Not seeing your hero on your TRMNL yet?</strong>
-      <span className="mt-1 block">Your TRMNL shows its playlist one plugin at a time, so Desk Crawler appears when its turn comes round.</span>
-      <Link to="/help/desk-crawler" hash="not-on-your-screen" className="mt-1 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">What to check</Link>
+      <strong className="block text-sky-ink">{t.playlistTitle}</strong>
+      <span className="mt-1 block">{t.playlistBody}</span>
+      <Link to="/help/desk-crawler" hash="not-on-your-screen" className="mt-1 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.whatToCheck}</Link>
     </div>
   )
 }
@@ -118,21 +123,17 @@ type HeroView = {
 type Occasion = { id: string; name: string; effect: string | null; daysLeft: number }
 type Standoff = { monsterId: string; name: string; hp: number; maxHp: number; hpPct: number; ticksLeft: number }
 
-/** "about 3 hours", "about 45 minutes": a number of quarter-hour adventures as wall time. */
-const aboutTime = (ticks: number) => (ticks >= 4 ? `about ${Math.round(ticks / 4)} ${Math.round(ticks / 4) === 1 ? 'hour' : 'hours'}` : `about ${ticks * 15} minutes`)
-
-const inDays = (days: number) => (days === 1 ? 'tomorrow' : `in ${days} days`)
 
 type Choice = { eventId: string; title: string; prompt: string; expiresAtTick: number; ticksLeft: number; defaultOptionId: string; options: Array<{ id: string; label: string; change: { gold: number; hp: number; potions: number } }> }
 
 type StanceId = 'cautious' | 'balanced' | 'bold'
 type Stance = { id: StanceId; name: string; blurb: string; potionBelowPct: number; restBelowPct: number; resumeAtPct: number; victoryXpPct: number; raidsPerDay?: number; raidWinPct?: number }
 
-/** D110: how often a stance raids, in words a player can picture (launches per exploring day). */
-const raidPace = (perDay: number) => (perDay < 0.75 ? 'raids about every other day' : perDay < 1.5 ? 'raids about once a day' : `raids about ${perDay < 2.5 ? 'twice' : Math.round(perDay) + ' times'} a day`)
 
 function HeroSheet({ hero }: { hero: HeroView }) {
   const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
+  const t = useT(dcHeroMessages)
+  const c = useContent()
   // Every command reports into one pinned notice (D98), so nothing under the buttons moves when an action settles.
   const { notice, notify, dismiss } = useNotice()
   const travel = useIntent(api.heroes.changeBiome, { onFeedback: notify })
@@ -161,82 +162,82 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const strengths = ((bag?.potionRows ?? []) as PotionRow[]).filter((row) => row.count > 0)
   const fit = strengths.find((row) => hero.hp + row.heals >= hero.maxHp) ?? strengths.at(-1) ?? null
   const healing = fit === null ? 0 : Math.min(hero.maxHp - hero.hp, fit.heals)
-  const potionLabel = `Drink potion +${healing} HP (${bag?.potions ?? 0})`
-  const drink = () => (strengths.length > 1 ? setAsk({ kind: 'potion' }) : potion.run(fit === null ? {} : { templateId: fit.templateId }, `${fit === null ? 'Potion' : fit.name} drunk, +${healing} HP.`))
+  const potionLabel = t.drinkPotion(healing, bag?.potions ?? 0)
+  const drink = () => (strengths.length > 1 ? setAsk({ kind: 'potion' }) : potion.run(fit === null ? {} : { templateId: fit.templateId }, t.potionDrunk(fit === null ? t.potion : fit.name, healing)))
   const chosenStance = hero.stances.find((option) => option.id === hero.stance) ?? null
   // D132: what the stance risks where the hero is now; the safe biome turns a knockout into a rescue.
   const here = hero.biomes.find((biome) => biome.id === hero.biomeId)
   const safeBiome = hero.biomes.find((biome) => biome.safe)
-  const stanceRisk = here === undefined || safeBiome === undefined ? null : here.safe ? `${here.name} can't knock your hero out, so Bold has no knockout risk here.` : `Here a knockout costs gold and sends your hero back to ${safeBiome.name}. Cautious gets knocked out least and Bold most.`
+  const stanceRisk = here === undefined || safeBiome === undefined ? null : here.safe ? t.stanceRiskSafe(here.name) : t.stanceRisk(safeBiome.name)
   // P35: a feature the hero's level has not reached shows as a locked card where its card will be.
   const locked = (feature: UnlockView[number]['feature']) => hero.unlocks?.find((entry) => entry.feature === feature && !entry.unlocked) ?? null
   // Pause and Resume swap places when they succeed; focus follows to whichever command takes over.
   const commands = useFocusWithin<HTMLElement>(hero.status)
 
-  const stopNote = hero.status === 'paused' ? 'Resume adventures to travel.' : hero.status === 'sleeping' ? 'Make room in your bag to travel.' : hero.status === 'dead' ? 'Travel opens again once your hero is back on their feet.' : null
+  const stopNote = hero.status === 'paused' ? t.resumeToTravel : hero.status === 'sleeping' ? t.roomToTravel : hero.status === 'dead' ? t.deadTravel : null
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
       {hero.career ? <GoalCard career={hero.career} level={hero.level} notify={notify} /> : null}
       {hero.roster ? <RosterCard roster={hero.roster} name={hero.name} className={hero.className ?? 'Warrior'} /> : null}
-      <section ref={commands} aria-label="Commands" className="flex flex-col gap-2">
+      <section ref={commands} aria-label={t.commands} className="flex flex-col gap-2">
         {canDrink || hero.status === 'paused' || hero.status === 'sleeping' ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.
           <div className="grid gap-2 sm:flex sm:flex-wrap">
             {hero.status === 'sleeping' ? (
               <Link to="/app/desk-crawler/inventory" className={`inline-flex min-h-11 items-center justify-center gap-2.5 px-4 ${BUTTON_PRIMARY}`}>
-                <Glyph name="bag" />Open bag
+                <Glyph name="bag" />{t.openBag}
               </Link>
             ) : null}
             {hero.status === 'paused' ? (
-              <Button icon="play" pending={resume.pending} busyLabel="Resuming…" disabled={!healthy} onClick={() => resume.run({}, 'Adventures resumed. Your hero joins the next adventure.')}>
-                Resume adventures
+              <Button icon="play" pending={resume.pending} busyLabel={t.resuming} disabled={!healthy} onClick={() => resume.run({}, t.resumed)}>
+                {t.resume}
               </Button>
             ) : null}
             {/* D156: only when a drink would heal; at full health or with an empty pouch there is no dead button. */}
             {canDrink && hero.hp < hero.maxHp && bag?.potions ? (
-              <Button icon="potion" pending={potion.pending} busyLabel="Drinking…" onClick={drink}>
+              <Button icon="potion" pending={potion.pending} busyLabel={t.drinking} onClick={drink}>
                 {potionLabel}
               </Button>
             ) : null}
             {canAct ? (
-              <Button icon="pause" variant="secondary" pending={pause.pending} busyLabel="Pausing…" onClick={() => setAsk({ kind: 'pause' })}>
-                Pause adventures
+              <Button icon="pause" variant="secondary" pending={pause.pending} busyLabel={t.pausing} onClick={() => setAsk({ kind: 'pause' })}>
+                {t.pause}
               </Button>
             ) : null}
           </div>
         ) : null}
         {hero.effects.length > 0 || hero.calendar?.today ? (
-          <ul aria-label="Effects" className="flex flex-wrap gap-2 text-sm">
+          <ul aria-label={t.effects} className="flex flex-wrap gap-2 text-sm">
             {/* D139: today's occasion leads the effects, with its one plain bonus. */}
-            {hero.calendar?.today ? <li className="border-[3px] border-gold px-2 py-1"><strong>{hero.calendar.today.name}</strong>{hero.calendar.today.effect ? ` · ${hero.calendar.today.effect}` : ''} · <span className="whitespace-nowrap">{hero.calendar.today.daysLeft === 1 ? 'today' : `${hero.calendar.today.daysLeft} days left`}</span></li> : null}
-            {hero.effects.map((effect) => <li key={effect.id} className={`border-[3px] px-2 py-1 ${effect.kind === 'bane' ? 'border-hp-ink' : 'border-night'}`}><strong>{effect.name}</strong> · {effect.blurb} · <span className="whitespace-nowrap">{effect.ticksLeft === 1 ? 'one adventure' : `${effect.ticksLeft} adventures`} left</span></li>)}
+            {hero.calendar?.today ? <li className="border-[3px] border-gold px-2 py-1"><strong>{c.text(hero.calendar.today.name)}</strong>{hero.calendar.today.effect ? ` · ${c.text(hero.calendar.today.effect)}` : ''} · <span className="whitespace-nowrap">{hero.calendar.today.daysLeft === 1 ? t.today : t.daysLeft(hero.calendar.today.daysLeft)}</span></li> : null}
+            {hero.effects.map((effect) => <li key={effect.id} className={`border-[3px] px-2 py-1 ${effect.kind === 'bane' ? 'border-hp-ink' : 'border-night'}`}><strong>{c.text(effect.name)}</strong> · {c.text(effect.blurb)} · <span className="whitespace-nowrap">{t.adventuresLeft(effect.ticksLeft)}</span></li>)}
           </ul>
         ) : null}
-        {hero.calendar?.next ? <p className="text-sm text-muted">Next on the office calendar: <strong>{hero.calendar.next.name}</strong> {inDays(hero.calendar.next.inDays)}{hero.calendar.next.effect ? ` (${hero.calendar.next.effect})` : ''}. <Link to="/help/desk-crawler" hash="office-calendar" className="underline underline-offset-4">See the calendar</Link></p> : null}
+        {hero.calendar?.next ? <p className="text-sm text-muted">{t.nextOnCalendarBefore}<strong>{c.text(hero.calendar.next.name)}</strong> {t.inDays(hero.calendar.next.inDays)}{hero.calendar.next.effect ? ` (${c.text(hero.calendar.next.effect)})` : ''}. <Link to="/help/desk-crawler" hash="office-calendar" className="underline underline-offset-4">{t.seeCalendar}</Link></p> : null}
         {hero.status === 'sleeping' && hero.wakeAtTick === null ? <AlertNudge /> : null}
-        {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>A merchant is visiting.</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">See the offers in your bag</Link> within {hero.merchantTicksLeft === 1 ? 'one adventure' : `${hero.merchantTicksLeft} adventures`}.</p> : null}
-        {!healthy ? <p className="text-sm">Paused for a service check. <Link to="/support" className="underline underline-offset-4">Contact support</Link> if it lasts.</p> : null}
+        {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>{t.merchantVisiting}</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.seeOffers}</Link>{t.withinAdventures(hero.merchantTicksLeft)}</p> : null}
+        {!healthy ? <p className="text-sm">{t.serviceCheck}<Link to="/support" className="underline underline-offset-4">{t.contactSupport}</Link>{t.ifItLasts}</p> : null}
       </section>
 
       {hero.standoff ? <StandoffCard standoff={hero.standoff} status={hero.status} healthy={healthy} pending={walkAway.pending} onWalkAway={() => setAsk({ kind: 'walkAway' })} /> : null}
 
       {hero.choice ? (
         <section aria-labelledby="choice-title" className="flex flex-col gap-3 border-[3px] border-night bg-panel p-4">
-          <SectionTitle id="choice-title" glyph="choice" tone="text-sky-ink" size="text-2xl">{hero.choice.title}</SectionTitle>
-          <p>{hero.choice.prompt}</p>
+          <SectionTitle id="choice-title" glyph="choice" tone="text-sky-ink" size="text-2xl">{c.text(hero.choice.title)}</SectionTitle>
+          <p>{c.text(hero.choice.prompt)}</p>
           <div className="grid gap-2 sm:flex sm:flex-wrap">
             {hero.choice.options.map((option) => {
-              const parts = [option.change.gold ? `${option.change.gold > 0 ? '+' : '−'}${Math.abs(option.change.gold)} gold` : null, option.change.hp ? `${option.change.hp > 0 ? '+' : '−'}${Math.abs(option.change.hp)} HP` : null, option.change.potions ? `+${option.change.potions} ${option.change.potions === 1 ? 'potion' : 'potions'}` : null].filter(Boolean)
+              const parts = [option.change.gold ? `${option.change.gold > 0 ? '+' : '−'}${Math.abs(option.change.gold)} ${t.gold}` : null, option.change.hp ? `${option.change.hp > 0 ? '+' : '−'}${Math.abs(option.change.hp)} ${t.hp}` : null, option.change.potions ? `+${option.change.potions} ${t.potions(option.change.potions)}` : null].filter(Boolean)
               return (
-                <Button key={option.id} variant={option.id === hero.choice!.defaultOptionId ? 'secondary' : 'primary'} pending={choose.pending} busyLabel="Deciding…" disabled={!healthy} onClick={() => (option.change.gold < 0 || option.change.hp < 0 ? setAsk({ kind: 'choice', optionId: option.id }) : choose.run({ optionId: option.id }, 'Decided.'))}>
+                <Button key={option.id} variant={option.id === hero.choice!.defaultOptionId ? 'secondary' : 'primary'} pending={choose.pending} busyLabel={t.deciding} disabled={!healthy} onClick={() => (option.change.gold < 0 || option.change.hp < 0 ? setAsk({ kind: 'choice', optionId: option.id }) : choose.run({ optionId: option.id }, t.decided))}>
                   {/* The stakes sit on their own small line, so a long option never wraps mid-figure in the pixel face. */}
-                  <span className="flex flex-col items-center gap-1">{option.label}{parts.length ? <>{' '}<span className="label-px">{parts.join(', ')}</span></> : null}</span>
+                  <span className="flex flex-col items-center gap-1">{c.text(option.label)}{parts.length ? <>{' '}<span className="label-px">{parts.join(', ')}</span></> : null}</span>
                 </Button>
               )
             })}
           </div>
-          <p className="text-sm text-muted">Decides itself in {hero.choice.ticksLeft === 1 ? 'one adventure' : `${hero.choice.ticksLeft} adventures`}: {hero.choice.options.find((option) => option.id === hero.choice!.defaultOptionId)?.label ?? 'the default'}.</p>
+          <p className="text-sm text-muted">{t.decidesItself(hero.choice.ticksLeft, c.text(hero.choice.options.find((option) => option.id === hero.choice!.defaultOptionId)?.label ?? '') || t.theDefault)}</p>
         </section>
       ) : null}
 
@@ -247,25 +248,25 @@ function HeroSheet({ hero }: { hero: HeroView }) {
       {hero.stances.length > 0 && !locked('stances') ? (
         <section aria-labelledby="stance-title" className="flex flex-col gap-3">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-            <SectionTitle id="stance-title" glyph="shield" tone="text-sky-ink">Stance</SectionTitle>
-            <p className="text-sm text-muted">Applies from the next adventure.</p>
+            <SectionTitle id="stance-title" glyph="shield" tone="text-sky-ink">{t.stance}</SectionTitle>
+            <p className="text-sm text-muted">{t.appliesNext}</p>
           </div>
           {/* One segmented row, like the ranking period: the chosen cell is pressed and its rule reads underneath. */}
           {/* Toggle buttons, like the ranking period: each is one Tab stop, and a busy choice keeps its focus (aria-disabled). */}
-          <div role="group" aria-label="Stance" className="flex border-2 border-edge">
+          <div role="group" aria-label={t.stance} className="flex border-2 border-edge">
             {hero.stances.map((option) => {
               const chosen = option.id === hero.stance
               return (
                 <button key={option.id} type="button" aria-pressed={chosen} aria-disabled={stance.pending || undefined} disabled={!healthy} onClick={() => { if (chosen || stance.pending) return; setAsk({ kind: 'stance', id: option.id }) }} className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 py-2 label-px uppercase tracking-wide not-last:border-r-2 not-last:border-edge not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink disabled:text-muted'}`}>
-                  {option.name}
+                  {c.text(option.name)}
                 </button>
               )
             })}
           </div>
           {chosenStance ? (
             <p className="min-h-10 text-sm" aria-live="polite">
-              <strong>{chosenStance.name}.</strong> {chosenStance.blurb}{' '}
-              <span className="text-muted tabular-nums">Potion below {chosenStance.potionBelowPct}% · rest below {chosenStance.restBelowPct}% · back out at {chosenStance.resumeAtPct}% · {chosenStance.victoryXpPct}% XP from wins{chosenStance.raidsPerDay !== undefined && chosenStance.raidWinPct !== undefined ? ` · ${raidPace(chosenStance.raidsPerDay)}, wins ${chosenStance.raidWinPct}% of raids against Balanced` : ''}.</span>
+              <strong>{c.text(chosenStance.name)}.</strong> {c.text(chosenStance.blurb)}{' '}
+              <span className="text-muted tabular-nums">{t.stanceRules(chosenStance.potionBelowPct, chosenStance.restBelowPct, chosenStance.resumeAtPct, chosenStance.victoryXpPct)}{chosenStance.raidsPerDay !== undefined && chosenStance.raidWinPct !== undefined ? t.raidWins(t.raidPace(chosenStance.raidsPerDay), chosenStance.raidWinPct) : ''}.</span>
             </p>
           ) : null}
           {stanceRisk ? <p className="text-sm">{stanceRisk}</p> : null}
@@ -273,7 +274,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
       ) : null}
 
       <section aria-labelledby="map-title">
-        <SectionTitle id="map-title" glyph="pin" tone="text-sky-ink">World map</SectionTitle>
+        <SectionTitle id="map-title" glyph="pin" tone="text-sky-ink">{t.worldMap}</SectionTitle>
         {/* Phones get one row per world (number, name, status, Travel); from 640px the three tiles sit side by side on their dashed path. */}
         <ol className="mt-4 grid gap-2 sm:grid-cols-3 sm:gap-[15px]">
           {hero.biomes.map((biome, index) => {
@@ -285,18 +286,18 @@ function HeroSheet({ hero }: { hero: HeroView }) {
             const chip = biome.unlocked ? BIOME_SWATCH[biome.id] ?? 'bg-night text-gold-ink' : 'bg-night text-faint'
             return (
               <li key={biome.id} aria-current={here ? 'location' : undefined} className={`relative flex min-w-0 items-center gap-3 px-3 py-2 sm:flex-col sm:items-stretch sm:gap-1 sm:p-4 sm:not-last:after:absolute sm:not-last:after:top-1/2 sm:not-last:after:-right-[15px] sm:not-last:after:w-[15px] sm:not-last:after:border-t-4 sm:not-last:after:border-dashed sm:not-last:after:border-gold sm:not-last:after:content-[''] window ${biome.unlocked ? '' : 'text-muted'} ${here ? 'outline-4 outline-gold' : ''}`}>
-                <span className="sr-only">World {index + 1}: </span>
+                <span className="sr-only">{t.world(index + 1)}</span>
                 <span aria-hidden="true" className={`hud grid size-7 shrink-0 place-items-center border-[3px] border-night text-hud-sm sm:hidden ${chip}`}>{index + 1}</span>
                 <span className="flex min-w-0 flex-1 flex-col sm:gap-1">
                   <span className="flex items-center gap-2 font-display text-xl font-bold sm:text-2xl">
                     <span aria-hidden="true" className={`hud hidden size-7 shrink-0 place-items-center border-[3px] border-night text-hud-sm sm:grid ${chip}`}>{index + 1}</span>
-                    <span className="leading-tight [overflow-wrap:normal]">{biome.name}</span>
+                    <span className="leading-tight [overflow-wrap:normal]">{c.name(biome.name)}</span>
                   </span>
-                  <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? 'You’re here' : onTheWay ? 'Arriving next adventure' : 'Unlocked') : `Opens at level ${biome.unlockLevel}`}</span>
+                  <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? t.youreHere : onTheWay ? t.arrivingNext : t.unlocked) : t.opensAt(biome.unlockLevel)}</span>
                 </span>
                 {biome.unlocked && !here && !onTheWay ? (
-                  <Button icon="travel" className="shrink-0 sm:mt-2 sm:self-start" pending={travel.pending} busyLabel="Travelling…" aria-label={travel.pending ? undefined : `Travel to ${biome.name}`} disabled={!canAct} onClick={() => setAsk({ kind: 'travel', biomeId: biome.id })}>
-                    Travel
+                  <Button icon="travel" className="shrink-0 sm:mt-2 sm:self-start" pending={travel.pending} busyLabel={t.travelling} aria-label={travel.pending ? undefined : t.travelTo(biome.name)} disabled={!canAct} onClick={() => setAsk({ kind: 'travel', biomeId: biome.id })}>
+                    {t.travel}
                   </Button>
                 ) : null}
               </li>
@@ -318,8 +319,6 @@ type Run<A> = { pending: boolean; run: (args: A, message?: string) => Promise<bo
 /** D131: one potion strength in the pouch, with the HP one drink restores for this hero. */
 type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
 
-const KNOCKOUT = 'a knockout costs 10% of your gold and about two hours'
-const pct = (value: number) => `${value}%`
 
 /**
  * The confirmations for the Hero page's commands that could cost progress or pace. Each says what the action costs and
@@ -327,11 +326,13 @@ const pct = (value: number) => `${value}%`
  */
 function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { pause: Run<Record<string, never>>; travel: Run<{ biomeId: string; leaveStandoff?: boolean }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }>; walkAway: Run<Record<string, never>> }; strengths: readonly PotionRow[] }) {
   const healthy = hero.simulationState !== 'quarantined'
+  const t = useT(dcHeroMessages)
+  const c = useContent()
   const here = hero.biomes.findIndex((b) => b.id === hero.biomeId)
   const common = { onClose: close, disabled: !healthy }
   if (ask?.kind === 'pause') {
     return (
-      <ConfirmSheet open title="Pause adventures?" confirmLabel="Pause" busyLabel="Pausing…" cancelLabel="Keep adventuring" pending={intents.pause.pending} {...common} onConfirm={async () => { if (await intents.pause.run({}, 'Adventures paused.')) close() }}>
+      <ConfirmSheet open title={t.pauseTitle} confirmLabel={t.pauseConfirm} busyLabel={t.pausing} cancelLabel={t.keepAdventuring} pending={intents.pause.pending} {...common} onConfirm={async () => { if (await intents.pause.run({}, t.paused)) close() }}>
         <PauseConsequences />
       </ConfirmSheet>
     )
@@ -343,15 +344,15 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
     const waiting = (hero.todo?.tasks ?? []).filter((task) => !task.done && task.biomeId === hero.biomeId)
     if (!destination) return null
     return (
-      <ConfirmSheet open title={`Travel to the ${destination.name}?`} confirmLabel="Travel" busyLabel="Travelling…" cancelLabel="Stay here" pending={intents.travel.pending} {...common} onConfirm={async () => { if (await intents.travel.run({ biomeId: destination.id, ...(hero.standoff ? { leaveStandoff: true } : {}) }, `Travelling to ${destination.name}. Arrive on the next adventure.`)) close() }}>
+      <ConfirmSheet open title={t.travelTitle(destination.name)} confirmLabel={t.travel} busyLabel={t.travelling} cancelLabel={t.stayHere} pending={intents.travel.pending} {...common} onConfirm={async () => { if (await intents.travel.run({ biomeId: destination.id, ...(hero.standoff ? { leaveStandoff: true } : {}) }, t.travellingTo(destination.name))) close() }}>
         <Consequences>
           {/* D163: travel leaves a dug-in elite behind for good. */}
-          {hero.standoff ? <li>The elite <strong>{hero.standoff.name}</strong> is left behind, with {hero.standoff.hpPct}% of its HP left. It won't be there when your hero comes back.</li> : null}
-          <li>The trip takes one adventure (about 15 minutes) with no encounter.</li>
-          {index < here ? <li>It is an easier floor than the {current?.name}: fights pay less XP and gold there.</li> : null}
+          {hero.standoff ? <li>{t.leftBehindBefore}<strong>{t.monster(hero.standoff.name)}</strong>{t.leftBehindAfter(hero.standoff.hpPct)}</li> : null}
+          <li>{t.tripTakes}</li>
+          {index < here ? <li>{t.easierFloor(current?.name ?? '')}</li> : null}
           {/* Office Cubicles (the first floor) is safe; anywhere else a knockout can happen. */}
-          {index > here ? <li>Fights are tougher there, and {KNOCKOUT}.</li> : index > 0 ? <li>Outside the Office Cubicles, {KNOCKOUT}.</li> : null}
-          {waiting.length > 0 ? <li>{waiting.length === 1 ? 'A to-do task needs' : `${waiting.length} to-do tasks need`} the {current?.name}; {waiting.length === 1 ? 'it waits' : 'they wait'} until your hero is back.</li> : null}
+          {index > here ? <li>{t.tougherThere}</li> : index > 0 ? <li>{t.outsideOffice}</li> : null}
+          {waiting.length > 0 ? <li>{t.tasksWait(waiting.length, current?.name ?? '')}</li> : null}
         </Consequences>
       </ConfirmSheet>
     )
@@ -361,13 +362,13 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
     const now = hero.stances.find((s) => s.id === hero.stance)
     if (!next || !now) return null
     return (
-      <ConfirmSheet open title={`Switch to ${next.name}?`} confirmLabel={`Go ${next.name}`} busyLabel="Switching…" cancelLabel={`Stay ${now.name}`} pending={intents.stance.pending} {...common} onConfirm={() => { close(); void intents.stance.run({ stance: next.id }, `${next.name} stance from the next adventure.`) }}>
-        <p>{next.blurb}</p>
+      <ConfirmSheet open title={t.switchTo(next.name)} confirmLabel={t.goStance(next.name)} busyLabel={t.switching} cancelLabel={t.stayStance(now.name)} pending={intents.stance.pending} {...common} onConfirm={() => { close(); void intents.stance.run({ stance: next.id }, t.stanceFromNext(next.name)) }}>
+        <p>{c.text(next.blurb)}</p>
         <Consequences>
-          {next.victoryXpPct < now.victoryXpPct ? <li>Wins give <strong>{pct(next.victoryXpPct)} XP</strong> instead of {pct(now.victoryXpPct)}, so your hero levels more slowly.</li> : next.victoryXpPct > now.victoryXpPct ? <li>Wins give {pct(next.victoryXpPct)} XP instead of {pct(now.victoryXpPct)}.</li> : null}
-          {next.restBelowPct < now.restBelowPct ? <li>It keeps fighting down to <strong>{pct(next.restBelowPct)} HP</strong> (now {pct(now.restBelowPct)}), so knockouts are more likely outside the Office; {KNOCKOUT}.</li> : null}
-          {next.potionBelowPct > now.potionBelowPct ? <li>It drinks potions sooner (below {pct(next.potionBelowPct)} HP instead of {pct(now.potionBelowPct)}), so they run out faster.</li> : null}
-          <li>It applies from the next adventure, and you can switch back any time.</li>
+          {next.victoryXpPct < now.victoryXpPct ? <li>{t.lessXpBefore}<strong>{t.lessXpMiddle(next.victoryXpPct)}</strong>{t.lessXpAfter(now.victoryXpPct)}</li> : next.victoryXpPct > now.victoryXpPct ? <li>{t.moreXp(next.victoryXpPct, now.victoryXpPct)}</li> : null}
+          {next.restBelowPct < now.restBelowPct ? <li>{t.fightsDownBefore}<strong>{t.fightsDownMiddle(next.restBelowPct)}</strong>{t.fightsDownAfter(now.restBelowPct)}</li> : null}
+          {next.potionBelowPct > now.potionBelowPct ? <li>{t.drinksSooner(next.potionBelowPct, now.potionBelowPct)}</li> : null}
+          <li>{t.switchBack}</li>
         </Consequences>
       </ConfirmSheet>
     )
@@ -375,30 +376,30 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
   if (ask?.kind === 'potion') {
     // D131: which strength to drink. Each row says what it restores now and how many are left.
     return (
-      <Sheet open onClose={() => { if (!intents.potion.pending) close() }} label="Drink a potion">
-        <SheetTitle>Which potion?</SheetTitle>
-        <p className="mt-2 text-sm text-muted tabular-nums">{hero.hp} of {hero.maxHp} HP. Your hero drinks the weakest one that keeps it adventuring; you can pick.</p>
+      <Sheet open onClose={() => { if (!intents.potion.pending) close() }} label={t.drinkAPotion}>
+        <SheetTitle>{t.whichPotion}</SheetTitle>
+        <p className="mt-2 text-sm text-muted tabular-nums">{t.potionPicker(hero.hp, hero.maxHp)}</p>
         <ul className="mt-3 flex flex-col gap-2">
           {strengths.map((row) => (
             <li key={row.templateId}>
-              <Button className="w-full" variant="secondary" icon="potion" disabled={!healthy} pending={intents.potion.pending} busyLabel="Drinking…" onClick={async () => { if (await intents.potion.run({ templateId: row.templateId }, `${row.name} drunk, +${Math.min(hero.maxHp - hero.hp, row.heals)} HP.`)) close() }}>
+              <Button className="w-full" variant="secondary" icon="potion" disabled={!healthy} pending={intents.potion.pending} busyLabel={t.drinking} onClick={async () => { if (await intents.potion.run({ templateId: row.templateId }, t.potionDrunk(row.name, Math.min(hero.maxHp - hero.hp, row.heals)))) close() }}>
                 {/* The figures sit on their own small line, as the decision buttons do, so nothing wraps mid-number in the pixel face. */}
-                <span className="flex flex-col items-center gap-1">{row.name}<span className="label-px tabular-nums">+{Math.min(hero.maxHp - hero.hp, row.heals)} HP · {row.count} left</span></span>
+                <span className="flex flex-col items-center gap-1">{c.name(row.name)}<span className="label-px tabular-nums">{t.potionRow(Math.min(hero.maxHp - hero.hp, row.heals), row.count)}</span></span>
               </Button>
             </li>
           ))}
         </ul>
-        <Button allowOffline variant="secondary" className="mt-3 w-full" disabled={intents.potion.pending} onClick={close}>Not now</Button>
+        <Button allowOffline variant="secondary" className="mt-3 w-full" disabled={intents.potion.pending} onClick={close}>{t.notNow}</Button>
       </Sheet>
     )
   }
   if (ask?.kind === 'walkAway' && hero.standoff) {
     const standoff = hero.standoff
     return (
-      <ConfirmSheet open title={`Walk away from the elite ${standoff.name}?`} confirmLabel="Walk away" busyLabel="Walking away…" cancelLabel="Keep at it" pending={intents.walkAway.pending} {...common} onConfirm={async () => { if (await intents.walkAway.run({}, `Walked away from the elite ${standoff.name}.`)) close() }}>
+      <ConfirmSheet open title={t.walkAwayTitle(standoff.name)} confirmLabel={t.walkAway} busyLabel={t.walkingAway} cancelLabel={t.keepAtIt} pending={intents.walkAway.pending} {...common} onConfirm={async () => { if (await intents.walkAway.run({}, t.walkedAway(standoff.name))) close() }}>
         <Consequences>
-          <li>It leaves now, with {standoff.hpPct}% of its HP left, and its reward goes with it.</li>
-          <li>Your hero keeps everything, and the next adventure is an ordinary one. This can't be undone.</li>
+          <li>{t.leavesNow(standoff.hpPct)}</li>
+          <li>{t.keepsEverything}</li>
         </Consequences>
       </ConfirmSheet>
     )
@@ -406,13 +407,14 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
   if (ask?.kind === 'choice' && hero.choice) {
     const option = hero.choice.options.find((o) => o.id === ask.optionId)
     if (!option) return null
-    const costs = [option.change.gold < 0 ? `${Math.abs(option.change.gold)} gold` : null, option.change.hp < 0 ? `${Math.abs(option.change.hp)} HP` : null].filter(Boolean).join(' and ')
-    const gains = [option.change.gold > 0 ? `${option.change.gold} gold` : null, option.change.hp > 0 ? `${option.change.hp} HP` : null, option.change.potions > 0 ? `${option.change.potions} ${option.change.potions === 1 ? 'potion' : 'potions'}` : null].filter(Boolean).join(' and ')
+    const costs = [option.change.gold < 0 ? `${Math.abs(option.change.gold)} ${t.gold}` : null, option.change.hp < 0 ? `${Math.abs(option.change.hp)} ${t.hp}` : null].filter(Boolean).join(t.and)
+    const gains = [option.change.gold > 0 ? `${option.change.gold} ${t.gold}` : null, option.change.hp > 0 ? `${option.change.hp} ${t.hp}` : null, option.change.potions > 0 ? `${option.change.potions} ${t.potions(option.change.potions)}` : null].filter(Boolean).join(t.and)
+    const label = c.text(option.label)
     return (
-      <ConfirmSheet open title={`${option.label}?`} confirmLabel={option.label} busyLabel="Deciding…" cancelLabel="Not yet" pending={intents.choose.pending} {...common} onConfirm={async () => { if (await intents.choose.run({ optionId: option.id }, 'Decided.')) close() }}>
+      <ConfirmSheet open title={t.question(label)} confirmLabel={label} busyLabel={t.deciding} cancelLabel={t.notYet} pending={intents.choose.pending} {...common} onConfirm={async () => { if (await intents.choose.run({ optionId: option.id }, t.decided)) close() }}>
         <Consequences>
-          <li>This costs <strong>{costs}</strong>{gains ? `, and gives ${gains}` : ''}.</li>
-          <li>A decision can't be undone. If you don't answer, “{hero.choice.options.find((o) => o.id === hero.choice!.defaultOptionId)?.label}” is chosen for you.</li>
+          <li>{t.costsBefore}<strong>{costs}</strong>{gains ? t.costsGains(gains) : ''}.</li>
+          <li>{t.cantUndo(c.text(hero.choice.options.find((o) => o.id === hero.choice!.defaultOptionId)?.label ?? ''))}</li>
         </Consequences>
       </ConfirmSheet>
     )
@@ -426,16 +428,17 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
  */
 function StandoffCard({ standoff, status, healthy, pending, onWalkAway }: { standoff: Standoff; status: string; healthy: boolean; pending: boolean; onWalkAway: () => void }) {
   const fighting = status === 'exploring'
+  const t = useT(dcHeroMessages)
   return (
     <section aria-labelledby="standoff-title" className="flex flex-col gap-3 border-[3px] border-night bg-panel p-4">
-      <SectionTitle id="standoff-title" glyph="combat" tone="text-hp-ink" size="text-2xl">An elite {standoff.name} has dug in</SectionTitle>
+      <SectionTitle id="standoff-title" glyph="combat" tone="text-hp-ink" size="text-2xl">{t.dugIn(standoff.name)}</SectionTitle>
       <div className="flex flex-col gap-1">
-        <Meter label={`Elite ${standoff.name} HP`} value={standoff.hp} max={standoff.maxHp} tone="hp" />
-        <p className="text-sm">Leaves in {standoff.ticksLeft === 1 ? 'one adventure' : `${standoff.ticksLeft} adventures`} ({aboutTime(standoff.ticksLeft)}).</p>
+        <Meter label={t.eliteHp(standoff.name)} value={standoff.hp} max={standoff.maxHp} tone="hp" />
+        <p className="text-sm">{t.leavesIn(standoff.ticksLeft, t.aboutTime(standoff.ticksLeft))}</p>
       </div>
-      <p className="text-sm">{fighting ? 'Your hero fights it every adventure.' : 'Your hero is resting and goes back to it once its health is up.'} It hits hard, and your hero fights on past its stance's rest line, so it can be knocked out. When it falls it pays many times an elite's XP and gold, and a rare or epic find from this floor.</p>
-      <Button variant="secondary" icon="door" className="self-start" disabled={!healthy} pending={pending} busyLabel="Walking away…" onClick={onWalkAway}>
-        Walk away
+      <p className="text-sm">{fighting ? t.fightsEvery : t.restingBack}{t.standoffBody}</p>
+      <Button variant="secondary" icon="door" className="self-start" disabled={!healthy} pending={pending} busyLabel={t.walkingAway} onClick={onWalkAway}>
+        {t.walkAway}
       </Button>
     </section>
   )
