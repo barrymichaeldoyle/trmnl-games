@@ -203,7 +203,7 @@ export const setPublicProfile = mutation({
 
 /**
  * The signed-in owner's dock: angler, cooler, bait, shop, forecast, recent stories and the device's twelve-hour
- * recap. Fixed bounded reads (the angler, at most 32 catches, 60 logs, the world). Null when signed out or before
+ * recap. Fixed bounded reads (the angler, at most 32 catches, 24 mounted fish, 60 logs, the world). Null when signed out or before
  * the angler exists.
  */
 export const dock = query({
@@ -219,6 +219,8 @@ export const dock = query({
     const state = toAnglerState(angler)
     const logged = speciesLogged(content, angler.logbook)
     const catches = await ctx.db.query('catches').withIndex('by_anglerId', (q) => q.eq('anglerId', angler._id)).take(32)
+    // D167: the mounted fish, so the cooler offers Mount only while a peg is free. At most the wall's 24, read under v2 only.
+    const mounted = content.trophies ? (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24)).length : 0
     // The recap reads as many stories as the device's (MAX_RECAP_STORIES); the Latest list shows the newest 20.
     const recentLogs = await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', angler._id)).order('desc').take(MAX_RECAP_STORIES)
     const logs = recentLogs.slice(0, 20)
@@ -297,7 +299,7 @@ export const dock = query({
       nextTickAt: IDLE_ANGLER_SCHEDULE.nextSlotAfter(now),
       worldTick: world?.currentTick ?? 0,
       // D162: content v2's goal, slate, season and wall; absent under v1.
-      full: fullDock(content, angler, catches, now, user.trmnlUtcOffset) ?? null,
+      full: fullDock(content, angler, catches, mounted, now, user.trmnlUtcOffset) ?? null,
     }
   },
 })

@@ -108,6 +108,8 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'mount-0002', catchId: tench! })).toMatchObject({ gold: 342 })
     const wall = await as('Pat').query(api.idleAngler.full.trophies, {})
     expect(wall).toMatchObject({ pegs: 6, wall: [{ name: 'Tench', grams: 2000, peg: 0 }], medals: [] })
+    // D167: the Dock counts free pegs, so the cooler offers Mount only while one is free.
+    expect((await as('Pat').query(api.idleAngler.anglers.dock, {})).full.pegs).toMatchObject({ pegs: 6, free: 5 })
     await as('Pat').mutation(api.idleAngler.full.takeDownTrophy, { operationId: 'down-00001', trophyId: wall.wall[0].id })
     expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall).toEqual([])
   })

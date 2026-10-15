@@ -11,6 +11,7 @@ import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishIcon, Scene } from './-art'
 import { FishName, FishText, WaterName } from './-fish'
+import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
 import { LocalTime } from '../../../lib/localTime'
@@ -69,7 +70,7 @@ function DockPage() {
       <section aria-labelledby="dock-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 id="dock-title" className="font-display text-3xl font-bold">{angler.alias}</h1>
-          <span className="text-sm text-muted"><strong className="text-ink">{angler.title}</strong> · <span className="text-gold-ink">{angler.gold} coins</span></span>
+          <span className="inline-flex flex-wrap items-center gap-x-2 text-sm text-muted"><strong className="text-ink">{angler.title}</strong> · <Coins n={angler.gold} className="text-gold-ink" /></span>
         </div>
         {scene ? <Scene sceneKey={scene} alt={`${angler.alias} fishing at ${here?.name ?? 'the water'}`} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
@@ -89,7 +90,7 @@ function DockPage() {
           <Meter label={angler.cooler.name} value={angler.cooler.used} max={angler.cooler.capacity} tone="gold" />
         </div>
         {!coolerFull && catches.length > 0 ? (
-          <p className="text-sm"><Link to="/app/idle-angler/cooler" className="underline underline-offset-4">Sell {catches.length} fish for {coolerValue} coins</Link></p>
+          <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 underline underline-offset-4">Sell {catches.length} fish <Coins n={coolerValue} sign /></Link></p>
         ) : null}
         {goal ? <p className="text-sm"><span className="text-muted">Next goal:</span> <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
         {full ? <GoalCard full={full} notify={notify} /> : null}
@@ -128,7 +129,7 @@ function DockPage() {
               disabled={chooseBait.pending}
               onClick={() => { if (angler.baitOnHook !== bait.class) void chooseBait.run({ bait: bait.class as never }, `Fishing with ${bait.name.toLowerCase()} from the next cast.`) }}
             >
-              {bait.name} · {bait.units} left
+              {bait.name} ×{bait.units}
             </Button>
           ))}
         </div>

@@ -12,6 +12,7 @@ import { LocalTime } from '../../../lib/localTime'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
 import { FishIcon } from './-art'
 import { FishName } from './-fish'
+import { Coins, Price } from './-coins'
 import { Rows } from './-rows'
 
 /**
@@ -74,11 +75,13 @@ function TrophiesPage() {
         )}
         {empty > 0 && wall.wall.length > 0 ? <p className="mt-3 text-sm text-muted">{empty} {empty === 1 ? 'peg is' : 'pegs are'} free.</p> : null}
         {next ? (
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button variant="secondary" disabled={dock.angler.gold < next.price || pegs.pending} onClick={() => void pegs.run({}, `The wall now has ${next.pegs} pegs.`)}>
-              {next.pegs} pegs for {next.price} coins
-            </Button>
-            {dock.angler.gold < next.price ? <span className="text-sm text-muted">{next.price - dock.angler.gold} coins short</span> : null}
+          // D156/D167: the Buy button with what it adds and costs, or the price and what is still to go.
+          <div className="mt-4">
+            {dock.angler.gold >= next.price ? (
+              <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={pegs.pending} onClick={() => void pegs.run({}, `The wall now has ${next.pegs} pegs.`)}>
+                {wall.pegs}→{next.pegs} pegs <Coins n={next.price} />
+              </Button>
+            ) : <><p className="mb-1 text-sm">{wall.pegs}→{next.pegs} pegs</p><Price price={next.price} gold={dock.angler.gold} /></>}
           </div>
         ) : null}
       </Card>

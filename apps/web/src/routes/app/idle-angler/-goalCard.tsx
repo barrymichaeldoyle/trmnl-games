@@ -5,6 +5,7 @@ import { Confetti, useBurst } from '../../../lib/confetti'
 import { GOAL_PAGE, type Dock } from '../../../lib/idleAngler'
 import { useIntent } from '../../../lib/intent'
 import { Button } from '../../../lib/ui'
+import { Coins } from './-coins'
 
 type FullDock = NonNullable<Dock['full']>
 
@@ -28,8 +29,8 @@ export function GoalCard({ full, notify }: { full: FullDock; notify: (feedback: 
           <p className="font-display text-2xl leading-tight font-bold">{reward.title}</p>
           <p className="text-sm">Your angler got there. The coins are yours to collect.</p>
           <div className="flex flex-wrap items-center gap-3">
-            <Button className="w-full sm:w-auto" icon="coin" pending={claim.pending} busyLabel="Claiming…" onClick={async () => { if (await claim.run({ goalId: reward.id }, `+${reward.coins} coins claimed.`)) { fireBurst(); captureAnalytics('goal claimed', { goal: reward.id }) } }}>
-              Claim +{reward.coins.toLocaleString()} coins
+            <Button className="inline-flex w-full items-center justify-center gap-2 sm:w-auto" pending={claim.pending} busyLabel="Claiming…" onClick={async () => { if (await claim.run({ goalId: reward.id }, `+${reward.coins} coins claimed.`)) { fireBurst(); captureAnalytics('goal claimed', { goal: reward.id }) } }}>
+              Claim <Coins n={reward.coins} sign />
             </Button>
             {waiting.length > 1 ? <span className="text-xs font-semibold text-muted">{waiting.length - 1} more waiting</span> : null}
           </div>
@@ -38,7 +39,7 @@ export function GoalCard({ full, notify }: { full: FullDock; notify: (feedback: 
       ) : (
         <p>
           {full.goal.page ? <Link to={GOAL_PAGE[full.goal.page]!} className="font-semibold underline underline-offset-4">{full.goal.line}</Link> : <strong>{full.goal.line}</strong>}
-          {full.goal.coins > 0 ? <span className="text-sm text-gold-ink"> · {full.goal.coins} coins</span> : null}
+          {full.goal.coins > 0 ? <> · <Coins n={full.goal.coins} sign className="text-sm text-gold-ink" /></> : null}
         </p>
       )}
       {!reward && full.comingUp ? <p className="text-sm text-muted">Coming up: {full.comingUp.name}, at {full.comingUp.species} species ({full.comingUp.logged} so far).</p> : null}

@@ -9,11 +9,16 @@ import { formatWeight, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
 import { FishIcon } from './-art'
+import { Coins } from './-coins'
 import { FishName, FishText } from './-fish'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { Rows } from './-rows'
 
-/** The cooler: choose fish to sell, or sell them all after a confirmation. Nothing is ever sold automatically. */
+/**
+ * The cooler: choose fish to sell, or sell them all after a confirmation. Nothing is ever sold automatically. The
+ * fishmonger shows only orders the cooler can fill now (D167): the angler cannot choose its catch, so an order it
+ * cannot fill is nothing to act on.
+ */
 export const Route = createFileRoute('/app/idle-angler/cooler')({
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {})),
   component: CoolerPage,
@@ -25,7 +30,6 @@ function CoolerPage() {
   const { notice, notify, dismiss } = useNotice()
   const sell = useIntent(api.idleAngler.anglers.sellCatches, { onFeedback: notify })
   const handOver = useIntent(api.idleAngler.full.handOverOrder, { onFeedback: notify })
-  const swap = useIntent(api.idleAngler.full.swapFishmongerOrder, { onFeedback: notify })
   const asBait = useIntent(api.idleAngler.full.useAsBait, { onFeedback: notify })
   const mount = useIntent(api.idleAngler.full.mountCatch, { onFeedback: notify })
   const [mounting, setMounting] = useState<{ id: Id<'catches'>; name: string; grams: number; cost: number } | null>(null)
@@ -42,6 +46,15 @@ function CoolerPage() {
     else next.add(id)
     return next
   })
+  // Orders the cooler fills now, with the fish a sale would take (the cheapest that fit) and their market price.
+  const ready = full?.features.orders
+    ? full.orders.flatMap((order) => {
+        const going = order.catchIds.map((id) => catches.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => c !== undefined)
+        return order.reward !== null && going.length === order.count ? [{ order, reward: order.reward, going, market: total(going) }] : []
+      })
+    : []
+  const wanted = new Set(ready.flatMap((r) => r.going.map((c) => c.id)))
+  const wantedInCooler = catches.filter((c) => wanted.has(c.id)).length
   const sellRows = async (rows: typeof catches) => {
     if (rows.length === 0) return
     if (await sell.run({ catchIds: rows.map((r) => r.id) }, `Sold ${rows.length} fish for ${total(rows)} coins.`)) setChosen(new Set())
@@ -50,40 +63,32 @@ function CoolerPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Cooler</h1>
-        <span className="text-sm text-muted"><strong className="text-ink">{dock.angler.cooler.name}</strong> · {catches.length} of {dock.angler.cooler.capacity} · <span className="text-gold-ink">{dock.angler.gold} coins</span></span>
+        <span className="inline-flex flex-wrap items-center gap-x-2 text-sm text-muted"><strong className="text-ink">{dock.angler.cooler.name}</strong> · <span className="tabular-nums">{catches.length}/{dock.angler.cooler.capacity}</span> · <Coins n={dock.angler.gold} className="text-gold-ink" /></span>
       </div>
-      {full?.features.orders ? (
-        <Card title="The fishmonger's orders">
-          <p className="mb-3 text-sm text-muted">The fishmonger pays more than the market for fish that fit his orders. Catch them, then hand them over here. Orders never expire.</p>
-          {full.orders.length === 0 ? <p>No orders on the slate yet. New ones arrive at 07:00.</p> : (
-            <ul className="flex flex-col gap-3">
-              {full.orders.map((order) => {
-                // The fish a hand-over would take: the cheapest that fit, so the dearer ones stay for the market.
-                const going = order.catchIds.map((id) => catches.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => c !== undefined)
-                const ready = order.reward !== null && going.length === order.count
-                return (
-                  <li key={order.id} className={`flex flex-col gap-2 border-[3px] p-3 ${ready ? 'border-gold bg-panel' : 'border-dashed border-faint'}`}>
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                      <p className="text-lg font-semibold"><FishText text={order.line} /></p>
-                      <p className="text-sm font-semibold text-gold-ink">{ready ? `Pays ${order.reward} coins` : `Pays half again the market price, plus ${order.bonus} coins`}</p>
-                    </div>
-                    {ready ? (
-                      <>
-                        <p className="text-sm">In your cooler: {going.map((c) => `${c.name}, ${formatWeight(c.grams)}`).join(' and ')}. Handing over takes {going.length === 1 ? 'it' : 'them'} out of the cooler.</p>
-                        <Button className="w-full sm:w-auto sm:self-start" icon="coin" pending={handOver.pending} busyLabel="Handing over…" onClick={() => void handOver.run({ orderId: order.id, catchIds: order.catchIds }, `Handed over for ${order.reward} coins.`)}>Hand over +{order.reward} coins</Button>
-                      </>
-                    ) : (
-                      <p className="text-sm text-muted">
-                        {order.hint ? <>Not in your logbook yet. Try {order.hint}.</> : 'Nothing in your cooler fits yet. Keep fishing; the angler lands them as it goes.'}
-                      </p>
-                    )}
-                    <Button variant="quiet" className="self-start !px-0 text-sm" disabled={full.swappedToday || swap.pending} onClick={() => void swap.run({ orderId: order.id }, 'The fishmonger asks for something else.')}>{full.swappedToday ? 'Already asked for something else today' : 'Ask for a different order'}</Button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-          <p className="mt-3 text-sm text-muted">Once a day you can ask for a different order in place of one you cannot fill. A filled order's slot refills at 07:00.</p>
+      {ready.length > 0 ? (
+        <Card title="Fishmonger" icon="coin">
+          <p className="mb-3 text-sm text-muted">Pays more than the market for these.</p>
+          <ul className="flex flex-col gap-3">
+            {ready.map(({ order, reward, going, market }) => (
+              <li key={order.id} className="flex flex-col gap-2 border-b border-rule pb-3 last:border-b-0 last:pb-0">
+                <p className="text-sm font-semibold text-muted"><FishText text={order.line} /></p>
+                <ul className="flex flex-col gap-1">
+                  {going.map((c) => (
+                    <li key={c.id} className="flex items-center gap-3">
+                      <FishIcon id={c.speciesId} />
+                      <span className="min-w-0"><FishName id={c.speciesId}>{c.name}</FishName> <span className="text-sm whitespace-nowrap text-muted">{formatWeight(c.grams)}</span></span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <Button className="inline-flex items-center justify-center gap-2" pending={handOver.pending} busyLabel="Selling…" onClick={() => void handOver.run({ orderId: order.id, catchIds: order.catchIds }, `Sold to the fishmonger for ${reward} coins.`)}>
+                    Sell <Coins n={reward} sign />
+                  </Button>
+                  <span className="text-sm text-muted">Market <Coins n={market} /></span>
+                </div>
+              </li>
+            ))}
+          </ul>
         </Card>
       ) : null}
       {catches.length === 0 ? (
@@ -97,31 +102,42 @@ function CoolerPage() {
                   <input type="checkbox" className="pixel-check size-5 shrink-0" checked={chosen.has(fish.id)} onChange={() => toggle(fish.id)} />
                   <FishIcon id={fish.speciesId} />
                   {/* Name over weight: inline, a phone's narrow row split the weight across lines. */}
-                  <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId}>{fish.name}</FishName>{' '}<span className="text-sm whitespace-nowrap text-muted">{formatWeight(fish.grams)}{fish.record ? <span className="text-gold-ink"> · personal best</span> : null}</span></span>
-                  <span className="shrink-0 tabular-nums text-gold-ink">{fish.value} coins</span>
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId}>{fish.name}</FishName>{' '}<span className="text-sm text-muted"><span className="whitespace-nowrap">{formatWeight(fish.grams)}</span>{fish.record ? <span className="whitespace-nowrap text-gold-ink"> · personal best</span> : null}{wanted.has(fish.id) ? <span className="whitespace-nowrap text-gold-ink"> · fishmonger</span> : null}</span></span>
+                  <Coins n={fish.value} className="shrink-0 text-gold-ink" />
                 </label>
-                {full && (full.catchActions[fish.id]?.bait || full.catchActions[fish.id]?.mountCost != null) ? (
-                  <div className="flex flex-wrap gap-2 border-b border-rule pb-2 pl-8">
-                    {full.catchActions[fish.id]?.bait ? <Button variant="secondary" disabled={asBait.pending} onClick={() => void asBait.run({ catchId: fish.id }, `The ${fish.name} goes in the deadbait box.`)}>Use as bait</Button> : null}
-                    {full.catchActions[fish.id]?.mountCost != null ? <Button variant="secondary" disabled={mount.pending} onClick={() => setMounting({ id: fish.id, name: fish.name, grams: fish.grams, cost: full.catchActions[fish.id]!.mountCost! })}>Mount for {full.catchActions[fish.id]!.mountCost} coins</Button> : null}
-                  </div>
-                ) : null}
+                {(() => {
+                  // Only what can happen now: Mount needs the coins and a free peg, so it waits rather than refusing.
+                  const bait = full?.catchActions[fish.id]?.bait === true
+                  const cost = full?.catchActions[fish.id]?.mountCost ?? null
+                  const mountable = cost !== null && full !== null && full.pegs.free > 0 && dock.angler!.gold >= cost
+                  if (!bait && !mountable) return null
+                  return (
+                    <div className="flex flex-wrap gap-2 border-b border-rule pb-2 pl-8">
+                      {bait ? <Button variant="secondary" disabled={asBait.pending} onClick={() => void asBait.run({ catchId: fish.id }, `The ${fish.name} goes in the deadbait box.`)}>Use as bait</Button> : null}
+                      {mountable ? <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={mount.pending} onClick={() => setMounting({ id: fish.id, name: fish.name, grams: fish.grams, cost })}>Mount <Coins n={cost} /></Button> : null}
+                    </div>
+                  )
+                })()}
               </li>
             ))}
           </ul>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Button disabled={picked.length === 0} pending={sell.pending} busyLabel="Selling…" onClick={() => void sellRows(picked)}>
-              {picked.length === 0 ? 'Choose fish to sell' : `Sell ${picked.length} for ${total(picked)} coins`}
-            </Button>
-            <Button variant="secondary" disabled={sell.pending} onClick={() => setAskingAll(true)}>Sell all for {total(catches)} coins</Button>
+          {/* D156: no dead button while nothing is ticked; the Sell button appears with the first fish chosen. */}
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {picked.length > 0 ? (
+              <Button className="inline-flex items-center justify-center gap-2" pending={sell.pending} busyLabel="Selling…" onClick={() => void sellRows(picked)}>
+                Sell {picked.length} <Coins n={total(picked)} sign />
+              </Button>
+            ) : null}
+            <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={sell.pending} onClick={() => setAskingAll(true)}>Sell all <Coins n={total(catches)} sign /></Button>
+            {picked.length === 0 ? <span className="text-sm text-muted">Or tick fish to sell some.</span> : null}
           </div>
-          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to double'], ['Cooler full', 'New catches are released. They still count for the logbook, achievements and boards, but earn no coins']]} />
+          <Rows className="mt-3" rows={[['Price', 'Heavier fish sell for more, up to ×2'], ['Cooler full', 'New catches are released: logged, but no coins']]} />
         </Card>
       )}
       <ConfirmSheet
         open={askingAll}
         title={`Sell all ${catches.length} fish?`}
-        confirmLabel={`Sell for ${total(catches)} coins`}
+        confirmLabel={`Sell for +${total(catches)} coins`}
         busyLabel="Selling…"
         cancelLabel="Cancel"
         pending={sell.pending}
@@ -132,7 +148,12 @@ function CoolerPage() {
           setAskingAll(false)
         }}
       >
-        <p>Every fish in the {dock.angler.cooler.name.toLowerCase()} goes, and you get {total(catches)} coins. Your logbook keeps every personal best, even once the fish is sold.</p>
+        <Rows rows={[
+          ['Fish', `${catches.length}`],
+          ['You get', <Coins n={total(catches)} sign className="text-gold-ink" />],
+          wantedInCooler > 0 ? ['Fishmonger', `Pays more for ${wantedInCooler} of them`] : null,
+          ['Logbook', 'Keeps every personal best'],
+        ]} />
       </ConfirmSheet>
       <ConfirmSheet
         open={mounting !== null}
@@ -148,7 +169,7 @@ function CoolerPage() {
           setMounting(null)
         }}
       >
-        {mounting ? <Rows rows={[['Goes to', 'The trophy wall, on a free peg'], ['Cost', `${mounting.cost} coins`], ['Coins left', `${dock.angler.gold - mounting.cost}`], ['Not sold', 'It leaves the cooler without earning coins']]} /> : null}
+        {mounting ? <Rows rows={[['Goes to', 'The trophy wall, on a free peg'], ['Cost', <Coins n={mounting.cost} />], ['Coins left', <Coins n={dock.angler.gold - mounting.cost} />], ['Not sold', 'It leaves the cooler without earning coins']]} /> : null}
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>

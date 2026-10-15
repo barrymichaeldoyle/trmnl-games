@@ -8,6 +8,7 @@ import { preload } from '../../../lib/preload'
 import { formatWeight, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
+import { Coins, Price } from './-coins'
 import { FishList, WaterName, baitCatches } from './-fish'
 import { Rows } from './-rows'
 
@@ -44,7 +45,10 @@ function ShopPage() {
   const upgradesOpen = !full || full.features.shop_upgrades
   const sea = dock.waters?.find((w) => w.charter)
   const seaKnown = sea?.opensAfter ? sea.opensAfter.logged >= sea.opensAfter.species : false
-  const short = (price: number) => (gold < price ? <span className="text-sm text-muted">{price - gold} coins short</span> : null)
+  // D156/D167: an affordable purchase is a Buy button with its price; one the angler cannot pay yet is its price and what is still to go.
+  const buy = (price: number, open: () => void) => (gold >= price
+    ? <Button className="inline-flex items-center justify-center gap-2" disabled={buying} onClick={open}>Buy <Coins n={price} /></Button>
+    : <Price price={price} gold={gold} />)
   const gateOf = (water: string) => dock.waters?.find((w) => w.id === water)?.opensAfter ?? null
   const nextRod = dock.shop.rod
   const nextCooler = dock.shop.cooler
@@ -66,15 +70,16 @@ function ShopPage() {
           ['Waters', waters.join(', ')],
           ...(catches.only.ids.length + catches.only.unseen > 0 ? [['Only bait for', <FishList {...catches.only} />] as const] : []),
           ...(catches.also.ids.length + catches.also.unseen > 0 ? [['Also catches', <FishList {...catches.also} />] as const] : []),
-          ['Tub', `${b.tubSize} for ${b.price} coins`],
+          ['Tub', <span className="inline-flex flex-wrap items-center gap-x-2">{b.tubSize} for <Coins n={b.price} /></span>],
         ]} />
-        <div className="flex flex-wrap gap-2">
-          {[1, 3].filter((n) => n <= b.tubsThatFit).map((n) => (
-            <Button key={n} variant="secondary" disabled={gold < b.price * n || buying} onClick={() => setOffer({ title: `Buy ${n === 1 ? 'a tub' : `${n} tubs`} of ${b.name.toLowerCase()}?`, price: b.price * n, rows: [['You get', `${b.tubSize * n} ${b.name.toLowerCase()}`], ['You will hold', `${b.units + b.tubSize * n} (now ${b.units})`]], buy: () => bait.run({ bait: b.class as never, tubs: n }, `Bought ${n} ${n === 1 ? 'tub' : 'tubs'} of ${b.name.toLowerCase()}.`) })}>
-              {n === 1 ? 'Buy 1 tub' : `Buy ${n} tubs`}
+        {/* Each button says what it adds and costs; a size the angler cannot pay for yet is left out. */}
+        <div className="flex flex-wrap items-center gap-2">
+          {[1, 3].filter((n) => n <= b.tubsThatFit && gold >= b.price * n).map((n) => (
+            <Button key={n} variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={buying} onClick={() => setOffer({ title: `Buy ${b.tubSize * n} ${b.name.toLowerCase()}?`, price: b.price * n, rows: [['You get', `+${b.tubSize * n}`], ['You will hold', `${b.units + b.tubSize * n} (now ${b.units})`]], buy: () => bait.run({ bait: b.class as never, tubs: n }, `Bought ${b.tubSize * n} ${b.name.toLowerCase()}.`) })}>
+              +{b.tubSize * n} <Coins n={b.price * n} />
             </Button>
           ))}
-          {b.tubsThatFit === 0 ? <span className="text-sm text-muted">No room for another tub</span> : null}
+          {b.tubsThatFit === 0 ? <span className="text-sm text-muted">Full: no room for another tub</span> : gold < b.price ? <Price price={b.price} gold={gold} /> : null}
         </div>
       </li>
     )
@@ -83,7 +88,7 @@ function ShopPage() {
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="font-display text-3xl font-bold">Tackle shop</h1>
-        <span className="text-sm font-semibold text-gold-ink">{gold} coins</span>
+        <Coins n={gold} className="text-sm font-semibold text-gold-ink" />
       </div>
 
       {!upgradesOpen ? <Card title="Rods and coolers"><p>Better rods and bigger coolers arrive once {full?.comingUp?.feature === 'shop_upgrades' ? full.comingUp.species : 2} species are in your logbook.</p></Card> : null}
@@ -95,11 +100,8 @@ function ShopPage() {
         <p className="mt-2 text-sm text-muted">A fish heavier than your rod can land gets away.</p>
         {nextRod ? (
           <>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <Button disabled={gold < nextRod.price || buying} onClick={() => setOffer({ title: `Buy the ${nextRod.name}?`, price: nextRod.price, rows: [['Replaces', `the ${angler.rod.name}`], ['Lands up to', `${formatWeight(nextRod.limitGrams)} (now ${formatWeight(angler.rod.limitGrams)})`], ['Bite chance', `+${nextRod.biteBonusPercent}% over the Cane Rod`]], buy: () => rod.run({}, `Bought the ${nextRod.name}.`) })}>
-                Buy for {nextRod.price} coins
-              </Button>
-              {short(nextRod.price)}
+            <div className="mt-3">
+              {buy(nextRod.price, () => setOffer({ title: `Buy the ${nextRod.name}?`, price: nextRod.price, rows: [['Replaces', `the ${angler.rod.name}`], ['Lands up to', `${formatWeight(nextRod.limitGrams)} (now ${formatWeight(angler.rod.limitGrams)})`], ['Bite chance', `+${nextRod.biteBonusPercent}% over the Cane Rod`]], buy: () => rod.run({}, `Bought the ${nextRod.name}.`) }))}
             </div>
           </>
         ) : <p className="mt-2 text-sm text-muted">This is the best rod.</p>}
@@ -113,11 +115,8 @@ function ShopPage() {
         <p className="mt-2 text-sm text-muted">When the cooler is full, new catches are released and earn no coins.</p>
         {nextCooler ? (
           <>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <Button disabled={gold < nextCooler.price || buying} onClick={() => setOffer({ title: `Buy the ${nextCooler.name}?`, price: nextCooler.price, rows: [['Replaces', `the ${angler.cooler.name}`], ['Holds', `${nextCooler.capacity} fish (now ${angler.cooler.capacity})`], ['Your catch', 'Moves into the new cooler']], buy: () => cooler.run({}, `Bought the ${nextCooler.name}.`) })}>
-                Buy for {nextCooler.price} coins
-              </Button>
-              {short(nextCooler.price)}
+            <div className="mt-3">
+              {buy(nextCooler.price, () => setOffer({ title: `Buy the ${nextCooler.name}?`, price: nextCooler.price, rows: [['Replaces', `the ${angler.cooler.name}`], ['Holds', `${nextCooler.capacity} fish (now ${angler.cooler.capacity})`], ['Your catch', 'Moves into the new cooler']], buy: () => cooler.run({}, `Bought the ${nextCooler.name}.`) }))}
             </div>
           </>
         ) : <p className="mt-2 text-sm text-muted">This is the biggest cooler.</p>}
@@ -125,15 +124,10 @@ function ShopPage() {
 
       {full?.charter && seaKnown ? (
         <Card title="Deep-sea charter">
-          <Rows rows={[['Ticket', `${full.charter.casts} casts at sea for ${full.charter.price} coins`], ['On your ticket', `${full.charter.castsLeft} casts`], ['Leaves from', 'The Harbour Pier, and sails back there when the ticket runs out']]} />
+          <Rows rows={[['Ticket', <span className="inline-flex flex-wrap items-center gap-x-2">{full.charter.casts} casts at sea for <Coins n={full.charter.price} /></span>], ['On your ticket', `${full.charter.castsLeft} casts`], ['Leaves from', 'The Harbour Pier, and sails back there when the ticket runs out']]} />
           <div className="mt-3 flex flex-wrap items-center gap-3">
             {full.charter.castsLeft > 0 ? <span className="text-sm text-muted">Casts left on a ticket stay for the next trip. Head out from the Dock.</span> : (
-              <>
-                <Button disabled={gold < full.charter.price || buying} onClick={() => setOffer({ title: 'Book a charter ticket?', price: full.charter!.price, rows: [['You get', `${full.charter!.casts} casts at sea`], ['Then', 'Fish the charter from the Dock']], buy: () => charter.run({}, `Booked a charter for ${full.charter!.casts} casts.`) })}>
-                  Book for {full.charter.price} coins
-                </Button>
-                {short(full.charter.price)}
-              </>
+              buy(full.charter.price, () => setOffer({ title: 'Book a charter ticket?', price: full.charter!.price, rows: [['You get', `${full.charter!.casts} casts at sea`], ['Then', 'Fish the charter from the Dock']], buy: () => charter.run({}, `Booked a charter for ${full.charter!.casts} casts.`) }))
             )}
           </div>
         </Card>
@@ -154,11 +148,7 @@ function ShopPage() {
                     ? <> once {gate.species} <WaterName id={gate.waterId}>{gate.waterName}</WaterName> species are in your logbook ({gate.logged} so far).</>
                     : <>. Your logbook has the {gate.species} <WaterName id={gate.waterId}>{gate.waterName}</WaterName> species it needs.</>}</p>
                 </div>
-                {item.owned ? <span className="text-sm font-semibold text-xp-ink">Owned</span> : (
-                  <Button variant="secondary" disabled={gold < item.price || buying} onClick={() => setOffer({ title: `Buy the ${item.name}?`, price: item.price, rows: [['Opens', water[0]!.toUpperCase() + water.slice(1)], ['Fish there', gate && missing > 0 ? `After ${missing} more ${gate.waterName} species` : 'Straight away']], buy: () => access.run({ access: item.id }, `Bought the ${item.name}.`) })}>
-                    Buy for {item.price} coins
-                  </Button>
-                )}
+                {item.owned ? <span className="text-sm font-semibold text-xp-ink">Owned</span> : buy(item.price, () => setOffer({ title: `Buy the ${item.name}?`, price: item.price, rows: [['Opens', water[0]!.toUpperCase() + water.slice(1)], ['Fish there', gate && missing > 0 ? `After ${missing} more ${gate.waterName} species` : 'Straight away']], buy: () => access.run({ access: item.id }, `Bought the ${item.name}.`) }))}
               </li>
             )
           })}
@@ -189,7 +179,7 @@ function ShopPage() {
           setOffer(null)
         }}
       >
-        {offer ? <Rows rows={[...offer.rows, ['Cost', `${offer.price} coins`], ['Coins left', `${gold - offer.price}`]]} /> : null}
+        {offer ? <Rows rows={[...offer.rows, ['Cost', <Coins n={offer.price} />], ['Coins left', <Coins n={gold - offer.price} />]]} /> : null}
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>

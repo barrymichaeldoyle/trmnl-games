@@ -48,7 +48,7 @@ interface FullDock {
   readonly season: { id: string; name: string; endsAt: number } | null
   readonly runs: ReadonlyArray<{ id: string; line: string; water: string; species: string }>
   readonly charter: { price: number; casts: number; castsLeft: number } | null
-  readonly pegs: { pegs: number; next: { pegs: number; price: number } | null }
+  readonly pegs: { pegs: number; free: number; next: { pegs: number; price: number } | null }
   readonly deadbait: number
   readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null }>>
 }

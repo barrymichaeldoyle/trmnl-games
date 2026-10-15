@@ -21,10 +21,10 @@ const FEATURE_NAMES = { shop_upgrades: 'Rod and cooler upgrades', orders: 'Fishm
 
 /**
  * The Dock's content v2 block (D162): the goal, the next locked feature, the slate with the fish that fit each order,
- * the season and its run, the charter ticket and the wall's pegs, and what each cooler fish can do. Undefined under
+ * the season and its run, the charter ticket and the wall's pegs (and how many are free), and what each cooler fish can do. Undefined under
  * content v1, so the companion shows the MVP Dock unchanged until the switch.
  */
-export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, catches: readonly Doc<'catches'>[], now: number, utcOffsetSeconds: number | undefined) {
+export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, catches: readonly Doc<'catches'>[], mounted: number, now: number, utcOffsetSeconds: number | undefined) {
   if (!content.goals) return undefined
   const state = toAnglerState(angler)
   const logged = speciesLogged(content, angler.logbook)
@@ -58,7 +58,7 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
     // Only runs at waters the angler can fish (D157): a newcomer is not told about the charter's cod.
     runs: runsAt(content, now).filter((r) => canFish(content, { ...state, charterCasts: 1 }, r.water)).map((r) => ({ id: r.id, line: r.line, water: r.water, species: speciesName(content, r.species) })),
     charter: content.charterTicket ? { price: content.charterTicket.price, casts: content.charterTicket.casts, castsLeft: angler.charterCasts ?? 0 } : null,
-    pegs: { pegs: pegsOf(content, state), next: nextPegs(content, state) },
+    pegs: { pegs: pegsOf(content, state), free: Math.max(0, pegsOf(content, state) - mounted), next: nextPegs(content, state) },
     deadbait: angler.bait.deadbait ?? 0,
     catchActions: Object.fromEntries(
       catches.map((c) => {

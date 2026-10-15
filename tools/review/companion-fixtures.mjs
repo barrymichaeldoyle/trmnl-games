@@ -22,7 +22,7 @@
  * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   goal=ready (D166, with v2=1: two reached goals waiting on the Dock's Claim button and a dot on the Dock tab)
- *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies)   v2=new (a first-day angler with everything locked)
+ *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount)   v2=new (a first-day angler with everything locked)
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
@@ -318,7 +318,7 @@ if (v2 && iaDock.angler) {
     comingUp: fresh ? { feature: 'shop_upgrades', name: 'Rod and cooler upgrades', species: 2, logged: 0 } : { feature: 'deadbait', name: 'Deadbait', species: 10, logged: 9 },
     features: { shop_upgrades: !fresh, orders: !fresh, opens: !fresh, trophies: !fresh, deadbait: !fresh },
     orders: fresh ? [] : [
-      { id: 'o1', kind: 'species', line: 'Two Chub', hint: null, count: 2, catchIds: ids.slice(0, 2), reward: 98, bonus: 20 },
+      { id: 'o1', kind: 'species', line: 'Two Chub', hint: null, count: 2, catchIds: [ids[1], ids[4]], reward: 161, bonus: 20 },
       { id: 'o2', kind: 'teaching', line: 'One Tench', hint: 'Millpond, on bread or worms, at dawn or dusk', count: 1, catchIds: [], reward: null, bonus: 60 },
       { id: 'o3', kind: 'time', line: 'Two fish caught at dawn or dusk', hint: null, count: 2, catchIds: [], reward: null, bonus: 30 },
     ],
@@ -326,7 +326,7 @@ if (v2 && iaDock.angler) {
     season: { id: 'autumn', name: 'Autumn', endsAt: now + 864e5 * 3 },
     runs: fresh ? [] : [{ id: 'salmon_run', line: 'The salmon are running at River Bend.', water: 'river_bend', species: 'Salmon' }],
     charter: { price: 550, casts: 96, castsLeft: 0 },
-    pegs: { pegs: 6, next: { pegs: 12, price: 800 } },
+    pegs: { pegs: 6, free: params.get('pegs') === 'full' ? 0 : 3, next: { pegs: 12, price: 800 } },
     deadbait: 6,
     catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && i === 0 ? 192 : null }])),
   };
