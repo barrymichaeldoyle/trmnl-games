@@ -57,7 +57,7 @@ function Landing() {
             <p>When the bag fills, your hero naps until you make room. Sell spare gear for gold, or salvage it for materials and upgrade the pieces your hero wears. Bigger bags and potion pouches are bought with gold, and a wandering merchant sometimes sells items at a discount.</p>
           </Topic>
           <Topic id="players-heading" glyph="sword" tone="text-hp-ink" title="Other players" help="desk-raids">
-            <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. A raid is a coin toss tilted by stance, never by level, and nobody chooses who gets raided. The loser hands over 5% of its gold.</p>
+            <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. Stance tilts the odds of winning, and nobody chooses who gets raided. The loser hands over 5% of its gold.</p>
             <p>Your screen shows the seven-day XP Top 5 for your level group, with your own row marked. You can also give your hero a public page with its level, rank and achievements, and share it with a picture card.</p>
           </Topic>
           <Topic id="career-heading" glyph="quest" tone="text-xp-ink" title="A career and a second hero" help="career">

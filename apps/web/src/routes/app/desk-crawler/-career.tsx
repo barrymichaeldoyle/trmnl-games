@@ -145,7 +145,7 @@ export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerV
           <SectionTitle id="career-title" glyph="career" as="h1">Career</SectionTitle>
           <p className="text-sm text-muted">{reached} of {career.total} reached</p>
         </div>
-        <p className="text-sm">One goal at a time. Your hero reaches some by adventuring; the rest are done here in the companion. Each pays a little gold, never XP.</p>
+        <p className="text-sm">One goal at a time. Your hero reaches some by adventuring; the rest are done here in the companion. Each pays a little gold.</p>
         <ol className="flex flex-col">
           {career.rungs.map((rung, index) => {
             const hidden = rung.state === 'ahead' && index > career.rung + PREVIEW

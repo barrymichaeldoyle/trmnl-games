@@ -287,7 +287,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
           <ul>
             {OCCASIONS.map((rule) => <li key={rule.id}><strong>{rule.name}</strong>, {occasionDate(rule)}: {rule.id === 'friday_13th' ? 'every desk raid goes wrong (below).' : rule.effectLabel ? `${rule.effectLabel}.` : 'decorations only.'}</li>)}
           </ul>
-          <p><strong>Friday the 13th.</strong> Desk raids start twice as often, and every one of them goes wrong: nobody wins, and both heroes lose 20% of their maximum HP and 5% of their gold, which nobody gets. It counts as a mishap, not a win or a loss, in your hero's raid record.</p>
+          <p><strong>Friday the 13th.</strong> Desk raids start twice as often, and every one of them goes wrong: nobody wins, and both heroes lose 20% of their maximum HP and 5% of their gold, which nobody gets. Your hero's raid record counts it as a mishap.</p>
           <p><strong>Christmas.</strong> Your hero finds one wrapped gift each Christmas: a piece of gear from the floor it's on, on its first adventure of the three days.</p>
         </>
       ) : null}
@@ -300,7 +300,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <li><strong>Thrifty</strong> loses 5 points less gold when things go wrong: a retreat loses no gold instead of 5%, and a knockout loses 5% instead of 10%.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
-      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero keeps adventuring until it finds another piece. That piece is held for you, never sold or thrown away, and your hero sleeps until you make room.</p>
+      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero keeps adventuring until it finds another piece. That piece is held for you, and your hero sleeps until you make room.</p>
       <h2 id="bigger-bags">Bigger bags</h2>
       <p>Your bag grows with gold. {TOTE ? `Your hero finds a ${TOTE.name} (${TOTE.capacity}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(SHOP_BAGS)}, up to {TOP_BAG} slots. There are no level requirements, and bags never drop as loot.</p>
       <ol className="[&_li]:list-decimal">
@@ -313,7 +313,7 @@ export const Route = createFileRoute('/help/desk-crawler')({
         <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
         <p>{WORKBENCH_LEVEL !== undefined ? `From level ${WORKBENCH_LEVEL}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {MATERIALS_LINE}. Epic gear pays {WORKBENCH.epicYieldMultiplier} times as much. Materials take no bag space and are never sold. Gear is only salvaged when you choose to.{WORKBENCH_LEVEL !== undefined ? ` Before level ${WORKBENCH_LEVEL}, sell your spares: the first upgrade needs level ${WORKBENCH_LEVEL} anyway.` : ''}</p>
         <p>The workbench spends materials and gold on the gear your hero wears, in place: the piece keeps its name and trait, and only its numbers change. Each piece has one next step. {TIER_STEPS.map((s, i) => `${i === 0 ? 'Raising a tier-1 piece to Mk II' : `Mk II to Mk III`} costs ${price(s)}`).join('; ')}; a piece can only be raised to a tier your hero’s level could equip. Once a piece is Mk III (or was found there), reinforcement adds one point a step: {REINFORCE_STEPS.map((s) => `+${s.to} for ${price(s)}`).join(', ')}. {REINFORCE_STEPS.length > 0 ? `After +${REINFORCE_STEPS.at(-1)!.to} the piece is finished.` : ''} Rare and epic gear can also have a trait of your choosing fitted for {price(WORKBENCH.affix)}, replacing the one it has.</p>
-        <p>Upgrades always succeed. Salvaging an upgraded piece pays what it was found at, not what you spent on it, so only upgrade gear you plan to keep wearing.</p>
+        <p>Upgrades always succeed. Salvaging an upgraded piece doesn't return what you spent upgrading it, so only upgrade gear you plan to keep wearing.</p>
       </> : null}
       <h2 id="getting-knocked-out">Getting knocked out</h2>
       <p>Your hero revives automatically after about two hours and returns to Office Cubicles. You keep your XP and equipment but lose 10% of your current gold.</p>

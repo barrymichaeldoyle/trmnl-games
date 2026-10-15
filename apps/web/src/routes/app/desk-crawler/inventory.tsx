@@ -584,7 +584,7 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
         <li>Spends {materialsText(step.materials, materials)}.</li>
         <li>Costs {step.gold} gold.</li>
         <li>Remaining gold: {hero.gold - step.gold}</li>
-        <li>Salvaging it later pays its find value, not what you spent.</li>
+        <li>If you salvage it later, the gold and materials spent here don't come back.</li>
       </Consequences> : null}
     </ConfirmSheet>
     <Sheet open={fitting !== null} onClose={() => { if (!intents.chooseAffix.pending) setFitting(null) }} label="Choose an affix">
