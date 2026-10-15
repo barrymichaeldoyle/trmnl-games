@@ -1,3 +1,4 @@
+import { INTL_TAG, type Locale } from '@trmnl-games/platform'
 /**
  * The public dev log (D153), newest first: changes players can see, in their words, dated by the day they went live.
  * Add an entry in the same commit as the change it describes. No decision numbers or internal names. A later change on
@@ -83,7 +84,7 @@ export const changeKeys = (): Array<{ key: string; title: string }> =>
   CHANGELOG.flatMap((entry) => entry.changes.map((change, index) => ({ key: `${entry.date}.${String(entry.changes.length - index).padStart(2, '0')}`, title: change.title })))
 
 /** The day an entry went live, written out in English ("14 October 2026"), the same on the server and in every browser. */
-export const changeDay = (date: string, year = true) => new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', ...(year ? { year: 'numeric' } : {}), timeZone: 'UTC' })
+export const changeDay = (date: string, year = true, locale: Locale = 'en') => new Date(`${date}T12:00:00Z`).toLocaleDateString(INTL_TAG[locale], { day: 'numeric', month: 'long', ...(year ? { year: 'numeric' } : {}), timeZone: 'UTC' })
 
 /** The newest `count` changes, newest first, each with the day it went live. */
 export const latestChanges = (count: number): Array<{ date: string; title: string; body: string }> =>

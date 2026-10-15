@@ -9,7 +9,7 @@ import { SiteShell } from '../lib/prose'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
 import { DESK_CRAWLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
 import { AfterListing, useGames } from '../lib/gameAccess'
-import { messagesFor, useT } from '../lib/i18n'
+import { messagesFor, useLocale, useT } from '../lib/i18n'
 import { pitchMessages } from '../i18n/pitch'
 
 export const Route = createFileRoute('/')({
@@ -51,6 +51,7 @@ function IdleAnglerSection() {
 /** The newest few What's new entries (D153), so the front page shows the game is still moving; the page has them all. */
 function RecentChanges() {
   const t = useT(pitchMessages)
+  const locale = useLocale()
   return (
     <section aria-labelledby="recent-heading" className="flex flex-col gap-6">
       <div className="flex max-w-prose flex-col gap-2">
@@ -60,9 +61,9 @@ function RecentChanges() {
       <ul className="grid gap-4 lg:grid-cols-3">
         {latestChanges(3).map((change) => (
           <li key={change.title} className="window flex flex-col gap-2 p-5">
-            <time dateTime={change.date} className="text-sm font-semibold text-muted">{changeDay(change.date)}</time>
-            <h3 className="font-display text-xl font-bold">{change.title}</h3>
-            <p className="line-clamp-4 leading-relaxed text-muted">{change.body}</p>
+            <time dateTime={change.date} className="text-sm font-semibold text-muted">{changeDay(change.date, true, locale)}</time>
+            <h3 lang="en" className="font-display text-xl font-bold">{change.title}</h3>
+            <p lang="en" className="line-clamp-4 leading-relaxed text-muted">{change.body}</p>
           </li>
         ))}
       </ul>

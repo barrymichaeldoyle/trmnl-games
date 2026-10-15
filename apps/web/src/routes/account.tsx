@@ -11,8 +11,12 @@ import { NameField, nameProblem } from '../lib/nameField'
 import { Button, ErrorNote } from '../lib/ui'
 import { seo } from '../lib/seo'
 import { preload } from '../lib/preload'
+import { formatDate, messagesFor, useLocale, useT, writeLocaleCookie } from '../lib/i18n'
+import { accountMessages } from '../i18n/account'
+import { LOCALES, LOCALE_NAMES, LANGUAGES_LIVE, isLocale, type Locale } from '@trmnl-games/platform'
+import { useMutation } from 'convex/react'
 
-export const Route = createFileRoute('/account')({ head: () => seo({ title: 'Account', index: false }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {})), component: () => <AuthShell><Account /></AuthShell> })
+export const Route = createFileRoute('/account')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(accountMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {})), component: () => <AuthShell><Account /></AuthShell> })
 
 function Account() {
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))
@@ -22,6 +26,7 @@ function Account() {
   const [error, setError] = useState<string | null>(null)
   const [now, setNow] = useState(Date.now)
   const inFlight = useRef(false)
+  const t = useT(accountMessages)
   useEffect(() => {
     if (!emailStatus) return
     const timer = window.setTimeout(() => setNow(Date.now()), Math.max(0, emailStatus.expiresAt - Date.now()) + 10)
@@ -30,7 +35,7 @@ function Account() {
   const activeRequest = emailStatus && emailStatus.expiresAt > now
   async function sendLink() {
     if (inFlight.current || activeRequest) return
-    if (!navigator.onLine) { setError('You are offline. Reconnect to request the email.'); return }
+    if (!navigator.onLine) { setError(t.offline); return }
     inFlight.current = true
     setPending(true)
     setError(null)
@@ -40,25 +45,26 @@ function Account() {
   }
   return (
     <main id="main" className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
-      <h1 className="font-display text-3xl font-bold">Account</h1>
-      {isPending ? <p role="status">Loading your account…</p> : (
+      <h1 className="font-display text-3xl font-bold">{t.title}</h1>
+      {isPending ? <p role="status">{t.loading}</p> : (
         <>
           <div className="flex flex-col gap-3">
-            {me?.user ? <p>Playing as <strong>{me.user.publicAlias}</strong> across TRMNL Games.</p> : <p>You pick a public name when you connect your first game from TRMNL.</p>}
-            <p className="text-sm text-muted">Manage your sign-in methods from the profile button above.</p>
+            {me?.user ? <p>{t.playingAsBefore}<strong>{me.user.publicAlias}</strong>{t.playingAsAfter}</p> : <p>{t.pickName}</p>}
+            <p className="text-sm text-muted">{t.signInMethods}</p>
           </div>
           {me?.user && !me.user.nameRepairRequired ? <PublicNameForm current={me.user.publicAlias} changeAt={me.user.publicNameChangeAt} /> : null}
-          <nav aria-label="Account" className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <Link to="/privacy" className="inline-flex min-h-11 items-center underline underline-offset-4">Privacy policy</Link>
-            <Link to="/app/desk-crawler/settings" className="inline-flex min-h-11 items-center underline underline-offset-4">Desk Crawler settings</Link>
+          {me?.user && LANGUAGES_LIVE ? <LanguageSetting saved={me.user.language} /> : null}
+          <nav aria-label={t.nav} className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+            <Link to="/privacy" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.privacyPolicy}</Link>
+            <Link to="/app/desk-crawler/settings" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.deskCrawlerSettings}</Link>
           </nav>
           {me ? (
             <details data-analytics-private className="border-t-2 border-hp pt-4">
-              <summary className="min-h-11 cursor-pointer font-semibold text-hp-ink">Delete TRMNL Games account…</summary>
-              <p>We first send a confirmation link to your verified primary email. Sign in from that link and type DELETE on the final confirmation page. This permanently removes your progress and connections from every game and deletes your sign-in. To remove only Desk Crawler progress, use <Link to="/app/desk-crawler/settings" className="underline underline-offset-4">Desk Crawler settings</Link>.</p>
-              <p className="mt-3 text-sm">Your account stays active until you confirm. The link expires after 30 minutes.</p>
-              {activeRequest ? <p role="status" className="mt-3">{emailStatus.state === 'pending' ? `Sending a link to ${emailStatus.email}…` : emailStatus.state === 'sent' ? `Check ${emailStatus.email} for your confirmation link.` : emailStatus.state === 'failed' ? 'We couldn’t deliver the email. Your account is still active. Contact support, or request a new link after this one expires.' : 'Account deletion is underway.'}</p> : emailStatus ? <p className="mt-3">Your previous link expired. You can request a new one.</p> : null}
-              <Button className="mt-4" variant="danger" pending={pending} busyLabel="Requesting email…" disabled={Boolean(activeRequest) || emailStatus === undefined} onClick={sendLink}>Email me a deletion link</Button>
+              <summary className="min-h-11 cursor-pointer font-semibold text-hp-ink">{t.deleteSummary}</summary>
+              <p>{t.deleteBodyBefore}<Link to="/app/desk-crawler/settings" className="underline underline-offset-4">{t.deskCrawlerSettings}</Link>{t.deleteBodyAfter}</p>
+              <p className="mt-3 text-sm">{t.staysActive}</p>
+              {activeRequest ? <p role="status" className="mt-3">{emailStatus.state === 'pending' ? t.sendingTo(emailStatus.email) : emailStatus.state === 'sent' ? t.checkEmail(emailStatus.email) : emailStatus.state === 'failed' ? t.deliveryFailed : t.deletionUnderway}</p> : emailStatus ? <p className="mt-3">{t.previousExpired}</p> : null}
+              <Button className="mt-4" variant="danger" pending={pending} busyLabel={t.requestingEmail} disabled={Boolean(activeRequest) || emailStatus === undefined} onClick={sendLink}>{t.emailDeletionLink}</Button>
               <ErrorNote message={error} />
             </details>
           ) : null}
@@ -68,7 +74,6 @@ function Account() {
   )
 }
 
-const longDate = (at: number) => new Date(at).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })
 
 /**
  * D142: change the public name shared by every game, free once every 7 days. Hero names are separate and change with
@@ -78,25 +83,60 @@ function PublicNameForm({ current, changeAt }: { current: string; changeAt: numb
   const [name, setName] = useState('')
   const [now] = useState(Date.now)
   const change = useIntent(api.users.changePublicName)
+  const t = useT(accountMessages)
+  const locale = useLocale()
   const open = changeAt === null || changeAt <= now
   const valid = nameProblem(name, ALIAS_RULE, 'public name') === null && name.trim() !== current
   return (
     <details className="border-t-2 border-faint pt-4">
-      <summary className="min-h-11 cursor-pointer font-semibold">Change public name…</summary>
-      <p>Your public name is how other players see you in every game: on leaderboards, raids, meetings and your public pages. Your heroes keep their own names.</p>
+      <summary className="min-h-11 cursor-pointer font-semibold">{t.changeNameSummary}</summary>
+      <p>{t.changeNameBody}</p>
       {open ? (
-        <form className="mt-3 flex flex-col gap-2" onSubmit={async (event) => { event.preventDefault(); if (valid && await change.run({ publicAlias: name.trim() }, `You are now ${name.trim()}.`)) setName('') }}>
-          <NameField label="New public name" small rule={ALIAS_RULE} noun="public name" value={name} onChange={setName} disabled={change.pending} />
+        <form className="mt-3 flex flex-col gap-2" onSubmit={async (event) => { event.preventDefault(); if (valid && await change.run({ publicAlias: name.trim() }, t.nowNamed(name.trim()))) setName('') }}>
+          <NameField label={t.newPublicName} small rule={ALIAS_RULE} noun="public name" value={name} onChange={setName} disabled={change.pending} />
           <ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
-            <li>Free, once every 7 days.</li>
-            <li>Links to your old public pages stop working, and nobody else can take {current} for 7 days.</li>
-            <li>Other players' logs show "Hidden player" where they met your old name.</li>
+            <li>{t.freeWeekly}</li>
+            <li>{t.oldLinks(current)}</li>
+            <li>{t.hiddenPlayer}</li>
           </ul>
-          <Button type="submit" className="self-start" pending={change.pending} busyLabel="Changing…" disabled={!valid}>Change to {name.trim() || 'new name'}</Button>
+          <Button type="submit" className="self-start" pending={change.pending} busyLabel={t.changing} disabled={!valid}>{t.changeTo(name.trim() || t.newName)}</Button>
         </form>
-      ) : <p className="mt-3 text-sm">You changed it recently. You can change it again on {longDate(changeAt)}.</p>}
+      ) : <p className="mt-3 text-sm">{t.changedRecently(formatDate(locale, changeAt, { day: 'numeric', month: 'long' }))}</p>}
       <ErrorNote message={change.error ?? null} />
       {change.message ? <p role="status" className="mt-2 text-sm">{change.message}</p> : null}
     </details>
+  )
+}
+
+/**
+ * D169: the account's language, for the companion and the TRMNL screens. Automatic clears the choice: the companion
+ * follows the browser and the screen the TRMNL account. The page reloads so the server renders the new language.
+ */
+function LanguageSetting({ saved }: { saved: Locale | null }) {
+  const t = useT(accountMessages)
+  const save = useMutation(api.users.setLanguage)
+  const [pending, setPending] = useState(false)
+  return (
+    <section aria-labelledby="language-title" className="flex flex-col gap-2 border-t-2 border-faint pt-4">
+      <h2 id="language-title" className="font-semibold">{t.languageTitle}</h2>
+      <p className="text-sm text-muted">{t.languageBody}</p>
+      <select
+        aria-labelledby="language-title"
+        value={saved ?? 'auto'}
+        disabled={pending}
+        onChange={async (event) => {
+          const value = event.target.value
+          const next = isLocale(value) ? value : null
+          setPending(true)
+          try { await save({ language: next }) } catch { setPending(false); return }
+          writeLocaleCookie(next)
+          window.location.reload()
+        }}
+        className="pixel-select min-h-11 self-start border-2 border-edge pr-9 pl-3 text-base"
+      >
+        <option value="auto">{t.automatic}</option>
+        {LOCALES.map((option) => <option key={option} value={option} lang={option}>{LOCALE_NAMES[option]}</option>)}
+      </select>
+    </section>
   )
 }

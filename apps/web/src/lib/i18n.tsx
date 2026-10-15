@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, isLocale, type Locale } from '@trmnl-games/platform'
+import { DEFAULT_LOCALE, INTL_TAG, isLocale, type Locale } from '@trmnl-games/platform'
 import { createContext, useContext, type ReactNode } from 'react'
 
 /**
@@ -47,3 +47,7 @@ export function readLocaleCookie(): Locale | null {
   const value = document.cookie.split('; ').find((part) => part.startsWith(`${LOCALE_COOKIE}=`))?.slice(LOCALE_COOKIE.length + 1)
   return isLocale(value) ? value : null
 }
+
+/** A date in the reader's language ("16 October", "16 octobre", "16. Oktober"). */
+export const formatDate = (locale: Locale, at: number | Date, options: Intl.DateTimeFormatOptions) => new Date(at).toLocaleDateString(INTL_TAG[locale], options)
+
