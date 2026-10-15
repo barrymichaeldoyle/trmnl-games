@@ -46,7 +46,7 @@ function ClassBody({ rule }: { rule: RosterView['classes'][number] }) {
   return <>
     <p className="font-semibold">{c.text(rule.name)}</p>
     <p className="text-sm">{c.text(rule.blurb)}</p>
-    <p className="mt-1 text-sm"><strong>{c.text(rule.passive.name)}:</strong> {c.text(rule.passive.blurb)}</p>
+    <p className="mt-1 text-sm"><strong>{c.text(rule.passive.name)}{t.colon}</strong> {c.text(rule.passive.blurb)}</p>
     <p className="mt-1 text-sm text-muted">{t.classNumbers(numbersOf(rule))}</p>
   </>
 }

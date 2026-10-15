@@ -14,6 +14,7 @@ import { INTL_TAG } from '@trmnl-games/platform'
 import { dcLogMessages } from '../../../i18n/dcLog'
 import { Records } from './-records'
 import { FollowingCard } from './-following'
+import { useShownName } from './-withName'
 
 export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcLogMessages, locale).rankingsTitle, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
 
@@ -32,6 +33,7 @@ const AROUND_FROM = 5
 function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) {
   const t = useT(dcLogMessages)
   const locale = useLocale()
+  const shown = useShownName()
   return (
     <li aria-current={own ? 'true' : undefined} className={`flex min-w-0 items-start gap-3 py-3 ${own ? '-mx-2 bg-ground px-2 outline-2 outline-gold' : ''}`}>
       {/* The podium wears a crown and medals beside its gold numerals; the rest keep a blank column so names stay aligned. */}
@@ -42,7 +44,7 @@ function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) 
         {row.profile ? (
           <Link to="/desk-crawler/heroes/$alias" params={{ alias: row.name }} className="block font-semibold underline decoration-dotted underline-offset-4">{breakable(row.name)}</Link>
         ) : (
-          <span className="block font-semibold">{breakable(row.name)}</span>
+          <span className="block font-semibold">{breakable(shown(row.name))}</span>
         )}
         {row.hero_name ? <span className="block text-sm text-muted">{row.hero_name}</span> : null}
       </span>

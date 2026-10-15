@@ -164,7 +164,7 @@ export function AlertsCard({ notify, kinds: given, intro: givenIntro, quietNote:
             <ul className="flex flex-col divide-y divide-rule">
               {alerts.devices.map((device) => (
                 <li key={device.id} className="flex items-center justify-between gap-2 py-2">
-                  <span className="min-w-0">{device.label}{device.id === thisDevice?.id ? <span className="ml-2 text-sm text-muted">{t.thisDevice}</span> : null}</span>
+                  <span className="min-w-0">{t.deviceLabel(device.label)}{device.id === thisDevice?.id ? <span className="ml-2 text-sm text-muted">{t.thisDevice}</span> : null}</span>
                   <Button variant="secondary" disabled={busy} onClick={() => remove.run({ deviceId: device.id }, alerts.devices.length === 1 ? t.deviceRemovedOff : t.deviceRemoved)}>{t.remove}</Button>
                 </li>
               ))}

@@ -11,6 +11,10 @@ import { useIntent } from '../../lib/intent'
 import { Rarity } from '../app/desk-crawler/-achievements'
 import { WithName } from '../app/desk-crawler/-withName'
 import { RARITY_TONE } from '../../lib/palette'
+import { formatDate, formatNumber, messagesFor, useLocale, useT } from '../../lib/i18n'
+import { useContent } from '../../lib/useContent'
+import { publicPagesMessages } from '../../i18n/publicPages'
+import type { Locale } from '@trmnl-games/platform'
 
 type Profile = {
   alias: string
@@ -37,45 +41,40 @@ const profileQuery = (alias: string) => convexQuery(api.profiles.view, { alias }
  * The hero's own social card from the art route (D109), 1200x630. Unfurlers cache images by URL, so the level and
  * rank ride along in the query and a new level or rank gets a fresh card. Without the art origin, the game's card.
  */
-const heroCard = (profile: Pick<Profile, 'alias' | 'heroName' | 'level' | 'rank'>) =>
+const heroCard = (profile: Pick<Profile, 'alias' | 'heroName' | 'level' | 'rank'>, locale: Locale) =>
   import.meta.env.VITE_CONVEX_SITE_URL
-    ? { url: artUrl(`/art/card/hero/${encodeURIComponent(profile.alias)}.png?v=${profile.level}-${profile.rank?.rank ?? 0}`), alt: `${profile.heroName}, level ${profile.level}, in Desk Crawler`, width: 1200, height: 630 }
+    ? { url: artUrl(`/art/card/hero/${encodeURIComponent(profile.alias)}.png?v=${profile.level}-${profile.rank?.rank ?? 0}`), alt: messagesFor(publicPagesMessages, locale).heroCardAlt(profile.heroName, profile.level), width: 1200, height: 630 }
     : DESK_CRAWLER_OG
 
 export const Route = createFileRoute('/desk-crawler/heroes/$alias')({
   loader: async ({ context, params }) => (await context.queryClient.ensureQueryData(profileQuery(params.alias))) as Profile | null,
-  head: ({ loaderData, params }) => loaderData
-    ? seo({ title: `${loaderData.heroName}, level ${loaderData.level}`, path: `/desk-crawler/heroes/${encodeURIComponent(loaderData.alias)}`, description: `${loaderData.alias}'s Desk Crawler hero ${loaderData.heroName}: level ${loaderData.level}${loaderData.rank ? `, ranked #${loaderData.rank.rank} of ${loaderData.rank.totalPlayers}` : ''}, ${loaderData.achievementCount} achievements.`, image: heroCard(loaderData) })
-    : seo({ title: 'Hero not found', path: `/desk-crawler/heroes/${encodeURIComponent(params.alias)}`, index: false }),
+  head: ({ loaderData, params, match: { context: { locale } } }) => {
+    const t = messagesFor(publicPagesMessages, locale)
+    return loaderData
+      ? seo({ title: t.heroTitle(loaderData.heroName, loaderData.level), path: `/desk-crawler/heroes/${encodeURIComponent(loaderData.alias)}`, description: t.heroDescription(loaderData.alias, loaderData.heroName, loaderData.level, loaderData.rank ? t.rankOf(loaderData.rank.rank, loaderData.rank.totalPlayers) : null, loaderData.achievementCount), image: heroCard(loaderData, locale), locale })
+      : seo({ title: t.heroNotFound, path: `/desk-crawler/heroes/${encodeURIComponent(params.alias)}`, index: false, locale })
+  },
   component: HeroProfile,
 })
-
-const STATUS: Record<Profile['status'], (biome: string) => string> = {
-  exploring: (biome) => `Exploring the ${biome}`,
-  resting: (biome) => `Resting in the ${biome}`,
-  travelling: () => 'Travelling between floors',
-  dead: () => 'Recovering from a knockout',
-  paused: () => 'Taking a break',
-  sleeping: () => 'Stopped with a full bag',
-}
 
 /** Public hero page (v1.2), on unless the owner hid it (D144). Hidden and missing heroes read the same. */
 function HeroProfile() {
   const { alias } = Route.useParams()
   const { data } = useQuery(profileQuery(alias))
   const profile = data as Profile | null | undefined
+  const t = useT(publicPagesMessages)
   return (
     <SiteShell>
       <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-8 px-4 py-10">
         {profile ? <Found profile={profile} /> : (
           <header className="flex flex-col gap-3">
-            <h1 className="font-display text-3xl font-bold">No hero here</h1>
-            <p>This hero's page is hidden, or there is no player by that name.</p>
+            <h1 className="font-display text-3xl font-bold">{t.noHero}</h1>
+            <p>{t.noHeroBody}</p>
           </header>
         )}
         <div className="flex flex-wrap items-center gap-4">
-          {profile ? <Link to="/profile/$alias" params={{ alias: profile.alias }} className="inline-flex min-h-11 items-center underline underline-offset-4">{profile.alias}'s profile</Link> : null}
-          <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">What is Desk Crawler?</Link>
+          {profile ? <Link to="/profile/$alias" params={{ alias: profile.alias }} className="inline-flex min-h-11 items-center underline underline-offset-4">{t.aliasProfile(profile.alias)}</Link> : null}
+          <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.whatIs}</Link>
         </div>
       </main>
     </SiteShell>
@@ -83,54 +82,59 @@ function HeroProfile() {
 }
 
 function Found({ profile }: { profile: Profile }) {
-  const since = new Date(profile.adventuringSince).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
-  const rows: Array<[string, number]> = [['Fights won', profile.lifetime.combatWins], ['Items found', profile.lifetime.itemsFound], ['Trips', profile.lifetime.trips], ['Rescues', profile.lifetime.rescues], ['Epic finds', profile.lifetime.epicFinds]]
+  const t = useT(publicPagesMessages)
+  const c = useContent()
+  const locale = useLocale()
+  const since = formatDate(locale, profile.adventuringSince, { day: 'numeric', month: 'long', year: 'numeric' })
+  const biome = profile.biome ?? 'Office Cubicles'
+  const r = t.lifetimeRows
+  const rows: Array<[string, number]> = [[r.fightsWon, profile.lifetime.combatWins], [r.itemsFound, profile.lifetime.itemsFound], [r.trips, profile.lifetime.trips], [r.rescues, profile.lifetime.rescues], [r.epicFinds, profile.lifetime.epicFinds]]
   // D110: the raid record, once there is one; never who was raided or the gold that moved.
   const raids = profile.raids
-  if (raids && raids.won + raids.failed + raids.repelled + raids.lost > 0) rows.push(['Raids won', raids.won], ['Raiders repelled', raids.repelled])
-  if ((profile.lostPropertyFound ?? 0) > 0) rows.push(['Spares found', profile.lostPropertyFound!])
+  if (raids && raids.won + raids.failed + raids.repelled + raids.lost > 0) rows.push([r.raidsWon, raids.won], [r.repelled, raids.repelled])
+  if ((profile.lostPropertyFound ?? 0) > 0) rows.push([r.sparesFound, profile.lostPropertyFound!])
   const spares = profile.lostProperty ?? []
   return (
     <>
       <header className="flex flex-col gap-2">
-        <p className="text-muted">{profile.alias}'s Desk Crawler hero</p>
+        <p className="text-muted">{t.aliasHero(profile.alias)}</p>
         <h1 className="font-display text-4xl font-bold leading-tight">{profile.heroName}</h1>
         <p className="flex flex-wrap items-baseline gap-x-3">
-          <span className="hud text-base text-xp-ink">Level {profile.level}</span>
-          {profile.rank ? <span><span className="hud text-base text-gold-ink">#{profile.rank.rank}</span> of {profile.rank.totalPlayers} {profile.rank.totalPlayers === 1 ? 'hero' : 'heroes'}, all time</span> : null}
+          <span className="hud text-base text-xp-ink">{t.level(profile.level)}</span>
+          {profile.rank ? <span><span className="hud text-base text-gold-ink">#{profile.rank.rank}</span>{t.ofAllTime(profile.rank.totalPlayers)}</span> : null}
         </p>
-        <p>{STATUS[profile.status](profile.biome ?? 'office')}. Adventuring since {since}.</p>
+        <p>{t.status(profile.status, biome)}.{t.since(since)}</p>
       </header>
       <FollowControls alias={profile.alias} />
-      <img src={artUrl(profile.scenePath)} alt={`${profile.heroName} in the ${profile.biome ?? 'office'}`} width={760} height={200} className="w-full border-[3px] border-night bg-cream [image-rendering:pixelated]" />
-      <Card title="Lifetime">
+      <img src={artUrl(profile.scenePath)} alt={t.sceneAlt(profile.heroName, biome)} width={760} height={200} className="w-full border-[3px] border-night bg-cream [image-rendering:pixelated]" />
+      <Card title={t.lifetime}>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3">
-          {rows.map(([label, value]) => <div key={label} className="flex flex-col"><dt className="text-sm text-muted">{label}</dt><dd className="hud text-base tabular-nums">{value.toLocaleString()}</dd></div>)}
+          {rows.map(([label, value]) => <div key={label} className="flex flex-col"><dt className="text-sm text-muted">{label}</dt><dd className="hud text-base tabular-nums">{formatNumber(locale, value)}</dd></div>)}
         </dl>
       </Card>
       {spares.length > 0 ? (
-        <Card title="Lost property">
-          <p className="text-sm text-muted">Other players' spares {profile.heroName} found and kept, names and all.</p>
-          <ul aria-label="Spares held" className="mt-2 flex flex-col gap-1">
+        <Card title={t.lostProperty}>
+          <p className="text-sm text-muted">{t.sparesKept(profile.heroName)}</p>
+          <ul aria-label={t.sparesHeld} className="mt-2 flex flex-col gap-1">
             {spares.map((spare, index) => (
               <li key={`${spare.name}-${spare.ownerName}-${index}`} className="min-w-0 break-words">
-                <span className={`font-semibold ${RARITY_TONE[spare.rarity] ?? ''}`}>{spare.name}</span>, <WithName text="{name}'s" name={spare.ownerName} profile={spare.profile} />
+                <span className={`font-semibold ${RARITY_TONE[spare.rarity] ?? ''}`}>{c.name(spare.name)}</span>, <WithName text={t.whose} name={spare.ownerName} profile={spare.profile} />
               </li>
             ))}
           </ul>
         </Card>
       ) : null}
-      <Card title={`Achievements (${profile.achievementCount})`}>
-        {profile.achievements.length === 0 ? <p>No achievements yet.</p> : (
+      <Card title={t.achievements(profile.achievementCount)}>
+        {profile.achievements.length === 0 ? <p>{t.noAchievements}</p> : (
           <ul className="flex flex-col gap-3">
             {profile.achievements.map((achievement) => (
               <li key={achievement.id} className="flex min-w-0 flex-col gap-1 border-[3px] border-night bg-panel p-3">
                 <p className="flex flex-wrap items-baseline gap-x-2">
-                  <strong>{achievement.name}</strong>
+                  <strong>{c.text(achievement.name)}</strong>
                   {achievement.tier > 1 ? <span className="hud text-hud-sm text-gold-ink">{tierLabel(achievement.tier)}</span> : null}
-                  <span className="text-xs text-muted">{achievement.family}</span>
+                  <span className="text-xs text-muted">{c.text(achievement.family)}</span>
                 </p>
-                <p className="text-sm">{achievement.blurb}</p>
+                <p className="text-sm">{c.text(achievement.blurb)}</p>
                 <Rarity id={achievement.id} rarity={profile.rarity} />
               </li>
             ))}
@@ -151,22 +155,23 @@ function FollowControls({ alias }: { alias: string }) {
   const follow = useIntent(api.follows.follow, { onFeedback: notify })
   const unfollow = useIntent(api.follows.unfollow, { onFeedback: notify })
   const rival = useIntent(api.follows.setRival, { onFeedback: notify })
+  const t = useT(publicPagesMessages)
   if (!status) return null
   const busy = follow.pending || unfollow.pending || rival.pending
   return (
     <div className="flex flex-col gap-2">
       {status.followId === null ? (
         <>
-          <div><Button icon="eye" pending={follow.pending} busyLabel="Following…" disabled={status.full || busy} onClick={() => follow.run({ alias }, `Following ${alias}. Find them under Rankings.`)}>Follow</Button></div>
-          <p className="text-sm text-muted">{status.full ? 'You follow 20 players already. Unfollow someone under Rankings first.' : 'Keep an eye on this hero from your Rankings page. They aren\'t told unless you make them your rival.'}</p>
+          <div><Button icon="eye" pending={follow.pending} busyLabel={t.following} disabled={status.full || busy} onClick={() => follow.run({ alias }, t.followingDone(alias))}>{t.follow}</Button></div>
+          <p className="text-sm text-muted">{status.full ? t.followFull : t.followBlurb}</p>
         </>
       ) : (
         <>
-          <p className="font-semibold">{status.rival ? `Following ${alias}, your rival.` : `Following ${alias}.`}</p>
+          <p className="font-semibold">{status.rival ? t.followingRival(alias) : t.followingAlias(alias)}</p>
           <div className="-ml-3 flex flex-wrap gap-x-2 min-[375px]:-ml-4">
-            <Button variant="quiet" disabled={busy} onClick={() => rival.run({ followId: status.rival ? null : status.followId }, status.rival ? 'Rival cleared.' : `${alias} is your rival.`)}>{status.rival ? 'Clear rival' : 'Make rival'}</Button>
-            <Button variant="quiet" disabled={busy} onClick={() => unfollow.run({ followId: status.followId! }, `Unfollowed ${alias}.`)}>Unfollow</Button>
-            <Link to="/app/desk-crawler/leaderboard" className="inline-flex min-h-11 items-center font-semibold text-muted underline underline-offset-4">Everyone you follow</Link>
+            <Button variant="quiet" disabled={busy} onClick={() => rival.run({ followId: status.rival ? null : status.followId }, status.rival ? t.rivalCleared : t.isYourRival(alias))}>{status.rival ? t.clearRival : t.makeRival}</Button>
+            <Button variant="quiet" disabled={busy} onClick={() => unfollow.run({ followId: status.followId! }, t.unfollowed(alias))}>{t.unfollow}</Button>
+            <Link to="/app/desk-crawler/leaderboard" className="inline-flex min-h-11 items-center font-semibold text-muted underline underline-offset-4">{t.everyoneYouFollow}</Link>
           </div>
         </>
       )}

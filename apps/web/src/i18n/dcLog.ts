@@ -20,6 +20,7 @@ type RaidLine = 'mishapRaider' | 'mishapTarget' | 'raided' | 'caughtRaiding' | '
 export const dcLogMessages = defineMessages({
   en: {
     logTitle: 'Log',
+    hiddenPlayer: 'Hidden player',
     filters: { all: 'All', fights: 'Fights', finds: 'Finds', milestones: 'Milestones', rest: 'Rest & traps', raids: 'Other people', todo: 'To-do' } as Record<FilterKey, string>,
     today: 'Today',
     yesterday: 'Yesterday',
@@ -137,6 +138,7 @@ export const dcLogMessages = defineMessages({
   },
   fr: {
     logTitle: 'Journal',
+    hiddenPlayer: 'Joueur masqué',
     filters: { all: 'Tout', fights: 'Combats', finds: 'Trouvailles', milestones: 'Étapes', rest: 'Repos et pièges', raids: 'Les autres', todo: 'Tâches' },
     today: 'Aujourd’hui',
     yesterday: 'Hier',
@@ -164,7 +166,7 @@ export const dcLogMessages = defineMessages({
     cardTitle: (group: string, n: string, count: number) => `${group}, ${n} héros`,
     rankedByLevel: 'Classé par niveau et XP totale.',
     rankedByXp: 'Classé par XP gagnée sur la période.',
-    updatedHourly: ' Mis à jour toutes les heures, dernière fois à ',
+    updatedHourly: ' Mis à jour toutes les heures, dernière fois le ',
     youAre: 'Vous êtes ',
     ofTotal: (total: string) => ` sur ${total}`,
     withXp: (xp: string) => ` avec ${xp} XP`,
@@ -254,6 +256,7 @@ export const dcLogMessages = defineMessages({
   },
   de: {
     logTitle: 'Log',
+    hiddenPlayer: 'Verborgener Spieler',
     filters: { all: 'Alles', fights: 'Kämpfe', finds: 'Funde', milestones: 'Meilensteine', rest: 'Rast & Fallen', raids: 'Andere Leute', todo: 'To-do' },
     today: 'Heute',
     yesterday: 'Gestern',
@@ -281,7 +284,7 @@ export const dcLogMessages = defineMessages({
     cardTitle: (group: string, n: string, count: number) => `${group}, ${n} ${plural(count, 'Held', 'Helden')}`,
     rankedByLevel: 'Nach Stufe und Gesamt-XP gewertet.',
     rankedByXp: 'Nach im Zeitraum verdienten XP gewertet.',
-    updatedHourly: ' Stündlich aktualisiert, zuletzt um ',
+    updatedHourly: ' Stündlich aktualisiert, zuletzt am ',
     youAre: 'Du bist ',
     ofTotal: (total: string) => ` von ${total}`,
     withXp: (xp: string) => ` mit ${xp} XP`,

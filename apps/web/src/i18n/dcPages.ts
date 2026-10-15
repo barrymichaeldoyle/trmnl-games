@@ -27,6 +27,7 @@ export const dcPagesMessages = defineMessages({
     rosterTitle: 'Heroes',
     loadingHeroes: 'Loading your heroes…',
     moreHeroesSoon: 'More heroes are on their way. Your Warrior keeps adventuring meanwhile.',
+    colon: ':',
     classNumbers: (n: Numbers) => classLine(n, { health: 'Health', attack: 'Attack', defense: 'Defense', gold: 'Gold', raids: (v) => `Raids ${v} points`, full: 'Full health, attack and defense' }, (v) => `${v}%`),
     waiting: (ticks: number, biome: string) => {
       const hours = Math.floor(ticks / 4)
@@ -71,6 +72,7 @@ export const dcPagesMessages = defineMessages({
     waitsExactly: (name: string | null) => `${name ?? 'Your hero'} stops adventuring and waits exactly where they are, until you switch back.`,
     daysSwitchBack: 'This is the day\'s switch; you can switch back within ten minutes.',
 
+    ladderLater: 'The career ladder arrives with your hero\'s next adventure.',
     notesTitle: 'Field notes',
     loadingHero: 'Loading your hero…',
     notesLater: 'Field notes arrive with the next content update.',
@@ -102,6 +104,7 @@ export const dcPagesMessages = defineMessages({
     rosterTitle: 'Héros',
     loadingHeroes: 'Chargement de vos héros…',
     moreHeroesSoon: 'D’autres héros arrivent bientôt. Votre Guerrier continue l’aventure en attendant.',
+    colon: ' :',
     classNumbers: (n: Numbers) => classLine(n, { health: 'Santé', attack: 'Attaque', defense: 'Défense', gold: 'Or', raids: (v) => `Raids ${v} points`, full: 'Santé, attaque et défense complètes' }, (v) => `${v} %`),
     waiting: (ticks: number, biome: string) => {
       const hours = Math.floor(ticks / 4)
@@ -146,6 +149,7 @@ export const dcPagesMessages = defineMessages({
     waitsExactly: (name: string | null) => `${name ?? 'Votre héros'} arrête l’aventure et attend exactement sur place, jusqu’à votre retour.`,
     daysSwitchBack: 'C’est le changement du jour ; vous pouvez revenir en arrière dans les dix minutes.',
 
+    ladderLater: 'L’échelle de carrière arrive avec la prochaine aventure de votre héros.',
     notesTitle: 'Notes de terrain',
     loadingHero: 'Chargement de votre héros…',
     notesLater: 'Les notes de terrain arrivent avec la prochaine mise à jour du contenu.',
@@ -177,6 +181,7 @@ export const dcPagesMessages = defineMessages({
     rosterTitle: 'Helden',
     loadingHeroes: 'Deine Helden werden geladen …',
     moreHeroesSoon: 'Weitere Helden sind unterwegs. Dein Krieger erkundet derweil weiter.',
+    colon: ':',
     classNumbers: (n: Numbers) => classLine(n, { health: 'LP', attack: 'Angriff', defense: 'Verteidigung', gold: 'Gold', raids: (v) => `Überfälle ${v} Punkte`, full: 'Volle LP, voller Angriff und volle Verteidigung' }, (v) => `${v} %`),
     waiting: (ticks: number, biome: string) => {
       const hours = Math.floor(ticks / 4)
@@ -221,6 +226,7 @@ export const dcPagesMessages = defineMessages({
     waitsExactly: (name: string | null) => `${name ?? 'Dein Held'} hört auf zu erkunden und wartet genau dort, bis du zurückwechselst.`,
     daysSwitchBack: 'Das ist der Wechsel des Tages; du kannst innerhalb von zehn Minuten zurückwechseln.',
 
+    ladderLater: 'Die Karriereleiter kommt mit dem nächsten Abenteuer deines Helden.',
     notesTitle: 'Feldnotizen',
     loadingHero: 'Dein Held wird geladen …',
     notesLater: 'Feldnotizen kommen mit dem nächsten Inhalts-Update.',

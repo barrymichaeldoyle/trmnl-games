@@ -469,7 +469,7 @@ function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: 
         // D122: a bag or pouch offer undercuts the Bag page, and the card says so.
         const deal = offer.id !== 'potions' && discountPct > 0
         return <li key={offer.id} className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-faint pt-3 first:border-t-0 first:pt-0">
-          <span><strong>{c.text(offer.name) === offer.name ? c.name(offer.name) : c.text(offer.name)}</strong>{deal ? <span className="block text-sm text-muted">{t.offPrice(discountPct)}</span> : null}{overflow ? <span className="block text-sm text-muted">{t.pouchRoom(cap)}</span> : null}</span>
+          <span><strong>{c.name(offer.name)}</strong>{deal ? <span className="block text-sm text-muted">{t.offPrice(discountPct)}</span> : null}{overflow ? <span className="block text-sm text-muted">{t.pouchRoom(cap)}</span> : null}</span>
           {affordable && !overflow ? <Button disabled={disabled} pending={intent.pending} icon="coin" busyLabel={t.buying} onClick={() => setAsking(offer)}>{t.buyFor(offer.price)}</Button> : <span className="text-sm font-semibold tabular-nums text-gold-ink">{t.goldAmount(offer.price)}</span>}
         </li>
       })}

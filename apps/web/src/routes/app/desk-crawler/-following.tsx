@@ -8,6 +8,7 @@ import { useIntent } from '../../../lib/intent'
 import { Button, NoticeBar, useNotice } from '../../../lib/ui'
 import { formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { dcLogMessages } from '../../../i18n/dcLog'
+import { useShownName } from './-withName'
 
 type Following = NonNullable<FunctionReturnType<typeof api.follows.list>>
 type Row = Following['follows'][number]
@@ -30,6 +31,7 @@ export function FollowingCard() {
   const { notice, notify, dismiss } = useNotice()
   const t = useT(dcLogMessages)
   const locale = useLocale()
+  const shown = useShownName()
   const unfollow = useIntent(api.follows.unfollow, { onFeedback: notify })
   const rivalBack = useIntent(api.follows.follow, { onFeedback: notify })
   const setRival = useIntent(api.follows.setRival, {
@@ -73,7 +75,7 @@ export function FollowingCard() {
                   {row.state === 'public' ? (
                     <Link to="/desk-crawler/heroes/$alias" params={{ alias: row.name }} className="font-semibold underline decoration-dotted underline-offset-4">{row.name}</Link>
                   ) : (
-                    <span className="font-semibold">{row.name}</span>
+                    <span className="font-semibold">{shown(row.name)}</span>
                   )}
                   {row.rival ? <span className="hud text-hud-sm text-gold-ink">{t.rival}</span> : null}
                 </p>

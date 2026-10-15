@@ -114,6 +114,8 @@ export const dcMoreMessages = defineMessages({
     inZone: (zone: string) => `In ${zone}, shared by your games. `,
     devices: 'Devices',
     thisDevice: 'This device',
+    /** Device labels are stored as "Chrome on Android" when alerts are allowed (lib/push.ts). */
+    deviceLabel: (label: string) => label,
     deviceRemovedOff: 'Device removed. Alerts are off.',
     deviceRemoved: 'Device removed.',
     remove: 'Remove',
@@ -209,7 +211,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alertes',
     loadingAlerts: 'Chargement des alertes…',
-    kinds: { asleep: { name: 'Héros endormi', blurb: 'Le sac est plein et les aventures sont arrêtées. Une fois par sieste.' }, merchant: { name: 'Bonne affaire du marchand', blurb: 'Un sac ou une bourse à votre portée est en promo pendant environ une heure. Au plus une fois par jour.' } },
+    kinds: { asleep: { name: 'Héros endormi', blurb: 'Le sac est plein et les aventures sont arrêtées. Une fois par sieste.' }, merchant: { name: 'Bonne affaire du marchand', blurb: 'Un sac ou une pochette à votre portée est en promo pendant environ une heure. Au plus une fois par jour.' } },
     intro: 'Recevez un petit rappel sur ce téléphone quand votre héros a besoin de vous.',
     quietNote: 'Pendant les heures calmes, les alertes de sieste attendent le matin et les bonnes affaires sont ignorées.',
     offByDefault: ' Désactivées par défaut. Au plus deux alertes par jour pour tous vos jeux.',
@@ -236,6 +238,7 @@ export const dcMoreMessages = defineMessages({
     inZone: (zone: string) => `Fuseau ${zone}, commun à vos jeux. `,
     devices: 'Appareils',
     thisDevice: 'Cet appareil',
+    deviceLabel: (label: string) => label.replace(' on ', ' sur '),
     deviceRemovedOff: 'Appareil retiré. Les alertes sont désactivées.',
     deviceRemoved: 'Appareil retiré.',
     remove: 'Retirer',
@@ -358,6 +361,7 @@ export const dcMoreMessages = defineMessages({
     inZone: (zone: string) => `In ${zone}, für alle deine Spiele. `,
     devices: 'Geräte',
     thisDevice: 'Dieses Gerät',
+    deviceLabel: (label: string) => label.replace(' on ', ' auf '),
     deviceRemovedOff: 'Gerät entfernt. Benachrichtigungen sind aus.',
     deviceRemoved: 'Gerät entfernt.',
     remove: 'Entfernen',

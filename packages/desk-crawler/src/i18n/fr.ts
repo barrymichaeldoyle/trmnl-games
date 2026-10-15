@@ -279,6 +279,7 @@ export const fr: FrDictionary = {
     "Picked up a healing potion left on a desk.": "A ramassé une potion de soin oubliée sur un bureau.",
     "Found a healing potion in the first-aid kit.": "A trouvé une potion de soin dans la trousse de secours.",
     "A healing potion rolled out from under a desk.": "Une potion de soin a roulé de sous un bureau.",
+    "Potion pouch": "Pochette à potions",
     "Potion pouch full; sold a spare for {gold} gold.": "Pochette à potions pleine ; en a revendu une.",
     "No room for another potion; sold it for {gold} gold.": "Plus de place pour une potion ; l’a revendue.",
     "Found a {item}. The pouch now holds {capacity} potions.": "A trouvé {un:item}. La pochette contient désormais {capacity} potions.",

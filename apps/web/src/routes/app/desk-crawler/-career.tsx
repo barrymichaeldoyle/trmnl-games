@@ -28,7 +28,8 @@ export type UnlockView = Array<{ feature: 'todo' | 'meetings' | 'workbench' | 's
 /** How many rungs the Career page previews past the current one; the rest stay a "?" like unearned achievements. */
 const PREVIEW = 2
 
-const reachedOn = (tag: string) => (date: Date) => date.toLocaleDateString(tag, { day: 'numeric', month: 'short' })
+// French and German short months end in a full stop ("13 oct."), which would double the sentence's own.
+const reachedOn = (tag: string) => (date: Date) => date.toLocaleDateString(tag, { day: 'numeric', month: tag.startsWith('en') ? 'short' : 'long' })
 const TAGS = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' } as const
 
 /**

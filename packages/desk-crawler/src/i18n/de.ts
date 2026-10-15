@@ -279,6 +279,7 @@ export const de: DeDictionary = {
     "Picked up a healing potion left on a desk.": "Einen auf einem Schreibtisch vergessenen Heiltrank aufgelesen.",
     "Found a healing potion in the first-aid kit.": "Einen Heiltrank im Erste-Hilfe-Kasten gefunden.",
     "A healing potion rolled out from under a desk.": "Ein Heiltrank ist unter einem Schreibtisch hervorgerollt.",
+    "Potion pouch": "Trankbeutel",
     "Potion pouch full; sold a spare for {gold} gold.": "Trankbeutel voll; einen übrigen verkauft.",
     "No room for another potion; sold it for {gold} gold.": "Kein Platz für noch einen Trank; ihn verkauft.",
     "Found a {item}. The pouch now holds {capacity} potions.": "Gefunden: {nom:item}. Der Beutel fasst jetzt {capacity} Tränke.",

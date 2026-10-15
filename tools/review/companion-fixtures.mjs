@@ -18,6 +18,7 @@
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   whatsnew=1 (D154: the What's new card, with every entry after 12 October)
  *   rank=9 (D152: the hero ninth on every board, so the rankings open with the rows around it)
+ *   lang=fr|de (D169: the companion in French or German)
  *   /desk-crawler/heroes/<name> serves the public hero page (private=1 reads as not found)
  * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
@@ -96,13 +97,13 @@ if (params.get('floor')) hero.biomeId = params.get('floor');
 if (flag('new')) { hero.activatedAt = Date.now() - 3600000; hero.screenServed = false }
 if (params.get('hp')) hero.hp = Math.round(hero.maxHp * Number(params.get('hp')) / 100);
 if (flag('choice')) hero.choice = { eventId: 'late_night', title: 'The boss asks for one more hour', prompt: 'The lights are dimming but the report is not done. Stay late for a bonus, or head home?', expiresAtTick: hero.world.currentTick + 4, ticksLeft: 4, defaultOptionId: 'home', options: [{ id: 'stay', label: 'Stay late', change: { gold: 50, hp: -6, potions: 0 } }, { id: 'home', label: 'Head home', change: { gold: 0, hp: 0, potions: 0 } }] };
-if (flag('effects')) hero.effects = [{ id: 'coffee', name: 'Coffee rush', blurb: '+3 ATK', kind: 'boon', ticksLeft: 3 }, { id: 'papercut', name: 'Paper cut', blurb: '-2 DEF', kind: 'bane', ticksLeft: 1 }];
+if (flag('effects')) hero.effects = [{ id: 'fired_up', name: 'Fired up', blurb: 'Hits harder after beating an elite.', kind: 'boon', ticksLeft: 3 }, { id: 'bruised', name: 'Bruised', blurb: 'A trap left a mark; defense is down until a rest.', kind: 'bane', ticksLeft: 1 }];
 // D139: occasion=1 shows Halloween today (chip and dressed scene); otherwise the next occasion is 18 days off.
 if (flag('occasion')) {
   hero.calendar = { today: { id: 'halloween', name: 'Halloween', effect: '+15% gold', daysLeft: 1 }, next: { id: 'diwali', name: 'Diwali', effect: '+15% XP', inDays: 8 } };
   hero.scenePath = hero.scenePath.replace('/v4/', '/v5/').replace('/day/', '/day/halloween/').replace('/night/', '/night/halloween/');
 } else hero.calendar = { today: null, next: { id: 'halloween', name: 'Halloween', effect: '+15% gold', inDays: 18 } };
-if (flag('merchant')) { hero.merchantTicksLeft = 3; inventory.merchant = { offers: [{ id: 'potions', name: 'Three potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 3, ticksLeft: 3, biomeId: hero.biomeId } }
+if (flag('merchant')) { hero.merchantTicksLeft = 3; inventory.merchant = { offers: [{ id: 'potions', name: '3 healing potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 3, ticksLeft: 3, biomeId: hero.biomeId } }
 if (flag('recap')) data.recap = { ...data.recap, baseline: { at: Date.now() - 36e5 * 26 }, xpGained: 212, levelsGained: 1, newEvents: 19, counters: { combatWins: 7, goldEarned: 43, itemsFound: 2, deaths: 1 } };
 // P37: the roster. The Heroes page reads roster:mine; the Hero page reads hero.roster.
 const rosterMode = params.get('roster');
@@ -460,6 +461,7 @@ import { Route as PlAchievements } from '../../apps/web/src/routes/app/paper-liv
 import { Route as PlPublic } from '../../apps/web/src/routes/profile/$alias_.lives.$n';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
+import { LocaleProvider } from '../../apps/web/src/lib/i18n';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
@@ -475,7 +477,9 @@ function App() {
 }
 document.body.className = 'bg-ground text-ink';
 const ProfilePage = (lifePage ? PlPublic : Profile).options.component;
-createRoot(document.getElementById('root')).render(<NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider>);
+const lang = ['fr', 'de'].includes(new URLSearchParams(location.search).get('lang')) ? new URLSearchParams(location.search).get('lang') : 'en';
+document.documentElement.lang = lang;
+createRoot(document.getElementById('root')).render(<LocaleProvider locale={lang}><NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider></LocaleProvider>);
 `)
 write('vite.config.mjs', `import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
