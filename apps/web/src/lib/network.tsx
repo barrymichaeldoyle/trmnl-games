@@ -1,4 +1,6 @@
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from 'react'
+import { useT } from './i18n'
+import { commonMessages } from '../i18n/common'
 
 const OnlineContext = createContext(true)
 const subscribe = (notify: () => void) => {
@@ -19,9 +21,10 @@ export const useOnline = () => useContext(OnlineContext)
 
 export function OfflineNote() {
   const online = useOnline()
+  const t = useT(commonMessages)
   return online ? null : (
     <p role="status" className="border-b border-rule px-4 py-3 text-center text-sm">
-      You’re offline, so this is the last update. Changes need a connection.
+      {t.offline}
     </p>
   )
 }

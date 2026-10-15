@@ -1,12 +1,16 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { cleanName, disallowedCharacters, validateName, type NameRule } from '@trmnl-games/platform'
 import { ErrorNote } from './ui'
+import { messagesFor, useT } from './i18n'
+import { commonMessages } from '../i18n/common'
+
+type Common = (typeof commonMessages)['en']
+const NOUN_KEYS: Record<string, keyof Common['nouns']> = { 'public name': 'publicName', 'hero name': 'heroName', 'first name': 'firstName' }
 
 const HIDDEN = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u
 
-function characterList(characters: string[]): string {
-  const shown = characters.slice(0, 3).map((character) => (HIDDEN.test(character) ? 'a hidden character' : `“${character}”`))
-  return shown.length > 1 ? `${shown.slice(0, -1).join(', ')} and ${shown.at(-1)}` : shown[0]!
+function characterList(characters: string[], t: Common): string {
+  return t.list(characters.slice(0, 3).map((character) => (HIDDEN.test(character) ? t.hiddenCharacter : `“${character}”`)))
 }
 
 /** The nearest name the rule allows: accents dropped, anything else refused left out. */
@@ -15,17 +19,18 @@ function nearestName(value: string): string {
 }
 
 /** What is wrong with a name under the server's rule, or null when the server will take it. */
-export function nameProblem(value: string, rule: NameRule, noun: string): string | null {
+export function nameProblem(value: string, rule: NameRule, noun: string, t: Common = messagesFor(commonMessages, 'en')): string | null {
+  const shownNoun = NOUN_KEYS[noun] === undefined ? noun : t.nouns[NOUN_KEYS[noun]!]
   const bad = disallowedCharacters(value)
   if (bad.length > 0) {
     const nearest = nearestName(value)
-    const suggestion = nearest !== '' && validateName(nearest, rule).ok ? ` Try “${nearest}”.` : ''
-    return `${characterList(bad)} can’t go in a ${noun}.${suggestion}`
+    const suggestion = nearest !== '' && validateName(nearest, rule).ok ? t.tryName(nearest) : ''
+    return `${t.cantGoIn(characterList(bad, t), shownNoun)}${suggestion}`
   }
   const length = [...cleanName(value)].length
-  if (length === 0) return `Enter a ${noun}.`
-  if (length < rule.min) return `Use at least ${rule.min} characters.`
-  if (length > rule.max) return `Use at most ${rule.max} characters.`
+  if (length === 0) return t.enterA(shownNoun)
+  if (length < rule.min) return t.atLeast(rule.min)
+  if (length > rule.max) return t.atMost(rule.max)
   return null
 }
 
@@ -47,9 +52,10 @@ export function NameField({ label, note, rule, noun, value, onChange, name, disa
   small?: boolean
 }) {
   const id = useId()
+  const t = useT(commonMessages)
   const input = useRef<HTMLInputElement>(null)
   const [touched, setTouched] = useState(false)
-  const problem = nameProblem(value, rule, noun)
+  const problem = nameProblem(value, rule, noun, t)
   const shown = problem !== null && (touched || disallowedCharacters(value).length > 0) ? problem : null
   useEffect(() => { input.current?.setCustomValidity(problem ?? '') }, [problem])
   const described = [note ? `${id}-note` : null, `${id}-rule`, shown ? `${id}-error` : null].filter(Boolean).join(' ')
@@ -57,7 +63,7 @@ export function NameField({ label, note, rule, noun, value, onChange, name, disa
     <div className="flex min-w-0 flex-col gap-1">
       <label htmlFor={id} className={`font-semibold ${small ? 'text-sm' : ''}`}>{label}</label>
       {note ? <span id={`${id}-note`} className="text-sm text-muted">{note}</span> : null}
-      <span id={`${id}-rule`} className="text-sm text-muted">{rule.min} to {rule.max} characters: letters A-Z, numbers, spaces and . _ ' -</span>
+      <span id={`${id}-rule`} className="text-sm text-muted">{t.nameRule(rule.min, rule.max)}</span>
       <input
         ref={input}
         id={id}

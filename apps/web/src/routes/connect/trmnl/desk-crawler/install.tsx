@@ -14,6 +14,9 @@ import { reportError } from '../../../../lib/errorReporting'
 import { NameField } from '../../../../lib/nameField'
 import { GenderPicker, type HeroGender } from '../../../../lib/genderPicker'
 import { useAnalyticsView } from '../../../../lib/analyticsProvider'
+import { documentLocale, messagesFor, useT } from '../../../../lib/i18n'
+import { installMessages } from '../../../../i18n/install'
+import { serverMessage } from '../../../../i18n/serverMessages'
 
 type Search = { code?: string; installation_callback_url?: string; invalid?: boolean }
 
@@ -31,8 +34,8 @@ export const Route = createFileRoute('/connect/trmnl/desk-crawler/install')({
     }
   },
   loader: async () => await getPendingInstall({ data: { gameSlug: 'desk-crawler' } }),
-  head: () => {
-    const head = seo({ title: 'Connect TRMNL', index: false })
+  head: ({ match: { context: { locale } } }) => {
+    const head = seo({ title: messagesFor(installMessages, locale).title, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: InstallPage,
@@ -41,23 +44,24 @@ export const Route = createFileRoute('/connect/trmnl/desk-crawler/install')({
 function InstallPage() {
   const { pending } = Route.useLoaderData()
   const { invalid } = Route.useSearch()
+  const t = useT(installMessages)
   useAnalyticsView(pending ? 'installation started' : 'setup screen shown', { setup_state: pending ? 'pending_install' : invalid ? 'invalid_install_link' : 'missing_install_link' })
 
   if (!pending) {
     return (
       <Page>
-        <h1 className="font-display text-3xl font-bold">Connect TRMNL</h1>
-        {invalid ? <p role="alert">That installation link was not valid.</p> : null}
-        <p>Start from the Desk Crawler plugin in your TRMNL account and choose Install. TRMNL will bring you back here.</p>
-        <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">Help with setup</Link>
+        <h1 className="font-display text-3xl font-bold">{t.title}</h1>
+        {invalid ? <p role="alert">{t.invalidLink}</p> : null}
+        <p>{t.startFromPlugin('Desk Crawler')}</p>
+        <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.helpWithSetup}</Link>
       </Page>
     )
   }
   return (
     <Page>
-      <h1 className="font-display text-3xl font-bold">Connect TRMNL to Desk Crawler</h1>
+      <h1 className="font-display text-3xl font-bold">{t.connectTo('Desk Crawler')}</h1>
       <Show when="signed-out">
-        <p>Sign in or create your TRMNL Games account. Next you’ll name your hero, then click Save back in TRMNL to start.</p>
+        <p>{t.signInFirst}</p>
         <SignIn routing="hash" forceRedirectUrl="/connect/trmnl/desk-crawler/install" signUpForceRedirectUrl="/connect/trmnl/desk-crawler/install" />
       </Show>
       <Show when="signed-in">
@@ -76,14 +80,15 @@ function ConnectForm() {
   const [heroName, setHeroName] = useState('')
   const [heroGender, setHeroGender] = useState<HeroGender>('male')
   const inFlight = useRef(false)
-  if (me === undefined) return <LoadingState label="Loading your account…" />
+  const t = useT(installMessages)
+  if (me === undefined) return <LoadingState label={t.loadingAccount} />
   const needsProfile = !me?.user
   const needsHero = !me?.hero
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (inFlight.current) return
-    if (!navigator.onLine) { setError('You are offline. Reconnect to continue setup.'); return }
+    if (!navigator.onLine) { setError(t.offline); return }
     inFlight.current = true
     setSubmitting(true)
     setError(null)
@@ -103,43 +108,43 @@ function ConnectForm() {
         window.location.assign(result.callbackUrl); return
       }
       captureAnalytics('installation failed', { error_code: result.code })
-      setError(result.message)
+      setError(serverMessage(result.message, documentLocale()))
     } catch (caught) {
       captureAnalytics('installation failed', { error_code: 'NETWORK_OR_SERVER_ERROR' })
       reportError(caught, 'installation')
-      setError('We couldn’t finish connecting. Check your connection and try again.')
+      setError(t.couldntFinish)
     } finally { inFlight.current = false; setSubmitting(false) }
   }
 
   if (reconnectCallback) return <section className="flex flex-col gap-4" data-analytics-private>
-    <h2 className="font-display text-xl font-bold">One more step to reconnect</h2>
-    <p>Save the plugin in TRMNL, then open its settings and choose Configure. We’ll ask you to confirm the connection here.</p>
-    <p>Your previously deleted progress stays deleted. This check lets you start again with this installation.</p>
-    <a href={reconnectCallback} className={`${LINK_BUTTON} ${BUTTON_PRIMARY}`}>Continue to TRMNL to save</a>
+    <h2 className="font-display text-xl font-bold">{t.reconnectTitle}</h2>
+    <p>{t.reconnectSave}</p>
+    <p>{t.reconnectDeleted}</p>
+    <a href={reconnectCallback} className={`${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{t.continueToTrmnl}</a>
   </section>
   return (
     <form onSubmit={onSubmit} data-analytics-private className="flex flex-col gap-4">
       {needsProfile ? (
         <p className="border-y border-edge py-3 text-sm">
-          This sign-in has no TRMNL Games account yet, so connecting creates one. If you already play, switch account and sign in the way you did before.
+          {t.newAccount}
         </p>
       ) : null}
       {needsProfile ? (
-        <NameField label="Your public name" note="This is you, in every TRMNL game. Other players see it on the rankings and in raid stories, so leave out contact details. You can change it once a week." rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
+        <NameField label={t.publicNameLabel} note={t.publicNameNote} rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
       ) : (
         <p>
-          Signed in as <strong>{me?.user?.publicAlias}</strong>, your public name.
+          {t.signedInAsBefore}<strong>{me?.user?.publicAlias}</strong>{t.signedInAsAfter}
         </p>
       )}
       {needsHero ? (
         <>
-          <NameField label="Your hero’s name" note="The character on your TRMNL screen. Renaming it later costs 200 gold in the game." rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} placeholder="Steve" disabled={submitting} />
-          <GenderPicker value={heroGender} onChange={setHeroGender} note="Changes how your hero looks, nothing else." disabled={submitting} />
+          <NameField label={t.heroNameLabel} note={t.heroNameNote} rule={HERO_NAME_RULE} noun="hero name" name="heroName" value={heroName} onChange={setHeroName} placeholder="Steve" disabled={submitting} />
+          <GenderPicker value={heroGender} onChange={setHeroGender} note={t.genderNote} disabled={submitting} />
           <RankingsPreview alias={(needsProfile ? alias : me?.user?.publicAlias ?? '').trim()} hero={heroName.trim()} />
         </>
       ) : (
         <p>
-          Your hero <strong>{me?.hero?.name}</strong> will appear on this TRMNL.
+          {t.yourHeroBefore}<strong>{me?.hero?.name}</strong>{t.yourHeroAfter}
         </p>
       )}
       <SwitchAccount returnTo="/connect/trmnl/desk-crawler/install" />
@@ -148,24 +153,25 @@ function ConnectForm() {
           {error}
         </p>
       ) : null}
-      <Button type="submit" pending={submitting} busyLabel="Connecting…">Connect this TRMNL installation</Button>
-      <p className="text-sm text-muted">Next, TRMNL asks you to save the plugin. Saving starts your hero’s adventures.</p>
+      <Button type="submit" pending={submitting} busyLabel={t.connecting}>{t.connect}</Button>
+      <p className="text-sm text-muted">{t.nextSave}</p>
     </form>
   )
 }
 
 /** How the two names sit together on the rankings (leaderboard.tsx): you in bold, your hero underneath. */
 function RankingsPreview({ alias, hero }: { alias: string; hero: string }) {
+  const t = useT(installMessages)
   return (
     <div className="flex flex-col gap-1" aria-hidden="true">
-      <p className="text-sm text-muted">On the rankings you’ll look like this:</p>
+      <p className="text-sm text-muted">{t.rankingsLook}</p>
       <div className="flex min-w-0 items-start gap-3 border-2 border-rule px-3 py-2">
         <span className="w-4 font-bold tabular-nums">1</span>
         <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
-          <span className="block font-semibold">{alias || 'Your public name'}</span>
+          <span className="block font-semibold">{alias || t.yourPublicName}</span>
           <span className="block text-sm text-muted">{hero || 'Steve'}</span>
         </span>
-        <span className="shrink-0 text-sm font-semibold text-gold-ink">Level 1</span>
+        <span className="shrink-0 text-sm font-semibold text-gold-ink">{t.level1}</span>
       </div>
     </div>
   )

@@ -12,6 +12,10 @@ import { fileURLToPath } from 'node:url'
 import { paintedSceneUri } from '../../packages/desk-crawler/src/art/sceneColour'
 import { scenePath } from '../../packages/desk-crawler/src/art/sceneKey'
 import { ACTIVE_CONTENT, catalogs } from '../../packages/desk-crawler/src/content/index'
+import { contentTranslator } from '../../packages/desk-crawler/src/i18n/index'
+import { renderPhrase } from '../../packages/desk-crawler/src/i18n/grammar'
+import { fr } from '../../packages/desk-crawler/src/i18n/fr'
+import { de } from '../../packages/desk-crawler/src/i18n/de'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const catalog = catalogs[ACTIVE_CONTENT]
@@ -26,7 +30,18 @@ const floors = catalog.biomes.map((biome) => {
   if (!uri) throw new Error(`No painted scene for ${biome.id}`)
   writeFileSync(join(outDir, `${biome.id}.png`), Buffer.from(uri.split(',')[1]!, 'base64'))
   const name = (id: string) => catalog.monsters.find((monster) => monster.id === id)?.name ?? id
-  return { id: biome.id, name: biome.name, level: biome.unlockLevel, featured: name(featured), monsters: biome.monsterIds.map(name) }
+  // D169: each floor in French and German too, with the picture's description built with the names' articles.
+  const phrase = (dictionary: typeof fr | typeof de, english: string) => ({ head: dictionary.nouns[english]![0], gender: dictionary.nouns[english]![1] })
+  const localized = (locale: 'fr' | 'de') => {
+    const t = contentTranslator(locale)
+    const monster = phrase(locale === 'fr' ? fr : de, name(featured))
+    const floor = phrase(locale === 'fr' ? fr : de, biome.name)
+    const alt = locale === 'fr'
+      ? `Un héros affronte ${renderPhrase('fr', monster, 'un', false)} dans ${renderPhrase('fr', floor, 'le', false)}`
+      : `Ein Held kämpft ${renderPhrase('de', floor, 'im', false)} gegen ${renderPhrase('de', monster, 'einen', false)}`
+    return { name: t.name(biome.name), monsters: biome.monsterIds.map((id) => t.name(name(id))), alt }
+  }
+  return { id: biome.id, name: biome.name, level: biome.unlockLevel, featured: name(featured), monsters: biome.monsterIds.map(name), fr: localized('fr'), de: localized('de') }
 })
 
 const literal = (value: unknown) => JSON.stringify(value, null, 2).replace(/"(\w+)":/g, '$1:').replace(/"/g, "'")

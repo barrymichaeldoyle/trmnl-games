@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
 import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, InstallCta } from '../lib/deskCrawlerPitch'
-import { FAQ_JSON_LD } from '../lib/deskCrawlerFaq'
+import { faqJsonLd } from '../lib/deskCrawlerFaq'
 import { Glyph } from '../lib/glyphs'
 import { changeDay, latestChanges } from '../lib/changelog'
 import { SITE_FRAME } from '../lib/platformHeader'
@@ -9,12 +9,15 @@ import { SiteShell } from '../lib/prose'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
 import { DESK_CRAWLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
 import { AfterListing, useGames } from '../lib/gameAccess'
+import { messagesFor, useT } from '../lib/i18n'
+import { pitchMessages } from '../i18n/pitch'
 
 export const Route = createFileRoute('/')({
-  head: () => seo({
+  head: ({ match: { context: { locale } } }) => seo({
     path: '/',
-    description: 'Games that play themselves on your TRMNL e-ink display. Desk Crawler is a free office RPG where your hero takes on a new adventure every 15 minutes, on the screen on your desk.',
-    jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, FAQ_JSON_LD].map(({ '@context': _, ...node }) => node) },
+    locale,
+    description: messagesFor(pitchMessages, locale).homeDescription,
+    jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, faqJsonLd(locale)].map(({ '@context': _, ...node }) => node) },
   }),
   // No loader: the page is static, and the games listing (only for the Idle Angler teaser) loads in the browser after it.
   component: Home,
@@ -23,20 +26,21 @@ export const Route = createFileRoute('/')({
 /** Idle Angler (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
 function IdleAnglerSection() {
   const data = useGames()
+  const t = useT(pitchMessages)
   const game = data?.games.find((g) => g.slug === 'idle-angler')
   if (!game || (game.status === 'hidden' && !data?.admin)) return null
   const live = game.status === 'live'
   return (
     <section aria-labelledby="idle-angler-heading" className="grid gap-6 md:grid-cols-2 md:items-center">
-      <img src="/games/idle-angler/sample.png" alt="A sample Idle Angler screen: an angler holding a barbel at River Bend at dusk" width={780} height={460} loading="lazy" className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
+      <img src="/games/idle-angler/sample.png" alt={t.idleAnglerAlt} width={780} height={460} loading="lazy" className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
       <div className="flex flex-col gap-3">
-        {live ? null : <p className="text-sm font-semibold text-muted">Coming next</p>}
+        {live ? null : <p className="text-sm font-semibold text-muted">{t.comingNext}</p>}
         <h2 id="idle-angler-heading" className="font-display text-3xl font-bold text-gold-ink">{games['idle-angler'].name}</h2>
-        <p className="max-w-prose leading-relaxed">{games['idle-angler'].description} Every fifteen minutes your angler casts, and the screen on your desk shows what bit.</p>
+        <p className="max-w-prose leading-relaxed">{t.idleAnglerBody}</p>
         {game.canOpen ? (
           <div className="flex flex-wrap gap-3">
-            <Link to="/games/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>How it plays</Link>
-            <Link to="/app/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">Open companion</Link>
+            <Link to="/games/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>{t.howItPlaysLink}</Link>
+            <Link to="/app/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.openCompanion}</Link>
           </div>
         ) : null}
       </div>
@@ -46,11 +50,12 @@ function IdleAnglerSection() {
 
 /** The newest few What's new entries (D153), so the front page shows the game is still moving; the page has them all. */
 function RecentChanges() {
+  const t = useT(pitchMessages)
   return (
     <section aria-labelledby="recent-heading" className="flex flex-col gap-6">
       <div className="flex max-w-prose flex-col gap-2">
-        <h2 id="recent-heading" className="font-display text-3xl font-bold text-gold-ink">Recently changed</h2>
-        <p className="leading-relaxed text-muted">The latest changes to Desk Crawler. Heroes keep their progress through every update.</p>
+        <h2 id="recent-heading" className="font-display text-3xl font-bold text-gold-ink">{t.recentlyChanged}</h2>
+        <p className="leading-relaxed text-muted">{t.recentIntro}</p>
       </div>
       <ul className="grid gap-4 lg:grid-cols-3">
         {latestChanges(3).map((change) => (
@@ -61,26 +66,27 @@ function RecentChanges() {
           </li>
         ))}
       </ul>
-      <Link to="/whats-new" className={`self-start gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="bell" />See every change</Link>
+      <Link to="/whats-new" className={`self-start gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="bell" />{t.seeEveryChange}</Link>
     </section>
   )
 }
 
 /** The platform front page: Desk Crawler's screen and install link first, then what the game holds. */
 function Home() {
+  const t = useT(pitchMessages)
   return (
     <SiteShell>
       <main id="main" className="flex flex-col">
         <section aria-labelledby="home-title" className={`grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14 ${SITE_FRAME}`}>
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
-              <p className="flex items-center gap-2 text-sm font-semibold text-gold-ink"><img src="/games/desk-crawler/favicon.svg" alt="" width={16} height={16} className="[image-rendering:pixelated]" />Desk Crawler for TRMNL</p>
-              <h1 id="home-title" className="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">An office RPG that plays itself on your desk</h1>
-              <p className="max-w-prose text-lg leading-relaxed text-muted">Every 15 minutes your hero fights a Stapler Mimic, finds a Keyboard Mace or gets knocked out, and your TRMNL e-ink screen shows what happened. You check in every few days to sort the loot.</p>
+              <p className="flex items-center gap-2 text-sm font-semibold text-gold-ink"><img src="/games/desk-crawler/favicon.svg" alt="" width={16} height={16} className="[image-rendering:pixelated]" />{t.eyebrow}</p>
+              <h1 id="home-title" className="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">{t.homeTitle}</h1>
+              <p className="max-w-prose text-lg leading-relaxed text-muted">{t.homeLead}</p>
             </div>
             <InstallCta place="home" />
           </div>
-          <DeviceSample caption="A real Desk Crawler screen on a TRMNL X, with a sample hero." priority />
+          <DeviceSample caption={t.homeCaption} priority />
         </section>
 
         <div className="border-y border-rule bg-night/40 py-14 sm:py-20">
@@ -92,15 +98,15 @@ function Home() {
           <div className="flex flex-col gap-8">
             <FeatureGrid headingId="features-heading" />
             <div className="flex flex-col items-start gap-4 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-prose text-muted">The guide covers every system in detail, from the first fight to the workbench.</p>
-              <Link to="/help/desk-crawler" className={`shrink-0 gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="quest" />Read the full guide</Link>
+              <p className="max-w-prose text-muted">{t.guideBody}</p>
+              <Link to="/help/desk-crawler" className={`shrink-0 gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="quest" />{t.readGuide}</Link>
             </div>
           </div>
           <RecentChanges />
           <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
             <Faq headingId="faq-heading" />
             <section aria-labelledby="launch-heading" className="window flex flex-col gap-4 self-start p-5 sm:p-6">
-              <h2 id="launch-heading" className="font-display text-2xl font-bold text-gold-ink">Get Desk Crawler</h2>
+              <h2 id="launch-heading" className="font-display text-2xl font-bold text-gold-ink">{t.getDeskCrawler}</h2>
               <InstallCta place="home end" />
             </section>
           </div>

@@ -7,9 +7,15 @@ import { ExpiredSubmission, Submission } from './submission'
 import { getFunctionName } from 'convex/server'
 import { captureAnalytics, intentAnalytics } from './analytics'
 import { reportError } from './errorReporting'
+import { documentLocale } from './i18n'
+import { serverMessage } from '../i18n/serverMessages'
 
 /** User-safe message from a structured Convex error (api.md error contract). */
 export function errorMessage(error: unknown): string {
+  return serverMessage(englishErrorMessage(error), documentLocale())
+}
+
+function englishErrorMessage(error: unknown): string {
   if (error instanceof ExpiredSubmission) return error.message
   if (error instanceof ConvexError && typeof error.data === 'object' && error.data !== null && 'message' in error.data) {
     return String((error.data as { message: unknown }).message)
@@ -38,7 +44,7 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
   async function run(args: Omit<Args, 'operationId'>, successMessage = 'Done. Your TRMNL will reflect this on its next refresh.'): Promise<boolean> {
     if (inFlight.current) return false
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      fail('You are offline. Reconnect, then try again. No action was queued.')
+      fail(serverMessage('You are offline. Reconnect, then try again. No action was queued.', documentLocale()))
       return false
     }
     inFlight.current = true
@@ -50,8 +56,10 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
       if (done) {
         const success = intentAnalytics(getFunctionName(fn), args as Record<string, unknown>)
         if (success) captureAnalytics(...success)
-        setMessage(successMessage)
-        onFeedback.current?.({ error: null, message: successMessage })
+        // Callers pass their own success line already in the reader's language; the default one is translated here.
+        const shown = serverMessage(successMessage, documentLocale())
+        setMessage(shown)
+        onFeedback.current?.({ error: null, message: shown })
       }
       return done
     } catch (caught) {

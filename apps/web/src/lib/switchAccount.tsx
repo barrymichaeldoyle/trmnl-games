@@ -2,6 +2,8 @@ import { useClerk, useUser } from '@clerk/tanstack-react-start'
 import { useState } from 'react'
 import { Button } from './ui'
 import { captureAnalytics } from './analytics'
+import { useT } from './i18n'
+import { commonMessages } from '../i18n/common'
 
 /**
  * Names the sign-in in use and offers to switch it. Clerk keeps each email/provider as a separate user unless they share a
@@ -13,14 +15,15 @@ export function SwitchAccount({ returnTo }: { returnTo: string }) {
   const clerk = useClerk()
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
+  const t = useT(commonMessages)
   const email = user?.primaryEmailAddress?.emailAddress
   return (
     <p data-analytics-private className="text-sm text-muted">
-      {email ? <>Signed in with {email}.</> : <>Signed in.</>}{' '}
-      <Button variant="quiet" className="px-0" pending={pending} busyLabel="Switching…" onClick={async () => { captureAnalytics('account switched'); setPending(true); setFailed(false); try { await clerk.signOut({ redirectUrl: returnTo }) } catch { setFailed(true); setPending(false) } }}>
-        Switch account
+      {email ? t.signedInWith(email) : t.signedIn}{' '}
+      <Button variant="quiet" className="px-0" pending={pending} busyLabel={t.switching} onClick={async () => { captureAnalytics('account switched'); setPending(true); setFailed(false); try { await clerk.signOut({ redirectUrl: returnTo }) } catch { setFailed(true); setPending(false) } }}>
+        {t.switchAccount}
       </Button>
-      {failed ? <span role="alert" className="block text-hp-ink">We couldn’t sign out. Check your connection and try again.</span> : null}
+      {failed ? <span role="alert" className="block text-hp-ink">{t.couldntSignOut}</span> : null}
     </p>
   )
 }

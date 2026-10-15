@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { useOnline } from './network'
 import { Glyph, type GlyphName } from './glyphs'
+import { useT } from './i18n'
+import { commonMessages } from '../i18n/common'
 
 /**
  * The gold menu choice: shared by Button and links styled as the primary action. A press sinks the key two pixels
@@ -17,8 +19,9 @@ const DISABLED = 'disabled:border-raised disabled:bg-raised disabled:text-faint'
 /** Layout for a Link that wears a button style. */
 export const LINK_BUTTON = 'inline-flex min-h-11 items-center px-4 py-2 no-underline'
 
-export function Button({ variant = 'primary', className = '', pending = false, busyLabel = 'Working…', allowOffline = false, icon, children, disabled, onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'quiet' | 'danger'; pending?: boolean; busyLabel?: string; allowOffline?: boolean; icon?: GlyphName }) {
+export function Button({ variant = 'primary', className = '', pending = false, busyLabel, allowOffline = false, icon, children, disabled, onClick, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'quiet' | 'danger'; pending?: boolean; busyLabel?: string; allowOffline?: boolean; icon?: GlyphName }) {
   const online = useOnline()
+  const t = useT(commonMessages)
   const styles = {
     primary: BUTTON_PRIMARY,
     secondary: BUTTON_SECONDARY,
@@ -26,7 +29,7 @@ export function Button({ variant = 'primary', className = '', pending = false, b
     danger: 'hud uppercase text-hud-sm border-[3px] border-hp text-hp-ink hover:bg-hp hover:text-night active:bg-hp active:text-night',
   }[variant]
   // A busy button stays focusable (aria-disabled, clicks swallowed): disabling it would drop keyboard focus to the page.
-  return <button type="button" {...props} aria-busy={pending || undefined} aria-disabled={pending || undefined} disabled={!pending && (disabled || (!online && !allowOffline))} onClick={(event) => { if (pending) { event.preventDefault(); return } onClick?.(event) }} className={`min-h-11 px-3 py-2 min-[375px]:px-4 ${icon ? 'inline-flex items-center justify-center gap-2.5' : ''} ${styles} disabled:cursor-not-allowed disabled:shadow-none disabled:no-underline disabled:active:translate-y-0 ${variant === 'quiet' ? 'disabled:text-faint' : DISABLED} aria-busy:cursor-wait aria-busy:active:translate-y-0 ${className}`}>{icon ? <Glyph name={icon} className={pending ? 'invisible' : ''} /> : null}{pending ? busyLabel : children}</button>
+  return <button type="button" {...props} aria-busy={pending || undefined} aria-disabled={pending || undefined} disabled={!pending && (disabled || (!online && !allowOffline))} onClick={(event) => { if (pending) { event.preventDefault(); return } onClick?.(event) }} className={`min-h-11 px-3 py-2 min-[375px]:px-4 ${icon ? 'inline-flex items-center justify-center gap-2.5' : ''} ${styles} disabled:cursor-not-allowed disabled:shadow-none disabled:no-underline disabled:active:translate-y-0 ${variant === 'quiet' ? 'disabled:text-faint' : DISABLED} aria-busy:cursor-wait aria-busy:active:translate-y-0 ${className}`}>{icon ? <Glyph name={icon} className={pending ? 'invisible' : ''} /> : null}{pending ? busyLabel ?? t.working : children}</button>
 }
 
 /**
@@ -100,9 +103,10 @@ export function NoticeBar({ notice, lifted = false, onDismiss }: { notice: Notic
 }
 
 function NoticePanel({ text, tone, onDismiss }: { text: string; tone: string; onDismiss: () => void }) {
+  const t = useT(commonMessages)
   return <div className="window notice-rise pointer-events-auto flex w-full max-w-md items-center gap-3 px-4 py-2 text-sm">
     <p className={`min-w-0 flex-1 font-semibold ${tone}`}>{text}</p>
-    <button type="button" aria-label="Dismiss" onClick={onDismiss} className="hud text-hud-sm flex size-11 shrink-0 items-center justify-center text-muted hover:text-ink active:text-ink">×</button>
+    <button type="button" aria-label={t.dismiss} onClick={onDismiss} className="hud text-hud-sm flex size-11 shrink-0 items-center justify-center text-muted hover:text-ink active:text-ink">×</button>
   </div>
 }
 
@@ -116,9 +120,10 @@ export function Card({ title, icon, children, className = '' }: { title?: string
   )
 }
 
-export function LoadingState({ label = 'Loading…' }: { label?: string }) {
+export function LoadingState({ label }: { label?: string }) {
+  const t = useT(commonMessages)
   return <div role="status" className="min-h-48 space-y-5 py-4 text-muted">
-    <p>{label}</p>
+    <p>{label ?? t.loading}</p>
     <div aria-hidden="true" className="space-y-4">
       <div className="h-6 w-2/3 bg-rule" />
       <div className="h-3 w-full bg-rule" />

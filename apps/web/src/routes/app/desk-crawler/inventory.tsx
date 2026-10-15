@@ -502,7 +502,7 @@ function Makeover({ makeover, heroName, gold, disabled, intent }: { makeover: { 
   useEffect(() => setGender(makeover.gender), [makeover.gender])
   const affordable = gold >= makeover.price
   const changed = gender !== makeover.gender
-  const label = GENDERS.find((option) => option.id === gender)!.label.toLowerCase()
+  const label = gender
   return <Card title="Makeover" icon="hero">
     <p>A new look for {heroName}, on your TRMNL, your hero page and other players' meetings.</p>
     {affordable ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (changed) setAsking(true) }}>

@@ -214,8 +214,6 @@ function AnalyticsLink({ className = FOOTER_LINK }: { className?: string }) {
 export const SUPPORT_EMAIL = 'barry@barrymichaeldoyle.com'
 /** Optional support for the games (D134): a plain link out, with nothing in play attached to it. */
 export const SPONSOR_URL = 'https://github.com/sponsors/barrymichaeldoyle'
-/** One release status line, shared by the public pages and the companion's start card. */
-export const RELEASE_STATUS = 'Free on the TRMNL marketplace.'
 /** Desk Crawler's public marketplace listing (plugin 564): its Install button starts the TRMNL connect flow. */
 export const DESK_CRAWLER_INSTALL_URL = 'https://trmnl.com/integrations/desk-crawler'
 /** Shown on the privacy and terms pages; bump whenever either changes. */
