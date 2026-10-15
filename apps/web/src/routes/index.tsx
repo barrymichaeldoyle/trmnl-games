@@ -59,11 +59,11 @@ function RecentChanges() {
         <p className="leading-relaxed text-muted">{t.recentIntro}</p>
       </div>
       <ul className="grid gap-4 lg:grid-cols-3">
-        {latestChanges(3).map((change) => (
+        {latestChanges(3, locale).map((change) => (
           <li key={change.title} className="window flex flex-col gap-2 p-5">
             <time dateTime={change.date} className="text-sm font-semibold text-muted">{changeDay(change.date, true, locale)}</time>
-            <h3 lang="en" className="font-display text-xl font-bold">{change.title}</h3>
-            <p lang="en" className="line-clamp-4 leading-relaxed text-muted">{change.body}</p>
+            <h3 className="font-display text-xl font-bold">{change.title}</h3>
+            <p className="line-clamp-4 leading-relaxed text-muted">{change.body}</p>
           </li>
         ))}
       </ul>

@@ -72,7 +72,7 @@ export const pagesMessages = defineMessages({
     sendFeedback: 'Envoyer',
     newsTitle: 'Nouveautés',
     newsDescription: 'Ce qui a changé dans Desk Crawler et quand : nouveautés et corrections, les plus récentes d’abord.',
-    newsIntro: 'Les changements des jeux et de ce site, les plus récents d’abord. Les notes de version sont rédigées en anglais.',
+    newsIntro: 'Les changements des jeux et de ce site, les plus récents d’abord.',
   },
   de: {
     supportTitle: 'Support',
@@ -108,6 +108,6 @@ export const pagesMessages = defineMessages({
     sendFeedback: 'Feedback senden',
     newsTitle: 'Neuigkeiten',
     newsDescription: 'Was sich in Desk Crawler wann geändert hat: neue Funktionen und Korrekturen, das Neueste zuerst.',
-    newsIntro: 'Änderungen an den Spielen und dieser Website, das Neueste zuerst. Die Versionshinweise sind auf Englisch.',
+    newsIntro: 'Änderungen an den Spielen und dieser Website, das Neueste zuerst.',
   },
 })

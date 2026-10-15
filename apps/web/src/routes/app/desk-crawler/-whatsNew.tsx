@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { changeKeys } from '../../../lib/changelog'
 import { Glyph } from '../../../lib/glyphs'
-import { useT } from '../../../lib/i18n'
+import { useLocale, useT } from '../../../lib/i18n'
 import { dcScreenMessages } from '../../../i18n/dcScreen'
 
 /** At most this many change titles in the card; the rest are counted, and the page has them all. */
@@ -22,9 +22,10 @@ export function WhatsNewCard() {
   const dismiss = useMutation(api.users.dismissWhatsNew)
   const [hidden, setHidden] = useState<string | null>(null)
   const t = useT(dcScreenMessages)
+  const locale = useLocale()
   const since = me?.user?.whatsNewSince
   if (!since) return null
-  const fresh = changeKeys().filter((change) => change.key > since && change.key > (hidden ?? ''))
+  const fresh = changeKeys(locale).filter((change) => change.key > since && change.key > (hidden ?? ''))
   if (fresh.length === 0) return null
   const titles = fresh.map((change) => change.title)
   const newest = fresh[0]!.key
@@ -36,7 +37,7 @@ export function WhatsNewCard() {
         <button type="button" className="-my-2 inline-flex min-h-11 shrink-0 items-center text-muted underline underline-offset-4 hover:text-ink" onClick={() => { setHidden(newest); void dismiss({ seen: newest }).catch(() => {}) }}>{t.hide}</button>
       </div>
       <ul className="mt-1 flex flex-col gap-1">
-        {titles.slice(0, SHOWN).map((title) => <li key={title} lang="en">{title}</li>)}
+        {titles.slice(0, SHOWN).map((title) => <li key={title}>{title}</li>)}
         {titles.length > SHOWN ? <li className="text-muted">{t.andMore(titles.length - SHOWN)}</li> : null}
       </ul>
       <Link to="/whats-new" className="mt-1 inline-flex min-h-11 items-center gap-1.5 font-semibold underline underline-offset-4">{t.seeWhatsNew} <Glyph name="play" size={8} /></Link>
