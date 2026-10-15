@@ -7,7 +7,7 @@ import { poseFor, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { sceneKeyFromUrl } from '@trmnl-games/idle-angler/art/sceneColour'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
-import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, type Dock } from '../../../lib/idleAngler'
+import { BAIT_LABEL, BAND_LABEL, WEATHER_LABEL, formatWeight, readyOrders, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishIcon, Scene } from './-art'
 import { FishName, FishText, WaterName } from './-fish'
@@ -61,6 +61,13 @@ function DockPage() {
   const rodWouldLand = nextRod ? (recap?.awayGrams ?? []).filter((g) => g <= nextRod.limitGrams).length : 0
   const full = dock.full ?? null
   const goal = full ? null : nextGoal(dock)
+  // D167: what the fishmonger pays now, counting each fish once when two orders could take the same one.
+  const taken = new Set<string>()
+  const fishmongerPays = readyOrders(dock).reduce((sum, r) => {
+    if (r.going.some((c) => taken.has(c.id))) return sum
+    r.going.forEach((c) => taken.add(c.id))
+    return sum + r.reward
+  }, 0)
   // D157 for Idle Angler (D162): open waters, then only the next locked one; the rest stay out of sight until it opens.
   const firstLocked = dock.waters?.find((w) => !w.open && !w.closed && !w.charter)
   const shownWaters = full ? (dock.waters ?? []).filter((w) => w.open || w.closed || (w.charter && full.charter && w.opensAfter && w.opensAfter.logged >= w.opensAfter.species) || w === firstLocked) : (dock.waters ?? [])
@@ -92,8 +99,9 @@ function DockPage() {
         {!coolerFull && catches.length > 0 ? (
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 underline underline-offset-4">Sell {catches.length} fish <Coins n={coolerValue} sign /></Link></p>
         ) : null}
+        {fishmongerPays > 0 ? <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 font-semibold text-gold-ink underline underline-offset-4">The fishmonger is buying <Coins n={fishmongerPays} sign /></Link></p> : null}
         {goal ? <p className="text-sm"><span className="text-muted">Next goal:</span> <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
-        {full ? <GoalCard full={full} notify={notify} /> : null}
+        {full ? <GoalCard full={full} fishmonger={fishmongerPays > 0} notify={notify} /> : null}
         {full?.runs.length ? <ul className="flex flex-col gap-1 text-sm">{full.runs.map((run) => <li key={run.id} className="font-semibold text-sky-ink">{run.line}</li>)}</ul> : null}
         {coolerFull ? (
           <p className="font-semibold text-hp-ink">
@@ -120,18 +128,24 @@ function DockPage() {
       <Card title="Bait">
         {usable.length === 0 ? <p className="mb-3 font-semibold text-hp-ink">You have no bait for {baitWater?.name}, so your angler {destination ? 'will fish' : 'is fishing'} a bare hook. <Link to="/app/idle-angler/shop" className="underline underline-offset-4">Buy bait</Link>.</p> : null}
         {usable.length > 0 && !fishing ? <p className="mb-3 font-semibold text-hp-ink">Your angler is fishing a bare hook. Choose a bait below{usable.every((b) => b.units === 0) ? <>, or <Link to="/app/idle-angler/shop" className="underline underline-offset-4">buy some</Link></> : null}.</p> : null}
-        <div className="flex flex-wrap gap-2">
-          {usable.map((bait) => (
-            <Button
-              key={bait.class}
-              variant={angler.baitOnHook === bait.class ? 'primary' : 'secondary'}
-              aria-pressed={angler.baitOnHook === bait.class}
-              disabled={chooseBait.pending}
-              onClick={() => { if (angler.baitOnHook !== bait.class) void chooseBait.run({ bait: bait.class as never }, `Fishing with ${bait.name.toLowerCase()} from the next cast.`) }}
-            >
-              {bait.name} ×{bait.units}
-            </Button>
-          ))}
+        {/* D167: Desk Crawler's stance picker (one look for a choice): the bait on the hook is the pressed cell with the cursor, the others are what a tap switches to. */}
+        {usable.length > 0 ? <p className="mb-2 text-sm text-muted">On the hook from the next cast:</p> : null}
+        <div role="group" aria-label="Bait on the hook" className="flex flex-wrap gap-0.5 border-2 border-edge bg-edge">
+          {usable.map((bait) => {
+            const chosen = angler.baitOnHook === bait.class
+            return (
+              <button
+                key={bait.class}
+                type="button"
+                aria-pressed={chosen}
+                aria-disabled={chooseBait.pending || undefined}
+                onClick={() => { if (!chosen && !chooseBait.pending) void chooseBait.run({ bait: bait.class as never }, `Fishing with ${bait.name.toLowerCase()} from the next cast.`) }}
+                className={`menu-cursor flex min-h-11 grow basis-[40%] items-center min-[480px]:basis-[30%] justify-center gap-2 px-2 py-2 label-px uppercase tracking-wide not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'bg-panel text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink'}`}
+              >
+                {bait.name} <span className="tabular-nums">×{bait.units}</span>
+              </button>
+            )
+          })}
         </div>
         <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
           <dt className="text-muted">Uses</dt><dd>One per fish kept or lost</dd>

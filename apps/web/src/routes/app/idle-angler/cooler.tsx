@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
-import { formatWeight, type Dock } from '../../../lib/idleAngler'
+import { formatWeight, readyOrders, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
 import { FishIcon } from './-art'
@@ -46,13 +46,7 @@ function CoolerPage() {
     else next.add(id)
     return next
   })
-  // Orders the cooler fills now, with the fish a sale would take (the cheapest that fit) and their market price.
-  const ready = full?.features.orders
-    ? full.orders.flatMap((order) => {
-        const going = order.catchIds.map((id) => catches.find((c) => c.id === id)).filter((c): c is NonNullable<typeof c> => c !== undefined)
-        return order.reward !== null && going.length === order.count ? [{ order, reward: order.reward, going, market: total(going) }] : []
-      })
-    : []
+  const ready = readyOrders(dock)
   const wanted = new Set(ready.flatMap((r) => r.going.map((c) => c.id)))
   const wantedInCooler = catches.filter((c) => wanted.has(c.id)).length
   const sellRows = async (rows: typeof catches) => {

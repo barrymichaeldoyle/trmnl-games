@@ -39,6 +39,8 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
   const features = Object.fromEntries((Object.keys(FEATURE_NAMES) as Array<keyof typeof FEATURE_NAMES>).map((f) => [f, unlocked(content, state, f)]))
   return {
     goal: {
+      // D167: a goal met by filling orders, which the companion links to the cooler only while an order can be filled.
+      orders: goal?.predicate.kind === 'counter' && goal.predicate.counter === 'ordersFilled',
       line: goalLine(content, state),
       coins: goal?.coins ?? 0,
       page: goal?.page ?? null,

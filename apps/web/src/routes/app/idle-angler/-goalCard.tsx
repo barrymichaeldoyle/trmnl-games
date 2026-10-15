@@ -14,7 +14,7 @@ type FullDock = NonNullable<Dock['full']>
  * and pays its coins; the card then turns into the next goal. Under content v2 goals still pay themselves, so a reward
  * is never waiting and the card only names the current goal.
  */
-export function GoalCard({ full, notify }: { full: FullDock; notify: (feedback: { error: string | null; message: string | null }) => void }) {
+export function GoalCard({ full, fishmonger, notify }: { full: FullDock; fishmonger: boolean; notify: (feedback: { error: string | null; message: string | null }) => void }) {
   const claim = useIntent(api.idleAngler.full.claimGoal, { onFeedback: notify })
   const [burst, fireBurst] = useBurst()
   const waiting = full.goal.unclaimed ?? []
@@ -38,10 +38,12 @@ export function GoalCard({ full, notify }: { full: FullDock; notify: (feedback: 
         </>
       ) : (
         <p>
-          {full.goal.page ? <Link to={GOAL_PAGE[full.goal.page]!} className="font-semibold underline underline-offset-4">{full.goal.line}</Link> : <strong>{full.goal.line}</strong>}
+          {/* D167: an order goal links to the cooler only while the fishmonger is there; the angler cannot choose its catch. */}
+          {full.goal.page && (!full.goal.orders || fishmonger) ? <Link to={GOAL_PAGE[full.goal.page]!} className="font-semibold underline underline-offset-4">{full.goal.line}</Link> : <strong>{full.goal.line}</strong>}
           {full.goal.coins > 0 ? <> · <Coins n={full.goal.coins} sign className="text-sm text-gold-ink" /></> : null}
         </p>
       )}
+      {!reward && full.goal.orders && !fishmonger ? <p className="text-sm text-muted">The fishmonger turns up on the Cooler page when a catch fits one of his orders.</p> : null}
       {!reward && full.comingUp ? <p className="text-sm text-muted">Coming up: {full.comingUp.name}, at {full.comingUp.species} species ({full.comingUp.logged} so far).</p> : null}
     </section>
   )

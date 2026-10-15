@@ -40,7 +40,7 @@ export interface Dock {
 type Feature = 'shop_upgrades' | 'orders' | 'opens' | 'trophies' | 'deadbait'
 
 interface FullDock {
-  readonly goal: { line: string | null; coins: number; page: 'cooler' | 'shop' | 'dock' | 'log' | null; rung: number; of: number; unclaimed?: ReadonlyArray<{ id: string; title: string; coins: number }> }
+  readonly goal: { orders?: boolean; line: string | null; coins: number; page: 'cooler' | 'shop' | 'dock' | 'log' | null; rung: number; of: number; unclaimed?: ReadonlyArray<{ id: string; title: string; coins: number }> }
   readonly comingUp: { feature: Feature; name: string; species: number; logged: number } | null
   readonly features: Readonly<Record<Feature, boolean>>
   readonly orders: ReadonlyArray<{ id: string; kind: string; line: string; hint: string | null; count: number; catchIds: Id<'catches'>[]; reward: number | null; bonus: number }>
@@ -51,6 +51,19 @@ interface FullDock {
   readonly pegs: { pegs: number; free: number; next: { pegs: number; price: number } | null }
   readonly deadbait: number
   readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null }>>
+}
+
+type Catch = NonNullable<Dock['catches']>[number]
+
+/** D167: the fishmonger's orders the cooler fills now, with the fish a sale takes (the cheapest that fit), the payout and their market price. */
+export function readyOrders(dock: Dock): Array<{ order: FullDock['orders'][number]; reward: number; going: Catch[]; market: number }> {
+  const full = dock.full
+  if (!full?.features.orders) return []
+  const catches = dock.catches ?? []
+  return full.orders.flatMap((order) => {
+    const going = order.catchIds.map((id) => catches.find((c) => c.id === id)).filter((c): c is Catch => c !== undefined)
+    return order.reward !== null && going.length === order.count ? [{ order, reward: order.reward, going, market: going.reduce((sum, c) => sum + c.value, 0) }] : []
+  })
 }
 
 export const formatWeight = (grams: number) => (grams >= 1000 ? `${(Math.round(grams / 100) / 10).toFixed(1)} kg` : `${grams} g`)
