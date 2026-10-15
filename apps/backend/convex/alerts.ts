@@ -14,6 +14,7 @@ import { coolerOf } from '@trmnl-games/idle-angler/sim'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/paper-lives/content'
 import { readWorld } from './world'
+import { deviceLocale } from './lib/trmnlUser'
 
 /** P33 hero alerts: preferences, this account's push devices and the sender's two transactions (alerts.md). */
 
@@ -274,7 +275,7 @@ export const claimDue = internalMutation({
       if (today.length >= ALERTS.dailyCap) { await skip(row, 'daily_cap'); continue }
       if (row.kind === 'merchant' && today.filter((other) => other.kind === 'merchant').length >= ALERTS.merchantDailyCap) { await skip(row, 'merchant_cap'); continue }
       await ctx.db.patch(row._id, { state: 'sending', localDay: day, attempts: row.attempts + 1, updatedAt: now })
-      const message = lifeMessage ?? alertMessage(row, name)
+      const message = lifeMessage ?? alertMessage(row, name, deviceLocale(owner))
       sends.push({
         outboxId: row._id,
         ttlSeconds,

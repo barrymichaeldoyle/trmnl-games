@@ -1,5 +1,6 @@
 /**
- * Four self-contained TRMNL layouts. Template v56 draws each story's changes behind its HUD mark, like the recap ("+14"
+ * Four self-contained TRMNL layouts. Template v57 reads its own words from the payload's `labels`, in the owner's
+ * language (D169). Template v56 draws each story's changes behind its HUD mark, like the recap ("+14"
  * behind the letters XP), without "No effect", and puts changes in words under the story on the X portrait ledger (D165). Template v55 shows a dug-in elite in the attention slot of every layout: its name,
  * ten HP ticks and the share left, and in the full layouts when it leaves (D163). Template v54 makes the OG quarter say a pause, a knockout's return time or a set
  * wake time, keeps the level beside a long name, gives its stories the width the QR column did not use, and shows the
@@ -44,8 +45,15 @@
  */
 import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
+import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 56
+export const TEMPLATE_VERSION = 57
+
+/**
+ * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
+ * a template that meets an older payload (web and backend deploy apart) reading as before.
+ */
+const L = (key: keyof DeviceWords['labels']) => `{{ labels.${key} | default: "${DEVICE_WORDS.en.labels[key]}" }}`
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -93,8 +101,8 @@ const runeRuleV = `<div class="no-shrink flex flex--col flex--center-x gap--none
  * Device-envelope-only code: no code in owner/public preview payloads. Fits the existing footer height. "code" tells a
  * passer-by it is something to enter; the narrow portrait bars drop the word to fit.
  */
-const KEEPSAKE_LABEL = 'Keepsake code'
-const keepsakeFooter = `{% if desk_keepsake_code %}<span class="instance">${KEEPSAKE_LABEL.replace(' code', '<span data-keepsake-word="true"> code</span>')} {{ desk_keepsake_code | escape }}</span>{% endif %}`
+const KEEPSAKE_WORD = `<span data-keepsake-word="true">${L('keepsake_word')}</span>`
+const keepsakeFooter = `{% if desk_keepsake_code %}<span class="instance">${L('keepsake')}${KEEPSAKE_WORD} {{ desk_keepsake_code | escape }}</span>{% endif %}`
 
 const titleBar = `
 <div class="title_bar">
@@ -109,7 +117,7 @@ const titleBar = `
  */
 const titleBarNarrow = titleBar
   .replace('<span class="title">', '<span class="title{% if desk_keepsake_code %} hidden lg:inline-block{% endif %}">')
-  .replace('<span data-keepsake-word="true"> code</span>', '')
+  .replace(KEEPSAKE_WORD, '')
 
 
 type SceneField = 'scene_url' | 'scene_url_small' | 'scene_url_medium'
@@ -183,7 +191,7 @@ const goldPotions = (classes = '') => counter('hud_coin', '{{ gold }}', classes)
  * width for the words too. `lg:flex` keeps the X's wider default gap.
  */
 const heroCounters =
-  hudRow('data-counters="words"', counter('hud_coin', '{{ gold }} gold') + counter('hud_potion', '{{ potions }} {% if potions == 1 %}potion{% else %}potions{% endif %}') + bagCount() + stanceCount(), COUNTER_GAP).replace('class="flex', 'class="flex lg:flex')
+  hudRow('data-counters="words"', counter('hud_coin', `{{ gold }} ${L('gold')}`) + counter('hud_potion', `{{ potions }} {% if potions == 1 %}${L('potion')}{% else %}${L('potions')}{% endif %}`) + bagCount() + stanceCount(), COUNTER_GAP).replace('class="flex', 'class="flex lg:flex')
 
 /**
  * The full layouts' name line (D88): the hero and level, then the attack and defense marks. On the OG a long name
@@ -203,7 +211,7 @@ const nameRow = (names: string) =>
  * since ten hearts already fill their width.
  */
 const HEART_CLASSES = 'w--[18px] h--[16px] no-shrink'
-const hpCount = '<span class="label lg:title--small no-shrink" data-hp-count="true">{{ hp }}/{{ max_hp }} HP</span>'
+const hpCount = `<span class="label lg:title--small no-shrink" data-hp-count="true">{{ hp }}/{{ max_hp }} ${L('hp')}</span>`
 const hearts = (count = true, extra = '') =>
   `{% if max_hp > 0 %}{% assign heart_halves = max_hp | divided_by: 2 | floor %}{% assign heart_halves = hp | default: 0 | times: 20 | plus: heart_halves | divided_by: max_hp | floor %}{% else %}{% assign heart_halves = 0 %}{% endif %}{% if hp > 0 and heart_halves < 1 %}{% assign heart_halves = 1 %}{% endif %}` +
   hudRow(`data-hearts="{{ heart_halves }}"`, `${heartRow('', grayOnly)}${heartRow('_ink', inkOnly)}${count ? hpCount : ''}${extra}`)
@@ -387,7 +395,7 @@ const celebrationBadge = (classes: string) => `
 const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelow = false, inline: ChipsInline = false, rowFit = 28) => `
   <div class="grow stretch-x" data-story-list="true">
     {% for entry in log %}{% unless attention and forloop.index > 1 %}{% if forloop.first %}${logLine('entry', classes, clamp, size, fit, 'block', timeBelow, inline, true)}{% else %}${logLine('entry', 'label lg:title--small', 1, 16, rowFit, inline ? `block pt--1 ${inline === 'all' ? '' : 'lg:'}pt--0.5` : 'block pt--1', timeBelow, inline)}{% endif %}{% endunless %}{% endfor %}
-    {% if log.size == 0 %}<span class="label lg:title--small">The first adventure starts soon.</span>{% endif %}
+    {% if log.size == 0 %}<span class="label lg:title--small">${L('first_soon')}</span>{% endif %}
   </div>`
 
 /**
@@ -692,7 +700,7 @@ const boardWindow = (limit: number | string, prefix = 'board') => `{% assign boa
   `{% assign ${prefix}_limit = ${limit} %}{% assign ${prefix}_offset = 0 %}{% assign ${prefix}_append = false %}` +
   `{% if board_own != nil %}{% assign ${prefix}_half = ${prefix}_limit | divided_by: 2 | floor %}{% assign ${prefix}_max = board_rows.size | minus: ${prefix}_limit | at_least: 0 %}{% assign ${prefix}_offset = board_own | minus: ${prefix}_half | at_least: 0 | at_most: ${prefix}_max %}` +
   `{% elsif rank and rank > ${prefix}_limit %}{% assign ${prefix}_limit = ${prefix}_limit | minus: 1 %}{% assign ${prefix}_append = true %}{% endif %}`
-const rankHeading = `This week{% if leaderboard_cohort_label != "" %} · {{ leaderboard_cohort_label | escape }}{% endif %}`
+const rankHeading = `${L('this_week')}{% if leaderboard_cohort_label != "" %} · {{ leaderboard_cohort_label | escape }}{% endif %}`
 const boardRow = rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')
 /**
  * The portrait's board on the X: rows 1-5 and 6-10 side by side, so a full-width row does not leave the name and score
@@ -706,7 +714,7 @@ const rankColumns = `${boardWindow(10, 'x')}{% assign x_right = x_offset | plus:
   `${boardWindow(OG_PORTRAIT_ROWS)}{% assign board_right = board_offset | plus: 3 %}{% assign board_right_limit = board_limit | minus: 3 %}` +
   `<div class="lg:hidden grid grid--cols-2 gap--medium stretch-x" data-board-columns="og">${rankColumn('offset: board_offset limit: 3')}${rankColumn('offset: board_right limit: board_right_limit', `{% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}`)}</div>`
 /** Period and group caption set into the rune rule above the ranking (D92); the OG shortens "Levels" to "Lv". */
-const rankCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label lg:title--small no-shrink lg:hidden">This week{% if leaderboard_cohort_label != "" %} · {{ leaderboard_cohort_label | replace: "Levels ", "Lv " | escape }}{% endif %}</span><span class="hidden lg:inline-block label lg:title--small no-shrink">${rankHeading}</span>${ruleFill}</div>`
+const rankCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label lg:title--small no-shrink lg:hidden">${L('this_week')}{% if leaderboard_cohort_label != "" %}{% assign cohort_long = labels.levels | default: "Levels " %}{% assign cohort_short = labels.lv | default: "Lv " %} · {{ leaderboard_cohort_label | replace: cohort_long, cohort_short | escape }}{% endif %}</span><span class="hidden lg:inline-block label lg:title--small no-shrink">${rankHeading}</span>${ruleFill}</div>`
 /**
  * The OG full landscape's board beside its scene (the X keeps its ten-row column under the rule): the caption, then up
  * to five rows; a hero below them takes the fifth row's place, so the panel never outgrows the scene.
@@ -714,14 +722,14 @@ const rankCaption = `<div class="flex flex--row flex--center-y gap--xsmall stret
 const OG_BOARD_ROWS = 5
 const ogBoard = `<div class="lg:hidden grow w--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall" data-board-column="og">
       ${rankCaption}
-      {% unless rank %}{% if rank_status == "dormant" %}<span class="label">Not ranked while paused</span>{% else %}<span class="label">Ranking within the hour</span>{% endif %}{% endunless %}
+      {% unless rank %}{% if rank_status == "dormant" %}<span class="label">${L('not_ranked_paused')}</span>{% else %}<span class="label">${L('ranking_soon')}</span>{% endif %}{% endunless %}
       ${boardWindow(OG_BOARD_ROWS)}
       {% for row in board_rows offset: board_offset limit: board_limit %}${rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')}{% endfor %}
       {% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}
     </div>`
 const rankPanel = (heading: boolean) => `
       ${heading ? rankCaption : ''}
-      {% unless rank %}{% if rank_status == "dormant" %}<span class="label lg:title--small">Not ranked while paused</span>{% else %}<span class="label lg:title--small">Ranking within the hour</span>{% endif %}{% endunless %}
+      {% unless rank %}{% if rank_status == "dormant" %}<span class="label lg:title--small">${L('not_ranked_paused')}</span>{% else %}<span class="label lg:title--small">${L('ranking_soon')}</span>{% endif %}{% endunless %}
       ${heading ? rankColumns : `${boardWindow(10, 'x')}{% for row in board_rows offset: x_offset limit: x_limit %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}`}
       {% if x_append %}${rankRule}${rankRow('rank', 'leaderboard_score', 'hidden lg:flex ', 'true')}{% endif %}`
 
@@ -742,7 +750,7 @@ const standoffRow = (classes: string, leaves: boolean) =>
   `{% if standoff %}{% assign standoff_halves = standoff.hp_pct | times: 20 | plus: 99 | divided_by: 100 | floor %}<div class="no-shrink flex flex--row flex--wrap flex--left flex--center-y gap--xsmall stretch-x" data-standoff="{{ standoff_halves }}">` +
   `<span class="${classes} text--bold">Elite {{ standoff.name | escape }}</span>` +
   `<div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="${TICK_CLASSES}" src="{% if standoff_halves >= tick_right %}{{ hud_tick_full }}{% elsif standoff_halves >= tick_left %}{{ hud_tick_half }}{% else %}{{ hud_tick_empty }}{% endif %}" alt="">{% endfor %}</div>` +
-  `<span class="${classes} no-shrink">{{ standoff.hp_pct }}%${leaves ? '{% if utc_offset != nil %} · leaves {{ standoff.leaves_at | plus: utc_offset | date: "%H:%M" }}{% endif %}' : ''}</span></div>{% endif %}`
+  `<span class="${classes} no-shrink">{{ standoff.hp_pct }}%${leaves ? `{% if utc_offset != nil %} · ${L('leaves')} {{ standoff.leaves_at | plus: utc_offset | date: "%H:%M" }}{% endif %}` : ''}</span></div>{% endif %}`
 
 /** Integer-scaled assets keep every QR module crisp on monochrome displays. */
 const qrImage = (scale: number, largeScale: number, field = 'qr_base') =>
@@ -762,8 +770,8 @@ const bagFullPanel = (column: boolean) => `
   <div class="grow h--min-0 flex ${column ? 'flex--col' : 'flex--row'} flex--center-x flex--center-y gap--medium lg:gap--large stretch-x" data-bag-full="true">
     <div class="no-shrink">${qrImage(3, 5)}</div>
     <div class="flex flex--col flex--left gap--small${column ? ' flex--center-x' : ''}">
-      <span class="title lg:title--large">Bag full</span>
-      <span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="2">Adventures are paused until you make room.</span>
+      <span class="title lg:title--large">${L('bag_full')}</span>
+      <span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="2">${L('bag_paused')}</span>
       <span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="1">{{ qr_label | escape }}</span>
     </div>
   </div>`
@@ -772,17 +780,17 @@ const bagFullPanel = (column: boolean) => `
 const bagQr = (scale = 3, largeScale = 4, caption = true) => `
   {% if qr_base != "" or companion_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x flex--top gap--xsmall" data-companion-qr="true"{% if qr_base != "" %} data-urgent="true"{% endif %}>
     {% if qr_base != "" %}${qrImage(scale, largeScale)}<span class="label lg:title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>
-    {% else %}${qrImage(scale, largeScale, 'companion_qr_base')}${caption ? '<span class="label lg:title--small">Your bag</span>' : ''}{% endif %}
+    {% else %}${qrImage(scale, largeScale, 'companion_qr_base')}${caption ? `<span class="label lg:title--small">${L('your_bag')}</span>` : ''}{% endif %}
   </div>{% endif %}`
 
 /**
  * Equipped gear with its slot named, so a find reads as a weapon or armor at a glance (X only: the OG has no spare line).
  * One line under the HUD rows in both full arrangements, wrapping where the HUD block is short.
  */
-const gearName = (field: string) => `<span class="text--bold inline-block">{% if ${field} != "" %}{{ ${field} | escape }}{% else %}None{% endif %}</span>`
-const gearLine = `{% assign gear_plain = weapon | default: "None" | append: armor | default: "None" %}<div class="hidden lg:block stretch-x" data-gear-line="true"><span class="title--small text--regular" ${fitClamp('gear_plain', 1, 44)}>Weapon ${gearName('weapon')} · Armor ${gearName('armor')}</span></div>`
+const gearName = (field: string) => `<span class="text--bold inline-block">{% if ${field} != "" %}{{ ${field} | escape }}{% else %}${L('none')}{% endif %}</span>`
+const gearLine = `{% assign gear_none = labels.none | default: "None" %}{% assign gear_plain = weapon | default: gear_none | append: armor | default: gear_none %}<div class="hidden lg:block stretch-x" data-gear-line="true"><span class="title--small text--regular" ${fitClamp('gear_plain', 1, 44)}>${L('weapon')} ${gearName('weapon')} · ${L('armor')} ${gearName('armor')}</span></div>`
 /** The gear on two lines, weapon over armor, for the X half's narrow details column (D97). */
-const gearLines = `<div class="flex flex--col flex--left gap--xsmall stretch-x" data-gear-line="stacked"><span class="title--small text--regular">Weapon ${gearName('weapon')}</span><span class="title--small text--regular">Armor ${gearName('armor')}</span></div>`
+const gearLines = `<div class="flex flex--col flex--left gap--xsmall stretch-x" data-gear-line="stacked"><span class="title--small text--regular">${L('weapon')} ${gearName('weapon')}</span><span class="title--small text--regular">${L('armor')} ${gearName('armor')}</span></div>`
 /**
  * The gear behind the attack and defense marks instead of the slot words, for the X side's header: each item keeps its
  * mark, and the armor drops under the weapon where both names don't fit one line.
@@ -796,7 +804,7 @@ const gearIcons = `<div class="flex flex--row flex--wrap flex--left flex--center
  */
 const gearItem = (icon: string, field: string, none: string) =>
   `<div class="flex flex--row flex--center-y gap--[3px] w--min-0"><img class="${COUNTER_ICON}" src="{{ ${icon} }}" alt=""><span class="label" data-clamp="1">{% if ${field} != "" %}{{ ${field} | escape }}{% else %}${none}{% endif %}</span></div>`
-const gearLineOg = `<div class="lg:hidden flex flex--row flex--left flex--center-y ${COUNTER_GAP} stretch-x" data-gear-line="og">${gearItem('hud_sword', 'weapon', 'No weapon')}${gearItem('hud_shield', 'armor', 'No armor')}</div>`
+const gearLineOg = `<div class="lg:hidden flex flex--row flex--left flex--center-y ${COUNTER_GAP} stretch-x" data-gear-line="og">${gearItem('hud_sword', 'weapon', L('no_weapon'))}${gearItem('hud_shield', 'armor', L('no_armor'))}</div>`
 
 /**
  * `shortColumn` is the column for the portrait half and `narrowColumn` for the portrait quarter. Neither slot has the
@@ -818,13 +826,13 @@ const welcome = (layout: WelcomeLayout) => {
   const title = compact ? 'title title--small lg:title--large' : 'title lg:title--large'
   const column = layout === 'halfVertical' || layout === 'shortColumn' || layout === 'narrowColumn'
   const line = (visibility = '') => `${visibility ? `${visibility} ` : ''}label lg:title--small${column ? ' text--center' : ''}`
-  const heading = `{% if status != "unlinked" %}{{ hero_name | escape }} is ready{% elsif data_state == "service_paused" %}Back soon{% else %}Finish setting up{% endif %}`
-  const detail = (visibility = '') => `{% if status == "unlinked" %}{% if qr_base != "" %}<span class="${line(visibility)}" data-clamp="2">Scan with your phone to open the companion.</span>{% endif %}
-      <span class="${line(visibility)}" data-clamp="3">{{ attention | escape }}</span>{% else %}<span class="${line(visibility)}" data-clamp="2">The first adventure starts within 15 minutes.</span>
-      <span class="${line(visibility)}" data-clamp="3">Scan to open your companion: manage gear and pick where to explore.</span>{% endif %}
+  const heading = `{% if status != "unlinked" %}{% assign ready_name = hero_name | escape %}{{ labels.ready | default: "${DEVICE_WORDS.en.labels.ready}" | replace: "%name%", ready_name }}{% elsif data_state == "service_paused" %}${L('back_soon')}{% else %}${L('finish_setup')}{% endif %}`
+  const detail = (visibility = '') => `{% if status == "unlinked" %}{% if qr_base != "" %}<span class="${line(visibility)}" data-clamp="2">${L('scan_phone')}</span>{% endif %}
+      <span class="${line(visibility)}" data-clamp="3">{{ attention | escape }}</span>{% else %}<span class="${line(visibility)}" data-clamp="2">${L('first_15')}</span>
+      <span class="${line(visibility)}" data-clamp="3">${L('scan_manage')}</span>{% endif %}
       <span class="${line(visibility)}">trmnlgames.com</span>`
   const lines = compact
-    ? `<span class="${line('lg:hidden')}" data-clamp="2">{% if status != "unlinked" %}First adventure within 15 minutes{% elsif qr_base != "" %}Scan with your phone.{% else %}{{ attention | escape }}{% endif %}</span>
+    ? `<span class="${line('lg:hidden')}" data-clamp="2">{% if status != "unlinked" %}${L('first_15_short')}{% elsif qr_base != "" %}${L('scan_phone_short')}{% else %}{{ attention | escape }}{% endif %}</span>
       ${detail('hidden lg:block')}`
     : detail()
   const text = `
@@ -864,7 +872,7 @@ const oriented = (classes: string, landscape: string, portrait: string, bar: str
 const qrFooter = (scale = 3, largeScale = 4, classes = '', standingScale = scale) => `
   {% if qr_base != "" or companion_qr_base != "" %}<div class="${classes}no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x" data-companion-qr="true"{% if qr_base != "" %} data-urgent="true"{% endif %}>
     {% if qr_base != "" %}<div class="no-shrink">${qrImage(scale, largeScale)}</div><span class="label lg:title--small grow" data-clamp="3">{{ qr_label | escape }}</span>
-    {% else %}<div class="no-shrink">${qrImage(standingScale, largeScale, 'companion_qr_base')}</div><span class="label lg:title--small grow">Your bag</span>{% endif %}
+    {% else %}<div class="no-shrink">${qrImage(standingScale, largeScale, 'companion_qr_base')}</div><span class="label lg:title--small grow">${L('your_bag')}</span>{% endif %}
   </div>{% endif %}`
 
 /**
@@ -892,8 +900,8 @@ const fullPortrait = `
   {% else %}
   <div class="no-shrink stretch-x"><div class="flex flex--col lg:flex--row lg:flex--wrap flex--top flex--left lg:flex--between gap--small lg:gap--large" data-hero-header="true">
     <div class="no-shrink flex flex--col flex--left gap--xsmall">
-      ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 16 | escape }}, level {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, level {{ level }}</span>
-      <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, level {{ level }}</span>`)}
+      ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 16 | escape }}, ${L('level')} {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, ${L('level')} {{ level }}</span>
+      <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>`)}
       ${statusLine(2, 40)}
       ${heroCounters}
     </div>
@@ -932,7 +940,7 @@ const xBlock = (inner: string, classes = 'no-shrink') => `<div class="hidden lg:
  * attack and defense marks drop under a name too wide to share their line (the X half's details column, D97).
  */
 const xName = (clamp = 0, size = 'title', wrap = false) => {
-  const row = nameRow(`<span class="${size} ${clamp ? `w--min-0" data-clamp="{% if hero_name.size > ${clamp} %}1{% else %}0{% endif %}" data-clamp-lg="{% if hero_name.size > ${clamp} %}1{% else %}0{% endif %}` : 'no-shrink'}">{{ hero_name | escape }}, level {{ level }}</span>`)
+  const row = nameRow(`<span class="${size} ${clamp ? `w--min-0" data-clamp="{% if hero_name.size > ${clamp} %}1{% else %}0{% endif %}" data-clamp-lg="{% if hero_name.size > ${clamp} %}1{% else %}0{% endif %}` : 'no-shrink'}">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>`)
   return wrap ? row.replace('flex--center-y gap--small stretch-x" data-name-row', 'flex--wrap flex--center-y gap--small stretch-x" data-name-row') : row
 }
 /**
@@ -962,7 +970,7 @@ const xScene = (field: SceneField, code = '') => `{% if ${field} != "" %}<div cl
  */
 const xBoard = (limit: number, fit = false) => `<div class="flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x" data-board-column="x"${fit ? ' data-fit-rows="true"' : ''}>
       ${rankCaption}
-      {% unless rank %}{% if rank_status == "dormant" %}<span class="title--small">Not ranked while paused</span>{% else %}<span class="title--small">Ranking within the hour</span>{% endif %}{% endunless %}
+      {% unless rank %}{% if rank_status == "dormant" %}<span class="title--small">${L('not_ranked_paused')}</span>{% else %}<span class="title--small">${L('ranking_soon')}</span>{% endif %}{% endunless %}
       ${boardWindow(limit)}
       {% for row in board_rows offset: board_offset limit: board_limit %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}${rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')}{% endfor %}
       {% if board_append %}<div class="border--h-30 stretch-x"></div>${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}
@@ -1050,7 +1058,7 @@ const halfVerticalPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('halfVertical')}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
-    <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
+    <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
     ${statusLine(2, 24)}${hearts(false)}${xpTicks()}${counters()}
   </div>
   <div class="lg:hidden no-shrink stretch-x">${divider}</div>
@@ -1073,7 +1081,7 @@ const quadrantPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('narrowColumn')}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
-    <span class="label" data-clamp="1">{{ hero_name | truncate: 13 | escape }}, level {{ level }}</span>
+    <span class="label" data-clamp="1">{{ hero_name | truncate: 13 | escape }}, ${L('level')} {{ level }}</span>
     ${hearts(false)}${quarterStatus}
   </div>
   <div class="lg:hidden grow h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x">
@@ -1092,7 +1100,7 @@ const halfVerticalBody = (withScene: boolean) => `
   {% else %}
   <div class="lg:hidden grid no-shrink stretch-x gap--small">
     <div class="col--span-8 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
-      <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
+      <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
       ${statusLine(2, 42)}${hearts(false)}
       ${counters()}
     </div>
@@ -1114,12 +1122,12 @@ const halfHorizontalPortrait = halfVerticalBody(false)
  * D138, X full landscape: today's three to-do tasks heading the board column, each behind a ticked or open box with
  * its progress at the end, ruled like the board under them. Labels keep their bold names; a long one takes two lines.
  */
-const todoCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label title--small no-shrink">Today's to-do</span>${ruleFill}</div>`
+const todoCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label title--small no-shrink">${L('todo_today')}</span>${ruleFill}</div>`
 const todoColumn = `<div class="no-shrink flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x" data-todo-column="x">
         {% for task in todo_tasks %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}<div class="label title--small flex flex--row flex--center-y gap--small stretch-x" data-todo-task="{% if task.done %}done{% else %}open{% endif %}">
           <img class="image no-shrink" src="{% if task.done %}{{ glyph16_todo }}{% else %}{{ glyph16_todoOpen }}{% endif %}" alt="">
           <span class="grow w--min-0" data-clamp="2">${richSpan(rich('task.t'))}</span>
-          <span class="no-shrink">{% if task.done %}Done{% else %}{{ task.p }}/{{ task.n }}{% endif %}</span>
+          <span class="no-shrink">{% if task.done %}${L('done')}{% else %}{{ task.p }}/{{ task.n }}{% endif %}</span>
         </div>{% endfor %}
       </div>`
 /**
@@ -1130,8 +1138,8 @@ const goalLine = `{% if goal %}<div class="hidden lg:flex no-shrink flex--col fl
         <div class="border--h-30 stretch-x"></div>
         <div class="flex flex--row flex--center-y gap--small stretch-x pt--1">
           <img class="image no-shrink" src="{{ glyph24_career }}" alt="">
-          <span class="title grow w--min-0" data-clamp="1"><span class="text--regular">Goal: </span>{{ goal.t | escape }}</span>
-          <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} gold</span>
+          <span class="title grow w--min-0" data-clamp="1"><span class="text--regular">${L('goal')}</span>{{ goal.t | escape }}</span>
+          <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
         </div>
       </div>{% endif %}`
 
@@ -1141,8 +1149,8 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   <div class="relative no-shrink flex flex--row flex--top gap--medium stretch-x">
     <div class="grow w--min-0 flex flex--row flex--top flex--between gap--medium lg:gap--large" data-hero-header="true">
       <div class="no-shrink flex flex--col flex--left gap--xsmall">
-        ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 12 | escape }}, level {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, level {{ level }}</span>
-        <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, level {{ level }}</span>`)}
+        ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 12 | escape }}, ${L('level')} {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, ${L('level')} {{ level }}</span>
+        <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>`)}
         ${statusLine(2, 56)}
         ${heroCounters}
       </div>
@@ -1189,7 +1197,7 @@ export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${or
   {% else %}
   <div class="lg:hidden grid grow h--full h--min-0 stretch-x gap--medium">
     <div class="col--span-4 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
-      <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, level {{ level }}</span>
+      <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
       ${statusLine(2, 36)}${hearts(false)}
       ${counters()}
     </div>
@@ -1208,7 +1216,7 @@ export const markupQuadrant = `${glyphAssigns([16])}${HUD_ASSIGNS}${oriented('la
   {% if status == "unlinked" or first_run %}${welcome('quadrant')}
   {% else %}
     <div class="lg:hidden no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">
-      <span class="label grow w--min-0" data-clamp="1">{{ hero_name | truncate: 11 | escape }}, level {{ level }}</span>
+      <span class="label grow w--min-0" data-clamp="1">{{ hero_name | truncate: 11 | escape }}, ${L('level')} {{ level }}</span>
       ${hearts(false)}
     </div>
     <div class="lg:hidden flex flex--row flex--top grow h--full h--min-0 stretch-x gap--small">

@@ -21,7 +21,7 @@ import { taskLabel } from '@trmnl-games/desk-crawler/sim/core/todo'
 import { toHeroState } from './sim/runs/adapter'
 import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
-import { trmnlUserChanged } from './lib/trmnlUser'
+import { deviceLocale, trmnlUserChanged } from './lib/trmnlUser'
 
 /**
  * Fixed-cost canonical payload for one authorized instance (trmnl.md "Query
@@ -174,6 +174,7 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
       : null,
     ownerAlias: user.publicAlias,
     timezone: user.timezone,
+    locale: deviceLocale(user),
     hero: hero
       ? {
           name: hero.name,

@@ -8,7 +8,9 @@
  * `--dump-contexts <file>` also writes each Liquid render context, for tools/trmnl/crosscheck.ts.
  * `--inline-art` draws scenes and codes locally and inlines them, so art changes preview before any deployment serves them.
  * `--occasion <id>` (D139) dresses every scene for one occasion, e.g. `--occasion halloween`.
+ * `--locale fr|de` (D169) renders the screen in that language; its pages are named `fr.<state>--…`, so `--filter fr.` sweeps them.
  */
+import { isLocale, type Locale } from '@trmnl-games/platform'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { Liquid } from 'liquidjs'
 import { buildPayload, MAX_RECAP_EVENTS, type ActivityEntry, type PayloadInput } from '@trmnl-games/desk-crawler/payload'
@@ -45,6 +47,8 @@ const utcOffset = PREVIEW_UTC_OFFSET
 const deskKeepsakeCode = process.argv.includes('--keepsakes') ? PREVIEW_KEEPSAKE_CODE : null
 const occasionIndex = process.argv.indexOf('--occasion')
 const occasion = occasionIndex >= 0 ? process.argv[occasionIndex + 1]! : null
+const localeIndex = process.argv.indexOf('--locale')
+const locale = localeIndex >= 0 && isLocale(process.argv[localeIndex + 1]) ? (process.argv[localeIndex + 1] as Locale) : null
 
 const { groups, overnightEntries, base } = previewScenarios(artBaseUrl)
 const states = groups.states
@@ -61,14 +65,16 @@ mkdirSync('.previews', { recursive: true })
 let written = 0
 const contextsIndex = process.argv.indexOf('--dump-contexts')
 const contexts: Array<{ name: string; layout: PreviewLayout; context: Record<string, unknown> }> = []
-for (const [name, input] of Object.entries(previewStates)) {
+for (const [state, scenario] of Object.entries(previewStates)) {
+  const name = locale === null ? state : `${locale}.${state}`
+  const input = locale === null ? scenario : { ...scenario, locale }
   const withRecap = process.argv.includes('--recap') ? withOvernightRecap(input, overnightEntries) : input
   const built = sceneUrlsAt(buildPayload(withRecap), input.now, utcOffset)
   // D139: `--occasion <id>` dresses every scene for that occasion, whatever date the scenario uses.
   const payload = occasion === null ? built : { ...built, ...Object.fromEntries((['scene_url', 'scene_url_small', 'scene_url_large', 'scene_url_medium'] as const).map((key) => [key, built[key].replace(/\/(?:plain|[a-z0-9_]+)\/(?=[a-z_]+\/(?:none|monster-|elite-|prop-))/, `/${occasion}/`)])) }
   if (process.argv.includes('--recap')) writeFileSync(`.previews/${name}--payload.json`, JSON.stringify(payload, null, 2))
   for (const layout of Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]) {
-    const context = { ...payload, desk_keepsake_code: KEEPSAKE_FREE_SCENARIOS.has(name) ? null : deskKeepsakeCode, utc_offset: NO_OFFSET_SCENARIOS.has(name) ? null : utcOffset }
+    const context = { ...payload, desk_keepsake_code: KEEPSAKE_FREE_SCENARIOS.has(state) ? null : deskKeepsakeCode, utc_offset: NO_OFFSET_SCENARIOS.has(state) ? null : utcOffset }
     if (contextsIndex >= 0) contexts.push({ name, layout, context })
     const inner = withLocalArt(await liquid.parseAndRender(screenMarkup[layout], context))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {

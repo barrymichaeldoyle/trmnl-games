@@ -182,7 +182,7 @@ describe('status times (D45)', () => {
   })
 
   it('formats fallback durations', () => {
-    expect([1, 3, 4, 5, 8].map(aboutDuration)).toEqual(['15 min', '45 min', '1 h', '1 h 15 min', '2 h'])
+    expect([1, 3, 4, 5, 8].map((ticks) => aboutDuration(ticks))).toEqual(['15 min', '45 min', '1 h', '1 h 15 min', '2 h'])
   })
 })
 

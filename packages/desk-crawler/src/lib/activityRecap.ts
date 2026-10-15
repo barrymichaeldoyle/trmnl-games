@@ -1,5 +1,8 @@
 import type { ContentCatalog, LogDetail } from '../sim/core/types'
 import type { LogDeltas } from './logPresentation'
+import type { Locale } from '@trmnl-games/platform'
+import { contentTranslator } from '../i18n'
+import { DEVICE_WORDS } from '../i18n/device'
 
 export const RECAP_WINDOW_MS = 12 * 60 * 60 * 1000
 /** Includes commands; an extra row detects an incomplete window. */
@@ -46,7 +49,7 @@ export interface ActivityEntry {
 }
 
 /** Read-only, deterministic digest of recorded outcomes within one completed period. Never infer facts from jokes. */
-export function activityRecap(entries: readonly ActivityEntry[], period: RecapPeriod, content: ContentCatalog, truncated = false) {
+export function activityRecap(entries: readonly ActivityEntry[], period: RecapPeriod, content: ContentCatalog, truncated = false, locale: Locale = 'en') {
   const totals = { xp: 0, gold: 0, wins: 0, gear: 0, potions: 0, breaks: 0, levels: 0, knockouts: 0, revivals: 0, rareFinds: 0, elites: 0, jackpots: 0, raidsWon: 0, raidsLost: 0, tasks: 0 }
   const arrivals = new Set<string>()
   let heldFind = false
@@ -121,29 +124,35 @@ export function activityRecap(entries: readonly ActivityEntry[], period: RecapPe
     totals.jackpots ? plural(totals.jackpots, 'jackpot') : null,
   ].filter((value): value is string => value !== null)
   const partial = truncated || entries.length > MAX_RECAP_EVENTS
+  // D169: the device's items and label read in the owner's language; the longer English digests stay as they are.
+  const w = DEVICE_WORDS[locale].recap
+  const areaName = (id: string) => { const name = content.biomes.find(biome => biome.id === id)?.name; return name === undefined ? null : contentTranslator(locale).name(name) }
+  const localRaidFact = !raids ? null : !totals.raidsLost ? w.raidsWon(totals.raidsWon) : !totals.raidsWon ? w.raidsLost(totals.raidsLost) : w.raids(raids, totals.raidsWon)
+  const quiet = events ? w.continued : partial ? w.noSample : w.noNew
   /**
    * The same facts as short icon-led items for the device (`k` names its mark), most notable first so a line that
    * cannot hold them all drops the routine ones. 'none' carries the quiet-period text without a mark.
    */
   const items: RecapItem[] = [
-    totals.levels ? { k: 'levelup', t: `+${plural(totals.levels, 'level')}` } : null,
-    ...[...arrivals].map((id): RecapItem => ({ k: 'travel', t: `Reached ${content.biomes.find(biome => biome.id === id)?.name ?? 'a new area'}` })),
-    totals.rareFinds ? { k: 'achievement', t: plural(totals.rareFinds, 'rare find') } : null,
-    totals.elites ? { k: 'combat', t: plural(totals.elites, 'elite') } : null,
-    totals.jackpots ? { k: 'coin', t: plural(totals.jackpots, 'jackpot') } : null,
-    heldFind ? { k: 'loot', t: 'Bag full' } : null,
-    totals.knockouts ? { k: 'death', t: plural(totals.knockouts, 'knockout') } : null,
-    totals.revivals ? { k: 'revive', t: plural(totals.revivals, 'revival') } : null,
-    raidFact ? { k: 'raid', t: raidFact } : null,
-    totals.tasks ? { k: 'todo', t: plural(totals.tasks, 'task') } : null,
+    totals.levels ? { k: 'levelup', t: w.levels(totals.levels) } : null,
+    ...[...arrivals].map((id): RecapItem => ({ k: 'travel', t: locale === 'en' ? `Reached ${areaName(id) ?? 'a new area'}` : w.reached(areaName(id) ?? '?') })),
+    totals.rareFinds ? { k: 'achievement', t: w.rareFinds(totals.rareFinds) } : null,
+    totals.elites ? { k: 'combat', t: w.elites(totals.elites) } : null,
+    totals.jackpots ? { k: 'coin', t: w.jackpots(totals.jackpots) } : null,
+    heldFind ? { k: 'loot', t: w.bagFull } : null,
+    totals.knockouts ? { k: 'death', t: w.knockouts(totals.knockouts) } : null,
+    totals.revivals ? { k: 'revive', t: w.revivals(totals.revivals) } : null,
+    localRaidFact ? { k: 'raid', t: localRaidFact } : null,
+    totals.tasks ? { k: 'todo', t: w.tasks(totals.tasks) } : null,
     totals.xp ? { k: 'xp', t: `+${totals.xp} XP` } : null,
-    totals.gold ? { k: 'coin', t: `${totals.gold} gold` } : null,
-    totals.wins ? { k: 'sword', t: plural(totals.wins, 'win') } : null,
-    totals.gear ? { k: 'loot', t: plural(totals.gear, 'gear find') } : null,
-    totals.potions ? { k: 'potion', t: plural(totals.potions, 'potion') } : null,
-    totals.breaks ? { k: 'rest', t: plural(totals.breaks, 'break') } : null,
+    totals.gold ? { k: 'coin', t: w.gold(totals.gold) } : null,
+    totals.wins ? { k: 'sword', t: w.wins(totals.wins) } : null,
+    totals.gear ? { k: 'loot', t: w.gearFinds(totals.gear) } : null,
+    totals.potions ? { k: 'potion', t: w.potions(totals.potions) } : null,
+    totals.breaks ? { k: 'rest', t: w.breaks(totals.breaks) } : null,
   ].filter((value): value is RecapItem => value !== null)
-  const label = partial ? `${period.label} · partial` : period.label
+  const periodLabel = locale === 'en' ? period.label : period.label === 'Night recap' ? DEVICE_WORDS[locale].nightRecap : DEVICE_WORDS[locale].dayRecap
+  const label = partial ? `${periodLabel} · ${DEVICE_WORDS[locale].partial}` : periodLabel
   // Compact screens get one useful fact about progress and one about activity.
   const compact = (highlights[0] ? [highlights[0], gains[0]] : [gains[0], activity[0]]).filter(Boolean).join(' · ') || (events ? 'Adventures continued' : partial ? 'No adventures in sample' : 'No new adventures')
   return {
@@ -158,7 +167,7 @@ export function activityRecap(entries: readonly ActivityEntry[], period: RecapPe
     gains: gains.join(' · '),
     highlights: highlights.slice(0, 2).join(' · '),
     compact,
-    items: items.length ? items : [{ k: 'none', t: events ? 'Adventures continued' : partial ? 'No adventures in sample' : 'No new adventures' }],
+    items: items.length ? items : [{ k: 'none', t: quiet }],
   }
 }
 

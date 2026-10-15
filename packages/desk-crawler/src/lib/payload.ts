@@ -15,6 +15,9 @@ import { nextSlotAfter, slotEta, SLOT_MS } from '../sim/schedule'
 import { bold } from '../sim/core/narrative'
 import { logPresentation, type LogDeltas } from './logPresentation'
 import { activityRecap, recapPeriod, type ActivityEntry } from './activityRecap'
+import { INTL_TAG, type Locale } from '@trmnl-games/platform'
+import { contentTranslator } from '../i18n'
+import { DEVICE_WORDS, deviceArea, type DeviceWords } from '../i18n/device'
 
 export { activityRecap, MAX_RECAP_EVENTS, RECAP_WINDOW_MS, recapPeriod } from './activityRecap'
 export type { ActivityEntry, ActivityRecap, RecapPeriod } from './activityRecap'
@@ -99,6 +102,8 @@ export interface PayloadInput {
   readonly todoTasks?: ReadonlyArray<{ readonly label: string; readonly progress: number; readonly target: number; readonly done: boolean }>
   /** D138: the hero's current career goal; absent off the ladder or past its end. */
   readonly goal?: { readonly title: string; readonly value: number; readonly target: number; readonly gold: number } | null
+  /** D169: the owner's language for everything the screen says; English when absent. */
+  readonly locale?: Locale
 }
 
 export interface PayloadRanking {
@@ -128,9 +133,9 @@ const iso = (timestamp: number) => new Date(timestamp).toISOString().replace(/\.
 const clampPct = (value: number) => Math.max(0, Math.min(100, value))
 
 /** Local "DD Mon HH:mm" plus numeric offset ("UTC+02:00"); falls back to UTC for unknown zones. */
-export function formatLocal(timestamp: number, timeZone: string): { label: string; offset: string } {
+export function formatLocal(timestamp: number, timeZone: string, locale: Locale = 'en'): { label: string; offset: string } {
   const format = (zone: string) => {
-    const parts = new Intl.DateTimeFormat('en-GB', {
+    const parts = new Intl.DateTimeFormat(INTL_TAG[locale], {
       timeZone: zone,
       day: '2-digit',
       month: 'short',
@@ -155,7 +160,7 @@ const sanitizeLabel = (raw: string | null, max: number, fallback: string) => {
   return cleaned === '' ? fallback : [...cleaned].slice(0, max).join('')
 }
 
-function rankingFields(ranking: PayloadRanking | null, unlinked: boolean, timeZone: string) {
+function rankingFields(ranking: PayloadRanking | null, unlinked: boolean, timeZone: string, locale: Locale, words: DeviceWords) {
   if (ranking === null || unlinked) {
     return {
       rank: null as number | null,
@@ -175,17 +180,17 @@ function rankingFields(ranking: PayloadRanking | null, unlinked: boolean, timeZo
       top10: [] as Array<{ rank: number; name: string; hero_name: string; level: number; class: string; score: number }>,
       board: [] as Array<{ rank: number; name: string; hero_name: string; level: number; class: string; score: number }>,
       board_own: null as number | null,
-      leaderboard_as_of_label: 'Ranking within the hour',
+      leaderboard_as_of_label: words.rankingSoon,
     }
   }
-  const asOf = formatLocal(ranking.scoreAt, timeZone)
+  const asOf = formatLocal(ranking.scoreAt, timeZone, locale)
   return {
     rank: ranking.rank,
     rank_delta: ranking.rankDelta,
     rank_status: ranking.status,
     leaderboard_board: 'recent_7d' as const,
     leaderboard_cohort: ranking.cohortKey,
-    leaderboard_cohort_label: ranking.cohortLabel,
+    leaderboard_cohort_label: locale === 'en' || ranking.cohortKey === null ? ranking.cohortLabel : words.cohort(ranking.cohortKey),
     leaderboard_score: ranking.score,
     leaderboard_window_start: iso(ranking.windowStart),
     leaderboard_window_end: iso(ranking.scoreAt),
@@ -216,41 +221,53 @@ export const keepUnitsTogether = (text: string) =>
  * A short cheer for the newest event when it is a big moment: a level-up, an elite win, a jackpot or a rare find.
  * Shown above the newest story until the next adventure replaces it.
  */
-export function celebrationFor(latest: LatestEvent | null, level: number): string | null {
+export function celebrationFor(latest: LatestEvent | null, level: number, locale: Locale = 'en'): string | null {
   if (latest === null) return null
-  if (latest.kind === 'achievement') return latest.title ? `Achievement: ${latest.title}` : null
+  const words = DEVICE_WORDS[locale]
+  const t = contentTranslator(locale)
+  if (latest.kind === 'achievement') return latest.title ? words.achievement(t.text(latest.title)) : null
   // P35: "Goal reached: Equip a find" or "Unlocked: the to-do list", exactly as the line reads.
-  if (latest.kind === 'career') return latest.title ?? null
-  if (latest.kind === 'levelup') return `Level up! Now level ${level}`
+  if (latest.kind === 'career') return latest.title === undefined ? null : (t.story(latest.title) ?? latest.title)
+  if (latest.kind === 'levelup') return words.levelUp(level)
   const outcome = latest.outcome
-  if (outcome?.variant === 'combat' && outcome.elite === true && outcome.outcome === 'victory') return 'Elite defeated!'
-  if (outcome?.variant === 'loot' && outcome.jackpot === true) return 'Jackpot!'
-  if (outcome?.variant === 'loot' && outcome.found === 'gear' && outcome.rarity === 'epic') return 'Epic find!'
-  if (outcome?.variant === 'loot' && outcome.found === 'gear' && outcome.rarity === 'rare') return 'Rare find!'
+  if (outcome?.variant === 'combat' && outcome.elite === true && outcome.outcome === 'victory') return words.eliteDefeated
+  if (outcome?.variant === 'loot' && outcome.jackpot === true) return words.jackpot
+  if (outcome?.variant === 'loot' && outcome.found === 'gear' && outcome.rarity === 'epic') return words.epicFind
+  if (outcome?.variant === 'loot' && outcome.found === 'gear' && outcome.rarity === 'rare') return words.rareFind
   return null
 }
 
 /** "45 min", "2 h", "1 h 15 min" for a number of quarter-hour ticks. */
-export function aboutDuration(ticks: number): string {
+export function aboutDuration(ticks: number, locale: Locale = 'en'): string {
   const minutes = (ticks * SLOT_MS) / 60_000
-  const hours = Math.floor(minutes / 60)
-  const rest = minutes % 60
-  return hours === 0 ? `${rest} min` : rest === 0 ? `${hours} h` : `${hours} h ${rest} min`
+  return DEVICE_WORDS[locale].duration(Math.floor(minutes / 60), minutes % 60)
 }
+
+/** Chip units the template draws as a HUD mark (screen.ts `chip`): these keep their English unit, the number is all that shows. */
+const markedUnit = (chip: string) => /^\S+[\s\u00a0](?:XP|gold|HP|HP from potion)$/.test(chip) || /potion|bag slot/.test(chip)
 
 export function buildPayload(input: PayloadInput) {
   const { now, world, hero, content } = input
+  const locale = input.locale ?? 'en'
+  const words = DEVICE_WORDS[locale]
+  const t = contentTranslator(locale)
+  const heroGender = hero?.gender === 'female' ? ('female' as const) : ('male' as const)
   const biomeName = (id: string | undefined) => content.biomes.find((b) => b.id === id)?.name ?? ''
   const lastCompletedAt = world?.lastCompletedAt
   const stale = world === null ? false : now - (lastCompletedAt ?? world.createdAt) > STALE_AFTER_MS
   const servicePaused = world !== null && (world.ticksPaused || world.maintenanceMode)
-  const gameAsOf = lastCompletedAt === undefined ? null : formatLocal(lastCompletedAt, input.timezone)
+  const gameAsOf = lastCompletedAt === undefined ? null : formatLocal(lastCompletedAt, input.timezone, locale)
   const logs = input.logs.slice(0, MAX_LOGS).map((log) => {
     // The device draws each change behind its mark, so a row without one already reads as no effect (the companion
     // still says so). Every signed number is tied to its unit, which names the mark ("+3 bag slots", "−12k gold").
-    const { narrative, changes: told } = logPresentation(log, { compactGold: true })
+    // D169: the story in the owner's language; a change the template marks keeps its English unit (only its number
+    // shows), and one it spells out (an effect, "Pouch holds 4") reads in the owner's language.
+    const { narrative, changes: english } = logPresentation(log, { compactGold: true, locale, chipLocale: 'en', heroGender })
+    const local = locale === 'en' ? english : logPresentation(log, { compactGold: true, locale, heroGender }).changes
+    const told = english.map((part, index) => (markedUnit(part) ? part : (local[index] ?? part)))
     const changes = told.filter((part) => part !== 'No effect').map((part) => part.replace(/^([+−-]\d+k?) /, '$1\u00a0'))
-    return { at: iso(log.at), u: Math.floor(log.at / 1000), t: formatLocal(log.at, input.timezone).label, k: log.kind, s: keepUnitsTogether(log.summary), n: keepUnitsTogether(narrative), d: keepUnitsTogether(changes.join(' · ')), ...(log.compact === undefined ? {} : { c: log.compact }) }
+    const compact = log.compact === undefined ? undefined : locale === 'en' ? log.compact : (t.story(log.compact, { heroGender }) ?? log.compact)
+    return { at: iso(log.at), u: Math.floor(log.at / 1000), t: formatLocal(log.at, input.timezone, locale).label, k: log.kind, s: keepUnitsTogether(log.summary), n: keepUnitsTogether(narrative), d: keepUnitsTogether(changes.join(' · ')), ...(compact === undefined ? {} : { c: compact }) }
   })
 
   const common = {
@@ -261,9 +278,11 @@ export function buildPayload(input: PayloadInput) {
     last_completed_at: lastCompletedAt === undefined ? null : iso(lastCompletedAt),
     stale,
     plugin_instance_name: sanitizeLabel(input.instanceName, 40, 'Desk Crawler'),
-    game_as_of_label: gameAsOf ? `${gameAsOf.label} ${gameAsOf.offset}` : 'Waiting for the first adventure',
-    recap: hero !== null && input.activity ? activityRecap(input.activity.entries, recapPeriod(now, input.utcOffset ?? null), content, input.activity.truncated) : null,
-    ...rankingFields(input.ranking, hero === null, input.timezone),
+    game_as_of_label: gameAsOf ? `${gameAsOf.label} ${gameAsOf.offset}` : words.waitingFirst,
+    recap: hero !== null && input.activity ? activityRecap(input.activity.entries, recapPeriod(now, input.utcOffset ?? null), content, input.activity.truncated, locale) : null,
+    ...rankingFields(input.ranking, hero === null, input.timezone, locale, words),
+    // D169: the template's own words (template v57).
+    labels: words.labels,
   }
 
   // D139: the scene dresses for the occasion on the device's local date.
@@ -292,7 +311,7 @@ export function buildPayload(input: PayloadInput) {
   if (hero === null) {
     return {
       ...common,
-      ...qrFields(servicePaused ? null : 'app', 'Scan to finish setup'),
+      ...qrFields(servicePaused ? null : 'app', words.scanSetup),
       companion_qr_base: '',
       home_qr_base: '',
       corner_qr_base: '',
@@ -315,7 +334,7 @@ export function buildPayload(input: PayloadInput) {
       defense: null,
       gold: null,
       status: 'unlinked' as const,
-      status_label: 'Setup not finished',
+      status_label: words.setupNotFinished,
       status_eta_ticks: 0,
       status_eta_at: null,
       status_eta_label: '',
@@ -338,7 +357,7 @@ export function buildPayload(input: PayloadInput) {
       goal: null,
       standoff: null,
       celebration: null,
-      attention: servicePaused ? 'Desk Crawler is down for maintenance.' : 'Sign in to the companion, then save this plugin in TRMNL.',
+      attention: servicePaused ? words.maintenance : words.signIn,
       notice: null,
     }
   }
@@ -348,41 +367,41 @@ export function buildPayload(input: PayloadInput) {
   const classMods = classRule(content, hero.class)?.modifiers ?? {}
   const xpToNext = xpToLeave(hero.level)
   const eta = (deadline: number | undefined) => (deadline === undefined ? 0 : Math.max(0, deadline - hero.lastTick))
-  // Area names carry bold marks, rendered by the templates like log summaries.
-  const area = (id: string | undefined) => bold(biomeName(id))
+  // Area names carry bold marks, rendered by the templates like log summaries; another language's article sits outside them.
+  const area = (id: string | undefined, use: 'at' | 'into' | 'object') => (locale === 'en' ? bold(biomeName(id)) : deviceArea(locale, biomeName(id), use))
   let statusLabel: string
   /** With an ETA, the status leading into its HH:MM ("Knocked out, back at"); the template appends the time. */
   let etaLabel = ''
   let etaTicks = 0
   switch (hero.status) {
     case 'exploring':
-      statusLabel = `Exploring the ${area(hero.biomeId)}`
+      statusLabel = words.exploring(area(hero.biomeId, 'object'))
       break
     case 'resting':
-      statusLabel = `Resting in the ${area(hero.biomeId)}`
+      statusLabel = words.resting(area(hero.biomeId, 'at'))
       break
     case 'travelling':
       etaTicks = eta(hero.arriveAtTick)
-      statusLabel = etaTicks === 0 ? 'Arrival pending' : `Travelling to the ${area(hero.targetBiomeId)}`
-      etaLabel = `To the ${area(hero.targetBiomeId)}, arriving`
+      statusLabel = etaTicks === 0 ? words.arrivalPending : words.travelling(area(hero.targetBiomeId, 'into'))
+      etaLabel = words.toArriving(area(hero.targetBiomeId, 'into'))
       break
     case 'dead':
       etaTicks = eta(hero.reviveAtTick)
-      statusLabel = etaTicks === 0 ? 'Revival pending' : `Knocked out. Back in about ${aboutDuration(etaTicks)}`
-      etaLabel = 'Knocked out, back at'
+      statusLabel = etaTicks === 0 ? words.revivalPending : words.knockedOutBack(aboutDuration(etaTicks, locale))
+      etaLabel = words.knockedOutBackAt
       break
     case 'paused':
-      statusLabel = 'Paused by you'
+      statusLabel = words.pausedByYou
       break
     case 'sleeping':
       if (hero.wakeAtTick !== undefined) {
         etaTicks = eta(hero.wakeAtTick)
-        statusLabel = etaTicks === 0 ? 'Resume pending' : 'Adventures resume soon'
-        etaLabel = 'Adventures resume at'
+        statusLabel = etaTicks === 0 ? words.resumePending : words.resumeSoon
+        etaLabel = words.resumeAt
       } else if (input.heldItemName) {
-        statusLabel = 'Bag full, holding a new find'
+        statusLabel = words.bagFullHolding
       } else {
-        statusLabel = 'Bag full. Free a slot to resume.'
+        statusLabel = words.bagFullFree
       }
       break
   }
@@ -393,21 +412,19 @@ export function buildPayload(input: PayloadInput) {
   const arrivesAt = hero.status === 'travelling' && etaTicks > 0 ? slotEta(now, etaTicks) : null
   const travelLine = arrivesAt === null ? null : (() => {
     const offset = input.utcOffset
-    const story = typeof offset === 'number' && Number.isInteger(offset)
-      ? `Off to the ${area(hero.targetBiomeId)}, arriving ${new Date(arrivesAt + offset * 1000).toISOString().slice(11, 16)}.`
-      : `Off to the ${area(hero.targetBiomeId)}.`
-    return { at: iso(arrivesAt), u: Math.floor(arrivesAt / 1000), t: formatLocal(arrivesAt, input.timezone).label, k: 'travel', s: story, n: story, d: '', live: true }
+    const story = words.offTo(area(hero.targetBiomeId, 'into'), typeof offset === 'number' && Number.isInteger(offset) ? new Date(arrivesAt + offset * 1000).toISOString().slice(11, 16) : null)
+    return { at: iso(arrivesAt), u: Math.floor(arrivesAt / 1000), t: formatLocal(arrivesAt, input.timezone, locale).label, k: 'travel', s: story, n: story, d: '', live: true }
   })()
 
   let attention: string | null = null
-  if (hero.quarantined || servicePaused) attention = 'Paused for a service check.'
-  else if (stale) attention = 'Updates are delayed.'
-  else if (hero.status === 'dead') attention = 'Revives automatically with all XP and gear.'
-  else if (hero.status === 'sleeping' && hero.wakeAtTick === undefined) attention = 'Make room in your bag in the companion, then resume.'
+  if (hero.quarantined || servicePaused) attention = words.serviceCheck
+  else if (stale) attention = words.delayed
+  else if (hero.status === 'dead') attention = words.revives
+  else if (hero.status === 'sleeping' && hero.wakeAtTick === undefined) attention = words.makeRoom
   // D78: a merchant visit is a cheerful notice, never an attention line (attention collapses the stories), and only while its offers are open.
   const tickNow = world?.currentTick ?? hero.lastTick
   // D79 outranks D78: a decision waiting is the more useful line; neither ever outranks a problem.
-  const notice = attention !== null ? null : hero.choiceExpiresAtTick !== undefined && hero.choiceExpiresAtTick > tickNow ? 'A decision is waiting in the companion.' : hero.merchantExpiresAtTick !== undefined && hero.merchantExpiresAtTick > tickNow ? 'Merchant visiting. Shop in the companion soon.' : null
+  const notice = attention !== null ? null : hero.choiceExpiresAtTick !== undefined && hero.choiceExpiresAtTick > tickNow ? words.decisionWaiting : hero.merchantExpiresAtTick !== undefined && hero.merchantExpiresAtTick > tickNow ? words.merchantVisiting : null
 
   const needsBag = hero.status === 'sleeping' && hero.wakeAtTick === undefined && !hero.quarantined && !servicePaused
   // A brand-new hero has no adventures yet: the screen welcomes them and links the companion.
@@ -418,7 +435,7 @@ export function buildPayload(input: PayloadInput) {
   const nextTickAt = adventuring && attention === null ? Math.floor(nextSlotAfter(now) / 1000) : null
   return {
     ...common,
-    ...(needsBag ? qrFields('bag', 'Scan to open your bag') : qrFields(firstRun ? 'app' : null, 'Scan to open your companion')),
+    ...(needsBag ? qrFields('bag', words.scanBag) : qrFields(firstRun ? 'app' : null, words.scanCompanion)),
     // The standing link to the bag (gear and potions): the full layout shows it whenever no action QR takes its place.
     companion_qr_base: input.artBaseUrl ? `${input.artBaseUrl}${qrBasePath('bag')}` : '',
     // D88: the full layout's small corner code to the companion home; the bag link stays for older templates and narrow views.
@@ -452,27 +469,27 @@ export function buildPayload(input: PayloadInput) {
     status_eta_label: etaTicks > 0 ? etaLabel : '',
     next_tick_at: nextTickAt,
     biome_id: hero.biomeId,
-    biome_name: biomeName(hero.biomeId),
+    biome_name: t.name(biomeName(hero.biomeId)),
     sprite: hero.status === 'dead' ? 'warrior_dead_v1' : 'warrior_idle_v1',
     sprite_url: input.spriteBaseUrl ? `${input.spriteBaseUrl}/sprites/${hero.status === 'dead' ? 'warrior-dead-v1' : 'warrior-idle-v1'}.png` : '',
-    weapon: input.weaponName ?? '',
-    armor: input.armorName ?? '',
+    weapon: input.weaponName === null ? '' : t.name(input.weaponName),
+    armor: input.armorName === null ? '' : t.name(input.armorName),
     potions: input.potions,
     bag_used: input.bagUsed,
     bag_capacity: input.bagCapacity,
     // D103: the stance outlasts its log line, so the HUD shows it under its gauge mark; empty under a catalog without stances.
     stance: stance ? stance.id : ('' as const),
-    stance_name: stance?.name ?? '',
-    held_item: input.heldItemName ?? '',
+    stance_name: stance ? t.text(stance.name) : '',
+    held_item: input.heldItemName === null ? '' : t.name(input.heldItemName),
     wake_at_tick: hero.wakeAtTick ?? null,
     log: travelLine === null ? logs : [travelLine, ...logs].slice(0, MAX_LOGS),
     // D138: the X full landscape's to-do column and goal line. `p`/`n` are progress and target, capped so "5/5" never reads "6/5".
-    todo_tasks: (input.todoTasks ?? []).map((task) => ({ t: task.label, p: Math.min(task.progress, task.target), n: task.target, done: task.done })),
-    goal: input.goal ? { t: input.goal.title, v: Math.min(input.goal.value, input.goal.target), n: input.goal.target, g: input.goal.gold } : null,
+    todo_tasks: (input.todoTasks ?? []).map((task) => ({ t: locale === 'en' ? task.label : (t.story(task.label, { heroGender }) ?? task.label), p: Math.min(task.progress, task.target), n: task.target, done: task.done })),
+    goal: input.goal ? { t: t.text(input.goal.title), v: Math.min(input.goal.value, input.goal.target), n: input.goal.target, g: input.goal.gold } : null,
     // D163: a dug-in elite's name, its HP left (never 0 while it stands) and when it leaves (UTC seconds); null without one.
-    standoff: standoffField(hero, content, now),
+    standoff: standoffField(hero, content, now, locale),
     // The badge sits above the newest story, so it waits while the travel line leads.
-    celebration: attention === null && travelLine === null && logs.length > 0 ? celebrationFor(input.newestEvent === undefined ? input.latestEvent : input.newestEvent, hero.level) : null,
+    celebration: attention === null && travelLine === null && logs.length > 0 ? celebrationFor(input.newestEvent === undefined ? input.latestEvent : input.newestEvent, hero.level, locale) : null,
     attention,
     notice,
   }
@@ -481,12 +498,12 @@ export function buildPayload(input: PayloadInput) {
 export type CanonicalPayload = ReturnType<typeof buildPayload>
 
 /** D163: the payload's standoff, or null when there is none the catalog can name. */
-function standoffField(hero: PayloadHero, content: ContentCatalog, now: number): { name: string; hp_pct: number; leaves_at: number } | null {
+function standoffField(hero: PayloadHero, content: ContentCatalog, now: number, locale: Locale): { name: string; hp_pct: number; leaves_at: number } | null {
   const standoff = hero.standoff
   const monster = standoff === undefined ? undefined : content.monsters.find((m) => m.id === standoff.monsterId)
   if (standoff === undefined || monster === undefined || standoff.maxHp <= 0) return null
   const ticksLeft = Math.max(1, standoff.untilTick - hero.lastTick)
-  return { name: monster.name, hp_pct: Math.min(100, Math.max(1, Math.ceil((standoff.hp * 100) / standoff.maxHp))), leaves_at: Math.floor(slotEta(now, ticksLeft) / 1000) }
+  return { name: contentTranslator(locale).name(monster.name), hp_pct: Math.min(100, Math.max(1, Math.ceil((standoff.hp * 100) / standoff.maxHp))), leaves_at: Math.floor(slotEta(now, ticksLeft) / 1000) }
 }
 
 /** D139: the occasion a scene dresses for at `now` in an offset, when the catalog has one live and there is art for it. */

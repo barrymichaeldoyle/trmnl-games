@@ -8,7 +8,7 @@ import { contentV1 } from '@trmnl-games/desk-crawler/content/v1'
 import { starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import type { SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
 import { SLOT_MS } from '../../apps/backend/convex/sim/runs/tick'
-import { ALERTS, inQuietHours, localDay, merchantDeal, queueAlerts, quietEndsAt } from '../../apps/backend/convex/lib/alerts'
+import { ALERTS, alertMessage, inQuietHours, localDay, merchantDeal, queueAlerts, quietEndsAt } from '../../apps/backend/convex/lib/alerts'
 import { purgeAlertRows } from '../../apps/backend/convex/alerts'
 import { runTick, seedHero, seedWorld, type T } from './helpers'
 
@@ -287,5 +287,13 @@ describe('alerts backend (P33)', () => {
     await queued(heroId, 'asleep', 10, { state: 'skipped' })
     await t.mutation(internal.maintenance.cleanup, { job: 'alerts' })
     expect((await outbox(t)).map((entry) => entry.eventTick)).toEqual([10])
+  })
+})
+
+describe('alert copy (D169)', () => {
+  it('sends Desk Crawler alerts in the owner’s language', () => {
+    expect(alertMessage({ kind: 'asleep', offerName: undefined }, 'Baz', 'fr').title).toBe('Baz fait la sieste')
+    expect(alertMessage({ kind: 'merchant', offerName: 'Messenger Bag' }, 'Baz', 'de').body).toContain('eine Kuriertasche')
+    expect(alertMessage({ kind: 'asleep', offerName: undefined }, 'Baz').title).toBe('Baz is napping')
   })
 })

@@ -1,4 +1,4 @@
-import { localeFromTag, type Locale } from '@trmnl-games/platform'
+import { LANGUAGES_LIVE, localeFromTag, type Locale } from '@trmnl-games/platform'
 import type { Doc } from '../_generated/dataModel'
 
 /** BCP 47-shaped: a 2 or 3 letter language, then up to two script/region/variant subtags. */
@@ -25,3 +25,6 @@ export function trmnlUserChanged(user: Doc<'users'>, utcOffset: number | null | 
 export function ownerLocale(user: Pick<Doc<'users'>, 'language' | 'trmnlLocale'>): Locale {
   return user.language ?? localeFromTag(user.trmnlLocale) ?? 'en'
 }
+
+/** The owner's language on the TRMNL screen: English until languages roll out (`LANGUAGES_LIVE`). */
+export const deviceLocale = (user: Pick<Doc<'users'>, 'language' | 'trmnlLocale'>): Locale => (LANGUAGES_LIVE ? ownerLocale(user) : 'en')

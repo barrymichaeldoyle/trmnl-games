@@ -3,6 +3,8 @@ import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx } from '../_generated/server'
 import type { SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
 import type { LifeState, PaperLivesCatalog } from '@trmnl-games/paper-lives/sim'
+import type { Locale } from '@trmnl-games/platform'
+import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 
 /**
  * P33 hero alerts (alerts.md): an alert goes out only when the hero has stopped or is about to lose something the
@@ -197,11 +199,28 @@ export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: s
 }
 
 /** One sentence in the game's voice, with nothing private on a lock screen, and the page it opens. */
-export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>, heroName: string): { title: string; body: string; url: string } {
+export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>, heroName: string, locale: Locale = 'en'): { title: string; body: string; url: string } {
   if (row.kind === 'cooler_full') return { title: 'Your cooler is full', body: 'New catches are being released. Sell some fish to make room.', url: '/app/idle-angler/cooler?alert=cooler_full' }
   if (row.kind === 'bait_out') return { title: 'Out of bait', body: 'Your angler is fishing a bare hook. Restock in the tackle shop.', url: '/app/idle-angler/shop?alert=bait_out' }
-  if (row.kind === 'asleep') {
-    return { title: `${heroName} is napping`, body: `${heroName}'s bag is full, so they've stopped for a nap. Make room to send them back out.`, url: '/app/desk-crawler/inventory?alert=asleep' }
-  }
-  return { title: 'A merchant is visiting', body: `A merchant is offering ${heroName} a ${row.offerName ?? 'bigger bag'} at a discount, and they have the gold. The offer lasts about an hour.`, url: '/app/desk-crawler/inventory?alert=merchant' }
+  if (row.kind === 'asleep') return { ...DESK_ALERTS[locale].asleep(heroName), url: '/app/desk-crawler/inventory?alert=asleep' }
+  return { ...DESK_ALERTS[locale].merchant(heroName, row.offerName ?? null), url: '/app/desk-crawler/inventory?alert=merchant' }
+}
+
+const fr = contentTranslator('fr')
+const de = contentTranslator('de')
+
+/** D169: Desk Crawler's two alerts in the owner's language (lib/trmnlUser.ts `deviceLocale`). */
+const DESK_ALERTS: Readonly<Record<Locale, { asleep: (hero: string) => { title: string; body: string }; merchant: (hero: string, offer: string | null) => { title: string; body: string } }>> = {
+  en: {
+    asleep: (hero) => ({ title: `${hero} is napping`, body: `${hero}'s bag is full, so they've stopped for a nap. Make room to send them back out.` }),
+    merchant: (hero, offer) => ({ title: 'A merchant is visiting', body: `A merchant is offering ${hero} a ${offer ?? 'bigger bag'} at a discount, and they have the gold. The offer lasts about an hour.` }),
+  },
+  fr: {
+    asleep: (hero) => ({ title: `${hero} fait la sieste`, body: `Le sac de ${hero} est plein : c’est l’heure de la sieste. Faites de la place pour repartir à l’aventure.` }),
+    merchant: (hero, offer) => ({ title: 'Un marchand est de passage', body: `Un marchand propose ${offer === null ? 'un sac plus grand' : fr.nameWith(offer, 'un')} à prix réduit à ${hero}, qui a l’or nécessaire. L’offre dure environ une heure.` }),
+  },
+  de: {
+    asleep: (hero) => ({ title: `${hero} macht ein Nickerchen`, body: `Die Tasche von ${hero} ist voll, also ist Nickerchen angesagt. Schaff Platz, damit es weitergeht.` }),
+    merchant: (hero, offer) => ({ title: 'Ein Händler ist da', body: `Ein Händler bietet ${hero} ${offer === null ? 'eine größere Tasche' : de.nameWith(offer, 'einen')} günstiger an, und das Gold reicht. Das Angebot gilt etwa eine Stunde.` }),
+  },
 }
