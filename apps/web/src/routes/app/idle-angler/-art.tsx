@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { inked, type Sprite } from '@trmnl-games/engine/art/canvas'
 import { fishSprite, FISH_LARGE, FISH_SMALL } from '@trmnl-games/idle-angler/art/fish'
-import { paintedSceneUri, sceneBands } from '@trmnl-games/idle-angler/art/sceneColour'
+import { paintedSceneUri, sceneSteps } from '@trmnl-games/idle-angler/art/sceneColour'
 import { clampStageWidth, MIN_STAGE_WIDTH, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { fishTones, flyTones, type Tones } from '@trmnl-games/idle-angler/art/tones'
 
@@ -42,6 +42,13 @@ export function FlyIcon({ id, rows, scale = 4, className = '' }: { id: string; r
 /** The scene's scale for the width of its box: 2x where a 3x stage would be narrower than the composer allows, 4x from 600px. */
 const sceneScale = (boxWidth: number) => (boxWidth < 3 * MIN_STAGE_WIDTH ? 2 : boxWidth < 600 ? 3 : 4)
 
+/** Flat bands with hard stops, top to bottom, sized by their pixel rows. */
+function stepped(steps: ReadonlyArray<{ colour: string; rows: number }>): string {
+  const total = steps.reduce((sum, step) => sum + step.rows, 0)
+  let at = 0
+  return `linear-gradient(${steps.map((step) => `${step.colour} ${(at * 100) / total}% ${((at += step.rows) * 100) / total}%`).join(', ')})`
+}
+
 /**
  * The dock's scene: the device's composition painted in colour over its sky and water bands, edge to edge (D125).
  * The box's width is measured, and the stage composed at that width over a whole-number scale (2x on narrow phones,
@@ -65,12 +72,12 @@ export function Scene({ sceneKey, alt }: { sceneKey: SceneKey; alt: string }) {
   const width = boxWidth ? clampStageWidth(boxWidth / scale) : STAGE_WIDTH
   // Keyed on the key's text: a fresh dock object with the same scene must not repaint.
   const painted = useMemo(() => paintedSceneUri(JSON.parse(id) as SceneKey, width), [id, width])
-  const bands = sceneBands(sceneKey)
+  const steps = sceneSteps(sceneKey)
   return (
     <div ref={box} className="relative overflow-hidden border-4 border-night bg-night">
       <div aria-hidden="true" className="absolute inset-0 grid grid-rows-[52.5%_1fr]">
-        <div style={{ background: bands.sky }} />
-        <div className="border-t-2 border-night/20" style={{ background: bands.water }} />
+        <div style={{ background: stepped(steps.sky) }} />
+        <div style={{ background: stepped(steps.water) }} />
       </div>
       {/* Sized to its pixels, never stretched: the bands take the few columns the whole-number scale leaves over. */}
       <img src={painted} alt={alt} width={width * scale} height={STAGE_HEIGHT * scale} style={{ width: width * scale, height: STAGE_HEIGHT * scale }} className="relative mx-auto block max-w-full object-cover object-left [image-rendering:pixelated]" />

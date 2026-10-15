@@ -34,6 +34,29 @@ export function sceneBands(key: Pick<SceneKey, 'water' | 'band' | 'weather'>): {
   return { sky: SKY[key.band][covered(key.weather) ? 1 : 0], water: WATER[key.water][key.band] }
 }
 
+/** `a` moved toward `b` by `t` (0 to 1), as #rrggbb. */
+export function mix(a: string, b: string, t: number): string {
+  const channel = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)
+  return `#${[0, 1, 2].map((i) => Math.round(channel(a, i) + (channel(b, i) - channel(a, i)) * t).toString(16).padStart(2, '0')).join('')}`
+}
+
+/**
+ * The bands as stepped pixel gradients, top to bottom, each step `rows` tall: the sky pales toward the horizon and the
+ * water deepens toward the viewer, in a few flat steps as pixel art does, never a smooth blend. Rows add up to the
+ * stage's 21 sky rows and 19 water rows, so each step edge lands on a pixel row at any whole-number scale.
+ */
+export function sceneSteps(key: Pick<SceneKey, 'water' | 'band' | 'weather'>): { sky: Array<{ colour: string; rows: number }>; water: Array<{ colour: string; rows: number }> } {
+  const { sky, water } = sceneBands(key)
+  const night = key.band === 'night'
+  const haze = night ? '#4a5280' : '#ffffff'
+  // Ice deepens toward a cold blue rather than dark water.
+  const deep = night ? '#0b1026' : key.water === 'frozen_tarn' ? '#8fb0cc' : '#1b2a4a'
+  return {
+    sky: [10, 6, 3, 2].map((rows, i) => ({ colour: mix(sky, haze, [0, 0.12, 0.24, 0.36][i]!), rows })),
+    water: [3, 5, 5, 6].map((rows, i) => ({ colour: mix(water, i === 0 ? haze : deep, [0.14, 0, 0.1, 0.2][i]!), rows })),
+  }
+}
+
 /** Backdrop and weather tones by day; the night table overrides what the dark changes. */
 const DAY: Record<string, Tones> = {
   star: { ink: '#ffe08f' },
@@ -165,12 +188,21 @@ export function paintedScene(key: SceneKey, width = STAGE_WIDTH): Array<Array<st
   composeScene(key, c)
   const angler = anglerPlacement(key)
   const table = key.band === 'night' ? NIGHT : key.band === 'day' ? DAY : LOW_SUN
+  // The colour layer's own polish (the device art is unchanged): ripples become solid glints in a paler tint of their
+  // water rather than white checker dots, the sea's bright rows a little brighter, and the horizon a deeper shade of
+  // the water instead of one navy line for every water.
+  const waterTone = WATER[key.water][key.band]
+  const glint = mix(waterTone, key.band === 'night' ? '#8fa8d8' : key.band === 'day' ? '#ffffff' : '#fff0d8', 0.38)
+  const sparkle = mix(waterTone, key.band === 'night' ? '#c9d3e0' : '#ffffff', 0.62)
+  const horizon = mix(waterTone, '#101a30', 0.55)
   return Array.from({ length: STAGE_HEIGHT }, (_, y) =>
     Array.from({ length: width }, (_, x) => {
       const ch = c.chars[y * width + x]!
       const region = c.regions[y * width + x]!
       if (!ch) return null
       if (region === 'angler') return anglerTone(angler.sprite, key.pose, ch, x - angler.left, y - angler.top)
+      if (region === 'ripple') return ch === '#' ? sparkle : glint
+      if (region === 'horizon') return horizon
       const tones: Tones = region.startsWith('fish:') ? fishTones(region.slice(5)) : (table[region] ?? {})
       if (ch === '#') return tones.ink ?? INK
       if (ch === 'w') return tones.paper ?? null

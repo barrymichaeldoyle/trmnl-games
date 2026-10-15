@@ -4,7 +4,7 @@ import { anglerPoses } from '@trmnl-games/idle-angler/art/angler'
 import { FISH_TRAITS } from '@trmnl-games/idle-angler/art/fish'
 import { sceneBase } from '@trmnl-games/idle-angler/art/route'
 import { anglerPlacement, composeScene, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
-import { paintedScene, paintedSceneUri, sceneBands, sceneKeyFromUrl } from '@trmnl-games/idle-angler/art/sceneColour'
+import { paintedScene, paintedSceneUri, sceneBands, sceneKeyFromUrl, sceneSteps } from '@trmnl-games/idle-angler/art/sceneColour'
 import { FISH_TONES, FLY_TONES, fishTones } from '@trmnl-games/idle-angler/art/tones'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
 import { FLIES } from '@trmnl-games/idle-angler/content/flies'
@@ -40,6 +40,21 @@ describe('companion painted scene', () => {
     for (const tone of [fishTones('golden_carp').paper, ...fishTones('golden_carp').shade]) expect(held).toContain(tone)
     expect(sceneBands(holding)).toEqual({ sky: '#a8d8f0', water: '#3f80b8' })
     expect(sceneBands({ ...holding, weather: 'fog', band: 'night' })).toEqual({ sky: '#262a44', water: '#1b2f52' })
+  })
+
+  it('tints ripples from their water and steps the bands along whole pixel rows', () => {
+    const key: SceneKey = { water: 'river_bend', band: 'day', weather: 'clear', pose: 'waiting', fish: null }
+    const grid = paintedScene(key)
+    // Ripples are solid glints a few shades paler than the water, never the old white checker dots.
+    const below = grid.slice(23).flat().filter((c): c is string => c !== null)
+    expect(below).toContain('#92bfdd')
+    expect(below).not.toContain('#e6f6ff')
+    for (const band of bands) {
+      const steps = sceneSteps({ ...key, band })
+      expect(steps.sky.reduce((n, s) => n + s.rows, 0)).toBe(21)
+      expect(steps.water.reduce((n, s) => n + s.rows, 0)).toBe(19)
+      expect(steps.sky[0]!.colour).toBe(sceneBands({ ...key, band }).sky)
+    }
   })
 
   it('draws the same 1-bit image on the painted canvas as on the device', () => {
