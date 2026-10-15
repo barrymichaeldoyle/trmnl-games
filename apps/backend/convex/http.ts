@@ -13,6 +13,7 @@ import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templ
 import { renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import { renderPaperLivesArt } from '@trmnl-games/paper-lives/art/route'
 import type { GameSlug } from '@trmnl-games/platform'
+import { parseTrmnlLocale } from './lib/trmnlUser'
 
 /**
  * TRMNL lifecycle and screen routes (trmnl.md). Every route authenticates the
@@ -117,14 +118,15 @@ const idleAnglerScreen = httpAction(async (ctx, request) => {
   const { tokenHash, form, uuid } = parsed
   const now = Date.now()
   const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
-  const args = { tokenHash, uuid, now, utcOffset }
+  const locale = parseTrmnlLocale(form.get('trmnl[user][locale]'))
+  const args = { tokenHash, uuid, now, utcOffset, locale }
   let result = await ctx.runQuery(internal.idleAngler.payload.forInstance, args)
   if (result?.outcome === 'recoverable') {
     await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'idle-angler', tokenHash, uuid, confirmedBy: 'screen_request' })
     result = await ctx.runQuery(internal.idleAngler.payload.forInstance, args)
   }
   if (result === null || result.outcome !== 'payload') return notFound()
-  if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
+  if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
   return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, utc_offset: utcOffset } })
 })
 http.route({ path: '/trmnl/idle-angler/v1/screen', method: 'POST', handler: idleAnglerScreen })
@@ -136,14 +138,15 @@ const paperLivesScreen = httpAction(async (ctx, request) => {
   const { tokenHash, form, uuid } = parsed
   const now = Date.now()
   const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
-  const args = { tokenHash, uuid, now, utcOffset }
+  const locale = parseTrmnlLocale(form.get('trmnl[user][locale]'))
+  const args = { tokenHash, uuid, now, utcOffset, locale }
   let result = await ctx.runQuery(internal.paperLives.payload.forInstance, args)
   if (result?.outcome === 'recoverable') {
     await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'paper-lives', tokenHash, uuid, confirmedBy: 'screen_request' })
     result = await ctx.runQuery(internal.paperLives.payload.forInstance, args)
   }
   if (result === null || result.outcome !== 'payload') return notFound()
-  if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
+  if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
   return json(200, { ...paperLivesMarkup, merge_variables: { ...result.payload, photo_code: result.photoCode, utc_offset: utcOffset } })
 })
 http.route({ path: '/trmnl/paper-lives/v1/screen', method: 'POST', handler: paperLivesScreen })
@@ -160,7 +163,9 @@ http.route({
     const now = Date.now()
     // TRMNL does not expose its `trmnl` metadata to third-party Liquid, so pass the owner's offset through (D42); it also picks the recap period (D75).
     const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
-    const args = { tokenHash, uuid, now, instanceName: instanceName === null ? null : instanceName.slice(0, 200), utcOffset }
+    // D168: the owner's locale, stored to size translation demand; nothing reads it for rendering yet.
+    const locale = parseTrmnlLocale(form.get('trmnl[user][locale]'))
+    const args = { tokenHash, uuid, now, instanceName: instanceName === null ? null : instanceName.slice(0, 200), utcOffset, locale }
     let result = await ctx.runQuery(internal.trmnlPayload.forInstance, args)
     if (result?.outcome === 'recoverable') {
       // Lost success callback: confirm a new instance only under a current pending attempt (V06).
@@ -168,7 +173,7 @@ http.route({
       result = await ctx.runQuery(internal.trmnlPayload.forInstance, args)
     }
     if (result === null || result.outcome !== 'payload') return notFound()
-    if (result.recordOffsetFor !== undefined && utcOffset !== null) await ctx.runMutation(internal.trmnl.recordUtcOffset, { userId: result.recordOffsetFor, utcOffset })
+    if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
     // Telemetry only: a failed write never fails a valid screen.
     if (result.screenServedFor !== undefined) { try { await ctx.runMutation(internal.trmnl.recordScreenServed, { instanceId: result.screenServedFor, at: now }) } catch { /* next request retries */ } }
     return json(200, { ...screenMarkup, merge_variables: { ...sceneUrlsAt(result.payload, now, utcOffset), desk_keepsake_code: result.keepsakeCode, utc_offset: utcOffset } })

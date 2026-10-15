@@ -100,19 +100,45 @@ describe('to-do list backend (D112 Q2)', () => {
     const screen = (offset: string) =>
       t.fetch('/trmnl/v1/screen', { method: 'POST', headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ user_uuid: UUID, 'trmnl[user][utc_offset]': offset }).toString() })
     const query = (utcOffset: number | null) => t.query(internal.trmnlPayload.forInstance, { tokenHash: sha256Hex(TOKEN), uuid: UUID, now: SLOT, instanceName: null, utcOffset })
-    expect(await query(7200)).toMatchObject({ recordOffsetFor: userId })
+    expect(await query(7200)).toMatchObject({ recordUserFor: userId })
     expect((await screen('7200')).status).toBe(200)
     expect((await userDoc(t, heroId)).trmnlUtcOffset).toBe(7200)
     // The same value asks for no write; a missing or invalid one keeps the stored value.
-    expect(await query(7200)).not.toHaveProperty('recordOffsetFor')
-    expect(await query(null)).not.toHaveProperty('recordOffsetFor')
+    expect(await query(7200)).not.toHaveProperty('recordUserFor')
+    expect(await query(null)).not.toHaveProperty('recordUserFor')
     for (const offset of ['', 'invalid', '7200']) expect((await screen(offset)).status).toBe(200)
     expect((await userDoc(t, heroId)).trmnlUtcOffset).toBe(7200)
     expect((await screen('-18000')).status).toBe(200)
     expect((await userDoc(t, heroId)).trmnlUtcOffset).toBe(-18000)
     // The mutation rechecks and bounds the value.
-    await t.mutation(internal.trmnl.recordUtcOffset, { userId, utcOffset: 99 * 3600 })
+    await t.mutation(internal.trmnl.recordTrmnlUser, { userId, utcOffset: 99 * 3600 })
     expect((await userDoc(t, heroId)).trmnlUtcOffset).toBe(-18000)
+  })
+
+  it('stores the TRMNL locale normalized, only when it changes, and never clears it (D168)', async () => {
+    vi.stubEnv('CONVEX_SITE_URL', 'https://example.test')
+    await seedWorld(t, { activeContentVersion: 'v9' })
+    const heroId = await seedHero(t, {}, 'Ana')
+    const userId = (await heroDoc(t, heroId)).userId
+    await t.run(async (ctx) => {
+      const grantId = await ctx.db.insert('trmnlGrants', { userId, tokenHash: sha256Hex(TOKEN), state: 'active', createdAt: SLOT })
+      await ctx.db.insert('trmnlInstances', { userId, grantId, uuid: UUID, state: 'active', confirmedBy: 'success_callback', createdAt: SLOT })
+    })
+    const screen = (locale: string) =>
+      t.fetch('/trmnl/v1/screen', { method: 'POST', headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ user_uuid: UUID, 'trmnl[user][locale]': locale }).toString() })
+    const query = (locale: string | null) => t.query(internal.trmnlPayload.forInstance, { tokenHash: sha256Hex(TOKEN), uuid: UUID, now: SLOT, instanceName: null, utcOffset: null, locale })
+    expect(await query('fr-FR')).toMatchObject({ recordUserFor: userId })
+    expect((await screen('fr_fr')).status).toBe(200)
+    expect((await userDoc(t, heroId)).trmnlLocale).toBe('fr-FR')
+    expect(await query('fr-FR')).not.toHaveProperty('recordUserFor')
+    for (const locale of ['', 'not a locale', '<script>', 'x'.repeat(40)]) expect((await screen(locale)).status).toBe(200)
+    expect((await userDoc(t, heroId)).trmnlLocale).toBe('fr-FR')
+    expect((await screen('pt-br')).status).toBe(200)
+    expect((await userDoc(t, heroId)).trmnlLocale).toBe('pt-BR')
+    // The mutation keeps only canonical values, and an offset-only write leaves the locale alone.
+    await t.mutation(internal.trmnl.recordTrmnlUser, { userId, locale: 'en_us' })
+    await t.mutation(internal.trmnl.recordTrmnlUser, { userId, utcOffset: 3600 })
+    expect(await userDoc(t, heroId)).toMatchObject({ trmnlLocale: 'pt-BR', trmnlUtcOffset: 3600 })
   })
 
   it('sends the device today\u2019s tasks and the current goal (D138)', async () => {

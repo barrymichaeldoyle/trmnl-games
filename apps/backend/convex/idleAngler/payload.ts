@@ -15,14 +15,15 @@ import { IDLE_ANGLER_RUNTIME, IDLE_ANGLER_SCHEDULE } from './runtime'
 import { readDeviceBoard } from './leaderboard'
 import { deviceFlyCode, flyTotal } from './flies'
 import { flyForClaim } from '@trmnl-games/idle-angler/content/flies'
+import { trmnlUserChanged } from '../lib/trmnlUser'
 
 /**
  * Idle Angler's device payload for one authorized installation (trmnl.md "Query read budget"): fixed reads,
  * null for any authorization failure so the HTTP layer answers a generic 404. Read-only.
  */
 export const forInstance = internalQuery({
-  args: { tokenHash: v.string(), uuid: v.string(), now: v.number(), utcOffset: v.optional(v.union(v.number(), v.null())) },
-  returns: v.union(v.null(), v.object({ outcome: v.literal('recoverable') }), v.object({ outcome: v.literal('payload'), payload: v.any(), flyCode: v.union(v.string(), v.null()), recordOffsetFor: v.optional(v.id('users')) })),
+  args: { tokenHash: v.string(), uuid: v.string(), now: v.number(), utcOffset: v.optional(v.union(v.number(), v.null())), locale: v.optional(v.union(v.string(), v.null())) },
+  returns: v.union(v.null(), v.object({ outcome: v.literal('recoverable') }), v.object({ outcome: v.literal('payload'), payload: v.any(), flyCode: v.union(v.string(), v.null()), recordUserFor: v.optional(v.id('users')) })),
   handler: async (ctx, args) => {
     const instance = await ctx.db.query('trmnlInstances').withIndex('by_uuid', (q) => q.eq('uuid', args.uuid)).unique()
     if (!instance) {
@@ -36,10 +37,10 @@ export const forInstance = internalQuery({
     const user = await ctx.db.get(instance.userId)
     if (user === null || user.state !== 'active' || (await idleAnglerProfile(ctx, user._id))?.state === 'deleting') return null
     const payload = await payloadFor(ctx, user, args.now, args.utcOffset ?? null)
-    const offsetChanged = args.utcOffset !== undefined && args.utcOffset !== null && args.utcOffset !== user.trmnlUtcOffset
+    const userChanged = trmnlUserChanged(user, args.utcOffset, args.locale)
     // Device envelope only: the companion's preview never carries the weekly fly code.
     const flyCode = payload.status === 'fishing' || payload.status === 'paused' || payload.status === 'travelling' ? await deviceFlyCode(ctx, user._id, args.now) : null
-    return { outcome: 'payload' as const, payload, flyCode, ...(offsetChanged ? { recordOffsetFor: user._id } : {}) }
+    return { outcome: 'payload' as const, payload, flyCode, ...(userChanged ? { recordUserFor: user._id } : {}) }
   },
 })
 

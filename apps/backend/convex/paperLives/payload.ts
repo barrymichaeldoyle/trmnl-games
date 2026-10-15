@@ -13,6 +13,7 @@ import { currentLife, paperLivesProfile } from './profile'
 import { readBoard } from './records'
 import { devicePhotoCode } from './photos'
 import { PAPER_LIVES_RUNTIME } from './runtime'
+import { trmnlUserChanged } from '../lib/trmnlUser'
 
 /** Rows on the device's board. */
 export const DEVICE_TOP = 5
@@ -22,8 +23,8 @@ export const DEVICE_TOP = 5
  * any authorization failure so the HTTP layer answers a generic 404. Read-only.
  */
 export const forInstance = internalQuery({
-  args: { tokenHash: v.string(), uuid: v.string(), now: v.number(), utcOffset: v.optional(v.union(v.number(), v.null())) },
-  returns: v.union(v.null(), v.object({ outcome: v.literal('recoverable') }), v.object({ outcome: v.literal('payload'), payload: v.any(), photoCode: v.union(v.string(), v.null()), recordOffsetFor: v.optional(v.id('users')) })),
+  args: { tokenHash: v.string(), uuid: v.string(), now: v.number(), utcOffset: v.optional(v.union(v.number(), v.null())), locale: v.optional(v.union(v.string(), v.null())) },
+  returns: v.union(v.null(), v.object({ outcome: v.literal('recoverable') }), v.object({ outcome: v.literal('payload'), payload: v.any(), photoCode: v.union(v.string(), v.null()), recordUserFor: v.optional(v.id('users')) })),
   handler: async (ctx, args) => {
     const instance = await ctx.db.query('trmnlInstances').withIndex('by_uuid', (q) => q.eq('uuid', args.uuid)).unique()
     if (!instance) {
@@ -37,10 +38,10 @@ export const forInstance = internalQuery({
     const user = await ctx.db.get(instance.userId)
     if (user === null || user.state !== 'active' || (await paperLivesProfile(ctx, user._id))?.state === 'deleting') return null
     const payload = await payloadFor(ctx, user, args.now)
-    const offsetChanged = args.utcOffset !== undefined && args.utcOffset !== null && args.utcOffset !== user.trmnlUtcOffset
+    const userChanged = trmnlUserChanged(user, args.utcOffset, args.locale)
     // The weekly photo code (L6) shows while a life is being lived, never in the companion's preview.
     const photoCode = payload.status === 'living' || payload.status === 'paused' ? await devicePhotoCode(ctx, user._id, args.now) : null
-    return { outcome: 'payload' as const, payload, photoCode, ...(offsetChanged ? { recordOffsetFor: user._id } : {}) }
+    return { outcome: 'payload' as const, payload, photoCode, ...(userChanged ? { recordUserFor: user._id } : {}) }
   },
 })
 

@@ -128,7 +128,7 @@ Management verification alone does not grant gameplay-mutation authority. The us
 | `trmnl.linkGrant` | Owner-preserving grant upsert after code validation |
 | `trmnl.confirmInstance` | Idempotent authenticated success/first-render lifecycle; atomically activate an existing prepared hero under authorized install intent |
 | `heroes.activateForConfirmedInstallation` | Internal transaction helper shared by confirmation and the completed-attempt creation race; proof checks and first-activation baseline only |
-| `trmnl.recordUtcOffset` | D112: store the TRMNL `utc_offset` the screen route received on the owner (`users.trmnlUtcOffset`). The route calls it only when the payload query saw a different value; it rechecks and bounds the value to ±14 hours, and a missing or invalid offset never clears the stored one |
+| `trmnl.recordTrmnlUser` | D112: store the TRMNL `utc_offset` the screen route received on the owner (`users.trmnlUtcOffset`), and D168: the TRMNL `locale` (`users.trmnlLocale`, normalized like `pt-BR`). The route calls it only when the payload query saw a different value; it rechecks, bounds the offset to ±14 hours, keeps only canonical locales, and a missing or invalid value never clears the stored one |
 | `alerts.claimDue`, `alerts.recordResults`, `alertsPush.deliver` | D114 sender: claim up to 50 due outbox rows and decide each (recheck, quiet hours, caps), push to each device with VAPID from a Node action, then record sent/retry/failed and delete devices the push service answered 404 or 410; each transaction schedules the next run for the earliest pending row |
 | `trmnl.uninstallInstance` | Tombstone UUID without deleting hero |
 | `trmnl.payloadForInstance` | Fixed-cost canonical payload query under trusted grant/instance authority |

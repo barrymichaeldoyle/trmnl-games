@@ -76,6 +76,7 @@ export const engagement = internalQuery({
     const reached = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.filter((h) => (pick(h.counters) ?? 0) > 0).length
     const visitedWithin = (days: number) => heroes.filter((h) => h.companionVisitBaseline && now - h.companionVisitBaseline.at <= days * DAY_MS).length
     const users = await ctx.db.query('users').withIndex('by_state', (q) => q.eq('state', 'active')).take(ENGAGEMENT_SCAN)
+    const localeOf = new Map(users.flatMap((u) => (u.trmnlLocale === undefined ? [] : [[u._id, u.trmnlLocale] as const])))
     return {
       truncated: scanned.length === ENGAGEMENT_SCAN,
       activeHeroes: heroes.length,
@@ -102,6 +103,8 @@ export const engagement = internalQuery({
       // D163: dug-in elites beaten, how many heroes have beaten one, and how many are dug in now.
       standoffs: { won: sum((c) => c.standoffsWon), heroes: reached((c) => c.standoffsWon), open: heroes.filter((h) => h.standoff).length },
       analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
+      // D168: the TRMNL locale of each active hero's owner, from screen requests; `unknown` until their screen next refreshes.
+      locales: tally(heroes.map((h) => localeOf.get(h.userId) ?? 'unknown')),
     }
   },
 })

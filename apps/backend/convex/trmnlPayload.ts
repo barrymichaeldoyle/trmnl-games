@@ -21,6 +21,7 @@ import { taskLabel } from '@trmnl-games/desk-crawler/sim/core/todo'
 import { toHeroState } from './sim/runs/adapter'
 import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
+import { trmnlUserChanged } from './lib/trmnlUser'
 
 /**
  * Fixed-cost canonical payload for one authorized instance (trmnl.md "Query
@@ -39,11 +40,11 @@ export const screenFetchedAfterInstall = (instance: { createdAt: number; lastScr
   instance.lastScreenServedAt !== undefined && instance.lastScreenServedAt - instance.createdAt >= INSTALL_RENDER_MS
 
 export const forInstance = internalQuery({
-  args: { gameSlug: v.optional(v.literal('desk-crawler')), tokenHash: v.string(), uuid: v.string(), now: v.number(), instanceName: v.union(v.string(), v.null()), utcOffset: v.optional(v.union(v.number(), v.null())) },
+  args: { gameSlug: v.optional(v.literal('desk-crawler')), tokenHash: v.string(), uuid: v.string(), now: v.number(), instanceName: v.union(v.string(), v.null()), utcOffset: v.optional(v.union(v.number(), v.null())), locale: v.optional(v.union(v.string(), v.null())) },
   returns: v.union(
     v.null(),
     v.object({ outcome: v.literal('recoverable') }),
-    v.object({ outcome: v.literal('payload'), payload: v.any(), keepsakeCode: v.union(v.string(), v.null()), recordOffsetFor: v.optional(v.id('users')), screenServedFor: v.optional(v.id('trmnlInstances')) }),
+    v.object({ outcome: v.literal('payload'), payload: v.any(), keepsakeCode: v.union(v.string(), v.null()), recordUserFor: v.optional(v.id('users')), screenServedFor: v.optional(v.id('trmnlInstances')) }),
   ),
   handler: async (ctx, args) => {
     const instance = await ctx.db
@@ -66,12 +67,12 @@ export const forInstance = internalQuery({
     const week = keepsakeWeek(args.now)
     const collection = await ctx.db.query('deskKeepsakes').withIndex('by_userId', (q) => q.eq('userId', user._id)).unique()
     const codeGrant = payload.status !== 'unlinked' && keepsakesOpen(args.now) && (!collection || collection.lastClaimWeek < week) ? await keepsakeGrant(ctx, user._id) : null
-    // P31: the route stores the owner's offset only when it differs from the stored one, so most requests write nothing.
-    const offsetChanged = args.utcOffset !== undefined && args.utcOffset !== null && args.utcOffset !== user.trmnlUtcOffset
+    // P31, D168: the route stores the owner's offset and locale only when one differs from the stored one, so most requests write nothing.
+    const userChanged = trmnlUserChanged(user, args.utcOffset, args.locale)
     // data-model.md: `lastScreenServedAt` is telemetry written at most once an hour per instance; the companion reads it to
     // know TRMNL has fetched this installation's screen at least once.
     const screenStale = instance.lastScreenServedAt === undefined || args.now - instance.lastScreenServedAt >= SCREEN_SERVED_THROTTLE_MS
-    return { outcome: 'payload' as const, payload, keepsakeCode: codeGrant ? keepsakeCode(codeGrant.tokenHash, user._id, week) : null, ...(offsetChanged ? { recordOffsetFor: user._id } : {}), ...(screenStale ? { screenServedFor: instance._id } : {}) }
+    return { outcome: 'payload' as const, payload, keepsakeCode: codeGrant ? keepsakeCode(codeGrant.tokenHash, user._id, week) : null, ...(userChanged ? { recordUserFor: user._id } : {}), ...(screenStale ? { screenServedFor: instance._id } : {}) }
   },
 })
 

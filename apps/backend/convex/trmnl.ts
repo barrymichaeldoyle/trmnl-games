@@ -19,6 +19,7 @@ import { getOrCreateWorld, worldContent } from './world'
 import { assertNotRevoked, identityHash } from './deletion'
 import { runIntent } from './lib/intent'
 import { MANAGEMENT_PROOF_MS, verifyManagementJwt } from './lib/trmnlManagement'
+import { parseTrmnlLocale } from './lib/trmnlUser'
 
 /** D115: which game's profile is being deleted, its player character, and its name in messages. */
 const gameDeleting = (slug: GameSlug) => (ctx: Parameters<typeof gameDeletingFor>[0], userId: Id<'users'>) => gameDeletingFor(ctx, slug, userId)
@@ -272,17 +273,20 @@ async function activateForConfirmedInstallation(ctx: MutationCtx, userId: Id<'us
 
 /** Uninstall webhook: tombstone one instance; the hero and other instances are untouched. */
 /**
- * P31: store the owner's TRMNL UTC offset for the stand-up. The screen route calls this only when the payload query
- * saw a different value, and it rechecks, so a burst of requests writes once.
+ * P31: store the owner's TRMNL UTC offset for the stand-up, and D168: the owner's TRMNL locale. The screen route calls
+ * this only when the payload query saw a different value, and it rechecks, so a burst of requests writes once. A missing
+ * or invalid value never clears the stored one.
  */
-export const recordUtcOffset = internalMutation({
-  args: { userId: v.id('users'), utcOffset: v.number() },
+export const recordTrmnlUser = internalMutation({
+  args: { userId: v.id('users'), utcOffset: v.optional(v.number()), locale: v.optional(v.string()) },
   returns: v.null(),
-  handler: async (ctx, { userId, utcOffset }) => {
+  handler: async (ctx, { userId, utcOffset, locale }) => {
     const user = await ctx.db.get(userId)
-    if (!Number.isSafeInteger(utcOffset) || Math.abs(utcOffset) > 14 * 3600) return null
-    if (user === null || user.state !== 'active' || user.trmnlUtcOffset === utcOffset) return null
-    await ctx.db.patch(userId, { trmnlUtcOffset: utcOffset })
+    if (user === null || user.state !== 'active') return null
+    const offsetPatch = utcOffset !== undefined && Number.isSafeInteger(utcOffset) && Math.abs(utcOffset) <= 14 * 3600 && user.trmnlUtcOffset !== utcOffset ? { trmnlUtcOffset: utcOffset } : {}
+    const localePatch = locale !== undefined && parseTrmnlLocale(locale) === locale && user.trmnlLocale !== locale ? { trmnlLocale: locale } : {}
+    if (Object.keys(offsetPatch).length + Object.keys(localePatch).length === 0) return null
+    await ctx.db.patch(userId, { ...offsetPatch, ...localePatch })
     return null
   },
 })

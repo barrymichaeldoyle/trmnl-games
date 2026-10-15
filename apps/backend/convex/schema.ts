@@ -497,6 +497,8 @@ export default defineSchema({
     heldAlias: v.optional(v.object({ normalized: v.string(), until: v.number() })),
     /** P31: the last UTC offset in seconds a TRMNL screen request sent, written only when it changes; the stand-up and the tick read it. */
     trmnlUtcOffset: v.optional(v.number()),
+    /** D168: the last locale a TRMNL screen request sent (`trmnl[user][locale]`, e.g. `fr-FR`), written only when it changes; sizes translation demand. */
+    trmnlLocale: v.optional(v.string()),
     /** P33: opt-in push alerts; absent means every kind off. Quiet hours are whole hours in `timezone`. */
     alerts: v.optional(alertPreferences),
     /** D154: the key (YYYY-MM-DD.NN) of the newest What's new change the owner dismissed; absent means none since joining. */
