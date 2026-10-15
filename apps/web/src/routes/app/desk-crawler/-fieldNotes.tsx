@@ -4,6 +4,9 @@ import { FOE } from '@trmnl-games/desk-crawler/art/sceneColour'
 import { useMemo } from 'react'
 import { Glyph, SectionTitle } from '../../../lib/glyphs'
 import { BIOME_SWATCH } from '../../../lib/palette'
+import { formatNumber, useLocale, useT } from '../../../lib/i18n'
+import { useContent } from '../../../lib/useContent'
+import { dcPagesMessages } from '../../../i18n/dcPages'
 
 /** heroes.mine's `lore` (D133): every floor with its note and its monsters' notes, each open or still a "?" slot. */
 export type LoreView = {
@@ -62,14 +65,17 @@ function MonsterSprite({ id, open }: { id: string; open: boolean }) {
  * unearned achievements are; nothing here nudges, notifies or explains how to open one beyond the one line.
  */
 export function FieldNotes({ lore, level }: { lore: LoreView; level: number }) {
+  const t = useT(dcPagesMessages)
+  const c = useContent()
+  const locale = useLocale()
   return (
     <div className="flex min-w-0 flex-col gap-8">
       <section aria-labelledby="notes-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-          <SectionTitle id="notes-title" glyph="quest" as="h1">Field notes</SectionTitle>
-          <p className="text-sm text-muted tabular-nums">{lore.open} of {lore.total} notes</p>
+          <SectionTitle id="notes-title" glyph="quest" as="h1">{t.notesTitle}</SectionTitle>
+          <p className="text-sm text-muted tabular-nums">{t.notesCount(lore.open, lore.total)}</p>
         </div>
-        <p className="text-sm">Your hero's notes on each floor and monster. A floor's note opens on the first visit, a monster's on the first win. Notes don't affect play.</p>
+        <p className="text-sm">{t.notesIntro}</p>
       </section>
 
       {lore.biomes.map((biome) => {
@@ -79,16 +85,16 @@ export function FieldNotes({ lore, level }: { lore: LoreView; level: number }) {
         return (
           <section key={biome.id} aria-labelledby={id} className="flex min-w-0 flex-col gap-3">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-              <SectionTitle id={id} glyph="travel" tone="text-sky-ink">{biome.name}</SectionTitle>
-              <p className="text-sm text-muted tabular-nums">{found} of {biome.monsters.length} monsters</p>
+              <SectionTitle id={id} glyph="travel" tone="text-sky-ink">{c.name(biome.name)}</SectionTitle>
+              <p className="text-sm text-muted tabular-nums">{t.monstersCount(found, biome.monsters.length)}</p>
             </div>
             <div className={`flex min-w-0 flex-col gap-2 border-[3px] px-3 py-3 min-[375px]:px-4 ${biome.open ? `border-night ${BIOME_SWATCH[biome.id] ?? 'bg-panel'}` : 'border-dashed border-faint text-muted'}`}>
               {biome.open && biome.note !== null ? (
-                <p className="text-sm leading-relaxed">{biome.note}</p>
+                <p className="text-sm leading-relaxed">{c.text(biome.note)}</p>
               ) : (
                 <p className="flex items-center gap-3 text-sm">
                   <span aria-hidden="true" className="hud grid size-8 shrink-0 place-items-center border-2 border-dashed border-faint text-hud-sm">?</span>
-                  <span>{locked ? `Opens at level ${biome.unlockLevel}.` : biome.safe ? 'Where every hero starts.' : 'Travel there and the note opens.'}</span>
+                  <span>{locked ? t.opensAt(biome.unlockLevel) : biome.safe ? t.everyHeroStarts : t.travelThere}</span>
                 </p>
               )}
             </div>
@@ -98,10 +104,10 @@ export function FieldNotes({ lore, level }: { lore: LoreView; level: number }) {
                   <MonsterSprite id={monster.id} open={monster.open} />
                   <div className="flex min-w-0 flex-col gap-1">
                     <p className="flex flex-wrap items-baseline gap-x-2 font-semibold">
-                      <span>{monster.open ? monster.name : '?'}</span>
-                      {monster.open ? <span className="text-xs text-muted tabular-nums"><Glyph name="combat" size={12} className="mr-1 inline-block align-[-1px]" />{monster.wins.toLocaleString()} {monster.wins === 1 ? 'win' : 'wins'}</span> : null}
+                      <span>{monster.open ? c.name(monster.name) : '?'}</span>
+                      {monster.open ? <span className="text-xs text-muted tabular-nums"><Glyph name="combat" size={12} className="mr-1 inline-block align-[-1px]" />{t.wins(formatNumber(locale, monster.wins), monster.wins)}</span> : null}
                     </p>
-                    <p className="text-sm leading-relaxed">{monster.open && monster.note !== null ? monster.note : 'Beat one and the note opens.'}</p>
+                    <p className="text-sm leading-relaxed">{monster.open && monster.note !== null ? c.text(monster.note) : t.beatOne}</p>
                   </div>
                 </li>
               ))}

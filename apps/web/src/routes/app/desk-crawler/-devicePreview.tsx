@@ -5,6 +5,8 @@ import { api } from '@trmnl-games/backend/api'
 import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { browserUtcOffset, localSceneUrl as sceneForNow, useMinute } from '../../../lib/localClock'
+import { useT } from '../../../lib/i18n'
+import { dcPagesMessages } from '../../../i18n/dcPages'
 import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
 
 const STORAGE_KEY = 'desk-crawler.preview'
@@ -45,6 +47,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
   const [loaded, setLoaded] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
   const frame = useRef<HTMLDivElement>(null)
+  const t = useT(dcPagesMessages)
   const device = PREVIEW_DEVICES[choice.device]
   const localSceneUrl = sceneForNow(sceneUrl, now)
 
@@ -87,10 +90,10 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
       <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)]">
         <div ref={frame} className="relative overflow-hidden rounded-md bg-white" style={{ aspectRatio: `${device.width} / ${device.height}` }}>
           {/* Scene stand-in: also what screen readers get, since the iframe is decorative duplication of the page. */}
-          <img src={localSceneUrl} alt={`${heroName}'s current scene`} width={760} height={200} decoding="async" className={`absolute inset-0 m-auto w-full [image-rendering:pixelated] transition-opacity duration-200 ${!payloadError && html && scale && loaded === html ? 'opacity-0' : 'opacity-100'}`} />
+          <img src={localSceneUrl} alt={t.currentScene(heroName)} width={760} height={200} decoding="async" className={`absolute inset-0 m-auto w-full [image-rendering:pixelated] transition-opacity duration-200 ${!payloadError && html && scale && loaded === html ? 'opacity-0' : 'opacity-100'}`} />
           {!payloadError && html && scale ? (
             <iframe
-              title={`TRMNL preview: ${PREVIEW_LAYOUTS[choice.layout].label} layout on ${device.label}`}
+              title={t.previewTitle(t.layouts[choice.layout], device.label)}
               srcDoc={html}
               onLoad={() => setLoaded(html)}
               sandbox="allow-scripts"
@@ -106,7 +109,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
       </div>
       <figcaption className="text-sm text-muted">
         {/* Two fixed rows (layout, then device) so the controls never reflow and the stand-in can reserve their height. */}
-        <div role="group" aria-label="Preview layout" className="flex border-2 border-edge">
+        <div role="group" aria-label={t.previewLayout} className="flex border-2 border-edge">
           {LAYOUTS.map((layout) => (
             <button
               key={layout}
@@ -115,11 +118,11 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
               onClick={() => choose({ layout })}
               className="menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 font-semibold text-muted not-last:border-r-2 not-last:border-edge hover:text-ink aria-pressed:bg-navy aria-pressed:text-gold"
             >
-              {PREVIEW_LAYOUTS[layout].label}
+              {t.layouts[layout]}
             </button>
           ))}
         </div>
-        <div role="group" aria-label="Preview device" className="mt-2 flex justify-between gap-x-2 sm:justify-start sm:gap-x-5 sm:pl-0.5">
+        <div role="group" aria-label={t.previewDevice} className="mt-2 flex justify-between gap-x-2 sm:justify-start sm:gap-x-5 sm:pl-0.5">
           {DEVICES.map((key) => (
             <button
               key={key}
@@ -134,10 +137,10 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
         </div>
         <p className="mt-3">
           {failed || payloadError
-            ? 'Preview unavailable. Showing the current scene.'
+            ? t.previewUnavailable
             : choice.layout === 'markup'
-              ? 'A live render of your TRMNL screen.'
-              : 'A live render of your TRMNL screen. Shaded areas are your other plugins.'}
+              ? t.liveRender
+              : t.liveRenderShared}
         </p>
       </figcaption>
     </figure>

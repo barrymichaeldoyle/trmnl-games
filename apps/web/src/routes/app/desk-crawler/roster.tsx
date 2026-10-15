@@ -4,12 +4,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
+import { messagesFor, useT } from '../../../lib/i18n'
+import { dcPagesMessages } from '../../../i18n/dcPages'
 import { LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
 import { Roster, type RosterView } from './-roster'
 
 /** The hero roster under More (P37): the heroes on the account, switching between them, and recruiting a new class. */
 export const Route = createFileRoute('/app/desk-crawler/roster')({
-  head: () => seo({ title: 'Heroes', index: false }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcPagesMessages, locale).rosterTitle, index: false, locale }),
   component: RosterPage,
 })
 
@@ -27,9 +29,10 @@ function RosterPage() {
   const now = useMinute()
   const { data } = useQuery(convexQuery(api.roster.mine, { now }))
   const { notice, notify, dismiss } = useNotice()
-  if (data === undefined) return <LoadingState label="Loading your heroes…" />
+  const t = useT(dcPagesMessages)
+  if (data === undefined) return <LoadingState label={t.loadingHeroes} />
   const roster = data as RosterView | null
-  if (roster === null || !roster.available) return <p className="text-muted">More heroes are on their way. Your Warrior keeps adventuring meanwhile.</p>
+  if (roster === null || !roster.available) return <p className="text-muted">{t.moreHeroesSoon}</p>
   return (
     <>
       <Roster roster={roster} notify={notify} />
