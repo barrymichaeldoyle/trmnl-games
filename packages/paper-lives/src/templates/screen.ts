@@ -19,10 +19,15 @@
  *
  * Template v5 (2026-10-14) fits the X's lines to their list (`fitLines`) in place of those counts, so a device scale
  * (`screen--scale-xlarge`) no longer cuts the last lines in half.
+ *
+ * Template v6 (2026-10-14) fills the space a young life leaves empty: lines wrap in full instead of clamping, every
+ * device fits them with `fitLines`, which draws them at the largest size that shows as many as the smallest, an empty board gives its
+ * column to the lines (the full layout's code then closes the lines column, beside the recap), and the quadrant shows lines under a decision. The
+ * close line wraps too: its one-line clamp cut "The year ends at 16:10" to "16:..." on the X.
  */
 import { markUri, STORY_GLYPHS, type PlMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 5
+export const TEMPLATE_VERSION = 6
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -69,7 +74,7 @@ const stats = (withMoney = true) =>
  */
 const prompt = (clamp = 2) =>
   `{% if decision %}<div class="flex flex--row flex--left flex--top gap--small stretch-x no-shrink" data-decision="{% if decision.major %}major{% else %}minor{% endif %}"><img class="${ICON}" src="{{ m_decision }}" alt=""><span class="${LABEL} label--inverted w--min-0" data-clamp="${clamp}">{{ decision.age }}: {{ decision.prompt | escape }} Decide in the companion.</span></div>` +
-  `{% elsif closes_at %}<div class="flex flex--row flex--left flex--center-y gap--small stretch-x no-shrink" data-close="true"><img class="${ICON}" src="{{ m_clock }}" alt=""><span class="${LABEL} w--min-0" data-clamp="1">The year ends{% if utc_offset != nil %} at {{ closes_at | plus: utc_offset | date: "%H:%M" }}{% else %} later today{% endif %}</span></div>{% endif %}`
+  `{% elsif closes_at %}<div class="flex flex--row flex--left flex--center-y gap--small stretch-x no-shrink" data-close="true"><img class="${ICON}" src="{{ m_clock }}" alt=""><span class="${LABEL} w--min-0">The year ends{% if utc_offset != nil %} at {{ closes_at | plus: utc_offset | date: "%H:%M" }}{% else %} later today{% endif %}</span></div>{% endif %}`
 
 /** One line's glyph by the story's own glyph name. */
 const lineGlyph = `{% case line.glyph %}${STORY_GLYPHS.filter((g) => g !== 'none')
@@ -77,47 +82,68 @@ const lineGlyph = `{% case line.glyph %}${STORY_GLYPHS.filter((g) => g !== 'none
   .join('')}{% else %}{% assign m_line = m_none %}{% endcase %}`
 
 /**
- * The newest lines, each behind its glyph and marked with the age it happened at. Template v4: `limit` is the most a
- * layout may show. On the OG the lines are a `data-overflow` list inside a `.columns > .column` pair, so the framework's
- * overflow engine measures them in place and hides the trailing ones that do not fit, and a tall slot fills with lines
- * instead of stopping at a fixed count; the list is `flex-auto`, so it takes exactly the space left. The engine misjudges
- * heights on the X (it scales its content), so there each line is one line high and `fitLines` hides the trailing lines
- * that end below the list, at whatever scale the device sets.
+ * The newest lines, each behind its glyph and marked with the age it happened at, wrapping onto as many lines as they
+ * need. Template v6: one list on every device, fitted by `fitLines` (below) rather than the framework's overflow engine,
+ * so the text can grow: the list is `flex-auto` and takes exactly the space left, and `fitLines` draws the lines at the
+ * largest size in `LINE_SIZES` that still shows as many whole lines as the smallest does. `limit` is the most a layout
+ * may show. The markup starts at the smallest size, as a fallback.
  */
-const lineList = (limit: number, clamp: number, classes: string, show: string, engine: boolean) =>
-  `<div class="columns ${show} flex-auto h--min-0 w--full" data-lines="true"${engine ? '' : ' data-fit-lines="true"'}><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--xsmall w--full"${engine ? ' data-overflow="true"' : ''}>{% for line in lines limit:${limit} %}${lineGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-line="{{ line.glyph }}"><img class="${ICON}" src="{{ m_line }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ line.age }}: {{ line.summary | escape }}</span></div>{% endfor %}</div></div></div>`
-const lines = (limit: number, clamp = 1, classes = 'description lg:title--small') => lineList(limit, clamp, classes, 'lg:hidden', true) + lineList(limit, 1, classes, 'hidden lg:flex', false)
+const LINE_SIZES = ['title title--large lg:title--xlarge', 'title lg:title--large', 'description description--large lg:title--base', 'description lg:title--small'] as const
+const lines = (limit: number) =>
+  `<div class="columns flex-auto h--min-0 w--full" data-lines="true" data-fit-lines="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--xsmall w--full">{% for line in lines limit:${limit} %}${lineGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-line="{{ line.glyph }}"><img class="${ICON}" src="{{ m_line }}" alt=""><span class="${LINE_SIZES.at(-1)} grow w--min-0" data-line-text="true">{{ line.age }}: {{ line.summary | escape }}</span></div>{% endfor %}</div></div></div>`
 
 /**
- * The X's line lists (`data-fit-lines`): once the framework has laid out the view, hide the trailing lines that end
- * below their list, so the list keeps whole lines at any device scale. Only visibility changes, as Desk Crawler's
+ * Fit each shown line list (`data-fit-lines`) once the framework has laid out the view. At the smallest size, count the
+ * whole lines that end inside the list (as many as fit, at any device scale such as `screen--scale-xlarge`); then use
+ * the largest size that shows that many, and hide the trailing lines past them. Only classes change, as Desk Crawler's
  * `fitStories`; scoped to this view and to the orientation the framework is showing.
  */
 const fitLines = `<script>
 (() => {
   const view = document.currentScript.closest('.view');
   if (!view) return;
+  const sizes = ${JSON.stringify(LINE_SIZES.map((size) => size.split(' ')))};
   const fit = () => view.querySelectorAll('[data-fit-lines]').forEach((list) => {
     if (!list.getClientRects().length) return;
     const items = Array.from(list.querySelectorAll('.item'));
+    const texts = items.map((item) => item.querySelector('[data-line-text]'));
     items.forEach((item) => item.classList.remove('hidden'));
-    const bottom = list.getBoundingClientRect().bottom;
-    let count = items.length;
-    while (count && items[count - 1].getBoundingClientRect().bottom > bottom + 0.5) items[--count].classList.add('hidden');
-    list.dataset.lineCount = String(count);
+    const shown = (size) => {
+      texts.forEach((text) => { sizes.forEach((s) => text.classList.remove(...s)); text.classList.add(...sizes[size]); });
+      const bottom = list.getBoundingClientRect().bottom + 0.5;
+      let count = 0;
+      while (count < items.length && items[count].getBoundingClientRect().bottom <= bottom) count++;
+      return count;
+    };
+    const most = shown(sizes.length - 1);
+    let size = 0;
+    while (size < sizes.length - 1 && shown(size) < most) size++;
+    if (size === sizes.length - 1) shown(size);
+    items.slice(most).forEach((item) => item.classList.add('hidden'));
+    list.dataset.lineSize = String(size);
+    list.dataset.lineCount = String(most);
   });
-  window.addEventListener('trmnl:terminalize:stats', fit);
-  window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
-  if (window.TRMNL_PLUGINS_READY) fit();
+  // Trying a size starts loading its font, and a font that lands after the measure changes every height: fit again then.
+  let refits = 0;
+  const run = () => {
+    fit();
+    if (document.fonts && document.fonts.status !== 'loaded' && refits++ < 3) document.fonts.ready.then(run);
+  };
+  window.addEventListener('trmnl:terminalize:stats', run);
+  window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) run(); }, { once: true });
+  if (window.TRMNL_PLUGINS_READY) run();
 })();
 </script>`
 
 /** The last year's recap under a rule, held at the foot of the layout. */
 const recap = `{% if recap %}<div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div><span class="pt--2 ${LABEL} text--bold" data-clamp="1">{{ recap | escape }}</span></div>{% endif %}`
 
-/** This week's longest lives: each row the life's name and age, the owner's own inverted; their best below when not listed. */
+/**
+ * This week's longest lives: each row the life's name and age, the owner's own inverted; their best below when not
+ * listed. Template v6: an empty board (no life finished this week) is left out, and its space goes to the lines.
+ */
 const board = (rows: number) =>
-  `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true">` +
+  `{% if board.rows.size > 0 %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true">` +
   `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="1">{{ board.label | escape }}</span></div>` +
   `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. {{ row.life | escape }}</span><span class="no-shrink">{{ row.age }}</span></div>{% endfor %}` +
   `{% unless board.own_listed %}<span class="${LABEL} w--full" data-clamp="1">{{ board.own_label | escape }}</span>{% endunless %}</div>{% endif %}`
@@ -183,14 +209,14 @@ const full = oriented(
       <div class="flex flex--col flex--left gap--small grow w--min-0 h--full">
         ${attention()}
         ${prompt(2)}
-        ${lines(24, 2)}
-        ${recap}
+        ${lines(24)}
+        {% if board.rows.size > 0 %}${recap}{% else %}<div class="no-shrink flex flex--row flex--left flex--bottom gap--medium stretch-x"><div class="grow w--min-0">${recap}</div>${qr(2, 4)}</div>{% endif %}
       </div>
-      <div class="no-shrink flex flex--col flex--left flex--top gap--medium w--44 lg:w--56 h--full">
+      {% if board.rows.size > 0 %}<div class="no-shrink flex flex--col flex--left flex--top gap--medium w--44 lg:w--56 h--full">
         ${board(5)}
         <div class="grow"></div>
         <div class="flex flex--row flex--right stretch-x">${qr(2, 4)}</div>
-      </div>`,
+      </div>{% endif %}`,
     `<div class="no-shrink flex flex--col flex--center-y h--full">${portrait(3, 4)}</div>
       ${memorialText(false)}
       <div class="no-shrink flex flex--col flex--bottom h--full">${qr(2, 4)}</div>`,
@@ -205,7 +231,7 @@ const full = oriented(
       ${stats()}
       ${attention(2)}
       ${prompt(3)}
-      ${lines(24, 2, 'label lg:title--small')}
+      ${lines(24)}
       ${board(5)}
       ${recap}
     </div>`,
@@ -226,7 +252,7 @@ const halfHorizontal = oriented(
       ${nameLine()}
       ${statusLine(1)}
       {% if attention %}${attention(1)}{% else %}${prompt(2)}{% endif %}
-      ${lines(24, 1)}
+      ${lines(24)}
     </div>
     ${qr(2, 4)}`,
     `${portrait(2, 3)}${memorialText(true)}${qr(2, 4)}`,
@@ -236,7 +262,7 @@ const halfHorizontal = oriented(
     `<div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
       <div class="flex flex--row flex--left flex--top gap--small stretch-x">${portrait(1, 2)}<div class="flex flex--col flex--left gap--xsmall grow w--min-0">${nameLine()}${statusLine(2)}</div>${qr(2, 4)}</div>
       {% if attention %}${attention(2)}{% else %}${prompt(2)}{% endif %}
-      ${lines(24, 2)}
+      ${lines(24)}
     </div>`,
     `<div class="flex flex--row flex--left flex--top gap--small stretch-x">${portrait(1, 2)}${memorialText(true)}${qr(2, 4)}</div>`,
   ),
@@ -249,7 +275,7 @@ const halfVertical = oriented(
     <div class="no-shrink flex flex--row flex--between flex--top stretch-x">${portrait(2, 3)}${qr(2, 4)}</div>
     ${statusLine(1)}
     {% if attention %}${attention(2)}{% else %}${prompt(3)}{% endif %}
-    ${lines(24, 2)}`,
+    ${lines(24)}`,
     `<div class="no-shrink flex flex--row flex--between flex--top stretch-x">${portrait(2, 3)}${qr(2, 4)}</div>${memorialText(false)}`,
   ),
   ready(
@@ -257,7 +283,7 @@ const halfVertical = oriented(
     ${portrait(2, 3)}
     ${statusLine(2)}
     {% if attention %}${attention(3)}{% else %}${prompt(3)}{% endif %}
-    ${lines(24, 3, 'description')}
+    ${lines(24)}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     `${portrait(2, 3)}${memorialText(true)}<div class="grow"></div><div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
   ),
@@ -271,14 +297,14 @@ const quadrant = oriented(
       <div class="flex flex--col flex--left gap--xsmall grow w--min-0">${nameLine()}${statusLine(2)}</div>
       ${qr(2, 4)}
     </div>
-    {% if attention %}${attention(2)}{% elsif decision %}${prompt(2)}{% else %}${lines(24, 2)}{% endif %}`,
+    {% if attention %}${attention(2)}{% else %}${prompt(2)}${lines(24)}{% endif %}`,
     `<div class="no-shrink flex flex--row flex--top gap--small stretch-x">${memorialText(true)}${qr(2, 4)}</div>`,
     true,
   ),
   ready(
     `${nameLine()}
     ${statusLine(1)}
-    {% if attention %}${attention(3)}<div class="grow"></div>{% elsif decision %}${prompt(3)}<div class="grow"></div>{% else %}${lines(24, 3, 'description')}{% endif %}
+    {% if attention %}${attention(3)}<div class="grow"></div>{% else %}${prompt(3)}${lines(24)}{% endif %}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     `${memorialText(true)}<div class="grow"></div><div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`,
     true,

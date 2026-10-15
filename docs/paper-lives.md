@@ -454,3 +454,13 @@ All 13 gates still pass over 2,700 lives. Wills are made in 36% of harness lives
 
 Switch production to v3: `npx convex run --prod paperLives/operations:setActiveContentVersion '{"contentVersion":"v3"}'`. Lives keep their state; the next year draws from v3.
 
+
+## Device template v6 (2026-10-14)
+
+Barry found the device screen empty on a new life, with lines cut off where they ran past their clamp, and asked for the lines to wrap and for the layout to use the space that is free.
+
+- **Lines wrap.** No line is clamped any more; each wraps onto as many lines as it needs. The close line ("The year ends at 16:10") wraps too: its one-line clamp had cut it to "16:..." on the X.
+- **The text grows to fill.** Every device fits its line list with `fitLines`, in place of the framework's overflow engine on the OG. It counts the whole lines that fit at the smallest size, then draws them at the largest of four sizes that still shows that many: 30px, 21px, 16px or 12px on the OG (30, 21 and 16 use the framework's title and description sizes; the X steps up by its own `lg:` sizes). A newborn's single line shows at 30px; a long life keeps every line that fits at 12px, as before. Trying a size starts loading its font, so the fit runs again once fonts have loaded.
+- **Empty space goes to the lines.** A board with no rows (nobody's life finished this week) is left out, and its column goes to the lines. Without a board, the full landscape's code closes the lines column beside the recap, so the board column only exists when it has rows. (The foot of the card was tried first: a two-line name pushed the code off the view.) The quarter shows lines under a decision instead of a blank space.
+
+A brand new life is a new preview scenario (`newborn`). The clip check (`.previews/pl-clip.mjs`) finds no clipped line on any of the 288 previews at the default, `screen--scale-xlarge` and `text--scale-large` scales.

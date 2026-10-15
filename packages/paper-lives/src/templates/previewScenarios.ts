@@ -5,7 +5,7 @@ import type { LifeState } from '../sim/types'
 
 /**
  * Every device state through the real payload builder (paper-lives.md "Device", L3): a full adult year with a
- * decision and a pet, a child between decisions, the year's end, the first infant years, a paused life, a service
+ * decision and a pet, a child between decisions, a brand new game, the year's end, the first infant years, a paused life, a service
  * pause, the memorial, a pending life, and long names on every line for the worst case.
  */
 const NOW = Date.UTC(2026, 10, 2, 9, 10)
@@ -96,6 +96,8 @@ export function previewScenarios(artBaseUrl: string | null): Record<string, Scen
       board: { top: [], own: null },
     }),
     'year-end': active(life({ age: 52, stage: 'adult', job: 'teacher', home: 'owned', house: 2, stats: { health: 55, happiness: 70, smarts: 74, charm: 60 }, gold: 88_000, year: { ...base.year, elapsed: 12 } }), { utcOffset: null }),
+    // A brand new game: the first year, one line and nobody's life finished this week (template v6 fills the space).
+    newborn: active(life({ age: 0, stage: 'infant', home: 'family', recap: undefined as unknown as string }), { stories: [story(0, 'pram', 'Born on a wet Tuesday, to Ada and Tom. Seven pounds of opinion.', 'infant')], board: { top: [], own: null } }),
     infant: active(life({ age: 2, stage: 'infant', home: 'family', recap: undefined as unknown as string }), { stories: [story(1, 'star', 'Counts the stairs every time, and corrects anyone who miscounts.', 'infant'), story(0, 'pram', 'Slept through the first night, which nobody believed.', 'infant')] }),
     senior: active(life({ age: 78, stage: 'senior', retired: true, home: 'owned', house: 3, traits: ['stubborn', 'sunny'], pet: { kind: 'cat', name: 'Marmalade', bornAt: 70, lifespan: 15, relationship: 80 }, stats: { health: 31, happiness: 82, smarts: 60, charm: 77 }, gold: 140_500, year: { ...base.year, elapsed: 2, pending: { decisionId: 'sn_will' } } }), {
       stories: [story(78, 'money', 'Time to write a will?', 'decision_offered'), ...ADULT_LINES.map((s) => ({ ...s, age: 77 }))],
