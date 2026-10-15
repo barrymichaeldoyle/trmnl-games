@@ -20,8 +20,13 @@ import { EmptySlot, Gem, PotionSlot, Sheet, SheetTitle, Slot, SlotPreview } from
 import { useNow } from './-pulse'
 import { ConfirmButtons, ConfirmSheet, Consequences } from './-confirm'
 import { WithName } from './-withName'
+import { formatTime, messagesFor, useLocale, useT } from '../../../lib/i18n'
+import { useContent } from '../../../lib/useContent'
+import { dcBagMessages, materialsList } from '../../../i18n/dcBag'
 
-export const Route = createFileRoute('/app/desk-crawler/inventory')({ head: () => seo({ title: 'Bag', index: false }), loader: ({ context }) => preload(context, convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.mine, {})), component: Inventory })
+type T = (typeof dcBagMessages)['en']
+
+export const Route = createFileRoute('/app/desk-crawler/inventory')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcBagMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.mine, {})), component: Inventory })
 
 type Gear = {
   id: Id<'items'>
@@ -58,15 +63,13 @@ type Combine = { from: { templateId: string; name: string; count: number; have: 
 
 const SALE_LIMIT = BATCH_ITEMS
 const statOf = (item: Gear) => item.kind === 'weapon' ? item.attack : item.defense
-const statLabel = (item: Gear) => item.kind === 'weapon' ? 'attack' : 'defense'
-const count = (n: number, noun: string) => `${n} ${n === 1 ? noun : `${noun}s`}`
 /** The materials several pieces yield together. */
 const yieldOf = (items: readonly Gear[]): MaterialCount => items.reduce<Record<string, number>>((total, item) => { for (const [id, n] of Object.entries(item.salvage)) total[id] = (total[id] ?? 0) + n; return total }, {})
 /** "6 Scrap and 1 Parts", in the catalog's order; "nothing" for an empty count. */
-function materialsText(counts: MaterialCount, materials: readonly Material[]): string {
-  const parts = materials.filter((m) => (counts[m.id] ?? 0) > 0).map((m) => `${counts[m.id]} ${m.name}`)
-  if (parts.length === 0) return 'nothing'
-  return parts.length === 1 ? parts[0]! : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`
+function materialsText(counts: MaterialCount, materials: readonly Material[], t: T): string {
+  const parts = materials.filter((m) => (counts[m.id] ?? 0) > 0).map((m) => t.material(counts[m.id]!, m.name))
+  if (parts.length === 0) return t.nothing
+  return materialsList(parts, t.and)
 }
 
 /**
@@ -106,14 +109,18 @@ function Inventory() {
   const buyOffer = useIntent(api.inventory.buyOffer, { onFeedback: notify })
   const buyNameTag = useIntent(api.inventory.buyNameTag, { onFeedback: notify })
   const buyMakeover = useIntent(api.inventory.buyMakeover, { onFeedback: notify })
+  const t = useT(dcBagMessages)
+  const c = useContent()
+  const statLabel = (item: Gear) => t.stat[item.kind]
+  const mats = (counts: MaterialCount) => materialsText(counts, materials, t)
   useEffect(() => {
     if (bag) setSelected((current) => retainSellableSelection(current, bag.gear as Gear[]))
   }, [bag])
-  if (!bag || !hero) return <LoadingState label="Loading your bag…" />
+  if (!bag || !hero) return <LoadingState label={t.loading} />
 
   const gear = bag.gear as Gear[]
   const manageable = hero.simulationState !== 'quarantined' && ['exploring', 'resting', 'travelling', 'sleeping'].includes(hero.status)
-  const reason = manageable ? null : hero.simulationState === 'quarantined' ? 'Gear changes are paused during a service check.' : hero.status === 'paused' ? 'Adventures are paused. Resume from Hero to change or sell gear.' : 'Gear changes open again once your hero is back on their feet.'
+  const reason = manageable ? null : hero.simulationState === 'quarantined' ? t.reasonService : hero.status === 'paused' ? t.reasonPaused : t.reasonDown
   const held = gear.find((item) => item.held) ?? null
   const sellable = gear.filter((item) => !item.equipped && !item.held)
   const inBag = sellable
@@ -131,7 +138,7 @@ function Inventory() {
   const potionRows = bag.potionRows as PotionRow[]
   const potionCombine = bag.potionCombine as Combine | null
   const heldStrengths = potionRows.filter((row) => row.count > 0)
-  const healsLine = heldStrengths.length === 0 ? `+${potionRows[0]?.heals ?? 0} HP each` : heldStrengths.length === 1 ? `+${heldStrengths[0]!.heals} HP each` : `+${heldStrengths[0]!.heals} to +${heldStrengths.at(-1)!.heals} HP`
+  const healsLine = heldStrengths.length === 0 ? t.healsEach(potionRows[0]?.heals ?? 0) : heldStrengths.length === 1 ? t.healsEach(heldStrengths[0]!.heals) : t.healsRange(heldStrengths[0]!.heals, heldStrengths.at(-1)!.heals)
   const full = bag.used >= bag.capacity
   // Quiet warning at 80% of the current bag (D61).
   const filling = bag.used >= Math.ceil(bag.capacity * 0.8)
@@ -140,14 +147,14 @@ function Inventory() {
   const opened = openId === 'potions' ? null : gear.find((item) => item.id === openId) ?? null
   const slotLabel = (item: Gear) => {
     const delta = deltaOf(item)
-    const compare = item.requiredLevel > hero.level ? `requires level ${item.requiredLevel}` : delta > 0 ? `${delta} better than equipped` : delta < 0 ? `${-delta} worse than equipped` : 'same as equipped'
-    return `${item.label}, ${item.rarity}, +${statOf(item)} ${statLabel(item)}, ${compare}${item.held ? ', held find' : ''}${item.spareOf ? `, ${item.spareOf.ownerName}'s spare` : ''}`
+    const compare = item.requiredLevel > hero.level ? t.requiresLevel(item.requiredLevel) : delta > 0 ? t.better(delta) : delta < 0 ? t.worse(-delta) : t.same
+    return `${c.name(item.label)}, ${t.rarity[item.rarity] ?? item.rarity}, ${t.statOf(statOf(item), statLabel(item))}, ${compare}${item.held ? t.heldFind : ''}${item.spareOf ? t.spareOf(item.spareOf.ownerName) : ''}`
   }
   const toggle = (id: string) => setSelected((current) => {
     const next = new Set(retainSellableSelection(current, gear))
     if (next.has(id)) next.delete(id)
     else if (next.size < SALE_LIMIT) next.add(id)
-    else announce({ error: `${mode === 'salvage' ? 'A salvage' : 'A sale'} holds up to ${SALE_LIMIT} items. ${mode === 'salvage' ? 'Salvage' : 'Sell'} these first, then select more.`, message: null })
+    else announce({ error: t.saleFull(mode === 'salvage', SALE_LIMIT), message: null })
     return next
   })
   const leaveSale = () => { setMode('browse'); setSelected(new Set()) }
@@ -164,8 +171,8 @@ function Inventory() {
     if (!review || !validReview || !manageable) return
     const ids = review.items.map((item) => item.id)
     const done = review.kind === 'sell'
-      ? await sellMany.run({ itemIds: ids }, `Sold ${count(review.items.length, 'item')} for ${goldOf(review.items)} gold.`)
-      : await salvageMany.run({ itemIds: ids }, `Salvaged ${count(review.items.length, 'item')} for ${materialsText(yieldOf(review.items), materials)}.`)
+      ? await sellMany.run({ itemIds: ids }, t.sold(t.items(review.items.length), goldOf(review.items)))
+      : await salvageMany.run({ itemIds: ids }, t.salvaged(t.items(review.items.length), mats(yieldOf(review.items))))
     if (done) {
       setReview(null)
       leaveSale()
@@ -173,48 +180,48 @@ function Inventory() {
   }
 
   const slots = Math.max(bag.capacity, inBag.length)
-  const claimMessage = (item: Gear) => `${item.label} is in your bag. Keep one slot free, then resume.`
+  const claimMessage = (item: Gear) => t.claimMessage(item.label)
   return (
     <div className="flex min-w-0 flex-col gap-8">
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-3xl font-bold">Your bag</h1>
-        <p className="text-sm tabular-nums text-muted">{bag.ladder.name} · {bag.used} of {bag.capacity} slots</p>
+        <h1 className="font-display text-3xl font-bold">{t.yourBag}</h1>
+        <p className="text-sm tabular-nums text-muted">{t.slots(bag.ladder.name, bag.used, bag.capacity)}</p>
       </header>
       {hero.status === 'sleeping' ? (
-        <Card title={hero.wakeAtTick !== null ? 'Resuming next adventure' : held ? 'A find is waiting' : 'Resume adventures'}>
+        <Card title={hero.wakeAtTick !== null ? t.resumingNext : held ? t.findWaiting : t.resumeAdventures}>
           {held ? <>
-            <p><strong>{held.label}</strong> didn’t fit, so adventures stopped. Sell gear to free a slot, claim the find, then keep one slot free to resume.</p>
-            <Button className="mt-3" pending={claim.pending} busyLabel="Claiming…" disabled={!manageable || busy || claimBlocked} onClick={() => act(held, claim, {}, claimMessage(held))}>Claim find</Button>
-            {claimBlocked ? <p className="mt-2 text-sm">Sell an item or get a bigger bag first.</p> : null}
+            <p><strong>{c.name(held.label)}</strong>{t.didntFit}</p>
+            <Button className="mt-3" pending={claim.pending} busyLabel={t.claiming} disabled={!manageable || busy || claimBlocked} onClick={() => act(held, claim, {}, claimMessage(held))}>{t.claimFind}</Button>
+            {claimBlocked ? <p className="mt-2 text-sm">{t.sellFirst}</p> : null}
           </> : hero.wakeAtTick !== null ? <ResumeAt /> : <>
-            <p>{bag.canResume ? 'Room for more finds. Resume here, or set out for another unlocked area.' : 'Sell one more item to keep a slot free, then resume.'}</p>
+            <p>{bag.canResume ? t.roomForMore : t.sellOneMore}</p>
             <label className="mt-4 flex flex-col gap-2 text-sm">
-              <span className="font-semibold">Resume in</span>
+              <span className="font-semibold">{t.resumeIn}</span>
               <select value={destination} disabled={busy || !manageable} onChange={(event) => setDestination(event.target.value)} className="pixel-select min-h-11 border-2 border-edge pr-9 pl-3 text-base">
-                <option value="">{hero.biomes.find((biome: Biome) => biome.id === hero.biomeId)?.name ?? 'Current area'}</option>
-                {hero.biomes.filter((biome: Biome) => biome.unlocked && biome.id !== hero.biomeId).map((biome: Biome) => <option key={biome.id} value={biome.id}>{biome.name}</option>)}
+                <option value="">{c.name(hero.biomes.find((biome: Biome) => biome.id === hero.biomeId)?.name ?? '') || t.currentArea}</option>
+                {hero.biomes.filter((biome: Biome) => biome.unlocked && biome.id !== hero.biomeId).map((biome: Biome) => <option key={biome.id} value={biome.id}>{c.name(biome.name)}</option>)}
               </select>
             </label>
-            <Button className="mt-3" pending={resume.pending} busyLabel="Scheduling…" disabled={!manageable || busy || !bag.canResume} onClick={() => resume.run(destination ? { biomeId: destination } : {}, 'Resuming on the next adventure.')}>Resume adventures</Button>
-            {destination ? <p className="mt-2 text-sm text-muted">Your hero sets out next adventure and arrives the one after.</p> : null}
+            <Button className="mt-3" pending={resume.pending} busyLabel={t.scheduling} disabled={!manageable || busy || !bag.canResume} onClick={() => resume.run(destination ? { biomeId: destination } : {}, t.resumingOnNext)}>{t.resumeAdventures}</Button>
+            {destination ? <p className="mt-2 text-sm text-muted">{t.setsOut}</p> : null}
           </>}
         </Card>
       ) : null}
-      {reason ? <p className="text-sm">{hero.status === 'paused' && hero.simulationState !== 'quarantined' ? <>Adventures are paused. <Link to="/app/desk-crawler" className="underline underline-offset-4">Resume from Hero</Link> to change or sell gear.</> : reason}</p> : null}
+      {reason ? <p className="text-sm">{hero.status === 'paused' && hero.simulationState !== 'quarantined' ? <>{t.pausedBefore}<Link to="/app/desk-crawler" className="underline underline-offset-4">{t.resumeFromHero}</Link>{t.pausedAfter}</> : reason}</p> : null}
 
-      <Card title="Equipped" icon="sword">
+      <Card title={t.equipped} icon="sword">
         <div className="grid grid-cols-3 gap-2 min-[375px]:gap-3 sm:max-w-sm sm:gap-5">
           {(['weapon', 'armor'] as const).map((kind) => {
             const item = equippedOf(kind)
             return <div key={kind} className="flex min-w-0 flex-col gap-1.5">
-              <h3 className="caps text-sm text-muted">{kind === 'weapon' ? 'Weapon' : 'Armor'}</h3>
-              {item ? <Slot item={item} label={`${item.label}, equipped ${kind}, +${statOf(item)} ${statLabel(item)}`} busy={busyId === item.id} onClick={() => setOpenId(item.id)} /> : <EmptySlot />}
-              <p className="text-sm leading-snug">{item ? <StatOf item={item} /> : <span className="text-muted">Empty</span>}</p>
+              <h3 className="caps text-sm text-muted">{t.kindTitle[kind]}</h3>
+              {item ? <Slot item={item} label={t.equippedLabel(c.name(item.label), t.kind[kind], t.statOf(statOf(item), statLabel(item)))} busy={busyId === item.id} onClick={() => setOpenId(item.id)} /> : <EmptySlot />}
+              <p className="text-sm leading-snug">{item ? <StatOf item={item} /> : <span className="text-muted">{t.empty}</span>}</p>
             </div>
           })}
           <div className="flex min-w-0 flex-col gap-1.5">
-            <h3 className="caps text-sm text-muted">Potions</h3>
-            <PotionSlot count={bag.potions} label={`${count(bag.potions, 'potion')}, ${heldStrengths.map((row) => `${row.count} ${row.name.toLowerCase()}`).join(', ') || 'none'}`} onClick={() => setOpenId('potions')} />
+            <h3 className="caps text-sm text-muted">{t.potionsTitle}</h3>
+            <PotionSlot count={bag.potions} label={t.potionSlot(t.potions(bag.potions), heldStrengths.map((row) => `${row.count} ${c.name(row.name.toLowerCase())}`).join(', ') || t.none)} onClick={() => setOpenId('potions')} />
             <p className="text-sm leading-snug tabular-nums">{healsLine}</p>
           </div>
         </div>
@@ -224,19 +231,19 @@ function Inventory() {
         {/* The title stays one line beside either button, so the header holds still when Sell gear becomes Done. */}
         <div className="flex min-h-11 items-center justify-between gap-3">
           {/* The page header already names the bag; this window is its gear. */}
-          <h2 id="bag-gear-title" className="flex min-w-0 items-center gap-3 font-display text-xl font-bold sm:text-2xl"><Glyph name="bag" size={24} className="text-gold-ink" /><span className="truncate">Gear</span></h2>
+          <h2 id="bag-gear-title" className="flex min-w-0 items-center gap-3 font-display text-xl font-bold sm:text-2xl"><Glyph name="bag" size={24} className="text-gold-ink" /><span className="truncate">{t.gear}</span></h2>
           {mode !== 'browse'
-            ? <Button allowOffline variant="secondary" className="w-28 shrink-0 whitespace-nowrap" disabled={busy} onClick={leaveSale}>Done</Button>
+            ? <Button allowOffline variant="secondary" className="w-28 shrink-0 whitespace-nowrap" disabled={busy} onClick={leaveSale}>{t.done}</Button>
             : <div className="flex shrink-0 gap-2">
-              <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="tag" disabled={sellable.length === 0} onClick={() => setMode('sell')}>Sell</Button>
+              <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="tag" disabled={sellable.length === 0} onClick={() => setMode('sell')}>{t.sell}</Button>
               {/* D129: the second way out of the bag, beside Sell. */}
-              {workbench ? <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="scrap" disabled={sellable.length === 0} onClick={() => setMode('salvage')}>Salvage</Button> : null}
+              {workbench ? <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="scrap" disabled={sellable.length === 0} onClick={() => setMode('salvage')}>{t.salvage}</Button> : null}
             </div>}
         </div>
         <p className="mt-1 min-h-5 text-sm text-muted">
           {mode !== 'browse'
-            ? <>Tap gear to select it.{sellable.length > chosen.length ? <> <button type="button" className="font-semibold text-ink underline underline-offset-4" onClick={() => setSelected(new Set(sellable.slice(0, SALE_LIMIT).map((item) => item.id)))}>Select all</button></> : null}</>
-            : inBag.length === 0 ? 'No spare gear yet. Finds land here.' : full ? 'Bag full. The next find is held, and adventures stop until you make room.' : filling ? `Bag nearly full. ${workbench ? 'Sell or salvage' : 'Sell'} gear you no longer need.` : `Tap a piece to compare, equip${workbench ? ', sell or salvage' : ' or sell'} it.`}
+            ? <>{t.tapToSelect}{sellable.length > chosen.length ? <> <button type="button" className="font-semibold text-ink underline underline-offset-4" onClick={() => setSelected(new Set(sellable.slice(0, SALE_LIMIT).map((item) => item.id)))}>{t.selectAll}</button></> : null}</>
+            : inBag.length === 0 ? t.noSpare : full ? t.bagFull : filling ? t.nearlyFull(workbench !== null) : t.tapToCompare(workbench !== null)}
         </p>
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
           {held ? <li><Slot item={held} held label={slotLabel(held)} busy={busyId === held.id} onClick={() => setOpenId(held.id)} /></li> : null}
@@ -256,54 +263,54 @@ function Inventory() {
 
       {mode !== 'browse' ? <div className="window sticky bottom-0 z-20 -mx-3 px-3 pt-3 min-[375px]:-mx-4 min-[375px]:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0">
         <div className="flex items-center justify-between gap-3">
-          <p role="status" className="min-w-0 text-sm tabular-nums">{chosen.length === 0 ? 'Nothing selected' : mode === 'sell' ? <>{count(chosen.length, 'item')} for <span className="text-gold-ink">{goldOf(chosen)} gold</span>{rareOf(chosen) > 0 ? `, ${rareOf(chosen)} rare` : ''}</> : <>{count(chosen.length, 'item')} for <span className="text-rare-ink">{materialsText(yieldOf(chosen), materials)}</span></>}</p>
-          <Button allowOffline disabled={!manageable || busy || chosen.length === 0} onClick={() => setReview({ kind: mode === 'sell' ? 'sell' : 'salvage', items: chosen })}>{mode === 'sell' ? 'Sell' : 'Salvage'} {chosen.length > 0 ? chosen.length : ''}</Button>
+          <p role="status" className="min-w-0 text-sm tabular-nums">{chosen.length === 0 ? t.nothingSelected : mode === 'sell' ? <>{t.forGold(t.items(chosen.length))}<span className="text-gold-ink">{t.goldAmount(goldOf(chosen))}</span>{rareOf(chosen) > 0 ? t.rareCount(rareOf(chosen)) : ''}</> : <>{t.forGold(t.items(chosen.length))}<span className="text-rare-ink">{mats(yieldOf(chosen))}</span></>}</p>
+          <Button allowOffline disabled={!manageable || busy || chosen.length === 0} onClick={() => setReview({ kind: mode === 'sell' ? 'sell' : 'salvage', items: chosen })}>{mode === 'sell' ? t.sellN(chosen.length) : t.salvageN(chosen.length)}</Button>
         </div>
       </div> : null}
 
-      <Sheet open={openId === 'potions'} onClose={() => { if (!combine.pending) setOpenId(null) }} label="Potions">
-        <SheetTitle>Potions</SheetTitle>
-        <p className="mt-2 tabular-nums">You have <strong className="text-rare-ink">{bag.potions}</strong>. Your {bag.pouch.name.toLowerCase()} holds {bag.pouch.cap}.</p>
+      <Sheet open={openId === 'potions'} onClose={() => { if (!combine.pending) setOpenId(null) }} label={t.potionsTitle}>
+        <SheetTitle>{t.potionsTitle}</SheetTitle>
+        <p className="mt-2 tabular-nums">{t.youHave}<strong className="text-rare-ink">{bag.potions}</strong>{t.pouchHolds(bag.pouch.name, bag.pouch.cap)}</p>
         {/* D131: one line per strength, weakest first, with what one drink restores for this hero. */}
-        <ul aria-label="Potions by strength" className="mt-3 flex flex-col gap-1 tabular-nums">
-          {potionRows.map((row) => <li key={row.templateId} className={`flex items-center justify-between gap-3 ${row.count === 0 ? 'text-muted' : ''}`}><span>{row.name} <span className="text-sm text-muted">· {row.healPct}%, +{row.heals} HP</span></span><strong className={row.count === 0 ? '' : 'text-rare-ink'}>{row.count}</strong></li>)}
+        <ul aria-label={t.byStrength} className="mt-3 flex flex-col gap-1 tabular-nums">
+          {potionRows.map((row) => <li key={row.templateId} className={`flex items-center justify-between gap-3 ${row.count === 0 ? 'text-muted' : ''}`}><span>{c.name(row.name)} <span className="text-sm text-muted">{t.strengthRow(row.healPct, row.heals)}</span></span><strong className={row.count === 0 ? '' : 'text-rare-ink'}>{row.count}</strong></li>)}
         </ul>
-        <p className="mt-2 text-sm text-muted">Your hero drinks the weakest potion that keeps it adventuring, or you choose one from Hero. Potions take no bag slots.</p>
+        <p className="mt-2 text-sm text-muted">{t.drinksWeakest}</p>
         {potionCombine ? <div className="mt-4 border-t-2 border-faint pt-3">
-          <p className="tabular-nums"><strong>Combine:</strong> {potionCombine.from.count} {potionCombine.from.name.toLowerCase()}s + {materialsText(potionCombine.materials, materials)} → 1 {potionCombine.to.name.toLowerCase()}.</p>
+          <p className="tabular-nums"><strong>{t.combine}</strong>{t.combineRecipe(potionCombine.from.count, potionCombine.from.name, mats(potionCombine.materials), potionCombine.to.name)}</p>
           {potionCombine.batches > 0
             ? <div className="mt-2 flex flex-wrap gap-2">
-              <Button disabled={!manageable || busy} pending={combine.pending} busyLabel="Combining…" onClick={() => combine.run({ batches: 1 }, `Combined into a ${potionCombine.to.name.toLowerCase()}.`)}>Combine 1</Button>
-              {potionCombine.batches > 1 ? <Button variant="secondary" disabled={!manageable || busy} pending={combine.pending} busyLabel="Combining…" onClick={() => combine.run({ batches: Math.min(10, potionCombine.batches) }, `Combined into ${Math.min(10, potionCombine.batches)} ${potionCombine.to.name.toLowerCase()}s.`)}>Combine {Math.min(10, potionCombine.batches)}</Button> : null}
+              <Button disabled={!manageable || busy} pending={combine.pending} busyLabel={t.combining} onClick={() => combine.run({ batches: 1 }, t.combinedOne(potionCombine.to.name))}>{t.combineN(1)}</Button>
+              {potionCombine.batches > 1 ? <Button variant="secondary" disabled={!manageable || busy} pending={combine.pending} busyLabel={t.combining} onClick={() => combine.run({ batches: Math.min(10, potionCombine.batches) }, t.combinedMany(Math.min(10, potionCombine.batches), potionCombine.to.name))}>{t.combineN(Math.min(10, potionCombine.batches))}</Button> : null}
             </div>
-            : <p className="mt-1 text-sm tabular-nums">Needs {[potionCombine.shortfall.potions > 0 ? `${potionCombine.shortfall.potions} more ${potionCombine.from.name.toLowerCase()}${potionCombine.shortfall.potions === 1 ? '' : 's'}` : null, Object.keys(potionCombine.shortfall.materials).length > 0 ? `${materialsText(potionCombine.shortfall.materials, materials)}${potionCombine.shortfall.potions > 0 ? '' : ' more'}` : null].filter(Boolean).join(' and ')}.</p>}
+            : <p className="mt-1 text-sm tabular-nums">{t.needs([potionCombine.shortfall.potions > 0 ? t.needsMorePotions(potionCombine.shortfall.potions, potionCombine.from.name) : null, Object.keys(potionCombine.shortfall.materials).length > 0 ? t.needsMaterials(mats(potionCombine.shortfall.materials), potionCombine.shortfall.potions === 0) : null].filter((part): part is string => part !== null))}</p>}
           <ErrorNote message={combine.error ?? null} />
         </div> : null}
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <Link to="/app/desk-crawler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY} justify-center`}>Go to Hero</Link>
-          <Button allowOffline variant="secondary" onClick={() => setOpenId(null)}>Close</Button>
+          <Link to="/app/desk-crawler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY} justify-center`}>{t.goToHero}</Link>
+          <Button allowOffline variant="secondary" onClick={() => setOpenId(null)}>{t.close}</Button>
         </div>
       </Sheet>
 
-      <Sheet open={openId !== null && openId !== 'potions'} onClose={() => setOpenId(null)} label="Gear">
-        {opened ? <ItemSheet key={opened.id} item={opened} hero={hero} current={equippedOf(opened.kind)} manageable={manageable} reason={reason} busy={busy} claimBlocked={claimBlocked} intents={{ equip, unequip, claim }} onClose={() => setOpenId(null)} onEquip={() => act(opened, equip, { itemId: opened.id }, `${opened.label} equipped.`)} onUnequip={() => act(opened, unequip, { slot: opened.kind }, `${opened.label} unequipped.`)} onClaim={() => act(opened, claim, {}, claimMessage(opened))} onSell={() => { setOpenId(null); setReview({ kind: 'sell', items: [opened] }) }} onSalvage={workbench ? () => { setOpenId(null); setReview({ kind: 'salvage', items: [opened] }) } : null} materials={materials} /> : <>
-          <SheetTitle>Gone from your bag</SheetTitle>
-          <p className="mt-2 text-sm">That piece was sold, salvaged or moved from another screen.</p>
-          <Button allowOffline variant="secondary" className="mt-4 w-full" onClick={() => setOpenId(null)}>Close</Button>
+      <Sheet open={openId !== null && openId !== 'potions'} onClose={() => setOpenId(null)} label={t.gear}>
+        {opened ? <ItemSheet key={opened.id} item={opened} hero={hero} current={equippedOf(opened.kind)} manageable={manageable} reason={reason} busy={busy} claimBlocked={claimBlocked} intents={{ equip, unequip, claim }} onClose={() => setOpenId(null)} onEquip={() => act(opened, equip, { itemId: opened.id }, t.equippedMsg(opened.label))} onUnequip={() => act(opened, unequip, { slot: opened.kind }, t.unequippedMsg(opened.label))} onClaim={() => act(opened, claim, {}, claimMessage(opened))} onSell={() => { setOpenId(null); setReview({ kind: 'sell', items: [opened] }) }} onSalvage={workbench ? () => { setOpenId(null); setReview({ kind: 'salvage', items: [opened] }) } : null} materials={materials} /> : <>
+          <SheetTitle>{t.goneTitle}</SheetTitle>
+          <p className="mt-2 text-sm">{t.goneBody}</p>
+          <Button allowOffline variant="secondary" className="mt-4 w-full" onClick={() => setOpenId(null)}>{t.close}</Button>
         </>}
       </Sheet>
 
-      <Sheet open={review !== null} onClose={() => { if (!reviewing?.pending) setReview(null) }} label={review?.kind === 'salvage' ? 'Salvage gear' : 'Sell gear'}>
+      <Sheet open={review !== null} onClose={() => { if (!reviewing?.pending) setReview(null) }} label={review?.kind === 'salvage' ? t.salvageGear : t.sellGear}>
         {review && reviewing ? <>
-          <SheetTitle>{review.kind === 'sell' ? <>Sell {count(review.items.length, 'item')} for <span className="text-gold-ink">{goldOf(review.items)} gold</span>?</> : <>Salvage {count(review.items.length, 'item')} for <span className="text-rare-ink">{materialsText(yieldOf(review.items), materials)}</span>?</>}</SheetTitle>
-          <p className="mt-2 text-sm">This cannot be undone.{rareOf(review.items) > 0 ? ` Includes ${count(rareOf(review.items), 'rare item')}.` : ''}{review.kind === 'salvage' ? ' Materials go to the workbench and are never sold.' : ''}</p>
-          <ul aria-label={review.kind === 'sell' ? 'Items in this sale' : 'Items to salvage'} className="mt-3 max-h-48 overflow-y-auto border-y-2 border-rule text-sm">{review.items.map((item) => <li key={item.id} className="flex items-center justify-between gap-3 border-b border-rule py-1.5 last:border-b-0"><span className={`flex min-w-0 items-center gap-2 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}><Gem rarity={item.rarity} scale={2} /><span className="truncate">{item.label}</span></span>{review.kind === 'sell' ? <span className="shrink-0 tabular-nums text-gold-ink">{item.saleValue} gold</span> : <span className="shrink-0 tabular-nums text-rare-ink">{materialsText(item.salvage, materials)}</span>}</li>)}</ul>
-          {!validReview ? <p role="alert" className="mt-3 text-sm font-semibold">Your gear changed. Close this and select the items again.</p> : null}
+          <SheetTitle>{review.kind === 'sell' ? <>{t.sellTitleBefore(t.items(review.items.length))}<span className="text-gold-ink">{t.goldAmount(goldOf(review.items))}</span>{t.titleEnd}</> : <>{t.salvageTitleBefore(t.items(review.items.length))}<span className="text-rare-ink">{mats(yieldOf(review.items))}</span>{t.titleEnd}</>}</SheetTitle>
+          <p className="mt-2 text-sm">{t.cannotUndo}{rareOf(review.items) > 0 ? t.includes(t.rareItems(rareOf(review.items))) : ''}{review.kind === 'salvage' ? t.materialsToBench : ''}</p>
+          <ul aria-label={review.kind === 'sell' ? t.itemsInSale : t.itemsToSalvage} className="mt-3 max-h-48 overflow-y-auto border-y-2 border-rule text-sm">{review.items.map((item) => <li key={item.id} className="flex items-center justify-between gap-3 border-b border-rule py-1.5 last:border-b-0"><span className={`flex min-w-0 items-center gap-2 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}><Gem rarity={item.rarity} scale={2} /><span className="truncate">{c.name(item.label)}</span></span>{review.kind === 'sell' ? <span className="shrink-0 tabular-nums text-gold-ink">{t.goldAmount(item.saleValue)}</span> : <span className="shrink-0 tabular-nums text-rare-ink">{mats(item.salvage)}</span>}</li>)}</ul>
+          {!validReview ? <p role="alert" className="mt-3 text-sm font-semibold">{t.gearChanged}</p> : null}
           {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : null}
           <div className="mt-3 empty:hidden"><ErrorNote message={reviewing.error} /></div>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <Button disabled={!manageable || busy || !validReview} pending={reviewing.pending} busyLabel={review.kind === 'sell' ? 'Selling…' : 'Salvaging…'} onClick={confirmReview}>Confirm</Button>
-            <Button allowOffline variant="secondary" disabled={reviewing.pending} onClick={() => setReview(null)}>Cancel</Button>
+            <Button disabled={!manageable || busy || !validReview} pending={reviewing.pending} busyLabel={review.kind === 'sell' ? t.selling : t.salvaging} onClick={confirmReview}>{t.confirm}</Button>
+            <Button allowOffline variant="secondary" disabled={reviewing.pending} onClick={() => setReview(null)}>{t.cancel}</Button>
           </div>
         </> : null}
       </Sheet>
@@ -338,38 +345,41 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
   // Unequipping, or equipping something weaker, makes the hero fight worse, so it asks first (in place, inside this sheet).
   const [confirming, setConfirming] = useState<'equip' | 'unequip' | null>(null)
   const weaker = !item.equipped && current !== null && delta < 0
+  const t = useT(dcBagMessages)
+  const c = useContent()
+  const stat = t.stat[item.kind]
   return <>
     <div className="flex items-start gap-3">
       <div className="w-16 shrink-0"><SlotPreview item={item} /></div>
       <div className="min-w-0 flex-1">
-        <SheetTitle><span className={RARITY_TONE[item.rarity] ?? ''}>{item.label}</span></SheetTitle>
-        <p className="mt-1 text-sm text-muted">{item.rarity} {item.kind}, level {item.requiredLevel}{item.equipped ? ', equipped' : item.held ? ', held find' : ''}</p>
+        <SheetTitle><span className={RARITY_TONE[item.rarity] ?? ''}>{c.name(item.label)}</span></SheetTitle>
+        <p className="mt-1 text-sm text-muted">{t.itemMeta(t.rarity[item.rarity] ?? item.rarity, t.kind[item.kind], item.requiredLevel, item.equipped ? t.equippedState : item.held ? t.heldFind : '')}</p>
       </div>
     </div>
     <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-      <dt className="caps text-muted">{statLabel(item)}</dt>
+      <dt className="caps text-muted">{stat}</dt>
       <dd className="tabular-nums"><StatOf item={item} />{!item.equipped ? <Delta delta={delta} /> : null}</dd>
-      {!item.equipped ? <><dt className="caps text-muted">Equipped</dt><dd className="tabular-nums">{current ? <>{current.label}, <StatOf item={current} /></> : <span className="text-muted">Nothing</span>}</dd></> : null}
-      {item.affix ? <><dt className="caps text-muted">{item.affix.name}</dt><dd>{item.affix.blurb}</dd></> : null}
-      {item.spareOf ? <><dt className="caps text-muted">Name on it</dt><dd><WithName text="{name}, in marker. Found in lost property." name={item.spareOf.ownerName} profile={item.spareOf.profile} /></dd></> : null}
-      <dt className="caps text-muted">Sells for</dt>
-      <dd className="tabular-nums text-gold-ink">{item.saleValue} gold</dd>
-      {onSalvage ? <><dt className="caps text-muted">Salvages for</dt><dd className="tabular-nums text-rare-ink">{materialsText(item.salvage, materials)}</dd></> : null}
+      {!item.equipped ? <><dt className="caps text-muted">{t.equipped}</dt><dd className="tabular-nums">{current ? <>{c.name(current.label)}, <StatOf item={current} /></> : <span className="text-muted">{t.nothingEquipped}</span>}</dd></> : null}
+      {item.affix ? <><dt className="caps text-muted">{c.text(item.affix.name)}</dt><dd>{c.text(item.affix.blurb)}</dd></> : null}
+      {item.spareOf ? <><dt className="caps text-muted">{t.nameOnIt}</dt><dd><WithName text={t.inMarker} name={item.spareOf.ownerName} profile={item.spareOf.profile} /></dd></> : null}
+      <dt className="caps text-muted">{t.sellsFor}</dt>
+      <dd className="tabular-nums text-gold-ink">{t.goldAmount(item.saleValue)}</dd>
+      {onSalvage ? <><dt className="caps text-muted">{t.salvagesFor}</dt><dd className="tabular-nums text-rare-ink">{materialsText(item.salvage, materials, t)}</dd></> : null}
     </dl>
-    {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : item.held && claimBlocked ? <p className="mt-3 text-sm">Sell an item or get a bigger bag to claim this find.</p> : !item.equipped && !item.held && !canEquip ? <p className="mt-3 text-sm">Your hero can wear this from level {item.requiredLevel}. It can still be sold.</p> : null}
+    {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : item.held && claimBlocked ? <p className="mt-3 text-sm">{t.claimNeedsRoom}</p> : !item.equipped && !item.held && !canEquip ? <p className="mt-3 text-sm">{t.wearFrom(item.requiredLevel)}</p> : null}
     <div className="mt-3 empty:hidden"><ErrorNote message={error} /></div>
     {confirming ? (
       <div className="mt-4 flex flex-col gap-3">
         <Consequences>
           {confirming === 'unequip'
-            ? <li>Your hero fights without a {item.kind} until you equip another, so its {statLabel(item)} drops by <strong>{statOf(item)}</strong>. The {item.label} goes into your bag.</li>
-            : <li>The {item.label} has <strong>{Math.abs(delta)} less {statLabel(item)}</strong> than your {current?.label}, so your hero fights a little worse. The {current?.label} goes into your bag.</li>}
-          <li>You can change it back any time on this page.</li>
+            ? <li>{t.unequipBefore(t.kind[item.kind], stat)}<strong>{statOf(item)}</strong>{t.unequipAfter(item.label)}</li>
+            : <li>{t.weakerBefore(item.label)}<strong>{t.weakerStrong(Math.abs(delta), stat)}</strong>{t.weakerAfter(current?.label ?? '')}</li>}
+          <li>{t.changeBack}</li>
         </Consequences>
         <ConfirmButtons
-          confirmLabel={confirming === 'unequip' ? 'Unequip' : 'Equip anyway'}
-          busyLabel={confirming === 'unequip' ? 'Removing…' : 'Equipping…'}
-          cancelLabel="Keep it on"
+          confirmLabel={confirming === 'unequip' ? t.unequip : t.equipAnyway}
+          busyLabel={confirming === 'unequip' ? t.removing : t.equipping}
+          cancelLabel={t.keepItOn}
           pending={confirming === 'unequip' ? intents.unequip.pending : intents.equip.pending}
           disabled={!manageable || busy}
           onConfirm={confirming === 'unequip' ? onUnequip : onEquip}
@@ -378,15 +388,15 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
       </div>
     ) : <div className="mt-4 grid grid-cols-2 gap-2">
       {item.equipped
-        ? <Button variant="secondary" disabled={!manageable || busy} pending={intents.unequip.pending} busyLabel="Removing…" onClick={() => setConfirming('unequip')}>Unequip</Button>
+        ? <Button variant="secondary" disabled={!manageable || busy} pending={intents.unequip.pending} busyLabel={t.removing} onClick={() => setConfirming('unequip')}>{t.unequip}</Button>
         : item.held
-          ? <Button disabled={!manageable || busy || claimBlocked} pending={intents.claim.pending} busyLabel="Claiming…" onClick={onClaim}>Claim find</Button>
+          ? <Button disabled={!manageable || busy || claimBlocked} pending={intents.claim.pending} busyLabel={t.claiming} onClick={onClaim}>{t.claimFind}</Button>
           : <>
-            <Button variant={delta > 0 && canEquip ? 'primary' : 'secondary'} disabled={!manageable || busy || !canEquip} pending={intents.equip.pending} busyLabel="Equipping…" onClick={() => (weaker ? setConfirming('equip') : onEquip())}>Equip</Button>
-            <Button allowOffline variant="secondary" disabled={!manageable || busy} onClick={onSell}>Sell</Button>
-            {onSalvage ? <Button allowOffline variant="secondary" icon="scrap" disabled={!manageable || busy} onClick={onSalvage}>Salvage</Button> : null}
+            <Button variant={delta > 0 && canEquip ? 'primary' : 'secondary'} disabled={!manageable || busy || !canEquip} pending={intents.equip.pending} busyLabel={t.equipping} onClick={() => (weaker ? setConfirming('equip') : onEquip())}>{t.equip}</Button>
+            <Button allowOffline variant="secondary" disabled={!manageable || busy} onClick={onSell}>{t.sell}</Button>
+            {onSalvage ? <Button allowOffline variant="secondary" icon="scrap" disabled={!manageable || busy} onClick={onSalvage}>{t.salvage}</Button> : null}
           </>}
-      <Button allowOffline variant="quiet" className={item.equipped || item.held || onSalvage ? '' : 'col-span-2'} disabled={busy} onClick={onClose}>Close</Button>
+      <Button allowOffline variant="quiet" className={item.equipped || item.held || onSalvage ? '' : 'col-span-2'} disabled={busy} onClick={onClose}>{t.close}</Button>
     </div>}
   </>
 }
@@ -404,9 +414,10 @@ type Pouch = { name: string; cap: number; findable: boolean; next: { id: string;
  * line, since its Buy button or price sits right below, and the merchant's discount is never advertised (D164).
  */
 function MilestoneLine({ milestone, findable }: { milestone: string | null; findable: boolean }) {
+  const t = useT(dcBagMessages)
   if (milestone === null) return null
-  const early = [findable ? 'your hero finds one' : null, 'the merchant has one'].filter((route) => route !== null)
-  return <p className="mt-1 text-sm text-muted">Yours {milestone}, or sooner if {early.join(' or ')}.</p>
+  const early = [findable ? t.heroFinds : null, t.merchantHas].filter((route): route is string => route !== null)
+  return <p className="mt-1 text-sm text-muted">{t.yoursAt(milestone, early)}</p>
 }
 type Offer = { id: 'potions' | 'pouch' | 'bag'; name: string; quantity: number; price: number; tierId?: string }
 type Visit = { offers: Offer[]; expiresAtTick: number; ticksLeft: number; biomeId: string }
@@ -414,7 +425,9 @@ type PurchaseIntent<A> = { pending: boolean; error?: string | null; run: (args: 
 
 /** D156: a price the hero cannot pay yet, as plain text where the Buy button will be, so no dead button sits on the page. */
 function Price({ price, gold, className = '' }: { price: number; gold: number; className?: string }) {
-  return <p className={`text-sm tabular-nums ${className}`}><span className="font-semibold text-gold-ink">{price} gold</span>. You have {gold}, so {price - gold} to go.</p>
+  const t = useT(dcBagMessages)
+  const [amount, rest] = t.priceToGo(price, gold)
+  return <p className={`text-sm tabular-nums ${className}`}><span className="font-semibold text-gold-ink">{amount}</span>{rest}</p>
 }
 
 /** D77/D122: the potion pouch, its next tier and how to get it, beside the bag ladder. */
@@ -422,26 +435,33 @@ function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch;
   const next = pouch.next
   const affordable = next?.price != null && gold >= next.price
   const [asking, setAsking] = useState(false)
-  return <Card title={pouch.name} icon="potion">
-    <p className="tabular-nums">Holds <strong>{pouch.cap}</strong> potions. You have <strong>{potions}</strong>.</p>
+  const t = useT(dcBagMessages)
+  const c = useContent()
+  const holds = t.holdsPotions(pouch.cap, potions)
+  const nextLine = next ? t.nextPouch(next.name, next.cap) : []
+  return <Card title={c.name(pouch.name)} icon="potion">
+    <p className="tabular-nums">{holds[0]}<strong>{holds[1]}</strong>{holds[2]}<strong>{holds[3]}</strong>{holds[4]}</p>
     {next ? <>
-      <p className="mt-3"><strong>Next: {next.name}</strong>, {next.cap} potions</p>
-      <MilestoneLine milestone={next.milestoneLevel !== null ? `at level ${next.milestoneLevel}` : null} findable={pouch.findable} />
+      <p className="mt-3"><strong>{nextLine[0]}</strong>{nextLine[1]}</p>
+      <MilestoneLine milestone={next.milestoneLevel !== null ? t.atLevel(next.milestoneLevel) : null} findable={pouch.findable} />
       {next.price !== null ? next.buyable ? <>
-        {affordable ? <Button className="mt-3" disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button> : <Price price={next.price} gold={gold} className="mt-3" />}
-        <BuySheet open={asking} title={`Buy the ${next.name}?`} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, `${next.name} bought. It holds ${next.cap} potions.`)}>
-          <li>Holds {next.cap} potions instead of {pouch.cap}.</li>
+        {affordable ? <Button className="mt-3" disabled={disabled} pending={intent.pending} icon="coin" busyLabel={t.buying} onClick={() => setAsking(true)}>{t.buyFor(next.price)}</Button> : <Price price={next.price} gold={gold} className="mt-3" />}
+        <BuySheet open={asking} title={t.buyTheTitle(next.name)} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, t.pouchBought(next.name, next.cap))}>
+          <li>{t.holdsInstead(next.cap, pouch.cap)}</li>
         </BuySheet>
-      </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? `You can buy it from level ${next.lockedUntilLevel}.` : 'You can buy it after your next pouch milestone.'}</p> : null}
-    </> : <p className="mt-3 text-sm text-muted">This is the biggest pouch for now.</p>}
+      </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? t.buyFrom(next.lockedUntilLevel) : t.afterPouchMilestone}</p> : null}
+    </> : <p className="mt-3 text-sm text-muted">{t.biggestPouch}</p>}
   </Card>
 }
 
 /** D78: the visiting merchant's offers, each sold once, open for a few adventures. */
 function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: { visit: Visit; gold: number; potions: number; cap: number; discountPct: number; disabled: boolean; intent: PurchaseIntent<{ offerId: Offer['id'] }> }) {
   const [asking, setAsking] = useState<Offer | null>(null)
-  return <Card title="Wandering Merchant" icon="merchant">
-    <p className="text-sm">Leaves in {visit.ticksLeft === 1 ? 'one adventure' : `${visit.ticksLeft} adventures`}. Each offer sells once.</p>
+  const t = useT(dcBagMessages)
+  const c = useContent()
+  const have = t.haveGold(gold)
+  return <Card title={t.merchant} icon="merchant">
+    <p className="text-sm">{t.leavesIn(visit.ticksLeft)}</p>
     <ul className="mt-3 flex flex-col gap-3">
       {visit.offers.map((offer) => {
         const affordable = gold >= offer.price
@@ -449,26 +469,27 @@ function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: 
         // D122: a bag or pouch offer undercuts the Bag page, and the card says so.
         const deal = offer.id !== 'potions' && discountPct > 0
         return <li key={offer.id} className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-faint pt-3 first:border-t-0 first:pt-0">
-          <span><strong>{offer.name}</strong>{deal ? <span className="block text-sm text-muted">{discountPct}% off the Bag page price.</span> : null}{overflow ? <span className="block text-sm text-muted">Your pouch holds {cap}; make room first.</span> : null}</span>
-          {affordable && !overflow ? <Button disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(offer)}>Buy for {offer.price} gold</Button> : <span className="text-sm font-semibold tabular-nums text-gold-ink">{offer.price} gold</span>}
+          <span><strong>{c.text(offer.name) === offer.name ? c.name(offer.name) : c.text(offer.name)}</strong>{deal ? <span className="block text-sm text-muted">{t.offPrice(discountPct)}</span> : null}{overflow ? <span className="block text-sm text-muted">{t.pouchRoom(cap)}</span> : null}</span>
+          {affordable && !overflow ? <Button disabled={disabled} pending={intent.pending} icon="coin" busyLabel={t.buying} onClick={() => setAsking(offer)}>{t.buyFor(offer.price)}</Button> : <span className="text-sm font-semibold tabular-nums text-gold-ink">{t.goldAmount(offer.price)}</span>}
         </li>
       })}
     </ul>
-    {visit.offers.some((offer) => gold < offer.price) ? <p className="mt-2 text-sm tabular-nums">You have <span className="text-gold-ink">{gold} gold</span>.</p> : null}
-    <BuySheet open={asking !== null} title={asking ? `Buy ${asking.name}?` : ''} price={asking?.price ?? 0} gold={gold} pending={intent.pending} onClose={() => setAsking(null)} onConfirm={() => (asking ? intent.run({ offerId: asking.id }, `${asking.name} bought.`) : Promise.resolve(false))}>
-      <li>The merchant sells each offer once.</li>
+    {visit.offers.some((offer) => gold < offer.price) ? <p className="mt-2 text-sm tabular-nums">{have[0]}<span className="text-gold-ink">{have[1]}</span>{have[2]}</p> : null}
+    <BuySheet open={asking !== null} title={asking ? t.buyOffer(asking.name) : ''} price={asking?.price ?? 0} gold={gold} pending={intent.pending} onClose={() => setAsking(null)} onConfirm={() => (asking ? intent.run({ offerId: asking.id }, t.offerBought(asking.name)) : Promise.resolve(false))}>
+      <li>{t.sellsOnce}</li>
     </BuySheet>
   </Card>
 }
 
 /** Every purchase asks first: a stray tap only opens this sheet, which says what changes and the gold left. */
 function BuySheet({ open, title, price, gold, pending, onConfirm, onClose, children }: { open: boolean; title: string; price: number; gold: number; pending: boolean; onConfirm: () => Promise<boolean>; onClose: () => void; children: ReactNode }) {
+  const t = useT(dcBagMessages)
   return (
-    <ConfirmSheet open={open} title={title} confirmLabel={`Buy for ${price} gold`} busyLabel="Buying…" cancelLabel="Cancel" pending={pending} onClose={onClose} onConfirm={async () => { if (pending) return; await onConfirm(); onClose() }}>
+    <ConfirmSheet open={open} title={title} confirmLabel={t.buyFor(price)} busyLabel={t.buying} cancelLabel={t.cancel} pending={pending} onClose={onClose} onConfirm={async () => { if (pending) return; await onConfirm(); onClose() }}>
       <Consequences>
         {children}
-        <li>Costs {price} gold.</li>
-        <li>Remaining gold: {gold - price}</li>
+        <li>{t.costs(price)}</li>
+        <li>{t.remaining(gold - price)}</li>
       </Consequences>
     </ConfirmSheet>
   )
@@ -481,16 +502,18 @@ function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { price: numb
   const inStock = tag.inStockAt === null || tag.inStockAt <= Date.now()
   const affordable = gold >= tag.price
   const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null && name.trim() !== heroName
-  return <Card title="Name tag" icon="tag">
-    <p>A fresh “Hi, my name is” sticker. Your hero goes by the name you write on it, on your TRMNL, the leaderboard and your hero page.</p>
-    {inStock && !affordable ? <><Price price={tag.price} gold={gold} className="mt-3" /><p className="mt-1 text-sm text-muted">One in stock a day.</p></> : inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
-      <NameField label={`New name for ${heroName}`} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={intent.pending} />
-      <Button type="submit" disabled={disabled || !valid} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {tag.price} gold</Button>
-      <p className="text-sm text-muted">One in stock a day.</p>
-    </form> : <p className="mt-3 text-sm text-muted">Today's tag is sold. The next one is in stock {new Date(tag.inStockAt!).toLocaleString(undefined, { weekday: 'short', hour: '2-digit', minute: '2-digit' })}.</p>}
-    <BuySheet open={asking} title={`Rename ${heroName} to ${name.trim()}?`} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, `Hi, my name is ${name.trim()}.`); if (done) setName(''); return done }}>
-      <li>{heroName} goes by {name.trim()} from now on. Level, gear and rank stay the same.</li>
-      <li>The next name tag is in stock tomorrow.</li>
+  const t = useT(dcBagMessages)
+  const locale = useLocale()
+  return <Card title={t.nameTag} icon="tag">
+    <p>{t.nameTagBody}</p>
+    {inStock && !affordable ? <><Price price={tag.price} gold={gold} className="mt-3" /><p className="mt-1 text-sm text-muted">{t.oneADay}</p></> : inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
+      <NameField label={t.newNameFor(heroName)} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={intent.pending} />
+      <Button type="submit" disabled={disabled || !valid} pending={intent.pending} icon="coin" busyLabel={t.buying}>{t.buyFor(tag.price)}</Button>
+      <p className="text-sm text-muted">{t.oneADay}</p>
+    </form> : <p className="mt-3 text-sm text-muted">{t.tagSold(new Date(tag.inStockAt!).toLocaleString(locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' }))}</p>}
+    <BuySheet open={asking} title={t.renameTitle(heroName, name.trim())} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, t.renamed(name.trim())); if (done) setName(''); return done }}>
+      <li>{t.goesBy(heroName, name.trim())}</li>
+      <li>{t.nextTag}</li>
     </BuySheet>
   </Card>
 }
@@ -502,17 +525,17 @@ function Makeover({ makeover, heroName, gold, disabled, intent }: { makeover: { 
   useEffect(() => setGender(makeover.gender), [makeover.gender])
   const affordable = gold >= makeover.price
   const changed = gender !== makeover.gender
-  const label = gender
-  return <Card title="Makeover" icon="hero">
-    <p>A new look for {heroName}, on your TRMNL, your hero page and other players' meetings.</p>
+  const t = useT(dcBagMessages)
+  return <Card title={t.makeover} icon="hero">
+    <p>{t.makeoverBody(heroName)}</p>
     {affordable ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (changed) setAsking(true) }}>
       <GenderPicker small value={gender} onChange={setGender} disabled={intent.pending} />
       {/* The button waits for a different look to be picked, so it never offers to buy the one the hero has. */}
-      {changed ? <Button type="submit" disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…">Buy for {makeover.price} gold</Button> : <p className="text-sm text-muted">Pick a new look to buy it.</p>}
+      {changed ? <Button type="submit" disabled={disabled} pending={intent.pending} icon="coin" busyLabel={t.buying}>{t.buyFor(makeover.price)}</Button> : <p className="text-sm text-muted">{t.pickLook}</p>}
     </form> : <Price price={makeover.price} gold={gold} className="mt-3" />}
-    <BuySheet open={asking} title={`Make ${heroName} ${label}?`} price={makeover.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => await intent.run({ gender }, `${heroName} is back with a new look.`)}>
-      <li>Only the look changes. Level, gear, stats and rank stay the same.</li>
-      <li>You can change it back any time for another {makeover.price} gold.</li>
+    <BuySheet open={asking} title={t.makeTitle(heroName, gender)} price={makeover.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => await intent.run({ gender }, t.newLook(heroName))}>
+      <li>{t.onlyLook}</li>
+      <li>{t.changeBackFor(makeover.price)}</li>
     </BuySheet>
   </Card>
 }
@@ -522,18 +545,21 @@ function BagLadder({ ladder, capacity, gold, disabled, intent }: { ladder: Ladde
   const next = ladder.next
   const affordable = next?.price != null && gold >= next.price
   const [asking, setAsking] = useState(false)
-  return <Card title="Bigger bags" icon="bag">
-    <p className="tabular-nums">Your <strong>{ladder.name}</strong> holds <strong>{capacity}</strong> pieces of gear. Equipped gear and potions don’t take up space.</p>
+  const t = useT(dcBagMessages)
+  const holds = t.yourBagHolds(ladder.name, capacity)
+  const nextLine = next ? t.nextBag(next.name, next.capacity) : []
+  return <Card title={t.biggerBags} icon="bag">
+    <p className="tabular-nums">{holds[0]}<strong>{holds[1]}</strong>{holds[2]}<strong>{holds[3]}</strong>{holds[4]}</p>
     {next ? <>
-      <p className="mt-3"><strong>Next: {next.name}</strong>, {next.capacity} slots</p>
-      <MilestoneLine milestone={next.milestoneAdventures !== null ? `after ${next.milestoneAdventures} adventures` : next.milestoneLevel !== null ? `at level ${next.milestoneLevel}` : null} findable={ladder.findable} />
+      <p className="mt-3"><strong>{nextLine[0]}</strong>{nextLine[1]}</p>
+      <MilestoneLine milestone={next.milestoneAdventures !== null ? t.afterAdventures(next.milestoneAdventures) : next.milestoneLevel !== null ? t.atLevel(next.milestoneLevel) : null} findable={ladder.findable} />
       {next.price !== null ? next.buyable ? <>
-        {affordable ? <Button className="mt-3" disabled={disabled} pending={intent.pending} icon="coin" busyLabel="Buying…" onClick={() => setAsking(true)}>Buy for {next.price} gold</Button> : <Price price={next.price} gold={gold} className="mt-3" />}
-        <BuySheet open={asking} title={`Buy the ${next.name}?`} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, `${next.name} bought. It holds ${next.capacity}.`)}>
-          <li>Holds {next.capacity} pieces of gear instead of {capacity}.</li>
+        {affordable ? <Button className="mt-3" disabled={disabled} pending={intent.pending} icon="coin" busyLabel={t.buying} onClick={() => setAsking(true)}>{t.buyFor(next.price)}</Button> : <Price price={next.price} gold={gold} className="mt-3" />}
+        <BuySheet open={asking} title={t.buyTheTitle(next.name)} price={next.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={() => intent.run({ tierId: next.id }, t.bagBought(next.name, next.capacity))}>
+          <li>{t.holdsGearInstead(next.capacity, capacity)}</li>
         </BuySheet>
-      </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? `You can buy it from level ${next.lockedUntilLevel}.` : 'You can buy it after your next bag milestone.'}</p> : null}
-    </> : <p className="mt-3 text-sm text-muted">This is the biggest bag for now.</p>}
+      </> : <p className="mt-2 text-sm">{next.lockedUntilLevel !== null ? t.buyFrom(next.lockedUntilLevel) : t.afterBagMilestone}</p> : null}
+    </> : <p className="mt-3 text-sm text-muted">{t.biggestBag}</p>}
   </Card>
 }
 
@@ -550,91 +576,97 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
   const affixShort = Object.fromEntries(Object.entries(affixPrice.materials).filter(([id, n]) => (materials.find((m) => m.id === id)?.count ?? 0) < n).map(([id, n]) => [id, n - (materials.find((m) => m.id === id)?.count ?? 0)]))
   const affixAffordable = Object.keys(affixShort).length === 0 && hero.gold >= affixPrice.gold
   const step = asking?.nextStep ?? null
-  return <Card title="Workbench" icon="components">
-    <p className="text-sm">Salvaged gear becomes materials. Spend them, with gold, to improve what your hero wears. Materials never sell and take no bag space.</p>
-    <ul aria-label="Materials" className="mt-3 flex flex-wrap gap-x-4 gap-y-1 tabular-nums">
-      {materials.map((m) => <li key={m.id} className="flex items-center gap-1.5"><Glyph name={m.glyph as 'scrap'} size={16} className="text-rare-ink" /><strong>{m.count}</strong> {m.name}</li>)}
+  const t = useT(dcBagMessages)
+  const c = useContent()
+  const mats = (counts: MaterialCount) => materialsText(counts, materials, t)
+  const statTitle = (item: Gear) => t.statTitle[item.kind]
+  return <Card title={t.workbench} icon="components">
+    <p className="text-sm">{t.workbenchBody}</p>
+    <ul aria-label={t.materials} className="mt-3 flex flex-wrap gap-x-4 gap-y-1 tabular-nums">
+      {materials.map((m) => <li key={m.id} className="flex items-center gap-1.5"><Glyph name={m.glyph as 'scrap'} size={16} className="text-rare-ink" /><strong>{m.count}</strong> {c.name(m.name)}</li>)}
     </ul>
     <ul className="mt-4 flex flex-col gap-4">
       {(['weapon', 'armor'] as const).map((kind, index) => {
         const item = equipped[index] ?? null
         const next = item?.nextStep ?? null
         return <li key={kind} className="border-t-2 border-faint pt-3">
-          <h3 className="caps text-sm text-muted">{kind === 'weapon' ? 'Weapon' : 'Armor'}</h3>
-          {item === null ? <p className="mt-1 text-sm text-muted">Nothing equipped. Equip a {kind} to work on it.</p> : <>
-            <p className={`mt-1 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}>{item.label}</p>
+          <h3 className="caps text-sm text-muted">{t.kindTitle[kind]}</h3>
+          {item === null ? <p className="mt-1 text-sm text-muted">{t.equipToWork(t.kind[kind])}</p> : <>
+            <p className={`mt-1 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}>{c.name(item.label)}</p>
             {next ? <>
-              <p className="mt-1 text-sm tabular-nums">{next.label}: {priceText(next, materials)}. {statLabel(item).charAt(0).toUpperCase() + statLabel(item).slice(1)} {next.stat.from} → <strong>{next.stat.to}</strong>.</p>
+              <p className="mt-1 text-sm tabular-nums">{t.stepLine(t.stepLabel(next.label), t.priceText(mats(next.materials), next.gold), statTitle(item), next.stat.from)}<strong>{next.stat.to}</strong>.</p>
               {next.affordable || item.affixable ? <div className="mt-2 flex flex-wrap items-center gap-2">
-                {next.affordable ? <Button disabled={disabled} pending={intents.upgrade.pending && asking?.id === item.id} busyLabel="Working…" onClick={() => setAsking(item)}>{next.kind === 'tier' ? 'Upgrade' : 'Reinforce'}</Button> : null}
-                {item.affixable ? <Button variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>Choose affix</Button> : null}
+                {next.affordable ? <Button disabled={disabled} pending={intents.upgrade.pending && asking?.id === item.id} busyLabel={t.working} onClick={() => setAsking(item)}>{next.kind === 'tier' ? t.upgrade : t.reinforce}</Button> : null}
+                {item.affixable ? <Button variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>{t.chooseAffix}</Button> : null}
               </div> : null}
-              {!next.affordable ? <p className="mt-2 text-sm tabular-nums">{shortText(next, hero, materials)}</p> : null}
+              {!next.affordable ? <p className="mt-2 text-sm tabular-nums">{shortText(next, hero, materials, t)}</p> : null}
             </> : <>
-              <p className="mt-1 text-sm text-muted">Fully reinforced.</p>
-              {item.affixable ? <Button className="mt-2" variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>Choose affix</Button> : null}
+              <p className="mt-1 text-sm text-muted">{t.fullyReinforced}</p>
+              {item.affixable ? <Button className="mt-2" variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>{t.chooseAffix}</Button> : null}
             </>}
           </>}
         </li>
       })}
     </ul>
-    <ConfirmSheet open={asking !== null && step !== null} title={asking && step ? `${step.label} on the ${asking.label}?` : ''} confirmLabel={step ? `${step.kind === 'tier' ? 'Upgrade' : 'Reinforce'} for ${step.gold} gold` : ''} busyLabel="Working…" cancelLabel="Not now" pending={intents.upgrade.pending} disabled={disabled} onClose={() => { if (!intents.upgrade.pending) setAsking(null) }} onConfirm={async () => { if (!asking || !step || intents.upgrade.pending) return; await intents.upgrade.run({ itemId: asking.id }, `${asking.label}: ${step.label.toLowerCase()}.`); setAsking(null) }}>
+    <ConfirmSheet open={asking !== null && step !== null} title={asking && step ? t.stepTitle(t.stepLabel(step.label), asking.label) : ''} confirmLabel={step ? t.stepConfirm(step.kind, step.gold) : ''} busyLabel={t.working} cancelLabel={t.notNow} pending={intents.upgrade.pending} disabled={disabled} onClose={() => { if (!intents.upgrade.pending) setAsking(null) }} onConfirm={async () => { if (!asking || !step || intents.upgrade.pending) return; await intents.upgrade.run({ itemId: asking.id }, t.stepDone(asking.label, t.stepLabel(step.label))); setAsking(null) }}>
       {asking && step ? <Consequences>
-        <li>{statLabel(asking).charAt(0).toUpperCase() + statLabel(asking).slice(1)} goes from {step.stat.from} to <strong>{step.stat.to}</strong>. The piece stays equipped and keeps its name{asking.affix ? ' and trait' : ''}.</li>
-        <li>Spends {materialsText(step.materials, materials)}.</li>
-        <li>Costs {step.gold} gold.</li>
-        <li>Remaining gold: {hero.gold - step.gold}</li>
+        <li>{t.statGoes(statTitle(asking), step.stat.from)}<strong>{step.stat.to}</strong>{t.staysEquipped(asking.affix !== null)}</li>
+        <li>{t.spends(mats(step.materials))}</li>
+        <li>{t.costs(step.gold)}</li>
+        <li>{t.remaining(hero.gold - step.gold)}</li>
       </Consequences> : null}
     </ConfirmSheet>
-    <Sheet open={fitting !== null} onClose={() => { if (!intents.chooseAffix.pending) setFitting(null) }} label="Choose an affix">
+    <Sheet open={fitting !== null} onClose={() => { if (!intents.chooseAffix.pending) setFitting(null) }} label={t.chooseAnAffix}>
       {fitting ? <>
-        <SheetTitle>Choose an affix for the {fitting.label}</SheetTitle>
-        <p className="mt-2 text-sm tabular-nums">Costs {materialsText(affixPrice.materials, materials)} and {affixPrice.gold} gold. The old trait is replaced; nothing else changes.</p>
-        <ul className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label="Affix">
+        <SheetTitle>{t.affixFor(fitting.label)}</SheetTitle>
+        <p className="mt-2 text-sm tabular-nums">{t.affixCosts(mats(affixPrice.materials), affixPrice.gold)}</p>
+        <ul className="mt-3 flex flex-col gap-2" role="radiogroup" aria-label={t.affix}>
           {rules.affixes.map((affix) => {
             const current = fitting.affix?.id === affix.id
             const picked = affixId === affix.id
             return <li key={affix.id}>
               <button type="button" role="radio" aria-checked={picked} disabled={current} onClick={() => setAffixId(affix.id)} className={`flex w-full flex-col border-2 px-3 py-2 text-left ${picked ? 'border-gold bg-raised' : 'border-edge'} disabled:opacity-60`}>
-                <span className="font-semibold">{affix.name}{current ? <span className="ml-2 text-sm text-muted">fitted now</span> : null}</span>
-                <span className="text-sm text-muted">{affix.blurb}</span>
+                <span className="font-semibold">{c.text(affix.name)}{current ? <span className="ml-2 text-sm text-muted">{t.fittedNow}</span> : null}</span>
+                <span className="text-sm text-muted">{c.text(affix.blurb)}</span>
               </button>
             </li>
           })}
         </ul>
-        {!affixAffordable ? <p className="mt-3 text-sm tabular-nums">{Object.keys(affixShort).length > 0 ? `Needs ${materialsText(affixShort, materials)} more.` : `You have ${hero.gold} gold.`}</p> : null}
+        {!affixAffordable ? <p className="mt-3 text-sm tabular-nums">{Object.keys(affixShort).length > 0 ? t.needsMore(mats(affixShort)) : t.youHaveGold(hero.gold)}</p> : null}
         <div className="mt-3 empty:hidden"><ErrorNote message={intents.chooseAffix.error ?? null} /></div>
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <Button disabled={disabled || !affixAffordable || affixId === null} pending={intents.chooseAffix.pending} busyLabel="Fitting…" onClick={async () => { if (!fitting || affixId === null) return; const name = rules.affixes.find((a) => a.id === affixId)?.name ?? 'the affix'; if (await intents.chooseAffix.run({ itemId: fitting.id, affixId }, `${name} fitted to the ${fitting.label}.`)) setFitting(null) }}>Fit for {affixPrice.gold} gold</Button>
-          <Button allowOffline variant="secondary" disabled={intents.chooseAffix.pending} onClick={() => setFitting(null)}>Cancel</Button>
+          <Button disabled={disabled || !affixAffordable || affixId === null} pending={intents.chooseAffix.pending} busyLabel={t.fitting} onClick={async () => { if (!fitting || affixId === null) return; const name = rules.affixes.find((a) => a.id === affixId)?.name ?? t.theAffix; if (await intents.chooseAffix.run({ itemId: fitting.id, affixId }, t.fitted(name, fitting.label))) setFitting(null) }}>{t.fitFor(affixPrice.gold)}</Button>
+          <Button allowOffline variant="secondary" disabled={intents.chooseAffix.pending} onClick={() => setFitting(null)}>{t.cancel}</Button>
         </div>
       </> : null}
     </Sheet>
   </Card>
 }
 
-/** "6 Scrap and 4 Parts + 500 gold". */
-const priceText = (step: Step, materials: readonly Material[]) => `${materialsText(step.materials, materials)} + ${step.gold} gold`
 
 /** Why the step is out of reach, one reason at a time: the level, then the materials, then the gold. */
-function shortText(step: Step, hero: { level: number; gold: number }, materials: readonly Material[]): string {
-  if (step.requiredLevel > hero.level) return `${step.label.replace('Upgrade to ', '')} needs level ${step.requiredLevel}.`
-  if (Object.keys(step.shortfall).length > 0) return `Needs ${materialsText(step.shortfall, materials)} more.`
-  return `You have ${hero.gold} gold.`
+function shortText(step: Step, hero: { level: number; gold: number }, materials: readonly Material[], t: T): string {
+  if (step.requiredLevel > hero.level) return t.stepNeedsLevel(step.label, step.requiredLevel)
+  if (Object.keys(step.shortfall).length > 0) return t.needsMore(materialsText(step.shortfall, materials, t))
+  return t.youHaveGold(hero.gold)
 }
 
 /** A piece's own figure stays neutral; only a comparison takes a colour (green better, red worse). */
 function StatOf({ item }: { item: Gear }) {
-  return <span>+{statOf(item)} {statLabel(item)}</span>
+  const t = useT(dcBagMessages)
+  return <span>{t.statOf(statOf(item), t.stat[item.kind])}</span>
 }
 
 /** The difference against the equipped piece, signed and coloured by direction. */
 function Delta({ delta }: { delta: number }) {
-  return <span className={`font-semibold ${delta > 0 ? 'text-xp-ink' : delta < 0 ? 'text-hp-ink' : 'text-muted'}`}>{delta > 0 ? ` (+${delta} better)` : delta < 0 ? ` (${delta} worse)` : ' (same)'}</span>
+  const t = useT(dcBagMessages)
+  return <span className={`font-semibold ${delta > 0 ? 'text-xp-ink' : delta < 0 ? 'text-hp-ink' : 'text-muted'}`}>{delta > 0 ? t.deltaBetter(delta) : delta < 0 ? t.deltaWorse(delta) : t.deltaSame}</span>
 }
 
 function ResumeAt() {
   const now = useNow(60_000)
-  const at = now === null ? null : new Date(nextSlotAfter(now)).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-  return <p>Resuming at {at ?? 'the next adventure'}, or the first adventure after that if updates run late.</p>
+  const t = useT(dcBagMessages)
+  const locale = useLocale()
+  const at = now === null ? null : formatTime(locale, nextSlotAfter(now))
+  return <p>{t.resumingAt(at)}</p>
 }
