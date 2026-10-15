@@ -38,7 +38,7 @@ export const Route = createFileRoute('/help/paper-lives')({
       </ul>
       <p>In the first year you can change the first name and choose pronouns (they, she or he) on the Life page.</p>
       <h2 id="how-a-year-works">How a year works</h2>
-      <p>The first six years pass quickly, one every fifteen minutes. After that, a year lasts at least {hours(t.minYearTicks)} hours. Events happen through the year without you, such as making a friend, catching a cold, getting a raise or the dog getting out. Your screen shows each one with the age it happened at.</p>
+      <p>The first six years pass quickly, one every fifteen minutes. After that, a year lasts at least {hours(t.minYearTicks)} hours. Events happen through the year without you, such as making a friend, catching a cold, getting a raise or the dog getting out. Your screen lists them newest first, under the age they happened at, with this year at the top.</p>
       <p>Everything a year has in store happens in its first {hours(t.minYearTicks)} hours. After that the year is ready: press <strong>Age up</strong> on the Life page and it ends there and then, with its recap and the next year's decision. Press it earlier and it waits until the year is ready, so nothing is skipped. If you are away, the year closes by itself after {hours(t.closeYearTicks)} hours. If you check in often, a life takes about a week. If you never do, it takes about a month.</p>
       <p>The seasons run through each year's first {hours(t.minYearTicks)} hours. A year left open after that is winding down, and the screen says when it will close.</p>
       <h2 id="decisions">Decisions</h2>
@@ -46,6 +46,7 @@ export const Route = createFileRoute('/help/paper-lives')({
       <p>If you choose nothing, the quietest option happens, such as staying put or saying nothing. A life where you never choose ends up ordinary. About one decision in five is a big one (marriage, a child, a house, a career, the will) and is marked as such.</p>
       <h2 id="stats-and-traits">Stats and traits</h2>
       <p>Health, happiness, smarts and charm run from 0 to 100. Health slips with age, and illness knocks it down for a while. Happiness follows how close you are to the people around you, your money and having a hobby. Smarts and charm open jobs and some decisions.</p>
+      <p>Many events and choices move a stat or your money, and the line says so. On your screen, a stat's mark follows the line with a + or a −, doubled for a big change, and money shows as an amount. The Life page spells it out, such as “Happiness up”.</p>
       <p>Each life has two traits that never change. They decide some events and options, and each one shifts one thing:</p>
       <ul>
         {content.traits.map((trait) => (
@@ -62,7 +63,7 @@ export const Route = createFileRoute('/help/paper-lives')({
       <h2 id="the-next-life">The next life</h2>
       <p>After a death, your screen shows a memorial until you start the next life on the Life page. You can carry on as one of the children, at the age they are, with the family name and what the will left them. Or you can start again as a stranger at birth.</p>
       <h2 id="your-screen">Your screen</h2>
-      <p>The full layout shows the portrait with the pet, the stats, the newest lines with their ages, the year's decision or the time it closes, last year's recap and this week's longest lives. Smaller layouts keep the name, the newest lines and the decision. The code in the corner opens the companion.</p>
+      <p>The full layout shows the portrait with the pet, the stats, the newest lines under their ages, the year's decision or the time it closes, last year's recap and this week's longest lives. Smaller layouts keep the name, the newest lines and the decision. The code in the corner opens the companion.</p>
       <h2 id="photos">Photos</h2>
       <p>Each week your TRMNL shows a Photo code in its title bar. Enter it on the Album page to take a photo of your character as they are that week, pet and all. You can take one photo a week, and last week's code still works if your screen was slow to refresh. Photos don't affect the life. They stay with the life they were taken in, in the album and on its public page, and count towards the Photos achievements.</p>
       <h2 id="alerts">Alerts</h2>

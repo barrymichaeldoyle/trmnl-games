@@ -159,6 +159,14 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
     if (stagesOf(event.stage).includes('infant') && (event.opens || event.effects?.addPerson)) problem(`${where}: infant events add nobody and open nothing`)
     if (strict) checkAges(where, event.stage, event.when)
   }
+  // From v4 a follow-up pays off a flag that some option or event sets, and nothing else gates it out of reach.
+  if (content.version >= 4) {
+    const set = new Set([...content.events.map((e) => e.effects?.flag), ...content.decisions.flatMap((d) => d.options.map((o) => o.effects?.flag))].filter((f): f is string => f !== undefined))
+    for (const event of content.events.filter((e) => e.followUp)) {
+      if (!event.when?.flags?.length) problem(`event ${event.id}: a follow-up with no flag to follow`)
+      for (const flag of event.when?.flags ?? []) if (!set.has(flag)) problem(`event ${event.id}: follows ${flag}, which nothing sets`)
+    }
+  }
   // From v2 every early year has at least three events that fit its age, so a toddler never gets a five-year-old's line.
   if (strict) {
     for (let age = 0; age <= 5; age += 1) {

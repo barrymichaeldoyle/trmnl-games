@@ -8,7 +8,7 @@ import { captureAnalytics } from '../../../lib/analytics'
 import { useIntent } from '../../../lib/intent'
 import { LocalTime, useHydrated } from '../../../lib/localTime'
 import { preload } from '../../../lib/preload'
-import { money, Named, namesIn, Portrait, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
+import { changeWords, money, Named, namesIn, Portrait, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
 import { ActionFeedback, Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 
 /** The Life page (paper-lives.md "Companion"): the character, the year card and its decision, the memorial and the next life, the recent story. */
@@ -38,6 +38,12 @@ function storyRows(logs: readonly Log[]): Array<Log & { newAge: boolean }> {
     } else rows.push(log)
   }
   return rows.slice(0, 20).map((row, i, all) => ({ ...row, newAge: i === 0 || all[i - 1]!.age !== row.age }))
+}
+
+/** What a line changed, on its own line under the words, in the muted ink. */
+function Changes({ log }: { log: Log }) {
+  const words = changeWords(log.changes)
+  return words ? <span className="block text-xs text-muted">{words}</span> : null
 }
 
 /** "in 1 h 20 min" until a moment, kept current each minute; hidden until the browser owns the page. */
@@ -123,7 +129,7 @@ function LifePage() {
           {lastYear.length > 0 ? (
             <>
               <p className="text-sm text-muted">Age {agedFrom}, looking back:</p>
-              <ol className="mt-2 flex flex-col gap-1 text-sm">{lastYear.map((log) => <li key={log.id}><Named text={log.summary} names={names} /></li>)}</ol>
+              <ol className="mt-2 flex flex-col gap-1 text-sm">{lastYear.map((log) => <li key={log.id}><Named text={log.summary} names={names} /><Changes log={log} /></li>)}</ol>
             </>
           ) : <p className="text-sm text-muted">A quiet year, and a new one begins.</p>}
           <div className="mt-3"><Button variant="quiet" onClick={() => setAgedFrom(null)}>Carry on</Button></div>
@@ -187,9 +193,10 @@ function LifePage() {
         {storyRows(view.logs ?? []).length === 0 ? <p className="text-muted">Nothing yet. The first lines arrive within fifteen minutes.</p> : null}
         <ol className="flex flex-col gap-1.5">
           {storyRows(view.logs ?? []).map((row) => (
-            <li key={row.id} className={`flex gap-3 text-sm ${row.newAge ? 'mt-2 first:mt-0' : ''}`}>
-              <span className="w-8 shrink-0 text-right tabular-nums text-muted">{row.newAge ? row.age : ''}</span>
-              <span className={`min-w-0 ${row.kind === 'death' || row.remarkable ? 'font-semibold' : ''} ${row.kind === 'achievement' ? 'text-gold-ink' : ''}`}><Named text={row.summary} names={names} /></span>
+            <li key={row.id} className={`text-sm ${row.newAge ? 'mt-3 first:mt-0' : ''}`}>
+              {row.newAge ? <p className="mb-1 text-xs font-semibold text-muted">Age {row.age}{row.age === life.age && !ended ? ' · this year' : ''}</p> : null}
+              <span className={`${row.kind === 'death' || row.remarkable ? 'font-semibold' : ''} ${row.kind === 'achievement' ? 'text-gold-ink' : ''}`}><Named text={row.summary} names={names} /></span>
+              <Changes log={row} />
             </li>
           ))}
         </ol>

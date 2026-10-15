@@ -69,6 +69,9 @@ describe('Paper Lives tick on the shared engine (D159, L2)', () => {
     const logs = await t.run(async (ctx) => await ctx.db.query('plTickLogs').withIndex('by_lifeId_and_at_and_sequence', (q) => q.eq('lifeId', lifeId)).collect())
     expect(logs.filter((l) => l.kind === 'recap').map((l) => l.age)).toEqual([30, 31])
     expect(logs.map((l) => l.sequence)).toEqual(logs.map((_, i) => i + 2))
+    // Lines keep what their effect moved (template v7), and only story lines carry it.
+    expect(logs.some((l) => l.changes !== undefined)).toBe(true)
+    for (const l of logs) if (l.changes) expect(['event', 'decision_resolved', 'infant']).toContain(l.kind)
   })
 
   it('skips a paused life and leaves it where it was', async () => {

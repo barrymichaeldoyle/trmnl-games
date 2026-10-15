@@ -181,6 +181,28 @@ describe('decisions', () => {
     expect(defaulted.life.counters.decisionsDefaulted).toBe(1)
   })
 
+  it('marks each story line with the stats and money its effect moved, and nothing else', () => {
+    let life = born()
+    let marked = 0
+    for (let n = 1; n <= 400 && life.status === 'living'; n += 1) {
+      const result = tick(life, n)
+      for (const event of result.events) {
+        if (!event.changes) continue
+        marked += 1
+        expect(['event', 'infant', 'decision_resolved']).toContain(event.kind)
+        for (const delta of Object.values(event.changes.stats ?? {})) expect(delta).not.toBe(0)
+        if (event.changes.gold !== undefined) expect(event.changes.gold).not.toBe(0)
+      }
+      life = result.life
+    }
+    expect(marked).toBeGreaterThan(10)
+    const chose = choose(withPending(grown(18, { stats: { health: 70, happiness: 50, smarts: 70, charm: 50 } }), 'yg_education'), content, 'yg_education', 'university')
+    if (!chose.ok) throw new Error('refused')
+    const resolved = runUntil(chose.life, (r) => r.disposition !== 'year').result.events.find((e) => e.kind === 'decision_resolved')
+    const option = decisionOf(content, 'yg_education').options.find((o) => o.id === 'university')!
+    for (const [stat, delta] of Object.entries(option.effects?.stats ?? {})) expect(resolved?.changes?.stats?.[stat as 'smarts']).toBe(delta)
+  })
+
   it('refuses a gated option with its reason, and lets a choice be changed', () => {
     const low = withPending(grown(18, { stats: { health: 70, happiness: 50, smarts: 30, charm: 50 } }), 'yg_education')
     const refused = choose(low, content, 'yg_education', 'university')

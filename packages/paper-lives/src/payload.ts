@@ -1,5 +1,6 @@
 import { portraitBase, portraitKey, qrBase as qrPath } from './art/route'
-import type { Glyph, LifeState, PaperLivesCatalog, StatId } from './sim/types'
+import { BIG_CHANGE, STATS } from './sim/rules'
+import type { Glyph, LifeState, LineChanges, PaperLivesCatalog, StatId } from './sim/types'
 
 /**
  * Paper Lives device payload v1 (paper-lives.md "Device"): the flat merge variables the screen templates read.
@@ -8,7 +9,7 @@ import type { Glyph, LifeState, PaperLivesCatalog, StatId } from './sim/types'
  */
 export const PAYLOAD_VERSION = 1
 export const STALE_AFTER_MS = 30 * 60 * 1000
-/** Story lines sent to the device; each layout shows as many as fit (template v4). */
+/** Story lines sent to the device; each layout shows as many as fit (template v4), under age headings (v7). */
 export const MAX_LINES = 24
 /** Log rows the backend reads for the device. */
 export const MAX_DEVICE_LOGS = 32
@@ -20,6 +21,7 @@ export interface PayloadStory {
   readonly summary: string
   readonly at: number
   readonly ordinal: number
+  readonly changes?: LineChanges
 }
 
 export interface PayloadBoard {
@@ -50,6 +52,22 @@ export interface PaperLivesPayloadInput {
 const SHOWN = new Set(['event', 'ambient', 'decision_resolved', 'check', 'stage', 'death', 'infant', 'system'])
 
 const ORDINALS = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth', 'Eleventh', 'Twelfth']
+
+/** One mark per stat a line moved, in the card's order: `+` or `-`, doubled for a big change (template v7). */
+export function lineMarks(changes: LineChanges | undefined): Array<{ k: StatId; sign: string }> {
+  return STATS.flatMap((k) => {
+    const delta = changes?.stats?.[k]
+    if (!delta) return []
+    const sign = delta > 0 ? '+' : '-'
+    return [{ k, sign: Math.abs(delta) >= BIG_CHANGE ? sign + sign : sign }]
+  })
+}
+
+/** "+300" or "-1,500": the money a line moved, or null. */
+export function lineMoney(changes: LineChanges | undefined): string | null {
+  const gold = changes?.gold
+  return gold ? `${gold > 0 ? '+' : '-'}${Math.abs(gold).toLocaleString('en-GB')}` : null
+}
 
 /** "Third of the Okafors". */
 export function generationLabel(generation: number, surname: string): string {
@@ -85,7 +103,7 @@ export function buildPayload(input: PaperLivesPayloadInput) {
       status_label: life === null ? 'Not set up yet' : 'Waiting for TRMNL Save',
       name: life ? `${life.state.first} ${life.state.last}` : null,
       attention: servicePaused ? 'Paper Lives is down for maintenance.' : 'Sign in to the companion, then save this plugin in TRMNL.',
-      lines: [] as Array<{ age: number; glyph: Glyph; summary: string }>,
+      lines: [] as Array<{ age: number; glyph: Glyph; summary: string; head: string | null; marks: Array<{ k: StatId; sign: string }>; money: string | null }>,
       qr_base: qrBase,
       stale: false,
     }
@@ -95,7 +113,15 @@ export function buildPayload(input: PaperLivesPayloadInput) {
   const lines = input.stories
     .filter((s) => s.ordinal === life.ordinal && SHOWN.has(s.kind))
     .slice(0, MAX_LINES)
-    .map((s) => ({ age: s.age, glyph: s.glyph, summary: s.summary }))
+    // Template v7: each age heads its own lines, newest first, so the order reads at a glance; the current year says so.
+    .map((s, i, all) => ({
+      age: s.age,
+      glyph: s.glyph,
+      summary: s.summary,
+      head: i === 0 || all[i - 1]!.age !== s.age ? (s.age === state.age && !ended ? `Age ${s.age} · this year` : `Age ${s.age}`) : null,
+      marks: lineMarks(s.changes),
+      money: lineMoney(s.changes),
+    }))
   const pending = state.year.pending
   const def = pending ? content.decisions.find((d) => d.id === pending.decisionId) : undefined
   const offered = pending ? input.stories.find((s) => s.ordinal === life.ordinal && s.kind === 'decision_offered') : undefined

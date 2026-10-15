@@ -1,6 +1,6 @@
 import { createRng, pickOne, pickWeighted, type Rng } from '@trmnl-games/engine/rng'
 import { endLife } from './death'
-import { addHistory, addPerson, applyEffects, bump, offerJob, PRIORITY, retire, updatePerson, type Candidate } from './effects'
+import { addHistory, addPerson, applyEffects, bump, changesOf, offerJob, PRIORITY, retire, updatePerson, type Candidate } from './effects'
 import { clampStat, drawPerson, healthTargetAt, holds, living, moneyBand, PaperLivesInvariantError, partnerOf, permilleAt, personAge, seasonAt, stageFor, tiltPercent, tilts } from './rules'
 import { fill } from './text'
 import type { DecisionDef, EventDef, LifeEvent, LifeState, OptionDef, PaperLivesCatalog, PendingDecision, Person, Rarity, Season, StatId, StreamName, TickInput, TickResult } from './types'
@@ -142,7 +142,10 @@ function passiveTick(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): T
   if (rngs.event.int(1, 100) <= percent && !full) {
     const pool = eligibleEvents(life, content, yearEnd ? undefined : season)
     if (pool.length > 0) {
-      const event = pickByRarity(rngs.event, pool, content.rarityWeights, eventWeight(life, content))
+      // Content v4: an unseen follow-up of an earlier choice goes first, most of the time.
+      const followUps = t.followUpPercent === undefined ? [] : pool.filter((e) => e.followUp && !life.seen.includes(e.id))
+      const preferred = followUps.length > 0 && rngs.event.int(1, 100) <= t.followUpPercent! ? followUps : pool
+      const event = pickByRarity(rngs.event, preferred, content.rarityWeights, eventWeight(life, content))
       return happen(life, event, content, rngs, season)
     }
   }
@@ -168,6 +171,7 @@ function yearOffset(life: LifeState): number {
 /** A passive event: effects, one line, perhaps the year's decision. */
 function happen(life: LifeState, event: EventDef, content: PaperLivesCatalog, rngs: Rngs, season: Season): TickResult {
   const person = event.when?.person ? drawPerson(rngs.people, life, event.when) : undefined
+  const before = life
   const applied = applyEffects(life, event.effects, { content, rng: rngs.people, ...(person ? { person } : {}) })
   life = markSeen(applied.life, event.id)
   const summary = line(life, event.line, content, { ...(person ? { person: person.name } : {}), ...applied.slots }, season)
@@ -176,7 +180,8 @@ function happen(life: LifeState, event: EventDef, content: PaperLivesCatalog, rn
   if (remarkable) life = highlight(bump(life, { remarkableEvents: 1 }), summary)
   const note = line(life, event.note, content, { ...(person ? { person: person.name } : {}), ...applied.slots })
   life = { ...life, year: { ...life.year, quietTicks: 0, lines: life.year.lines + 1, notes: [...life.year.notes, note, ...applied.extra.map((c) => c.note)] } }
-  const events: LifeEvent[] = [{ kind: 'event', glyph: event.glyph, age: life.age, summary, ...(remarkable ? { remarkable: true } : {}) }]
+  const changes = changesOf(before, applied.life)
+  const events: LifeEvent[] = [{ kind: 'event', glyph: event.glyph, age: life.age, summary, ...(remarkable ? { remarkable: true } : {}), ...(changes ? { changes } : {}) }]
   if (event.opens && !life.year.pending) {
     const def = decisionOf(content, event.opens)
     if (holds(def.when, life)) {
@@ -203,8 +208,9 @@ function infantYear(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): Ti
     const event = pickByRarity(rngs.event, pool, content.rarityWeights)
     const person = event.when?.person ? drawPerson(rngs.people, life, event.when) : undefined
     const applied = applyEffects(life, event.effects, { content, rng: rngs.people, ...(person ? { person } : {}) })
+    const changes = changesOf(life, applied.life)
     life = markSeen(applied.life, event.id)
-    events.push({ kind: 'infant', glyph: event.glyph, age: life.age, summary: line(life, event.line, content, { ...(person ? { person: person.name } : {}), ...applied.slots }) })
+    events.push({ kind: 'infant', glyph: event.glyph, age: life.age, summary: line(life, event.line, content, { ...(person ? { person: person.name } : {}), ...applied.slots }), ...(changes ? { changes } : {}) })
   }
   return newYear(life, content, rngs, events, [])
 }
@@ -373,12 +379,13 @@ function yearBoundary(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): 
     const option = chosen && optionOpen(life, chosen) ? chosen : optionOf(def, def.default)
     const person = pending.personId ? life.people.find((p) => p.id === pending.personId) : undefined
     const applied = applyEffects(life, option.effects, { content, rng: rngs.people, ...(person ? { person } : {}) })
+    const changes = changesOf(life, applied.life)
     life = bump(applied.life, chosen === option ? { decisionsChosen: 1 } : { decisionsDefaulted: 1 })
     const summary = line(life, option.line, content, { ...(person ? { person: person.name } : {}), ...applied.slots })
     if (person) life = updatePerson(life, person.id, (p) => addHistory(p, `${life.age}: ${summary}`))
     if (def.major) life = highlight(life, summary)
     const note = line(life, option.note, content, { ...(person ? { person: person.name } : {}), ...applied.slots })
-    cands.push({ priority: PRIORITY.decision, kind: 'decision_resolved', glyph: def.glyph, summary, note, ...(def.major ? { major: true } : {}) }, ...applied.extra)
+    cands.push({ priority: PRIORITY.decision, kind: 'decision_resolved', glyph: def.glyph, summary, note, ...(def.major ? { major: true } : {}), ...(changes ? { changes } : {}) }, ...applied.extra)
   }
   // 2. Drift, then 3. the yearly checks.
   life = drift(life, content, cands, rngs)
@@ -425,7 +432,7 @@ function pickLines(cands: readonly Candidate[], max: number): Candidate[] {
 }
 
 function toEvent(c: Candidate, age: number): LifeEvent {
-  return { kind: c.kind, glyph: c.glyph, age, summary: c.summary, ...(c.remarkable ? { remarkable: true } : {}), ...(c.major ? { major: true } : {}) }
+  return { kind: c.kind, glyph: c.glyph, age, summary: c.summary, ...(c.remarkable ? { remarkable: true } : {}), ...(c.major ? { major: true } : {}), ...(c.changes ? { changes: c.changes } : {}) }
 }
 
 /** The recap names the year's biggest things first (paper-lives.md "What a player sees"). */
@@ -464,7 +471,8 @@ function newYear(life: LifeState, content: PaperLivesCatalog, rngs: Rngs, events
   if (stage !== 'infant') {
     const { forced, drawn } = eligibleDecisions(life, content)
     let def: DecisionDef | undefined = forced[0]
-    if (!def && drawn.length > 0 && rngs.decision.int(1, 100) <= content.tuning.decisionPercent) def = pickByRarity(rngs.decision, drawn, content.rarityWeights)
+    const percent = content.tuning.decisionPercentByStage?.[stage] ?? content.tuning.decisionPercent
+    if (!def && drawn.length > 0 && rngs.decision.int(1, 100) <= percent) def = pickByRarity(rngs.decision, drawn, content.rarityWeights)
     if (def) {
       const offered = offer(life, def, rngs)
       life = offered.life

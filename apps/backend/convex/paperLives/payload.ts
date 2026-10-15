@@ -60,7 +60,7 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number)
       doc && state
         ? { state, activationState: doc.activationState, quarantined: doc.simulationState === 'quarantined', ordinal: doc.ordinal, ...yearTimes(state, content, now) }
         : null,
-    stories: logs.map((l) => ({ kind: l.kind, glyph: l.glyph, age: l.age, summary: l.summary, at: l.at, ordinal: l.ordinal })),
+    stories: logs.map((l) => ({ kind: l.kind, glyph: l.glyph, age: l.age, summary: l.summary, at: l.at, ordinal: l.ordinal, ...(l.changes ? { changes: l.changes } : {}) })),
     board: board ? { top: board.entries.map(({ rank, name, life, age, own }) => ({ rank, name, life, age, own })), own: board.own ? { rank: board.own.rank, age: board.own.age } : null } : null,
     artBaseUrl: process.env.CONVEX_SITE_URL ?? null,
   })

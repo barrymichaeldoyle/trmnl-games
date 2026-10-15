@@ -1,4 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { BIG_CHANGE } from '@trmnl-games/paper-lives/sim/rules'
+import type { LineChanges } from '@trmnl-games/paper-lives/sim/types'
 import { composePortrait, type PortraitKey } from '@trmnl-games/paper-lives/art/portrait'
 import { LocalTime } from './localTime'
 
@@ -56,7 +58,7 @@ export interface LifeView {
     hobby: string | null
   }
   memorial?: { line: string | null; epitaph: string | null; recorded: boolean; heirs: Array<{ id: string; name: string; age: number }> } | null
-  logs?: Array<{ id: string; at: number; kind: string; glyph: string; age: number; summary: string; remarkable: boolean; major: boolean }>
+  logs?: Array<{ id: string; at: number; kind: string; glyph: string; age: number; summary: string; remarkable: boolean; major: boolean; changes?: LineChanges | null }>
   nextTickAt?: number
 }
 
@@ -85,6 +87,20 @@ export const WILL_LABEL = { split: 'Split among the children', one_child: 'All t
 
 /** Plain numbers, as the game writes money: no currency sign. */
 export const money = (n: number) => n.toLocaleString('en-GB')
+
+const STAT_WORD = { health: 'Health', happiness: 'Happiness', smarts: 'Smarts', charm: 'Charm' } as const
+
+/** "Health down · Happiness up a lot · Money +1,500": what a story line changed, as the device's marks say it (template v7). */
+export function changeWords(changes: LineChanges | null | undefined): string | null {
+  if (!changes) return null
+  const words = (Object.keys(STAT_WORD) as Array<keyof typeof STAT_WORD>).flatMap((k) => {
+    const delta = changes.stats?.[k]
+    if (!delta) return []
+    return [`${STAT_WORD[k]} ${delta > 0 ? 'up' : 'down'}${Math.abs(delta) >= BIG_CHANGE ? ' a lot' : ''}`]
+  })
+  if (changes.gold) words.push(`Money ${changes.gold > 0 ? '+' : '−'}${money(Math.abs(changes.gold))}`)
+  return words.length > 0 ? words.join(' · ') : null
+}
 
 /**
  * The life's portrait, drawn from the same art as the device at a whole-number scale, so every pixel stays crisp.

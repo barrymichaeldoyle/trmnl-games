@@ -1,6 +1,6 @@
 import { pickOne, pickWeighted, type Rng } from '@trmnl-games/engine/rng'
 import { clampStat, living, partnerOf, PaperLivesInvariantError, stageFor, tierCap } from './rules'
-import type { Effects, Glyph, JobDef, LifeCounters, LifeState, PaperLivesCatalog, Person, Role } from './types'
+import type { Effects, Glyph, JobDef, LifeCounters, LifeState, LineChanges, PaperLivesCatalog, Person, Role, StatId } from './types'
 
 /** A story line waiting for the boundary's three-line cap (paper-lives.md "The year"). Lower priority writes first. */
 export interface Candidate {
@@ -11,6 +11,17 @@ export interface Candidate {
   readonly note: string
   readonly remarkable?: boolean
   readonly major?: boolean
+  readonly changes?: LineChanges
+}
+
+/** The stats and money that moved between two states of a life, for the line that moved them; undefined when none did. */
+export function changesOf(before: LifeState, after: LifeState): LineChanges | undefined {
+  const stats: Partial<Record<StatId, number>> = {}
+  for (const id of Object.keys(before.stats) as StatId[]) if (after.stats[id] !== before.stats[id]) stats[id] = after.stats[id] - before.stats[id]
+  const gold = after.gold - before.gold
+  const changed = Object.keys(stats).length > 0
+  if (!changed && gold === 0) return undefined
+  return { ...(changed ? { stats } : {}), ...(gold !== 0 ? { gold } : {}) }
 }
 
 export const PRIORITY = { death: 0, decision: 1, family: 2, stage: 3, other: 4 } as const

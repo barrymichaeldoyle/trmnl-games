@@ -3,7 +3,7 @@ import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
 import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, order, season, timeBand, waterId, weather } from './idleAngler/validators'
-import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, plLogKind, portraitKey as plPortraitKey } from './paperLives/validators'
+import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, lineChanges as plLineChanges, plLogKind, portraitKey as plPortraitKey } from './paperLives/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
@@ -433,6 +433,8 @@ export default defineSchema({
     summary: v.string(),
     remarkable: v.optional(v.boolean()),
     major: v.optional(v.boolean()),
+    /** The stats and money the line's effect moved (template v7); absent on older lines and lines that moved none. */
+    changes: v.optional(plLineChanges),
   })
     .index('by_lifeId_and_at_and_sequence', ['lifeId', 'at', 'sequence'])
     .index('by_at', ['at']),

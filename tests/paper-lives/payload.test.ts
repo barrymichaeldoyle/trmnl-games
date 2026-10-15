@@ -38,7 +38,7 @@ describe('Paper Lives payload v1', () => {
       },
     )
     expect(payload).toMatchObject({ status: 'living', decision: { age: 18, prompt: 'Eighteen. University, a trade, or straight to work?', major: true } })
-    expect(payload.lines).toEqual([{ age: 18, glyph: 'star', summary: 'Bought a fern.' }])
+    expect(payload.lines).toEqual([{ age: 18, glyph: 'star', summary: 'Bought a fern.', head: 'Age 18 · this year', marks: [], money: null }])
   })
 
   it('sends the newest twenty-four lines, each layout showing as many as fit (template v4)', () => {
@@ -47,6 +47,22 @@ describe('Paper Lives payload v1', () => {
     expect(payload.lines).toHaveLength(MAX_LINES)
     expect(MAX_LINES).toBe(24)
     expect(payload.lines.at(-1)).toMatchObject({ summary: 'Line 23.' })
+  })
+
+  it('heads each age once, newest first, and marks what each line changed (template v7)', () => {
+    const story = (age: number, summary: string, changes?: { stats?: Record<string, number>; gold?: number }) => ({ kind: 'event', glyph: 'star' as const, age, summary, at, ordinal: 1, ...(changes ? { changes } : {}) })
+    const payload = input(
+      { age: 9, stage: 'child' },
+      { stories: [story(9, 'A sleepover.', { stats: { charm: 2, health: -1 } }), story(9, 'A library card.', { stats: { smarts: 5 } }), story(8, 'Found a pound.', { gold: 1_500 }), story(8, 'Rain.', { stats: { happiness: -7 }, gold: -40 })] },
+    )
+    expect(payload.lines.map((l) => [l.head, l.marks.map((m) => `${m.k}${m.sign}`).join(' '), l.money])).toEqual([
+      ['Age 9 · this year', 'health- charm+', null],
+      [null, 'smarts++', null],
+      ['Age 8', '', '+1,500'],
+      [null, 'happiness--', '-40'],
+    ])
+    // Once the year has turned, last year's lines head as plain ages.
+    expect(input({ age: 10, stage: 'child' }, { stories: [story(9, 'A sleepover.')] }).lines[0]?.head).toBe('Age 9')
   })
 
   it('turns an ended life into a memorial and flags a stalled world', () => {

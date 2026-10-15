@@ -2,6 +2,8 @@ import type { Rng } from '@trmnl-games/engine/rng'
 import type { Education, LifeState, MoneyBand, PaperLivesCatalog, Person, Role, Season, Stage, StatId, TraitTilt, When } from './types'
 
 export const STATS: readonly StatId[] = ['health', 'happiness', 'smarts', 'charm']
+/** A line's change of this many points or more reads as a big one (a doubled mark): a stat tick is ten points, and most effects move one to five. */
+export const BIG_CHANGE = 5
 export const SEASONS: readonly Season[] = ['spring', 'summer', 'autumn', 'winter']
 
 export class PaperLivesInvariantError extends Error {

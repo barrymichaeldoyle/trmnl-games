@@ -342,7 +342,7 @@ export const view = query({
               heirs: (record?.heirs ?? []).filter((h) => h.role === 'child').map((h) => ({ id: h.id, name: h.name, age: h.age })),
             }
           : null,
-      logs: logs.filter((l) => l.ordinal === doc.ordinal).map((l) => ({ id: l._id, at: l.at, kind: l.kind, glyph: l.glyph, age: l.age, summary: l.summary, remarkable: l.remarkable === true, major: l.major === true })),
+      logs: logs.filter((l) => l.ordinal === doc.ordinal).map((l) => ({ id: l._id, at: l.at, kind: l.kind, glyph: l.glyph, age: l.age, summary: l.summary, remarkable: l.remarkable === true, major: l.major === true, changes: l.changes ?? null })),
       nextTickAt: PAPER_LIVES_SCHEDULE.nextSlotAfter(now),
       worldTick: world?.currentTick ?? 0,
     }

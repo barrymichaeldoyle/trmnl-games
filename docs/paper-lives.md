@@ -464,3 +464,24 @@ Barry found the device screen empty on a new life, with lines cut off where they
 - **Empty space goes to the lines.** A board with no rows (nobody's life finished this week) is left out, and its column goes to the lines. Without a board, the full landscape's code closes the lines column beside the recap, so the board column only exists when it has rows. (The foot of the card was tried first: a two-line name pushed the code off the view.) The quarter shows lines under a decision instead of a blank space.
 
 A brand new life is a new preview scenario (`newborn`). The clip check (`.previews/pl-clip.mjs`) finds no clipped line on any of the 288 previews at the default, `screen--scale-xlarge` and `text--scale-large` scales.
+
+## Template v7 and content v4 (2026-10-15)
+
+Barry found the device's story hard to read in order, the life dry ("especially as a kid"), and wanted to know whether actions affect the stats. They did, but nothing showed it: events and options moved stats and money, and the simulator dropped the numbers once applied.
+
+**What a line changed.** Every event, infant event and resolved decision now records what its effect moved (`LifeEvent.changes`: stat points and money, from the state before and after, so no randomness moves and v1 to v3 replay unchanged). The backend keeps it on the log row (`plTickLogs.changes`, optional) and passes it to the device and the companion.
+
+**Template v7.**
+- **Age headings.** Lines sit under their age, newest first: "Age 9 · this year", then "Age 8". The age before every line is gone. An age heading never closes the list without a line under it.
+- **Marks.** Each line ends with a stat's mark and `+` or `-`, doubled for a change of five points or more (`BIG_CHANGE`; a tick on the bars is ten points, and most effects move one to five), then money as an amount. The marks are sized with the line text by `fitLines`: 24px with the 30px text, 16px with 21px and 16px, and 8px, the art's own size, with 12px. Each sits on the baseline like a capital.
+
+**The companion** heads the story the same way and spells out each line's changes under it ("Happiness up a lot · Money −200"). The help page explains the order and the marks.
+
+**Content v4: choices that come back.** Before v4, ten options in the game left a flag and five events read one, so a child's choice was gone at the end of the year.
+- Each childhood and teen option that does something now leaves a flag, and 56 follow-up events pay the flags off in later years (the art club painting goes up in the library, the sweets bring a filling, the green hair comes back in old photos). While a follow-up fits and is unseen, the event draw takes one 60% of the time (`followUpPercent`, a tuning field only v4 sets).
+- Eight more childhood and six more teen decisions, each with a follow-up. Childhood years open with a decision 85% of the time and teen years 80% (`decisionPercentByStage`), up from two years in three.
+- The toy shop sale is offered only to a child who saved, so the jar is what buys the kite. A few flat default lines say something now.
+- The validator checks that every follow-up reads a flag something sets.
+- Two trait nudges keep the harness's trait gate (each trait moves an outcome by 5% to 25%): Tidy softens health losses to 70% (was 75%), since childhood's extra health had thinned its edge at 60 to 4.98%, and Lucky's risk before 80 is 62% of the usual (was 60%). Lucky had already overshot in v3, at 25.2% more years past 70 over 2,700 lives. All 13 gates pass on v4 over 2,700 lives.
+
+Over 150 hourly lives, a v4 life meets 5.6 follow-ups without a name in them (v3: none), and gets 6.0 decisions across childhood (v3: 4.7) and 4.0 across the teens (v3: 3.4).

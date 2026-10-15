@@ -168,6 +168,8 @@ export interface EventDef {
   readonly kind?: 'pet' | 'hobby'
   /** Weight inside its rarity tier (default 1). */
   readonly weight?: number
+  /** Content v4: pays off an earlier choice (its `when.flags`), so it is drawn first while unseen (`followUpPercent`). */
+  readonly followUp?: boolean
 }
 
 export interface OptionDef {
@@ -304,6 +306,13 @@ export interface Tuning {
   readonly ambientEvery: number
   /** Percent of years that open with a decision. */
   readonly decisionPercent: number
+  /** Content v4: a stage's own percent of years that open with a decision, in place of `decisionPercent`. */
+  readonly decisionPercentByStage?: Readonly<Partial<Record<Exclude<Stage, 'infant'>, number>>>
+  /**
+   * Content v4: when an event is drawn and an unseen follow-up (`EventDef.followUp`) fits, the draw takes a follow-up
+   * this percent of the time, so an earlier choice pays off within a year or two rather than by luck.
+   */
+  readonly followUpPercent?: number
   /** Mortality per thousand a year at these ages, interpolated linearly between points. */
   readonly mortality: readonly (readonly [number, number])[]
   /** Extra mortality per thousand for each health point under 30. */
@@ -443,6 +452,12 @@ export interface LifeState {
   readonly death?: { readonly cause: string; readonly line: string; readonly epitaph: string }
 }
 
+/** What a story line's effect changed: stat points and money, as written on the line (template v7). */
+export interface LineChanges {
+  readonly stats?: Partial<Record<StatId, number>>
+  readonly gold?: number
+}
+
 export interface LifeEvent {
   readonly kind: 'event' | 'ambient' | 'decision_offered' | 'decision_resolved' | 'check' | 'stage' | 'recap' | 'death' | 'infant'
   readonly glyph: Glyph
@@ -451,6 +466,8 @@ export interface LifeEvent {
   readonly summary: string
   readonly remarkable?: boolean
   readonly major?: boolean
+  /** The stats and money this line's effect moved; absent when it moved none. */
+  readonly changes?: LineChanges
 }
 
 export interface TickInput {

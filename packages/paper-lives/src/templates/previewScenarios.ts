@@ -17,14 +17,14 @@ function life(patch: Partial<LifeState>): LifeState {
   return { ...base, first: 'Maud', last: 'Okafor', ...patch }
 }
 
-const story = (age: number, glyph: PayloadStory['glyph'], summary: string, kind = 'event'): PayloadStory => ({ kind, glyph, age, summary, at: NOW - HOUR, ordinal: 1 })
+const story = (age: number, glyph: PayloadStory['glyph'], summary: string, kind = 'event', changes?: PayloadStory['changes']): PayloadStory => ({ kind, glyph, age, summary, at: NOW - HOUR, ordinal: 1, ...(changes ? { changes } : {}) })
 
 const ADULT_LINES: PayloadStory[] = [
-  story(34, 'work', 'Took the night shift. Tired, but the rent is paid.'),
-  story(34, 'paw', 'Walked Biscuit in the woods every morning. The best hour of the day.'),
+  story(34, 'work', 'Took the night shift. Tired, but the rent is paid.', 'event', { stats: { health: -3 }, gold: 1_500 }),
+  story(34, 'paw', 'Walked Biscuit in the woods every morning. The best hour of the day.', 'event', { stats: { health: 2, happiness: 5 } }),
   story(34, 'none', 'A good stew on the hob all afternoon.', 'ambient'),
   story(33, 'heart', 'An anniversary dinner with Sam at the place you had your first date.'),
-  story(33, 'health', 'Flu over Christmas. Ate the leftovers in bed.'),
+  story(33, 'health', 'Flu over Christmas. Ate the leftovers in bed.', 'event', { stats: { health: -6 } }),
   story(33, 'star', 'Turned thirty. A quiet dinner and a new pair of slippers.', 'stage'),
   // Template v4 shows as many lines as fit, so the matrix sends the payload's full twenty-four.
   story(32, 'work', 'Passed the ward exams on the second go.'),
@@ -47,7 +47,7 @@ const ADULT_LINES: PayloadStory[] = [
   story(27, 'star', 'Ran a half marathon, slowly.'),
 ]
 
-const LONG_LINES: PayloadStory[] = Array.from({ length: 24 }, (_, i) => story(87, i % 2 ? 'family' : 'candle', 'Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer than planned.'))
+const LONG_LINES: PayloadStory[] = Array.from({ length: 24 }, (_, i) => story(100 - Math.floor(i / 3), i % 2 ? 'family' : 'candle', 'Went to Ottilie’s funeral and told the story about the canoe, which went on rather longer than planned.', 'event', { stats: { health: -8, happiness: -6, smarts: 1, charm: 9 }, gold: -12_500 }))
 
 const BOARD = {
   top: [
@@ -92,7 +92,7 @@ export function previewScenarios(artBaseUrl: string | null): Record<string, Scen
   return {
     adult: active(adult, { stories: decisionStories }),
     child: active(life({ age: 9, stage: 'child', education: 'school', home: 'family', pet: { kind: 'rabbit', name: 'Bobbin', bornAt: 8, lifespan: 8, relationship: 70 }, stats: { health: 80, happiness: 66, smarts: 52, charm: 61 }, recap: 'Age 8: a new friend.' }), {
-      stories: [story(9, 'family', 'A sleepover at Finn’s house. Nobody slept.'), story(9, 'book', 'Got a library card and took out the maximum every week.'), story(8, 'family', 'Made a friend called Finn over a shared rubber.')],
+      stories: [story(9, 'family', 'A sleepover at Finn’s house. Nobody slept.', 'decision_resolved', { stats: { happiness: 4, health: -1 } }), story(9, 'book', 'Got a library card and took out the maximum every week.', 'event', { stats: { smarts: 5 } }), story(8, 'family', 'Made a friend called Finn over a shared rubber.', 'event', { stats: { charm: 2, happiness: 2 } })],
       board: { top: [], own: null },
     }),
     'year-end': active(life({ age: 52, stage: 'adult', job: 'teacher', home: 'owned', house: 2, stats: { health: 55, happiness: 70, smarts: 74, charm: 60 }, gold: 88_000, year: { ...base.year, elapsed: 12 } }), { utcOffset: null }),

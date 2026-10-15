@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { ACTIVE_CONTENT, contentV2, contentV3 } from '@trmnl-games/paper-lives/content'
+import { contentV2, contentV3 } from '@trmnl-games/paper-lives/content'
 import { validateContent } from '@trmnl-games/paper-lives/content/validate'
 import { simulateLifeRun, POLICIES } from '../../tools/balance/paper-lives'
 
 /** The first content pack (Barry chose it as the first work after the MVP, 2026-10-14). */
 describe('Paper Lives content v3', () => {
-  it('is active, passes the validator and keeps every v2 id', () => {
-    expect(ACTIVE_CONTENT).toBe('v3')
+  it('passes the validator and keeps every v2 id', () => {
     expect(validateContent(contentV3).problems).toEqual([])
     const ids = new Set([...contentV3.events, ...contentV3.decisions].map((x) => x.id))
     for (const x of [...contentV2.events, ...contentV2.decisions]) expect(ids.has(x.id)).toBe(true)

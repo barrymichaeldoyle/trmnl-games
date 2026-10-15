@@ -24,10 +24,14 @@
  * device fits them with `fitLines`, which draws them at the largest size that shows as many as the smallest, an empty board gives its
  * column to the lines (the full layout's code then closes the lines column, beside the recap), and the quadrant shows lines under a decision. The
  * close line wraps too: its one-line clamp cut "The year ends at 16:10" to "16:..." on the X.
+ *
+ * Template v7 (2026-10-15) makes the order and the stakes readable: the lines sit under age headings, newest first
+ * ("Age 9 · this year", then "Age 8"), in place of the age before every line, and each line ends with what it changed:
+ * a stat's mark with `+` or `-` (doubled for five points or more) and money as an amount (`lines[].marks`, `money`).
  */
 import { markUri, STORY_GLYPHS, type PlMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 6
+export const TEMPLATE_VERSION = 7
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -88,9 +92,26 @@ const lineGlyph = `{% case line.glyph %}${STORY_GLYPHS.filter((g) => g !== 'none
  * largest size in `LINE_SIZES` that still shows as many whole lines as the smallest does. `limit` is the most a layout
  * may show. The markup starts at the smallest size, as a fallback.
  */
-const LINE_SIZES = ['title title--large lg:title--xlarge', 'title lg:title--large', 'description description--large lg:title--base', 'description lg:title--small'] as const
+const LINE_SIZES = [
+  { text: 'title title--large lg:title--xlarge', mark: 'w--[24px] h--[24px]' },
+  { text: 'title lg:title--large', mark: 'w--[16px] h--[16px] lg:w--[24px] lg:h--[24px]' },
+  { text: 'description description--large lg:title--base', mark: 'w--[16px] h--[16px]' },
+  { text: 'description lg:title--small', mark: 'w--[8px] h--[8px] lg:w--[16px] lg:h--[16px]' },
+] as const
+const SMALLEST = LINE_SIZES[LINE_SIZES.length - 1]!
+/**
+ * Template v7: what a line changed, after its words: each stat's mark and its sign, then money, kept whole as the line
+ * wraps. The marks are sized with the text (`LINE_SIZES`), so each sits on the baseline like a capital.
+ */
+const MARK = `${SMALLEST.mark}" data-line-mark="true`
+const lineMarks =
+  `{% for mark in line.marks %}{% case mark.k %}{% when "health" %}{% assign m_mark = m_statHealth %}{% when "happiness" %}{% assign m_mark = m_statHappy %}{% when "smarts" %}{% assign m_mark = m_statSmarts %}{% else %}{% assign m_mark = m_statCharm %}{% endcase %}` +
+  ` <span class="inline-block" data-mark="{{ mark.k }}"><img class="${MARK}" src="{{ m_mark }}" alt="">{{ mark.sign }}</span>{% endfor %}` +
+  `{% if line.money %} <span class="inline-block" data-mark="money"><img class="${MARK}" src="{{ m_money }}" alt="">{{ line.money }}</span>{% endif %}`
 const lines = (limit: number) =>
-  `<div class="columns flex-auto h--min-0 w--full" data-lines="true" data-fit-lines="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--xsmall w--full">{% for line in lines limit:${limit} %}${lineGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-line="{{ line.glyph }}"><img class="${ICON}" src="{{ m_line }}" alt=""><span class="${LINE_SIZES.at(-1)} grow w--min-0" data-line-text="true">{{ line.age }}: {{ line.summary | escape }}</span></div>{% endfor %}</div></div></div>`
+  `<div class="columns flex-auto h--min-0 w--full" data-lines="true" data-fit-lines="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--xsmall w--full">{% for line in lines limit:${limit} %}${lineGlyph}` +
+  `{% if line.head %}<div class="item stretch-x{% unless forloop.first %} pt--2{% endunless %}" data-age-head="true"><span class="${LABEL} text--bold">{{ line.head | escape }}</span></div>{% endif %}` +
+  `<div class="item flex flex--row flex--top gap--small stretch-x" data-line="{{ line.glyph }}"><img class="${ICON}" src="{{ m_line }}" alt=""><span class="${SMALLEST.text} grow w--min-0" data-line-text="true">{{ line.summary | escape }}${lineMarks}</span></div>{% endfor %}</div></div></div>`
 
 /**
  * Fit each shown line list (`data-fit-lines`) once the framework has laid out the view. At the smallest size, count the
@@ -102,20 +123,25 @@ const fitLines = `<script>
 (() => {
   const view = document.currentScript.closest('.view');
   if (!view) return;
-  const sizes = ${JSON.stringify(LINE_SIZES.map((size) => size.split(' ')))};
+  const sizes = ${JSON.stringify(LINE_SIZES.map((size) => ({ text: size.text.split(' '), mark: size.mark.split(' ') })))};
   const fit = () => view.querySelectorAll('[data-fit-lines]').forEach((list) => {
     if (!list.getClientRects().length) return;
     const items = Array.from(list.querySelectorAll('.item'));
-    const texts = items.map((item) => item.querySelector('[data-line-text]'));
+    const texts = items.map((item) => item.querySelector('[data-line-text]')).filter(Boolean);
+    const marks = Array.from(list.querySelectorAll('[data-line-mark]'));
     items.forEach((item) => item.classList.remove('hidden'));
     const shown = (size) => {
-      texts.forEach((text) => { sizes.forEach((s) => text.classList.remove(...s)); text.classList.add(...sizes[size]); });
+      texts.forEach((text) => { sizes.forEach((s) => text.classList.remove(...s.text)); text.classList.add(...sizes[size].text); });
+      marks.forEach((mark) => { sizes.forEach((s) => mark.classList.remove(...s.mark)); mark.classList.add(...sizes[size].mark); });
       const bottom = list.getBoundingClientRect().bottom + 0.5;
       let count = 0;
       while (count < items.length && items[count].getBoundingClientRect().bottom <= bottom) count++;
+      while (count && items[count - 1].dataset.ageHead) count--;
       return count;
     };
-    const most = shown(sizes.length - 1);
+    let most = shown(sizes.length - 1);
+    // An age heading never closes the list without a line under it.
+    while (most && items[most - 1].dataset.ageHead) most--;
     let size = 0;
     while (size < sizes.length - 1 && shown(size) < most) size++;
     if (size === sizes.length - 1) shown(size);

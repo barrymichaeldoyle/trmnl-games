@@ -61,6 +61,7 @@ async function writeLogs(ctx: MutationCtx, life: Doc<'lives'>, result: ReturnTyp
       summary: event.summary,
       ...(event.remarkable ? { remarkable: true } : {}),
       ...(event.major ? { major: true } : {}),
+      ...(event.changes ? { changes: event.changes } : {}),
     })
   }
   return sequence

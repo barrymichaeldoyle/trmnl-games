@@ -24,6 +24,11 @@ export const glyph = v.union(
   v.literal('none'),
 )
 export const stats = v.object({ health: v.number(), happiness: v.number(), smarts: v.number(), charm: v.number() })
+/** What a story line's effect changed (template v7): the stat points and money it moved. */
+export const lineChanges = v.object({
+  stats: v.optional(v.object({ health: v.optional(v.number()), happiness: v.optional(v.number()), smarts: v.optional(v.number()), charm: v.optional(v.number()) })),
+  gold: v.optional(v.number()),
+})
 
 export const person = v.object({
   id: v.string(),
