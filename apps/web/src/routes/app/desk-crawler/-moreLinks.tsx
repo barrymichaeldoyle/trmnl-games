@@ -4,21 +4,26 @@ import { Glyph, type GlyphName } from '../../../lib/glyphs'
 import { captureAnalytics } from '../../../lib/analytics'
 import { SPONSOR_URL } from '../../../lib/prose'
 import { CHANGELOG, changeDay } from '../../../lib/changelog'
+import { useLocale, useT } from '../../../lib/i18n'
+import { dcMoreMessages } from '../../../i18n/dcMore'
 
 /** The More tab's pages (D124), each a row with its glyph: what the Hero tab used to hold under the world map. */
 const MORE_LINKS = [
-  { to: '/app/desk-crawler/roster', label: 'Heroes', blurb: 'Your heroes, switching between them, and recruiting a new class.', glyph: 'hero' },
-  { to: '/app/desk-crawler/career', label: 'Career', blurb: 'The ladder of goals, and what opens at each level.', glyph: 'career' },
-  { to: '/app/desk-crawler/achievements', label: 'Achievements', blurb: 'Every one you have earned, and how rare it is.', glyph: 'achievement' },
-  { to: '/app/desk-crawler/field-notes', label: 'Field notes', blurb: 'What your hero knows about every floor and monster.', glyph: 'quest' },
-  { to: '/app/desk-crawler/keepsakes', label: 'Desk keepsakes', blurb: 'The weekly code from your TRMNL and your shelf.', glyph: 'keepsake' },
-  { to: '/app/desk-crawler/trmnl', label: 'On your TRMNL', blurb: 'What the plugin is showing, in every layout.', glyph: 'screen' },
-  { to: '/help/desk-crawler', label: 'How Desk Crawler works', blurb: 'Adventures, floors, gear, stances and setup help.', glyph: 'quest' },
+  { to: '/app/desk-crawler/roster', key: 'roster', glyph: 'hero' },
+  { to: '/app/desk-crawler/career', key: 'career', glyph: 'career' },
+  { to: '/app/desk-crawler/achievements', key: 'achievements', glyph: 'achievement' },
+  { to: '/app/desk-crawler/field-notes', key: 'fieldNotes', glyph: 'quest' },
+  { to: '/app/desk-crawler/keepsakes', key: 'keepsakes', glyph: 'keepsake' },
+  { to: '/app/desk-crawler/trmnl', key: 'trmnl', glyph: 'screen' },
+  { to: '/help/desk-crawler', key: 'help', glyph: 'quest' },
   // Always here, so the changes stay one tap away after the Hero tab's card is hidden (D154).
-  { to: '/whats-new', label: 'What’s new', blurb: `Every change to the game, newest first. Last updated ${changeDay(CHANGELOG[0]!.date, false)}.`, glyph: 'bell' },
-] as const satisfies ReadonlyArray<{ to: string; label: string; blurb: string; glyph: GlyphName }>
+  { to: '/whats-new', key: 'whatsNew', glyph: 'bell' },
+] as const satisfies ReadonlyArray<{ to: string; key: string; glyph: GlyphName }>
 
 export function MoreLinks() {
+  const t = useT(dcMoreMessages)
+  const locale = useLocale()
+  const day = changeDay(CHANGELOG[0]!.date, false, locale)
   return (
     <Card>
       <ul className="flex flex-col">
@@ -27,8 +32,8 @@ export function MoreLinks() {
             <Link to={link.to} className="flex min-h-12 items-center gap-3 py-2">
               <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center border-2 border-night bg-night text-gold-ink"><Glyph name={link.glyph} size={20} /></span>
               <span className="flex min-w-0 flex-col">
-                <span className="font-semibold underline underline-offset-4">{link.label}</span>
-                <span className="text-sm text-muted">{link.blurb}</span>
+                <span className="font-semibold underline underline-offset-4">{t.links[link.key].label}</span>
+                <span className="text-sm text-muted">{t.links[link.key].blurb.replace('{day}', day)}</span>
               </span>
             </Link>
           </li>
@@ -38,8 +43,8 @@ export function MoreLinks() {
           <a href={SPONSOR_URL} className="flex min-h-12 items-center gap-3 py-2" onClick={() => captureAnalytics('sponsor link opened', { place: 'more' })}>
             <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center border-2 border-night bg-night text-gold-ink"><Glyph name="heart" size={20} /></span>
             <span className="flex min-w-0 flex-col">
-              <span className="font-semibold underline underline-offset-4">Sponsor on GitHub</span>
-              <span className="text-sm text-muted">Help keep the games running. Sponsors get nothing extra in play.</span>
+              <span className="font-semibold underline underline-offset-4">{t.sponsor}</span>
+              <span className="text-sm text-muted">{t.sponsorBlurb}</span>
             </span>
           </a>
         </li>

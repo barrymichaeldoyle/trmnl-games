@@ -7,6 +7,8 @@ import { captureAnalytics } from '../../../lib/analytics'
 import { useIntent } from '../../../lib/intent'
 import { currentSubscription, deviceLabel, endpointFingerprint, pushSupport, subscribePush, type PushSupport } from '../../../lib/push'
 import { Button, Card, LoadingState } from '../../../lib/ui'
+import { useT } from '../../../lib/i18n'
+import { dcMoreMessages } from '../../../i18n/dcMore'
 
 /** The switches a game's card owns (D115: each game shows its own kinds; devices and quiet hours are shared). */
 const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival'] as const
@@ -19,17 +21,16 @@ type Notify = (feedback: { error: string | null; message: string | null }) => vo
 const HOURS = Array.from({ length: 24 }, (_, hour) => hour)
 const clock = (hour: number) => `${String(hour).padStart(2, '0')}:00`
 
-/** The two kinds (alerts.md), each saying what it is and how often it can arrive. */
-const KINDS: readonly AlertKindCopy[] = [
-  { id: 'asleep', name: 'Hero asleep', blurb: 'The bag is full and adventures have stopped. Once per nap.' },
-  { id: 'merchant', name: 'Merchant deal', blurb: 'A bag or pouch you can afford is on sale for about an hour. At most once a day.' },
-]
-
 /**
  * Settings → Alerts (P33): off by default, the browser prompt only after a tap, a device list and two switches with
- * quiet hours. The device remains the surface that always works, and the card says so.
+ * quiet hours. The device remains the surface that always works, and the card says so. Desk Crawler's two kinds
+ * (alerts.md) are the default, each saying what it is and how often it can arrive.
  */
-export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this phone when your hero needs you.', quietNote = 'During quiet hours, nap alerts wait until morning and merchant deals are skipped.' }: { notify: Notify; kinds?: readonly AlertKindCopy[]; intro?: string; quietNote?: string }) {
+export function AlertsCard({ notify, kinds: given, intro: givenIntro, quietNote: givenNote }: { notify: Notify; kinds?: readonly AlertKindCopy[]; intro?: string; quietNote?: string }) {
+  const t = useT(dcMoreMessages)
+  const kinds: readonly AlertKindCopy[] = given ?? [{ id: 'asleep', ...t.kinds.asleep }, { id: 'merchant', ...t.kinds.merchant }]
+  const intro = givenIntro ?? t.intro
+  const quietNote = givenNote ?? t.quietNote
   const { data: alerts } = useQuery(convexQuery(api.alerts.mine, {}))
   const subscribe = useIntent(api.alerts.subscribe, { onFeedback: notify })
   const save = useIntent(api.alerts.setPreferences, {
@@ -68,7 +69,7 @@ export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this
       .catch(() => setThisFingerprint(null))
   }, [deviceCount])
 
-  if (alerts === undefined) return <Card title="Alerts" icon="bell"><LoadingState label="Loading alerts…" /></Card>
+  if (alerts === undefined) return <Card title={t.alerts} icon="bell"><LoadingState label={t.loadingAlerts} /></Card>
   if (alerts === null) return null
   const timezone = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || alerts.timezone
   const thisDevice = alerts.devices.find((device) => device.fingerprint === thisFingerprint)
@@ -79,7 +80,7 @@ export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this
   const update = async (patch: Partial<Prefs>, message: string) => {
     const next = { ...shown, ...patch }
     if (next.quietStart === next.quietEnd) {
-      notify({ error: 'Quiet hours need a different start and end.', message: null })
+      notify({ error: t.quietSame, message: null })
       return
     }
     setDraft(next)
@@ -108,63 +109,63 @@ export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this
     setAsking(false)
     if (result === 'denied') {
       setSupport('denied')
-      notify({ error: 'Notifications are blocked for this site, so alerts cannot reach this device.', message: null })
+      notify({ error: t.blocked, message: null })
       return
     }
     if (result === 'failed') {
-      notify({ error: 'This browser could not set up alerts. Try again, or use another browser.', message: null })
+      notify({ error: t.setupFailed, message: null })
       return
     }
-    if (await subscribe.run({ ...result, label: deviceLabel() }, 'This device can get alerts. Choose which ones below.')) setThisFingerprint(await endpointFingerprint(result.endpoint))
+    if (await subscribe.run({ ...result, label: deviceLabel() }, t.deviceReady)) setThisFingerprint(await endpointFingerprint(result.endpoint))
   }
 
   return (
-    <Card title="Alerts" icon="bell"><div id="alerts" className="flex flex-col gap-3">
-      <p>{intro} Off by default. At most two alerts a day across all your games.</p>
-      {alerts.offReason === 'no_devices' ? <p className="text-sm font-semibold">Alerts turned off because no device could receive them any more. Allow this device to turn them back on.</p> : null}
+    <Card title={t.alerts} icon="bell"><div id="alerts" className="flex flex-col gap-3">
+      <p>{intro}{t.offByDefault}</p>
+      {alerts.offReason === 'no_devices' ? <p className="text-sm font-semibold">{t.offNoDevices}</p> : null}
       {thisDevice ? null : !alerts.vapidPublicKey ? (
-        <p className="text-sm text-muted">Alerts are not available yet.</p>
+        <p className="text-sm text-muted">{t.notAvailable}</p>
       ) : support === 'ios-install' ? (
-        <p className="text-sm">On iPhone and iPad, alerts work once TRMNL Games is on your Home Screen: tap Share, then <strong>Add to Home Screen</strong>, and open it from there.</p>
+        <p className="text-sm">{t.iosBefore}<strong>{t.iosStrong}</strong>{t.iosAfter}</p>
       ) : support === 'unsupported' ? (
-        <p className="text-sm">This browser cannot show alerts.</p>
+        <p className="text-sm">{t.unsupported}</p>
       ) : support === 'denied' ? (
-        <p className="text-sm">Notifications are blocked for this site. Allow them in this browser's site settings, then come back here.</p>
+        <p className="text-sm">{t.blockedHere}</p>
       ) : support === 'ready' ? (
-        <Button className="self-start" icon="bell" pending={asking || subscribe.pending} busyLabel="Allowing…" disabled={busy} onClick={allow}>Allow on this device</Button>
+        <Button className="self-start" icon="bell" pending={asking || subscribe.pending} busyLabel={t.allowing} disabled={busy} onClick={allow}>{t.allowDevice}</Button>
       ) : null}
       {deviceCount > 0 ? (
         <>
           <fieldset className="flex flex-col gap-2">
-            <legend className="sr-only">Alert kinds</legend>
+            <legend className="sr-only">{t.alertKinds}</legend>
             {kinds.map((kind) => (
               <label key={kind.id} className="flex min-h-11 cursor-pointer items-start gap-3 py-1">
-                <input type="checkbox" className="mt-1 size-6 shrink-0 accent-gold" checked={shown[kind.id] === true} onChange={(event) => update({ [kind.id]: event.target.checked }, event.target.checked ? `${kind.name} alerts on.` : `${kind.name} alerts off.`)} />
+                <input type="checkbox" className="mt-1 size-6 shrink-0 accent-gold" checked={shown[kind.id] === true} onChange={(event) => update({ [kind.id]: event.target.checked }, event.target.checked ? t.kindOn(kind.name) : t.kindOff(kind.name))} />
                 <span><strong>{kind.name}</strong><span className="block text-sm">{kind.blurb}</span></span>
               </label>
             ))}
           </fieldset>
           <div className="flex flex-col gap-2">
-            <p className="font-semibold">Quiet hours</p>
+            <p className="font-semibold">{t.quietHours}</p>
             <div className="flex flex-wrap gap-3">
               {(['quietStart', 'quietEnd'] as const).map((field) => (
                 <label key={field} className="flex items-center gap-2 text-sm">
-                  <span>{field === 'quietStart' ? 'From' : 'Until'}</span>
-                  <select value={shown[field]} onChange={(event) => update({ [field]: Number(event.target.value) }, 'Quiet hours saved.')} className="pixel-select min-h-11 border-2 border-edge pr-9 pl-3 text-base">
+                  <span>{field === 'quietStart' ? t.from : t.until}</span>
+                  <select value={shown[field]} onChange={(event) => update({ [field]: Number(event.target.value) }, t.quietSaved)} className="pixel-select min-h-11 border-2 border-edge pr-9 pl-3 text-base">
                     {HOURS.map((hour) => <option key={hour} value={hour}>{clock(hour)}</option>)}
                   </select>
                 </label>
               ))}
             </div>
-            <p className="text-sm text-muted">In {timezone}, shared by your games. {quietNote}</p>
+            <p className="text-sm text-muted">{t.inZone(timezone)}{quietNote}</p>
           </div>
           <div>
-            <p className="font-semibold">Devices</p>
+            <p className="font-semibold">{t.devices}</p>
             <ul className="flex flex-col divide-y divide-rule">
               {alerts.devices.map((device) => (
                 <li key={device.id} className="flex items-center justify-between gap-2 py-2">
-                  <span className="min-w-0">{device.label}{device.id === thisDevice?.id ? <span className="ml-2 text-sm text-muted">This device</span> : null}</span>
-                  <Button variant="secondary" disabled={busy} onClick={() => remove.run({ deviceId: device.id }, alerts.devices.length === 1 ? 'Device removed. Alerts are off.' : 'Device removed.')}>Remove</Button>
+                  <span className="min-w-0">{device.label}{device.id === thisDevice?.id ? <span className="ml-2 text-sm text-muted">{t.thisDevice}</span> : null}</span>
+                  <Button variant="secondary" disabled={busy} onClick={() => remove.run({ deviceId: device.id }, alerts.devices.length === 1 ? t.deviceRemovedOff : t.deviceRemoved)}>{t.remove}</Button>
                 </li>
               ))}
             </ul>
@@ -178,8 +179,9 @@ export function AlertsCard({ notify, kinds = KINDS, intro = 'Get a nudge on this
 /** The single quiet way in besides Settings (alerts.md): under the bag-full state, only while the nap alert is off. */
 export function AlertNudge() {
   const { data: alerts } = useQuery(convexQuery(api.alerts.mine, {}))
+  const t = useT(dcMoreMessages)
   if (!alerts || alerts.asleep || !alerts.vapidPublicKey) return null
-  return <p className="text-sm">Want a nudge next time? <Link to="/app/desk-crawler/settings" hash="alerts" className="underline underline-offset-4">Turn on alerts</Link></p>
+  return <p className="text-sm">{t.nudge}<Link to="/app/desk-crawler/settings" hash="alerts" className="underline underline-offset-4">{t.turnOnAlerts}</Link></p>
 }
 
 const OPENED_KINDS = new Set(['asleep', 'merchant', 'cooler_full', 'bait_out', 'major_decision', 'life_ended', 'new_arrival'])

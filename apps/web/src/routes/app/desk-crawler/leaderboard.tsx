@@ -9,31 +9,29 @@ import { Button, Card, LoadingState } from '../../../lib/ui'
 import { preload } from '../../../lib/preload'
 import { levelGroup } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { LocalTime } from '../../../lib/localTime'
+import { formatNumber, messagesFor, useLocale, useT } from '../../../lib/i18n'
+import { INTL_TAG } from '@trmnl-games/platform'
+import { dcLogMessages } from '../../../i18n/dcLog'
 import { Records } from './-records'
 import { FollowingCard } from './-following'
 
-export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: () => seo({ title: 'Rankings', index: false }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
+export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcLogMessages, locale).rankingsTitle, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
 
 type Board = 'recent_7d' | 'recent_24h' | 'overall'
-const TABS: Array<{ board: Board; label: string }> = [
-  // Short enough to sit on one line in a third of a phone screen. Shortest period first; it opens the page.
-  { board: 'recent_24h', label: '24 hours' },
-  { board: 'recent_7d', label: '7 days' },
-  { board: 'overall', label: 'Lifetime' },
-]
+// Labels short enough to sit on one line in a third of a phone screen. Shortest period first; it opens the page.
+const TABS: Board[] = ['recent_24h', 'recent_7d', 'overall']
 
 /** Player names are often one long token ("Marcus_the_Bold"): offer a line break after each underscore before any mid-word break. */
 const breakable = (name: string) => name.split(/(?<=_)/).flatMap((part, index) => (index ? [<wbr key={index} />, part] : [part]))
 
-const groupLabel = (key: string) => (key === 'all' ? 'All heroes' : `Levels ${key.replace('-', '–')}`)
-
-const updatedAt = (date: Date) => date.toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 type Row = { rank: number; name: string; hero_name: string; level: number; score: number; profile?: boolean }
 /** The neighbours block shows once the hero sits below this many rows (zero-based index), where the top of the list stops showing it. */
 const AROUND_FROM = 5
 
 function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) {
+  const t = useT(dcLogMessages)
+  const locale = useLocale()
   return (
     <li aria-current={own ? 'true' : undefined} className={`flex min-w-0 items-start gap-3 py-3 ${own ? '-mx-2 bg-ground px-2 outline-2 outline-gold' : ''}`}>
       {/* The podium wears a crown and medals beside its gold numerals; the rest keep a blank column so names stay aligned. */}
@@ -48,7 +46,7 @@ function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) 
         )}
         {row.hero_name ? <span className="block text-sm text-muted">{row.hero_name}</span> : null}
       </span>
-      <span className={`min-w-0 max-w-[45%] shrink-0 text-right text-sm font-semibold tabular-nums [overflow-wrap:anywhere] ${board === 'overall' ? 'text-gold-ink' : 'text-xp-ink'}`}>{board === 'overall' ? `Level ${row.level}` : `${row.score.toLocaleString()} XP`}</span>
+      <span className={`min-w-0 max-w-[45%] shrink-0 text-right text-sm font-semibold tabular-nums [overflow-wrap:anywhere] ${board === 'overall' ? 'text-gold-ink' : 'text-xp-ink'}`}>{board === 'overall' ? t.level(row.level) : t.xp(formatNumber(locale, row.score))}</span>
     </li>
   )
 }
@@ -56,6 +54,10 @@ function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) 
 function Leaderboard() {
   const [board, setBoard] = useState<Board>('recent_24h')
   const [cohortKey, setCohortKey] = useState<string | undefined>(undefined)
+  const t = useT(dcLogMessages)
+  const locale = useLocale()
+  const n = (value: number) => formatNumber(locale, value)
+  const updatedAt = (date: Date) => date.toLocaleString(INTL_TAG[locale], { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
   // The previous board stays while the next one loads, so switching period or group never collapses to a skeleton.
   const { data, isPlaceholderData } = useQuery({ ...convexQuery(api.leaderboard.view, { board, ...(cohortKey ? { cohortKey } : {}) }), placeholderData: keepPreviousData })
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
@@ -69,66 +71,66 @@ function Leaderboard() {
   const around = ownIndex >= AROUND_FROM ? entries.slice(aroundStart, aroundStart + 5) : []
   return (
     <>
-      <h1 className="font-display text-3xl font-bold">Rankings</h1>
-      <div role="group" aria-label="Ranking period" className="flex border-2 border-edge">
+      <h1 className="font-display text-3xl font-bold">{t.rankingsTitle}</h1>
+      <div role="group" aria-label={t.rankingPeriod} className="flex border-2 border-edge">
         {TABS.map((tab) => (
           <button
-            key={tab.board}
+            key={tab}
             type="button"
-            aria-pressed={board === tab.board}
+            aria-pressed={board === tab}
             onClick={() => {
-              setBoard(tab.board)
+              setBoard(tab)
               setCohortKey(undefined)
             }}
-            className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-1 py-2 label-px uppercase tracking-wide whitespace-nowrap not-last:border-r-2 min-[360px]:px-2 not-last:border-edge not-aria-pressed:before:hidden ${board === tab.board ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink'}`}
+            className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-1 py-2 label-px uppercase tracking-wide whitespace-nowrap not-last:border-r-2 min-[360px]:px-2 not-last:border-edge not-aria-pressed:before:hidden ${board === tab ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink'}`}
           >
-            {tab.label}
+            {t.tabs[tab]}
           </button>
         ))}
       </div>
-      {board !== 'overall' ? <label className="flex flex-wrap items-center gap-3 text-sm"><span className="font-semibold">Level group</span><select value={cohortKey ?? ownGroup} onChange={(event) => setCohortKey(event.target.value === ownGroup ? undefined : event.target.value)} className="pixel-select min-h-11 flex-1 border-2 border-edge pr-9 pl-3 text-base sm:flex-none">{groups.map((key) => <option key={key} value={key}>{groupLabel(key)}{key === ownGroup ? ' (your group)' : ''}</option>)}</select></label> : null}
+      {board !== 'overall' ? <label className="flex flex-wrap items-center gap-3 text-sm"><span className="font-semibold">{t.levelGroup}</span><select value={cohortKey ?? ownGroup} onChange={(event) => setCohortKey(event.target.value === ownGroup ? undefined : event.target.value)} className="pixel-select min-h-11 flex-1 border-2 border-edge pr-9 pl-3 text-base sm:flex-none">{groups.map((key) => <option key={key} value={key}>{t.group(key)}{key === ownGroup ? t.yourGroup : ''}</option>)}</select></label> : null}
       {!data ? (
-        <LoadingState label="Loading rankings…" />
+        <LoadingState label={t.loadingRankings} />
       ) : !data.published ? (
-        <Card title="First rankings within the hour">
-          <p>The board publishes hourly. Your hero is on the next one.</p>
+        <Card title={t.firstRankings}>
+          <p>{t.publishesHourly}</p>
         </Card>
       ) : (
-        <Card title={`${groupLabel(data.cohortKey)}, ${data.totalPlayers} ${data.totalPlayers === 1 ? 'hero' : 'heroes'}`} className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+        <Card title={t.cardTitle(t.group(data.cohortKey), n(data.totalPlayers), data.totalPlayers)} className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
           <p className="mb-3 text-sm text-muted">
-            {board === 'overall' ? 'Ranked by level and lifetime XP.' : 'Ranked by XP earned in the period.'} Updated hourly, last at{' '}
+            {board === 'overall' ? t.rankedByLevel : t.rankedByXp}{t.updatedHourly}
             <LocalTime at={data.scoreAt} format={updatedAt} />.
           </p>
           {data.own ? (
             <p className="mb-3 font-semibold">
-              You are <span className="text-gold-ink">#{data.own.rank.toLocaleString()}</span> of {data.totalPlayers.toLocaleString()}
-              {board !== 'overall' && data.own.score !== null ? ` with ${data.own.score.toLocaleString()} XP` : ''}
-              {data.own.rankDelta ? <>, <span className={`inline-flex items-center gap-1 ${data.own.rankDelta > 0 ? 'text-xp-ink' : 'text-hp-ink'}`}><Glyph name={data.own.rankDelta > 0 ? 'up' : 'down'} size={8} />{data.own.rankDelta > 0 ? 'up' : 'down'} {Math.abs(data.own.rankDelta)}</span> since the last update</> : ''}
+              {t.youAre}<span className="text-gold-ink">#{n(data.own.rank)}</span>{t.ofTotal(n(data.totalPlayers))}
+              {board !== 'overall' && data.own.score !== null ? t.withXp(n(data.own.score)) : ''}
+              {data.own.rankDelta ? <>, <span className={`inline-flex items-center gap-1 ${data.own.rankDelta > 0 ? 'text-xp-ink' : 'text-hp-ink'}`}><Glyph name={data.own.rankDelta > 0 ? 'up' : 'down'} size={8} />{data.own.rankDelta > 0 ? t.up(data.own.rankDelta) : t.down(Math.abs(data.own.rankDelta))}</span>{t.sinceUpdate}</> : ''}
             </p>
           ) : ownGroup !== data.cohortKey && board !== 'overall' ? (
             <Button variant="quiet" onClick={() => setCohortKey(undefined)}>
-              Back to my group
+              {t.backToGroup}
             </Button>
           ) : (
-            <p className="mb-3 text-sm text-muted">{stopped && board !== 'overall' ? 'Unranked: stopped, with no XP left in this period.' : 'Your hero’s rank appears at the next hourly update.'}</p>
+            <p className="mb-3 text-sm text-muted">{stopped && board !== 'overall' ? t.unrankedStopped : t.rankAppears}</p>
           )}
           {around.length > 0 ? (
-            <section aria-label="Around you" className="mb-4">
-              <h3 className="mb-1 text-sm font-semibold text-muted">Around you</h3>
+            <section aria-label={t.aroundYou} className="mb-4">
+              <h3 className="mb-1 text-sm font-semibold text-muted">{t.aroundYou}</h3>
               <ol className="flex flex-col divide-y divide-rule">
                 {around.map((row: Row) => <RankRow key={row.rank} row={row} own={data.own?.rank === row.rank} board={board} />)}
               </ol>
             </section>
           ) : null}
-          {around.length > 0 ? <h3 className="mb-1 text-sm font-semibold text-muted">Top {data.entries.length}</h3> : null}
+          {around.length > 0 ? <h3 className="mb-1 text-sm font-semibold text-muted">{t.top(data.entries.length)}</h3> : null}
           {data.entries.length === 0 ? (
-            <p>No ranked heroes in this group for this period.</p>
+            <p>{t.noRanked}</p>
           ) : (
             <ol className="flex flex-col divide-y divide-rule">
               {data.entries.map((row: Row) => <RankRow key={row.rank} row={row} own={data.own?.rank === row.rank} board={board} />)}
             </ol>
           )}
-          {data.totalPlayers > data.entries.length ? <p className="mt-3 text-sm text-muted">Top {data.entries.length} of {data.totalPlayers.toLocaleString()} heroes.</p> : null}
+          {data.totalPlayers > data.entries.length ? <p className="mt-3 text-sm text-muted">{t.topOf(data.entries.length, n(data.totalPlayers))}</p> : null}
         </Card>
       )}
       {/* D143: the players this account follows, rival first, between the board and the records. */}

@@ -6,20 +6,26 @@ import { Button } from '../../../lib/ui'
 import { SectionTitle } from '../../../lib/glyphs'
 import { PixelIcon } from './-pixelIcon'
 import { KIND_BADGE } from '../../../lib/palette'
-import type { LogDeltas } from '@trmnl-games/desk-crawler/log'
+import { logPresentation, type LogDeltas, type PresentationOptions } from '@trmnl-games/desk-crawler/log'
+import { formatDate, useLocale, useT } from '../../../lib/i18n'
+import type { Locale } from '@trmnl-games/platform'
+import { useStoryOptions } from '../../../lib/useStory'
+import { dcLogMessages } from '../../../i18n/dcLog'
 
 type Entry = { id: string; at: number; tick: number | null; kind: string; summary: string; source: string; deltas: LogDeltas }
 
+type T = (typeof dcLogMessages)['en']
+
 /** Each filter is a badge wearing the glyph of the log lines it keeps, so all of them fit one phone-width row. */
 const FILTERS = [
-  { key: 'all', label: 'All', kinds: null, glyph: null },
-  { key: 'fights', label: 'Fights', kinds: ['combat'], glyph: 'combat' },
-  { key: 'finds', label: 'Finds', kinds: ['loot'], glyph: 'loot' },
-  { key: 'milestones', label: 'Milestones', kinds: ['levelup', 'achievement', 'career', 'occasion', 'death', 'revive', 'travel'], glyph: 'levelup' },
-  { key: 'rest', label: 'Rest & traps', kinds: ['rest', 'trap'], glyph: 'rest' },
+  { key: 'all', kinds: null, glyph: null },
+  { key: 'fights', kinds: ['combat'], glyph: 'combat' },
+  { key: 'finds', kinds: ['loot'], glyph: 'loot' },
+  { key: 'milestones', kinds: ['levelup', 'achievement', 'career', 'occasion', 'death', 'revive', 'travel'], glyph: 'levelup' },
+  { key: 'rest', kinds: ['rest', 'trap'], glyph: 'rest' },
   // D141, D145: raids, meetings and lost property are the ways another player's hero turns up.
-  { key: 'raids', label: 'Other people', kinds: ['raid', 'meeting', 'lost_property'], glyph: 'raid' },
-  { key: 'todo', label: 'To-do', kinds: ['todo'], glyph: 'todo' },
+  { key: 'raids', kinds: ['raid', 'meeting', 'lost_property'], glyph: 'raid' },
+  { key: 'todo', kinds: ['todo'], glyph: 'todo' },
 ] as const
 
 /** Entries shown before "Show more": the log is the longest thing on the Hero page. */
@@ -28,29 +34,29 @@ const MORE = 20
 
 type FilterKey = (typeof FILTERS)[number]['key']
 
-const dayLabel = (at: number) => {
+const dayLabel = (at: number, t: T, locale: Locale) => {
   const day = new Date(at)
   const today = new Date()
   const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
-  if (day.toDateString() === today.toDateString()) return 'Today'
-  if (day.toDateString() === yesterday.toDateString()) return 'Yesterday'
-  return day.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })
+  if (day.toDateString() === today.toDateString()) return t.today
+  if (day.toDateString() === yesterday.toDateString()) return t.yesterday
+  return formatDate(locale, day, { weekday: 'long', day: 'numeric', month: 'short' })
 }
 
 const minute = (at: number) => Math.floor(at / 60_000)
-const listNames = (names: string[]) => (names.length === 1 ? names[0]! : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`)
 
 /**
  * Achievements earned together (one after another within the same minute) fold into one line naming them all, so a
- * burst of unlocks reads as one moment instead of a column of identical badges.
+ * burst of unlocks reads as one moment instead of a column of identical badges. The folded line is written in the
+ * reader's language from each entry's told line, so LogStory shows it as it stands.
  */
-function foldAchievements(entries: Entry[]): Entry[] {
+function foldAchievements(entries: Entry[], t: T, story: PresentationOptions): Entry[] {
   const out: Entry[] = []
   let run: Entry[] = []
   const flush = () => {
     if (run.length > 1) {
-      const names = run.map((entry) => entry.summary.replace(/^Achievement:\s*/, ''))
-      out.push({ ...run[0]!, id: run.map((entry) => entry.id).join('+'), summary: `${run.length} achievements: ${listNames(names)}` })
+      const names = run.map((entry) => logPresentation(entry, story).narrative.replace(/^[^:]*?\s?:\s*/, ''))
+      out.push({ ...run[0]!, id: run.map((entry) => entry.id).join('+'), summary: t.achievements(names) })
     } else out.push(...run)
     run = []
   }
@@ -65,10 +71,10 @@ function foldAchievements(entries: Entry[]): Entry[] {
 }
 
 /** One encounter = the entries a single tick wrote; companion commands stand alone. */
-function group(entries: Entry[]) {
+function group(entries: Entry[], t: T, locale: Locale) {
   const days: Array<{ label: string; encounters: Array<{ key: string; at: number; entries: Entry[] }> }> = []
   for (const entry of entries) {
-    const label = dayLabel(entry.at)
+    const label = dayLabel(entry.at, t, locale)
     let day = days.at(-1)
     if (!day || day.label !== label) days.push((day = { label, encounters: [] }))
     const key = entry.source === 'tick' && entry.tick !== null ? `tick-${entry.tick}` : entry.id
@@ -83,10 +89,13 @@ export function AdventureLog() {
   const { results, status, loadMore } = usePaginatedQuery(api.heroes.recentLog, {}, { initialNumItems: 40 })
   const [filter, setFilter] = useState<FilterKey>('all')
   const [limit, setLimit] = useState(FIRST_VIEW)
+  const t = useT(dcLogMessages)
+  const locale = useLocale()
+  const story = useStoryOptions()
   const chosen = FILTERS.find((item) => item.key === filter)!
   const kinds = chosen.kinds as readonly string[] | null
-  const shown = useMemo(() => foldAchievements((results as Entry[]).filter((entry) => kinds === null || kinds.includes(entry.kind))), [results, kinds])
-  const days = useMemo(() => group(shown.slice(0, limit)), [shown, limit])
+  const shown = useMemo(() => foldAchievements((results as Entry[]).filter((entry) => kinds === null || kinds.includes(entry.kind)), t, story), [results, kinds, t, story])
+  const days = useMemo(() => group(shown.slice(0, limit), t, locale), [shown, limit, t, locale])
   const hidden = shown.length > limit
   const showMore = () => {
     setLimit((value) => value + MORE)
@@ -97,9 +106,9 @@ export function AdventureLog() {
   return (
     <section aria-labelledby="log-title" className="min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
-        <SectionTitle id="log-title" glyph="quest">Quest log</SectionTitle>
+        <SectionTitle id="log-title" glyph="quest">{t.questLog}</SectionTitle>
         {/* Seven badges share one row on phones (44px tall, as wide as the row allows), so none drops to a row of its own; the chosen one's name reads below. */}
-        <div role="group" aria-label="Filter adventure log" className="grid w-full grid-cols-7 gap-1 sm:flex sm:w-auto">
+        <div role="group" aria-label={t.filterLog} className="grid w-full grid-cols-7 gap-1 sm:flex sm:w-auto">
           {FILTERS.map((item) => {
             const pressed = filter === item.key
             return (
@@ -107,22 +116,22 @@ export function AdventureLog() {
                 key={item.key}
                 type="button"
                 aria-pressed={pressed}
-                aria-label={item.label}
-                title={item.label}
+                aria-label={t.filters[item.key]}
+                title={t.filters[item.key]}
                 onClick={() => { setFilter(item.key); setLimit(FIRST_VIEW) }}
                 className={`grid h-11 min-w-0 place-items-center border-2 sm:w-11 sm:shrink-0 ${pressed ? `border-night outline-2 outline-gold ${item.glyph ? KIND_BADGE[item.glyph] : 'bg-gold'} text-night` : 'border-raised bg-panel text-muted hover:border-edge hover:text-ink active:border-edge'}`}
               >
-                {item.glyph ? <PixelIcon kind={item.glyph} plain /> : <span className="label-px">All</span>}
+                {item.glyph ? <PixelIcon kind={item.glyph} plain /> : <span className="label-px">{t.allBadge}</span>}
               </button>
             )
           })}
         </div>
       </div>
-      <p aria-live="polite" className="mt-2 label-px text-muted">{filter === 'all' ? 'Everything' : chosen.label}</p>
+      <p aria-live="polite" className="mt-2 label-px text-muted">{filter === 'all' ? t.everything : t.filters[filter]}</p>
 
       {status === 'LoadingFirstPage' ? (
-        <div role="status" aria-label="Reading the log" className="mt-2 flex flex-col">
-          <p aria-hidden="true" className="py-2 label-px text-muted">Today</p>
+        <div role="status" aria-label={t.readingLog} className="mt-2 flex flex-col">
+          <p aria-hidden="true" className="py-2 label-px text-muted">{t.today}</p>
           <ol aria-hidden="true" className="flex flex-col pb-3">
             {[0, 1, 2].map((row) => (
               <li key={row} className="grid min-h-[4.75rem] grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 border-b-2 border-rule py-2.5">
@@ -136,7 +145,7 @@ export function AdventureLog() {
           </ol>
         </div>
       ) : days.length === 0 ? (
-        <p className="mt-3 text-muted">{filter === 'all' ? 'Nothing logged yet.' : 'No entries of this kind loaded.'}</p>
+        <p className="mt-3 text-muted">{filter === 'all' ? t.nothingLogged : t.noEntries}</p>
       ) : (
         <div className="mt-2 flex flex-col">
           {days.map((day) => (
@@ -149,7 +158,7 @@ export function AdventureLog() {
                     <ul className="flex flex-col">
                       {encounter.entries.map((entry) => (
                         <li key={entry.id} className="border-b-2 border-rule py-2.5">
-                          <LogStory entry={entry} />
+                          <LogStory entry={entry} story={story} />
                         </li>
                       ))}
                     </ul>
@@ -163,11 +172,11 @@ export function AdventureLog() {
 
       {hidden || status === 'CanLoadMore' ? (
         <Button variant="quiet" className="mt-2" onClick={showMore}>
-          Show more
+          {t.showMore}
         </Button>
       ) : null}
-      {status === 'LoadingMore' ? <p role="status" className="mt-3 text-sm">Loading older adventures…</p> : null}
-      {status === 'Exhausted' && !hidden && days.length > 0 ? <p className="mt-3 text-xs text-muted">Detailed history is kept for three days.</p> : null}
+      {status === 'LoadingMore' ? <p role="status" className="mt-3 text-sm">{t.loadingOlder}</p> : null}
+      {status === 'Exhausted' && !hidden && days.length > 0 ? <p className="mt-3 text-xs text-muted">{t.keptThreeDays}</p> : null}
     </section>
   )
 }
