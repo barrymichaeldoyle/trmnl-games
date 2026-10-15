@@ -467,7 +467,8 @@ function BuySheet({ open, title, price, gold, pending, onConfirm, onClose, child
     <ConfirmSheet open={open} title={title} confirmLabel={`Buy for ${price} gold`} busyLabel="Buying…" cancelLabel="Cancel" pending={pending} onClose={onClose} onConfirm={async () => { if (pending) return; await onConfirm(); onClose() }}>
       <Consequences>
         {children}
-        <li>Costs {price} gold, leaving you {gold - price}.</li>
+        <li>Costs {price} gold.</li>
+        <li>Remaining gold: {gold - price}</li>
       </Consequences>
     </ConfirmSheet>
   )
@@ -581,7 +582,8 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
       {asking && step ? <Consequences>
         <li>{statLabel(asking).charAt(0).toUpperCase() + statLabel(asking).slice(1)} goes from {step.stat.from} to <strong>{step.stat.to}</strong>. The piece stays equipped and keeps its name{asking.affix ? ' and trait' : ''}.</li>
         <li>Spends {materialsText(step.materials, materials)}.</li>
-        <li>Costs {step.gold} gold, leaving you {hero.gold - step.gold}.</li>
+        <li>Costs {step.gold} gold.</li>
+        <li>Remaining gold: {hero.gold - step.gold}</li>
         <li>Salvaging it later still pays what it was found at, not what was spent.</li>
       </Consequences> : null}
     </ConfirmSheet>
