@@ -1,7 +1,7 @@
 import type { GameSlug } from '@trmnl-games/platform'
 import { defineMessages } from '../lib/i18n'
 
-type Hero = { name: string; activationState: string; status: string }
+type Hero = { name: string; activationState: string; status: string; waking?: boolean }
 type Angler = { title: string; activationState: string; status: string }
 type Life = { first: string; last: string; age: number; activationState: string; status: string }
 
@@ -9,10 +9,10 @@ type Life = { first: string; last: string; age: number; activationState: string;
 export const shellMessages = defineMessages({
   en: {
     games: { 'desk-crawler': 'An office RPG that plays itself on your TRMNL.', 'idle-angler': 'A fishing game that plays itself on your TRMNL.', 'paper-lives': 'A life story that writes itself on your TRMNL.' } as Record<GameSlug, string>,
-    heroStatus: { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full' } as Record<string, string>,
+    heroStatus: { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full', resuming: 'Resuming' } as Record<string, string>,
     adventuring: 'Adventuring',
     waitingForSave: 'Waiting for TRMNL Save',
-    heroLine(this: void, hero: Hero): string { return `${hero.name} · ${hero.activationState === 'active' ? shellMessages.en.heroStatus[hero.status] ?? 'Adventuring' : 'Waiting for TRMNL Save'}` },
+    heroLine(this: void, hero: Hero): string { return `${hero.name} · ${hero.activationState === 'active' ? (hero.waking ? shellMessages.en.heroStatus.resuming : shellMessages.en.heroStatus[hero.status] ?? 'Adventuring') : 'Waiting for TRMNL Save'}` },
     anglerLine: (angler: Angler) => `${angler.title} · ${angler.activationState !== 'active' ? 'Waiting for TRMNL Save' : angler.status === 'paused' ? 'Paused' : 'Fishing'}`,
     lifeLine: (life: Life) => `${life.first} ${life.last} · ${life.activationState !== 'active' ? 'Waiting for TRMNL Save' : life.status === 'ended' ? 'A life remembered' : life.status === 'paused' ? 'Paused' : `Age ${life.age}`}`,
     removingProgress: 'Removing progress',
@@ -60,10 +60,10 @@ export const shellMessages = defineMessages({
   },
   fr: {
     games: { 'desk-crawler': 'Un RPG de bureau qui se joue tout seul sur votre TRMNL.', 'idle-angler': 'Un jeu de pêche qui se joue tout seul sur votre TRMNL.', 'paper-lives': 'Une histoire de vie qui s’écrit toute seule sur votre TRMNL.' },
-    heroStatus: { paused: 'En pause', dead: 'K.-O.', sleeping: 'Sac plein' },
+    heroStatus: { paused: 'En pause', dead: 'K.-O.', sleeping: 'Sac plein', resuming: 'Reprise' },
     adventuring: 'En aventure',
     waitingForSave: 'En attente de l’enregistrement TRMNL',
-    heroLine(this: void, hero: Hero): string { return `${hero.name} · ${hero.activationState === 'active' ? shellMessages.fr.heroStatus[hero.status] ?? 'En aventure' : 'En attente de l’enregistrement TRMNL'}` },
+    heroLine(this: void, hero: Hero): string { return `${hero.name} · ${hero.activationState === 'active' ? (hero.waking ? shellMessages.fr.heroStatus.resuming : shellMessages.fr.heroStatus[hero.status] ?? 'En aventure') : 'En attente de l’enregistrement TRMNL'}` },
     anglerLine: (angler: Angler) => `${angler.title} · ${angler.activationState !== 'active' ? 'En attente de l’enregistrement TRMNL' : angler.status === 'paused' ? 'En pause' : 'À la pêche'}`,
     lifeLine: (life: Life) => `${life.first} ${life.last} · ${life.activationState !== 'active' ? 'En attente de l’enregistrement TRMNL' : life.status === 'ended' ? 'Une vie qu’on se rappelle' : life.status === 'paused' ? 'En pause' : `${life.age} ans`}`,
     removingProgress: 'Suppression de la progression',
@@ -111,10 +111,10 @@ export const shellMessages = defineMessages({
   },
   de: {
     games: { 'desk-crawler': 'Ein Büro-RPG, das sich auf deinem TRMNL von selbst spielt.', 'idle-angler': 'Ein Angelspiel, das sich auf deinem TRMNL von selbst spielt.', 'paper-lives': 'Eine Lebensgeschichte, die sich auf deinem TRMNL von selbst schreibt.' },
-    heroStatus: { paused: 'Pausiert', dead: 'K. o.', sleeping: 'Tasche voll' },
+    heroStatus: { paused: 'Pausiert', dead: 'K. o.', sleeping: 'Tasche voll', resuming: 'Geht weiter' },
     adventuring: 'Auf Abenteuer',
     waitingForSave: 'Wartet auf Speichern in TRMNL',
-    heroLine(this: void, hero: Hero): string { return `${hero.name} · ${hero.activationState === 'active' ? shellMessages.de.heroStatus[hero.status] ?? 'Auf Abenteuer' : 'Wartet auf Speichern in TRMNL'}` },
+    heroLine(this: void, hero: Hero): string { return `${hero.name} · ${hero.activationState === 'active' ? (hero.waking ? shellMessages.de.heroStatus.resuming : shellMessages.de.heroStatus[hero.status] ?? 'Auf Abenteuer') : 'Wartet auf Speichern in TRMNL'}` },
     anglerLine: (angler: Angler) => `${angler.title} · ${angler.activationState !== 'active' ? 'Wartet auf Speichern in TRMNL' : angler.status === 'paused' ? 'Pausiert' : 'Beim Angeln'}`,
     lifeLine: (life: Life) => `${life.first} ${life.last} · ${life.activationState !== 'active' ? 'Wartet auf Speichern in TRMNL' : life.status === 'ended' ? 'Ein Leben in Erinnerung' : life.status === 'paused' ? 'Pausiert' : `${life.age} Jahre`}`,
     removingProgress: 'Fortschritt wird gelöscht',

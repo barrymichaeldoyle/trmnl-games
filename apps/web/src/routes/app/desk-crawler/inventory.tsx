@@ -20,7 +20,7 @@ import { EmptySlot, Gem, PotionSlot, Sheet, SheetTitle, Slot, SlotPreview } from
 import { useNow } from './-pulse'
 import { ConfirmButtons, ConfirmSheet, Consequences } from './-confirm'
 import { WithName } from './-withName'
-import { formatTime, messagesFor, useLocale, useT } from '../../../lib/i18n'
+import { formatNumber, formatTime, messagesFor, useLocale, useT } from '../../../lib/i18n'
 import { useContent } from '../../../lib/useContent'
 import { dcBagMessages, materialsList } from '../../../i18n/dcBag'
 
@@ -81,6 +81,7 @@ function materialsText(counts: MaterialCount, materials: readonly Material[], t:
 function Inventory() {
   const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
+  const locale = useLocale()
   const [mode, setMode] = useState<'browse' | 'sell' | 'salvage'>('browse')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [openId, setOpenId] = useState<string | 'potions' | null>(null)
@@ -186,9 +187,16 @@ function Inventory() {
   const claimMessage = (item: Gear) => t.claimMessage(item.label)
   return (
     <div className="flex min-w-0 flex-col gap-8">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-3xl font-bold">{t.yourBag}</h1>
-        <p className="text-sm tabular-nums text-muted">{t.slots(bag.ladder.name, bag.used, bag.capacity)}</p>
+      <header className="sticky top-13 z-20 -mx-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b-4 border-raised bg-night px-3 py-3 min-[375px]:-mx-4 min-[375px]:px-4">
+        <div className="min-w-0">
+          <h1 className="font-display text-3xl font-bold">{t.yourBag}</h1>
+          <p className="text-sm tabular-nums text-muted">{t.slots(bag.ladder.name, bag.used, bag.capacity)}</p>
+        </div>
+        <p className="flex items-center gap-2 font-display text-2xl font-bold tabular-nums text-gold-ink">
+          <Glyph name="coin" />
+          <span>{formatNumber(locale, hero.gold)}</span>
+          <span className="font-sans text-sm font-semibold tracking-wide">{t.goldLabel}</span>
+        </p>
       </header>
       {hero.status === 'sleeping' ? (
         <Card title={hero.wakeAtTick !== null ? t.resumingNext : plan ? (plan.claim ? t.findWaiting : t.resumeAdventures) : t.resumeAdventures}>

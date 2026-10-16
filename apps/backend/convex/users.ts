@@ -32,7 +32,7 @@ export const me = query({
       ),
       hero: v.union(
         v.null(),
-        v.object({ name: v.string(), activationState: v.union(v.literal('pending_trmnl'), v.literal('active')), status: heroStatus }),
+        v.object({ name: v.string(), activationState: v.union(v.literal('pending_trmnl'), v.literal('active')), status: heroStatus, waking: v.boolean() }),
       ),
     }),
   ),
@@ -51,7 +51,7 @@ export const me = query({
       hasActiveInstallation: installation !== null,
       gameState: user ? (await gameProfile(ctx, user._id))?.state ?? (hero ? 'active' as const : null) : null,
       user: user === null ? null : { publicAlias: user.publicAlias, timezone: user.timezone, state: user.state, nameRepairRequired: user.nameRepairRequired ?? false, analyticsConsent: user.analyticsConsent ?? false, publicNameChangeAt: user.publicNameChangedAt === undefined ? null : user.publicNameChangedAt + PUBLIC_NAME_GAP_MS, whatsNewSince: user.whatsNewSeen ?? utcDate(user.createdAt), language: user.language ?? null },
-      hero: hero === null ? null : { name: hero.name, activationState: hero.activationState, status: hero.status },
+      hero: hero === null ? null : { name: hero.name, activationState: hero.activationState, status: hero.status, waking: hero.status === 'sleeping' && hero.wakeAtTick !== undefined },
     }
   },
 })

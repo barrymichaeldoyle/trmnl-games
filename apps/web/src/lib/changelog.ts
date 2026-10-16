@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'A cleared bag says so, and gold stays in view',
+        body: 'Once the bag has room, the companion offers Resume instead of sending you back to the bag. After you resume, it says the next adventure is the one that starts again. The bag page keeps your gold in view while you shop.',
+        fr: { title: 'Un sac libéré le dit, et l’or reste visible', body: 'Dès que le sac a de la place, le compagnon propose Reprendre au lieu de vous renvoyer au sac. Après la reprise, il dit que la prochaine aventure est celle qui repart. La page du sac garde votre or en vue pendant les achats.' },
+        de: { title: 'Eine freie Tasche sagt das, und das Gold bleibt sichtbar', body: 'Sobald die Tasche Platz hat, bietet die Begleit-App Fortsetzen an, statt dich zurück zur Tasche zu schicken. Nach dem Fortsetzen sagt sie, dass das nächste Abenteuer wieder losgeht. Die Taschenseite behält dein Gold im Blick, während du einkaufst.' },
+      },
+      {
         title: 'A full bag stops the adventure view',
         body: 'When adventures stop because the bag is full, every TRMNL layout says so and shows a large code straight to the bag, with the slots used and anything waiting to be claimed. In the companion, one confirmation sells the weakest spare, claims a waiting find and sends the hero back out.',
         fr: { title: 'Un sac plein arrête la vue d’aventure', body: 'Quand les aventures s’arrêtent parce que le sac est plein, chaque écran TRMNL le dit et montre un grand code qui ouvre le sac, avec les places utilisées et la trouvaille en attente. Dans le compagnon, une confirmation vend le plus faible en trop, récupère la trouvaille et renvoie le héros.' },

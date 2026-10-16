@@ -42,10 +42,12 @@ type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number;
  */
 function HeroHome() {
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
+  const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
   const t = useT(dcHeroMessages)
   if (!hero) return <LoadingState label={t.loading} />
   const biomeName = hero.biomes.find((b: Biome) => b.id === hero.biomeId)?.name ?? ''
   const targetName = hero.biomes.find((b: Biome) => b.id === hero.targetBiomeId)?.name ?? ''
+  const bagReady = (bag as { canResume?: boolean } | undefined)?.canResume === true
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
@@ -53,7 +55,7 @@ function HeroHome() {
       <h1 className="sr-only">{t.yourHero(hero.name)}</h1>
       <KeepsakeCallout />
       <PlaylistNudge activatedAt={hero.activatedAt} screenServed={hero.screenServed} />
-      <GameScreen hero={{ ...hero, biomeName, targetName }} />
+      <GameScreen hero={{ ...hero, biomeName, targetName, bagReady }} />
       <ReturnNudge />
       <WhatsNewCard />
       <HeroSheet hero={hero} />
@@ -140,6 +142,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const potion = useIntent(api.inventory.usePotion, { onFeedback: notify })
   const pause = useIntent(api.heroes.pause, { onFeedback: notify })
   const resume = useIntent(api.heroes.resume, { onFeedback: notify })
+  const bagResume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
   // The stance is a stored preference: once confirmed it shows as chosen at once, and rolls back if the save fails.
   const stance = useIntent(api.heroes.setStance, {
     onFeedback: notify,
@@ -174,17 +177,23 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   // Pause and Resume swap places when they succeed; focus follows to whichever command takes over.
   const commands = useFocusWithin<HTMLElement>(hero.status)
 
-  const stopNote = hero.status === 'paused' ? t.resumeToTravel : hero.status === 'sleeping' ? t.roomToTravel : hero.status === 'dead' ? t.deadTravel : null
+  const bagReady = bag?.canResume === true
+  const waking = hero.status === 'sleeping' && hero.wakeAtTick !== null
+  const stopNote = hero.status === 'paused' || (hero.status === 'sleeping' && bagReady) ? t.resumeToTravel : waking ? t.resumesNext : hero.status === 'sleeping' ? t.roomToTravel : hero.status === 'dead' ? t.deadTravel : null
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
       {hero.career ? <GoalCard career={hero.career} level={hero.level} notify={notify} /> : null}
       {hero.roster ? <RosterCard roster={hero.roster} name={hero.name} className={hero.className ?? 'Warrior'} /> : null}
       <section ref={commands} aria-label={t.commands} className="flex flex-col gap-2">
-        {canDrink || hero.status === 'paused' || hero.status === 'sleeping' ? (
+        {canDrink || hero.status === 'paused' || (hero.status === 'sleeping' && !waking) ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.
           <div className="grid gap-2 sm:flex sm:flex-wrap">
-            {hero.status === 'sleeping' ? (
+            {hero.status === 'sleeping' && !waking && bagReady ? (
+              <Button icon="play" pending={bagResume.pending} busyLabel={t.resuming} disabled={!healthy} onClick={() => bagResume.run({}, t.resumed)}>
+                {t.resume}
+              </Button>
+            ) : hero.status === 'sleeping' && !waking && bag && !bagReady ? (
               <Link to="/app/desk-crawler/inventory" className={`inline-flex min-h-11 items-center justify-center gap-2.5 px-4 ${BUTTON_PRIMARY}`}>
                 <Glyph name="bag" />{t.openBag}
               </Link>
@@ -215,7 +224,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
           </ul>
         ) : null}
         {hero.calendar?.next ? <p className="text-sm text-muted">{t.nextOnCalendarBefore}<strong>{c.text(hero.calendar.next.name)}</strong> {t.inDays(hero.calendar.next.inDays)}{hero.calendar.next.effect ? ` (${c.text(hero.calendar.next.effect)})` : ''}. <Link to="/help/desk-crawler" hash="office-calendar" className="underline underline-offset-4">{t.seeCalendar}</Link></p> : null}
-        {hero.status === 'sleeping' && hero.wakeAtTick === null ? <AlertNudge /> : null}
+        {hero.status === 'sleeping' && hero.wakeAtTick === null && !bagReady ? <AlertNudge /> : null}
         {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>{t.merchantVisiting}</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.seeOffers}</Link>{t.withinAdventures(hero.merchantTicksLeft)}</p> : null}
         {!healthy ? <p className="text-sm">{t.serviceCheck}<Link to="/support" className="underline underline-offset-4">{t.contactSupport}</Link>{t.ifItLasts}</p> : null}
       </section>

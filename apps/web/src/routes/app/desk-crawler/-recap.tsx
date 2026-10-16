@@ -21,6 +21,8 @@ type Summary = {
   unequipped: number
   held: boolean
   status: string
+  waking?: boolean
+  bagReady?: boolean
 }
 
 const sinceAt = (tag: string) => (date: Date) => date.toLocaleString(tag, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -133,7 +135,7 @@ function Ledger({ summary }: { summary: Summary }) {
         </p>
       </div>
       {quiet ? (
-        <p className="mt-2">{summary.status === 'paused' ? t.quietPaused : summary.status === 'sleeping' ? t.quietSleeping : t.quiet}</p>
+        <p className="mt-2">{summary.status === 'paused' ? t.quietPaused : summary.status === 'sleeping' ? (summary.waking ? t.quietResuming : summary.bagReady ? t.quietReady : t.quietSleeping) : t.quiet}</p>
       ) : (
         <dl className="mt-3 grid grid-cols-1 min-[480px]:grid-cols-2 min-[480px]:gap-x-6">
           {rows.map(([label, value]) => (

@@ -15,11 +15,12 @@ import { AlertsCard } from './-alerts'
 import { MoreLinks } from './-moreLinks'
 
 /** The More tab (D124): the pages that are not play (achievements, keepsakes, the device) above the settings. */
-export const Route = createFileRoute('/app/desk-crawler/settings')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcMoreMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), convexQuery(api.heroes.mine, {}), convexQuery(api.connections.mine, {}), convexQuery(api.alerts.mine, {})), component: Settings })
+export const Route = createFileRoute('/app/desk-crawler/settings')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcMoreMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.connections.mine, {}), convexQuery(api.alerts.mine, {})), component: Settings })
 
 function Settings() {
   const { data: me } = useQuery(convexQuery(api.users.me, {}))
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
+  const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
   // One pinned notice for every command on the page (D98), so the cards hold their shape while an action settles.
   const { notice, notify, dismiss } = useNotice()
   const pause = useIntent(api.heroes.pause, { onFeedback: notify })
@@ -31,6 +32,7 @@ function Settings() {
   const [askPause, setAskPause] = useState(false)
   const [disconnectId, setDisconnectId] = useState<string | null>(null)
   const resume = useIntent(api.heroes.resume, { onFeedback: notify })
+  const bagResume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
   // Visibility is a stored preference, so the card flips on the tap and rolls back if the save fails.
   const profile = useIntent(api.heroes.setPublicProfile, {
     onFeedback: notify,
@@ -63,8 +65,17 @@ function Settings() {
               {t.resumeAdventures}
             </Button>
           </>
+        ) : hero.status === 'sleeping' && hero.wakeAtTick !== null ? (
+          <p>{t.resumesNext}</p>
+        ) : hero.status === 'sleeping' && bag?.canResume ? (
+          <>
+            <p>{t.bagHasRoom}</p>
+            <Button className="mt-3" icon="play" pending={bagResume.pending} busyLabel={t.resuming} disabled={!healthy} onClick={() => bagResume.run({}, t.resumed)}>
+              {t.resumeAdventures}
+            </Button>
+          </>
         ) : hero.status === 'sleeping' ? (
-          <p>{t.stoppedFullBag}<Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.makeRoom}</Link>.</p>
+          bag ? <p>{t.stoppedFullBag}<Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.makeRoom}</Link>.</p> : null
         ) : (
           <>
             <p>{t.pausingStops}</p>

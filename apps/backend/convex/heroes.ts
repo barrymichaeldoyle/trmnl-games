@@ -34,6 +34,7 @@ import { loreView } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
+import { isBagFull } from '@trmnl-games/desk-crawler/sim/core/bag'
 
 const intentResult = intentReturns({
   operationId: v.string(),
@@ -525,6 +526,12 @@ export const returnSummary = query({
       unequipped,
       held: hero.heldItemId !== undefined,
       status: hero.status,
+      // Sleeping lasts until the next adventure even after the bag is clear. The recap uses these so it stops saying the bag is full.
+      waking: hero.status === 'sleeping' && hero.wakeAtTick !== undefined,
+      bagReady: hero.status === 'sleeping' && hero.wakeAtTick === undefined && hero.heldItemId === undefined && !isBagFull(
+        { heldItemId: hero.heldItemId, weaponId: hero.weaponId, armorId: hero.armorId, bagCapacity: hero.bagCapacity },
+        items.map((item) => ({ id: item._id, kind: item.kind })),
+      ),
     }
   },
 })

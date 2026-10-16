@@ -13,6 +13,8 @@ export type PulseHero = {
   arriveAtTick: number | null
   reviveAtTick: number | null
   wakeAtTick: number | null
+  /** Sleeping with a free slot and nothing held, so Resume is the next step. */
+  bagReady?: boolean
   world: { currentTick: number; lastCompletedTick: number | null; lastCompletedAt: number | null; lastStartedWallSlot: number | null; paused: boolean } | null
 }
 
@@ -47,7 +49,7 @@ function sentence(hero: PulseHero, t: (typeof dcScreenMessages)['en']): string {
     case 'paused':
       return t.pausedByYou
     case 'sleeping':
-      return hero.wakeAtTick !== null ? t.readyToResume : t.stoppedForBag
+      return hero.wakeAtTick !== null ? t.readyToResume : hero.bagReady ? t.roomInBag : t.stoppedForBag
     default:
       return t.adventuring
   }
@@ -77,7 +79,7 @@ export function usePulse(hero: PulseHero): { glyph: string; sentence: string; de
     const ticksTo = (tick: number | null) => (tick === null ? null : Math.max(1, tick - world.currentTick))
     if (late) detail = t.late
     else if (hero.status === 'paused') detail = t.noAdventures
-    else if (hero.status === 'sleeping') detail = hero.wakeAtTick !== null ? t.resumeScheduled : t.manageBag
+    else if (hero.status === 'sleeping') detail = hero.wakeAtTick !== null ? t.resumeScheduled : hero.bagReady ? t.chooseResume : t.manageBag
     else if (running && now - slot < 5 * 60_000) detail = t.adventuringNow
     else if (hero.status === 'travelling' && ticksTo(hero.arriveAtTick)) detail = t.arrivesAbout(clock(slotEta(now, ticksTo(hero.arriveAtTick)!)))
     else if (hero.status === 'dead' && ticksTo(hero.reviveAtTick)) detail = t.backAbout(clock(slotEta(now, ticksTo(hero.reviveAtTick)!)))
