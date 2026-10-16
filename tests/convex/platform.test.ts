@@ -44,7 +44,7 @@ describe('Desk Crawler progress deletion', () => {
     expect(await screen(t, tokenHash)).toMatchObject({ outcome: 'payload' })
 
     await ana.mutation(api.deletion.requestGameDeletion, { operationId: 'game-delete-0001', confirm: 'DELETE' })
-    await expect(ana.mutation(api.heroes.pause, { operationId: 'pause-0001' })).rejects.toThrow()
+    expect(await ana.mutation(api.heroes.pause, { operationId: 'pause-0001' })).toMatchObject({ ok: false })
     expect(await screen(t, tokenHash)).toBeNull()
     expect(await ana.query(api.users.me, {})).toMatchObject({ gameState: 'deleting', hero: null })
 

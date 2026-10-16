@@ -4,7 +4,7 @@ import { internalMutation, internalQuery, mutation, query, type MutationCtx, typ
 import { currentHero } from './lib/gameProfile'
 import { appError } from './lib/errors'
 import { sha256Hex } from './lib/hash'
-import { currentUser, runIntent } from './lib/intent'
+import { currentUser, intentReturns, narrowChanged, runIntent } from './lib/intent'
 import { validateTimezone } from './lib/names'
 import { ALERTS, alertMessage, DESK_CRAWLER_KINDS, ensureSender, inQuietHours, kindOn, lifeAlertMessage, localDay, PAPER_LIVES_KINDS, PREF_FOR, quietEndsAt, IDLE_ANGLER_KINDS, SWITCHES, type AlertKind, type AlertSwitch } from './lib/alerts'
 import { currentAngler } from './idleAngler/profile'
@@ -20,7 +20,7 @@ import { deviceLocale } from './lib/trmnlUser'
 
 const SLOT_MINUTES = 15
 
-const intentResult = v.object({ operationId: v.string(), changed: v.boolean() })
+const intentResult = intentReturns({ operationId: v.string(), changed: v.boolean() })
 
 const switches = (prefs: Doc<'users'>['alerts']) => Object.fromEntries(SWITCHES.map((id) => [id, prefs?.[id] ?? false])) as Record<AlertSwitch, boolean>
 
@@ -115,7 +115,7 @@ export const setPreferences = mutation({
       await ctx.db.patch(user._id, { alerts: next, timezone })
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 
@@ -158,7 +158,7 @@ export const subscribe = mutation({
       }
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 
@@ -173,7 +173,7 @@ export const removeDevice = mutation({
       await removeSubscription(ctx, device, undefined)
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 

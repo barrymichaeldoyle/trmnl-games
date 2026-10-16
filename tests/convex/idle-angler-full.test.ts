@@ -69,18 +69,18 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(claimed).toMatchObject({ changed: true, gold: 20 })
     expect(await as('Pat').mutation(api.idleAngler.full.claimGoal, { operationId: 'claim-goal-1' })).toEqual(claimed)
     expect(await angler(id)).toMatchObject({ gold: 20, goal: { rung: 2 } })
-    await expect(as('Pat').mutation(api.idleAngler.full.claimGoal, { operationId: 'claim-goal-2' })).rejects.toThrow(/No goal reward/)
+    expect(await as('Pat').mutation(api.idleAngler.full.claimGoal, { operationId: 'claim-goal-2' })).toMatchObject({ ok: false, message: expect.stringMatching(/No goal reward/) })
   })
 
   it('pays an order once for exactly the right fish, the receipt answering a retry', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(['minnow', 'roach', 'rudd', 'perch']), orders: [{ id: 'o1', kind: 'species', speciesId: 'roach', count: 2, bonus: 20 }] }, 'Pat')
     const [a, b, c] = await addFish(id, [['roach', 200, 10], ['roach', 300, 14], ['perch', 400, 18]])
-    await expect(as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'order-0001', orderId: 'o1', catchIds: [a!, c!] })).rejects.toThrow(/do not fit/)
+    expect(await as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'order-0001', orderId: 'o1', catchIds: [a!, c!] })).toMatchObject({ ok: false, message: expect.stringMatching(/do not fit/) })
     const first = await as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'order-0002', orderId: 'o1', catchIds: [a!, b!] })
     expect(first).toMatchObject({ changed: true, gold: 56, count: 2 })
     expect(await as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'order-0002', orderId: 'o1', catchIds: [a!, b!] })).toEqual(first)
     expect(await angler(id)).toMatchObject({ gold: 56, orders: [], counters: { ordersFilled: 1 } })
-    await expect(as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'order-0003', orderId: 'o1', catchIds: [c!] })).rejects.toThrow()
+    expect(await as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'order-0003', orderId: 'o1', catchIds: [c!] })).toMatchObject({ ok: false })
   })
 
   it('swaps one order a day', async () => {
@@ -89,13 +89,13 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     const orders = (await angler(id)).orders!
     await as('Pat').mutation(api.idleAngler.full.swapFishmongerOrder, { operationId: 'swap-00001', orderId: orders[0]!.id })
     expect((await angler(id)).orders![0]).not.toEqual(orders[0])
-    await expect(as('Pat').mutation(api.idleAngler.full.swapFishmongerOrder, { operationId: 'swap-00002', orderId: orders[1]!.id })).rejects.toThrow(/swapped an order today/)
+    expect(await as('Pat').mutation(api.idleAngler.full.swapFishmongerOrder, { operationId: 'swap-00002', orderId: orders[1]!.id })).toMatchObject({ ok: false, message: expect.stringMatching(/swapped an order today/) })
   })
 
   it('turns a small fish into deadbait and refuses a big one', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(TEN) }, 'Pat')
     const [roach, perch] = await addFish(id, [['roach', 120, 10], ['perch', 400, 18]])
-    await expect(as('Pat').mutation(api.idleAngler.full.useAsBait, { operationId: 'bait-00001', catchId: perch! })).rejects.toThrow(/small fish/)
+    expect(await as('Pat').mutation(api.idleAngler.full.useAsBait, { operationId: 'bait-00001', catchId: perch! })).toMatchObject({ ok: false, message: expect.stringMatching(/small fish/) })
     await as('Pat').mutation(api.idleAngler.full.useAsBait, { operationId: 'bait-00002', catchId: roach! })
     expect((await angler(id)).bait).toMatchObject({ deadbait: 3 })
     expect(await t.run(async (ctx) => await ctx.db.get(roach!))).toBeNull()
@@ -104,7 +104,7 @@ describe('Idle Angler, the full game (D162, F2)', () => {
   it('mounts a big fish on a peg, shows it on the wall, and takes it down', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT), gold: 500 }, 'Pat')
     const [tench, small] = await addFish(id, [['tench', 2000, 58], ['tench', 600, 40]])
-    await expect(as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'mount-0001', catchId: small! })).rejects.toThrow(/too small/)
+    expect(await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'mount-0001', catchId: small! })).toMatchObject({ ok: false, message: expect.stringMatching(/too small/) })
     expect(await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'mount-0002', catchId: tench! })).toMatchObject({ gold: 342 })
     const wall = await as('Pat').query(api.idleAngler.full.trophies, {})
     expect(wall).toMatchObject({ pegs: 6, wall: [{ name: 'Tench', grams: 2000, peg: 0 }], medals: [] })
@@ -116,7 +116,7 @@ describe('Idle Angler, the full game (D162, F2)', () => {
 
   it('takes the angler out on a charter, spends the ticket and sails back to the Pier', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(PIER_SIX), gold: 1000, waterId: 'harbour_pier', access: ['waders', 'pier_permit'], rodTier: 4, baitOnHook: 'strip', bait: { strip: 48 } }, 'Pat')
-    await expect(as('Pat').mutation(api.idleAngler.anglers.travelTo, { operationId: 'sea-000001', waterId: 'deep_sea' })).rejects.toThrow(/charter ticket/)
+    expect(await as('Pat').mutation(api.idleAngler.anglers.travelTo, { operationId: 'sea-000001', waterId: 'deep_sea' })).toMatchObject({ ok: false, message: expect.stringMatching(/charter ticket/) })
     expect(await as('Pat').mutation(api.idleAngler.full.buyCharterTicket, { operationId: 'sea-000002' })).toMatchObject({ gold: 450 })
     await as('Pat').mutation(api.idleAngler.anglers.travelTo, { operationId: 'sea-000003', waterId: 'deep_sea' })
     await nextIdleAnglerTick(t)

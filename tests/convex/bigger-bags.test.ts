@@ -17,7 +17,8 @@ const as = (t: T, alias: string) => t.withIdentity({ issuer: 'issuer', subject: 
 
 async function errorCode(promise: Promise<unknown>): Promise<string | undefined> {
   try {
-    await promise
+    const result = await promise
+    if (typeof result === 'object' && result !== null && 'ok' in result && (result as { ok: unknown }).ok === false && 'code' in result) return String((result as { code: unknown }).code)
     return undefined
   } catch (error) {
     return (error as { data?: { code?: string } }).data?.code

@@ -1,5 +1,5 @@
 /**
- * Four self-contained TRMNL layouts. Template v57 reads its own words from the payload's `labels`, in the owner's
+ * Four self-contained TRMNL layouts. Template v58 makes a full bag the whole view on every layout, with the largest bag code, the slot count and a held find (D171). Template v57 reads its own words from the payload's `labels`, in the owner's
  * language (D169). Template v56 draws each story's changes behind its HUD mark, like the recap ("+14"
  * behind the letters XP), without "No effect", and puts changes in words under the story on the X portrait ledger (D165). Template v55 shows a dug-in elite in the attention slot of every layout: its name,
  * ten HP ticks and the share left, and in the full layouts when it leaves (D163). Template v54 makes the OG quarter say a pause, a knockout's return time or a set
@@ -47,7 +47,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 57
+export const TEMPLATE_VERSION = 58
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -139,9 +139,10 @@ const grayOnly = 'hidden 1bit:block 2bit:block 4bit:block'
 const sceneImage = (field: SceneField, classes = 'lg:hidden') =>
   `<div class="${classes} flex w--min-0"><img class="image ${grayOnly}" src="{{ ${field} }}" alt=""><img class="image ${inkOnly}" src="{{ ${field} | replace: ".png", "-bwry.png" }}" alt=""></div>`
 /** Base scene everywhere, swapped for an integer-scaled larger image on screen--lg (TRMNL X). */
-const scene = (field: SceneField, large = field === 'scene_url' ? 'scene_url_large' : 'scene_url_medium') => {
+const scene = (field: SceneField, large = field === 'scene_url' ? 'scene_url_large' : 'scene_url_medium', hideXWhenBag = false) => {
+  const xArt = hideXWhenBag ? `{% if qr_base == "" %}<img class="image hidden lg:block" src="{{ ${large} }}" alt="">{% endif %}` : `<img class="image hidden lg:block" src="{{ ${large} }}" alt="">`
   return `
-  {% if ${field} != "" %}<div class="flex flex--row flex--center-x stretch-x" data-scene-art="true">${sceneImage(field)}<img class="image hidden lg:block" src="{{ ${large} }}" alt=""></div>{% endif %}`
+  {% if ${field} != "" %}<div class="flex flex--row flex--center-x stretch-x" data-scene-art="true">${sceneImage(field)}${xArt}</div>{% endif %}`
 }
 
 /** The rune rule across the full width of its column. */
@@ -763,18 +764,32 @@ const qrImage = (scale: number, largeScale: number, field = 'qr_base') =>
 const homeQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="no-shrink" data-home-qr="true">${qrImage(2, 3, 'home_qr_base')}</div>{% endif %}`
 
 /**
- * A full bag in the full layouts (D88): the stories give way to a panel that says the adventure is paused, with a
- * large code straight to the bag. `qr_base` is set on an active hero only for a full bag.
+ * A full bag (D88, D171): the adventure view gives way to this panel. The code is the largest each screen serves and
+ * opens the bag. Slots and a held find say why adventures stopped. `qr_base` is set on an active hero only for a full bag.
  */
 const bagFullPanel = (column: boolean) => `
   <div class="grow h--min-0 flex ${column ? 'flex--col' : 'flex--row'} flex--center-x flex--center-y gap--medium lg:gap--large stretch-x" data-bag-full="true">
-    <div class="no-shrink">${qrImage(3, 5)}</div>
+    <div class="no-shrink flex flex--col flex--center-x gap--xsmall">
+      ${qrImage(5, 7)}
+      <span class="label lg:title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>
+    </div>
     <div class="flex flex--col flex--left gap--small${column ? ' flex--center-x' : ''}">
       <span class="title lg:title--large">${L('bag_full')}</span>
-      <span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="2">${L('bag_paused')}</span>
-      <span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="1">{{ qr_label | escape }}</span>
+      <span class="title--small lg:title${column ? ' text--center' : ''}" data-clamp="2">${L('bag_paused')}</span>
+      <span class="label lg:title--small${column ? ' text--center' : ''}">{{ bag_used }}/{{ bag_capacity }} ${L('bag_slots')}</span>
+      {% if held_item != "" %}<span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="2">${L('bag_holding')} {{ held_item | escape }}</span>{% endif %}
+      {% if scene_url_small != "" %}<div class="no-shrink" data-scene-art="true"><img class="image" src="{{ scene_url_small }}" alt=""></div>{% endif %}
+      ${attention('label lg:title--small', 2)}
     </div>
   </div>`
+
+/** Name and status over the bag panel, for every layout that is not the full screen. */
+const bagTakeover = (column: boolean) => `
+  <div class="no-shrink flex flex--col flex--left gap--xsmall stretch-x" data-hero-header="true">
+    <span class="title" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
+    ${statusLine(2, 40)}
+  </div>
+  ${bagFullPanel(column)}`
 
 /** One reserved companion entry point per narrow view; an urgent action replaces the standing bag link. */
 const bagQr = (scale = 3, largeScale = 4, caption = true) => `
@@ -913,7 +928,7 @@ const fullPortrait = `
     </div>
   </div></div>
   <div class="no-shrink flex flex--col gap--small stretch-x">
-    <div class="relative stretch-x lg:pt--2" data-scene-row="true">${scene('scene_url_medium', 'scene_url')}${sceneQr}</div>
+    <div class="relative stretch-x lg:pt--2" data-scene-row="true">${scene('scene_url_medium', 'scene_url', true)}${sceneQr}</div>
     ${divider}
   </div>
   {% if qr_base != "" %}${bagFullPanel(true)}
@@ -1056,6 +1071,7 @@ const xQuadrant = (portrait: boolean) => `
 /** Side, portrait: a narrow column. Hero and health first, the stories take the height, the companion QR closes the column. */
 const halfVerticalPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('halfVertical')}
+  {% elsif qr_base != "" %}${bagTakeover(true)}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
     <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
@@ -1079,6 +1095,7 @@ const quarterStatus = `{% assign quarter_status = true %}{% if status == "explor
 /** Quarter, portrait: hero line, the stories, then the companion QR across the bottom. */
 const quadrantPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('narrowColumn')}
+  {% elsif qr_base != "" %}${bagTakeover(true)}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
     <span class="label" data-clamp="1">{{ hero_name | truncate: 13 | escape }}, ${L('level')} {{ level }}</span>
@@ -1097,6 +1114,7 @@ const quadrantPortrait = `
  */
 const halfVerticalBody = (withScene: boolean) => `
   {% if status == "unlinked" or first_run %}${welcome(withScene ? 'halfVertical' : 'shortColumn')}
+  {% elsif qr_base != "" %}${bagTakeover(false)}
   {% else %}
   <div class="lg:hidden grid no-shrink stretch-x gap--small">
     <div class="col--span-8 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
@@ -1163,7 +1181,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   </div>
   <div class="no-shrink flex flex--col gap--small stretch-x">
     <div class="flex flex--row flex--top lg:flex--center-x gap--medium stretch-x" data-scene-row="true">
-      {% if scene_url != "" %}<div class="no-shrink" data-scene-art="true">${sceneImage('scene_url_medium')}<img class="image hidden lg:block" src="{{ scene_url_large }}" alt=""></div>{% endif %}
+      {% if scene_url != "" %}<div class="no-shrink" data-scene-art="true">${sceneImage('scene_url_medium')}{% if qr_base == "" %}<img class="image hidden lg:block" src="{{ scene_url_large }}" alt="">{% endif %}</div>{% endif %}
       ${ogBoard}
     </div>
     <div class="grid stretch-x gap--none" data-rune-rule="true">
@@ -1194,6 +1212,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
 
 export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('halfHorizontal')}
+  {% elsif qr_base != "" %}${bagTakeover(false)}
   {% else %}
   <div class="lg:hidden grid grow h--full h--min-0 stretch-x gap--medium">
     <div class="col--span-4 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
@@ -1214,6 +1233,7 @@ export const markupHalfVertical = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${orie
 
 export const markupQuadrant = `${glyphAssigns([16])}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('quadrant')}
+  {% elsif qr_base != "" %}${bagTakeover(true)}
   {% else %}
     <div class="lg:hidden no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">
       <span class="label grow w--min-0" data-clamp="1">{{ hero_name | truncate: 11 | escape }}, ${L('level')} {{ level }}</span>

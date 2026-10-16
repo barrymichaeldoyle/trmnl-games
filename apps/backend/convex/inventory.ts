@@ -4,7 +4,7 @@ import type { Doc, Id } from './_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/server'
 import { appError } from './lib/errors'
 import { HERO_NAME_RULE, validateName } from './lib/names'
-import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
+import { commandLog, currentUser, intentReturns, isIntentRefusal, requirePlayableHero, runIntent } from './lib/intent'
 import { heroGender } from './schema'
 import { heroMaxHp, pctOf } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { bagUsed, currentTier, guaranteedTierIndex, isBagFull, nextEarlyTier, nextTier } from '@trmnl-games/desk-crawler/sim/core/bag'
@@ -25,7 +25,7 @@ import { unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career
 
 const currentTick = async (ctx: QueryCtx) => (await readWorld(ctx))?.currentTick ?? 0
 
-const intentResult = v.object({
+const intentResult = intentReturns({
   operationId: v.string(),
   changed: v.boolean(),
   gold: v.optional(v.number()),
@@ -228,6 +228,7 @@ export const mine = query({
       potionRows: potionStrengths(content).map((strength) => ({ templateId: strength.templateId, name: strength.name, healPct: strength.healPct, heals: Math.min(heroMaxHp(content, hero), pctOf(heroMaxHp(content, hero), strength.healPct)), count: items.find((item) => item.kind === 'potion' && item.templateId === strength.templateId)?.quantity ?? 0 })),
       potionCombine: workbenchOpen ? combineView(content, items, held) : null,
       canResume: hero.status === 'sleeping' && hero.heldItemId === undefined && !bagFull(hero, items) && hero.wakeAtTick === undefined,
+      resumePlan: hero.status === 'sleeping' && hero.wakeAtTick === undefined && !(hero.heldItemId === undefined && !bagFull(hero, items)) ? resumePlanView(hero, items) : null,
       gear: items
         .filter((item) => isGear(item.kind))
         .map((item) => ({
@@ -480,6 +481,69 @@ export const resumeAdventures = mutation({
       return { changed: true, tick: wakeAtTick }
     }),
 })
+
+/**
+ * Sell the weakest spares, claim the held find, and wake, in one step. The ids must be the ones `mine` showed, so a
+ * bag that changed between the look and the tap is refused before anything is sold. Resumes in the current area.
+ */
+export const clearAndResume = mutation({
+  args: { operationId: v.string(), itemIds: v.array(v.id('items')) },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.clearAndResume', { itemIds: [...args.itemIds] }, async (user) => {
+      const hero = await requirePlayableHero(ctx, user)
+      if (hero.status !== 'sleeping' || hero.wakeAtTick !== undefined) throw appError('INVALID_STATE', 'Your hero is not waiting on a full bag.')
+      const items = await heroItems(ctx, hero._id)
+      const free = hero.bagCapacity - bagUsed(asBagHero(hero), asSnapshots(items))
+      const holding = hero.heldItemId !== undefined
+      const count = Math.max(0, (holding ? 1 : 0) + 1 - free)
+      const needed = weakestSpares(hero, items, count)
+      if (needed.length < count) throw appError('BAG_FULL', 'Nothing left to sell. Free a slot another way.')
+      const wanted = [...args.itemIds].map(String).sort().join(',')
+      const actual = needed.map((item) => String(item._id)).sort().join(',')
+      if (wanted !== actual) throw appError('INVALID_STATE', 'Your bag changed. Look again before selling.')
+      let gold = 0
+      if (needed.length > 0) {
+        const sold = await sellItems(ctx, hero, needed.map((item) => item._id))
+        gold = sold.gold
+        await commandLog(ctx, (await ctx.db.get(hero._id))!, 'sell', `Sold ${sold.items.map(itemLabel).join(', ')}.`, { xpEarned: 0, gold, hp: 0 })
+      }
+      const afterSale = (await ctx.db.get(hero._id))!
+      if (afterSale.heldItemId !== undefined) {
+        const held = items.find((item) => item._id === afterSale.heldItemId)
+        await ctx.db.patch(hero._id, { heldItemId: undefined })
+        await commandLog(ctx, (await ctx.db.get(hero._id))!, 'claim_held', held ? `Claimed the ${itemLabel(held)}.` : 'Claimed the held find.')
+      }
+      const world = await readWorld(ctx)
+      const wakeAtTick = (world?.currentTick ?? 0) + 1
+      await ctx.db.patch(hero._id, { wakeAtTick })
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'resume_adventures', 'Adventures resume within 15 minutes.')
+      await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+      return { changed: true, gold, tick: wakeAtTick, count: needed.length }
+    }),
+})
+
+/** What to sell and whether to claim so one tap can put the hero back on the road. */
+function resumePlanView(hero: Doc<'heroes'>, items: Doc<'items'>[]) {
+  const free = hero.bagCapacity - bagUsed(asBagHero(hero), asSnapshots(items))
+  const holding = hero.heldItemId !== undefined
+  const count = Math.max(0, (holding ? 1 : 0) + 1 - free)
+  const sell = weakestSpares(hero, items, count)
+  return {
+    sell: sell.map((item) => ({ id: item._id, label: itemLabel(item), saleValue: item.saleValue })),
+    gold: sell.reduce((sum, item) => sum + item.saleValue, 0),
+    claim: holding,
+  }
+}
+
+/** The cheapest unequipped spares, the ones a full bag should give up first. */
+function weakestSpares(hero: Doc<'heroes'>, items: Doc<'items'>[], count: number): Doc<'items'>[] {
+  if (count <= 0) return []
+  return items
+    .filter((item) => isGear(item.kind) && item._id !== hero.weaponId && item._id !== hero.armorId && item._id !== hero.heldItemId)
+    .sort((a, b) => a.saleValue - b.saleValue || a.attack + a.defense - (b.attack + b.defense) || (a._id < b._id ? -1 : 1))
+    .slice(0, count)
+}
 
 /**
  * D61: buy the next bag with gold. The client names the bag it saw, so a

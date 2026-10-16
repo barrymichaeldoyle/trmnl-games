@@ -52,7 +52,7 @@ describe('Paper Lives photos (D159, L6)', () => {
   it("accepts last week's code from a slow screen and limits wrong guesses", async () => {
     const lastWeek = photoCode(sha256Hex(TOKEN), await userId(), photoWeek(Date.now()) - 1)
     for (let i = 0; i < 10; i += 1) expect((await ana().mutation(api.paperLives.photos.claim, { operationId: `miss-${String(i).padStart(5, '0')}`, code: '000000' })).outcome).toBe('invalid_code')
-    await expect(ana().mutation(api.paperLives.photos.claim, { operationId: 'miss-final1', code: lastWeek })).rejects.toThrow(/Too many/)
+    expect(await ana().mutation(api.paperLives.photos.claim, { operationId: 'miss-final1', code: lastWeek })).toMatchObject({ ok: false, message: expect.stringMatching(/Too many/) })
     vi.advanceTimersByTime(24 * 3_600_000)
     expect((await ana().mutation(api.paperLives.photos.claim, { operationId: 'photo-late1', code: photoCode(sha256Hex(TOKEN), await userId(), photoWeek(Date.now()) - 1) })).outcome).toBe('claimed')
   })
@@ -61,6 +61,6 @@ describe('Paper Lives photos (D159, L6)', () => {
     const code = photoCode(sha256Hex(TOKEN), await userId(), photoWeek(Date.now()))
     await t.run(async (ctx) => { const life = (await ctx.db.query('lives').first())!; await ctx.db.patch(life._id, { life: { ...life.life, status: 'ended' } }) })
     expect((await screen()).photo_code).toBeNull()
-    await expect(ana().mutation(api.paperLives.photos.claim, { operationId: 'photo-ended', code })).rejects.toThrow(/Begin the next life/)
+    expect(await ana().mutation(api.paperLives.photos.claim, { operationId: 'photo-ended', code })).toMatchObject({ ok: false, message: expect.stringMatching(/Begin the next life/) })
   })
 })

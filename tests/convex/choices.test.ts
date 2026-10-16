@@ -16,7 +16,8 @@ const potions = (t: T, heroId: Id<'heroes'>) => t.run(async (ctx) => (await ctx.
 
 async function errorCode(promise: Promise<unknown>): Promise<string | undefined> {
   try {
-    await promise
+    const result = await promise
+    if (typeof result === 'object' && result !== null && 'ok' in result && (result as { ok: unknown }).ok === false && 'code' in result) return String((result as { code: unknown }).code)
     return undefined
   } catch (error) {
     return (error as { data?: { code?: string } }).data?.code

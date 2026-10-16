@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 import { currentHero, gameProfile } from './lib/gameProfile'
-import { currentUser, runIntent } from './lib/intent'
+import { currentUser, intentReturns, isIntentRefusal, runIntent } from './lib/intent'
 import { appError } from './lib/errors'
 import { keepsakeCode, keepsakeGrant, letterKeepsakeCode, normalizedKeepsakeCode } from './lib/keepsakes'
 import { KEEPSAKES_OPEN_AT, keepsakesOpen, keepsakeWeek, keepsakeWeekStartsAt, LETTER_CODES_UNTIL, SAMPLE_KEEPSAKE_CODE } from '@trmnl-games/desk-crawler/content/keepsakes'
@@ -40,7 +40,7 @@ export const mine = query({
  */
 export const claim = mutation({
   args: { operationId: v.string(), code: v.string() },
-  returns: v.object({ operationId: v.string(), changed: v.boolean(), outcome: v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code'), v.literal('easter_egg')), totalCollected: v.number() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean(), outcome: v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code'), v.literal('easter_egg')), totalCollected: v.number() }),
   handler: async (ctx, args) => {
     const code = normalizedKeepsakeCode(args.code.slice(0, 64))
     const result = await runIntent(ctx, args.operationId, 'keepsakes.claim', { code }, async (user) => {
@@ -89,6 +89,7 @@ export const claim = mutation({
       await awardAchievements(ctx, hero, achievementState(hero, totalCollected), achievementState(hero, values.totalCollected), worldContent(world), now, world?.currentTick ?? 0)
       return { changed: true, count: values.totalCollected, keepsakeOutcome: 'claimed' as const }
     })
+    if (isIntentRefusal(result)) return result
     return { operationId: result.operationId, changed: result.changed, outcome: result.keepsakeOutcome!, totalCollected: result.count! }
   },
 })

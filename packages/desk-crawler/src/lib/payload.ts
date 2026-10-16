@@ -281,7 +281,7 @@ export function buildPayload(input: PayloadInput) {
     game_as_of_label: gameAsOf ? `${gameAsOf.label} ${gameAsOf.offset}` : words.waitingFirst,
     recap: hero !== null && input.activity ? activityRecap(input.activity.entries, recapPeriod(now, input.utcOffset ?? null), content, input.activity.truncated, locale) : null,
     ...rankingFields(input.ranking, hero === null, input.timezone, locale, words),
-    // D169: the template's own words (template v57).
+    // D169: the template's own words (template v58).
     labels: words.labels,
   }
 

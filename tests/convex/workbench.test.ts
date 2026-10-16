@@ -14,7 +14,8 @@ const as = (t: T, alias: string) => t.withIdentity({ issuer: 'issuer', subject: 
 
 async function errorCode(promise: Promise<unknown>): Promise<string | undefined> {
   try {
-    await promise
+    const result = await promise
+    if (typeof result === 'object' && result !== null && 'ok' in result && (result as { ok: unknown }).ok === false && 'code' in result) return String((result as { code: unknown }).code)
     return undefined
   } catch (error) {
     return (error as { data?: { code?: string } }).data?.code
@@ -131,12 +132,7 @@ describe('salvage and the workbench (D129, content v13)', () => {
     await t.run(async (ctx) => await ctx.db.patch(heroId, { level: 8 }))
     const view = await user.query(api.inventory.mine, {})
     expect(view.gear.find((g: { id: string }) => g.id === weaponId).nextStep).toMatchObject({ label: 'Upgrade to Mk III', affordable: false, shortfall: { scrap: 6, parts: 4 } })
-    try {
-      await user.mutation(api.inventory.upgrade, { operationId: opId(), itemId: weaponId })
-      throw new Error('expected a refusal')
-    } catch (error) {
-      expect((error as { data?: { code?: string; message?: string } }).data).toMatchObject({ code: 'NOT_ENOUGH_MATERIALS', message: 'Needs 6 Scrap and 4 Parts more.' })
-    }
+    expect(await user.mutation(api.inventory.upgrade, { operationId: opId(), itemId: weaponId })).toMatchObject({ ok: false, code: 'NOT_ENOUGH_MATERIALS', message: 'Needs 6 Scrap and 4 Parts more.' })
     expect(await materialsOf(t, heroId)).toEqual({})
   })
 

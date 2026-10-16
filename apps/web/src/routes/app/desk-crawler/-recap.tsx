@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react'
 import { useEffect, useRef, useState } from 'react'
 import { Glyph } from '../../../lib/glyphs'
 import { api } from '@trmnl-games/backend/api'
+import { isRefusal } from '../../../lib/intent'
 import { afterVisibleVisit } from '../../../lib/visibleVisit'
 import { LocalTime } from '../../../lib/localTime'
 import { formatNumber, useLocale, useT } from '../../../lib/i18n'
@@ -48,6 +49,7 @@ export function ReturnRecap() {
       acknowledged.current = true
       try {
         const result = await record({ operationId: crypto.randomUUID(), expectedLogSequence: sequence })
+        if (isRefusal(result)) return
         if (result.recapChanged && retries.current < 1) {
           retries.current += 1
           // Newer events exist: show them before acknowledging (bounded retry).

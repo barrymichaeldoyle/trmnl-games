@@ -10,7 +10,7 @@ import type { Doc, Id } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
 import { mutation, query } from './_generated/server'
 import { appError } from './lib/errors'
-import { currentUser, runIntent } from './lib/intent'
+import { currentUser, intentReturns, narrowChanged, runIntent } from './lib/intent'
 
 /** D115: each game's connections are its own; a game being deleted shows none. */
 async function gameDeleting(ctx: QueryCtx, userId: Id<'users'>, slug: GameSlug): Promise<boolean> {
@@ -79,7 +79,7 @@ export const forManagement = query({
 /** Local revocation of one installation; the hero and other installations are untouched. */
 export const disconnect = mutation({
   args: { gameSlug: v.optional(gameSlug), operationId: v.string(), instanceId: v.id('trmnlInstances') },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     const result = await runIntent(ctx, args.operationId, 'connections.disconnect', { instanceId: args.instanceId }, async (user) => {
       const row = await ctx.db.get(args.instanceId)
@@ -88,6 +88,6 @@ export const disconnect = mutation({
       await ctx.db.patch(row._id, { state: 'disconnected' })
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })

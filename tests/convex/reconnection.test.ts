@@ -292,7 +292,7 @@ describe('delete → fresh TRMNL installation with a reused credential', () => {
     const first = await verify('New', NEW_UUID)
     const second = await verify('Other', NEW_UUID)
     await user('New').mutation(api.trmnl.completeReconnection, { attemptId: first, operationId: 'win-same-uuid-race', confirm: 'CONNECT' })
-    await expect(user('Other').mutation(api.trmnl.completeReconnection, { attemptId: second, operationId: 'lose-same-uuid-race', confirm: 'CONNECT' })).rejects.toThrow(/another/)
+    expect(await user('Other').mutation(api.trmnl.completeReconnection, { attemptId: second, operationId: 'lose-same-uuid-race', confirm: 'CONNECT' })).toMatchObject({ ok: false, code: 'CONNECTION_CONFLICT' })
     expect(await t.run(ctx => ctx.db.query('users').collect())).toHaveLength(1) // losing confirmation rolled back its new profile too
     expect(await t.run(ctx => ctx.db.query('heroes').collect())).toHaveLength(1)
     expect(await t.run(ctx => ctx.db.query('trmnlGrants').collect())).toHaveLength(1)

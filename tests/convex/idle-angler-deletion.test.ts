@@ -48,7 +48,7 @@ describe('Idle Angler deletion (D115, S2)', () => {
     await ana().mutation(api.deletion.requestGameDeletion, { operationId: 'del-ia-0001', confirm: 'DELETE', gameSlug: 'idle-angler' })
     // Authority goes at once.
     expect((await screen(t, 'ia-token-ana', IA_UUID, '/trmnl/idle-angler/v1/screen')).status).toBe(404)
-    await expect(ana().mutation(api.idleAngler.anglers.pause, { operationId: 'pause-ia-01' })).rejects.toThrow()
+    expect(await ana().mutation(api.idleAngler.anglers.pause, { operationId: 'pause-ia-01' })).toMatchObject({ ok: false })
     await t.finishAllScheduledFunctions(vi.runAllTimers)
     const state = await t.run(async (ctx) => ({
       anglers: await ctx.db.query('anglers').collect(),

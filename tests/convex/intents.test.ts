@@ -16,7 +16,8 @@ const as = (t: T, alias: string) => t.withIdentity({ issuer: 'issuer', subject: 
 
 async function errorCode(promise: Promise<unknown>): Promise<string | undefined> {
   try {
-    await promise
+    const result = await promise
+    if (typeof result === 'object' && result !== null && 'ok' in result && (result as { ok: unknown }).ok === false && 'code' in result) return String((result as { code: unknown }).code)
     return undefined
   } catch (error) {
     return (error as { data?: { code?: string } }).data?.code
@@ -143,6 +144,26 @@ describe('player intents', () => {
     expect(resumed).toMatchObject({ changed: true, tick: 1 })
     await runTick(t)
     expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ status: 'travelling', targetBiomeId: 'server_room', arriveAtTick: 2 })
+  })
+
+  it('sells the weakest spares, claims the held find and resumes in one step', async () => {
+    const heroId = await seedHero(t, { level: 4, hp: 136, status: 'sleeping' }, 'Ana')
+    await addGear(t, heroId, 6)
+    const [held] = await addGear(t, heroId, 1)
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { heldItemId: held }))
+    const user = as(t, 'Ana')
+    const view = (await user.query(api.inventory.mine, {})) as { resumePlan: { sell: { id: Id<'items'>; saleValue: number }[]; claim: boolean; gold: number } | null; canResume: boolean }
+    expect(view.canResume).toBe(false)
+    expect(view.resumePlan?.claim).toBe(true)
+    expect(view.resumePlan?.sell.length).toBeGreaterThan(0)
+    expect(await errorCode(user.mutation(api.inventory.clearAndResume, { operationId: opId(), itemIds: [] }))).toBe('INVALID_STATE')
+    expect(await t.run(async (ctx) => await ctx.db.get(held!))).not.toBeNull()
+    const cleared = await user.mutation(api.inventory.clearAndResume, { operationId: opId(), itemIds: view.resumePlan!.sell.map((item) => item.id) })
+    expect(cleared).toMatchObject({ changed: true, gold: view.resumePlan!.gold })
+    const hero = await t.run(async (ctx) => await ctx.db.get(heroId))
+    expect(hero?.heldItemId).toBeUndefined()
+    expect(hero?.wakeAtTick).toBe(1)
+    expect(hero?.status).toBe('sleeping')
   })
 
   it('pauses and resumes without catch-up, and potions respect full HP', async () => {

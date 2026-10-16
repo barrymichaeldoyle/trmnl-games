@@ -5,7 +5,7 @@ import { ConvexError } from 'convex/values'
 import { useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { captureAnalytics } from '../../../lib/analytics'
-import { errorMessage } from '../../../lib/intent'
+import { errorMessage, isRefusal } from '../../../lib/intent'
 import { LocalTime } from '../../../lib/localTime'
 import { useOnline } from '../../../lib/network'
 import { Photos, type PhotoView } from '../../../lib/paperLives'
@@ -45,6 +45,7 @@ export function PhotoClaim({ name }: { name: string }) {
     try {
       await submission.current.run({ code: normalized }, async (input) => {
         const result = await mutate(input)
+        if (isRefusal(result)) { setError(result.message); return }
         if (result.outcome === 'invalid_code') setError('That code doesn’t match your TRMNL connection. Check the digits on your screen, or wait for its next refresh.')
         else if (result.outcome === 'already_claimed') setMessage('This week’s photo is already in the album.')
         else {

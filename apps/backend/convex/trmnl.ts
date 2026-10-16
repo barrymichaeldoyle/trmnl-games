@@ -17,7 +17,7 @@ import { ALIAS_RULE, HERO_NAME_RULE, normalizeAlias, validateName, validateTimez
 import { aliasTaken } from './lib/aliases'
 import { getOrCreateWorld, worldContent } from './world'
 import { assertNotRevoked, identityHash } from './deletion'
-import { runIntent } from './lib/intent'
+import { intentReturns, narrowChanged, runIntent } from './lib/intent'
 import { MANAGEMENT_PROOF_MS, verifyManagementJwt } from './lib/trmnlManagement'
 import { parseTrmnlLocale } from './lib/trmnlUser'
 
@@ -394,7 +394,7 @@ export const recordReconnectionProof = internalMutation({
 /** The explicit same-account confirmation is the only point that creates/relinks game data. */
 export const completeReconnection = mutation({
   args: { operationId: v.string(), attemptId: v.id('trmnlReconnectAttempts'), confirm: v.literal('CONNECT') },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) throw appError('UNAUTHENTICATED', 'Sign in to reconnect TRMNL.')
@@ -402,6 +402,10 @@ export const completeReconnection = mutation({
     const now = Date.now()
     const pending = await ctx.db.get(args.attemptId)
     let user = await ctx.db.query('users').withIndex('by_tokenIdentifier', q => q.eq('tokenIdentifier', identity.tokenIdentifier)).unique()
+    // A taken installation is refused before a new profile is written. A throw inside runIntent would commit that profile.
+    const verifiedUuid = pending?.verifiedUuid
+    const taken = verifiedUuid === undefined ? null : await ctx.db.query('trmnlInstances').withIndex('by_uuid', (q) => q.eq('uuid', verifiedUuid)).unique()
+    if (taken && taken.userId !== user?._id) return { operationId: args.operationId, ok: false as const, changed: false as const, code: 'CONNECTION_CONFLICT', message: 'This installation is connected to another TRMNL Games account.' }
     if (!user) {
       if (!pending || pending.tokenIdentifier !== identity.tokenIdentifier || !pending.verifiedUuid || pending.expiresAt <= now || !pending.proofExpiresAt || pending.proofExpiresAt <= now) throw appError('INSTALL_INVALID', 'Verify this installation through Configure in TRMNL before connecting.')
       const alias = validateName(pending.publicAlias, ALIAS_RULE)
@@ -432,7 +436,7 @@ export const completeReconnection = mutation({
       await ctx.db.delete(attempt._id)
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 

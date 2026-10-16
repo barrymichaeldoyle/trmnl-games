@@ -87,10 +87,11 @@ function Inventory() {
   const [review, setReview] = useState<Review | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const [destination, setDestination] = useState('')
+  const [clearing, setClearing] = useState(false)
   const { notice, notify: announce, dismiss } = useNotice()
   // Errors inside an open sheet show there; the pinned notice carries the rest (the sheet would hide it).
   const sheetOpen = useRef(false)
-  sheetOpen.current = openId !== null || review !== null
+  sheetOpen.current = openId !== null || review !== null || clearing
   const notify = (feedback: { error: string | null; message: string | null }) => {
     if (feedback.error && sheetOpen.current) return
     announce(feedback)
@@ -104,6 +105,7 @@ function Inventory() {
   const combine = useIntent(api.inventory.combinePotions, { onFeedback: notify })
   const claim = useIntent(api.inventory.claimHeld, { onFeedback: notify })
   const resume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
+  const clearResume = useIntent(api.inventory.clearAndResume, { onFeedback: notify })
   const buyBag = useIntent(api.inventory.buyBag, { onFeedback: notify })
   const buyPouch = useIntent(api.inventory.buyPouch, { onFeedback: notify })
   const buyOffer = useIntent(api.inventory.buyOffer, { onFeedback: notify })
@@ -133,7 +135,7 @@ function Inventory() {
   const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
   const deltaOf = (item: Gear) => { const current = equippedOf(item.kind); return statOf(item) - (current ? statOf(current) : 0) }
-  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending || buyNameTag.pending || buyMakeover.pending
+  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || clearResume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending || buyNameTag.pending || buyMakeover.pending
   // D131: the strengths in the pouch and the combine recipe; one row and no recipe under a catalog without strengths.
   const potionRows = bag.potionRows as PotionRow[]
   const potionCombine = bag.potionCombine as Combine | null
@@ -144,6 +146,7 @@ function Inventory() {
   const filling = bag.used >= Math.ceil(bag.capacity * 0.8)
   // A held find needs a free bag slot to be claimed.
   const claimBlocked = full
+  const plan = bag.resumePlan as { sell: { id: Id<'items'>; label: string; saleValue: number }[]; gold: number; claim: boolean } | null
   const opened = openId === 'potions' ? null : gear.find((item) => item.id === openId) ?? null
   const slotLabel = (item: Gear) => {
     const delta = deltaOf(item)
@@ -188,13 +191,15 @@ function Inventory() {
         <p className="text-sm tabular-nums text-muted">{t.slots(bag.ladder.name, bag.used, bag.capacity)}</p>
       </header>
       {hero.status === 'sleeping' ? (
-        <Card title={hero.wakeAtTick !== null ? t.resumingNext : held ? t.findWaiting : t.resumeAdventures}>
-          {held ? <>
-            <p><strong>{c.name(held.label)}</strong>{t.didntFit}</p>
-            <Button className="mt-3" pending={claim.pending} busyLabel={t.claiming} disabled={!manageable || busy || claimBlocked} onClick={() => act(held, claim, {}, claimMessage(held))}>{t.claimFind}</Button>
-            {claimBlocked ? <p className="mt-2 text-sm">{t.sellFirst}</p> : null}
-          </> : hero.wakeAtTick !== null ? <ResumeAt /> : <>
-            <p>{bag.canResume ? t.roomForMore : t.sellOneMore}</p>
+        <Card title={hero.wakeAtTick !== null ? t.resumingNext : plan ? (plan.claim ? t.findWaiting : t.resumeAdventures) : t.resumeAdventures}>
+          {hero.wakeAtTick !== null ? <ResumeAt /> : plan ? <>
+            <p>{plan.claim && held ? <><strong>{c.name(held.label)}</strong>{t.didntFit}</> : t.bagStopped}</p>
+            {plan.sell.length > 0 ? <p className="mt-2 text-sm">{t.sellWeakest(plan.sell.map((item) => c.name(item.label)).join(', '), plan.gold)}</p> : null}
+            {plan.sell.length > 0
+              ? <Button className="mt-3" disabled={!manageable || busy} onClick={() => setClearing(true)}>{plan.claim ? t.sellClaimResume : t.sellAndResume}</Button>
+              : <Button className="mt-3" pending={clearResume.pending} busyLabel={t.claiming} disabled={!manageable || busy} onClick={() => clearResume.run({ itemIds: [] }, t.resumingOnNext)}>{t.claimAndResume}</Button>}
+          </> : <>
+            <p>{t.roomForMore}</p>
             <label className="mt-4 flex flex-col gap-2 text-sm">
               <span className="font-semibold">{t.resumeIn}</span>
               <select value={destination} disabled={busy || !manageable} onChange={(event) => setDestination(event.target.value)} className="pixel-select min-h-11 border-2 border-edge pr-9 pl-3 text-base">
@@ -206,6 +211,18 @@ function Inventory() {
             {destination ? <p className="mt-2 text-sm text-muted">{t.setsOut}</p> : null}
           </>}
         </Card>
+      ) : null}
+      {plan && plan.sell.length > 0 ? (
+        <ConfirmSheet open={clearing} title={t.makeRoomResume} confirmLabel={plan.claim ? t.sellClaimResume : t.sellAndResume} busyLabel={t.scheduling} cancelLabel={t.keepThem} pending={clearResume.pending} disabled={!manageable} onClose={() => setClearing(false)} onConfirm={async () => {
+          const done = await clearResume.run({ itemIds: plan.sell.map((item) => item.id) }, t.resumingOnNext)
+          if (done) setClearing(false)
+        }}>
+          <Consequences>
+            <li>{t.sellWeakest(plan.sell.map((item) => c.name(item.label)).join(', '), plan.gold)}</li>
+            {plan.claim && held ? <li>{t.claimMessage(held.label)}</li> : null}
+          </Consequences>
+          <ErrorNote message={clearResume.error} />
+        </ConfirmSheet>
       ) : null}
       {reason ? <p className="text-sm">{hero.status === 'paused' && hero.simulationState !== 'quarantined' ? <>{t.pausedBefore}<Link to="/app/desk-crawler" className="underline underline-offset-4">{t.resumeFromHero}</Link>{t.pausedAfter}</> : reason}</p> : null}
 
@@ -293,7 +310,7 @@ function Inventory() {
       </Sheet>
 
       <Sheet open={openId !== null && openId !== 'potions'} onClose={() => setOpenId(null)} label={t.gear}>
-        {opened ? <ItemSheet key={opened.id} item={opened} hero={hero} current={equippedOf(opened.kind)} manageable={manageable} reason={reason} busy={busy} claimBlocked={claimBlocked} intents={{ equip, unequip, claim }} onClose={() => setOpenId(null)} onEquip={() => act(opened, equip, { itemId: opened.id }, t.equippedMsg(opened.label))} onUnequip={() => act(opened, unequip, { slot: opened.kind }, t.unequippedMsg(opened.label))} onClaim={() => act(opened, claim, {}, claimMessage(opened))} onSell={() => { setOpenId(null); setReview({ kind: 'sell', items: [opened] }) }} onSalvage={workbench ? () => { setOpenId(null); setReview({ kind: 'salvage', items: [opened] }) } : null} materials={materials} /> : <>
+        {opened ? <ItemSheet key={opened.id} item={opened} hero={hero} current={equippedOf(opened.kind)} manageable={manageable} reason={reason} busy={busy} claimBlocked={claimBlocked} bagFull={full} intents={{ equip, unequip, claim }} onClose={() => setOpenId(null)} onEquip={() => act(opened, equip, { itemId: opened.id }, t.equippedMsg(opened.label))} onUnequip={() => act(opened, unequip, { slot: opened.kind }, t.unequippedMsg(opened.label))} onClaim={() => act(opened, claim, {}, claimMessage(opened))} onSell={() => { setOpenId(null); setReview({ kind: 'sell', items: [opened] }) }} onSalvage={workbench ? () => { setOpenId(null); setReview({ kind: 'salvage', items: [opened] }) } : null} materials={materials} /> : <>
           <SheetTitle>{t.goneTitle}</SheetTitle>
           <p className="mt-2 text-sm">{t.goneBody}</p>
           <Button allowOffline variant="secondary" className="mt-4 w-full" onClick={() => setOpenId(null)}>{t.close}</Button>
@@ -321,7 +338,7 @@ function Inventory() {
 }
 
 /** One piece: its icon, stats against the equipped piece, affix and sale value, then the actions open to it. */
-function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked, intents, onClose, onEquip, onUnequip, onClaim, onSell, onSalvage, materials }: {
+function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked, bagFull, intents, onClose, onEquip, onUnequip, onClaim, onSell, onSalvage, materials }: {
   item: Gear
   hero: { level: number }
   current: Gear | null
@@ -329,6 +346,7 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
   reason: string | null
   busy: boolean
   claimBlocked: boolean
+  bagFull: boolean
   intents: { equip: { pending: boolean; error: string | null }; unequip: { pending: boolean; error: string | null }; claim: { pending: boolean; error: string | null } }
   onClose: () => void
   onEquip: () => void
@@ -366,7 +384,7 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
       <dd className="tabular-nums text-gold-ink">{t.goldAmount(item.saleValue)}</dd>
       {onSalvage ? <><dt className="caps text-muted">{t.salvagesFor}</dt><dd className="tabular-nums text-rare-ink">{materialsText(item.salvage, materials, t)}</dd></> : null}
     </dl>
-    {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : item.held && claimBlocked ? <p className="mt-3 text-sm">{t.claimNeedsRoom}</p> : !item.equipped && !item.held && !canEquip ? <p className="mt-3 text-sm">{t.wearFrom(item.requiredLevel)}</p> : null}
+    {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : item.held && claimBlocked ? <p className="mt-3 text-sm">{t.claimNeedsRoom}</p> : item.equipped && bagFull ? <p className="mt-3 text-sm">{t.freeToUnequip}</p> : !item.equipped && !item.held && !canEquip ? <p className="mt-3 text-sm">{t.wearFrom(item.requiredLevel)}</p> : null}
     <div className="mt-3 empty:hidden"><ErrorNote message={error} /></div>
     {confirming ? (
       <div className="mt-4 flex flex-col gap-3">
@@ -381,14 +399,14 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
           busyLabel={confirming === 'unequip' ? t.removing : t.equipping}
           cancelLabel={t.keepItOn}
           pending={confirming === 'unequip' ? intents.unequip.pending : intents.equip.pending}
-          disabled={!manageable || busy}
+          disabled={!manageable || busy || (confirming === 'unequip' && bagFull)}
           onConfirm={confirming === 'unequip' ? onUnequip : onEquip}
           onCancel={() => setConfirming(null)}
         />
       </div>
     ) : <div className="mt-4 grid grid-cols-2 gap-2">
       {item.equipped
-        ? <Button variant="secondary" disabled={!manageable || busy} pending={intents.unequip.pending} busyLabel={t.removing} onClick={() => setConfirming('unequip')}>{t.unequip}</Button>
+        ? <Button variant="secondary" disabled={!manageable || busy || bagFull} pending={intents.unequip.pending} busyLabel={t.removing} onClick={() => setConfirming('unequip')}>{t.unequip}</Button>
         : item.held
           ? <Button disabled={!manageable || busy || claimBlocked} pending={intents.claim.pending} busyLabel={t.claiming} onClick={onClaim}>{t.claimFind}</Button>
           : <>

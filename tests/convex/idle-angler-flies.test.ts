@@ -51,7 +51,7 @@ describe('Idle Angler fly box (D115, S6)', () => {
   it("accepts last week's code from a slow screen and limits wrong guesses", async () => {
     const lastWeek = flyCode(sha256Hex(TOKEN), await userId(), flyWeek(Date.now()) - 1)
     for (let i = 0; i < 10; i += 1) expect((await ana().mutation(api.idleAngler.flies.claim, { operationId: `miss-${String(i).padStart(5, '0')}`, code: '000000' })).outcome).toBe('invalid_code')
-    await expect(ana().mutation(api.idleAngler.flies.claim, { operationId: 'miss-final1', code: lastWeek })).rejects.toThrow(/Too many/)
+    expect(await ana().mutation(api.idleAngler.flies.claim, { operationId: 'miss-final1', code: lastWeek })).toMatchObject({ ok: false, message: expect.stringMatching(/Too many/) })
     vi.advanceTimersByTime(24 * 3_600_000)
     expect((await ana().mutation(api.idleAngler.flies.claim, { operationId: 'fly-late01', code: flyCode(sha256Hex(TOKEN), await userId(), flyWeek(Date.now()) - 1) })).outcome).toBe('claimed')
   })

@@ -34,10 +34,10 @@ describe('friends and rivals (D143)', () => {
   it('follows only public pages, never yourself, and fails the same way for hidden and missing names', async () => {
     await seedHero(t, {}, 'Wren')
     await seedHero(t, { publicProfile: false }, 'Moss')
-    await expect(follow('Wren', 'Moss')).rejects.toThrow(/hidden, or there is no player/)
-    await expect(follow('Wren', 'Nobody')).rejects.toThrow(/hidden, or there is no player/)
+    expect(await follow('Wren', 'Moss')).toMatchObject({ ok: false, message: expect.stringMatching(/hidden, or there is no player/) })
+    expect(await follow('Wren', 'Nobody')).toMatchObject({ ok: false, message: expect.stringMatching(/hidden, or there is no player/) })
     await publish('Wren')
-    await expect(follow('Wren', 'Wren')).rejects.toThrow(/hidden, or there is no player/)
+    expect(await follow('Wren', 'Wren')).toMatchObject({ ok: false, message: expect.stringMatching(/hidden, or there is no player/) })
     await publish('Moss')
     expect(await follow('Wren', ' moss ')).toMatchObject({ changed: true })
     expect(await follow('Wren', 'Moss')).toMatchObject({ changed: false })
@@ -109,7 +109,7 @@ describe('friends and rivals (D143)', () => {
       })
     }
     await publish('Moss')
-    await expect(follow('Wren', 'Moss')).rejects.toThrow(/up to 20/)
+    expect(await follow('Wren', 'Moss')).toMatchObject({ ok: false, message: expect.stringMatching(/up to 20/) })
     expect(await as('Wren').query(api.follows.status, { alias: 'Moss' })).toMatchObject({ full: true })
     const { follows } = await list('Wren')
     expect(follows).toHaveLength(20)

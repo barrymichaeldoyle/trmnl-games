@@ -72,7 +72,7 @@ describe('dug-in elites (D163)', () => {
     await seedWorld(t, { activeContentVersion: 'v24' })
     const id = await seedHero(t, hero)
     const user = await as(t, id)
-    await expect(user.mutation(api.heroes.changeBiome, { operationId: 'travel-0001', biomeId: 'cafeteria_depths' })).rejects.toThrow(/STANDOFF_RUNNING|dug-in/)
+    expect(await user.mutation(api.heroes.changeBiome, { operationId: 'travel-0001', biomeId: 'cafeteria_depths' })).toMatchObject({ ok: false, message: expect.stringMatching(/STANDOFF_RUNNING|dug-in/) })
     expect((await heroDoc(t, id)).standoff).toEqual(standoff)
     await user.mutation(api.heroes.changeBiome, { operationId: 'travel-0002', biomeId: 'cafeteria_depths', leaveStandoff: true })
     const after = await heroDoc(t, id)

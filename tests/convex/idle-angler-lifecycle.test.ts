@@ -119,7 +119,7 @@ describe('Idle Angler TRMNL lifecycle (D115, S2)', () => {
     expect(await ana.query(api.connections.forManagement, { gameSlug: 'idle-angler', uuid: UUID_A })).toMatchObject({ owned: true, heroName: 'Ana' })
     expect(await ana.query(api.connections.forManagement, { uuid: UUID_A })).toEqual({ owned: false })
     const id = (await t.run(async (ctx) => await ctx.db.query('trmnlInstances').first()))!._id
-    await expect(ana.mutation(api.connections.disconnect, { operationId: 'disc-00001', instanceId: id })).rejects.toThrow()
+    expect(await ana.mutation(api.connections.disconnect, { operationId: 'disc-00001', instanceId: id })).toMatchObject({ ok: false })
     expect(await ana.mutation(api.connections.disconnect, { gameSlug: 'idle-angler', operationId: 'disc-00002', instanceId: id })).toMatchObject({ changed: true })
     expect((await screen(t, 'ia-tok-ana', UUID_A)).status).toBe(404)
   })

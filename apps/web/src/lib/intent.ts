@@ -15,6 +15,10 @@ export function errorMessage(error: unknown): string {
   return serverMessage(englishErrorMessage(error), documentLocale())
 }
 
+export function isRefusal(value: unknown): value is { ok: false; code: string; message: string } {
+  return typeof value === 'object' && value !== null && 'ok' in value && (value as { ok?: unknown }).ok === false && 'message' in value && 'code' in value
+}
+
 function englishErrorMessage(error: unknown): string {
   if (error instanceof ExpiredSubmission) return error.message
   if (error instanceof ConvexError && typeof error.data === 'object' && error.data !== null && 'message' in error.data) {
@@ -53,6 +57,11 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
     setMessage(null)
     try {
       const done = await submission.run(args, (input) => (mutate as unknown as (input: Args) => Promise<unknown>)(input as Args), (error) => error instanceof ConvexError)
+      if (isRefusal(done)) {
+        captureAnalytics('intent failed', { intent: getFunctionName(fn), error_code: done.code })
+        fail(serverMessage(done.message, documentLocale()))
+        return false
+      }
       if (done) {
         const success = intentAnalytics(getFunctionName(fn), args as Record<string, unknown>)
         if (success) captureAnalytics(...success)
@@ -61,7 +70,7 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
         setMessage(shown)
         onFeedback.current?.({ error: null, message: shown })
       }
-      return done
+      return Boolean(done)
     } catch (caught) {
       const code = caught instanceof ConvexError && caught.data && typeof caught.data === 'object' && 'code' in caught.data ? String(caught.data.code) : caught instanceof ExpiredSubmission ? 'SUBMISSION_EXPIRED' : 'UNKNOWN'
       captureAnalytics('intent failed', { intent: getFunctionName(fn), error_code: code })

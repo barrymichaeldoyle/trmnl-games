@@ -17,7 +17,7 @@ import type { Doc, Id, TableNames } from './_generated/dataModel'
 import { action, internalAction, internalMutation, internalQuery, mutation, query, type MutationCtx } from './_generated/server'
 import { appError } from './lib/errors'
 import { sha256Hex } from './lib/hash'
-import { runIntent } from './lib/intent'
+import { intentReturns, narrowChanged, runIntent } from './lib/intent'
 import { eraseAnalyticsPerson } from './analytics'
 import { DELETION_EMAIL_ATTEMPTS, DELETION_LINK_TTL_MS, deletionToken, validDeletionToken, verifiedPrimaryEmail } from './lib/deletionConfirmation'
 import schema from './schema'
@@ -38,7 +38,7 @@ export const identityHash = (tokenIdentifier: string) => sha256Hex(`auth:${token
 export const requestDeletion = mutation({
   // Optional only for a rolling deploy: the former immediate-delete call fails safely.
   args: { operationId: v.string(), confirm: v.literal('DELETE'), token: v.optional(v.string()) },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity()
     if (!identity) throw appError('UNAUTHENTICATED', 'Sign in to continue.')
@@ -63,14 +63,14 @@ export const requestDeletion = mutation({
       await ctx.db.patch(confirmation._id, { state: 'confirmed' })
       return { changed: await startDeletion(ctx, user, Date.now()) }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 
 /** Delete this game's progress and connections while retaining the shared account. */
 export const requestGameDeletion = mutation({
   args: { operationId: v.string(), confirm: v.literal('DELETE'), gameSlug: v.optional(gameSlugValidator) },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     // D115: Idle Angler progress is deleted on its own; the account and Desk Crawler stay.
     if (args.gameSlug === 'idle-angler') {
@@ -84,7 +84,7 @@ export const requestGameDeletion = mutation({
         await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
         return { changed: true }
       })
-      return { operationId: result.operationId, changed: result.changed }
+      return narrowChanged(result)
     }
     // D159: Paper Lives progress likewise, leaving the account and the other games.
     if (args.gameSlug === 'paper-lives') {
@@ -98,7 +98,7 @@ export const requestGameDeletion = mutation({
         await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
         return { changed: true }
       })
-      return { operationId: result.operationId, changed: result.changed }
+      return narrowChanged(result)
     }
     const result = await runIntent(ctx, args.operationId, 'deletion.requestGameDeletion', {}, async (user) => {
       const reconnect = await ctx.db.query('trmnlReconnectAttempts').withIndex('by_tokenIdentifier', q => q.eq('tokenIdentifier', user.tokenIdentifier)).unique()
@@ -115,7 +115,7 @@ export const requestGameDeletion = mutation({
       await ctx.scheduler.runAfter(0, internal.deletion.purgeGameStep, { jobId })
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 

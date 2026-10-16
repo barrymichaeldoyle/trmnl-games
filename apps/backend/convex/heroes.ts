@@ -8,7 +8,7 @@ import { isGear } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
 import { appError } from './lib/errors'
 import { pagePublic } from './lib/publicPage'
-import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
+import { commandLog, currentUser, intentReturns, requirePlayableHero, runIntent } from './lib/intent'
 import { deriveStats } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
@@ -35,7 +35,7 @@ import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocke
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 
-const intentResult = v.object({
+const intentResult = intentReturns({
   operationId: v.string(),
   changed: v.boolean(),
   gold: v.optional(v.number()),

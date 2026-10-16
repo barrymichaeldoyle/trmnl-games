@@ -2,7 +2,7 @@ import { currentHero, gameProfile } from './lib/gameProfile'
 import { heroStatus, locale } from './schema'
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { currentUser, runIntent } from './lib/intent'
+import { currentUser, intentReturns, narrowChanged, runIntent } from './lib/intent'
 import { ALIAS_RULE, HERO_NAME_RULE, normalizeAlias, validateName, validateTimezone } from './lib/names'
 import { appError } from './lib/errors'
 import { identityHash } from './deletion'
@@ -100,7 +100,7 @@ export const setLanguage = mutation({
 /** Formatting-only setting (api.md); never affects deadlines or rewards. */
 export const setTimezone = mutation({
   args: { operationId: v.string(), timezone: v.string() },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     const result = await runIntent(ctx, args.operationId, 'users.setTimezone', { timezone: args.timezone }, async (user) => {
       const timezone = validateTimezone(args.timezone)
@@ -108,14 +108,14 @@ export const setTimezone = mutation({
       await ctx.db.patch(user._id, { timezone })
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 
 /** Restricted owner replacement after an admin name repair (D23); not an ordinary rename. */
 export const replacePublicNames = mutation({
   args: { operationId: v.string(), publicAlias: v.string(), heroName: v.string() },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     const result = await runIntent(ctx, args.operationId, 'users.replacePublicNames', { publicAlias: args.publicAlias, heroName: args.heroName }, async (user) => {
       if (!user.nameRepairRequired) throw appError('INVALID_STATE', 'No name change is required.')
@@ -130,7 +130,7 @@ export const replacePublicNames = mutation({
       if (hero) await ctx.db.patch(hero._id, { name: heroName.value })
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })
 
@@ -141,7 +141,7 @@ export const replacePublicNames = mutation({
  */
 export const changePublicName = mutation({
   args: { operationId: v.string(), publicAlias: v.string() },
-  returns: v.object({ operationId: v.string(), changed: v.boolean() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean() }),
   handler: async (ctx, args) => {
     const result = await runIntent(ctx, args.operationId, 'users.changePublicName', { publicAlias: args.publicAlias }, async (user) => {
       if (user.nameRepairRequired) throw appError('INVALID_STATE', 'Choose new names from the name change notice first.')
@@ -157,6 +157,6 @@ export const changePublicName = mutation({
       await ctx.db.patch(user._id, { publicAlias: alias.value, normalizedAlias, publicNameVersion: user.publicNameVersion + 1, publicNameChangedAt: now, heldAlias: held })
       return { changed: true }
     })
-    return { operationId: result.operationId, changed: result.changed }
+    return narrowChanged(result)
   },
 })

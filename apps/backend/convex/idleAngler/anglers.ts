@@ -8,7 +8,7 @@ import type { Doc } from '../_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from '../_generated/server'
 import { appError } from '../lib/errors'
 import { pagePublic } from '../lib/publicPage'
-import { currentUser, runIntent, type IntentResult } from '../lib/intent'
+import { currentUser, intentReturns, isIntentRefusal, runIntent, type IntentRefusal, type IntentResult } from '../lib/intent'
 import { readEngineWorld } from '../lib/engine/world'
 import { fromAnglerState, toAnglerState } from './adapter'
 import { currentAngler, idleAnglerProfile } from './profile'
@@ -83,8 +83,9 @@ export function shopIntent(operation: string, apply: (content: IdleAnglerCatalog
     })
 }
 
-export const intentResult = v.object({ operationId: v.string(), changed: v.boolean(), gold: v.optional(v.number()), count: v.optional(v.number()) })
-export const strip = (r: IntentResult & { operationId: string }) => ({ operationId: r.operationId, changed: r.changed, ...(r.gold === undefined ? {} : { gold: r.gold }), ...(r.count === undefined ? {} : { count: r.count }) })
+export const intentResult = intentReturns({ operationId: v.string(), changed: v.boolean(), gold: v.optional(v.number()), count: v.optional(v.number()) })
+export const strip = (r: (IntentResult & { operationId: string }) | IntentRefusal) =>
+  isIntentRefusal(r) ? r : { operationId: r.operationId, changed: r.changed, ...(r.gold === undefined ? {} : { gold: r.gold }), ...(r.count === undefined ? {} : { count: r.count }) }
 
 export const buyNextRod = mutation({
   args: { operationId: v.string() },

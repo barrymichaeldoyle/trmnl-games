@@ -70,7 +70,7 @@ describe('the hidden Easter Egg keepsake (D140)', () => {
     })
     const wrong = weekly() === '000000' ? '000 001' : '000 000'
     for (let i = 0; i < KEEPSAKE_MISS_LIMIT; i++) await owner().mutation(api.keepsakes.claim, { operationId: `easter-bad-${String(i).padStart(4, '0')}`, code: wrong })
-    await expect(owner().mutation(api.keepsakes.claim, { operationId: 'easter-bad-late', code: wrong })).rejects.toThrow(/wrong keepsake codes/)
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'easter-bad-late', code: wrong })).toMatchObject({ ok: false, message: expect.stringMatching(/wrong keepsake codes/) })
     expect(await owner().mutation(api.keepsakes.claim, { operationId: 'easter-egg-limited', code: SAMPLE })).toMatchObject({ changed: true, outcome: 'easter_egg' })
   })
 

@@ -62,7 +62,7 @@ describe('Paper Lives deletion (D159, L2)', () => {
     await ana().mutation(api.deletion.requestGameDeletion, { operationId: 'del-pl-0001', confirm: 'DELETE', gameSlug: 'paper-lives' })
     // Authority goes at once.
     expect((await screen(t, 'pl-token-ana', PL_UUID, '/trmnl/paper-lives/v1/screen')).status).toBe(404)
-    await expect(ana().mutation(api.paperLives.lives.pause, { operationId: 'pause-pl-01' })).rejects.toThrow()
+    expect(await ana().mutation(api.paperLives.lives.pause, { operationId: 'pause-pl-01' })).toMatchObject({ ok: false })
     await t.finishAllScheduledFunctions(vi.runAllTimers)
     const state = await t.run(async (ctx) => ({
       lives: await ctx.db.query('lives').collect(),

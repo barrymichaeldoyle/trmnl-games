@@ -43,13 +43,13 @@ describe('Idle Angler intents (D115, S2)', () => {
     const mine = await seedAngler(t, {}, 'Pat')
     await seedAngler(t, {}, 'Sam')
     const [fish] = await fillCooler(mine, [['roach', 300, 15]])
-    await expect(as('Sam').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'sell-00002', catchIds: [fish!] })).rejects.toThrow(/no longer in your cooler/)
+    expect(await as('Sam').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'sell-00002', catchIds: [fish!] })).toMatchObject({ ok: false, message: expect.stringMatching(/no longer in your cooler/) })
     await expect(as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'sell-00003', catchIds: [] })).rejects.toThrow()
   })
 
   it('buys up the ladders only with enough coins, and spends exactly the price', async () => {
     const anglerId = await seedAngler(t, { gold: 310 }, 'Pat')
-    await expect(as('Pat').mutation(api.idleAngler.anglers.buyAccessItem, { operationId: 'buy-000001', access: 'pier_permit' })).rejects.toThrow(/Not enough coins/)
+    expect(await as('Pat').mutation(api.idleAngler.anglers.buyAccessItem, { operationId: 'buy-000001', access: 'pier_permit' })).toMatchObject({ ok: false, message: expect.stringMatching(/Not enough coins/) })
     expect(await as('Pat').mutation(api.idleAngler.anglers.buyNextRod, { operationId: 'buy-000002' })).toMatchObject({ gold: 60 })
     expect(await as('Pat').mutation(api.idleAngler.anglers.buyNextCooler, { operationId: 'buy-000003' })).toMatchObject({ gold: 0 })
     expect(await t.run(async (ctx) => await ctx.db.get(anglerId))).toMatchObject({ rodTier: 2, coolerTier: 2, gold: 0 })
@@ -57,14 +57,14 @@ describe('Idle Angler intents (D115, S2)', () => {
 
   it('buys bait in whole tubs up to the cap', async () => {
     const anglerId = await seedAngler(t, { gold: 1000 }, 'Pat')
-    await expect(as('Pat').mutation(api.idleAngler.anglers.buyBaitTubs, { operationId: 'bait-00001', bait: 'worms', tubs: 6 })).rejects.toThrow(/more bait/)
+    expect(await as('Pat').mutation(api.idleAngler.anglers.buyBaitTubs, { operationId: 'bait-00001', bait: 'worms', tubs: 6 })).toMatchObject({ ok: false, message: expect.stringMatching(/more bait/) })
     await as('Pat').mutation(api.idleAngler.anglers.buyBaitTubs, { operationId: 'bait-00002', bait: 'bread', tubs: 2 })
     expect(await t.run(async (ctx) => await ctx.db.get(anglerId))).toMatchObject({ gold: 960, bait: { worms: 12, bread: 24 } })
   })
 
   it('travels only to an open water, arriving after one tick', async () => {
     const anglerId = await seedAngler(t, {}, 'Pat')
-    await expect(as('Pat').mutation(api.idleAngler.anglers.travelTo, { operationId: 'trip-00001', waterId: 'river_bend' })).rejects.toThrow(/not open/)
+    expect(await as('Pat').mutation(api.idleAngler.anglers.travelTo, { operationId: 'trip-00001', waterId: 'river_bend' })).toMatchObject({ ok: false, message: expect.stringMatching(/not open/) })
     const five = Object.fromEntries(['minnow', 'roach', 'rudd', 'perch', 'bream', 'tench'].map((id) => [id, { count: 1, bestGrams: 100, firstTick: 1 }]))
     await t.run(async (ctx) => await ctx.db.patch(anglerId, { logbook: five, access: ['waders'] }))
     await as('Pat').mutation(api.idleAngler.anglers.travelTo, { operationId: 'trip-00002', waterId: 'river_bend' })

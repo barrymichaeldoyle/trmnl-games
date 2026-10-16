@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'A full bag stops the adventure view',
+        body: 'When adventures stop because the bag is full, every TRMNL layout says so and shows a large code straight to the bag, with the slots used and anything waiting to be claimed. In the companion, one confirmation sells the weakest spare, claims a waiting find and sends the hero back out.',
+        fr: { title: 'Un sac plein arrête la vue d’aventure', body: 'Quand les aventures s’arrêtent parce que le sac est plein, chaque écran TRMNL le dit et montre un grand code qui ouvre le sac, avec les places utilisées et la trouvaille en attente. Dans le compagnon, une confirmation vend le plus faible en trop, récupère la trouvaille et renvoie le héros.' },
+        de: { title: 'Eine volle Tasche stoppt die Abenteueransicht', body: 'Wenn die Abenteuer anhalten, weil die Tasche voll ist, sagt das jeder TRMNL-Bildschirm und zeigt einen großen Code direkt zur Tasche, mit den belegten Plätzen und einem wartenden Fund. In der Begleit-App verkauft eine Bestätigung das schwächste Ersatzstück, holt den Fund ab und schickt den Helden wieder los.' },
+      },
+      {
         title: 'Rankings say when they were updated',
         body: 'The rankings now show the last update beside the group name, instead of a line of explanation under it.',
         fr: { title: 'Le classement indique quand il a été mis à jour', body: 'Le classement affiche maintenant la dernière mise à jour à côté du nom du groupe, à la place d’une ligne d’explication en dessous.' },

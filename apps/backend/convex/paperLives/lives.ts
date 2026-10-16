@@ -30,7 +30,7 @@ import type { Doc } from '../_generated/dataModel'
 import { mutation, query, type MutationCtx, type QueryCtx } from '../_generated/server'
 import { appError } from '../lib/errors'
 import { pagePublic } from '../lib/publicPage'
-import { currentUser, runIntent, type IntentResult } from '../lib/intent'
+import { currentUser, intentReturns, isIntentRefusal, runIntent, type IntentRefusal, type IntentResult } from '../lib/intent'
 import { HERO_NAME_RULE, validateName } from '../lib/names'
 import { readEngineWorld } from '../lib/engine/world'
 import { fromLifeState, toLifeState } from './adapter'
@@ -94,8 +94,8 @@ function lifeIntent(operation: string, act: (ctx: MutationCtx, life: Doc<'lives'
     })
 }
 
-const intentResult = v.object({ operationId: v.string(), changed: v.boolean() })
-const strip = (r: IntentResult & { operationId: string }) => ({ operationId: r.operationId, changed: r.changed })
+const intentResult = intentReturns({ operationId: v.string(), changed: v.boolean() })
+const strip = (r: (IntentResult & { operationId: string }) | IntentRefusal) => (isIntentRefusal(r) ? r : { operationId: r.operationId, changed: r.changed })
 
 /** Choose an option for the open decision; it resolves when the year ends. Choosing again replaces it. */
 export const choose = mutation({

@@ -115,12 +115,12 @@ describe('weekly TRMNL keepsakes', () => {
 
   it('rejects anonymous, pending, foreign, disconnected and revoked credentials', async () => {
     const code = (await envelope(t)).merge_variables.desk_keepsake_code!
-    await expect(t.mutation(api.keepsakes.claim, { operationId: 'anon-0001', code })).rejects.toThrow()
+    expect(await t.mutation(api.keepsakes.claim, { operationId: 'anon-0001', code })).toMatchObject({ ok: false })
     const boId = await seedHero(t, {}, 'Bo')
     await installation(t, boId, 'bbbbbbbb-2222-4aed-8464-bad68368e97c', 'bo-installation-token')
     expect(await t.withIdentity({ issuer: 'issuer', subject: 'Bo' }).mutation(api.keepsakes.claim, { operationId: 'foreign-0001', code })).toMatchObject({ outcome: 'invalid_code' })
     await t.run(async (ctx) => { await ctx.db.patch(boId, { activationState: 'pending_trmnl' }) })
-    await expect(t.withIdentity({ issuer: 'issuer', subject: 'Bo' }).mutation(api.keepsakes.claim, { operationId: 'pending-0001', code })).rejects.toThrow()
+    expect(await t.withIdentity({ issuer: 'issuer', subject: 'Bo' }).mutation(api.keepsakes.claim, { operationId: 'pending-0001', code })).toMatchObject({ ok: false })
     const instance = await t.run(async (ctx) => await ctx.db.query('trmnlInstances').withIndex('by_uuid', (q) => q.eq('uuid', UUID)).unique())
     await owner().mutation(api.connections.disconnect, { instanceId: instance!._id, operationId: 'disconnect-1' })
     expect(await owner().mutation(api.keepsakes.claim, { operationId: 'offline-0001', code })).toMatchObject({ outcome: 'invalid_code' })
@@ -133,8 +133,8 @@ describe('weekly TRMNL keepsakes', () => {
     const valid = (await envelope(t)).merge_variables.desk_keepsake_code!
     const wrong = valid === '000 000' ? '000 001' : '000 000'
     for (let i = 0; i < KEEPSAKE_MISS_LIMIT; i++) expect(await owner().mutation(api.keepsakes.claim, { operationId: `bad-code-${i}`, code: i % 2 ? wrong : 'INVALID' })).toMatchObject({ outcome: 'invalid_code' })
-    await expect(owner().mutation(api.keepsakes.claim, { operationId: 'bad-code-late', code: wrong })).rejects.toThrow(/wrong keepsake codes/)
-    await expect(owner().mutation(api.keepsakes.claim, { operationId: 'valid-in-limit', code: valid })).rejects.toThrow(/wrong keepsake codes/)
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'bad-code-late', code: wrong })).toMatchObject({ ok: false, message: expect.stringMatching(/wrong keepsake codes/) })
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'valid-in-limit', code: valid })).toMatchObject({ ok: false, message: expect.stringMatching(/wrong keepsake codes/) })
     vi.setSystemTime(Math.ceil(NOW / 86_400_000) * 86_400_000)
     expect(await owner().mutation(api.keepsakes.claim, { operationId: 'valid-next-day', code: valid.replace(' ', '') })).toMatchObject({ outcome: 'claimed' })
   })
@@ -176,7 +176,7 @@ describe('weekly TRMNL keepsakes', () => {
     if (kind === 'game') await owner().mutation(api.deletion.requestGameDeletion, { operationId: 'delete-0001', confirm: 'DELETE' })
     else await owner().mutation(api.deletion.requestDeletion, { operationId: 'delete-0001', confirm: 'DELETE', token: await seedDeletionConfirmation(t, 'Ana') })
     expect(await owner().query(api.keepsakes.mine, {})).toBeNull()
-    await expect(owner().mutation(api.keepsakes.claim, { operationId: 'during-delete', code })).rejects.toThrow()
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'during-delete', code })).toMatchObject({ ok: false })
     await t.finishAllScheduledFunctions(vi.runAllTimers)
     expect(await t.run(async (ctx) => await ctx.db.query('deskKeepsakes').collect())).toEqual([])
     if (kind === 'account') expect(await t.run(async (ctx) => (await ctx.db.query('rateLimitBuckets').collect()).filter((row) => row.key.startsWith('keepsake:')))).toEqual([])

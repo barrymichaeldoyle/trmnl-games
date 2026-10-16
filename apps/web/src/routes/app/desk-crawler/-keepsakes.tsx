@@ -6,7 +6,7 @@ import { Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { DESK_KEEPSAKES, EASTER_EGG_KEEPSAKE, KEEPSAKES_OPEN_AT, keepsakesOpen, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
-import { errorMessage } from '../../../lib/intent'
+import { errorMessage, isRefusal } from '../../../lib/intent'
 import { useOnline } from '../../../lib/network'
 import { Submission } from '../../../lib/submission'
 import { ActionFeedback, BUTTON_SECONDARY, Button, LINK_BUTTON } from '../../../lib/ui'
@@ -66,6 +66,7 @@ function useKeepsakeClaim() {
     try {
       await submission.current.run({ code: normalized }, async (input) => {
         const result = await mutate(input)
+        if (isRefusal(result)) { setError(result.message); return }
         // D140: the sample screen's code finds the hidden Easter Egg once; the server decides, so a real matching code still collects.
         if (result.outcome === 'easter_egg' && result.changed) {
           setEarned(EASTER_EGG_KEEPSAKE)

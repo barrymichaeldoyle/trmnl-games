@@ -37,7 +37,7 @@ describe('owner-run moderation (D23)', () => {
     const owner = t.withIdentity({ issuer: 'issuer', subject: 'Rude' })
     await owner.mutation(api.users.replacePublicNames, { operationId: 'names-0001', publicAlias: 'Polite', heroName: 'Gentle' })
     expect(await t.run(async (ctx) => await ctx.db.get(user))).toMatchObject({ publicAlias: 'Polite', publicNameVersion: 3, nameRepairRequired: false })
-    await expect(owner.mutation(api.users.replacePublicNames, { operationId: 'names-0002', publicAlias: 'Again', heroName: 'Again' })).rejects.toThrow()
+    expect(await owner.mutation(api.users.replacePublicNames, { operationId: 'names-0002', publicAlias: 'Again', heroName: 'Again' })).toMatchObject({ ok: false })
   })
 
   it('suspension blocks commands until restored', async () => {
@@ -46,7 +46,7 @@ describe('owner-run moderation (D23)', () => {
     const admin = t.withIdentity({ issuer: 'issuer', subject: 'Admin' })
     await admin.mutation(api.admin.setSuspended, { userId: user, suspended: true, reasonCode: 'abuse' })
     const player = t.withIdentity({ issuer: 'issuer', subject: 'Spam' })
-    await expect(player.mutation(api.heroes.pause, { operationId: 'pause-0009' })).rejects.toThrow()
+    expect(await player.mutation(api.heroes.pause, { operationId: 'pause-0009' })).toMatchObject({ ok: false })
     await admin.mutation(api.admin.setSuspended, { userId: user, suspended: false, reasonCode: 'appeal_ok' })
     await player.mutation(api.heroes.pause, { operationId: 'pause-0010' })
   })

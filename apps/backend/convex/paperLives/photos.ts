@@ -5,7 +5,7 @@ import type { Id } from '../_generated/dataModel'
 import { mutation, query, type QueryCtx } from '../_generated/server'
 import { appError } from '../lib/errors'
 import { isGame } from '../lib/gameHooks'
-import { currentUser, runIntent } from '../lib/intent'
+import { currentUser, intentReturns, isIntentRefusal, runIntent } from '../lib/intent'
 import { normalizedKeepsakeCode, photoCode } from '../lib/keepsakes'
 import { readEngineWorld } from '../lib/engine/world'
 import { toLifeState } from './adapter'
@@ -78,7 +78,7 @@ export const mine = query({
 
 export const claim = mutation({
   args: { operationId: v.string(), code: v.string() },
-  returns: v.object({ operationId: v.string(), changed: v.boolean(), outcome: v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code')), totalCollected: v.number() }),
+  returns: intentReturns({ operationId: v.string(), changed: v.boolean(), outcome: v.union(v.literal('claimed'), v.literal('already_claimed'), v.literal('invalid_code')), totalCollected: v.number() }),
   handler: async (ctx, args) => {
     const code = normalizedKeepsakeCode(args.code.slice(0, 64))
     const result = await runIntent(ctx, args.operationId, 'paperLives.photos.claim', { code }, async (user) => {
@@ -121,6 +121,7 @@ export const claim = mutation({
       return { changed: true, count: total + 1, keepsakeOutcome: 'claimed' as const }
     })
     // The receipt field is shared with Desk Crawler keepsakes; photos never produce its Easter Egg outcome (D140).
+    if (isIntentRefusal(result)) return result
     const outcome = result.keepsakeOutcome!
     if (outcome === 'easter_egg') throw appError('SERVICE_PAUSED', 'Your album needs a service check.')
     return { operationId: result.operationId, changed: result.changed, outcome, totalCollected: result.count! }

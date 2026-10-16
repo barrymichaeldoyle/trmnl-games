@@ -70,7 +70,7 @@ export interface DeviceWords {
     readonly noSample: string
     readonly noNew: string
   }
-  /** The template's fixed words, read as `labels.*` (template v57). */
+  /** The template's fixed words, read as `labels.*` (template v58). */
   readonly labels: {
     readonly level: string
     /** `%name%` stands for the hero's name (Ruby Liquid will not lex braces inside a string). */
@@ -95,6 +95,8 @@ export interface DeviceWords {
     readonly your_bag: string
     readonly bag_full: string
     readonly bag_paused: string
+    readonly bag_slots: string
+    readonly bag_holding: string
     readonly first_soon: string
     readonly first_15: string
     readonly first_15_short: string
@@ -177,7 +179,7 @@ const en: DeviceWords = {
   labels: {
     level: 'level', ready: '%name% is ready', back_soon: 'Back soon', finish_setup: 'Finish setting up', hp: 'HP', done: 'Done', gold: 'gold', potion: 'potion', potions: 'potions', weapon: 'Weapon', armor: 'Armor', none: 'None', no_weapon: 'No weapon', no_armor: 'No armor',
     this_week: 'This week', levels: 'Levels ', lv: 'Lv ', not_ranked_paused: 'Not ranked while paused', ranking_soon: 'Ranking within the hour', your_bag: 'Your bag',
-    bag_full: 'Bag full', bag_paused: 'Adventures are paused until you make room.', first_soon: 'The first adventure starts soon.', first_15: 'The first adventure starts within 15 minutes.',
+    bag_full: 'Bag full', bag_paused: 'Clear a slot in your bag to keep adventuring.', bag_slots: 'slots', bag_holding: 'Holding', first_soon: 'The first adventure starts soon.', first_15: 'The first adventure starts within 15 minutes.',
     first_15_short: 'First adventure within 15 minutes', scan_phone: 'Scan with your phone to open the companion.', scan_phone_short: 'Scan with your phone.',
     scan_manage: 'Scan to open your companion: manage gear and pick where to explore.', goal: 'Goal: ', todo_today: 'Today\'s to-do', leaves: 'leaves', keepsake: 'Keepsake', keepsake_word: ' code',
   },
@@ -249,7 +251,7 @@ const fr: DeviceWords = {
   labels: {
     level: 'niveau', ready: 'Tout est prêt pour %name%', back_soon: 'De retour bientôt', finish_setup: 'Terminez l’installation', hp: 'PV', done: 'Fait', gold: 'or', potion: 'potion', potions: 'potions', weapon: 'Arme', armor: 'Armure', none: 'Aucune', no_weapon: 'Sans arme', no_armor: 'Sans armure',
     this_week: 'Cette semaine', levels: 'Niveaux ', lv: 'Niv ', not_ranked_paused: 'Non classé pendant la pause', ranking_soon: 'Classement dans l’heure', your_bag: 'Votre sac',
-    bag_full: 'Sac plein', bag_paused: 'Les aventures sont en pause jusqu’à ce que vous fassiez de la place.', first_soon: 'La première aventure commence bientôt.', first_15: 'La première aventure commence d’ici 15 minutes.',
+    bag_full: 'Sac plein', bag_paused: 'Libérez une place dans votre sac pour continuer l’aventure.', bag_slots: 'places', bag_holding: 'Tient', first_soon: 'La première aventure commence bientôt.', first_15: 'La première aventure commence d’ici 15 minutes.',
     first_15_short: 'Première aventure d’ici 15 minutes', scan_phone: 'Scannez avec votre téléphone pour ouvrir le compagnon.', scan_phone_short: 'Scannez avec votre téléphone.',
     scan_manage: 'Scannez pour ouvrir le compagnon : gérez l’équipement et choisissez où explorer.', goal: 'Objectif : ', todo_today: 'Tâches du jour', leaves: 'part à', keepsake: 'Code', keepsake_word: ' souvenir',
   },
@@ -321,7 +323,7 @@ const de: DeviceWords = {
   labels: {
     level: 'Stufe', ready: '%name% ist bereit', back_soon: 'Bald zurück', finish_setup: 'Einrichtung abschließen', hp: 'LP', done: 'Erledigt', gold: 'Gold', potion: 'Trank', potions: 'Tränke', weapon: 'Waffe', armor: 'Rüstung', none: 'Keine', no_weapon: 'Keine Waffe', no_armor: 'Keine Rüstung',
     this_week: 'Diese Woche', levels: 'Stufen ', lv: 'St ', not_ranked_paused: 'Kein Rang während der Pause', ranking_soon: 'Rangliste innerhalb der Stunde', your_bag: 'Deine Tasche',
-    bag_full: 'Tasche voll', bag_paused: 'Die Abenteuer pausieren, bis du Platz schaffst.', first_soon: 'Das erste Abenteuer beginnt bald.', first_15: 'Das erste Abenteuer startet in 15 Minuten.',
+    bag_full: 'Tasche voll', bag_paused: 'Mach einen Platz in deiner Tasche frei, um weiterzuziehen.', bag_slots: 'Plätze', bag_holding: 'Hält', first_soon: 'Das erste Abenteuer beginnt bald.', first_15: 'Das erste Abenteuer startet in 15 Minuten.',
     first_15_short: 'Erstes Abenteuer innerhalb von 15 Minuten', scan_phone: 'Mit dem Handy scannen, um die Begleit-App zu öffnen.', scan_phone_short: 'Mit dem Handy scannen.',
     scan_manage: 'Scannen für die Begleit-App: Ausrüstung verwalten, Stockwerk wählen.', goal: 'Ziel: ', todo_today: 'Heutige Aufgaben', leaves: 'geht um', keepsake: 'Andenken', keepsake_word: '-Code',
   },

@@ -7,7 +7,7 @@ import type { ContentCatalog, HeroClass } from '@trmnl-games/desk-crawler/sim/co
 import { appError } from './lib/errors'
 import { createHero } from './lib/heroCreate'
 import { currentHero, gameProfile, setCurrentHero } from './lib/gameProfile'
-import { commandLog, currentUser, requirePlayableHero, runIntent } from './lib/intent'
+import { commandLog, currentUser, intentReturns, requirePlayableHero, runIntent } from './lib/intent'
 import { HERO_NAME_RULE, validateName } from './lib/names'
 import { readWorld, worldContent } from './world'
 import { heroGender } from './schema'
@@ -22,7 +22,7 @@ import { heroGender } from './schema'
 export const SWITCH_GAP_MS = 24 * 60 * 60 * 1000
 export const UNDO_MS = 10 * 60 * 1000
 const CLASSES: readonly HeroClass[] = ['warrior', 'rogue']
-const intentResult = v.object({ operationId: v.string(), changed: v.boolean() })
+const intentResult = intentReturns({ operationId: v.string(), changed: v.boolean() })
 
 /** Every hero the account owns, oldest first (at most one per class). */
 async function rosterOf(ctx: QueryCtx, userId: Id<'users'>): Promise<Doc<'heroes'>[]> {

@@ -20,7 +20,7 @@ describe('companion action submissions', () => {
     const submit = vi.fn().mockRejectedValueOnce(new Error('Connection lost')).mockResolvedValue({})
     const args = { itemIds: ['one', 'two'] }
     await expect(operation.run(args, submit, () => false)).rejects.toThrow('Connection lost')
-    expect(await operation.run(args, submit, () => false)).toBe(true)
+    expect(await operation.run(args, submit, () => false)).toEqual({})
     expect(submit.mock.calls[1]![0]).toEqual(submit.mock.calls[0]![0])
     await operation.run(args, submit, () => false)
     expect(submit.mock.calls[2]![0].operationId).not.toBe(submit.mock.calls[0]![0].operationId)

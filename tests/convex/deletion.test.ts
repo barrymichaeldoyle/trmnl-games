@@ -49,7 +49,7 @@ describe('account deletion (D22)', () => {
 
     await user.mutation(api.deletion.requestDeletion, { operationId: 'delete-0001', confirm: 'DELETE', token: await seedDeletionConfirmation(t, 'Ana') })
     // Immediate denial: commands fail before the purge runs.
-    await expect(user.mutation(api.heroes.pause, { operationId: 'pause-0001' })).rejects.toThrow()
+    expect(await user.mutation(api.heroes.pause, { operationId: 'pause-0001' })).toMatchObject({ ok: false })
 
     await t.finishAllScheduledFunctions(vi.runAllTimers)
     const remaining = await t.run(async (ctx) => ({

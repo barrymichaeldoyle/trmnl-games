@@ -3,7 +3,7 @@ import { mutation, query, type MutationCtx, type QueryCtx } from './_generated/s
 import type { Doc } from './_generated/dataModel'
 import { currentHero } from './lib/gameProfile'
 import { appError } from './lib/errors'
-import { currentUser, runIntent } from './lib/intent'
+import { currentUser, intentReturns, runIntent } from './lib/intent'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
 import { pagePublic } from './lib/publicPage'
 import { readWorld, worldContent } from './world'
@@ -15,7 +15,7 @@ import { readWorld, worldContent } from './world'
  */
 export const MAX_FOLLOWS = 20
 
-const intentResult = v.object({ operationId: v.string(), changed: v.boolean() })
+const intentResult = intentReturns({ operationId: v.string(), changed: v.boolean() })
 
 const heroStatus = v.union(v.literal('exploring'), v.literal('resting'), v.literal('travelling'), v.literal('dead'), v.literal('paused'), v.literal('sleeping'))
 

@@ -38,7 +38,7 @@ Email is out (Barry, 2026-10-09). A push lands on the phone the player already u
 
 Every alert kind starts off. Turning one on is a receipted intent, `alerts.setPreferences`, and the companion never turns one on as a side effect of something else. Onboarding doesn't ask, and no banner or nag suggests alerts. The Settings card is the only way in, plus a single quiet link under the bag-full state on the hero page ("Want a nudge next time? Turn on alerts").
 
-Push goes to each browser the player enabled. No email address is used or stored by this system.
+Push goes to each browser the player enabled. No email address is used or stored by this system. A full bag uses this same `asleep` push when the player turned it on (D171, 2026-10-16). Players without push see the bag on the TRMNL itself. Nobody is emailed that their bag is full.
 
 ### When an alert fires
 

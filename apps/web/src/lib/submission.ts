@@ -12,7 +12,7 @@ export class Submission {
   private busy = false
   private uncertain = new Map<string, { id: string; at: number }>()
 
-  async run<T extends object>(args: T, submit: (input: T & { operationId: string }) => Promise<unknown>, isDefiniteFailure: (error: unknown) => boolean): Promise<boolean> {
+  async run<T extends object>(args: T, submit: (input: T & { operationId: string }) => Promise<unknown>, isDefiniteFailure: (error: unknown) => boolean): Promise<unknown> {
     if (this.busy) return false
     const key = JSON.stringify(args)
     const previous = this.uncertain.get(key)
@@ -24,9 +24,9 @@ export class Submission {
     const operation = previous ?? { id: crypto.randomUUID(), at: now }
     this.busy = true
     try {
-      await submit({ ...args, operationId: operation.id })
+      const result = await submit({ ...args, operationId: operation.id })
       this.uncertain.delete(key)
-      return true
+      return result === undefined ? true : result
     } catch (error) {
       if (isDefiniteFailure(error)) this.uncertain.delete(key)
       else this.uncertain.set(key, operation)
