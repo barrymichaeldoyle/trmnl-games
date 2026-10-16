@@ -1,5 +1,5 @@
 /**
- * Four self-contained TRMNL layouts. Template v58 makes a full bag the whole view on every layout, with the largest bag code, the slot count and a held find (D171). Template v57 reads its own words from the payload's `labels`, in the owner's
+ * Four self-contained TRMNL layouts. Template v59 bounds stories to their allocated column and the board below, and refits after fonts settle. Template v58 makes a full bag the whole view on every layout, with the largest bag code, the slot count and a held find (D171). Template v57 reads its own words from the payload's `labels`, in the owner's
  * language (D169). Template v56 draws each story's changes behind its HUD mark, like the recap ("+14"
  * behind the letters XP), without "No effect", and puts changes in words under the story on the X portrait ledger (D165). Template v55 shows a dug-in elite in the attention slot of every layout: its name,
  * ten HP ticks and the share left, and in the full layouts when it leaves (D163). Template v54 makes the OG quarter say a pause, a knockout's return time or a set
@@ -47,7 +47,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 58
+export const TEMPLATE_VERSION = 59
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -566,11 +566,22 @@ const fitStories = `<script>
         if (!list.getClientRects().length) return;
         const entries = Array.from(list.children).filter(entry => entry.classList.contains('block'));
         entries.forEach(entry => entry.classList.remove('hidden'));
-        const parent = list.parentElement;
-        let bottom = Math.min(layoutBottom, parent.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(parent).paddingBottom) || 0));
-        const gap = parseFloat(getComputedStyle(parent).rowGap) || 0;
-        for (let sibling = list.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
-          if (getComputedStyle(sibling).display !== 'none') bottom -= sibling.getBoundingClientRect().height + gap;
+        // A nested h--full ledger can grow past its allocated flex wrapper. Respect every ancestor's
+        // slot and the next visible block (especially the side view's leaderboard), not just the ledger.
+        let bottom = layoutBottom;
+        for (let slot = list; slot && slot !== layout; slot = slot.parentElement) {
+          const parent = slot.parentElement;
+          const style = getComputedStyle(parent);
+          let slotBottom = parent.getBoundingClientRect().bottom - (parseFloat(style.paddingBottom) || 0);
+          const gap = parseFloat(style.rowGap) || 0;
+          for (let sibling = slot.nextElementSibling; sibling; sibling = sibling.nextElementSibling) {
+            const box = sibling.getBoundingClientRect();
+            const own = slot.getBoundingClientRect();
+            if (sibling.getClientRects().length && box.left < own.right - 0.5 && box.right > own.left + 0.5) {
+              slotBottom -= box.height + gap;
+            }
+          }
+          bottom = Math.min(bottom, slotBottom);
         }
         let count = entries.length;
         while (count && entries[count - 1].getBoundingClientRect().bottom > bottom + 0.5) entries[--count].classList.add('hidden');
@@ -638,6 +649,8 @@ const fitStories = `<script>
   window.addEventListener('trmnl:terminalize:stats', fit);
   window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
   if (window.TRMNL_PLUGINS_READY) fit();
+  // Webfonts can change wrapping after the framework's first measurement.
+  if (document.fonts) document.fonts.ready.then(() => { if (window.TRMNL_PLUGINS_READY) fit(); });
 })();
 </script>`
 
@@ -775,7 +788,7 @@ const bagFullPanel = (column: boolean) => `
     </div>
     <div class="flex flex--col flex--left gap--small${column ? ' flex--center-x' : ''}">
       <span class="title lg:title--large">${L('bag_full')}</span>
-      <span class="title--small lg:title${column ? ' text--center' : ''}" data-clamp="2">${L('bag_paused')}</span>
+      <span class="title--small lg:title--base${column ? ' text--center' : ''}" data-clamp="2">${L('bag_paused')}</span>
       <span class="label lg:title--small${column ? ' text--center' : ''}">{{ bag_used }}/{{ bag_capacity }} ${L('bag_slots')}</span>
       {% if held_item != "" %}<span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="2">${L('bag_holding')} {{ held_item | escape }}</span>{% endif %}
       {% if scene_url_small != "" %}<div class="no-shrink" data-scene-art="true"><img class="image" src="{{ scene_url_small }}" alt=""></div>{% endif %}

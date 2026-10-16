@@ -206,6 +206,19 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     todoStandupRow: { ...base, logs: [base.logs[0]!, { at: NOW - 22 * 60_000, kind: 'todo', summary: 'Stand-up: Defeat 5 [[Legacy Mainframes]]. Earn 140 gold adventuring. Beat an elite.', compact: 'Stand-up: 3 new tasks.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs.slice(1)] },
     // Older rows with every kind of change: a shop purchase with a bag-slot mark (which once left the story a word wide
     // on a scaled portrait X), a potion found and drunk, the widest numbers each column holds, and a change with no mark.
+    // User report: zero-change achievements mixed with multi-line changes in the X vertical half.
+    sideAchievementLog: { ...base, hero: hero({ name: 'Rombso', level: 1, xp: 41, hp: 100, gold: 36, biomeId: 'office_cubicles' }), logs: [
+      { kind: 'achievement', summary: 'Achievement: [[Coffee Break]]', hp: 0, gold: 0, xp: 0 },
+      { kind: 'rest', summary: 'A decent cup of coffee.', hp: 2, gold: 0, xp: 0 },
+      { kind: 'loot', summary: 'An old expense claim finally paid out.', hp: 0, gold: 2, xp: 0 },
+      { kind: 'achievement', summary: 'Achievement: [[First Aid]]', hp: 0, gold: 0, xp: 0 },
+      { kind: 'system', summary: 'Drank a healing potion.', hp: 40, gold: 0, xp: 0 },
+      { kind: 'combat', summary: 'Filed a [[Dust Daemon]] under defeated.', hp: -14, gold: 2, xp: 7 },
+      { kind: 'trap', summary: 'Got stuck in the revolving door. Bruised for 4 adventures.', hp: -7, gold: 0, xp: 0 },
+      { kind: 'loot', summary: 'An old expense claim finally paid out.', hp: 0, gold: 3, xp: 0 },
+      { kind: 'combat', summary: 'Cleared a [[Dust Daemon]] from the break room.', hp: -8, gold: 2, xp: 6 },
+      { kind: 'rest', summary: 'Took a coffee break.', hp: 4, gold: 0, xp: 0 },
+    ].map((entry, index) => ({ at: NOW - (index + 1) * 60_000, kind: entry.kind, summary: entry.summary, deltas: { xpEarned: entry.xp, gold: entry.gold, hp: entry.hp } })) },
     ledgerChanges: { ...base, logs: [base.logs[0]!,
       { at: NOW - 22 * 60_000, kind: 'system', summary: 'Bought a [[Laptop Backpack]]. Bag holds 13.', deltas: { xpEarned: 0, gold: -100, hp: 0, bagSlots: 3 } },
       { at: NOW - 23 * 60_000, kind: 'loot', summary: 'Found a healing potion. Drank a potion.', deltas: { xpEarned: 0, gold: 0, hp: 8, potionsFound: 1, potionHealing: 20 } },

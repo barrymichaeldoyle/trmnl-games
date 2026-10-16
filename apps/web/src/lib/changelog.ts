@@ -32,6 +32,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
         de: { title: 'Ausrüsten und zu Draufgängerisch wechseln haken das Ziel sofort ab', body: 'Gefundene Ausrüstung anlegen, oder nach einem anderen Stil bei Draufgängerisch landen, markiert das Ziel sofort als geschafft. Die Belohnung wartet weiter auf Abholen.' },
       },
       {
+        title: 'A clearer TRMNL preview in either orientation',
+        body: 'The TRMNL preview now lets you switch between landscape and portrait and remembers your choice. Adventure logs in the vertical half layout keep clear of the leaderboard below.',
+        fr: { title: 'Un aperçu TRMNL plus clair dans les deux orientations', body: 'L’aperçu TRMNL permet maintenant de passer du paysage au portrait et mémorise votre choix. Dans la demi-page verticale, le journal d’aventure reste au-dessus du classement.' },
+        de: { title: 'Eine klarere TRMNL-Vorschau in beiden Ausrichtungen', body: 'Die TRMNL-Vorschau lässt sich jetzt zwischen Querformat und Hochformat umschalten und merkt sich deine Wahl. Im vertikalen Halblayout bleibt das Abenteuerprotokoll über der Rangliste.' },
+      },
+      {
         title: 'A goal you finish here is marked done right away',
         body: 'A goal you finish in the companion, such as salvaging a piece of gear, is marked done immediately. The reward waits on the Claim button instead of the next adventure.',
         fr: { title: 'Un objectif fini ici est coché tout de suite', body: 'Un objectif que vous terminez dans le compagnon, comme démonter un équipement, est marqué comme fait immédiatement. La récompense attend sur le bouton Récupérer, au lieu de la prochaine aventure.' },

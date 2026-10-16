@@ -7,7 +7,7 @@ import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { browserUtcOffset, localSceneUrl as sceneForNow, useMinute } from '../../../lib/localClock'
 import { useT } from '../../../lib/i18n'
 import { dcPagesMessages } from '../../../i18n/dcPages'
-import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
+import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, previewSize, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
 
 const STORAGE_KEY = 'desk-crawler.preview'
 const LAYOUTS = Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]
@@ -20,15 +20,16 @@ const getRenderer = () => renderer ??= import('liquidjs').then(({ Liquid }) => {
 }).catch((error) => { renderer = undefined; throw error })
 
 /** Per-viewer convenience only: the remembered device and layout. Storage can be unavailable. */
-function remembered(): { device: PreviewDevice; layout: PreviewLayout } {
+function remembered(): { device: PreviewDevice; layout: PreviewLayout; portrait: boolean } {
   try {
-    const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null') as { device?: string; layout?: string } | null
+    const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? 'null') as { device?: string; layout?: string; portrait?: boolean } | null
     return {
       device: DEVICES.includes(saved?.device as PreviewDevice) ? (saved!.device as PreviewDevice) : 'x',
       layout: LAYOUTS.includes(saved?.layout as PreviewLayout) ? (saved!.layout as PreviewLayout) : 'markup',
+      portrait: saved?.portrait === true,
     }
   } catch {
-    return { device: 'x', layout: 'markup' }
+    return { device: 'x', layout: 'markup', portrait: false }
   }
 }
 
@@ -41,7 +42,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
   const now = useMinute()
   const utcOffset = browserUtcOffset(now)
   const { data: payload, isError: payloadError } = useQuery({ ...convexQuery(api.trmnlPayload.mine, { now: now ?? 0, utcOffset }), enabled: now !== null, throwOnError: false })
-  const [choice, setChoice] = useState<{ device: PreviewDevice; layout: PreviewLayout }>({ device: 'x', layout: 'markup' })
+  const [choice, setChoice] = useState<{ device: PreviewDevice; layout: PreviewLayout; portrait: boolean }>({ device: 'x', layout: 'markup', portrait: false })
   const [html, setHtml] = useState<string | null>(null)
   const [scale, setScale] = useState(0)
   const [loaded, setLoaded] = useState<string | null>(null)
@@ -49,6 +50,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
   const frame = useRef<HTMLDivElement>(null)
   const t = useT(dcPagesMessages)
   const device = PREVIEW_DEVICES[choice.device]
+  const size = previewSize(choice.device, choice.portrait)
   const localSceneUrl = sceneForNow(sceneUrl, now)
 
   useEffect(() => setChoice(remembered()), [])
@@ -70,7 +72,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
       const { engine, templates } = await getRenderer()
       // TRMNL renders in UTC and the screen route adds the owner's offset as `utc_offset`; the browser's offset stands in for the TRMNL setting here.
       const inner = await engine.render(templates[choice.layout], { ...sceneUrlsAt(payload, now, utcOffset), utc_offset: utcOffset })
-      if (!cancelled) { setHtml(previewDocument(inner, choice.device, choice.layout, `${heroName} on ${device.label}`, { shadeOtherSlots: true })); setFailed(false) }
+      if (!cancelled) { setHtml(previewDocument(inner, choice.device, choice.layout, `${heroName} on ${device.label}`, { shadeOtherSlots: true, portrait: choice.portrait })); setFailed(false) }
     })().catch(() => { if (!cancelled) { setFailed(true); setHtml(null) } })
     return () => {
       cancelled = true
@@ -80,15 +82,15 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
   useEffect(() => {
     const element = frame.current
     if (!element) return
-    const observer = new ResizeObserver(([entry]) => setScale(entry!.contentRect.width / device.width))
+    const observer = new ResizeObserver(([entry]) => setScale(entry!.contentRect.width / size.width))
     observer.observe(element)
     return () => observer.disconnect()
-  }, [device.width])
+  }, [size.width])
 
   return (
     <figure className="flex flex-col gap-3">
       <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)]">
-        <div ref={frame} className="relative overflow-hidden rounded-md bg-white" style={{ aspectRatio: `${device.width} / ${device.height}` }}>
+        <div ref={frame} className="relative overflow-hidden rounded-md bg-white" style={{ aspectRatio: `${size.width} / ${size.height}` }}>
           {/* Scene stand-in: also what screen readers get, since the iframe is decorative duplication of the page. */}
           <img src={localSceneUrl} alt={t.currentScene(heroName)} width={760} height={200} decoding="async" className={`absolute inset-0 m-auto w-full [image-rendering:pixelated] transition-opacity duration-200 ${!payloadError && html && scale && loaded === html ? 'opacity-0' : 'opacity-100'}`} />
           {!payloadError && html && scale ? (
@@ -100,7 +102,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
               tabIndex={-1}
               aria-hidden="true"
               className="pointer-events-none absolute top-0 left-0 origin-top-left border-0"
-              style={{ width: device.width, height: device.height, transform: `scale(${scale})` }}
+              style={{ width: size.width, height: size.height, transform: `scale(${scale})` }}
             />
           ) : null}
           {/* E-ink refresh: replays whenever a new screen finishes loading. */}
@@ -108,7 +110,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
         </div>
       </div>
       <figcaption className="text-sm text-muted">
-        {/* Two fixed rows (layout, then device) so the controls never reflow and the stand-in can reserve their height. */}
+        {/* Separate rows keep every choice readable on narrow phones. */}
         <div role="group" aria-label={t.previewLayout} className="flex border-2 border-edge">
           {LAYOUTS.map((layout) => (
             <button
@@ -132,6 +134,19 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
               className="menu-cursor inline-flex min-h-11 items-center font-semibold whitespace-nowrap text-muted hover:text-ink aria-pressed:text-gold-ink"
             >
               {PREVIEW_DEVICES[key].label}
+            </button>
+          ))}
+        </div>
+        <div role="group" aria-label={t.previewOrientation} className="mt-2 flex border-2 border-edge">
+          {[false, true].map((portrait) => (
+            <button
+              key={String(portrait)}
+              type="button"
+              aria-pressed={choice.portrait === portrait}
+              onClick={() => choose({ portrait })}
+              className="menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 font-semibold text-muted not-last:border-r-2 not-last:border-edge hover:text-ink aria-pressed:bg-navy aria-pressed:text-gold"
+            >
+              {portrait ? t.portrait : t.landscape}
             </button>
           ))}
         </div>

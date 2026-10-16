@@ -1,0 +1,1874 @@
+{
+ "total": 24,
+ "failures": 0,
+ "results": [
+  {
+   "file": "sideAchievementLog--bwry--markup.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": false,
+   "layout": "markup",
+   "ok": true,
+   "slotStress": null,
+   "bound": 430.875,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 3,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 5,
+     "items": 7,
+     "marks": 5,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 287,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(160, 32, 32)",
+     "height": 22
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 93,
+   "storyTop": 268
+  },
+  {
+   "file": "sideAchievementLog--bwry--markup_half_horizontal.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": false,
+   "layout": "markup_half_horizontal",
+   "ok": true,
+   "slotStress": null,
+   "bound": 203,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 3,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 5,
+     "items": 7,
+     "marks": 5,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 242.5,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 2,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 20
+  },
+  {
+   "file": "sideAchievementLog--bwry--markup_half_vertical.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": false,
+   "layout": "markup_half_vertical",
+   "ok": true,
+   "slotStress": null,
+   "bound": 438,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 2,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 7,
+     "items": 7,
+     "marks": 7,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds 4 potions 17 breaks"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 240.96875,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 2,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 306
+  },
+  {
+   "file": "sideAchievementLog--bwry--markup_quadrant.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": false,
+   "layout": "markup_quadrant",
+   "ok": true,
+   "slotStress": null,
+   "bound": 203,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 1,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 2,
+     "fit": "complete",
+     "shown": 2,
+     "items": 7,
+     "marks": 2,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 198,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 113
+  },
+  {
+   "file": "sideAchievementLog--bwry-portrait--markup.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": true,
+   "layout": "markup",
+   "ok": true,
+   "slotStress": null,
+   "bound": 750.515625,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 6,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 2,
+     "items": 7,
+     "marks": 2,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 287,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeld... 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(160, 32, 32)",
+     "height": 22
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "6",
+     "own": false,
+     "text": "6. Eli 1390 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 171,
+   "storyTop": 315
+  },
+  {
+   "file": "sideAchievementLog--bwry-portrait--markup_half_horizontal.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": true,
+   "layout": "markup_half_horizontal",
+   "ok": true,
+   "slotStress": null,
+   "bound": 363,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 1,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 7,
+     "items": 7,
+     "marks": 7,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds 4 potions 17 breaks"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 290.953125,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 282
+  },
+  {
+   "file": "sideAchievementLog--bwry-portrait--markup_half_vertical.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": true,
+   "layout": "markup_half_vertical",
+   "ok": true,
+   "slotStress": null,
+   "bound": 758,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 5,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 3,
+     "items": 7,
+     "marks": 3,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 205,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 2,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 358
+  },
+  {
+   "file": "sideAchievementLog--bwry-portrait--markup_quadrant.html",
+   "state": "sideAchievementLog",
+   "device": "bwry",
+   "portrait": true,
+   "layout": "markup_quadrant",
+   "ok": true,
+   "slotStress": null,
+   "bound": 363,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 2,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 2,
+     "fit": "complete",
+     "shown": 1,
+     "items": 7,
+     "marks": 1,
+     "text": "Night recap 19:00-07:00 3 rare finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 205,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 134
+  },
+  {
+   "file": "sideAchievementLog--og--markup.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": false,
+   "layout": "markup",
+   "ok": true,
+   "slotStress": null,
+   "bound": 430.875,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 3,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 5,
+     "items": 7,
+     "marks": 5,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 287,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 22
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 93,
+   "storyTop": 268
+  },
+  {
+   "file": "sideAchievementLog--og--markup_half_horizontal.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": false,
+   "layout": "markup_half_horizontal",
+   "ok": true,
+   "slotStress": null,
+   "bound": 203,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 3,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 5,
+     "items": 7,
+     "marks": 5,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 242.5,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 2,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 20
+  },
+  {
+   "file": "sideAchievementLog--og--markup_half_vertical.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": false,
+   "layout": "markup_half_vertical",
+   "ok": true,
+   "slotStress": null,
+   "bound": 438,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 2,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 7,
+     "items": 7,
+     "marks": 7,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds 4 potions 17 breaks"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 240.96875,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 2,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 306
+  },
+  {
+   "file": "sideAchievementLog--og--markup_quadrant.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": false,
+   "layout": "markup_quadrant",
+   "ok": true,
+   "slotStress": null,
+   "bound": 203,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 1,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 2,
+     "fit": "complete",
+     "shown": 2,
+     "items": 7,
+     "marks": 2,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 198,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 113
+  },
+  {
+   "file": "sideAchievementLog--og-portrait--markup.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": true,
+   "layout": "markup",
+   "ok": true,
+   "slotStress": null,
+   "bound": 750.515625,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 6,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 2,
+     "items": 7,
+     "marks": 2,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 287,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeld... 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 22
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    },
+    {
+     "rank": "6",
+     "own": false,
+     "text": "6. Eli 1390 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 20
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 171,
+   "storyTop": 315
+  },
+  {
+   "file": "sideAchievementLog--og-portrait--markup_half_horizontal.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": true,
+   "layout": "markup_half_horizontal",
+   "ok": true,
+   "slotStress": null,
+   "bound": 363,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 1,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 7,
+     "items": 7,
+     "marks": 7,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds 4 potions 17 breaks"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 290.953125,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 282
+  },
+  {
+   "file": "sideAchievementLog--og-portrait--markup_half_vertical.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": true,
+   "layout": "markup_half_vertical",
+   "ok": true,
+   "slotStress": null,
+   "bound": 758,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 5,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 3,
+     "items": 7,
+     "marks": 3,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 205,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 3,
+     "rows": 1,
+     "text": "100/100 15 6"
+    },
+    {
+     "items": 4,
+     "rows": 2,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 358
+  },
+  {
+   "file": "sideAchievementLog--og-portrait--markup_quadrant.html",
+   "state": "sideAchievementLog",
+   "device": "og",
+   "portrait": true,
+   "layout": "markup_quadrant",
+   "ok": true,
+   "slotStress": null,
+   "bound": 363,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 2,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 2,
+     "fit": "complete",
+     "shown": 1,
+     "items": 7,
+     "marks": 1,
+     "text": "Night recap 19:00-07:00 3 rare finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 205,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [],
+   "counters": [],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 134
+  },
+  {
+   "file": "sideAchievementLog--x--markup.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": false,
+   "layout": "markup",
+   "ok": true,
+   "slotStress": null,
+   "bound": 1314.9561767578125,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 8,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 7,
+     "items": 7,
+     "marks": 7,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds 4 potions 17 breaks"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 528.8343505859375,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.53753662109375
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.53753662109375
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 38.137451171875
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 194.39999389648438,
+   "storyTop": 702
+  },
+  {
+   "file": "sideAchievementLog--x--markup_half_horizontal.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": false,
+   "layout": "markup_half_horizontal",
+   "ok": true,
+   "slotStress": null,
+   "bound": 635.3999633789062,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 5,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 7,
+     "items": 7,
+     "marks": 7,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds 4 potions 17 breaks"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 528.8343505859375,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 4 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.537506103515625
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 38.13751220703125
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 36,
+   "storyTop": 0
+  },
+  {
+   "file": "sideAchievementLog--x--markup_half_vertical.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": false,
+   "layout": "markup_half_vertical",
+   "ok": true,
+   "slotStress": {
+    "overlap": 0
+   },
+   "bound": 1328.4000244140625,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 4,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 2,
+     "items": 7,
+     "marks": 2,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 664.199951171875,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 38.1375732421875
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 327.8249816894531,
+   "storyTop": 0
+  },
+  {
+   "file": "sideAchievementLog--x--markup_quadrant.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": false,
+   "layout": "markup_quadrant",
+   "ok": true,
+   "slotStress": null,
+   "bound": 635.3999633789062,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 4,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 2,
+     "items": 7,
+     "marks": 2,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 671.3999633789062,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 0
+  },
+  {
+   "file": "sideAchievementLog--x-portrait--markup.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": true,
+   "layout": "markup",
+   "ok": true,
+   "slotStress": null,
+   "bound": 1782.703125,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 10,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 5,
+     "items": 7,
+     "marks": 5,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins 3 gear finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 528.8344116210938,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.53759765625
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 38.137451171875
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "6",
+     "own": false,
+     "text": "6. Eli 1390 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "7",
+     "own": false,
+     "text": "7. Fen 1210 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.53759765625
+    },
+    {
+     "rank": "8",
+     "own": false,
+     "text": "8. Gus 1085 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "9",
+     "own": false,
+     "text": "9. Hal 940 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "10",
+     "own": false,
+     "text": "10. Ivy 815 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 215.54998779296875,
+   "storyTop": 622.3499755859375
+  },
+  {
+   "file": "sideAchievementLog--x-portrait--markup_half_horizontal.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": true,
+   "layout": "markup_half_horizontal",
+   "ok": true,
+   "slotStress": null,
+   "bound": 869.3999633789062,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 4,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 1,
+     "fit": "complete",
+     "shown": 4,
+     "items": 7,
+     "marks": 4,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 528.8344116210938,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.537506103515625
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 38.13751220703125
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.537506103515625
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 219.14999389648438,
+   "storyTop": 0
+  },
+  {
+   "file": "sideAchievementLog--x-portrait--markup_half_vertical.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": true,
+   "layout": "markup_half_vertical",
+   "ok": true,
+   "slotStress": {
+    "overlap": 0
+   },
+   "bound": 1796.39990234375,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 6,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 3,
+     "fit": "complete",
+     "shown": 4,
+     "items": 7,
+     "marks": 4,
+     "text": "Night recap 19:00-07:00 3 rare finds +182 XP 65 gold 13 wins"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 639,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [
+    {
+     "items": 4,
+     "rows": 1,
+     "text": "36 gold 4 potions 17/20 Balanced"
+    }
+   ],
+   "rankRows": [
+    {
+     "rank": "1",
+     "own": false,
+     "text": "1. Ana 2410 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.53759765625
+    },
+    {
+     "rank": "2",
+     "own": false,
+     "text": "2. Bo 1990 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "3",
+     "own": true,
+     "text": "3. barrymichaeldoyle 1840 XP",
+     "color": "rgb(255, 255, 255)",
+     "bg": "rgb(0, 0, 0)",
+     "height": 38.137451171875
+    },
+    {
+     "rank": "4",
+     "own": false,
+     "text": "4. Cy 1700 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    },
+    {
+     "rank": "5",
+     "own": false,
+     "text": "5. Dee 1515 XP",
+     "color": "rgb(0, 0, 0)",
+     "bg": "rgba(0, 0, 0, 0)",
+     "height": 34.5374755859375
+    }
+   ],
+   "chips": 0,
+   "sceneTop": 362.36248779296875,
+   "storyTop": 0
+  },
+  {
+   "file": "sideAchievementLog--x-portrait--markup_quadrant.html",
+   "state": "sideAchievementLog",
+   "device": "x",
+   "portrait": true,
+   "layout": "markup_quadrant",
+   "ok": true,
+   "slotStress": null,
+   "bound": 869.3999633789062,
+   "overflow": [],
+   "broken": [],
+   "textOverflow": [],
+   "titleOverflow": [],
+   "underRibbon": [],
+   "underCode": [],
+   "underBoard": [],
+   "lists": [
+    {
+     "fit": "complete",
+     "count": 4,
+     "candidates": 10
+    }
+   ],
+   "recaps": [
+    {
+     "lines": 2,
+     "fit": "complete",
+     "shown": 1,
+     "items": 7,
+     "marks": 1,
+     "text": "Night recap 19:00-07:00 3 rare finds"
+    }
+   ],
+   "hearts": [
+    {
+     "halves": 20,
+     "images": 10,
+     "width": 639,
+     "wrappedRows": 1,
+     "rows": 1
+    }
+   ],
+   "ticks": [
+    {
+     "halves": 16,
+     "images": 10,
+     "rows": 2,
+     "tickRows": 1
+    }
+   ],
+   "counters": [],
+   "rankRows": [],
+   "chips": 0,
+   "sceneTop": null,
+   "storyTop": 0
+  }
+ ]
+}

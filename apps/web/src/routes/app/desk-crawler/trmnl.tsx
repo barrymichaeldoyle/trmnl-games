@@ -55,8 +55,8 @@ function DeviceStandIn({ sceneUrl, heroName }: { sceneUrl: string; heroName: str
         </div>
       </div>
       <figcaption className="text-sm text-muted">
-        {/* Matches the preview's two control rows: 44px tabs, 8px gap, 44px device picker. */}
-        <div aria-hidden="true" className="h-24" />
+        {/* Matches the preview's three control rows: layout, device and orientation. */}
+        <div aria-hidden="true" className="h-[9.25rem]" />
         <p className="mt-3">{t.loadingTrmnl}</p>
       </figcaption>
     </figure>

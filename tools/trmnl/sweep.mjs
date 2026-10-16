@@ -102,17 +102,50 @@ for (const file of files.sort()) {
     const ribbon = Array.from(layoutEl.querySelectorAll('[data-recap-ribbon]')).find(visible)
     const ribbonTop = ribbon ? ribbon.getBoundingClientRect().top : null
     const underRibbon = ribbon ? Array.from(layoutEl.querySelectorAll('span,img')).filter(visible).filter((e) => !ribbon.contains(e) && e.getBoundingClientRect().height > 0 && e.getBoundingClientRect().bottom > ribbonTop + 1).map((e) => ({ tag: e.tagName, text: (e.innerText || '').slice(0, 40), bottom: e.getBoundingClientRect().bottom, ribbonTop })) : []
+    // A story may overflow its allocated flex slot without crossing the footer: check the board separately.
+    const boards = Array.from(layoutEl.querySelectorAll('[data-board-column], [data-rank-panel], [data-board-columns]')).filter(visible)
+    const underBoard = Array.from(layoutEl.querySelectorAll('[data-story-list] span, [data-story-list] img')).filter(visible).filter((e) => {
+      const r = e.getBoundingClientRect()
+      return r.width > 0 && r.height > 0 && boards.some((board) => {
+        const b = board.getBoundingClientRect()
+        return r.left < b.right - 1 && r.right > b.left + 1 && r.top < b.bottom - 1 && r.bottom > b.top + 1
+      })
+    }).map((e) => ({ text: (e.innerText || '').slice(0, 60), bottom: e.getBoundingClientRect().bottom }))
     // No text may sit under a scannable code: a no-shrink row once ran an Idle Angler XP count under the X's QR.
     const codes = Array.from(layoutEl.querySelectorAll('[data-companion-qr] img, [data-home-qr] img')).filter(visible).map((e) => e.getBoundingClientRect())
     const underCode = Array.from(layoutEl.querySelectorAll('span')).filter(visible).filter((e) => !e.querySelector('span') && e.innerText.trim()).filter((e) => {
       const r = e.getBoundingClientRect()
       return codes.some((c) => r.left < c.right - 1 && r.right > c.left + 1 && r.top < c.bottom - 1 && r.bottom > c.top + 1)
     }).map((e) => ({ text: e.innerText.slice(0, 40), right: e.getBoundingClientRect().right }))
-    return { bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
+    return { bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, underBoard, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
   })
-  const ok = !result.error && result.overflow.length === 0 && result.titleOverflow.length === 0 && result.underRibbon.length === 0 && result.underCode.length === 0 && result.broken.length === 0 && result.textOverflow.length === 0 && result.lists.every((l) => l.fit === 'complete') && result.recaps.every((r) => r.fit === 'complete') && result.hearts.every((h) => h.images === 10 && h.wrappedRows === 1 && h.rows === 1) && result.ticks.every((t) => t.images === 10 && t.tickRows === 1)
+  // Regression for the X side view: an inner ledger can outgrow its fixed flex slot during reflow.
+  // Grow only the inner box, rerun the real fitter, then restore it before taking the normal screenshot.
+  const slotStress = device === 'x' && layout === 'markup_half_vertical' ? await page.evaluate(() => {
+    const visible = e => e.getClientRects().length > 0
+    const ledger = Array.from(document.querySelectorAll('[data-ledger="x"]')).find(visible)
+    const board = Array.from(document.querySelectorAll('[data-board-column="x"]')).find(visible)
+    if (!ledger || !board) return null
+    const style = ledger.getAttribute('style')
+    try {
+      ledger.style.height = '1000px'
+      ledger.style.flexShrink = '0'
+      window.dispatchEvent(new Event('trmnl:terminalize:stats'))
+      const b = board.getBoundingClientRect()
+      const overlap = Array.from(ledger.querySelectorAll('[data-story-list] span, [data-story-list] img')).filter(visible).filter(e => {
+        const r = e.getBoundingClientRect()
+        return r.width > 0 && r.height > 0 && r.top < b.bottom - 1 && r.bottom > b.top + 1 && r.left < b.right - 1 && r.right > b.left + 1
+      }).length
+      return { overlap }
+    } finally {
+      if (style === null) ledger.removeAttribute('style'); else ledger.setAttribute('style', style)
+      window.dispatchEvent(new Event('trmnl:terminalize:stats'))
+    }
+  }) : null
+  const hasRegressionStory = state !== 'sideAchievementLog' || result.lists?.some(list => list.count > 0)
+  const ok = hasRegressionStory && (!slotStress || slotStress.overlap === 0) && !result.error && result.overflow.length === 0 && result.titleOverflow.length === 0 && result.underRibbon.length === 0 && result.underCode.length === 0 && result.underBoard.length === 0 && result.broken.length === 0 && result.textOverflow.length === 0 && result.lists.every((l) => l.fit === 'complete') && result.recaps.every((r) => r.fit === 'complete') && result.hearts.every((h) => h.images === 10 && h.wrappedRows === 1 && h.rows === 1) && result.ticks.every((t) => t.images === 10 && t.tickRows === 1)
   if (!ok) failures++
-  results.push({ file, state, device, portrait, layout, ok, ...result })
+  results.push({ file, state, device, portrait, layout, ok, slotStress, ...result })
   // The plugin's own view: in portrait the mashup slots are not the landscape box turned on its side.
   if (shotsDir) await page.locator('.view').first().screenshot({ path: join(shotsDir, file.replace('.html', '.png')) })
   process.stdout.write(`${ok ? 'ok  ' : 'FAIL'} ${file}\n`)
