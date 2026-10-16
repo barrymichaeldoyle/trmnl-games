@@ -1,6 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { games } from '@trmnl-games/platform'
-import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, InstallCta } from '../lib/deskCrawlerPitch'
+import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, InstallCta, OfficeCensus } from '../lib/deskCrawlerPitch'
 import { faqJsonLd } from '../lib/deskCrawlerFaq'
 import { Glyph } from '../lib/glyphs'
 import { changeDay, latestChanges } from '../lib/changelog'
@@ -88,6 +88,7 @@ function Home() {
             <InstallCta place="home" />
           </div>
           <DeviceSample caption={t.homeCaption} priority />
+          <AfterListing><OfficeCensus className="lg:col-span-2" /></AfterListing>
         </section>
 
         <div className="border-y border-rule bg-night/40 py-14 sm:py-20">

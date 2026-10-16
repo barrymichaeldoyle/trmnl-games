@@ -4,6 +4,7 @@ import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 import { SEED_VERSION } from '@trmnl-games/engine/seed'
 import { makeSchedule } from '@trmnl-games/engine/schedule'
 import { internal } from '../../_generated/api'
+import { publishOfficeCensus } from '../../census'
 import type { EngineRuntime } from './runtime'
 import { DESK_CRAWLER_TABLES } from './tables'
 
@@ -22,4 +23,5 @@ export const DESK_CRAWLER_RUNTIME: EngineRuntime<ContentCatalog> = {
     buildBatch: internal.leaderboard.buildBatch,
     cleanupPublication: internal.leaderboard.cleanupPublication,
   },
+  onCohortWalked: publishOfficeCensus,
 }

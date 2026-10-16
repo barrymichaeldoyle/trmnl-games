@@ -35,8 +35,8 @@ const TAGS = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' } as const
 /**
  * The hero page's goal card (P35, D129): rewards waiting to be claimed come first, one at a time with a Claim button
  * that pops confetti and pays the gold; then the one thing to do next, its office blurb, the gold it will set aside
- * and, where the rung counts something, how far along it is. The ladder itself moves without a visit; only the gold
- * waits here, and it never expires.
+ * and, where the rung counts something, how far along it is. A goal finished in the companion is marked off in that
+ * same action. A goal the hero finishes while adventuring is marked off on that adventure. Only the gold waits here.
  */
 export function GoalCard({ career, level, notify }: { career: CareerView; level: number; notify?: (feedback: { error: string | null; message: string | null }) => void }) {
   const goal = career.current
@@ -44,7 +44,6 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
   const claim = useIntent(api.heroes.claimGoal, notify ? { onFeedback: notify } : {})
   const [burst, fireBurst] = useBurst()
   const counted = goal !== null && goal.target > 1
-  // The ladder moves on the hero's next adventure, so a goal done here (an equip, a stance) waits up to one adventure.
   const met = goal !== null && goal.value >= goal.target
   const pct = goal === null ? 0 : Math.max(0, Math.min(100, Math.round((Math.min(goal.value, goal.target) * 100) / Math.max(1, goal.target))))
   const reward = waiting[0]

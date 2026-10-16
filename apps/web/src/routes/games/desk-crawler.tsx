@@ -1,6 +1,7 @@
 import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { DeviceSample, FloorGrid, HowItPlays, InstallCta } from '../../lib/deskCrawlerPitch'
+import { DeviceSample, FloorGrid, HowItPlays, InstallCta, OfficeCensus } from '../../lib/deskCrawlerPitch'
+import { AfterListing } from '../../lib/gameAccess'
 import { UNLOCKS } from '../../lib/facts.gen'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { SITE_FRAME } from '../../lib/platformHeader'
@@ -42,6 +43,7 @@ function Landing() {
             <InstallCta place="landing" />
           </div>
           <DeviceSample caption="Sample hero on a TRMNL X. Your own hero starts when you install the plugin and save it in TRMNL." priority />
+          <AfterListing><OfficeCensus className="lg:col-span-2" headingId="office-census-game" /></AfterListing>
         </section>
 
         <HowItPlays headingId="how-heading" />

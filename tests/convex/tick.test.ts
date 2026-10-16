@@ -1,7 +1,7 @@
 // @vitest-environment edge-runtime
 import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { internal } from '@trmnl-games/backend/api'
+import { api, internal } from '@trmnl-games/backend/api'
 import type { Id } from '@trmnl-games/backend/data-model'
 import schema from '../../apps/backend/convex/schema'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
@@ -165,6 +165,31 @@ describe('tick scheduler', () => {
     await runTick(t)
     expect((await world(t))?.currentTick).toBe(2)
     expect((await t.run(async (ctx) => await ctx.db.get(heroId)))?.lastTick).toBe(2)
+  })
+
+  it('publishes an office census of heroes who have started, and replaces it on the next tick', async () => {
+    const counters = starterHero('x', contentV1, 0).counters
+    await seedHero(t, { status: 'paused', counters: { ...counters, combatWins: 4, itemsFound: 2, itemsSold: 5, itemsSalvaged: 1, potionsUsed: 3, gearUpgraded: 2, raidsWon: 1, tasksCompleted: 4 } })
+    await seedHero(t, { isActive: false, status: 'paused', counters: { ...counters, combatWins: 3, itemsFound: 1, itemsSold: 1, potionsUsed: 1, tasksCompleted: 2 } })
+    await seedHero(t, { activationState: 'pending_trmnl', counters: { ...counters, combatWins: 9, itemsFound: 9, itemsSold: 9, itemsSalvaged: 9, potionsUsed: 9 } })
+    await runTick(t)
+    expect(await t.query(api.census.office, {})).toEqual({
+      heroes: 2,
+      monstersDefeated: 7,
+      finds: 3,
+      asOfTick: 1,
+      extras: { sold: 6, salvaged: 1, potions: 4, upgraded: 2, raids: 1, tasks: 6 },
+    })
+
+    vi.setSystemTime(SLOT + 15 * 60_000 + 1_000)
+    await runTick(t)
+    expect(await t.query(api.census.office, {})).toEqual({
+      heroes: 2,
+      monstersDefeated: 7,
+      finds: 3,
+      asOfTick: 2,
+      extras: { sold: 6, salvaged: 1, potions: 4, upgraded: 2, raids: 1, tasks: 6 },
+    })
   })
 
   it('never simulates pending heroes or heroes not yet eligible', async () => {

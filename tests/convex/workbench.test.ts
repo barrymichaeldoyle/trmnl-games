@@ -172,16 +172,26 @@ describe('salvage and the workbench (D129, content v13)', () => {
     expect(view.gear.find((g: { id: string }) => g.id === spare)).toMatchObject({ nextStep: null, salvage: {}, affixable: false })
   })
 
-  it('pays the salvage rung at the next tick once the hero has salvaged', async () => {
+  it('marks the salvage goal done as soon as the hero salvages, and the next tick does not pay it again', async () => {
     const heroId = await seedHero(t, { level: 12, gold: 500, bagCapacity: 10, career: { rung: 19, startedTick: 0, reached: [] } }, 'Fay')
     const user = as(t, 'Fay')
     const spare = await giveGear(t, heroId)
     await user.mutation(api.inventory.salvageMany, { operationId: opId(), itemIds: [spare] })
-    vi.setSystemTime(SLOT + 15 * 60_000)
-    await runTick(t)
     const hero = await heroDoc(t, heroId)
+    expect(hero.gold).toBe(500)
     expect(hero.career?.rung).toBe(20)
     expect(hero.career?.reached.map((r) => r.id)).toEqual(['first_salvage'])
+    expect(hero.career?.unclaimed).toEqual([expect.objectContaining({ id: 'first_salvage', gold: 60 })])
+    expect((await logs(t, heroId)).map((log) => log.summary)).toContain('Goal reached: Salvage a piece of gear. Next: Upgrade a piece of gear.')
+    const view = await user.query(api.heroes.mine, {})
+    expect(view?.career?.current?.id).not.toBe('first_salvage')
+    expect(view?.career?.unclaimed?.[0]).toMatchObject({ id: 'first_salvage', gold: 60 })
+
+    vi.setSystemTime(SLOT + 15 * 60_000)
+    await runTick(t)
+    const after = await heroDoc(t, heroId)
+    expect(after.career?.reached.filter((entry) => entry.id === 'first_salvage')).toHaveLength(1)
+    expect(after.career?.unclaimed?.filter((entry) => entry.id === 'first_salvage')).toHaveLength(1)
   })
 })
 

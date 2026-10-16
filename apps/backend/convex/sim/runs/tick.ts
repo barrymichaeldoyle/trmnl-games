@@ -54,6 +54,19 @@ export const simulateBatch = internalMutation({
 
 /** One hero's share of a page: eligibility, dormant skip, quarantine, the pure core, then its writes and rank input. */
 async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, world, content, now, tally }: SubjectStep<ContentCatalog>): Promise<void> {
+  // D174: the landing tally. Pending installs have not started. Parked heroes still count, and so do their wins.
+  // This runs before the dormant skip, on the hero document the page already loaded.
+  if (hero.activationState === 'active') {
+    tally.counts.censusHeroes = (tally.counts.censusHeroes ?? 0) + 1
+    tally.counts.censusMonsters = (tally.counts.censusMonsters ?? 0) + hero.counters.combatWins
+    tally.counts.censusFinds = (tally.counts.censusFinds ?? 0) + hero.counters.itemsFound
+    tally.counts.censusSold = (tally.counts.censusSold ?? 0) + (hero.counters.itemsSold ?? 0)
+    tally.counts.censusSalvaged = (tally.counts.censusSalvaged ?? 0) + (hero.counters.itemsSalvaged ?? 0)
+    tally.counts.censusPotions = (tally.counts.censusPotions ?? 0) + (hero.counters.potionsUsed ?? 0)
+    tally.counts.censusUpgraded = (tally.counts.censusUpgraded ?? 0) + (hero.counters.gearUpgraded ?? 0)
+    tally.counts.censusRaids = (tally.counts.censusRaids ?? 0) + (hero.counters.raidsWon ?? 0)
+    tally.counts.censusTasks = (tally.counts.censusTasks ?? 0) + (hero.counters.tasksCompleted ?? 0)
+  }
   const counts = tally.counts as Record<'eligible' | 'skippedDormant' | 'quarantined' | 'deaths' | 'levelUps' | 'heldFinds', number>
   if (!hero.isActive || hero.activationState !== 'active' || hero.eligibleFromTick > run.tick || hero.lastTick >= run.tick) return
   const owner = await ctx.db.get(hero.userId)

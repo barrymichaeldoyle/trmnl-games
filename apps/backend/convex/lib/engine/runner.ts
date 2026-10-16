@@ -129,13 +129,15 @@ export async function runBatch<Content>(
     await ctx.db.patch(runId, { ...progress, nextScheduledFunctionId: scheduled })
     return null
   }
+  await ctx.db.patch(runId, progress)
+  const walked = (await ctx.db.get(runId))!
+  if (runtime.onCohortWalked) await runtime.onCohortWalked(ctx, walked)
   if (run.publishes) {
-    // Publication run: freeze progress, then build and atomically publish all three boards.
-    await ctx.db.patch(runId, progress)
-    await beginEngineBuild(ctx, runtime, (await ctx.db.get(runId))!, world, now)
+    // Publication run: the hero walk is frozen; build and atomically publish all three boards.
+    await beginEngineBuild(ctx, runtime, walked, world, now)
     return null
   }
-  await ctx.db.patch(runId, { ...progress, state: 'completed', finishedAt: now, nextScheduledFunctionId: undefined })
+  await ctx.db.patch(runId, { state: 'completed', finishedAt: now, nextScheduledFunctionId: undefined })
   await ctx.db.patch(world._id, { activeRunId: undefined, lastCompletedTick: run.tick, lastCompletedAt: now })
   await recoverIncidents(ctx, runId, now)
   return null

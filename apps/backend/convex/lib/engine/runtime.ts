@@ -1,6 +1,7 @@
 import type { FunctionReference } from 'convex/server'
 import type { TickSchedule } from '@trmnl-games/engine/schedule'
-import type { Id } from '../../_generated/dataModel'
+import type { Doc, Id } from '../../_generated/dataModel'
+import type { MutationCtx } from '../../_generated/server'
 import type { DESK_CRAWLER_TABLES, EngineTableNames } from './tables'
 
 /**
@@ -25,6 +26,8 @@ export interface EngineRuntime<Content> {
     readonly buildBatch: FunctionReference<'mutation', 'internal', { publicationId: Id<'leaderboardPublications'>; expectedSequence: number }, null>
     readonly cleanupPublication: FunctionReference<'mutation', 'internal', { publicationId: Id<'leaderboardPublications'> }, null>
   }
+  /** Called once when this run's hero walk finishes, before publication or completion. */
+  onCohortWalked?(ctx: MutationCtx, run: Doc<'simulationRuns'>): Promise<void>
 }
 
 export type TypedTables = typeof DESK_CRAWLER_TABLES

@@ -2,8 +2,12 @@ import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { ACHIEVEMENTS_VERSION, type AchievementDef } from '@trmnl-games/desk-crawler/content/achievements'
 import { allSatisfied, needsFullPass, newlyUnlocked, type AchievementState } from '@trmnl-games/desk-crawler/sim/core/achievements'
+import { careerLine, reachSatisfiedRung } from '@trmnl-games/desk-crawler/sim/core/career'
+import { codePoints } from '@trmnl-games/desk-crawler/sim/core/narrative'
+import { SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
+import { toHeroState } from '../sim/runs/adapter'
 
 /**
  * Achievement authority (achievements.md "Storage", D65). Unlock rows are
@@ -76,12 +80,77 @@ export async function awardAchievements(
   return written
 }
 
-/** For intents: compare the hero before the intent with its committed state now. */
+/** For intents: the goal first, so a rung the action just finished is marked done before the response returns, then achievements. */
 export async function awardAfterIntent(ctx: MutationCtx, before: Doc<'heroes'>, content: ContentCatalog, tick: number): Promise<AchievementDef[]> {
   const hero = await ctx.db.get(before._id)
   if (hero === null) return []
-  const keepsakes = await keepsakeTotal(ctx, hero.userId)
-  return await awardAchievements(ctx, hero, achievementState(before, keepsakes), achievementState(hero, keepsakes), content, Date.now(), tick)
+  const settled = await settleCompanionGoal(ctx, hero, content, tick)
+  const keepsakes = await keepsakeTotal(ctx, settled.userId)
+  return await awardAchievements(ctx, settled, achievementState(before, keepsakes), achievementState(settled, keepsakes), content, Date.now(), tick)
+}
+
+/**
+ * A companion action can finish the current goal (salvage, sell, equip, a stance). Mark that rung reached now,
+ * with its reward waiting on Claim, instead of on the next adventure. The pointer moves, so the following tick
+ * does not pay it again.
+ */
+async function settleCompanionGoal(ctx: MutationCtx, hero: Doc<'heroes'>, content: ContentCatalog, tick: number): Promise<Doc<'heroes'>> {
+  const now = Date.now()
+  const { hero: next, reached } = reachSatisfiedRung(toHeroState(hero), content, tick, now)
+  if (!reached || next.career === undefined) return hero
+  const { full, compact } = careerLine({ variant: 'career', phase: 'reached', id: reached.id, title: reached.title, ...(reached.next === undefined ? {} : { next: reached.next }), gold: reached.gold })
+  const summary = codePoints(full) <= content.constants.summaryMaxCodePoints ? full : compact
+  const sequence = hero.logSequence + 1
+  await ctx.db.insert('tickLogs', {
+    heroId: hero._id,
+    source: 'command',
+    sequence,
+    at: now,
+    kind: 'career',
+    summary,
+    detail: {
+      v: 1,
+      simulationVersion: SIMULATION_VERSION,
+      contentVersion: content.contentVersion,
+      disposition: dispositionFor(hero.status),
+      potionsUsed: 0,
+      levelsGained: 0,
+      goldPenalty: 0,
+      heldFind: false,
+      outcome: { variant: 'career', phase: 'reached', id: reached.id, title: reached.title, ...(reached.next === undefined ? {} : { next: reached.next }), gold: reached.gold },
+    },
+    deltas: { xpEarned: 0, gold: 0, hp: 0 },
+  })
+  const career = next.career
+  await ctx.db.patch(hero._id, {
+    logSequence: sequence,
+    counters: next.counters,
+    career: {
+      rung: career.rung,
+      startedTick: career.startedTick,
+      reached: career.reached.map((entry) => ({ ...entry })),
+      ...(career.unclaimed === undefined ? {} : { unclaimed: career.unclaimed.map((entry) => ({ ...entry })) }),
+    },
+  })
+  return (await ctx.db.get(hero._id)) ?? hero
+}
+
+/** A career line stores a disposition because every simulation detail does. The action itself changed no status. */
+function dispositionFor(status: Doc<'heroes'>['status']): 'advanced' | 'rested' | 'waiting_travel' | 'waiting_dead' | 'paused' | 'sleeping' {
+  switch (status) {
+    case 'resting':
+      return 'rested'
+    case 'travelling':
+      return 'waiting_travel'
+    case 'dead':
+      return 'waiting_dead'
+    case 'paused':
+      return 'paused'
+    case 'sleeping':
+      return 'sleeping'
+    default:
+      return 'advanced'
+  }
 }
 
 /** Publication runs: add one hero's unlocks to the run tally (achievements.md "Rarity"). */

@@ -1,4 +1,8 @@
+import { useState } from 'react'
 import { Show, SignInButton } from '@clerk/tanstack-react-start'
+import { convexQuery } from '@convex-dev/react-query'
+import { api } from '@trmnl-games/backend/api'
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { FAQ } from './deskCrawlerFaq'
 import { FLOORS, UNLOCKS } from './facts.gen'
@@ -9,7 +13,7 @@ import { BUTTON_PRIMARY, Button, LINK_BUTTON } from './ui'
 import { useAnalyticsView } from './analyticsProvider'
 import { captureAnalytics } from './analytics'
 import { PRELOAD_CLERK_UI } from './clerkUi'
-import { useLocale, useT } from './i18n'
+import { formatNumber, useLocale, useT } from './i18n'
 import { pitchMessages } from '../i18n/pitch'
 import { shellMessages } from '../i18n/shell'
 
@@ -78,6 +82,58 @@ export function FloorGrid({ headingId, headingLevel: Heading = 'h2' }: { heading
           </li>
         ))}
       </ul>
+    </section>
+  )
+}
+
+const CENSUS_EXTRAS = [
+  { id: 'sold', glyph: 'coin', tone: 'text-gold-ink', label: 'censusSold' },
+  { id: 'salvaged', glyph: 'shirt', tone: 'text-muted', label: 'censusSalvaged' },
+  { id: 'potions', glyph: 'potion', tone: 'text-rare-ink', label: 'censusPotions' },
+  { id: 'upgraded', glyph: 'cog', tone: 'text-sky-ink', label: 'censusUpgraded' },
+  { id: 'raids', glyph: 'flag', tone: 'text-hp-ink', label: 'censusRaids' },
+  { id: 'tasks', glyph: 'quest', tone: 'text-gold-ink', label: 'censusTasks' },
+] as const
+
+/**
+ * Heroes, monsters defeated and gear found (D174), plus one extra lifetime total chosen in the browser.
+ * Renders nothing until a tick has published the tally, and nothing while that tally is still empty.
+ * The landing page mounts this in the browser, after first byte.
+ */
+export function OfficeCensus({ className = '', headingId = 'office-census' }: { className?: string; headingId?: string }) {
+  const t = useT(pitchMessages)
+  const locale = useLocale()
+  const { data, isError } = useQuery(convexQuery(api.census.office, {}))
+  const [choice, setChoice] = useState<{ tick: number; id: (typeof CENSUS_EXTRAS)[number]['id'] } | null>(null)
+  const options = CENSUS_EXTRAS.filter((extra) => (data?.extras?.[extra.id] ?? 0) > 0)
+  let picked = choice !== null && choice.tick === data?.asOfTick ? choice.id : null
+  if (data && picked === null && options.length > 0) {
+    picked = options[Math.floor(Math.random() * options.length)]!.id
+    setChoice({ tick: data.asOfTick, id: picked })
+  }
+  if (isError || !data || data.heroes === 0) return null
+  const extra = options.find((entry) => entry.id === picked)
+  const stats = [
+    { glyph: 'hero' as const, tone: 'text-sky-ink', value: data.heroes, label: t.censusHeroes },
+    { glyph: 'sword' as const, tone: 'text-hp-ink', value: data.monstersDefeated, label: t.censusMonsters },
+    { glyph: 'bag' as const, tone: 'text-gold-ink', value: data.finds, label: t.censusFinds },
+    ...(extra ? [{ glyph: extra.glyph, tone: extra.tone, value: data.extras[extra.id], label: t[extra.label] }] : []),
+  ]
+  return (
+    <section aria-labelledby={headingId} className={`flex flex-col gap-3 ${className}`}>
+      <h2 id={headingId} className="text-sm font-semibold text-gold-ink">{t.censusHeading}</h2>
+      <dl className="flex flex-wrap gap-x-10 gap-y-4">
+        {stats.map((stat) => (
+          <div key={stat.label} className="flex min-w-28 flex-col">
+            <dd className="flex items-center gap-2 font-display text-2xl font-bold tabular-nums sm:text-3xl">
+              <Glyph name={stat.glyph} size={18} className={stat.tone} />
+              {formatNumber(locale, stat.value)}
+            </dd>
+            <dt className="text-sm text-muted">{stat.label}</dt>
+          </div>
+        ))}
+      </dl>
+      <p className="text-sm text-faint">{t.censusNote}</p>
     </section>
   )
 }

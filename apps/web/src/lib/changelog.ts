@@ -26,6 +26,18 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'A goal you finish here is marked done right away',
+        body: 'A goal you finish in the companion, such as salvaging a piece of gear, is marked done immediately. The reward waits on the Claim button instead of the next adventure.',
+        fr: { title: 'Un objectif fini ici est coché tout de suite', body: 'Un objectif que vous terminez dans le compagnon, comme démonter un équipement, est marqué comme fait immédiatement. La récompense attend sur le bouton Récupérer, au lieu de la prochaine aventure.' },
+        de: { title: 'Ein Ziel, das du hier schaffst, wird sofort abgehakt', body: 'Ein Ziel, das du in der Begleit-App erledigst, zum Beispiel Ausrüstung zerlegen, ist sofort als geschafft markiert. Die Belohnung wartet auf Abholen, nicht bis zum nächsten Abenteuer.' },
+      },
+      {
+        title: 'The office keeps a public count',
+        body: 'The Desk Crawler page now shows how many heroes have started, how many monsters they have defeated and how much gear they have found. One more number joins them, and it changes: gear sold, gear salvaged, potions drunk, and a few others. The numbers update with every adventure.',
+        fr: { title: 'Le bureau tient un compte public', body: 'La page Desk Crawler indique maintenant combien de héros ont commencé, combien de monstres ils ont vaincus et combien d’équipement ils ont trouvé. Un chiffre de plus les rejoint, et il change : équipement vendu, équipement démonté, potions bues, et quelques autres. Les chiffres se mettent à jour à chaque aventure.' },
+        de: { title: 'Das Büro führt eine öffentliche Zählung', body: 'Die Desk-Crawler-Seite zeigt jetzt, wie viele Helden begonnen haben, wie viele Monster sie besiegt haben und wie viel Ausrüstung sie gefunden haben. Eine weitere Zahl kommt dazu und wechselt: verkaufte Ausrüstung, zerlegte Ausrüstung, getrunkene Tränke und ein paar weitere. Die Zahlen aktualisieren sich bei jedem Abenteuer.' },
+      },
+      {
         title: 'The site stays in the language you picked',
         body: 'Chrome’s translator was rewriting the page and could crash it. The site already speaks English, French and German, so the browser leaves the page as it is. Switch language with the picker at the bottom of any page, or under Account.',
         fr: { title: 'Le site reste dans la langue que vous avez choisie', body: 'Le traducteur de Chrome réécrivait la page et pouvait la faire planter. Le site parle déjà anglais, français et allemand, donc le navigateur laisse la page telle quelle. Changez de langue avec le sélecteur en bas de chaque page, ou dans Compte.' },

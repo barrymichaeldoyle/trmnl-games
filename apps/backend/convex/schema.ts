@@ -200,6 +200,25 @@ export default defineSchema({
     at: v.number(),
   }).index('by_key', ['key']),
 
+  /**
+   * Desk Crawler's public office tally (D174): one row, replaced at the end of each tick's hero walk.
+   * Heroes who have started, the monsters they have defeated and the gear they have found.
+   */
+  officeCensus: defineTable({
+    key: v.literal('current'),
+    heroes: v.number(),
+    monstersDefeated: v.number(),
+    finds: v.number(),
+    asOfTick: v.number(),
+    /** Extra lifetime totals (D174). Optional so a row written before them still validates; the page hides a zero. */
+    sold: v.optional(v.number()),
+    salvaged: v.optional(v.number()),
+    potions: v.optional(v.number()),
+    upgraded: v.optional(v.number()),
+    raids: v.optional(v.number()),
+    tasks: v.optional(v.number()),
+  }).index('by_key', ['key']),
+
   /** Server-controlled game lifecycle (idle-angler.md "Architecture"): one row per game once an admin sets its status. */
   platformGames: defineTable({
     slug: gameSlug,
@@ -208,7 +227,22 @@ export default defineSchema({
   }).index('by_slug', ['slug']),
 
   worldState: deskCrawlerEngine.world,
-  simulationRuns: defineTable(deskCrawlerEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
+  /**
+   * Census totals are optional so a run stored before D174 still validates. They are summed across the hero walk
+   * and copied to `officeCensus` when the walk finishes; they are not engine counters, which are required on every run.
+   */
+  simulationRuns: defineTable({
+    ...deskCrawlerEngine.runFields,
+    censusHeroes: v.optional(v.number()),
+    censusMonsters: v.optional(v.number()),
+    censusFinds: v.optional(v.number()),
+    censusSold: v.optional(v.number()),
+    censusSalvaged: v.optional(v.number()),
+    censusPotions: v.optional(v.number()),
+    censusUpgraded: v.optional(v.number()),
+    censusRaids: v.optional(v.number()),
+    censusTasks: v.optional(v.number()),
+  }).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
   simulationFailures: deskCrawlerEngine.failures,
   heroScoreWindows: deskCrawlerEngine.scoreWindows,
   rankInputs: deskCrawlerEngine.rankInputs,

@@ -190,20 +190,17 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
   }
 
   if (rules !== undefined && rules.rungs.length > 0) {
-    let state: CareerState = hero.career ?? { rung: firstOpenRung(rules, before, content), startedTick: tick, reached: [] }
-    // A pointer left on a rung a later catalog retired moves past it silently (retired rungs carry no guarantee).
-    if (liveRung(rules, state.rung) !== state.rung) state = { rung: liveRung(rules, state.rung), startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
-    const current = rules.rungs[state.rung]
-    if (current !== undefined && rungSatisfied(current, hero, content)) {
-      const gold = current.supersedes !== undefined && state.reached.some((entry) => entry.id === current.supersedes) ? 0 : current.gold
-      hero = { ...hero, counters: { ...hero.counters, careerRungs: hero.counters.careerRungs + 1 } }
+    // A hero with no place yet joins at the first rung it had not satisfied when the tick began, then this tick can pay it.
+    if (hero.career === undefined) hero = { ...hero, career: { rung: firstOpenRung(rules, before, content), startedTick: tick, reached: [] } }
+    const settled = reachSatisfiedRung(hero, content, tick, input.tickAt)
+    hero = settled.hero
+    if (settled.reached) {
       metrics.careerRungs = 1
-      const next = liveRung(rules, state.rung + 1)
-      const when = input.tickAt === undefined ? {} : { at: input.tickAt }
-      state = { rung: next, startedTick: tick, reached: [...state.reached, { id: current.id, tick, ...when }], unclaimed: [...(state.unclaimed ?? []), ...(gold > 0 ? [{ id: current.id, gold, tick, ...when }] : [])] }
-      const following = rules.rungs[next]
-      events.push(careerEvent(input, result, { variant: 'career', phase: 'reached', id: current.id, title: current.title, ...(following === undefined ? {} : { next: following.title }), gold }))
+      const { id, title, next, gold } = settled.reached
+      events.push(careerEvent(input, result, { variant: 'career', phase: 'reached', id, title, ...(next === undefined ? {} : { next }), gold }))
     }
+    let state: CareerState = hero.career ?? { rung: firstOpenRung(rules, before, content), startedTick: tick, reached: [] }
+    if (liveRung(rules, state.rung) !== state.rung) state = { rung: liveRung(rules, state.rung), startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
     // Arm the rung's guarantee once its feature is on; it counts adventures from here.
     const rung = rules.rungs[state.rung]
     const feature = rung?.guarantee === undefined ? undefined : guaranteeFeature(rung.guarantee.event)
@@ -215,6 +212,49 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
 
   if (events.length === (result.extraEvents?.length ?? 0) && hero === result.nextHero) return result
   return { ...result, nextHero: hero, metrics, ...(events.length === 0 ? {} : { extraEvents: events }) }
+}
+
+export interface ReachedRung {
+  readonly id: string
+  readonly title: string
+  readonly next?: string
+  readonly gold: number
+}
+
+/**
+ * Mark the current rung done when the hero has already satisfied it. One rung per call, the same step a tick takes,
+ * so a companion action and the next adventure cannot both pay it. A hero with no place on the ladder is left alone:
+ * the tick's first evaluation backfills that place without pay. A pointer sitting on a rung a later catalog retired
+ * moves past it with no gold and no line.
+ */
+export function reachSatisfiedRung(hero: HeroState, content: ContentCatalog, tick: number, at?: number): { hero: HeroState; reached?: ReachedRung } {
+  const rules = content.career
+  if (rules === undefined || rules.rungs.length === 0 || hero.career === undefined) return { hero }
+  let state = hero.career
+  const live = liveRung(rules, state.rung)
+  if (live !== state.rung) {
+    state = { rung: live, startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
+    hero = { ...hero, career: state }
+  }
+  const current = rules.rungs[state.rung]
+  if (current === undefined || !rungSatisfied(current, hero, content)) return { hero }
+  const gold = current.supersedes !== undefined && state.reached.some((entry) => entry.id === current.supersedes) ? 0 : current.gold
+  const next = liveRung(rules, state.rung + 1)
+  const when = at === undefined ? {} : { at }
+  const following = rules.rungs[next]
+  return {
+    hero: {
+      ...hero,
+      counters: { ...hero.counters, careerRungs: hero.counters.careerRungs + 1 },
+      career: {
+        rung: next,
+        startedTick: tick,
+        reached: [...state.reached, { id: current.id, tick, ...when }],
+        unclaimed: [...(state.unclaimed ?? []), ...(gold > 0 ? [{ id: current.id, gold, tick, ...when }] : [])],
+      },
+    },
+    reached: { id: current.id, title: current.title, ...(following === undefined ? {} : { next: following.title }), gold },
+  }
 }
 
 /** The line's text: full form with the next goal when it fits the budget, else the compact form the device also uses. */
