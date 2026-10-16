@@ -151,12 +151,13 @@ function RootDocument({ children }: { children: ReactNode }) {
   const { locale } = useRouteContext({ from: Route.id })
   return (
     <LocaleProvider locale={locale}>
-    <html lang={locale}>
+    {/* translate=no: Chrome's translator wraps text in <font> and the next React commit crashes (D173). */}
+    <html lang={locale} translate="no" className="notranslate">
       <head>
         <HeadContent />
         {/* Outside route head: HeadContent keeps only one meta per name. */}
         <meta name="theme-color" content="#15122b" />
-        
+        <meta name="google" content="notranslate" />
       </head>
       <body className="antialiased">
         <a href="#main" className="sr-only border-2 border-night bg-gold px-4 py-3 font-semibold text-night focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50">

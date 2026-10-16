@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'The site stays in the language you picked',
+        body: 'Chrome’s translator was rewriting the page and could crash it. The site already speaks English, French and German, so the browser leaves the page as it is. Switch language with the picker at the bottom of any page, or under Account.',
+        fr: { title: 'Le site reste dans la langue que vous avez choisie', body: 'Le traducteur de Chrome réécrivait la page et pouvait la faire planter. Le site parle déjà anglais, français et allemand, donc le navigateur laisse la page telle quelle. Changez de langue avec le sélecteur en bas de chaque page, ou dans Compte.' },
+        de: { title: 'Die Website bleibt in der Sprache, die du gewählt hast', body: 'Chrome hat die Seite mit seinem Übersetzer umgeschrieben und konnte sie abstürzen lassen. Die Website spricht schon Englisch, Französisch und Deutsch, also lässt der Browser die Seite, wie sie ist. Die Sprache wechselst du unten auf jeder Seite oder unter Konto.' },
+      },
+      {
         title: 'A cleared bag says so, and gold stays in view',
         body: 'Once the bag has room, the companion offers Resume instead of sending you back to the bag. After you resume, it says the next adventure is the one that starts again. The bag page keeps your gold in view while you shop.',
         fr: { title: 'Un sac libéré le dit, et l’or reste visible', body: 'Dès que le sac a de la place, le compagnon propose Reprendre au lieu de vous renvoyer au sac. Après la reprise, il dit que la prochaine aventure est celle qui repart. La page du sac garde votre or en vue pendant les achats.' },

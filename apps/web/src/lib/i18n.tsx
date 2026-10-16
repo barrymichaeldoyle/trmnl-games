@@ -5,7 +5,8 @@ import { createContext, useContext, type ReactNode } from 'react'
  * D169: the companion's languages. Each page keeps its copy in a catalog beside it (`src/i18n/`), with English as the
  * source and every other locale typed against it, so a missing translation fails the typecheck rather than showing
  * English. The locale comes from the `tg_locale` cookie, else the browser's Accept-Language (`resolveLocale`), and the
- * server renders `<html lang>` with it, which the browser then reads back on client navigation.
+ * server renders `<html lang translate="no">` with it, which the browser then reads back on client navigation.
+ * `translate="no"` keeps Chrome from rewriting the text and crashing the next React commit (D173).
  */
 export const LOCALE_COOKIE = 'tg_locale'
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365

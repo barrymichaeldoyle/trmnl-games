@@ -21,6 +21,8 @@ Reports carry no person. `dataCollection` turns off user info, cookies, headers,
 - deletes `user` and `server_name`;
 - runs the analytics scrubber over the message, exception values, breadcrumbs, `extra`, tags and transaction, which strips URL query strings and hashes, `code=`, `jwt=`, `token=`, `installation_callback_url=` and similar pairs, and JWT-shaped strings. The DOM shape in `extra` is tags, ids and classes only: text nodes contribute a character count, never the characters.
 
+A `NotFoundError` from `insertBefore` or `removeChild` whose stack is only React DOM is the browser's translator rewriting text nodes (TRMNL-GAMES-3, TRMNL-GAMES-4). The document opts out of that translation (D173).
+
 The project also has server-side scrubbing: Sentry's default data scrubber, IP address scrubbing, and the sensitive fields `code`, `jwt`, `token`, `access_token`, `installation_callback_url`, `callbackUrl`, `tokenIdentifier` and `tokenHash`. No session replay, no release-health sessions (`BrowserSession` is removed, so the browser sends nothing unless an error happens) and no tracing (no `tracesSampleRate`, so no trace headers reach Convex or Clerk).
 
 Because nothing links a report to an account, account deletion has nothing to erase in Sentry; reports age out with the plan's retention (90 days at most). The privacy page names Sentry as a US service and says so. `tests/web/sentry.test.ts` covers the boundary.
