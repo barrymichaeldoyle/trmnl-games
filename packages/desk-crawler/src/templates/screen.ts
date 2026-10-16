@@ -1,4 +1,6 @@
 /**
+ * Template v60 gives full portrait a screen-wide ledger followed by goal/tasks on the left and a compact board on
+ * the right on X. Its five-row window keeps the hero visible; the OG retains its compact two-column board.
  * Four self-contained TRMNL layouts. Template v59 bounds stories to their allocated column and the board below, and refits after fonts settle. Template v58 makes a full bag the whole view on every layout, with the largest bag code, the slot count and a held find (D171). Template v57 reads its own words from the payload's `labels`, in the owner's
  * language (D169). Template v56 draws each story's changes behind its HUD mark, like the recap ("+14"
  * behind the letters XP), without "No effect", and puts changes in words under the story on the X portrait ledger (D165). Template v55 shows a dug-in elite in the attention slot of every layout: its name,
@@ -47,7 +49,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 59
+export const TEMPLATE_VERSION = 60
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -344,18 +346,18 @@ const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSor
  * the screen's width).
  */
 type ChipsInline = false | 'lg' | 'all'
-const logLine = (entry: string, classes: string, clamp: number, size: number, fit: number, wrapper = 'block', timeBelow = false, inline: ChipsInline = false, leadMeta = false) => {
+const logLine = (entry: string, classes: string, clamp: number, size: number, fit: number, wrapper = 'block', timeBelow = false, inline: ChipsInline = false, leadMeta = false, ogMeta = false) => {
   // On the X alone the inline forms swap in with `lg:` classes; everywhere, they replace the stacked forms outright.
   // `lg:flex` brings the framework's default gap and outranks gap classes, so `'all'` pairs it with `flex` to keep the
   // X's spacing exactly as the X-only form draws it.
   const onlyX = (lg: string) => (inline === 'all' ? '' : lg)
   const shown = inline === 'all' ? 'flex lg:flex' : 'hidden lg:flex'
   // A live entry (the travel line, D91) says its time in the story; the column is for when something happened.
-  const timeSpan = (extra = '') => `{% if line_timed %}<span class="${extra}label lg:title--small no-shrink" data-story-time="true">{{ ${entry}.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
+  const timeSpan = (extra = '') => `{% if line_timed %}<span class="${extra}label lg:title--small no-shrink${ogMeta ? ' pl--2' : ''}" data-story-time="true">{{ ${entry}.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
   // The newest story in the inline ledgers (`leadMeta`) is larger: it keeps the whole width, and its changes and time
   // take the line below in the same columns as the rows beneath, rather than squeezing it into three lines.
   const lead = inline !== false && leadMeta
-  const time = lead && inline === 'all' ? '' : timeSpan(lead ? 'lg:hidden ' : '')
+  const time = ogMeta ? (lead ? '' : timeSpan('hidden lg:inline-block ')) : lead && inline === 'all' ? '' : timeSpan(lead ? 'lg:hidden ' : '')
   const changes = `{% for change in line_changes %} ${chip('change')}{% endfor %}`
   const hasChanges = `${entry}.d != nil and ${entry}.d != ""`
   const columns = chipColumns(shown)
@@ -363,19 +365,21 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   // on one line once a device scale enlarges them, so those changes take a line under the story there instead; the
   // fitter moves the potion and bag marks there too when a text scale leaves the story too narrow.
   const othersBelow = inline === 'lg' && !lead
-  const lineFit = Math.max(0, fit - (timeBelow ? 0 : 14))
+  const lineFit = Math.max(0, fit - (timeBelow || ogMeta ? 0 : 14))
   // D112: on the OG, a to-do line too long for this row's fit says its count instead ("Stand-up: 3 new tasks."), so it
   // never clamps mid-name; `line_full` keeps the labels for the X.
   const compactSwap = `{% assign line_full = nil %}{% if ${entry}.c and line_plain.size > ${lineFit} %}{% assign line_full = line_story %}{% assign line_story = ${entry}.c %}{% assign line_plain = line_story %}{% endif %}`
   const inlineChips = inline && !lead ? `{% if ${hasChanges} %}${othersBelow ? chipColumns(shown, false) : columns}{% endif %}` : ''
-  const storySpan = `<span class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
+  const storySpan = `<span${ogMeta ? ' data-adaptive-text="true"' : ''} class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
   // Sorted before the row opens, so a row with changes under its story aligns to the story's first line, not its middle.
   const sortFirst = othersBelow ? `{% assign chip_words = "" %}{% assign chip_marked = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
   const story = othersBelow ? `<div class="grow w--min-0">${storySpan.replace('<span ', '<span data-story-text="true" ')}{% if chip_words != "" or chip_marked != "" %}<div class="hidden{% if chip_words != "" %} lg:flex{% endif %} flex--row flex--wrap flex--left flex--center-y gap--small pt--1" data-story-chips-other="true"{% if chip_words != "" %} data-words="true"{% endif %}>{% if chip_marked != "" %}<span class="hidden flex--row flex--wrap flex--center-y gap--small" data-marked-below="true">{{ chip_marked }}</span>{% endif %}{{ chip_words }}</div>{% endif %}</div>` : storySpan
   const centred = inline && !lead ? (othersBelow ? '{% if chip_words == "" %} lg:flex--center-y{% endif %}' : ` ${onlyX('lg:')}flex--center-y`) : ''
   const leadRow = lead ? `{% if line_timed or ${hasChanges} %}<div class="${shown} flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true">{% if ${hasChanges} %}${columns}{% endif %}${timeSpan()}</div>{% endif %}` : ''
-  const stacked = `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
-  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none">${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"${othersBelow ? ' data-ledger-row="true"' : ''}><div class="no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
+  // OG full portrait keeps event icon, deltas and timestamp on one metadata row below the full-width story.
+  const ogMetadata = `<div class="lg:hidden flex flex--row flex--left flex--center-y gap--small pt--1" data-story-meta="og"><div class="no-shrink">${logIcon(`${entry}.k`, 16)}</div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${changes}</div>${timeSpan()}</div>`
+  const stacked = ogMeta ? ogMetadata : `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
+  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none"${ogMeta ? ' data-adaptive-story="true"' : ''}>${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"${othersBelow ? ' data-ledger-row="true"' : ''}${ogMeta ? ' data-adaptive-main="true"' : ''}><div class="${ogMeta ? 'hidden lg:block ' : ''}no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
 }
 
 /** The status line, its clamp fitted like log lines. */
@@ -393,9 +397,9 @@ const celebrationBadge = (classes: string) => `
  * Whole story/stat pairs; the fitter keeps the longest newest-first prefix that fits. `rowFit` is the plain length the
  * older one-line entries may reach before the OG clamps them; the full landscape's screen-wide ledger allows more.
  */
-const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelow = false, inline: ChipsInline = false, rowFit = 28) => `
+const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelow = false, inline: ChipsInline = false, rowFit = 28, ogMeta = false) => `
   <div class="grow stretch-x" data-story-list="true">
-    {% for entry in log %}{% unless attention and forloop.index > 1 %}{% if forloop.first %}${logLine('entry', classes, clamp, size, fit, 'block', timeBelow, inline, true)}{% else %}${logLine('entry', 'label lg:title--small', 1, 16, rowFit, inline ? `block pt--1 ${inline === 'all' ? '' : 'lg:'}pt--0.5` : 'block pt--1', timeBelow, inline)}{% endif %}{% endunless %}{% endfor %}
+    {% for entry in log %}{% unless attention and forloop.index > 1 %}{% if forloop.first %}${logLine('entry', classes, clamp, size, fit, 'block', timeBelow, inline, true, ogMeta)}{% else %}${logLine('entry', 'label lg:title--small', 1, 16, rowFit, inline ? `block pt--1 ${inline === 'all' ? '' : 'lg:'}pt--0.5` : 'block pt--1', timeBelow, inline, false, ogMeta)}{% endif %}{% endunless %}{% endfor %}
     {% if log.size == 0 %}<span class="label lg:title--small">${L('first_soon')}</span>{% endif %}
   </div>`
 
@@ -412,10 +416,20 @@ const fitStories = `<script>
 (() => {
   const view = document.currentScript.closest('.view');
   if (!view) return;
+  // Keep original locations/classes so repeated framework/font fits can try the single-line form afresh.
+  const adaptiveStates = new WeakMap();
+  const resetAdaptive = root => {
+    const state = adaptiveStates.get(root);
+    if (!state) return;
+    for (const [el, classes] of state.classes) el.className = classes;
+    if (state.meta) state.parent.insertBefore(state.meta, state.next && state.next.parentElement === state.parent ? state.next : null);
+    adaptiveStates.delete(root);
+  };
   const fit = () => {
     const layout = Array.from(view.querySelectorAll('.layout')).find(el => el.getClientRects().length > 0);
     const footer = Array.from(view.querySelectorAll('.title_bar')).find(el => el.getClientRects().length > 0);
     if (!layout || !footer) return;
+    view.querySelectorAll('[data-adaptive-story]').forEach(resetAdaptive);
     // Undo the last run's giving way (below) before measuring anything.
     view.querySelectorAll('[data-gave-way]').forEach(el => {
       el.classList.remove('hidden');
@@ -488,10 +502,16 @@ const fitStories = `<script>
       const word = instance.querySelector('[data-keepsake-word]');
       if (word && instance.scrollWidth > instance.clientWidth + 1) giveWay(word);
     }
+    // Full portrait uses natural-width changes, without empty stat placeholders; other ledgers retain their columns.
+    layout.querySelectorAll('[data-adaptive-story] [data-chip-cell]').forEach(cell => {
+      Array.from(cell.classList).filter(cls => cls.startsWith('w--[')).forEach(cls => cell.classList.remove(cls));
+      cell.classList.toggle('hidden', !cell.querySelector('[data-change]'));
+      cell.setAttribute('data-chip-packed', 'true');
+    });
     // Stat columns (D165): a text scale grows the numbers but not the cells' pixel widths, so give every cell of a
     // column the framework width class its widest change needs (the classes run to 128 pixels).
     ['xp', 'gold', 'hp'].forEach(kind => {
-      const cells = Array.from(view.querySelectorAll('[data-chip-cell="' + kind + '"]')).filter(cell => cell.getClientRects().length > 0);
+      const cells = Array.from(view.querySelectorAll('[data-chip-cell="' + kind + '"]')).filter(cell => cell.getClientRects().length > 0 && !cell.hasAttribute('data-chip-packed'));
       if (!cells.length) return;
       const base = Number(cells[0].dataset.chipWidth);
       cells.forEach(cell => { cell.classList.remove('w--[' + cell.dataset.chipFitted + 'px]'); cell.classList.add('w--[' + base + 'px]'); delete cell.dataset.chipFitted; });
@@ -518,6 +538,37 @@ const fitStories = `<script>
       };
       move(false);
       if (text.getBoundingClientRect().width < 24 * (parseFloat(getComputedStyle(text).fontSize) || 16)) move(true);
+    });
+    // Try the whole event on one row using actual glyph, rich-text, change and time boxes at this device/font scale.
+    layout.querySelectorAll('[data-adaptive-story]').forEach(root => {
+      if (!root.getClientRects().length) return;
+      const main = root.querySelector('[data-adaptive-main]');
+      const text = root.querySelector('[data-adaptive-text]');
+      const og = root.querySelector('[data-story-meta="og"]');
+      const x = root.querySelector('[data-story-lead-meta]');
+      if (!main || !text || !og) return;
+      const small = og.getClientRects().length > 0;
+      const meta = small ? og : x;
+      const icon = main.firstElementChild;
+      const metaIcon = og.firstElementChild;
+      const changed = [main, icon, metaIcon, ...(meta ? [meta] : [])];
+      adaptiveStates.set(root, { classes: changed.map(el => [el, el.className]), meta, parent: meta && meta.parentElement, next: meta && meta.nextSibling });
+      if (small) { icon.classList.remove('hidden'); metaIcon.classList.add('hidden'); }
+      main.classList.remove('flex--top'); main.classList.add('flex--center-y');
+      if (meta) {
+        meta.classList.remove('pt--1'); meta.classList.add('no-shrink');
+        main.append(meta);
+      }
+      const range = document.createRange(); range.selectNodeContents(text);
+      const boxes = Array.from(range.getClientRects()).filter(box => box.width > 0 && box.height > 0);
+      const box = main.getBoundingClientRect();
+      const oneLine = boxes.length && Math.max(...boxes.map(r => r.top)) - Math.min(...boxes.map(r => r.top)) <= 2 * (box.width / main.clientWidth || 1);
+      const contained = [text, ...main.querySelectorAll('img, [data-change], [data-story-time]')].filter(el => el.getClientRects().length > 0).every(el => {
+        const r = el.getBoundingClientRect(); return r.left >= box.left - 0.5 && r.right <= box.right + 0.5;
+      });
+      const fits = oneLine && contained && main.scrollWidth <= main.clientWidth + 1 && text.scrollWidth <= text.clientWidth + 1;
+      if (!fits) resetAdaptive(root);
+      root.dataset.storyArrangement = fits ? 'inline' : 'stacked';
     });
     // Recap rows first, since the story budget subtracts their height: drop trailing facts past the row's line cap.
     view.querySelectorAll('[data-recap-items]').forEach(row => {
@@ -716,17 +767,6 @@ const boardWindow = (limit: number | string, prefix = 'board') => `{% assign boa
   `{% elsif rank and rank > ${prefix}_limit %}{% assign ${prefix}_limit = ${prefix}_limit | minus: 1 %}{% assign ${prefix}_append = true %}{% endif %}`
 const rankHeading = `${L('this_week')}{% if leaderboard_cohort_label != "" %} · {{ leaderboard_cohort_label | escape }}{% endif %}`
 const boardRow = rankRow('row.rank', 'row.score', '', 'rank and row.rank == rank')
-/**
- * The portrait's board on the X: rows 1-5 and 6-10 side by side, so a full-width row does not leave the name and score
- * a panel apart and the stories keep their height. The OG pairs rows 1-3 with 4-6 the same way; a hero below them
- * takes the sixth row's place. Each column is a plain flex column (the framework's gaps need `flex`).
- */
-const OG_PORTRAIT_ROWS = 6
-const rankColumn = (loop: string, extra = '') => `<div class="flex flex--col flex--top flex--stretch-x gap--xsmall">{% for row in board_rows ${loop} %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}${extra}</div>`
-const rankColumns = `${boardWindow(10, 'x')}{% assign x_right = x_offset | plus: 5 %}{% assign x_right_limit = x_limit | minus: 5 %}` +
-  `<div class="hidden lg:block stretch-x"><div class="grid grid--cols-1 lg:grid--cols-2 gap--none lg:gap--large stretch-x">${rankColumn('offset: x_offset limit: 5')}${rankColumn('offset: x_right limit: x_right_limit')}</div></div>` +
-  `${boardWindow(OG_PORTRAIT_ROWS)}{% assign board_right = board_offset | plus: 3 %}{% assign board_right_limit = board_limit | minus: 3 %}` +
-  `<div class="lg:hidden grid grid--cols-2 gap--medium stretch-x" data-board-columns="og">${rankColumn('offset: board_offset limit: 3')}${rankColumn('offset: board_right limit: board_right_limit', `{% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}`)}</div>`
 /** Period and group caption set into the rune rule above the ranking (D92); the OG shortens "Levels" to "Lv". */
 const rankCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label lg:title--small no-shrink lg:hidden">${L('this_week')}{% if leaderboard_cohort_label != "" %}{% assign cohort_long = labels.levels | default: "Levels " %}{% assign cohort_short = labels.lv | default: "Lv " %} · {{ leaderboard_cohort_label | replace: cohort_long, cohort_short | escape }}{% endif %}</span><span class="hidden lg:inline-block label lg:title--small no-shrink">${rankHeading}</span>${ruleFill}</div>`
 /**
@@ -744,7 +784,7 @@ const ogBoard = `<div class="lg:hidden grow w--min-0 flex flex--col flex--left f
 const rankPanel = (heading: boolean) => `
       ${heading ? rankCaption : ''}
       {% unless rank %}{% if rank_status == "dormant" %}<span class="label lg:title--small">${L('not_ranked_paused')}</span>{% else %}<span class="label lg:title--small">${L('ranking_soon')}</span>{% endif %}{% endunless %}
-      ${heading ? rankColumns : `${boardWindow(10, 'x')}{% for row in board_rows offset: x_offset limit: x_limit %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}`}
+      ${boardWindow(10, 'x')}{% for row in board_rows offset: x_offset limit: x_limit %}{% unless forloop.first %}${rankRule}{% endunless %}${boardRow}{% endfor %}
       {% if x_append %}${rankRule}${rankRow('rank', 'leaderboard_score', 'hidden lg:flex ', 'true')}{% endif %}`
 
 
@@ -910,50 +950,6 @@ const qrFooter = (scale = 3, largeScale = 4, classes = '', standingScale = scale
  */
 const cornerQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="hidden lg:block no-shrink" data-home-qr="true"><img class="image" src="{{ home_qr_base }}/3.png" alt=""></div>` +
   `{% if corner_qr_base != "" %}<div class="lg:hidden absolute top--0 right--0" data-home-qr="corner"><img class="image" src="{{ corner_qr_base }}/2.png" alt=""></div>{% endif %}{% endif %}`
-
-/** The portrait's standing link set into the top-right corner of the scene, its quiet zone framing it. */
-const sceneQr = homeQr.replace('class="no-shrink" data-home-qr="true"', 'class="absolute top--0 right--0 flex bg--black p--1" data-home-qr="true"')
-
-/**
- * Full, portrait: the landscape's header (hero, status and counters, then the HUD block with the gear line), then the
- * scene across the full width with the standing QR hung in its top-right corner, then the stories take the height with
- * the ranking below a captioned rule; a full bag replaces both with its panel. The OG stacks the HUD under the hero.
- * On the X the HUD slot grows from no basis with a minimum that holds a full hearts row and XP count, so the row breaks
- * only beside the longest names, where the HUD moves under the hero; otherwise it sits against the right edge and its
- * gear line wraps if the slot is short. The framework stretches a wrapping row to the layout's height, so the header
- * sits in a plain block.
- */
-const fullPortrait = `
-  {% if status == "unlinked" or first_run %}${welcome('halfVertical')}
-  {% else %}
-  <div class="no-shrink stretch-x"><div class="flex flex--col lg:flex--row lg:flex--wrap flex--top flex--left lg:flex--between gap--small lg:gap--large" data-hero-header="true">
-    <div class="no-shrink flex flex--col flex--left gap--xsmall">
-      ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 16 | escape }}, ${L('level')} {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, ${L('level')} {{ level }}</span>
-      <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>`)}
-      ${statusLine(2, 40)}
-      ${heroCounters}
-    </div>
-    <div class="lg:grow lg:basis--0 lg:w--min-96 flex flex--col flex--left lg:flex--right" data-hud-slot="true">
-      <div class="pt--2 flex flex--col flex--left gap--xsmall" data-hud-block="true">
-        ${hudWide(false)}
-        ${gearLine}${gearLineOg}
-      </div>
-    </div>
-  </div></div>
-  <div class="no-shrink flex flex--col gap--small stretch-x">
-    <div class="relative stretch-x lg:pt--2" data-scene-row="true">${scene('scene_url_medium', 'scene_url', true)}${sceneQr}</div>
-    ${divider}
-  </div>
-  {% if qr_base != "" %}${bagFullPanel(true)}
-  {% else %}
-  <div class="grow h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall lg:gap--small stretch-x">
-    ${attention('label lg:title--small', 3, true)}
-    {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 40, false, 'lg')}
-  </div>
-  <div class="no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall lg:gap--small stretch-x pt--1 lg:pt--2" data-rank-panel="true">${rankPanel(true)}</div>
-  {% endif %}
-  {% unless attention %}${recapRibbon}{% endunless %}
-  {% endif %}`
 
 /**
  * The X's own arrangements of the half, side and quarter views (D95). The OG keeps its arrangements, each top-level
@@ -1153,9 +1149,9 @@ const halfHorizontalPortrait = halfVerticalBody(false)
  * D138, X full landscape: today's three to-do tasks heading the board column, each behind a ticked or open box with
  * its progress at the end, ruled like the board under them. Labels keep their bold names; a long one takes two lines.
  */
-const todoCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label title--small no-shrink">${L('todo_today')}</span>${ruleFill}</div>`
+const todoCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label lg:title--small no-shrink">${L('todo_today')}</span>${ruleFill}</div>`
 const todoColumn = `<div class="no-shrink flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x" data-todo-column="x">
-        {% for task in todo_tasks %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}<div class="label title--small flex flex--row flex--center-y gap--small stretch-x" data-todo-task="{% if task.done %}done{% else %}open{% endif %}">
+        {% for task in todo_tasks %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}<div class="label lg:title--small flex flex--row flex--center-y gap--small stretch-x" data-todo-task="{% if task.done %}done{% else %}open{% endif %}">
           <img class="image no-shrink" src="{% if task.done %}{{ glyph16_todo }}{% else %}{{ glyph16_todoOpen }}{% endif %}" alt="">
           <span class="grow w--min-0" data-clamp="2">${richSpan(rich('task.t'))}</span>
           <span class="no-shrink">{% if task.done %}${L('done')}{% else %}{{ task.p }}/{{ task.n }}{% endif %}</span>
@@ -1173,6 +1169,71 @@ const goalLine = `{% if goal %}<div class="hidden lg:flex no-shrink flex--col fl
           <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
         </div>
       </div>{% endif %}`
+
+/** The OG keeps its six-row board in two columns, leaving room for full-width stories. */
+const ogPortraitBoard = `${rankCaption}
+  {% unless rank %}<span class="label">{% if rank_status == "dormant" %}${L('not_ranked_paused')}{% else %}${L('ranking_soon')}{% endif %}</span>{% endunless %}
+  ${boardWindow(6)}{% assign board_right = board_offset | plus: 3 %}{% assign board_right_limit = board_limit | minus: 3 %}
+  <div class="grid grid--cols-2 gap--medium stretch-x" data-board-columns="og">
+    <div class="flex flex--col flex--top flex--stretch-x gap--xsmall">{% for row in board_rows offset: board_offset limit: 3 %}${boardRow}{% endfor %}</div>
+    <div class="flex flex--col flex--top flex--stretch-x gap--xsmall">{% for row in board_rows offset: board_right limit: board_right_limit %}${boardRow}{% endfor %}{% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}</div>
+  </div>`
+
+/** A compact goal row above the tasks; only the title wraps, while progress and reward stay together. */
+const portraitGoal = `{% if goal %}<div class="flex flex--row flex--top gap--small stretch-x" data-portrait-goal="true">
+  <img class="image no-shrink" src="{{ glyph16_career }}" alt="">
+  <span class="label lg:title--small grow w--min-0" data-clamp="2">${L('goal')}{{ goal.t | escape }}</span>
+  <span class="label lg:title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
+</div>{% endif %}`
+
+/**
+ * Full portrait: hero details and HUD stacked against the left edge, standing QR at the header's top right,
+ * then the full-width scene and ledger. X closes with goal/tasks beside the compact ranking; OG keeps its board.
+ */
+const fullPortrait = `
+  {% if status == "unlinked" or first_run %}${welcome('halfVertical')}
+  {% else %}
+  <div class="no-shrink flex flex--row flex--top gap--medium lg:gap--large stretch-x" data-portrait-header="true">
+  <div class="grow w--min-0 flex flex--col flex--left flex--stretch-x gap--small" data-hero-header="true">
+    <div class="flex flex--col flex--left gap--xsmall stretch-x">
+      ${nameRow(`<span class="title lg:hidden w--min-0" data-clamp="1" data-name-long="true">{{ hero_name | truncate: 16 | escape }}, ${L('level')} {{ level }}</span><span class="title hidden w--min-0" data-name-short="true">{{ hero_name | truncate: 8 | escape }}, ${L('level')} {{ level }}</span>
+      <span class="hidden lg:inline-block title no-shrink">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>`)}
+      ${statusLine(2, 40)}
+      ${heroCounters}
+    </div>
+    <div class="flex flex--col flex--left stretch-x w--min-0" data-hud-slot="true">
+      <div class="pt--2 flex flex--col flex--left gap--xsmall" data-hud-block="true">
+        ${hudWide(false)}
+        ${gearLine}${gearLineOg}
+      </div>
+    </div>
+  </div>
+  ${homeQr}
+  </div>
+  <div class="no-shrink flex flex--col gap--small stretch-x">
+    <div class="relative stretch-x lg:pt--2" data-scene-row="true">${scene('scene_url_medium', 'scene_url', true)}</div>
+    ${divider}
+  </div>
+  {% if qr_base != "" %}${bagFullPanel(true)}
+  {% else %}
+  <div class="grow h--min-0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall lg:gap--small stretch-x">
+    ${attention('label lg:title--small', 3, true)}
+    {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 64, false, 'lg', 74, true)}
+  </div>
+  <div class="hidden lg:block no-shrink stretch-x pt--2" data-portrait-summary="true"><div class="flex flex--row flex--stretch-y gap--medium stretch-x">
+    <div class="grow basis--0 flex flex--col flex--left flex--top flex--stretch-x gap--small w--min-0" data-portrait-objectives="true">
+      ${portraitGoal}
+      {% if todo_tasks.size > 0 %}${todoCaption}${todoColumn}{% endif %}
+    </div>
+    <div class="no-shrink border--v-30" data-portrait-column-rule="true"></div>
+    <div class="grow basis--0 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall w--min-0" data-rank-panel="portrait">
+      ${xBoard(5)}
+    </div>
+  </div></div>
+  <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x pt--1">${ogPortraitBoard}</div>
+  {% endif %}
+  {% unless attention %}${recapRibbon}{% endunless %}
+  {% endif %}`
 
 export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen = "${glyphUri('todoOpen', 16)}" %}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--xsmall lg:gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('full')}

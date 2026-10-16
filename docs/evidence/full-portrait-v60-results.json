@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-16",
+  "templateVersion": 60,
+  "x": {
+    "total": 194,
+    "failures": 0
+  },
+  "og": {
+    "total": 3,
+    "failures": 0
+  },
+  "followup": {
+    "normal": {
+      "total": 72,
+      "failures": 0
+    },
+    "longText": {
+      "total": 72,
+      "failures": 0
+    }
+  },
+  "adaptive": {
+    "normal": {
+      "total": 72,
+      "failures": 0
+    },
+    "longText": {
+      "total": 72,
+      "failures": 0
+    }
+  }
+}

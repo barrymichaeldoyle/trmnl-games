@@ -220,8 +220,8 @@ describe('full layout', () => {
     return {
       ogLandscape: rows(from(landscape, 'data-board-column="og"', 'data-rune-rule')),
       xLandscape: rows(from(landscape, 'data-board-column="true"')),
-      xPortrait: [...rows(from(portrait, 'data-rank-panel', 'data-board-columns="og"')), ...rows(from(portrait, 'data-board-columns="og"')).filter((r) => r.hidden)],
-      // The X portrait's appended own row follows the OG columns; it is hidden below the X's breakpoint.
+      xPortrait: rows(from(portrait, 'data-rank-panel', 'data-board-columns="og"')),
+      // The OG portrait retains its compact board in two columns.
       ogPortrait: rows(from(portrait, 'data-board-columns="og"')).filter((r) => !r.hidden),
     }
   }
@@ -235,7 +235,8 @@ describe('full layout', () => {
     expect(text).toContain('This week · Levels 4-7')
     // Every board lists the five rows once; only the third is inverted.
     const { ogLandscape, xLandscape, ogPortrait } = boards(html)
-    for (const list of [ogLandscape, xLandscape, ogPortrait]) expect(list.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, true], [4, false], [5, false]])
+    for (const list of [ogLandscape, xLandscape]) expect(list.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, true], [4, false], [5, false]])
+    expect(ogPortrait.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, true], [4, false], [5, false]])
     expect(xLandscape[2]!.text).toBe('3. barrymichaeldoyle1840 XP')
     // On ink panels the own row is red rather than black (D94).
     expect(html).toMatch(/label--inverted bg--red 1bit:bg--black 2bit:bg--black 4bit:bg--black" data-rank-row="3"/)
@@ -255,17 +256,17 @@ describe('full layout', () => {
     // Landscape: ten rows in the X's column, five beside the OG's scene; nothing is appended because the hero is on the board.
     expect(xLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     expect(ogLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5])
-    // Portrait: rows 1-5 beside 6-10 on the X, 1-3 beside 4-6 on the OG.
-    expect(html).toContain('<div class="hidden lg:block stretch-x"><div class="grid grid--cols-1 lg:grid--cols-2 gap--none lg:gap--large stretch-x">')
-    expect(xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    // Portrait reserves the full-width log above five X rows or six OG rows in two columns.
+    expect(html).toContain('data-portrait-summary="true"')
+    expect(xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5])
     expect(ogPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6])
     // A hero below the tenth row takes the tenth row's place in the X landscape, the fifth beside the OG scene, and the
-    // sixth in the OG portrait, and the fifth of the X portrait's right column.
+    // sixth in the OG portrait, and fifth in the X portrait.
     const eleventh = boards(await render({ ...board(11, 400), top10: ten }))
     expect(eleventh.xLandscape.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [6, false], [7, false], [8, false], [9, false], [11, true]])
     expect(eleventh.ogLandscape.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, false], [4, false], [11, true]])
     expect(eleventh.ogPortrait.map((r) => [r.rank, r.own])).toEqual([[1, false], [2, false], [3, false], [4, false], [5, false], [11, true]])
-    expect(eleventh.xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 11])
+    expect(eleventh.xPortrait.map((r) => r.rank)).toEqual([1, 2, 3, 4, 11])
     // An older payload without top10 still draws its five rows.
     expect(boards(await render(board(3))).xLandscape.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5])
   })
@@ -283,9 +284,9 @@ describe('full layout', () => {
   it('centres every board on the hero from the rows around it (D152)', async () => {
     const window = Array.from({ length: 10 }, (_, i) => ({ rank: i + 9, name: `P${i + 9}`, hero_name: `H${i + 9}`, level: 4, score: 900 - i * 10 }))
     const mid = boards(await render({ ...board(14, 850), board: window, board_own: 5 }))
-    // Ten rows on the X, the hero sixth; five beside the OG scene and six in the OG portrait, the hero in the middle.
+    // Ten rows on X landscape; five on X portrait and OG landscape, six on OG portrait, centred on the hero.
     expect(mid.xLandscape.map((r) => r.rank)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
-    expect(mid.xPortrait.map((r) => r.rank)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17, 18])
+    expect(mid.xPortrait.map((r) => r.rank)).toEqual([12, 13, 14, 15, 16])
     expect(mid.ogLandscape.map((r) => [r.rank, r.own])).toEqual([[12, false], [13, false], [14, true], [15, false], [16, false]])
     expect(mid.ogPortrait.map((r) => r.rank)).toEqual([11, 12, 13, 14, 15, 16])
     // Near either end the window slides inside the rows sent rather than leaving blanks.
@@ -313,7 +314,7 @@ describe('full layout', () => {
     const standing = await render({ ...payload(), companion_qr_base: `${base}/bag`, home_qr_base: `${base}/app` })
     expect(standing).toContain('data-home-qr="true"')
     expect(standing).toContain('data-board-column="true"')
-    expect(standing).toContain('data-rank-panel="true"')
+    expect(standing).toContain('data-rank-panel="portrait"')
     const action = await render({ ...payload(), companion_qr_base: `${base}/bag`, home_qr_base: `${base}/app`, qr_base: `${base}/bag`, qr_url: `${base}/bag/3.png`, qr_url_large: `${base}/bag/5.png`, qr_label: 'Scan to open your bag' })
     expect(markupOnly(action)).not.toContain('data-home-qr')
     // The stories and their ranking give way to the panel; the OG landscape keeps its board beside the scene.
@@ -434,17 +435,17 @@ describe('log lines (D44)', () => {
     const html = await render({ ...payload(), utc_offset: 7200 })
     expect(html).toContain('class="image no-shrink" src="data:image/svg+xml,')
     expect(html).toMatch(/<span class="text--regular">Unplugged a Cable Serpent/)
-    expect(html).toMatch(/data-story-time="true">10:19<\/span><\/div><div class="(lg:hidden )?flex[^"]*" data-story-changes="true">/)
+    expect(html).toMatch(/data-story-meta="og">.*data-story-time="true">10:19<\/span><\/div>/)
   })
 
   it('gives the newest story the whole line on the X and puts its changes and time below it, in the columns', async () => {
     const vars = payload() as { log: Array<Record<string, unknown>> } & Record<string, unknown>
     const html = await render({ ...vars, utc_offset: 7200, log: [{ ...vars.log[0], n: 'Took down an elite [[Legacy Mainframe]]. The floor heard it.' }, ...vars.log] })
     const [landscape, portrait] = html.split('landscape:hidden')
-    // Portrait, on the X: no chips on the story's line, a meta row with the stat columns and the time; on the OG: the time stays on the line.
+    // Portrait: X keeps stat columns; OG keeps icon, changes and time together below the story.
     const lead = portrait!.split('The floor heard it.')[1]!.split('border--h-30')[0]!
-    expect(lead).toMatch(/<span class="lg:hidden label lg:title--small no-shrink" data-story-time="true">10:19<\/span>/)
-    expect(lead).toMatch(/<div class="hidden lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="hidden lg:flex[^"]*" data-story-chips-inline="true">.*data-chip-cell="xp" data-chip-width="78">.*<span class="label lg:title--small no-shrink" data-story-time="true">10:19<\/span><\/div>/)
+    expect(lead).toMatch(/data-story-meta="og">.*data-change="true".*data-story-time="true">10:19<\/span>/)
+    expect(lead).toMatch(/<div class="hidden lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="hidden lg:flex[^"]*" data-story-chips-inline="true">.*data-chip-cell="xp" data-chip-width="78">.*<span class="label lg:title--small no-shrink pl--2" data-story-time="true">10:19<\/span><\/div>/)
     // Landscape: the screen-wide ledger uses the meta row on every device, and the OG's stacked chips are gone.
     const wide = landscape!.split('The floor heard it.')[1]!.split('border--h-30')[0]!
     expect(wide).toMatch(/<div class="flex lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="flex lg:flex flex--row[^"]*" data-story-chips-inline="true">/)
@@ -463,7 +464,7 @@ describe('log lines (D44)', () => {
     expect(html).toMatch(/data-story-chips-inline="true"><span[^>]*data-change="true"><img [^>]*><span[^>]*>\+1<\/span><\/span><span[^>]*data-chip-cell="xp"/)
     // The second entry has no changes, so it reserves no columns and its story keeps the line.
     expect(html.match(/data-story-chips-inline/g)).toHaveLength(2)
-    expect(html).toMatch(/<div class="lg:hidden flex[^"]*" data-story-changes="true">/)
+    expect(html).toMatch(/<div class="lg:hidden flex[^"]*" data-story-meta="og">/)
     // The narrower layouts keep the changes under the story on both devices.
     const side = await new Liquid({ timezoneOffset: 0 }).parseAndRender(screenMarkup.markup_half_vertical, { ...vars, utc_offset: 7200 })
     expect(side).not.toContain('data-story-chips-inline')
@@ -485,7 +486,7 @@ describe('log lines (D44)', () => {
     expect(inline).toMatch(/^<span class="flex flex--row[^"]*" data-marked-inline="true">/)
     expect(changeText(inline)).toEqual(['bag:+3', 'gold:−100'])
     // The row aligns to the story's first line rather than centring between it and the words.
-    expect(portrait!.split('Bag holds 13.')[0]!.split('border--h-30').at(-1)).toMatch(/<div class="flex flex--row flex--left flex--top gap--xsmall" data-ledger-row="true">/)
+    expect(portrait!.split('Bag holds 13.')[0]!.split('border--h-30').at(-1)).toMatch(/<div class="flex flex--row flex--left flex--top gap--xsmall" data-ledger-row="true" data-adaptive-main="true">/)
     // The screen-wide landscape ledger keeps everything on the line.
     expect(landscape).not.toContain('data-story-chips-other')
     expect(changeText(landscape!.split('Bag holds 13.')[1]!.split('data-story-time')[0]!)).toEqual(['bag:+3', ':Pouch holds 6', 'gold:−100'])
@@ -534,8 +535,10 @@ describe('log lines (D44)', () => {
       const html = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, vars)
       const text = html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ')
       expect(text).toContain('Unplugged a Cable Serpent.')
-      const stacked = html.split('data-story-changes="true">')[1]!.split('</div></div>')[0]!
-      expect(stacked).toMatch(/^<div class="no-shrink w--\[\d+px\]"><\/div><div class="grow w--min-0 flex flex--row flex--wrap[^"]*">/)
+      const ogMeta = markupOnly(html).includes('data-story-meta="og"')
+      const stacked = html.split(ogMeta ? 'data-story-meta="og">' : 'data-story-changes="true">')[1]!.split('</div>').slice(0, 2).join('</div>')
+      if (ogMeta) expect(stacked).toMatch(/^<div class="no-shrink"><img /)
+      else expect(stacked).toMatch(/^<div class="no-shrink w--\[\d+px\]"><\/div><div class="grow w--min-0 flex flex--row flex--wrap[^"]*">/)
       expect(changeText(stacked)).toEqual(['xp:+14', 'gold:+5', 'hp:−12'])
     }
   })
@@ -544,7 +547,7 @@ describe('log lines (D44)', () => {
     const vars = payload() as { log: Array<Record<string, unknown>> } & Record<string, unknown>
     const html = await render({ ...vars, log: [{ ...vars.log[0], n: 'A very long story '.repeat(10) }] })
     expect(html).toMatch(/data-clamp="2" data-clamp-lg="0"><span class="text--regular">A very long story/)
-    expect(html).toMatch(/<\/span><\/div><div class="(lg:hidden )?flex[^"]*" data-story-changes="true">/)
+    expect(html).toMatch(/<\/span><\/div><div class="lg:hidden flex[^"]*" data-story-meta="og">/)
     const old = await render({ ...vars, log: [{ s: 'Old story. +4 XP.', k: 'combat', u: NOW / 1000 }] })
     expect(old).toContain('Old story. +4 XP.')
     expect(old).not.toContain('undefined')
@@ -700,6 +703,26 @@ describe('to-do tasks and the goal on the X full landscape (D138)', () => {
     expect(p.goal).toEqual({ t: 'Reach level 7', v: 5, n: 7, g: 40 })
     expect((payload() as Record<string, unknown>).todo_tasks).toEqual([])
     expect((payload() as Record<string, unknown>).goal).toBeNull()
+  })
+
+  it('stacks the portrait HUD on the left and puts the home QR in the header before the scene', async () => {
+    const html = await render({ ...withTasks(), home_qr_base: 'https://art.test/art/qr/v3/app' })
+    const portrait = html.split('landscape:hidden')[1]!
+    const order = ['data-portrait-header', 'data-hero-header', 'data-hud-slot', 'data-home-qr', 'data-scene-row'].map(marker => portrait.indexOf(marker))
+    expect(order.every((position, i) => position >= 0 && (i === 0 || position > order[i - 1]!))).toBe(true)
+    expect(portrait).toContain('class="flex flex--col flex--left stretch-x w--min-0" data-hud-slot')
+    expect(portrait.slice(portrait.indexOf('data-scene-row'))).not.toContain('data-home-qr')
+  })
+
+  it('places a full-width portrait log before the goal/tasks and board, including without objectives', async () => {
+    const portrait = (await render(withTasks())).split('landscape:hidden')[1]!
+    const order = ['data-story-list', 'data-portrait-summary', 'data-portrait-objectives', 'data-portrait-goal', 'data-todo-column', 'data-rank-panel'].map(marker => portrait.indexOf(marker))
+    expect(order.every((position, i) => position >= 0 && (i === 0 || position > order[i - 1]!))).toBe(true)
+    expect(portrait).not.toContain('data-story-columns')
+    const plain = (await render(payload())).split('landscape:hidden')[1]!
+    expect(plain).not.toContain('data-portrait-goal')
+    expect(plain).not.toContain('data-todo-column')
+    expect(plain).toContain('data-rank-panel')
   })
 
   it('draws the tasks, the fitted board and the goal on the X only, and the plain board without tasks', async () => {

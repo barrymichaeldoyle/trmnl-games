@@ -5,7 +5,7 @@
  * (`~/Library/Caches/ms-playwright`, installed by the Playwright MCP or `npx playwright install chromium`), waits for
  * the framework to settle, then records layout checks and optional screenshots. It approximates TRMNL's renderer;
  * real-device renders stay the acceptance gate.
- * Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>]   (run from the repository root)
+ * Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>] [--full-screen]   (run from the repository root)
  */
 import { chromium } from 'playwright-core'
 import { readdirSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -17,6 +17,7 @@ const [outJson] = process.argv.slice(2)
 if (!outJson || outJson.startsWith('--')) throw new Error('Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>]')
 const shotsIndex = process.argv.indexOf('--shots')
 const shotsDir = shotsIndex >= 0 ? process.argv[shotsIndex + 1] : null
+const fullScreen = process.argv.includes('--full-screen')
 const filterIndex = process.argv.indexOf('--filter')
 const filter = filterIndex >= 0 ? process.argv[filterIndex + 1] : null
 const previews = join(process.cwd(), '.previews')
@@ -117,7 +118,8 @@ for (const file of files.sort()) {
       const r = e.getBoundingClientRect()
       return codes.some((c) => r.left < c.right - 1 && r.right > c.left + 1 && r.top < c.bottom - 1 && r.bottom > c.top + 1)
     }).map((e) => ({ text: e.innerText.slice(0, 40), right: e.getBoundingClientRect().right }))
-    return { bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, underBoard, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
+    const adaptiveStories = Array.from(layoutEl.querySelectorAll('[data-adaptive-story]')).filter(visible).map(el => ({ arrangement: el.dataset.storyArrangement, text: el.querySelector('[data-adaptive-text]').innerText, metadataRows: Array.from(el.querySelectorAll('[data-story-time]')).filter(visible).length }));
+    return { adaptiveStories, bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, underBoard, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
   })
   // Regression for the X side view: an inner ledger can outgrow its fixed flex slot during reflow.
   // Grow only the inner box, rerun the real fitter, then restore it before taking the normal screenshot.
@@ -146,8 +148,8 @@ for (const file of files.sort()) {
   const ok = hasRegressionStory && (!slotStress || slotStress.overlap === 0) && !result.error && result.overflow.length === 0 && result.titleOverflow.length === 0 && result.underRibbon.length === 0 && result.underCode.length === 0 && result.underBoard.length === 0 && result.broken.length === 0 && result.textOverflow.length === 0 && result.lists.every((l) => l.fit === 'complete') && result.recaps.every((r) => r.fit === 'complete') && result.hearts.every((h) => h.images === 10 && h.wrappedRows === 1 && h.rows === 1) && result.ticks.every((t) => t.images === 10 && t.tickRows === 1)
   if (!ok) failures++
   results.push({ file, state, device, portrait, layout, ok, slotStress, ...result })
-  // The plugin's own view: in portrait the mashup slots are not the landscape box turned on its side.
-  if (shotsDir) await page.locator('.view').first().screenshot({ path: join(shotsDir, file.replace('.html', '.png')) })
+  // Default to the plugin view for regression evidence; --full-screen retains the display's outer padding for sharing.
+  if (shotsDir) await page.locator(fullScreen ? '.screen' : '.view').first().screenshot({ path: join(shotsDir, file.replace('.html', '.png')) })
   process.stdout.write(`${ok ? 'ok  ' : 'FAIL'} ${file}\n`)
 }
 await browser.close()

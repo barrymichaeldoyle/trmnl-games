@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'More room for portrait adventures',
+        body: 'On full-screen portrait displays, the event log uses the whole width. Your goal and today’s tasks sit together below it, beside a compact leaderboard that keeps your own row in view. Available on TRMNL X. On both X and OG portrait screens, health and gear line up beneath the hero, with the QR code at the top right. Portrait events fit on one row when there is room for the icon, full story, closely grouped stats and a separate timestamp; longer stories keep the details below. A vertical rule separates the goal and tasks from the leaderboard.',
+        fr: { title: 'Plus de place pour les aventures en portrait', body: 'En plein écran portrait, le journal occupe toute la largeur. Votre objectif et les tâches du jour sont regroupés dessous, à côté d’un classement compact qui garde votre ligne visible. Disponible sur TRMNL X. Sur les écrans portrait X et OG, la santé et l’équipement s’alignent sous le héros, avec le code QR en haut à droite. En portrait, les événements tiennent sur une ligne si l’icône, le récit complet, les statistiques regroupées et l’heure bien séparée y entrent ; sinon les détails restent dessous. Un trait vertical sépare l’objectif et les tâches du classement.' },
+        de: { title: 'Mehr Platz für Abenteuer im Hochformat', body: 'Im Vollbild-Hochformat nutzt das Protokoll die ganze Breite. Dein Ziel und die heutigen Aufgaben stehen darunter zusammen, neben einer kompakten Rangliste, die deine eigene Zeile sichtbar hält. Verfügbar auf TRMNL X. Im Hochformat auf X und OG stehen Gesundheit und Ausrüstung links unter dem Helden, der QR-Code oben rechts. Im Hochformat stehen Ereignissymbol, vollständiger Text, eng gruppierte Werte und eine deutlich abgesetzte Uhrzeit in einer Zeile, wenn alles hineinpasst; sonst bleiben die Details darunter. Eine senkrechte Linie trennt Ziel und Aufgaben von der Rangliste.' },
+      },
+      {
         title: 'Equipping gear and switching to Bold mark the goal done right away',
         body: 'Putting on a piece of gear you found, or landing on Bold after another stance, marks that goal done immediately. The reward still waits on Claim.',
         fr: { title: 'Équiper et passer en Audacieux cochent l’objectif tout de suite', body: 'Enfiler un équipement trouvé, ou arriver sur Audacieux après un autre style, marque cet objectif comme fait immédiatement. La récompense attend toujours sur Récupérer.' },

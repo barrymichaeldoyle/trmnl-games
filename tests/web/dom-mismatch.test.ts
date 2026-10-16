@@ -15,7 +15,7 @@ type Shape = {
 }
 
 function element(name: string, options: { id?: string; classList?: string[]; children?: Shape[] } = {}): Shape {
-  const node: Shape = { nodeType: ELEMENT, nodeName: name.toUpperCase(), parentNode: null, childNodes: options.children ?? [], id: options.id, classList: options.classList }
+  const node: Shape = { nodeType: ELEMENT, nodeName: name.toUpperCase(), parentNode: null, childNodes: options.children ?? [], ...(options.id === undefined ? {} : { id: options.id }), ...(options.classList === undefined ? {} : { classList: options.classList }) }
   for (const child of node.childNodes) child.parentNode = node
   return node
 }
