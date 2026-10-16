@@ -260,11 +260,13 @@ const STANCE_IDS = ['cautious', 'balanced', 'bold'] as const
 
 /**
  * Choose how the hero sustains itself (D76). A policy, not an action: allowed in every gameplay status, takes effect
- * at the hero's next evaluation under a catalog that knows stances, never advances or rewards anything.
+ * at the hero's next evaluation under a catalog that knows stances. A stance goal this switch satisfies is marked
+ * done in the same action.
  *
  * Only the stance the next tick plays by matters (D103), so switches with nothing logged between them share one line:
  * the newest switch rewrites it, and switching back to where it started removes it. The counter follows the line, so
- * flicking between stances never counts more than one change.
+ * flicking between stances never counts more than one change. Every branch settles, so landing on Bold marks
+ * "Switch to Bold" whether it was the first switch, a rewrite, or a switch back.
  */
 export const setStance = mutation({
   args: { operationId: v.string(), stance: v.union(v.literal('cautious'), v.literal('balanced'), v.literal('bold')) },
@@ -284,10 +286,10 @@ export const setStance = mutation({
       const recent = await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(4)
       const latest = recent.find((log) => log.kind !== 'achievement') ?? null
       const open = latest !== null && latest.source === 'command' && 'operation' in latest.detail && latest.detail.operation === 'set_stance' ? latest.detail.stanceFrom : undefined
+      const tick = (await readWorld(ctx))?.currentTick ?? 0
       if (latest === null || open === undefined) {
         await ctx.db.patch(hero._id, { stance: args.stance, counters: { ...counters, stanceChanges: counters.stanceChanges + 1 } })
         await commandLog(ctx, hero, 'set_stance', stanceSummary(content, hero.stance ?? 'balanced', args.stance), undefined, { stanceFrom: hero.stance ?? 'balanced' })
-        await awardAfterIntent(ctx, hero, content, (await readWorld(ctx))?.currentTick ?? 0)
       } else if (open === args.stance) {
         await ctx.db.patch(hero._id, { stance: args.stance, counters: { ...counters, stanceChanges: Math.max(0, counters.stanceChanges - 1) } })
         await ctx.db.delete(latest._id)
@@ -295,6 +297,7 @@ export const setStance = mutation({
         await ctx.db.patch(hero._id, { stance: args.stance })
         await ctx.db.patch(latest._id, { at: Date.now(), summary: stanceSummary(content, open, args.stance) })
       }
+      await awardAfterIntent(ctx, hero, live, tick)
       return { changed: true }
     }),
 })

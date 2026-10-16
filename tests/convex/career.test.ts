@@ -3,6 +3,7 @@ import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, internal } from '@trmnl-games/backend/api'
 import type { Id } from '@trmnl-games/backend/data-model'
+import { contentV24 } from '@trmnl-games/desk-crawler/content/v24'
 import schema from '../../apps/backend/convex/schema'
 import { runTick, seedHero, seedWorld, type T } from './helpers'
 
@@ -208,5 +209,47 @@ describe('career ladder backend (P35)', () => {
     for (const id of [low, balanced, bold]) expect((await heroDoc(t, id)).career).toEqual(onRaid)
     expect((await heroDoc(t, after)).career!.rung).toBe(14)
     expect((await heroDoc(t, done)).career!.rung).toBe(24)
+  })
+
+  it('marks Equip a piece of gear you found done as soon as you equip it', { timeout: 30_000 }, async () => {
+    const equipFind = contentV24.career!.rungs.findIndex((rung) => rung.id === 'equip_find')
+    await seedWorld(t, { activeContentVersion: 'v24', currentTick: 10 })
+    const heroId = await seedHero(t, { level: 3, career: { rung: equipFind, startedTick: 0, reached: [] } }, 'Jo')
+    const spare = await t.run(async (ctx) => {
+      const hero = (await ctx.db.get(heroId))!
+      const weapon = (await ctx.db.get(hero.weaponId!))!
+      return await ctx.db.insert('items', { ...weapon, _id: undefined, _creationTime: undefined, attack: weapon.attack + 1 } as never)
+    })
+    await as(t, 'Jo').mutation(api.inventory.equip, { operationId: opId(), itemId: spare })
+    const equipped = await heroDoc(t, heroId)
+    expect(equipped.career?.reached.map((entry) => entry.id)).toEqual(['equip_find'])
+    expect(equipped.career?.unclaimed).toEqual([expect.objectContaining({ id: 'equip_find', gold: 15 })])
+    await tickAt(t, 1)
+    const after = await heroDoc(t, heroId)
+    expect(after.career?.reached.filter((entry) => entry.id === 'equip_find')).toHaveLength(1)
+    expect(after.career?.unclaimed?.filter((entry) => entry.id === 'equip_find')).toHaveLength(1)
+  })
+
+  it('marks Switch to Bold done when a later switch lands on Bold', { timeout: 30_000 }, async () => {
+    const goBold = contentV24.career!.rungs.findIndex((rung) => rung.id === 'go_bold')
+    await seedWorld(t, { activeContentVersion: 'v24', currentTick: 10 })
+    const rewrite = await seedHero(t, { level: 9, career: { rung: goBold, startedTick: 0, reached: [] } }, 'Kay')
+    await as(t, 'Kay').mutation(api.heroes.setStance, { operationId: opId(), stance: 'cautious' })
+    expect((await heroDoc(t, rewrite)).career?.rung).toBe(goBold)
+    await as(t, 'Kay').mutation(api.heroes.setStance, { operationId: opId(), stance: 'bold' })
+    const rewritten = await heroDoc(t, rewrite)
+    expect(rewritten.stance).toBe('bold')
+    expect(rewritten.career?.reached.map((entry) => entry.id)).toEqual(['go_bold'])
+    expect(rewritten.career?.unclaimed).toEqual([expect.objectContaining({ id: 'go_bold', gold: 20 })])
+
+    // Switching away from Bold and straight back undoes the log line and still lands on Bold.
+    const undo = await seedHero(t, { level: 9, stance: 'bold', career: { rung: goBold, startedTick: 0, reached: [] } }, 'Lee')
+    await as(t, 'Lee').mutation(api.heroes.setStance, { operationId: opId(), stance: 'cautious' })
+    expect((await heroDoc(t, undo)).career?.rung).toBe(goBold)
+    await as(t, 'Lee').mutation(api.heroes.setStance, { operationId: opId(), stance: 'bold' })
+    const undone = await heroDoc(t, undo)
+    expect(undone.stance).toBe('bold')
+    expect(undone.career?.reached.map((entry) => entry.id)).toEqual(['go_bold'])
+    expect(undone.career?.unclaimed).toEqual([expect.objectContaining({ id: 'go_bold', gold: 20 })])
   })
 })

@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'Equipping gear and switching to Bold mark the goal done right away',
+        body: 'Putting on a piece of gear you found, or landing on Bold after another stance, marks that goal done immediately. The reward still waits on Claim.',
+        fr: { title: 'Équiper et passer en Audacieux cochent l’objectif tout de suite', body: 'Enfiler un équipement trouvé, ou arriver sur Audacieux après un autre style, marque cet objectif comme fait immédiatement. La récompense attend toujours sur Récupérer.' },
+        de: { title: 'Ausrüsten und zu Draufgängerisch wechseln haken das Ziel sofort ab', body: 'Gefundene Ausrüstung anlegen, oder nach einem anderen Stil bei Draufgängerisch landen, markiert das Ziel sofort als geschafft. Die Belohnung wartet weiter auf Abholen.' },
+      },
+      {
         title: 'A goal you finish here is marked done right away',
         body: 'A goal you finish in the companion, such as salvaging a piece of gear, is marked done immediately. The reward waits on the Claim button instead of the next adventure.',
         fr: { title: 'Un objectif fini ici est coché tout de suite', body: 'Un objectif que vous terminez dans le compagnon, comme démonter un équipement, est marqué comme fait immédiatement. La récompense attend sur le bouton Récupérer, au lieu de la prochaine aventure.' },

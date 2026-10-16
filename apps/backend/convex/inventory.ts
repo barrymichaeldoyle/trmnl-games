@@ -367,9 +367,10 @@ export const equip = mutation({
       const slot = item.kind === 'weapon' ? 'weaponId' : 'armorId'
       if (hero[slot] === item._id) return { changed: false }
       // Swapping is always possible: the old item takes the new one's bag slot. Filling an empty slot frees one.
-      // P35: the equip counts, for the ladder's "Equip a piece of gear you found".
+      // P35: the equip counts, for the ladder's "Equip a piece of gear you found", and that goal marks done now.
       await ctx.db.patch(hero._id, { [slot]: item._id, counters: { ...withCounterDefaults(hero.counters), itemsEquipped: (hero.counters.itemsEquipped ?? 0) + 1 } })
       await commandLog(ctx, hero, 'equip', `Equipped the ${itemLabel(item)}.`)
+      await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
       return { changed: true }
     }),
 })
