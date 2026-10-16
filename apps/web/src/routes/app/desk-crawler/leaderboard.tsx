@@ -98,11 +98,16 @@ function Leaderboard() {
           <p>{t.publishesHourly}</p>
         </Card>
       ) : (
-        <Card title={t.cardTitle(t.group(data.cohortKey), n(data.totalPlayers), data.totalPlayers)} className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
-          <p className="mb-3 text-sm text-muted">
-            {board === 'overall' ? t.rankedByLevel : t.rankedByXp}{t.updatedHourly}
-            <LocalTime at={data.scoreAt} format={updatedAt} />.
-          </p>
+        <Card
+          title={t.cardTitle(t.group(data.cohortKey), n(data.totalPlayers), data.totalPlayers)}
+          meta={
+            <>
+              <span className="whitespace-nowrap">{t.lastUpdated}</span>
+              <LocalTime at={data.scoreAt} format={updatedAt} className="ml-1 whitespace-nowrap" />
+            </>
+          }
+          className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}
+        >
           {data.own ? (
             <p className="mb-3 font-semibold">
               {t.youAre}<span className="text-gold-ink">#{n(data.own.rank)}</span>{t.ofTotal(n(data.totalPlayers))}

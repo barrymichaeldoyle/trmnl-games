@@ -110,11 +110,22 @@ function NoticePanel({ text, tone, onDismiss }: { text: string; tone: string; on
   </div>
 }
 
-export function Card({ title, icon, children, className = '' }: { title?: string; icon?: GlyphName; children: ReactNode; className?: string }) {
+export function Card({ title, icon, meta, children, className = '' }: { title?: string; icon?: GlyphName; meta?: ReactNode; children: ReactNode; className?: string }) {
   const id = useId()
   return (
     <section aria-labelledby={title ? id : undefined} className={`window min-w-0 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5 ${className}`}>
-      {title ? icon ? <h2 id={id} className="mb-3 flex items-center gap-3 font-display text-2xl font-bold"><Glyph name={icon} size={24} className="text-gold-ink" /><span className="min-w-0">{title}</span></h2> : <h2 id={id} className="mb-3 font-display text-2xl font-bold">{title}</h2> : null}
+      {title && meta ? (
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          {icon ? (
+            <h2 id={id} className="flex max-w-full shrink-0 items-center gap-3 font-display text-2xl font-bold"><Glyph name={icon} size={24} className="text-gold-ink" /><span className="min-w-0">{title}</span></h2>
+          ) : (
+            <h2 id={id} className="max-w-full shrink-0 font-display text-2xl font-bold">{title}</h2>
+          )}
+          <p className="ml-auto max-w-full shrink-0 text-right text-sm text-muted sm:whitespace-nowrap">{meta}</p>
+        </div>
+      ) : title ? (
+        icon ? <h2 id={id} className="mb-3 flex items-center gap-3 font-display text-2xl font-bold"><Glyph name={icon} size={24} className="text-gold-ink" /><span className="min-w-0">{title}</span></h2> : <h2 id={id} className="mb-3 font-display text-2xl font-bold">{title}</h2>
+      ) : null}
       {children}
     </section>
   )

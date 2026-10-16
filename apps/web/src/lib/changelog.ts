@@ -23,6 +23,17 @@ export const changeIn = (change: Change, locale: Locale): { title: string; body:
 
 export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-16',
+    changes: [
+      {
+        title: 'Rankings say when they were updated',
+        body: 'The rankings now show the last update beside the group name, instead of a line of explanation under it.',
+        fr: { title: 'Le classement indique quand il a été mis à jour', body: 'Le classement affiche maintenant la dernière mise à jour à côté du nom du groupe, à la place d’une ligne d’explication en dessous.' },
+        de: { title: 'Die Rangliste sagt, wann sie aktualisiert wurde', body: 'Die Rangliste zeigt das letzte Update jetzt neben dem Gruppennamen, statt einer Erklärung darunter.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-15',
     changes: [
       {
