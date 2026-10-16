@@ -4,8 +4,10 @@ import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { ConvexReactClient } from 'convex/react'
 import { routeTree } from './routeTree.gen'
+import { installDomMismatchGuard } from './lib/domMismatch'
+import { reportError } from './lib/errorReporting'
 import { RouteError } from './lib/routeError'
-import { recoverFromStaleChunks } from './lib/staleChunks'
+import { isStaleChunkError, recoverFromStaleChunks, reloadingForNewBuild } from './lib/staleChunks'
 import { holdQueriesForAuth } from './lib/authHold'
 
 /**
@@ -37,9 +39,17 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultErrorComponent: RouteError,
+    // CatchBoundary keeps the component stack in onCatch and does not pass it to the error screen.
+    defaultOnCatch: (error, errorInfo) => {
+      if (reloadingForNewBuild() || isStaleChunkError(error)) return
+      reportError(error, 'route', errorInfo.componentStack ?? undefined)
+    },
   })
   setupRouterSsrQueryIntegration({ router, queryClient })
-  if (typeof window !== 'undefined') recoverFromStaleChunks()
+  if (typeof window !== 'undefined') {
+    recoverFromStaleChunks()
+    installDomMismatchGuard()
+  }
   return router
 }
 

@@ -1,7 +1,6 @@
 import { Link, useRouter, type ErrorComponentProps } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './ui'
-import { reportError } from './errorReporting'
 import { isStaleChunkError, reloadingForNewBuild } from './staleChunks'
 import { useT } from './i18n'
 import { commonMessages } from '../i18n/common'
@@ -11,9 +10,8 @@ export function RouteError({ reset, error }: ErrorComponentProps) {
   const [retrying, setRetrying] = useState(false)
   const [retryFailed, setRetryFailed] = useState(false)
   const t = useT(commonMessages)
-  // A stale chunk is a deploy reaching this tab, not a fault: offer the reload rather than reporting it.
+  // A stale chunk is a deploy reaching this tab, not a fault: offer the reload. The router reports the crash from onCatch, where the component stack still exists.
   const newBuild = isStaleChunkError(error)
-  useEffect(() => { if (!reloadingForNewBuild() && !isStaleChunkError(error)) reportError(error, 'route') }, [error])
   // Inside a shell the error sits in its <main>; at the top level it is the page, so it takes the skip link's target.
   const section = useRef<HTMLElement>(null)
   useEffect(() => { if (section.current && !document.getElementById('main')) section.current.id = 'main' }, [])

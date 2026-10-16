@@ -1,4 +1,5 @@
 import { captureAnalyticsException, readAnalyticsConsent } from './analytics'
+import { routeErrorContext } from './domMismatch'
 import { scrubSentryBreadcrumb, scrubSentryEvent, sentryOptions } from './sentry'
 
 type SentryBrowser = typeof import('./sentryBrowser')
@@ -24,8 +25,12 @@ export function startErrorReporting(): Promise<SentryBrowser | null> {
   return loading
 }
 
-/** An error the app caught itself (route error screen, failed intent or installation), sent to both PostHog and Sentry. */
-export function reportError(error: unknown, source: string) {
-  captureAnalyticsException(error, source)
-  void startErrorReporting().then((Sentry) => { Sentry?.captureException(error, { tags: { source, game: 'desk-crawler' } }) })
+/**
+ * An error the app caught itself (route crash, failed intent or installation), sent to both PostHog and Sentry.
+ * A route crash passes the React component stack from the router's `onCatch`; a DOM insert failure already carries its node shape.
+ */
+export function reportError(error: unknown, source: string, componentStack?: string) {
+  const detail = routeErrorContext(error, componentStack)
+  captureAnalyticsException(error, source, detail)
+  void startErrorReporting().then((Sentry) => { Sentry?.captureException(error, { tags: { source, game: 'desk-crawler' }, ...(detail ? { extra: detail } : {}) }) })
 }

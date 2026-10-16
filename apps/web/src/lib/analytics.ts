@@ -197,10 +197,11 @@ export function intentAnalytics(intent: string, args: Record<string, unknown>): 
   return [event, typeof args[arg] === 'string' ? { [property]: args[arg] } : {}]
 }
 
-export function captureAnalyticsException(error: unknown, source: string) {
+export function captureAnalyticsException(error: unknown, source: string, detail?: Record<string, string>) {
   const safe = new Error(scrubAnalyticsText(error instanceof Error ? error.message : 'Unknown application error'))
   if (error instanceof Error) { safe.name = error.name; if (error.stack) safe.stack = scrubAnalyticsText(error.stack) }
-  void analyticsClient().then((sdk) => { if (readAnalyticsConsent() === 'allowed') sdk?.captureException(safe, { source, game: currentGame() }) }).catch(() => {})
+  const properties = detail && Object.fromEntries(Object.entries(detail).map(([key, value]) => [key, scrubAnalyticsText(value)]))
+  void analyticsClient().then((sdk) => { if (readAnalyticsConsent() === 'allowed') sdk?.captureException(safe, { source, game: currentGame(), ...properties }) }).catch(() => {})
 }
 
 export function stopAnalytics() {
