@@ -26,7 +26,7 @@
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 9
+export const TEMPLATE_VERSION = 10
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -94,7 +94,7 @@ const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
-const oriented = (classes: string, landscape: string, portrait: string, narrowPortrait = false) => `${ASSIGNS}${fitStories}
+const oriented = (classes: string, landscape: string, portrait: string, narrowPortrait = false) => `${ASSIGNS}${FLY_ASSIGNS}${fitStories}
 <div class="${classes} portrait:hidden">${landscape}
 </div>${titleBar('landscape')}
 <div class="${classes} landscape:hidden">${portrait}
@@ -109,8 +109,14 @@ const oriented = (classes: string, landscape: string, portrait: string, narrowPo
 const scene = (og: readonly [width: number, scale: number], x: readonly [width: number, scale: number], classes = 'stretch-x') =>
   `{% if scene_base != "" %}<div class="${classes} no-shrink flex flex--row flex--center-x"><img class="image lg:hidden" src="{{ scene_base }}/${og[0]}/${og[1]}.png" alt=""><img class="image hidden lg:block" src="{{ scene_base }}/${x[0]}/${x[1]}.png" alt=""></div>{% endif %}`
 
+/**
+ * D180: while this week's fly waits and the code is not sending a full cooler to the companion, the standing code opens
+ * the fly's claim link instead and is captioned with the code, so a hidden title bar still leaves a way to it.
+ */
+const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_base and fly_qr_base != "" and qr_base != "" and qr != "cooler" %}{% assign fly_waiting = true %}{% assign qr_base = fly_qr_base %}{% endif %}`
+
 const qr = (og: number, x: number) =>
-  `{% if qr_base != "" %}<div class="no-shrink" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt=""></div>{% endif %}`
+  `{% if qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">{% if fly_waiting %}<span class="${LABEL} text--center text--bold" data-fly-caption="true">Fly&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}</div>{% endif %}`
 
 /** The angler's name, then the title beside it. */
 const nameLine = (classes = 'title title--small') =>

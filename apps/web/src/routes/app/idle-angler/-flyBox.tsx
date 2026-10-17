@@ -1,6 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { Button, Card } from '../../../lib/ui'
@@ -13,20 +14,37 @@ type Notify = (feedback: { error: string | null; message: string | null }) => vo
 
 const weekday = (date: Date) => date.toLocaleDateString([], { weekday: 'long' })
 
-/** The fly box (D115): enter the code your TRMNL shows for one fly a week. Cosmetic; the newest one rides on the angler's hat. */
-export function FlyBox({ notify }: { notify: Notify }) {
+/**
+ * The fly box (D115): enter the code your TRMNL shows for one fly a week. Cosmetic; the newest one rides on the angler's hat.
+ * D180: `scanned` is a code from the screen's fly QR. Once the box loads it is sent once, the address drops it, and the
+ * box scrolls into view while the notice bar says how it went.
+ */
+export function FlyBox({ notify, scanned }: { notify: Notify; scanned?: string }) {
   const { data } = useQuery(convexQuery(api.idleAngler.flies.mine, {}))
   const box = data as Box | undefined
   const claim = useIntent(api.idleAngler.flies.claim, { onFeedback: notify })
   const [code, setCode] = useState('')
+  const sent = useRef(false)
+  const card = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (!scanned || sent.current || !box) return
+    sent.current = true
+    void navigate({ to: '/app/idle-angler/logbook', search: {}, replace: true })
+    if (!box.connected) return
+    card.current?.scrollIntoView({ block: 'center' })
+    setCode(scanned)
+    void claim.run({ code: scanned }, 'Checking the code…').then((ok) => { if (ok) setCode('') })
+  }, [scanned, box, claim, navigate])
   if (!box) return null
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (await claim.run({ code }, 'Checking the code…')) setCode('')
   }
   return (
+    <div ref={card} className="scroll-mt-20">
     <Card title="Fly box">
-      <p>Each week your TRMNL shows a <strong>Fly code</strong> in its title bar. Enter it to add a fly to the box. Your angler wears the newest one on their hat.</p>
+      <p>Each week your TRMNL shows a <strong>Fly code</strong> beside its QR code and in its title bar. Scan the code, or enter it here, to add a fly to the box. Your angler wears the newest one on their hat.</p>
       {box.claimedThisWeek ? (
         <p className="mt-3 text-sm font-semibold">This week's fly is in the box. A new code appears on {box.nextAvailableAt ? <LocalTime at={box.nextAvailableAt} format={weekday} /> : null}.</p>
       ) : box.connected ? (
@@ -49,5 +67,6 @@ export function FlyBox({ notify }: { notify: Notify }) {
         ))}
       </ul>
     </Card>
+    </div>
   )
 }

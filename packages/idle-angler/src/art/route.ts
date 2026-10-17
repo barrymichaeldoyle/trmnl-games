@@ -34,6 +34,14 @@ export function sceneBase(key: SceneKey): string {
 }
 
 export const qrBase = (target: QrTarget) => `/art/ia/qr/v${QR_VERSION}/${target}`
+/**
+ * D180 for the fly box: while this week's fly waits, the standing code opens `/f/<six digits>`, which adds it in the
+ * companion. Only six digits are encoded, and the URL is the `/ia` link's size.
+ */
+export const flyQrBase = (code: string) => {
+  const digits = code.replace(/\D/g, '')
+  return /^\d{6}$/.test(digits) ? `/art/ia/qr/v${QR_VERSION}/fly/${digits}` : null
+}
 
 export const FISH_VERSION = 1
 /** The large catalogue sprite (30x12) at whole-number scales: 3 for the OG's portrait panel up to 8 for the X. */
@@ -61,6 +69,13 @@ export function parseScenePath(path: string): (SceneKey & { width: number; scale
 }
 
 export function renderIdleAnglerArt(path: string, origin: string): { png: Uint8Array; immutable: boolean } | null {
+  const fly = /^\/art\/ia\/qr\/v(\d+)\/fly\/(\d{6})\/(\d)\.png$/.exec(path)
+  if (fly) {
+    const scale = Number(fly[3])
+    if (Number(fly[1]) !== QR_VERSION || !QR_SCALES.has(scale)) return null
+    const { size, ink } = qrInk(`${origin}/f/${fly[2]}`, scale)
+    return { png: encodePng1Bit(size, size, ink), immutable: false }
+  }
   const qr = /^\/art\/ia\/qr\/v(\d+)\/([a-z]+)\/(\d)\.png$/.exec(path)
   if (qr) {
     const target = qr[2] as QrTarget

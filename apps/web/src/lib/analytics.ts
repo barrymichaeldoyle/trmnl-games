@@ -57,7 +57,7 @@ export function beforeAnalyticsSend(event: CaptureResult | null): CaptureResult 
 }
 
 function hasSensitiveLocation() {
-  return typeof window !== 'undefined' && /(?:[?&#])(code|jwt|token|installation_callback_url|access_token|keepsake)=/i.test(window.location.href)
+  return typeof window !== 'undefined' && /(?:[?&#])(code|jwt|token|installation_callback_url|access_token|keepsake|fly)=/i.test(window.location.href)
 }
 
 export const analyticsOptions: Partial<PostHogConfig> = {

@@ -37,13 +37,17 @@ describe('Idle Angler fly box (D115, S6)', () => {
 
   it('shows the weekly code on the device only, and adds one fly a week for it', async () => {
     const code = flyCode(sha256Hex(TOKEN), await userId(), flyWeek(Date.now()))
-    expect((await screen()).fly_code).toBe(code)
+    const first = await screen()
+    expect(first.fly_code).toBe(code)
+    // D180: the fly's claim link rides beside the code, and leaves with it once the fly is in the box.
+    expect(first.fly_qr_base).toBe(`https://art.example/art/ia/qr/v1/fly/${code.replace(' ', '')}`)
     expect(await ana().query(api.idleAngler.payload.preview, {})).not.toHaveProperty('fly_code')
     expect(await ana().mutation(api.idleAngler.flies.claim, { operationId: 'fly-000001', code })).toMatchObject({ outcome: 'claimed', totalCollected: 1 })
     expect(await ana().mutation(api.idleAngler.flies.claim, { operationId: 'fly-000002', code })).toMatchObject({ outcome: 'already_claimed', totalCollected: 1 })
     // Claimed this week: the screen stops showing a code, the fly rides on the hat and the Flies family starts.
     const after = await screen()
     expect(after.fly_code).toBeNull()
+    expect(after.fly_qr_base).toBe('')
     expect(after.scene_base).toMatch(/\/black_gnat$/)
     expect((await t.run(async (ctx) => await ctx.db.query('iaAchievements').collect())).map((r) => r.achievementId)).toContain('flies_1')
   })

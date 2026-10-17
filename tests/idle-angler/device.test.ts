@@ -216,6 +216,26 @@ describe('Idle Angler markup', () => {
     expect(full).toContain('data-attention="cooler"')
   })
 
+  it('turns the dock code into the waiting fly\'s claim link with its code, but never a full cooler\'s (D180)', async () => {
+    const fly = { fly_code: '482 917', fly_qr_base: 'https://art.test/art/ia/qr/v1/fly/482917' }
+    for (const [layout, markup] of Object.entries(screenMarkup)) {
+      const html = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.catch!), ...fly })
+      expect(html, layout).toContain('src="https://art.test/art/ia/qr/v1/fly/482917/')
+      expect(html, layout).not.toMatch(/qr\/v1\/home\//)
+      expect(html, layout).toContain('data-fly-caption="true">Fly&nbsp;482&nbsp;917</span>')
+      const cooler = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.coolerFull!), ...fly })
+      expect(cooler, layout).not.toContain('qr/v1/fly/')
+      expect(cooler, layout).not.toContain('data-fly-caption')
+      const older = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.catch!), fly_code: '482 917' })
+      expect(older, layout).not.toContain('qr/v1/fly/')
+    }
+    const { flyQrBase, renderIdleAnglerArt } = await import('@trmnl-games/idle-angler/art/route')
+    expect(flyQrBase('482 917')).toBe('/art/ia/qr/v1/fly/482917')
+    expect(flyQrBase('4829')).toBeNull()
+    expect(renderIdleAnglerArt('/art/ia/qr/v1/fly/482917/3.png', 'https://trmnlgames.com')).not.toBeNull()
+    for (const bad of ['/art/ia/qr/v1/fly/48291/3.png', '/art/ia/qr/v1/fly/482917/9.png', '/art/ia/qr/v2/fly/482917/3.png']) expect(renderIdleAnglerArt(bad, 'https://trmnlgames.com')).toBeNull()
+  })
+
   it('renders every preview state in every layout without Liquid errors', async () => {
     for (const input of Object.values(scenarios)) for (const markup of Object.values(screenMarkup)) await liquid.parseAndRender(markup, { ...buildPayload(input), fly_code: null })
   })

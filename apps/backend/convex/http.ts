@@ -10,7 +10,7 @@ import { DEFAULT_COMPANION_ORIGIN, keepsakeQrFields, renderQrPng } from '@trmnl-
 import { parseUtcOffset, screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templates/screen'
-import { renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
+import { flyQrBase, renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import { renderPaperLivesArt } from '@trmnl-games/paper-lives/art/route'
 import type { GameSlug } from '@trmnl-games/platform'
 import { parseTrmnlLocale } from './lib/trmnlUser'
@@ -127,7 +127,9 @@ const idleAnglerScreen = httpAction(async (ctx, request) => {
   }
   if (result === null || result.outcome !== 'payload') return notFound()
   if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
-  return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, utc_offset: utcOffset } })
+  // D180: this week's fly code also rides in the standing QR, as Desk Crawler's keepsake does.
+  const flyQr = result.flyCode && process.env.CONVEX_SITE_URL ? flyQrBase(result.flyCode) : null
+  return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, fly_qr_base: flyQr ? `${process.env.CONVEX_SITE_URL}${flyQr}` : '', utc_offset: utcOffset } })
 })
 http.route({ path: '/trmnl/idle-angler/v1/screen', method: 'POST', handler: idleAnglerScreen })
 

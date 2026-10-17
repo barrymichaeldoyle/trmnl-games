@@ -30,6 +30,7 @@ import { Route as DeskCrawlerUnsubscribeRouteImport } from './routes/desk-crawle
 import { Route as DeskCrawlerWaitingListRouteImport } from './routes/desk-crawler/waiting-list'
 import { Route as DevDeskCrawlerRouteImport } from './routes/dev/desk-crawler'
 import { Route as DevOgRouteImport } from './routes/dev/og'
+import { Route as FCodeRouteImport } from './routes/f.$code'
 import { Route as GamesDeskCrawlerRouteImport } from './routes/games/desk-crawler'
 import { Route as GamesIdleAnglerRouteImport } from './routes/games/idle-angler'
 import { Route as GamesPaperLivesRouteImport } from './routes/games/paper-lives'
@@ -176,6 +177,11 @@ const DevDeskCrawlerRoute = DevDeskCrawlerRouteImport.update({
 const DevOgRoute = DevOgRouteImport.update({
   id: '/dev/og',
   path: '/dev/og',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FCodeRoute = FCodeRouteImport.update({
+  id: '/f/$code',
+  path: '/f/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GamesDeskCrawlerRoute = GamesDeskCrawlerRouteImport.update({
@@ -421,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
+  '/f/$code': typeof FCodeRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
   '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/games/paper-lives': typeof GamesPaperLivesRoute
@@ -482,6 +489,7 @@ export interface FileRoutesByTo {
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
+  '/f/$code': typeof FCodeRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
   '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/games/paper-lives': typeof GamesPaperLivesRoute
@@ -548,6 +556,7 @@ export interface FileRoutesById {
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
   '/dev/og': typeof DevOgRoute
+  '/f/$code': typeof FCodeRoute
   '/games/desk-crawler': typeof GamesDeskCrawlerRoute
   '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/games/paper-lives': typeof GamesPaperLivesRoute
@@ -615,6 +624,7 @@ export interface FileRouteTypes {
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
+    | '/f/$code'
     | '/games/desk-crawler'
     | '/games/idle-angler'
     | '/games/paper-lives'
@@ -676,6 +686,7 @@ export interface FileRouteTypes {
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
+    | '/f/$code'
     | '/games/desk-crawler'
     | '/games/idle-angler'
     | '/games/paper-lives'
@@ -741,6 +752,7 @@ export interface FileRouteTypes {
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
     | '/dev/og'
+    | '/f/$code'
     | '/games/desk-crawler'
     | '/games/idle-angler'
     | '/games/paper-lives'
@@ -804,6 +816,7 @@ export interface RootRouteChildren {
   DeskCrawlerWaitingListRoute: typeof DeskCrawlerWaitingListRoute
   DevDeskCrawlerRoute: typeof DevDeskCrawlerRoute
   DevOgRoute: typeof DevOgRoute
+  FCodeRoute: typeof FCodeRoute
   GamesDeskCrawlerRoute: typeof GamesDeskCrawlerRoute
   GamesIdleAnglerRoute: typeof GamesIdleAnglerRoute
   GamesPaperLivesRoute: typeof GamesPaperLivesRoute
@@ -969,6 +982,13 @@ declare module '@tanstack/react-router' {
       path: '/dev/og'
       fullPath: '/dev/og'
       preLoaderRoute: typeof DevOgRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/f/$code': {
+      id: '/f/$code'
+      path: '/f/$code'
+      fullPath: '/f/$code'
+      preLoaderRoute: typeof FCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/games/desk-crawler': {
@@ -1384,6 +1404,7 @@ const rootRouteChildren: RootRouteChildren = {
   DeskCrawlerWaitingListRoute: DeskCrawlerWaitingListRoute,
   DevDeskCrawlerRoute: DevDeskCrawlerRoute,
   DevOgRoute: DevOgRoute,
+  FCodeRoute: FCodeRoute,
   GamesDeskCrawlerRoute: GamesDeskCrawlerRoute,
   GamesIdleAnglerRoute: GamesIdleAnglerRoute,
   GamesPaperLivesRoute: GamesPaperLivesRoute,

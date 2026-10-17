@@ -14,6 +14,8 @@ import { WaterName, FishName } from './-fish'
 
 /** The logbook: every species by water, then the fly box. A caught fish shows its count, best weight and where to find it; an unseen one is a silhouette with its bait (epics give nothing away). */
 export const Route = createFileRoute('/app/idle-angler/logbook')({
+  // D180: a fly QR's six digits, added by the fly box and then dropped from the address.
+  validateSearch: (search: Record<string, unknown>): { fly?: string } => (typeof search.fly === 'string' && /^\d{6}$/.test(search.fly) ? { fly: search.fly } : typeof search.fly === 'number' && Number.isInteger(search.fly) && search.fly >= 0 && search.fly < 1e6 ? { fly: String(search.fly).padStart(6, '0') } : {}),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.logbook, {}), convexQuery(api.idleAngler.flies.mine, {})),
   component: LogbookPage,
 })
@@ -31,6 +33,7 @@ function silhouette(id: string) {
 const RARITIES = ['common', 'uncommon', 'rare', 'epic'] as const
 
 function LogbookPage() {
+  const { fly: scanned } = Route.useSearch()
   const { data } = useQuery(convexQuery(api.idleAngler.anglers.logbook, {}))
   const { notice, notify, dismiss } = useNotice()
   const book = data as Array<{ water: { id: string; name: string }; species: Entry[] }> | null | undefined
@@ -75,7 +78,7 @@ function LogbookPage() {
           </ul>
         </Card>
       ))}
-      <FlyBox notify={notify} />
+      <FlyBox notify={notify} scanned={scanned} />
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>
   )

@@ -7,7 +7,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { Liquid } from 'liquidjs'
 import { buildPayload } from '@trmnl-games/idle-angler/payload'
-import { renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
+import { flyQrBase, renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import { screenMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { previewScenarios } from '@trmnl-games/idle-angler/templates/previewScenarios'
 import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
@@ -38,7 +38,9 @@ for (const [name, input] of Object.entries(previewScenarios(LOCAL))) {
     // The weekly fly code sits in the title bar on every fishing screen (it is the longest title-bar text).
     // `--no-fly` renders listing images without a code.
     const flyCode = !process.argv.includes('--no-fly') && (payload.status === 'fishing' || payload.status === 'paused' || payload.status === 'travelling') ? '482 917' : null
-    const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, fly_code: flyCode }))
+    // D180: the screen route's fly QR beside the code.
+    const flyQr = flyCode ? flyQrBase(flyCode) : null
+    const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, fly_code: flyCode, fly_qr_base: flyQr ? `${LOCAL}${flyQr}` : '' }))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
       for (const portrait of [false, true]) {
         const file = `.previews/ia-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`

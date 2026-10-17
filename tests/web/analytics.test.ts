@@ -26,7 +26,7 @@ describe('support analytics privacy boundary', () => {
   })
   it('drops every capture while a raw TRMNL install or management credential is in the URL', () => {
     storage.set('tg_analytics_consent_v1', 'allowed')
-    for (const query of ['code=secret-code', 'jwt=secret-jwt', 'token=deletion-proof', 'installation_callback_url=https%3A%2F%2Ftrmnl.com', 'keepsake=482917']) {
+    for (const query of ['code=secret-code', 'jwt=secret-jwt', 'token=deletion-proof', 'installation_callback_url=https%3A%2F%2Ftrmnl.com', 'keepsake=482917', 'fly=482917']) {
       window.location.href = `https://trmnlgames.com/connect/trmnl/desk-crawler/install?${query}`
       expect(beforeAnalyticsSend(event({}))).toBeNull()
     }
