@@ -37,13 +37,18 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
       .sort((a, b) => a.value - b.value)
       .slice(0, order.count)
   const features = Object.fromEntries((Object.keys(FEATURE_NAMES) as Array<keyof typeof FEATURE_NAMES>).map((f) => [f, unlocked(content, state, f)]))
+  const mountCosts = new Map(catches.map((c) => [c._id, features.trophies === true ? mountCost(content, c) : null]))
+  // Issue #6: the mount goal points at the cooler only while a fish there is big enough; otherwise the wall says what to catch.
+  const mountGoal = goal?.predicate.kind === 'counter' && goal.predicate.counter === 'trophiesMounted'
+  const trophySized = [...mountCosts.values()].some((cost) => cost !== null)
   return {
     goal: {
       // D167: a goal met by filling orders, which the companion links to the cooler only while an order can be filled.
       orders: goal?.predicate.kind === 'counter' && goal.predicate.counter === 'ordersFilled',
       line: goalLine(content, state),
       coins: goal?.coins ?? 0,
-      page: goal?.page ?? null,
+      page: mountGoal && !trophySized ? 'log' : (goal?.page ?? null),
+      hint: mountGoal && content.trophies ? `Catch a fish at ${content.trophies.minPercent}% of its species' top weight, then mount it from the Cooler.` : null,
       // A counted goal's progress ("Log eight species" at 5 of 8) for the goal card's bar; null for one-step goals.
       progress: goal ? goalProgress(content, state, goal.predicate) : null,
       rung: angler.goal?.rung ?? 0,
@@ -63,11 +68,13 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
     runs: runsAt(content, now).filter((r) => canFish(content, { ...state, charterCasts: 1 }, r.water)).map((r) => ({ id: r.id, line: r.line, water: r.water, species: speciesName(content, r.species) })),
     charter: content.charterTicket ? { price: content.charterTicket.price, casts: content.charterTicket.casts, castsLeft: angler.charterCasts ?? 0 } : null,
     pegs: { pegs: pegsOf(content, state), free: Math.max(0, pegsOf(content, state) - mounted), next: nextPegs(content, state) },
+    // Issue #6: the mounting rule, so the companion's copy reads its numbers from content.
+    trophies: content.trophies ? { minPercent: content.trophies.minPercent, fee: content.trophies.fee } : null,
     deadbait: angler.bait.deadbait ?? 0,
     catchActions: Object.fromEntries(
       catches.map((c) => {
         const species = content.species.find((s) => s.id === c.speciesId)
-        return [c._id, { bait: features.deadbait === true && species?.baitFish === true, mountCost: features.trophies === true ? mountCost(content, c) : null }]
+        return [c._id, { bait: features.deadbait === true && species?.baitFish === true, mountCost: mountCosts.get(c._id) ?? null }]
       }),
     ),
   }

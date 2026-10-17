@@ -12,12 +12,13 @@ export function unlocked(content: Pick<IdleAnglerCatalog, 'unlocks' | 'species'>
   return at === undefined || Object.keys(angler.logbook).length >= at
 }
 
-const FEATURE_LINE: Readonly<Record<FeatureId, string>> = {
-  shop_upgrades: 'Unlocked: rod and cooler upgrades in the tackle shop.',
-  orders: 'Unlocked: fishmonger orders. Three are on the slate.',
-  trophies: 'Unlocked: the trophy wall. Big fish can be mounted.',
-  opens: 'Unlocked: the weekend Opens at every water.',
-  deadbait: 'Unlocked: small fish can go back on the hook as deadbait.',
+const FEATURE_LINE: Readonly<Record<FeatureId, (content: IdleAnglerCatalog) => string>> = {
+  shop_upgrades: () => 'Unlocked: rod and cooler upgrades in the tackle shop.',
+  orders: () => 'Unlocked: fishmonger orders. Three are on the slate.',
+  // Issue #6: the line says what "big" means; the Dock links it to the wall.
+  trophies: (content) => `Unlocked: the trophy wall. Fish at ${content.trophies?.minPercent ?? 60}% of their species' top weight can be mounted from the Cooler.`,
+  opens: () => 'Unlocked: the weekend Opens at every water.',
+  deadbait: () => 'Unlocked: small fish can go back on the hook as deadbait.',
 }
 
 /** Unlock lines for features that opened with this many species (written once, when the count crosses). */
@@ -25,7 +26,7 @@ export function unlockEvents(content: IdleAnglerCatalog, logged: number): TickEv
   if (!content.unlocks) return []
   return (Object.entries(content.unlocks) as Array<[FeatureId, number]>)
     .filter(([, at]) => at === logged && at > 0)
-    .map(([feature]) => ({ kind: 'milestone', summary: FEATURE_LINE[feature], detail: {}, deltas: { gold: 0 } }))
+    .map(([feature]) => ({ kind: 'milestone', summary: FEATURE_LINE[feature](content), detail: {}, deltas: { gold: 0 } }))
 }
 
 const popcount = (bits: number) => {

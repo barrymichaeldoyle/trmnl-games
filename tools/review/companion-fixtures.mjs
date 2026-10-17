@@ -24,6 +24,7 @@
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   goal=ready (D166, with v2=1: two reached goals waiting on the Dock's Claim button and a dot on the Dock tab)
  *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) goal=count (a counted goal with its progress bar) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
+ *   passes=all (issue #7: every pass owned)   trophy=none (issue #6: no trophy-sized fish, the mount goal points at the wall)   trophy=poor (too few coins to mount)   wall=empty (nothing mounted)
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
@@ -311,11 +312,15 @@ if (v2 && iaDock.angler) {
     { id: 'deep_sea', name: 'Deep-sea charter', opensAfter: { waterId: 'harbour_pier', waterName: 'Harbour Pier', species: 6, logged: fresh ? 0 : 6 }, access: null, open: false, charter: true, weather: 'wind', band: 'dusk', bitePercent: 15, baits: ['ragworm', 'strip', 'spinner', 'deadbait'], weatherUntil: now + 36e5 * 2 },
     { id: 'frozen_tarn', name: 'Frozen Tarn', opensAfter: { waterId: 'heron_lake', waterName: 'Heron Lake', species: 5, logged: fresh ? 0 : 5 }, access: 'ice_auger', open: false, closed: !fresh, weather: 'clear', band: 'dusk', bitePercent: 11, baits: ['maggots', 'worms', 'spinner', 'deadbait'], weatherUntil: now + 36e5 * 2 },
   );
-  iaDock.shop.access.push({ id: 'rowing_boat', name: 'Rowing Boat', price: 1200, water: 'heron_lake', owned: !fresh }, { id: 'ice_auger', name: 'Ice Auger', price: 3500, water: 'frozen_tarn', owned: false });
+  // Issue #7: the shop lists owned passes and those on sale; the Ice Auger shows once Heron Lake is open. passes=all owns every one.
+  const allPasses = params.get('passes') === 'all';
+  iaDock.shop.access.push({ id: 'rowing_boat', name: 'Rowing Boat', price: 1200, water: 'heron_lake', owned: !fresh || allPasses }, ...(fresh ? [] : [{ id: 'ice_auger', name: 'Ice Auger', price: 3500, water: 'frozen_tarn', owned: allPasses }]));
+  if (allPasses) { for (const a of iaDock.shop.access) a.owned = true; iaDock.angler.access = iaDock.shop.access.map((a) => a.id); }
+  iaDock.shop.moreAccess = fresh && !allPasses;
   iaDock.angler.bait.push(bait('boilies', 'Boilies', 24, 12, 45), bait('deadbait', 'Deadbait', 6, 3, 0));
   const ids = iaDock.catches.map((c) => c.id);
   iaDock.full = {
-    goal: { ...(fresh ? { line: 'Land your first fish', coins: 10, page: null, rung: 0, of: 26 } : params.get('goal') === 'count' ? { line: 'Log eight species', coins: 30, page: null, progress: { value: 5, target: 8 }, rung: 12, of: 26 } : params.get('goal') === 'orders' ? { line: 'Fill an order for the fishmonger', coins: 20, page: 'cooler', orders: true, rung: 5, of: 26 } : { line: 'Mount a fish on the wall', coins: 30, page: 'cooler', rung: 13, of: 26 }), ...(params.get('goal') === 'ready' ? { unclaimed: [{ id: 'first_order', title: 'Fill an order for the fishmonger', coins: 20 }, { id: 'ten_species', title: 'Log ten species', coins: 30 }] } : {}) },
+    goal: { ...(fresh ? { line: 'Land your first fish', coins: 10, page: null, rung: 0, of: 26 } : params.get('goal') === 'count' ? { line: 'Log eight species', coins: 30, page: null, progress: { value: 5, target: 8 }, rung: 12, of: 26 } : params.get('goal') === 'orders' ? { line: 'Fill an order for the fishmonger', coins: 20, page: 'cooler', orders: true, rung: 5, of: 26 } : { line: 'Mount a fish on the wall', coins: 30, page: params.get('trophy') === 'none' ? 'log' : 'cooler', hint: "Catch a fish at 60% of its species' top weight, then mount it from the Cooler.", rung: 13, of: 26 }), ...(params.get('goal') === 'ready' ? { unclaimed: [{ id: 'first_order', title: 'Fill an order for the fishmonger', coins: 20 }, { id: 'ten_species', title: 'Log ten species', coins: 30 }] } : {}) },
     comingUp: fresh ? { feature: 'shop_upgrades', name: 'Rod and cooler upgrades', species: 2, logged: 0 } : { feature: 'deadbait', name: 'Deadbait', species: 10, logged: 9 },
     features: { shop_upgrades: !fresh, orders: !fresh, opens: !fresh, trophies: !fresh, deadbait: !fresh },
     orders: fresh ? [] : [
@@ -329,10 +334,13 @@ if (v2 && iaDock.angler) {
     charter: { price: 550, casts: 96, castsLeft: 0 },
     pegs: { pegs: 6, free: params.get('pegs') === 'full' ? 0 : 3, next: { pegs: 12, price: 800 } },
     deadbait: 6,
-    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && i === 0 ? 192 : null }])),
+    trophies: { minPercent: 60, fee: 100 },
+    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && i === 0 && params.get('trophy') !== 'none' ? 192 : null }])),
   };
+  // Issue #6: trophy=poor leaves too few coins to mount the trophy-sized fish.
+  if (params.get('trophy') === 'poor') iaDock.angler.gold = 120;
 }
-const species = (water, list) => ({ water, species: list.map(([id, name, rarity, count, best, max, baits, times, weather]) => count ? { id, seen: true, name, rarity, count, bestGrams: best, maxGrams: max, baits, times, weather } : { id, seen: false, rarity, baits: rarity === 'epic' ? null : baits ?? null }) });
+const species = (water, list) => ({ water, species: list.map(([id, name, rarity, count, best, max, baits, times, weather]) => count ? { id, seen: true, name, rarity, count, bestGrams: best, maxGrams: max, trophyGrams: v2 && v2 !== 'new' ? Math.ceil(max * 0.6) : null, baits, times, weather } : { id, seen: false, rarity, baits: rarity === 'epic' ? null : baits ?? null }) });
 const iaBook = [
   species({ id: 'millpond', name: 'Millpond' }, [['minnow', 'Minnow', 'common', 12, 48, 50, ['worms', 'bread'], null, null], ['roach', 'Roach', 'common', 30, 590, 600, ['worms', 'bread'], null, null], ['perch', 'Perch', 'common', 9, 1210, 1400, ['worms', 'spinner'], null, null], ['bream', 'Bream', 'uncommon', 3, 2200, 3500, ['bread', 'worms'], ['dawn', 'dusk', 'night'], null], ['eel', 'Eel', 'rare', 0, 0, 0, ['worms']], ['golden_carp', 'Golden Carp', 'epic', 0]]),
   species({ id: 'river_bend', name: 'River Bend' }, [['chub', 'Chub', 'common', 22, 2100, 2500, ['worms', 'maggots'], null, null], ['grayling', 'Grayling', 'uncommon', 4, 1100, 1500, ['maggots'], null, ['overcast', 'rain']], ['pike', 'Pike', 'rare', 0, 0, 0, ['spinner']], ['salmon', 'Salmon', 'epic', 0]]),
@@ -356,7 +364,7 @@ const queries = {
   'idleAngler/anglers:dock': () => iaDock,
   'idleAngler/anglers:logbook': () => iaBook,
   'idleAngler/payload:preview': () => ({ scene_base: '' }),
-  'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),
+  'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: params.get('wall') === 'empty' ? [] : [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),
   'idleAngler/full:opens': () => (params.get('v2') ? { period: 'o2026-10-24', startsAt: now - 36e5 * 5, endsAt: now + 864e5, on: true, prizes: [500, 300, 150], waters: [['millpond', 'Millpond', 'perch', 'Perch'], ['river_bend', 'River Bend', 'chub', 'Chub'], ['heron_lake', 'Heron Lake', 'mirror_carp', 'Mirror Carp']].map(([id, name, tid, tname], w) => ({ id, name, target: { id: tid, name: tname }, own: w === 1 ? { rank: 4, speciesId: tid, grams: 1300 } : null, entries: w === 2 ? [] : [['Quillfeather_Longname', 2400], ['Mo', 1900], ['Bea', 1500], ['Barry', 1300]].map(([n, g], i) => ({ rank: i + 1, name: n, speciesId: tid, grams: g, own: n === 'Barry', profile: false })) })) } : null),
   'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
   'idleAngler/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, own: { rank: 3, speciesId: 'barbel', grams: 1900 }, entries: [['Quillfeather_Longname', 'pike', 5240], ['Mo', 'chub', 2410], ['Barry', 'barbel', 1900], ['Hidden player', 'grayling', 1210], ['Bea', 'dace', 380]].map(([name, speciesId, grams], i) => ({ rank: i + 1, name, speciesId, grams, own: name === 'Barry', profile: name === 'Mo' })) }),

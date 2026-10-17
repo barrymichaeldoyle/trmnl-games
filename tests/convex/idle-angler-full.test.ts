@@ -47,6 +47,14 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(dock.full.season).toMatchObject({ id: 'spring', name: 'Spring' })
   })
 
+  it('lists owned passes and the ones on sale, with no name or price for later passes (issue #7)', async () => {
+    await seedAngler(t, { access: ['waders'], logbook: logbookOf(MILLPOND_EIGHT) }, 'Pat')
+    const dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
+    expect(dock.shop.access.map((a: { id: string; owned: boolean }) => [a.id, a.owned])).toEqual([['waders', true], ['pier_permit', false], ['rowing_boat', false]])
+    expect(dock.shop.moreAccess).toBe(true)
+    expect(JSON.stringify(dock.shop)).not.toMatch(/ice_auger|Ice Auger|3500/)
+  })
+
   it('marks a companion goal off at once: selling a fish on the "Sell a fish" goal pays it and names the next', async () => {
     const id = await seedAngler(t, { goal: { rung: 1, castsAtStart: 0 }, counters: { ...(await seedCounters()), fishCaught: 1 } }, 'Pat')
     const [fish] = await addFish(id, [['roach', 200, 10]])
@@ -112,6 +120,17 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect((await as('Pat').query(api.idleAngler.anglers.dock, {})).full.pegs).toMatchObject({ pegs: 6, free: 5 })
     await as('Pat').mutation(api.idleAngler.full.takeDownTrophy, { operationId: 'down-00001', trophyId: wall.wall[0].id })
     expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall).toEqual([])
+  })
+
+  it('points the mount goal at the wall until a cooler fish is big enough, and shows trophy weights (issue #6)', async () => {
+    const id = await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT), goal: { rung: 13, castsAtStart: 0 } }, 'Pat')
+    const before = (await as('Pat').query(api.idleAngler.anglers.dock, {})).full
+    expect(before.goal).toMatchObject({ line: 'Mount a fish on the wall', page: 'log', hint: "Catch a fish at 60% of its species' top weight, then mount it from the Cooler." })
+    expect(before.trophies).toEqual({ minPercent: 60, fee: 100 })
+    await addFish(id, [['tench', 1800, 58]])
+    expect((await as('Pat').query(api.idleAngler.anglers.dock, {})).full.goal.page).toBe('cooler')
+    const tench = (await as('Pat').query(api.idleAngler.anglers.logbook, {})).flatMap((w: { species: Array<{ id: string }> }) => w.species).find((s: { id: string }) => s.id === 'tench')
+    expect(tench).toMatchObject({ maxGrams: 3000, trophyGrams: 1800 })
   })
 
   it('takes the angler out on a charter, spends the ticket and sails back to the Pier', async () => {

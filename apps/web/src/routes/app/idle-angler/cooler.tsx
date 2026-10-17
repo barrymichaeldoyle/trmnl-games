@@ -1,6 +1,6 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
@@ -9,7 +9,7 @@ import { formatWeight, readyOrders, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
 import { FishIcon } from './-art'
-import { Coins } from './-coins'
+import { Coins, Price } from './-coins'
 import { FishName, FishText } from './-fish'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { Rows } from './-rows'
@@ -96,19 +96,22 @@ function CoolerPage() {
                   <input type="checkbox" className="pixel-check size-5 shrink-0" checked={chosen.has(fish.id)} onChange={() => toggle(fish.id)} />
                   <FishIcon id={fish.speciesId} />
                   {/* Name over weight: inline, a phone's narrow row split the weight across lines. */}
-                  <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId}>{fish.name}</FishName>{' '}<span className="text-sm text-muted"><span className="whitespace-nowrap">{formatWeight(fish.grams)}</span>{fish.record ? <span className="whitespace-nowrap text-gold-ink"> · personal best</span> : null}{wanted.has(fish.id) ? <span className="whitespace-nowrap text-gold-ink"> · fishmonger</span> : null}</span></span>
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId}>{fish.name}</FishName>{' '}<span className="text-sm text-muted"><span className="whitespace-nowrap">{formatWeight(fish.grams)}</span>{fish.record ? <span className="whitespace-nowrap text-gold-ink"> · personal best</span> : null}{wanted.has(fish.id) ? <span className="whitespace-nowrap text-gold-ink"> · fishmonger</span> : null}{full?.catchActions[fish.id]?.mountCost != null ? <span className="whitespace-nowrap text-gold-ink"> · trophy size</span> : null}</span></span>
                   <Coins n={fish.value} className="shrink-0 text-gold-ink" />
                 </label>
                 {(() => {
-                  // Only what can happen now: Mount needs the coins and a free peg, so it waits rather than refusing.
+                  // A trophy-sized fish always says where it stands (issue #6): Mount when it can go up now, else the
+                  // price and coins to go, or that the wall is full with a link to buy pegs.
                   const bait = full?.catchActions[fish.id]?.bait === true
                   const cost = full?.catchActions[fish.id]?.mountCost ?? null
-                  const mountable = cost !== null && full !== null && full.pegs.free > 0 && dock.angler!.gold >= cost
-                  if (!bait && !mountable) return null
+                  if (!bait && cost === null) return null
+                  const wallFull = full !== null && full.pegs.free === 0
                   return (
-                    <div className="flex flex-wrap gap-2 border-b border-rule pb-2 pl-8">
+                    <div className="flex flex-wrap items-center gap-2 border-b border-rule pb-2 pl-8">
                       {bait ? <Button variant="secondary" disabled={asBait.pending} onClick={() => void asBait.run({ catchId: fish.id }, `The ${fish.name} goes in the deadbait box.`)}>Use as bait</Button> : null}
-                      {mountable ? <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={mount.pending} onClick={() => setMounting({ id: fish.id, name: fish.name, grams: fish.grams, cost })}>Mount <Coins n={cost} /></Button> : null}
+                      {cost === null ? null : wallFull ? <span className="text-sm text-muted">Mount: the wall is full. <Link to="/app/idle-angler/trophies" className="underline underline-offset-4">Add pegs</Link></span>
+                        : dock.angler!.gold >= cost ? <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={mount.pending} onClick={() => setMounting({ id: fish.id, name: fish.name, grams: fish.grams, cost })}>Mount <Coins n={cost} /></Button>
+                        : <div className="flex flex-wrap items-center gap-x-2 text-sm"><span className="text-muted">Mount</span><Price price={cost} gold={dock.angler!.gold} /></div>}
                     </div>
                   )
                 })()}

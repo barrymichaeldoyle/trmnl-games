@@ -21,6 +21,19 @@ export function nextCooler(content: IdleAnglerCatalog, angler: AnglerState) {
   return content.coolers.find((c) => c.tier === angler.coolerTier + 1)
 }
 
+/**
+ * Passes on sale (issue #7): every unowned pass whose water opens off a water the angler can already fish, in catalog
+ * order. After the Waders both the Pier Permit and the Rowing Boat show, since both open off River Bend. The season is
+ * ignored, so the Ice Auger stays on sale out of winter.
+ */
+export function nextAccess(content: IdleAnglerCatalog, angler: AnglerState) {
+  return content.access.filter((item) => {
+    if (angler.access.includes(item.id)) return false
+    const parent = waterOf(content, item.water).opensAfter?.water
+    return parent === undefined || canFish(content, angler, parent)
+  })
+}
+
 export function buyRod(content: IdleAnglerCatalog, angler: AnglerState): ShopResult {
   const rod = nextRod(content, angler)
   if (!rod) return refuse('MAX_TIER')

@@ -102,6 +102,8 @@ function DockPage() {
         {fishmongerPays > 0 ? <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 font-semibold text-gold-ink underline underline-offset-4">The fishmonger is buying <Coins n={fishmongerPays} sign /></Link></p> : null}
         {goal ? <p className="text-sm"><span className="text-muted">Next goal:</span> <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{goal}</Link></p> : null}
         {full ? <GoalCard full={full} fishmonger={fishmongerPays > 0} notify={notify} /> : null}
+        {/* Issue #6: the wall's way in from the Dock once it opens, with what is on it. */}
+        {full?.features.trophies ? <p className="text-sm"><Link to="/app/idle-angler/trophies" className="underline underline-offset-4">Trophy wall</Link> <span className="text-muted">· {full.pegs.pegs - full.pegs.free} of {full.pegs.pegs} pegs</span></p> : null}
         {full?.runs.length ? <ul className="flex flex-col gap-1 text-sm">{full.runs.map((run) => <li key={run.id} className="font-semibold text-sky-ink">{run.line}</li>)}</ul> : null}
         {coolerFull ? (
           <p className="font-semibold text-hp-ink">
@@ -185,7 +187,7 @@ function DockPage() {
           {dock.logs?.slice(0, 10).map((log) => (
             <li key={log.id} className="flex gap-3 text-sm">
               <span className="w-12 shrink-0 tabular-nums text-muted">{time(log.at)}</span>
-              <span className="min-w-0"><FishText text={log.summary} /></span>
+              <span className="min-w-0"><FishText text={log.summary} />{log.summary.startsWith('Unlocked: the trophy wall') ? <> <Link to="/app/idle-angler/trophies" className="underline underline-offset-4">See the wall</Link></> : null}</span>
             </li>
           ))}
         </ol>

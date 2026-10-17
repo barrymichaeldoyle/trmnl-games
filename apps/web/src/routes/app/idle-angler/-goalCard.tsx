@@ -43,6 +43,7 @@ export function GoalCard({ full, fishmonger, notify }: { full: FullDock; fishmon
         </p>
       )}
       {!reward && full.goal.progress ? <Meter label="Progress" value={full.goal.progress.value} max={full.goal.progress.target} tone="gold" /> : null}
+      {!reward && full.goal.hint ? <p className="text-sm text-muted">{full.goal.hint}</p> : null}
       {!reward && full.goal.orders && !fishmonger ? <p className="text-sm text-muted">The fishmonger turns up on the Cooler page when a catch fits one of his orders.</p> : null}
       {!reward && full.comingUp ? <p className="text-sm text-muted">Coming up: {full.comingUp.name}, at {full.comingUp.species} species ({full.comingUp.logged} so far).</p> : null}
     </section>

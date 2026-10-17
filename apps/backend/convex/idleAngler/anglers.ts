@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
-import { activeBait, baitOf, bitePermille, canFish, coolerOf, forecastBlock, nextTitle, rodOf, speciesLogged, titleFor, waterOf, type AnglerState, type IdleAnglerCatalog, type WaterId } from '@trmnl-games/idle-angler/sim'
-import { buyAccess, buyBait, buyCooler, buyRod, nextCooler, nextRod, sell, setBait, travel, tubsThatFit, type ShopResult } from '@trmnl-games/idle-angler/sim/shop'
+import { activeBait, baitOf, bitePermille, canFish, coolerOf, forecastBlock, nextTitle, rodOf, speciesLogged, titleFor, unlocked, waterOf, type AnglerState, type IdleAnglerCatalog, type WaterId } from '@trmnl-games/idle-angler/sim'
+import { buyAccess, buyBait, buyCooler, buyRod, nextAccess, nextCooler, nextRod, sell, setBait, travel, tubsThatFit, type ShopResult } from '@trmnl-games/idle-angler/sim/shop'
 import { conditionsAt } from '@trmnl-games/idle-angler/sim/simulate'
 import { forecastFor } from '@trmnl-games/idle-angler/sim/seed'
 import type { Doc } from '../_generated/dataModel'
@@ -255,6 +255,7 @@ export const dock = query({
       }
     })
     const next = { rod: nextRod(content, state) ?? null, cooler: nextCooler(content, state) ?? null }
+    const onSale = new Set(nextAccess(content, state).map((a) => a.id))
     return {
       gameState: profile?.state ?? 'active',
       angler: {
@@ -284,7 +285,9 @@ export const dock = query({
       shop: {
         rod: next.rod && { name: next.rod.name, price: next.rod.price, limitGrams: next.rod.limitGrams, biteBonusPercent: next.rod.biteBonusPercent },
         cooler: next.cooler && { name: next.cooler.name, price: next.cooler.price, capacity: next.cooler.capacity },
-        access: content.access.map((a) => ({ id: a.id, name: a.name, price: a.price, water: a.water, owned: angler.access.includes(a.id) })),
+        // Issue #7: owned passes and the ones on sale now; later passes stay hidden, names and prices both.
+        access: content.access.filter((a) => angler.access.includes(a.id) || onSale.has(a.id)).map((a) => ({ id: a.id, name: a.name, price: a.price, water: a.water, owned: angler.access.includes(a.id) })),
+        moreAccess: content.access.some((a) => !angler.access.includes(a.id) && !onSale.has(a.id)),
       },
       logs: logs.map((l) => ({ id: l._id, at: l.at, kind: l.kind, summary: l.summary, gold: l.deltas.gold })),
       // The device's twelve-hour recap (payload.ts), with fish that broke free for the rod nudge.
@@ -314,6 +317,8 @@ export const logbook = query({
     const angler = await currentAngler(ctx, user)
     if (angler === null) return null
     const { content } = await worldContentOf(ctx)
+    // Issue #6: once the wall is open, each logged species shows the weight a fish needs to be mounted.
+    const trophyRule = content.trophies && unlocked(content, toAnglerState(angler), 'trophies') ? content.trophies : null
     return content.waters.map((w) => ({
       water: { id: w.id, name: w.name },
       species: content.species
@@ -321,7 +326,7 @@ export const logbook = query({
         .map((s) => {
           const entry = angler.logbook[s.id]
           return entry
-            ? { id: s.id, seen: true as const, name: s.name, rarity: s.rarity, count: entry.count, bestGrams: entry.bestGrams, maxGrams: s.maxGrams, baits: s.baits, times: s.times ?? null, weather: s.weather ?? null, seasons: s.seasons ?? null }
+            ? { id: s.id, seen: true as const, name: s.name, rarity: s.rarity, count: entry.count, bestGrams: entry.bestGrams, maxGrams: s.maxGrams, trophyGrams: trophyRule ? Math.ceil((s.maxGrams * trophyRule.minPercent) / 100) : null, baits: s.baits, times: s.times ?? null, weather: s.weather ?? null, seasons: s.seasons ?? null }
             // An uncaught fish hints its bait, except the epics, which stay a puzzle.
             : { id: s.id, seen: false as const, rarity: s.rarity, baits: s.rarity === 'epic' ? null : s.baits }
         }),

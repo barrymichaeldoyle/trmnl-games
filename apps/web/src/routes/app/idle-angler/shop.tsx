@@ -12,7 +12,7 @@ import { Coins, Price } from './-coins'
 import { FishList, WaterName, baitCatches } from './-fish'
 import { Rows } from './-rows'
 
-/** The tackle shop: the next rod and cooler, the passes and bait tubs, each at a fixed price and confirmed before buying. */
+/** The tackle shop: the next rod and cooler, the passes on sale and bait tubs, each at a fixed price and confirmed before buying. */
 export const Route = createFileRoute('/app/idle-angler/shop')({
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {}), convexQuery(api.idleAngler.anglers.logbook, {})),
   component: ShopPage,
@@ -153,6 +153,9 @@ function ShopPage() {
             )
           })}
         </ul>
+        {/* Issue #7: later passes stay a surprise until their water's way in can be fished. */}
+        {dock.shop.moreAccess ? <p className="mt-3 text-sm text-muted">More passes appear as you open new waters.</p>
+          : dock.shop.access.every((item) => item.owned) ? <p className="mt-3 text-sm text-muted">You have every pass.</p> : null}
       </Card>
 
       <Card title="Bait">

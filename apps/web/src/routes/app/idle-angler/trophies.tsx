@@ -51,6 +51,10 @@ function TrophiesPage() {
   }
   const next = full?.pegs.next ?? null
   const empty = Math.max(0, wall.pegs - wall.wall.length)
+  const rule = full?.trophies ?? null
+  // Issue #6: a cooler fish already big enough is the first thing to say on an empty wall.
+  const trophyInCooler = Object.values(full?.catchActions ?? {}).some((a) => a.mountCost !== null)
+  const cooler = <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">Cooler</Link>
   return (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -58,7 +62,7 @@ function TrophiesPage() {
         <span className="text-sm text-muted">{wall.wall.length} of {wall.pegs} pegs</span>
       </div>
       <Card title="Mounted fish">
-        {wall.wall.length === 0 ? <p>No fish mounted yet. A fish of at least 60% of its species' top weight can be mounted from the <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">cooler</Link>.</p> : (
+        {wall.wall.length === 0 ? <p>No fish mounted yet. {trophyInCooler ? <>A fish in your cooler is big enough: mount it from the {cooler}.</> : <>Nothing in your cooler is big enough yet{rule ? <>: a fish needs {rule.minPercent}% of its species' top weight. The Logbook shows each one's trophy weight</> : null}.</>}</p> : (
           <ul className="grid gap-3 sm:grid-cols-2">
             {wall.wall.map((t) => (
               <li key={t.id} className="flex items-start gap-3 border border-rule p-3">
@@ -85,6 +89,23 @@ function TrophiesPage() {
           </div>
         ) : null}
       </Card>
+      {/* Issue #6: the rules stay on the page, open while the wall is empty and folded away once a fish is up. */}
+      {rule ? (
+        <Card>
+          <details open={wall.wall.length === 0}>
+            <summary className="min-h-11 cursor-pointer py-2 font-semibold">How mounting works</summary>
+            <Rows rows={[
+              ['Which fish', `At least ${rule.minPercent}% of its species' top weight`],
+              ['Where', <>Mount it from the {cooler}</>],
+              ['Cost', <span className="inline-flex flex-wrap items-center gap-x-1">The fish's value + <Coins n={rule.fee} /></span>],
+              ['The fish', "Isn't sold and earns no coins"],
+              ['Pegs', next ? `${wall.pegs} now, more on this page` : `${wall.pegs}, the most the wall takes`],
+              ['Take down', 'Frees the peg, with no refund'],
+            ]} />
+            <Link to="/help/idle-angler" hash="the-trophy-wall" className="mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4">More in the help</Link>
+          </details>
+        </Card>
+      ) : null}
       <Card title="Shelf">
         <Rows rows={[['Rosettes', `${wall.rosettes}, one for each Open you entered`], ['Medals', `${wall.medals.length}`]]} />
         {wall.medals.length > 0 ? (

@@ -29,6 +29,8 @@ export interface Dock {
     readonly rod: { name: string; price: number; limitGrams: number; biteBonusPercent: number } | null
     readonly cooler: { name: string; price: number; capacity: number } | null
     readonly access: ReadonlyArray<{ id: 'waders' | 'pier_permit' | 'rowing_boat' | 'ice_auger'; name: string; price: number; water: string; owned: boolean }>
+    /** Issue #7: passes not on sale yet, kept back without names or prices. */
+    readonly moreAccess?: boolean
   }
   readonly logs?: ReadonlyArray<{ id: string; at: number; kind: string; summary: string; gold: number }>
   readonly recap?: { landed: number; released: number; records: number; firsts: number; best: { speciesId: string; grams: number } | null; gotAway: number; awayGrams: number[] }
@@ -40,7 +42,7 @@ export interface Dock {
 type Feature = 'shop_upgrades' | 'orders' | 'opens' | 'trophies' | 'deadbait'
 
 interface FullDock {
-  readonly goal: { orders?: boolean; line: string | null; coins: number; page: 'cooler' | 'shop' | 'dock' | 'log' | null; progress?: { value: number; target: number } | null; rung: number; of: number; unclaimed?: ReadonlyArray<{ id: string; title: string; coins: number }> }
+  readonly goal: { orders?: boolean; line: string | null; coins: number; page: 'cooler' | 'shop' | 'dock' | 'log' | null; hint?: string | null; progress?: { value: number; target: number } | null; rung: number; of: number; unclaimed?: ReadonlyArray<{ id: string; title: string; coins: number }> }
   readonly comingUp: { feature: Feature; name: string; species: number; logged: number } | null
   readonly features: Readonly<Record<Feature, boolean>>
   readonly orders: ReadonlyArray<{ id: string; kind: string; line: string; hint: string | null; count: number; catchIds: Id<'catches'>[]; reward: number | null; bonus: number }>
@@ -49,6 +51,8 @@ interface FullDock {
   readonly runs: ReadonlyArray<{ id: string; line: string; water: string; species: string }>
   readonly charter: { price: number; casts: number; castsLeft: number } | null
   readonly pegs: { pegs: number; free: number; next: { pegs: number; price: number } | null }
+  /** Issue #6: the mounting rule (a fish at `minPercent` of its species' top weight, for its value plus `fee`). */
+  readonly trophies?: { minPercent: number; fee: number } | null
   readonly deadbait: number
   readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null }>>
 }

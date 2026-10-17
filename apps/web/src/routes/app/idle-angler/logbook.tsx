@@ -21,7 +21,7 @@ export const Route = createFileRoute('/app/idle-angler/logbook')({
 })
 
 type Entry =
-  | { id: string; seen: true; name: string; rarity: string; count: number; bestGrams: number; maxGrams: number; baits: string[]; times: string[] | null; weather: string[] | null; seasons?: string[] | null }
+  | { id: string; seen: true; name: string; rarity: string; count: number; bestGrams: number; maxGrams: number; trophyGrams?: number | null; baits: string[]; times: string[] | null; weather: string[] | null; seasons?: string[] | null }
   | { id: string; seen: false; rarity: string; baits?: string[] | null }
 
 /** An unseen fish: its outline in full ink, so the shape hints without naming it. */
@@ -64,6 +64,8 @@ function LogbookPage() {
                   {s.seen ? (
                     <>
                       <p className="text-sm">{s.count} caught · best {formatWeight(s.bestGrams)} of {formatWeight(s.maxGrams)}</p>
+                      {/* Issue #6: what a fish of this species must weigh to go on the wall. */}
+                      {s.trophyGrams ? <p className={`text-sm ${s.bestGrams >= s.trophyGrams ? 'text-gold-ink' : 'text-muted'}`}>Trophy at {formatWeight(s.trophyGrams)}</p> : null}
                       <p className="text-sm text-muted">
                         {s.baits.map((b) => BAIT_LABEL[b]).join(', ')}
                         {s.times ? ` · ${s.times.map((t) => BAND_LABEL[t]).join(', ')}` : ''}
