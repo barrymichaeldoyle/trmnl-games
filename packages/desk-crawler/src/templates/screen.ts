@@ -49,7 +49,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 61
+export const TEMPLATE_VERSION = 62
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -828,32 +828,44 @@ const qrImage = (scale: number, largeScale: number, field = 'qr_base') =>
 const homeQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-home-qr="true">${qrImage(2, 3, 'home_qr_base')}{% if keepsake_waiting %}${keepsakeCaption('label lg:title--small text--center')}{% endif %}</div>{% endif %}`
 
 /**
- * A full bag (D88, D171): the adventure view gives way to this panel. The code is the largest each screen serves and
- * opens the bag. Slots and a held find say why adventures stopped. `qr_base` is set on an active hero only for a full bag.
+ * How much of the bag panel a slot holds, OG and X apart: the code's scale on each (`qr`, as `qrImage` takes them), and
+ * whether the small sleep scene and the attention line show on both, only the X, or neither.
  */
-const bagFullPanel = (column: boolean) => `
+type BagFit = { readonly qr: readonly [number, number]; readonly scene: 'both' | 'x' | 'none'; readonly attention: 'both' | 'x' | 'none' }
+/** Everything at the largest codes: the full portrait, the X's full and half views. */
+const BAG_ROOMY: BagFit = { qr: [5, 7], scene: 'both', attention: 'both' }
+/** The quarter: a smaller code, the slot count and a held find; the status line above already says why. */
+const BAG_COMPACT: BagFit = { qr: [3, 5], scene: 'none', attention: 'none' }
+const onlyOnX = (shown: BagFit['scene'], inner: string) => (shown === 'none' ? '' : shown === 'x' ? `<div class="hidden lg:block">${inner}</div>` : inner)
+
+/**
+ * A full bag (D88, D171): the adventure view gives way to this panel. The code is the largest each slot holds and
+ * opens the bag. Slots and a held find say why adventures stopped. `qr_base` is set on an active hero only for a full bag.
+ * The text column may shrink, so its lines clamp in a narrow slot rather than running off the screen.
+ */
+const bagFullPanel = (column: boolean, fit: BagFit = BAG_ROOMY) => `
   <div class="grow h--min-0 flex ${column ? 'flex--col' : 'flex--row'} flex--center-x flex--center-y gap--medium lg:gap--large stretch-x" data-bag-full="true">
     <div class="no-shrink flex flex--col flex--center-x gap--xsmall">
-      ${qrImage(5, 7)}
+      ${qrImage(fit.qr[0], fit.qr[1])}
       <span class="label lg:title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>
     </div>
-    <div class="flex flex--col flex--left gap--small${column ? ' flex--center-x' : ''}">
+    <div class="w--min-0 flex flex--col flex--left gap--small${column ? ' flex--center-x' : ''}">
       <span class="title lg:title--large">${L('bag_full')}</span>
       <span class="title--small lg:title--base${column ? ' text--center' : ''}" data-clamp="2">${L('bag_paused')}</span>
       <span class="label lg:title--small${column ? ' text--center' : ''}">{{ bag_used }}/{{ bag_capacity }} ${L('bag_slots')}</span>
       {% if held_item != "" %}<span class="label lg:title--small${column ? ' text--center' : ''}" data-clamp="2">${L('bag_holding')} {{ held_item | escape }}</span>{% endif %}
-      {% if scene_url_small != "" %}<div class="no-shrink" data-scene-art="true"><img class="image" src="{{ scene_url_small }}" alt=""></div>{% endif %}
-      ${attention('label lg:title--small', 2)}
+      ${onlyOnX(fit.scene, `{% if scene_url_small != "" %}<div class="no-shrink" data-scene-art="true"><img class="image" src="{{ scene_url_small }}" alt=""></div>{% endif %}`)}
+      ${onlyOnX(fit.attention, attention('label lg:title--small', 2))}
     </div>
   </div>`
 
 /** Name and status over the bag panel, for every layout that is not the full screen. */
-const bagTakeover = (column: boolean) => `
+const bagTakeover = (column: boolean, fit: BagFit = BAG_ROOMY) => `
   <div class="no-shrink flex flex--col flex--left gap--xsmall stretch-x" data-hero-header="true">
     <span class="title" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
     ${statusLine(2, 40)}
   </div>
-  ${bagFullPanel(column)}`
+  ${bagFullPanel(column, fit)}`
 
 /** One reserved companion entry point per narrow view; an urgent action replaces the standing bag link. */
 const bagQr = (scale = 3, largeScale = 4, caption = true) => `
@@ -1091,7 +1103,7 @@ const xQuadrant = (portrait: boolean) => `
 /** Side, portrait: a narrow column. Hero and health first, the stories take the height, the companion QR closes the column. */
 const halfVerticalPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('halfVertical')}
-  {% elsif qr_base != "" %}${bagTakeover(true)}
+  {% elsif qr_base != "" %}${bagTakeover(true, { qr: [4, 7], scene: 'x', attention: 'both' })}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
     <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
@@ -1115,7 +1127,7 @@ const quarterStatus = `{% assign quarter_status = true %}{% if status == "explor
 /** Quarter, portrait: hero line, the stories, then the companion QR across the bottom. */
 const quadrantPortrait = `
   {% if status == "unlinked" or first_run %}${welcome('narrowColumn')}
-  {% elsif qr_base != "" %}${bagTakeover(true)}
+  {% elsif qr_base != "" %}${bagTakeover(true, BAG_COMPACT)}
   {% else %}
   <div class="lg:hidden no-shrink flex flex--col flex--left flex--stretch-x gap--xsmall stretch-x">
     <span class="label" data-clamp="1">{{ hero_name | truncate: 13 | escape }}, ${L('level')} {{ level }}</span>
@@ -1134,7 +1146,7 @@ const quadrantPortrait = `
  */
 const halfVerticalBody = (withScene: boolean) => `
   {% if status == "unlinked" or first_run %}${welcome(withScene ? 'halfVertical' : 'shortColumn')}
-  {% elsif qr_base != "" %}${bagTakeover(false)}
+  {% elsif qr_base != "" %}${bagTakeover(withScene, { qr: [4, 7], scene: 'x', attention: 'x' })}
   {% else %}
   <div class="lg:hidden grid no-shrink stretch-x gap--small">
     <div class="col--span-8 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
@@ -1274,7 +1286,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
       <div class="hidden lg:flex col--span-4 flex--row flex--center-y">{% if qr_base == "" %}{% if todo_tasks.size > 0 %}${todoCaption}{% else %}${rankCaption}{% endif %}{% else %}${ruleFill}{% endif %}</div>
     </div>
   </div>
-  {% if qr_base != "" %}${bagFullPanel(false)}
+  {% if qr_base != "" %}${bagFullPanel(false, { qr: [4, 7], scene: 'x', attention: 'x' })}
   {% else %}
   <div class="grid grow h--full h--min-0 stretch-x gap--small lg:gap--large pt--1 lg:pt--2" data-story-columns="true">
     <div class="col--span-12 lg:col--span-8 flex flex--col flex--left flex--top gap--xsmall lg:gap--small h--full">
@@ -1297,7 +1309,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
 
 export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${KEEPSAKE_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('halfHorizontal')}
-  {% elsif qr_base != "" %}${bagTakeover(false)}
+  {% elsif qr_base != "" %}${bagTakeover(false, { qr: [3, 7], scene: 'x', attention: 'x' })}
   {% else %}
   <div class="lg:hidden grid grow h--full h--min-0 stretch-x gap--medium">
     <div class="col--span-4 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
@@ -1318,7 +1330,7 @@ export const markupHalfVertical = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${KEEP
 
 export const markupQuadrant = `${glyphAssigns([16])}${HUD_ASSIGNS}${KEEPSAKE_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('quadrant')}
-  {% elsif qr_base != "" %}${bagTakeover(true)}
+  {% elsif qr_base != "" %}${bagTakeover(false, BAG_COMPACT)}
   {% else %}
     <div class="lg:hidden no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">
       <span class="label grow w--min-0" data-clamp="1">{{ hero_name | truncate: 11 | escape }}, ${L('level')} {{ level }}</span>

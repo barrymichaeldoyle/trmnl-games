@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-17',
     changes: [
       {
+        title: 'The bag-full panel fits every TRMNL layout',
+        body: 'When the bag is full, the panel with the bag’s QR code no longer runs into the header or off the edge in the half, side and quarter layouts. Smaller slots show a smaller code and leave out the scene.',
+        fr: { title: 'Le panneau « Sac plein » tient dans toutes les mises en page TRMNL', body: 'Quand le sac est plein, le panneau avec le QR code du sac ne déborde plus sur l’en-tête ni hors de l’écran dans les mises en page demi, côté et quart. Les petits emplacements montrent un code plus petit et laissent la scène de côté.' },
+        de: { title: 'Das Tasche-voll-Feld passt in jedes TRMNL-Layout', body: 'Ist die Tasche voll, läuft das Feld mit dem QR-Code der Tasche in den halben, seitlichen und Viertel-Layouts nicht mehr in die Kopfzeile oder über den Rand. Kleine Felder zeigen einen kleineren Code und lassen die Szene weg.' },
+      },
+      {
         title: 'Scan the screen to collect your keepsake',
         body: 'While a keepsake waits, the QR code on your TRMNL collects it: scan it with your phone and it goes straight onto your shelf. The code is printed beside the QR where there is room, so it shows even with the title bar turned off.',
         fr: { title: 'Scannez l’écran pour récupérer votre souvenir', body: 'Tant qu’un souvenir attend, le QR code de votre TRMNL le récupère : scannez-le avec votre téléphone et il rejoint directement votre étagère. Le code est imprimé à côté du QR quand il y a la place, donc il reste visible même sans barre de titre.' },

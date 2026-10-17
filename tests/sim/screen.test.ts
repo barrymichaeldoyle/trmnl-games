@@ -159,10 +159,14 @@ describe('companion QR in every view', () => {
       expect(standing).toContain('Your bag')
       const action = await liquid.parseAndRender(markup, { ...payload(), companion_qr_base: `${base}/bag`, qr_base: `${base}/app`, qr_label: 'Open your companion', attention: 'A find is waiting.', bag_used: 6, bag_capacity: 6, held_item: 'Oak staff' })
       expect(action).toContain('data-bag-full="true"')
-      expect(action).toContain(`src="${base}/app/5.png"`)
-      expect(action).toContain(`src="${base}/app/7.png"`)
+      // Each slot draws the largest code that fits with the panel's text (the X quarter 5, the rest of the X 7; the OG
+      // half 3 landscape and 4 portrait, the side 4, the quarter 3). The quarter leaves the attention line to its status.
+      const quarter = markup === screenMarkup.markup_quadrant
+      for (const scale of quarter ? [3, 5] : markup === screenMarkup.markup_half_horizontal ? [3, 4, 7] : [4, 7]) expect(action).toContain(`src="${base}/app/${scale}.png"`)
+      expect(action).not.toContain(`src="${base}/app/${quarter ? 7 : 5}.png"`)
       expect(action).toContain('Open your companion')
-      expect(action).toContain('A find is waiting.')
+      if (quarter) expect(markupOnly(action)).not.toContain('A find is waiting.')
+      else expect(action).toContain('A find is waiting.')
       expect(action).toContain('6/6')
       expect(action).toContain('Holding Oak staff')
       expect(action).not.toContain(`src="${base}/bag/`)
