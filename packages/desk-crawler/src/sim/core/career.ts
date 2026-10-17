@@ -41,6 +41,17 @@ export function unlocked(content: ContentCatalog, level: number, feature: Unlock
   return at !== undefined && level >= at
 }
 
+/**
+ * The companion Career page's "What opens when" list: each gated feature at its resolved catalog level, lowest first.
+ * Ties keep FEATURES order. Null when the catalog has no unlocks. The roster is reported separately (P37).
+ */
+export function unlocksView(content: ContentCatalog, level: number) {
+  if (content.unlocks === undefined) return null
+  return FEATURES.filter((feature): feature is Exclude<UnlockableFeature, 'roster'> => feature !== 'roster' && unlockLevel(content, feature) !== undefined)
+    .map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: unlockLevel(content, feature)!, unlocked: unlocked(content, level, feature) }))
+    .sort((a, b) => a.level - b.level)
+}
+
 /** The stance the hero plays by: its own once stances are unlocked, else balanced (undefined). */
 export function effectiveStance(content: ContentCatalog, hero: Pick<HeroState, 'level' | 'stance'>): StanceId | undefined {
   return unlocked(content, hero.level, 'stances') ? hero.stance : undefined
