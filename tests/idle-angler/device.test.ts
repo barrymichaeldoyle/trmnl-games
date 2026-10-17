@@ -188,6 +188,18 @@ describe('Idle Angler markup', () => {
     }
   })
 
+  it('lets the framework repaint every mark in the theme ink, but not scenes, fish or codes (D181)', async () => {
+    for (const [name, input] of Object.entries(scenarios)) {
+      const payload = { ...buildPayload(input), fly_code: '482 917' }
+      for (const [layout, markup] of Object.entries(screenMarkup)) {
+        const html = (await liquid.parseAndRender(markup, payload)).replace(/<script>[\s\S]*?<\/script>/g, '')
+        for (const [, classes, src] of html.matchAll(/<img class="([^"]*)"[^>]* src="([^"]*)"/g)) {
+          expect(classes!.split(' ').includes('image--adaptive'), `${name} ${layout} ${src!.slice(0, 50)}`).toBe(src!.startsWith('data:'))
+        }
+      }
+    }
+  })
+
   it('escapes the public name in every layout', async () => {
     const payload = { ...buildPayload({ ...scenarios.catch!, angler: { ...scenarios.catch!.angler!, alias: '<b>x</b>' } }), fly_code: null }
     for (const markup of Object.values(screenMarkup)) {

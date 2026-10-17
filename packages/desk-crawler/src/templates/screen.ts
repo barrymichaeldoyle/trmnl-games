@@ -49,7 +49,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 62
+export const TEMPLATE_VERSION = 63
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -81,23 +81,26 @@ const runeDivider = (width: number) => {
 }
 /** The ornament alone: its rule stubs meet the fills on either side. */
 const RUNE_ORNAMENT = runeDivider(120)
-/** A plain stretch of the same 2-unit rule, stretched to any width (`preserveAspectRatio="none"`). */
-const RULE_FILL = svgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="4" height="12" viewBox="0 0 4 12" preserveAspectRatio="none" fill="black"><rect x="0" y="5" width="4" height="2"/></svg>')
+/**
+ * D181: the framework repaints `image--adaptive` marks in the theme's ink (white under TRMNL's Dark theme), where
+ * black-on-clear art would vanish. Every 1-bit mark carries it; scenes, codes and the red ink-panel hearts do not.
+ */
+const ADAPTIVE = 'image--adaptive'
 /**
  * Every piece of the rule is sized by the framework's pixel classes, which the X scales up, so fills and ornament
- * always join at one weight (D92). `ruleFill` stretches; the ornament keeps its shape.
+ * always join at one weight (D92). `ruleFill` stretches as a 2-unit bar in the theme's black (an adaptive image keeps
+ * its proportions, so a stretched one could not follow the theme); the ornament keeps its shape.
  */
-const ruleFill = `<img class="grow w--min-0 h--[12px]" src="${RULE_FILL}" alt="">`
-const runeRule = `${ruleFill}<img class="no-shrink w--[120px] h--[12px]" src="${RUNE_ORNAMENT}" alt="">${ruleFill}`
+const ruleFill = `<div class="grow w--min-0 h--[2px] bg--black"></div>`
+const runeRule = `${ruleFill}<img class="no-shrink w--[120px] h--[12px] ${ADAPTIVE}" src="${RUNE_ORNAMENT}" alt="">${ruleFill}`
 
 /**
  * The rune rule stood on end, for the X landscape half's column separator (D97): the same ornament and fill transposed,
  * the fills stretching to the column's height.
  */
 const RUNE_ORNAMENT_V = svgDataUri(atob(RUNE_ORNAMENT.split(',')[1]!).replace('width="120" height="12" viewBox="0 0 120 12" fill="black">', 'width="12" height="120" viewBox="0 0 12 120" fill="black"><g transform="matrix(0 1 1 0 0 0)">').replace('</svg>', '</g></svg>'))
-const RULE_FILL_V = svgDataUri('<svg xmlns="http://www.w3.org/2000/svg" width="12" height="4" viewBox="0 0 12 4" preserveAspectRatio="none" fill="black"><rect x="5" y="0" width="2" height="4"/></svg>')
-const ruleFillV = `<img class="grow h--min-0 w--[12px]" src="${RULE_FILL_V}" alt="">`
-const runeRuleV = `<div class="no-shrink flex flex--col flex--center-x gap--none" data-rune-rule="vertical">${ruleFillV}<img class="no-shrink w--[12px] h--[120px]" src="${RUNE_ORNAMENT_V}" alt="">${ruleFillV}</div>`
+const ruleFillV = `<div class="grow h--min-0 w--[2px] bg--black"></div>`
+const runeRuleV = `<div class="no-shrink flex flex--col flex--center-x gap--none" data-rune-rule="vertical">${ruleFillV}<img class="no-shrink w--[12px] h--[120px] ${ADAPTIVE}" src="${RUNE_ORNAMENT_V}" alt="">${ruleFillV}</div>`
 
 /**
  * Device-envelope-only code: no code in owner/public preview payloads. Fits the existing footer height. "code" tells a
@@ -108,7 +111,7 @@ const keepsakeFooter = `{% if desk_keepsake_code %}<span class="instance">${L('k
 
 const titleBar = `
 <div class="title_bar">
-  <img class="image image-stroke" src="${TITLE_ICON}" alt="">
+  <img class="image image-stroke ${ADAPTIVE}" src="${TITLE_ICON}" alt="">
   <span class="title">Desk Crawler</span>
   ${keepsakeFooter}
 </div>`
@@ -183,7 +186,7 @@ const hudRow = (data: string, inner: string, gap = 'gap--small') => `<div class=
  * three pixels from its number and counts sit a medium gap apart (`COUNTER_GAP`), so each number reads as its own
  * mark's rather than the next one's.
  */
-const COUNTER_ICON = 'w--[16px] h--[16px] no-shrink'
+const COUNTER_ICON = `w--[16px] h--[16px] no-shrink ${ADAPTIVE}`
 const COUNTER_GAP = 'gap--medium'
 const counter = (icon: string, text: string, classes = '') => `<div class="${classes}flex flex--row flex--center-y gap--[3px] no-shrink"><img class="${COUNTER_ICON}" src="{{ ${icon} }}" alt=""><span class="label lg:title--small">${text}</span></div>`
 /** Attack and defense (the companion's ATK/DEF, D60): the level base plus the equipped gear. */
@@ -232,14 +235,14 @@ const hearts = (count = true, extra = '') =>
  * wrapper, since the bit-depth `flex` variants bring the framework's default gap with them.
  */
 const heartRow = (suffix: string, visibility: string) =>
-  `<div class="${visibility} no-shrink"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign heart_right = i | times: 2 %}{% assign heart_left = heart_right | minus: 1 %}<img class="${HEART_CLASSES}" src="{% if heart_halves >= heart_right %}{{ hud_heart_full${suffix} }}{% elsif heart_halves >= heart_left %}{{ hud_heart_half${suffix} }}{% else %}{{ hud_heart_empty${suffix} }}{% endif %}" alt="">{% endfor %}</div></div>`
+  `<div class="${visibility} no-shrink"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign heart_right = i | times: 2 %}{% assign heart_left = heart_right | minus: 1 %}<img class="${HEART_CLASSES}${suffix ? '' : ` ${ADAPTIVE}`}" src="{% if heart_halves >= heart_right %}{{ hud_heart_full${suffix} }}{% elsif heart_halves >= heart_left %}{{ hud_heart_half${suffix} }}{% else %}{{ hud_heart_empty${suffix} }}{% endif %}" alt="">{% endfor %}</div></div>`
 
 /**
  * XP as ten half-step ticks the width of the hearts, the thin bar directly under them with the numbers at the end
  * (D74): the same 5% steps and the same floor as the hearts, so liquidjs and Ruby Liquid agree. Wide rows add the
  * coin and potion counts after the numbers (`extra`); the 240-pixel portrait columns wrap the numbers under the ticks.
  */
-const TICK_CLASSES = 'w--[18px] h--[8px] no-shrink'
+const TICK_CLASSES = `w--[18px] h--[8px] no-shrink ${ADAPTIVE}`
 const xpCount = '<span class="label lg:title--small no-shrink" data-xp-count="true">{{ xp }}/{{ xp_to_next }} XP</span>'
 /** `extra` counters (the portrait's gold, potions and bag) follow the XP count at the counter gap. */
 const xpTicks = (extra = '') =>
@@ -282,7 +285,7 @@ const glyphAssigns = (sizes: readonly number[]) =>
 const logIcon = (kind: string, size: number) =>
   `{% case ${kind} %}${GLYPH_KINDS.filter((k) => k !== 'system')
     .map((k) => `{% when "${k}" %}{% assign glyph = glyph${size}_${k} %}`)
-    .join('')}{% else %}{% assign glyph = glyph${size}_system %}{% endcase %}<img class="image no-shrink" src="{{ glyph }}" alt="">`
+    .join('')}{% else %}{% assign glyph = glyph${size}_system %}{% endcase %}<img class="image no-shrink ${ADAPTIVE}" src="{{ glyph }}" alt="">`
 
 /**
  * Stored text with names in [[bold marks]]: escaped first, then each mark becomes an atomic inline `text--bold` span (plain <b> loses to
@@ -325,7 +328,7 @@ const chipInk = (text: string) => `{% if ${text} contains "\u00a0HP" and ${text}
  */
 const chip = (text: string) =>
   `{% assign change_parts = ${text} | split: "\u00a0" %}{% assign change_unit = change_parts | last %}{% assign change_icon = "" %}{% assign change_size = "${COUNTER_ICON}" %}{% assign change_text = ${text} %}` +
-  `{% if change_parts.size > 1 %}{% case change_unit %}{% when "XP" %}{% assign change_icon = hud_xp %}{% assign change_size = "w--[24px] h--[16px] no-shrink" %}{% when "gold" %}{% assign change_icon = hud_coin %}{% when "HP" %}{% assign change_icon = hud_heart_full %}{% assign change_size = "w--[18px] h--[16px] no-shrink" %}{% when "bag slot", "bag slots" %}{% assign change_icon = hud_bag %}{% endcase %}` +
+  `{% if change_parts.size > 1 %}{% case change_unit %}{% when "XP" %}{% assign change_icon = hud_xp %}{% assign change_size = "w--[24px] h--[16px] no-shrink ${ADAPTIVE}" %}{% when "gold" %}{% assign change_icon = hud_coin %}{% when "HP" %}{% assign change_icon = hud_heart_full %}{% assign change_size = "w--[18px] h--[16px] no-shrink ${ADAPTIVE}" %}{% when "bag slot", "bag slots" %}{% assign change_icon = hud_bag %}{% endcase %}` +
   `{% if change_unit contains "potion" %}{% assign change_icon = hud_potion %}{% endif %}` +
   `{% if change_icon != "" %}{% assign change_text = change_parts | first %}{% if change_unit == "HP from potion" %}{% assign change_text = change_text | append: "\u00a0HP" %}{% endif %}{% endif %}{% endif %}` +
   `<span class="flex flex--row flex--center-y gap--[3px] no-shrink" data-change="true">{% if change_icon != "" %}<img class="{{ change_size }}" src="{{ change_icon }}" alt="">{% endif %}<span class="label lg:title--small${chipInk(text)}">{{ change_text | escape }}</span></span>`
@@ -717,7 +720,7 @@ const fitStories = `<script>
 </script>`
 
 /** The mark for one recap item (`item.k`): HUD marks for XP, gold, wins and potions, log glyphs for the rest. */
-const recapIcon = `{% assign recap_size = "${COUNTER_ICON}" %}{% case item.k %}{% when "xp" %}{% assign recap_icon = hud_xp %}{% assign recap_size = "w--[24px] h--[16px] no-shrink" %}{% when "coin" %}{% assign recap_icon = hud_coin %}{% when "sword" %}{% assign recap_icon = hud_sword %}{% when "potion" %}{% assign recap_icon = hud_potion %}${GLYPH_KINDS.filter((k) => k !== 'system')
+const recapIcon = `{% assign recap_size = "${COUNTER_ICON}" %}{% case item.k %}{% when "xp" %}{% assign recap_icon = hud_xp %}{% assign recap_size = "w--[24px] h--[16px] no-shrink ${ADAPTIVE}" %}{% when "coin" %}{% assign recap_icon = hud_coin %}{% when "sword" %}{% assign recap_icon = hud_sword %}{% when "potion" %}{% assign recap_icon = hud_potion %}${GLYPH_KINDS.filter((k) => k !== 'system')
   .map((k) => `{% when "${k}" %}{% assign recap_icon = glyph16_${k} %}`)
   .join('')}{% else %}{% assign recap_icon = "" %}{% endcase %}{% if recap_icon != "" %}<img class="{{ recap_size }}" src="{{ recap_icon }}" alt="">{% endif %}`
 
@@ -1175,7 +1178,7 @@ const halfHorizontalPortrait = halfVerticalBody(false)
 const todoCaption = `<div class="flex flex--row flex--center-y gap--xsmall stretch-x">${ruleFill}<span class="label lg:title--small no-shrink">${L('todo_today')}</span>${ruleFill}</div>`
 const todoColumn = `<div class="no-shrink flex flex--col flex--left flex--top flex--stretch-x gap--xsmall stretch-x" data-todo-column="x">
         {% for task in todo_tasks %}{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}<div class="label lg:title--small flex flex--row flex--center-y gap--small stretch-x" data-todo-task="{% if task.done %}done{% else %}open{% endif %}">
-          <img class="image no-shrink" src="{% if task.done %}{{ glyph16_todo }}{% else %}{{ glyph16_todoOpen }}{% endif %}" alt="">
+          <img class="image no-shrink ${ADAPTIVE}" src="{% if task.done %}{{ glyph16_todo }}{% else %}{{ glyph16_todoOpen }}{% endif %}" alt="">
           <span class="grow w--min-0" data-clamp="2">${richSpan(rich('task.t'))}</span>
           <span class="no-shrink">{% if task.done %}${L('done')}{% else %}{{ task.p }}/{{ task.n }}{% endif %}</span>
         </div>{% endfor %}
@@ -1187,7 +1190,7 @@ const todoColumn = `<div class="no-shrink flex flex--col flex--left flex--top fl
 const goalLine = `{% if goal %}<div class="hidden lg:flex no-shrink flex--col flex--stretch-x gap--xsmall stretch-x" data-goal-line="x">
         <div class="border--h-30 stretch-x"></div>
         <div class="flex flex--row flex--center-y gap--small stretch-x pt--1">
-          <img class="image no-shrink" src="{{ glyph24_career }}" alt="">
+          <img class="image no-shrink ${ADAPTIVE}" src="{{ glyph24_career }}" alt="">
           <span class="title grow w--min-0" data-clamp="1"><span class="text--regular">${L('goal')}</span>{{ goal.t | escape }}</span>
           <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
         </div>
@@ -1204,7 +1207,7 @@ const ogPortraitBoard = `${rankCaption}
 
 /** A compact goal row above the tasks; only the title wraps, while progress and reward stay together. */
 const portraitGoal = `{% if goal %}<div class="flex flex--row flex--top gap--small stretch-x" data-portrait-goal="true">
-  <img class="image no-shrink" src="{{ glyph16_career }}" alt="">
+  <img class="image no-shrink ${ADAPTIVE}" src="{{ glyph16_career }}" alt="">
   <span class="label lg:title--small grow w--min-0" data-clamp="2">${L('goal')}{{ goal.t | escape }}</span>
   <span class="label lg:title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
 </div>{% endif %}`

@@ -9,6 +9,7 @@
  * `--inline-art` draws scenes and codes locally and inlines them, so art changes preview before any deployment serves them.
  * `--occasion <id>` (D139) dresses every scene for one occasion, e.g. `--occasion halloween`.
  * `--locale fr|de` (D169) renders the screen in that language; its pages are named `fr.<state>--…`, so `--filter fr.` sweeps them.
+ * `--theme dark|white-and-red|black-and-yellow` renders under that TRMNL theme; its pages are named `dark.<state>--…`.
  */
 import { isLocale, type Locale } from '@trmnl-games/platform'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -19,7 +20,7 @@ import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { renderScenePng } from '@trmnl-games/desk-crawler/art/route'
 import { DEFAULT_COMPANION_ORIGIN, keepsakeQrFields, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
-import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
+import { isPreviewTheme, PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout, type PreviewTheme } from '@trmnl-games/desk-crawler/templates/preview'
 import { KEEPSAKE_FREE_SCENARIOS, NO_OFFSET_SCENARIOS, PREVIEW_KEEPSAKE_CODE, PREVIEW_NOW, PREVIEW_UTC_OFFSET, previewScenarios, withOvernightRecap } from '@trmnl-games/desk-crawler/templates/previewScenarios'
 
 const LOCAL_ART_ORIGIN = 'https://local-art.invalid'
@@ -49,6 +50,9 @@ const occasionIndex = process.argv.indexOf('--occasion')
 const occasion = occasionIndex >= 0 ? process.argv[occasionIndex + 1]! : null
 const localeIndex = process.argv.indexOf('--locale')
 const locale = localeIndex >= 0 && isLocale(process.argv[localeIndex + 1]) ? (process.argv[localeIndex + 1] as Locale) : null
+const themeIndex = process.argv.indexOf('--theme')
+const themeArg = themeIndex >= 0 ? process.argv[themeIndex + 1] : undefined
+const theme: PreviewTheme | undefined = isPreviewTheme(themeArg) ? themeArg : undefined
 
 const { groups, overnightEntries, base } = previewScenarios(artBaseUrl)
 const states = groups.states
@@ -66,7 +70,8 @@ let written = 0
 const contextsIndex = process.argv.indexOf('--dump-contexts')
 const contexts: Array<{ name: string; layout: PreviewLayout; context: Record<string, unknown> }> = []
 for (const [state, scenario] of Object.entries(previewStates)) {
-  const name = locale === null ? state : `${locale}.${state}`
+  const named = locale === null ? state : `${locale}.${state}`
+  const name = theme === undefined ? named : `${theme}.${named}`
   const input = locale === null ? scenario : { ...scenario, locale }
   const withRecap = process.argv.includes('--recap') ? withOvernightRecap(input, overnightEntries) : input
   const built = sceneUrlsAt(buildPayload(withRecap), input.now, utcOffset)
@@ -80,10 +85,10 @@ for (const [state, scenario] of Object.entries(previewStates)) {
     if (contextsIndex >= 0) contexts.push({ name, layout, context })
     const inner = withLocalArt(await liquid.parseAndRender(screenMarkup[layout], context))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
-      writeFileSync(`.previews/${name}--${device}--${layout}.html`, previewDocument(inner, device, layout, `${name} · ${device} · ${PREVIEW_LAYOUTS[layout].label}`))
+      writeFileSync(`.previews/${name}--${device}--${layout}.html`, previewDocument(inner, device, layout, `${name} · ${device} · ${PREVIEW_LAYOUTS[layout].label}`, { theme }))
       written++
       if (process.argv.includes('--portrait')) {
-        writeFileSync(`.previews/${name}--${device}-portrait--${layout}.html`, previewDocument(inner, device, layout, `${name} · ${device} portrait · ${PREVIEW_LAYOUTS[layout].label}`, { portrait: true }))
+        writeFileSync(`.previews/${name}--${device}-portrait--${layout}.html`, previewDocument(inner, device, layout, `${name} · ${device} portrait · ${PREVIEW_LAYOUTS[layout].label}`, { portrait: true, theme }))
         written++
       }
     }

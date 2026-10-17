@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-17',
     changes: [
       {
+        title: 'Desk Crawler’s marks show under the Dark theme',
+        body: 'With your TRMNL set to the Dark theme, the hearts, XP bar, gold and potion marks, log icons and the rule under the scene used to vanish. They now draw in the theme’s ink, so they show on every theme.',
+        fr: { title: 'Les symboles de Desk Crawler s’affichent avec le thème Sombre', body: 'Avec votre TRMNL réglé sur le thème Sombre, les cœurs, la barre d’XP, les symboles d’or et de potions, les icônes du journal et la ligne sous la scène disparaissaient. Ils s’affichent maintenant dans l’encre du thème, donc sur tous les thèmes.' },
+        de: { title: 'Desk Crawlers Symbole erscheinen im dunklen Design', body: 'War dein TRMNL auf das dunkle Design gestellt, verschwanden Herzen, XP-Leiste, Gold- und Tranksymbole, die Protokollsymbole und die Linie unter der Szene. Jetzt zeichnen sie sich in der Farbe des Designs und erscheinen in jedem Design.' },
+      },
+      {
         title: 'The bag-full panel fits every TRMNL layout',
         body: 'When the bag is full, the panel with the bag’s QR code no longer runs into the header or off the edge in the half, side and quarter layouts. Smaller slots show a smaller code and leave out the scene.',
         fr: { title: 'Le panneau « Sac plein » tient dans toutes les mises en page TRMNL', body: 'Quand le sac est plein, le panneau avec le QR code du sac ne déborde plus sur l’en-tête ni hors de l’écran dans les mises en page demi, côté et quart. Les petits emplacements montrent un code plus petit et laissent la scène de côté.' },

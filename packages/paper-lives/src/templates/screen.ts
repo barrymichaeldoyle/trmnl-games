@@ -31,7 +31,7 @@
  */
 import { markUri, STORY_GLYPHS, type PlMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 7
+export const TEMPLATE_VERSION = 8
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -45,7 +45,9 @@ const MARKS: readonly PlMark[] = ['statHealth', 'statHappy', 'statSmarts', 'stat
 const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${mark.startsWith('tick') ? markUri(mark, 36, 16) : markUri(mark, 32)}" %}`).join('')
 
 /** 16px on the OG; 20px on the X, where the text beside it is larger. */
-const ICON = 'w--[16px] h--[16px] lg:w--[20px] lg:h--[20px] no-shrink'
+/** D181: the framework repaints `image--adaptive` marks in the theme's ink, so they stay visible under TRMNL's Dark theme. */
+const ADAPTIVE = 'image--adaptive'
+const ICON = `w--[16px] h--[16px] lg:w--[20px] lg:h--[20px] no-shrink ${ADAPTIVE}`
 const LABEL = 'label lg:title--small'
 
 /** The portrait at the OG's scale, then the X's (the X draws images at 1.8x, so its scale is smaller per pixel). */
@@ -68,7 +70,7 @@ const traits = `{% if traits_label %}<span class="${LABEL} no-shrink w--min-0" d
 const stats = (withMoney = true) =>
   `{% if stat_rows %}<div class="flex flex--col flex--left gap--xsmall no-shrink" data-stats="true">{% for stat in stat_rows %}` +
   `{% case stat.k %}{% when "health" %}{% assign m_stat = m_statHealth %}{% when "happiness" %}{% assign m_stat = m_statHappy %}{% when "smarts" %}{% assign m_stat = m_statSmarts %}{% else %}{% assign m_stat = m_statCharm %}{% endcase %}` +
-  `<div class="flex flex--row flex--left flex--center-y gap--small" data-stat="{{ stat.k }}" data-stat-halves="{{ stat.halves }}"><img class="${ICON}" src="{{ m_stat }}" alt=""><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..5) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink" src="{% if stat.halves >= tick_right %}{{ m_tickFull }}{% elsif stat.halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div></div>{% endfor %}` +
+  `<div class="flex flex--row flex--left flex--center-y gap--small" data-stat="{{ stat.k }}" data-stat-halves="{{ stat.halves }}"><img class="${ICON}" src="{{ m_stat }}" alt=""><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..5) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink ${ADAPTIVE}" src="{% if stat.halves >= tick_right %}{{ m_tickFull }}{% elsif stat.halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div></div>{% endfor %}` +
   (withMoney ? `<div class="flex flex--row flex--left flex--center-y gap--small" data-money="true"><img class="${ICON}" src="{{ m_money }}" alt=""><span class="${LABEL}">{{ money_label }}</span></div>` : '') +
   `</div>{% endif %}`
 
@@ -103,7 +105,7 @@ const SMALLEST = LINE_SIZES[LINE_SIZES.length - 1]!
  * Template v7: what a line changed, after its words: each stat's mark and its sign, then money, kept whole as the line
  * wraps. The marks are sized with the text (`LINE_SIZES`), so each sits on the baseline like a capital.
  */
-const MARK = `${SMALLEST.mark}" data-line-mark="true`
+const MARK = `${SMALLEST.mark} ${ADAPTIVE}" data-line-mark="true`
 const lineMarks =
   `{% for mark in line.marks %}{% case mark.k %}{% when "health" %}{% assign m_mark = m_statHealth %}{% when "happiness" %}{% assign m_mark = m_statHappy %}{% when "smarts" %}{% assign m_mark = m_statSmarts %}{% else %}{% assign m_mark = m_statCharm %}{% endcase %}` +
   ` <span class="inline-block" data-mark="{{ mark.k }}"><img class="${MARK}" src="{{ m_mark }}" alt="">{{ mark.sign }}</span>{% endfor %}` +
@@ -206,7 +208,7 @@ const ready = (live: string, memorial: string, compact = false) => `{% if status
  */
 const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
 <div class="title_bar ${orientation === 'landscape' ? 'portrait:hidden' : 'landscape:hidden'}">
-  <img class="image image-stroke" src="${TITLE_ICON}" alt="">
+  <img class="image image-stroke ${ADAPTIVE}" src="${TITLE_ICON}" alt="">
   <span class="title${narrow ? '{% if photo_code %} hidden lg:inline-block{% endif %}' : ''}">Paper Lives</span>
   {% if photo_code %}<span class="instance">${narrow ? 'Photo' : 'Photo code'} {{ photo_code | escape }}</span>{% endif %}
 </div>`

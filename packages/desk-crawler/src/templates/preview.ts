@@ -33,6 +33,11 @@ export const PREVIEW_LAYOUTS = {
 } as const
 export type PreviewLayout = keyof typeof PREVIEW_LAYOUTS
 
+/** TRMNL's device and per-screen themes: a `screen--theme-<id>` class plus the framework's theme stylesheet. */
+export const PREVIEW_THEMES = ['dark', 'white-and-red', 'black-and-yellow'] as const
+export type PreviewTheme = (typeof PREVIEW_THEMES)[number]
+export const isPreviewTheme = (value: unknown): value is PreviewTheme => PREVIEW_THEMES.includes(value as PreviewTheme)
+
 /** Mashup slots this plugin does not own: a dither field labelled as the owner's other plugins, its cell sized to the device so it survives scaling down. */
 const otherSlotsStyle = (device: PreviewDevice) => {
   const cell = Math.round((12 * PREVIEW_DEVICES[device].width) / 800)
@@ -52,10 +57,12 @@ export const previewSize = (device: PreviewDevice, portrait = false) => {
   return portrait ? { width: height, height: width } : { width, height }
 }
 
-export function previewDocument(renderedMarkup: string, device: PreviewDevice, layout: PreviewLayout, title = 'Desk Crawler', options: { shadeOtherSlots?: boolean; portrait?: boolean } = {}): string {
-  const classes = options.portrait ? PREVIEW_DEVICES[device].classes.replace('screen--landscape', 'screen--portrait') : PREVIEW_DEVICES[device].classes
+export function previewDocument(renderedMarkup: string, device: PreviewDevice, layout: PreviewLayout, title = 'Desk Crawler', options: { shadeOtherSlots?: boolean; portrait?: boolean; theme?: PreviewTheme | undefined } = {}): string {
+  const oriented = options.portrait ? PREVIEW_DEVICES[device].classes.replace('screen--landscape', 'screen--portrait') : PREVIEW_DEVICES[device].classes
+  const classes = options.theme ? `${oriented} screen--theme-${options.theme}` : oriented
+  const themeSheet = options.theme ? `<link rel="stylesheet" href="https://trmnl.com/css/${FRAMEWORK_VERSION}/themes/${options.theme}-theme.css">` : ''
   return `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title><base href="https://trmnl.com/">
-<link rel="stylesheet" href="https://trmnl.com/css/${FRAMEWORK_VERSION}/plugins.css"><script src="https://trmnl.com/js/${FRAMEWORK_VERSION}/plugins.js"></script>
+<link rel="stylesheet" href="https://trmnl.com/css/${FRAMEWORK_VERSION}/plugins.css">${themeSheet}<script src="https://trmnl.com/js/${FRAMEWORK_VERSION}/plugins.js"></script>
 <style>html,body{margin:0;overflow:hidden}${options.shadeOtherSlots ? otherSlotsStyle(device) : ''}</style>
 </head><body class="environment trmnl"><div class="${classes}">${PREVIEW_LAYOUTS[layout].wrapper(renderedMarkup)}</div></body></html>`
 }

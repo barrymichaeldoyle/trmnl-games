@@ -460,7 +460,7 @@ describe('log lines (D44)', () => {
   })
   it('shows each line with its glyph and owner-local HH:MM', async () => {
     const html = await render({ ...payload(), utc_offset: 7200 })
-    expect(html).toContain('class="image no-shrink" src="data:image/svg+xml,')
+    expect(html).toContain('class="image no-shrink image--adaptive" src="data:image/svg+xml,')
     expect(html).toMatch(/<span class="text--regular">Unplugged a Cable Serpent/)
     expect(html).toMatch(/data-story-meta="og">.*data-story-time="true">10:19<\/span><\/div>/)
   })
@@ -602,6 +602,24 @@ describe('merchant notice (D78)', () => {
       expect(html).toContain('>Two<')
       const withAttention = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...vars, attention: 'Updates delayed. Nothing is lost.' })
       expect(withAttention).not.toContain('A merchant is visiting')
+    }
+  })
+})
+
+describe('marks under TRMNL themes (D181)', () => {
+  it('lets the framework repaint every 1-bit mark in the theme ink, but never scenes, codes or the red ink hearts', async () => {
+    const base = 'https://art.test/art/qr/v3'
+    for (const [layout, markup] of Object.entries(screenMarkup)) {
+      const html = markupOnly(await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...payload(), companion_qr_base: `${base}/bag`, home_qr_base: `${base}/home`, corner_qr_base: `${base}/corner`, scene_url: 'https://art.test/scene.png', scene_url_small: 'https://art.test/scene-s.png', scene_url_medium: 'https://art.test/scene-m.png', scene_url_large: 'https://art.test/scene-l.png' }))
+      const images = [...html.matchAll(/<img class="([^"]*)" src="([^"]*)"/g)].map(([, classes, src]) => ({ adaptive: classes!.split(' ').includes('image--adaptive'), src: src! }))
+      // Data URIs are the marks; network art is scenes and codes.
+      for (const image of images) {
+        const ink = image.src.includes(encodeURIComponent("fill='#ff0000'"))
+        expect(image.adaptive, `${layout} ${image.src.slice(0, 60)}`).toBe(image.src.startsWith('data:') && !ink)
+      }
+      expect(images.some((image) => image.adaptive), layout).toBe(true)
+      // The stretched rule pieces are bars in the theme's black, not images.
+      expect(html, layout).not.toMatch(/<img class="grow /)
     }
   })
 })

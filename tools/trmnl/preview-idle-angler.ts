@@ -10,7 +10,7 @@ import { buildPayload } from '@trmnl-games/idle-angler/payload'
 import { flyQrBase, renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import { screenMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { previewScenarios } from '@trmnl-games/idle-angler/templates/previewScenarios'
-import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
+import { isPreviewTheme, PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout, type PreviewTheme } from '@trmnl-games/desk-crawler/templates/preview'
 
 const LOCAL = 'https://local-art.invalid'
 const inline = process.argv.includes('--inline-art')
@@ -31,6 +31,9 @@ const liquid = new Liquid({ timezoneOffset: 0 })
 mkdirSync('.previews', { recursive: true })
 let written = 0
 const filter = process.argv.includes('--filter') ? process.argv[process.argv.indexOf('--filter') + 1] : null
+// `--theme dark|white-and-red|black-and-yellow` renders under that TRMNL theme, as pages named `<theme>.ia-<state>--…`.
+const themeArg = process.argv.includes('--theme') ? process.argv[process.argv.indexOf('--theme') + 1] : undefined
+const theme: PreviewTheme | undefined = isPreviewTheme(themeArg) ? themeArg : undefined
 for (const [name, input] of Object.entries(previewScenarios(LOCAL))) {
   if (filter && !name.includes(filter)) continue
   const payload = buildPayload(input)
@@ -43,8 +46,8 @@ for (const [name, input] of Object.entries(previewScenarios(LOCAL))) {
     const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, fly_code: flyCode, fly_qr_base: flyQr ? `${LOCAL}${flyQr}` : '' }))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
       for (const portrait of [false, true]) {
-        const file = `.previews/ia-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`
-        writeFileSync(file, previewDocument(inner, device, layout, `Idle Angler · ${name} · ${device}${portrait ? ' portrait' : ''} · ${PREVIEW_LAYOUTS[layout].label}`, { portrait }))
+        const file = `.previews/${theme ? `${theme}.` : ''}ia-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`
+        writeFileSync(file, previewDocument(inner, device, layout, `Idle Angler · ${name} · ${device}${portrait ? ' portrait' : ''} · ${PREVIEW_LAYOUTS[layout].label}`, { portrait, theme }))
         written += 1
       }
     }

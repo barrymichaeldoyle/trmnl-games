@@ -1,5 +1,7 @@
 # TRMNL layout evidence: A10 (in progress)
 
+Template v63 (2026-10-17): [device marks follow the TRMNL theme's ink](dark-theme-marks.md).
+
 Template v62 (2026-10-17): the bag-full panel fits every slot (see the D171 follow-up in decisions.md); 72 of 72 bag previews pass with and without the title bar.
 
 Template v61 (2026-10-17): [fitter runs with the title bar hidden](hidden-title-bar.md).

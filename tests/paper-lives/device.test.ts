@@ -51,6 +51,18 @@ describe('Paper Lives portraits', () => {
 })
 
 describe('Paper Lives screen templates', () => {
+  it('lets the framework repaint every mark in the theme ink, but not portraits or codes (D181)', async () => {
+    for (const [name, { utcOffset, ...input }] of Object.entries(previewScenarios(ART))) {
+      const payload = buildPayload(input)
+      for (const [layout, markup] of Object.entries(screenMarkup)) {
+        const html = (await liquid.parseAndRender(markup, { ...payload, utc_offset: utcOffset })).replace(/<script>[\s\S]*?<\/script>/g, '')
+        for (const [, classes, src] of html.matchAll(/<img class="([^"]*)"[^>]* src="([^"]*)"/g)) {
+          expect(classes!.split(' ').includes('image--adaptive'), `${name} ${layout} ${src!.slice(0, 50)}`).toBe(src!.startsWith('data:'))
+        }
+      }
+    }
+  })
+
   it('render every scenario and layout without inline style, escaping user text', async () => {
     for (const [name, { utcOffset, ...input }] of Object.entries(previewScenarios(ART))) {
       const payload = buildPayload(input)

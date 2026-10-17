@@ -26,7 +26,7 @@
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 10
+export const TEMPLATE_VERSION = 11
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -41,7 +41,9 @@ const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'trop
 const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${mark.startsWith('tick') ? markUri(mark, 36, 16) : markUri(mark, 32)}" %}`).join('')
 
 /** 16px on the OG; 20px on the X, where the text beside it is larger. */
-const ICON = 'w--[16px] h--[16px] lg:w--[20px] lg:h--[20px] no-shrink'
+/** D181: the framework repaints `image--adaptive` marks in the theme's ink, so they stay visible under TRMNL's Dark theme. */
+const ADAPTIVE = 'image--adaptive'
+const ICON = `w--[16px] h--[16px] lg:w--[20px] lg:h--[20px] no-shrink ${ADAPTIVE}`
 const LABEL = 'label lg:title--small'
 
 /** One count behind its mark; the mark sits three pixels from its text. Counts are short and their row wraps, so none clamps. */
@@ -80,7 +82,7 @@ const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
  * and rounding, so both Liquids agree; at the last title there is nothing left to fill and the bar is left off.
  */
 const xpTicks = (count = true) =>
-  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
+  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink ${ADAPTIVE}" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
 
 /**
  * The title bar with the weekly fly code. A narrow portrait column (side, quarter) cannot fit the name beside the
@@ -88,7 +90,7 @@ const xpTicks = (count = true) =>
  */
 const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
 <div class="title_bar ${orientation === 'landscape' ? 'portrait:hidden' : 'landscape:hidden'}">
-  <img class="image image-stroke" src="${TITLE_ICON}" alt="">
+  <img class="image image-stroke ${ADAPTIVE}" src="${TITLE_ICON}" alt="">
   <span class="title${narrow ? '{% if fly_code %} hidden lg:inline-block{% endif %}' : ''}">Idle Angler</span>
   {% if fly_code %}<span class="instance">${narrow ? 'Fly' : 'Fly code'} {{ fly_code | escape }}</span>{% endif %}
 </div>`
