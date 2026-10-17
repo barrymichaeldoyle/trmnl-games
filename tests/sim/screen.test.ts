@@ -751,7 +751,7 @@ describe('to-do tasks and the goal on the X full landscape (D138)', () => {
   it('carries the tasks with progress capped at the target, and the goal', () => {
     const p = withTasks()
     expect(p.todo_tasks).toEqual([{ t: 'Defeat 4 [[Cable Serpents]]', p: 4, n: 4, done: true }, { t: 'Find a piece of gear', p: 0, n: 1, done: false }])
-    expect(p.goal).toEqual({ t: 'Reach level 7', v: 5, n: 7, g: 40 })
+    expect(p.goal).toEqual({ t: 'Reach level 7', v: 5, n: 7, g: 40, c: false })
     expect((payload() as Record<string, unknown>).todo_tasks).toEqual([])
     expect((payload() as Record<string, unknown>).goal).toBeNull()
   })
@@ -792,5 +792,14 @@ describe('to-do tasks and the goal on the X full landscape (D138)', () => {
     expect(plain).not.toContain('data-goal-line')
     // A one-step goal shows its gold without a count.
     expect(await render(withTasks({ goal: { title: 'Beat an elite', value: 0, target: 1, gold: 40 } }))).toMatch(/Beat an elite<\/span>\s*<span class="title--small no-shrink">40 gold/)
+  })
+
+  it('inverts the goal row and points to the companion while a reward waits (D184)', async () => {
+    const html = await render(withTasks({ goal: { title: 'Equip a find', value: 1, target: 1, gold: 90, claimable: true } }))
+    expect(html).toMatch(/data-goal-claim="x"[\s\S]*Goal reached! Claim your reward in the companion\.[\s\S]*\+90 gold/)
+    expect(html).toMatch(/data-goal-claim="portrait"[\s\S]*Goal reached! Claim your reward in the companion\.[\s\S]*\+90 gold/)
+    expect(html).toMatch(/class="title label--inverted [^"]*" data-goal-claim="x"/)
+    expect(html).not.toContain('Equip a find')
+    expect(await render(withTasks())).not.toContain('data-goal-claim')
   })
 })

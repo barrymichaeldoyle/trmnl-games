@@ -240,9 +240,17 @@ export const mine = query({
   },
 })
 
-/** D138: the hero's current goal with its progress, for the device; null off the ladder or past its end. */
+/**
+ * D138: the hero's current goal with its progress, for the device; null off the ladder or past its end. While a reached
+ * goal's reward waits to be claimed (D184) the device shows that instead, with all the gold waiting.
+ */
 function deviceGoal(content: ContentCatalog, hero: Doc<'heroes'>) {
   const state = toHeroState(hero)
+  const waiting = state.career?.unclaimed ?? []
+  if (content.career !== undefined && waiting.length > 0) {
+    const first = content.career.rungs.find((rung) => rung.id === waiting[0]!.id)
+    return { title: first?.title ?? waiting[0]!.id, value: 1, target: 1, gold: waiting.reduce((sum, reward) => sum + reward.gold, 0), claimable: true }
+  }
   const rung = currentRung(content, state)
   if (rung === undefined) return null
   const { value, target } = measureRung(rung.predicate, state, content)

@@ -104,6 +104,7 @@ export interface DeviceWords {
     readonly scan_phone_short: string
     readonly scan_manage: string
     readonly goal: string
+    readonly goal_claim: string
     readonly todo_today: string
     readonly leaves: string
     readonly keepsake: string
@@ -181,7 +182,7 @@ const en: DeviceWords = {
     this_week: 'This week', levels: 'Levels ', lv: 'Lv ', not_ranked_paused: 'Not ranked while paused', ranking_soon: 'Ranking within the hour', your_bag: 'Your bag',
     bag_full: 'Bag full', bag_paused: 'Clear a slot in your bag to keep adventuring.', bag_slots: 'slots', bag_holding: 'Holding', first_soon: 'The first adventure starts soon.', first_15: 'The first adventure starts within 15 minutes.',
     first_15_short: 'First adventure within 15 minutes', scan_phone: 'Scan with your phone to open the companion.', scan_phone_short: 'Scan with your phone.',
-    scan_manage: 'Scan to open your companion: manage gear and pick where to explore.', goal: 'Goal: ', todo_today: 'Today\'s to-do', leaves: 'leaves', keepsake: 'Keepsake', keepsake_word: ' code',
+    scan_manage: 'Scan to open your companion: manage gear and pick where to explore.', goal: 'Goal: ', goal_claim: 'Goal reached! Claim your reward in the companion.', todo_today: 'Today\'s to-do', leaves: 'leaves', keepsake: 'Keepsake', keepsake_word: ' code',
   },
 }
 
@@ -253,7 +254,7 @@ const fr: DeviceWords = {
     this_week: 'Cette semaine', levels: 'Niveaux ', lv: 'Niv ', not_ranked_paused: 'Non classé pendant la pause', ranking_soon: 'Classement dans l’heure', your_bag: 'Votre sac',
     bag_full: 'Sac plein', bag_paused: 'Libérez une place dans votre sac pour continuer l’aventure.', bag_slots: 'places', bag_holding: 'Tient', first_soon: 'La première aventure commence bientôt.', first_15: 'La première aventure commence d’ici 15 minutes.',
     first_15_short: 'Première aventure d’ici 15 minutes', scan_phone: 'Scannez avec votre téléphone pour ouvrir le compagnon.', scan_phone_short: 'Scannez avec votre téléphone.',
-    scan_manage: 'Scannez pour ouvrir le compagnon : gérez l’équipement et choisissez où explorer.', goal: 'Objectif : ', todo_today: 'Tâches du jour', leaves: 'part à', keepsake: 'Code', keepsake_word: ' souvenir',
+    scan_manage: 'Scannez pour ouvrir le compagnon : gérez l’équipement et choisissez où explorer.', goal: 'Objectif : ', goal_claim: 'Objectif atteint ! À récupérer dans le compagnon.', todo_today: 'Tâches du jour', leaves: 'part à', keepsake: 'Code', keepsake_word: ' souvenir',
   },
 }
 
@@ -325,7 +326,7 @@ const de: DeviceWords = {
     this_week: 'Diese Woche', levels: 'Stufen ', lv: 'St ', not_ranked_paused: 'Kein Rang während der Pause', ranking_soon: 'Rangliste innerhalb der Stunde', your_bag: 'Deine Tasche',
     bag_full: 'Tasche voll', bag_paused: 'Mach einen Platz in deiner Tasche frei, um weiterzuziehen.', bag_slots: 'Plätze', bag_holding: 'Hält', first_soon: 'Das erste Abenteuer beginnt bald.', first_15: 'Das erste Abenteuer startet in 15 Minuten.',
     first_15_short: 'Erstes Abenteuer innerhalb von 15 Minuten', scan_phone: 'Mit dem Handy scannen, um die Begleit-App zu öffnen.', scan_phone_short: 'Mit dem Handy scannen.',
-    scan_manage: 'Scannen für die Begleit-App: Ausrüstung verwalten, Stockwerk wählen.', goal: 'Ziel: ', todo_today: 'Heutige Aufgaben', leaves: 'geht um', keepsake: 'Andenken', keepsake_word: '-Code',
+    scan_manage: 'Scannen für die Begleit-App: Ausrüstung verwalten, Stockwerk wählen.', goal: 'Ziel: ', goal_claim: 'Ziel erreicht! Belohnung in der Begleit-App abholen.', todo_today: 'Heutige Aufgaben', leaves: 'geht um', keepsake: 'Andenken', keepsake_word: '-Code',
   },
 }
 

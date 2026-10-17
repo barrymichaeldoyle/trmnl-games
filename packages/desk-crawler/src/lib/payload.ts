@@ -100,8 +100,11 @@ export interface PayloadInput {
   readonly ranking: PayloadRanking | null
   /** D138: today's to-do tasks (labels keep their [[bold marks]]); absent before the list arrives. */
   readonly todoTasks?: ReadonlyArray<{ readonly label: string; readonly progress: number; readonly target: number; readonly done: boolean }>
-  /** D138: the hero's current career goal; absent off the ladder or past its end. */
-  readonly goal?: { readonly title: string; readonly value: number; readonly target: number; readonly gold: number } | null
+  /**
+   * D138: the hero's current career goal; absent off the ladder or past its end. `claimable` (D184) means a reached
+   * goal's reward waits in the companion: the screen says so instead of naming the next goal, and `gold` is what waits.
+   */
+  readonly goal?: { readonly title: string; readonly value: number; readonly target: number; readonly gold: number; readonly claimable?: boolean } | null
   /** D169: the owner's language for everything the screen says; English when absent. */
   readonly locale?: Locale
 }
@@ -488,7 +491,7 @@ export function buildPayload(input: PayloadInput) {
     log: travelLine === null ? logs : [travelLine, ...logs].slice(0, MAX_LOGS),
     // D138: the X full landscape's to-do column and goal line. `p`/`n` are progress and target, capped so "5/5" never reads "6/5".
     todo_tasks: (input.todoTasks ?? []).map((task) => ({ t: locale === 'en' ? task.label : (t.story(task.label, { heroGender }) ?? task.label), p: Math.min(task.progress, task.target), n: task.target, done: task.done })),
-    goal: input.goal ? { t: t.text(input.goal.title), v: Math.min(input.goal.value, input.goal.target), n: input.goal.target, g: input.goal.gold } : null,
+    goal: input.goal ? { t: t.text(input.goal.title), v: Math.min(input.goal.value, input.goal.target), n: input.goal.target, g: input.goal.gold, c: input.goal.claimable === true } : null,
     // D163: a dug-in elite's name, its HP left (never 0 while it stands) and when it leaves (UTC seconds); null without one.
     standoff: standoffField(hero, content, now, locale),
     // The badge sits above the newest story, so it waits while the travel line leads.

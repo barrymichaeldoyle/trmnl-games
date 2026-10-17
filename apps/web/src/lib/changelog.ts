@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-17',
     changes: [
       {
+        title: 'Your TRMNL says when a goal reward is waiting',
+        body: 'When you reach a goal, the goal line on your TRMNL turns black and tells you to claim the gold in the companion, instead of showing the next goal. The next goal comes back once you have claimed it.',
+        fr: { title: 'Votre TRMNL indique quand une récompense d’objectif attend', body: 'Quand vous atteignez un objectif, la ligne d’objectif de votre TRMNL passe en noir et vous invite à récupérer l’or dans le compagnon, au lieu d’afficher l’objectif suivant. L’objectif suivant revient une fois la récompense récupérée.' },
+        de: { title: 'Dein TRMNL zeigt, wenn eine Zielbelohnung wartet', body: 'Erreichst du ein Ziel, wird die Zielzeile auf deinem TRMNL schwarz und erinnert dich, das Gold in der Begleit-App abzuholen, statt das nächste Ziel zu zeigen. Das nächste Ziel erscheint wieder, sobald du es abgeholt hast.' },
+      },
+      {
         title: 'More of the adventure log fits in the full landscape layout',
         body: 'In the full landscape layout, the newest entry now keeps its XP, gold, HP and time on its own line when they fit, and the changes on older entries take only the room they need. Fewer entries wrap, so the log shows one or two more.',
         fr: { title: 'Le journal d’aventure en montre plus en paysage plein écran', body: 'En paysage plein écran, l’entrée la plus récente garde son XP, son or, ses PV et son heure sur sa propre ligne quand ils tiennent, et les gains des entrées plus anciennes ne prennent que la place nécessaire. Moins d’entrées passent à la ligne, donc le journal en montre une ou deux de plus.' },

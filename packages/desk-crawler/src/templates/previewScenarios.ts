@@ -181,6 +181,8 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       ],
       goal: { title: 'Win a fight in the Parking Garage', value: 0, target: 1, gold: 150 },
     },
+    // D184: a reached goal's reward waits, so the goal row inverts and points to the companion (five-digit gold at its widest).
+    goalClaim: { ...base, goal: { title: 'Equip a piece of gear you found', value: 1, target: 1, gold: 12_340, claimable: true } },
     // D123: the widest HUD (a full bag, five-digit gold, the longest name and the Cautious stance) and sleep on a full bag.
     hudWide: { ...base, bagUsed: 20, hero: hero({ name: 'Sir Staplington', biomeId: 'cafeteria_depths', stance: 'cautious', gold: 99_999 }), latestEvent: { kind: 'loot', outcome: { variant: 'loot', found: 'gear' } }, logs: [{ at: NOW - 7 * 60_000, kind: 'loot', summary: 'Found an [[Epic Ladle of Ruin]] under a stack of unread memos.' }, ...base.logs] },
     bagSleeping: { ...base, hero: hero({ status: 'sleeping' }), heldItemName: 'Rare Spork Halberd', bagUsed: 20, latestEvent: { kind: 'loot', outcome: { variant: 'loot', found: 'gear' } }, logs: [{ at: NOW - 7 * 60_000, kind: 'loot', summary: 'Found a [[Rare Spork Halberd]]. Bag full. Holding it until you make room.' }, ...base.logs] },

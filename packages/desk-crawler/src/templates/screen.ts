@@ -1,4 +1,5 @@
 /**
+ * Template v65 inverts the goal row and points to the companion while a reached goal's reward waits (D184).
  * Template v64 gives the full landscape ledger the portrait's adaptive rows: changes packed at their natural width and
  * the newest story on one line with its changes and time whenever they fit (D183).
  * Template v60 gives full portrait a screen-wide ledger followed by goal/tasks on the left and a compact board on
@@ -51,7 +52,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 64
+export const TEMPLATE_VERSION = 65
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -1188,14 +1189,20 @@ const todoColumn = `<div class="no-shrink flex flex--col flex--left flex--top fl
       </div>`
 /**
  * D138, X full landscape: the current goal pinned under the stories behind the ladder glyph, its progress and gold at
- * the end; the story fitter drops the oldest stories to make room. A one-step goal shows no count.
+ * the end; the story fitter drops the oldest stories to make room. A one-step goal shows no count. While a reached
+ * goal's reward waits (D184) the row inverts and points to the companion instead of naming the next goal; the row is
+ * the label, so its spans keep the inverted text colour, and the glyph stays outside the black.
  */
 const goalLine = `{% if goal %}<div class="hidden lg:flex no-shrink flex--col flex--stretch-x gap--xsmall stretch-x" data-goal-line="x">
         <div class="border--h-30 stretch-x"></div>
         <div class="flex flex--row flex--center-y gap--small stretch-x pt--1">
           <img class="image no-shrink ${ADAPTIVE}" src="{{ glyph24_career }}" alt="">
+          {% if goal.c %}<div class="title label--inverted ${ink('bg', 'red')} grow w--min-0 flex flex--row flex--center-y gap--small" data-goal-claim="x">
+            <span class="grow w--min-0" data-clamp="1">${L('goal_claim')}</span>
+            <span class="no-shrink">+{{ goal.g }} ${L('gold')}</span>
+          </div>{% else %}
           <span class="title grow w--min-0" data-clamp="1"><span class="text--regular">${L('goal')}</span>{{ goal.t | escape }}</span>
-          <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
+          <span class="title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>{% endif %}
         </div>
       </div>{% endif %}`
 
@@ -1208,11 +1215,15 @@ const ogPortraitBoard = `${rankCaption}
     <div class="flex flex--col flex--top flex--stretch-x gap--xsmall">{% for row in board_rows offset: board_right limit: board_right_limit %}${boardRow}{% endfor %}{% if board_append %}${rankRow('rank', 'leaderboard_score', '', 'true')}{% endif %}</div>
   </div>`
 
-/** A compact goal row above the tasks; only the title wraps, while progress and reward stay together. */
+/** A compact goal row above the tasks; only the title wraps, while progress and reward stay together. Inverted while a reward waits (D184). */
 const portraitGoal = `{% if goal %}<div class="flex flex--row flex--top gap--small stretch-x" data-portrait-goal="true">
   <img class="image no-shrink ${ADAPTIVE}" src="{{ glyph16_career }}" alt="">
+  {% if goal.c %}<div class="label lg:title--small label--inverted ${ink('bg', 'red')} grow w--min-0 flex flex--row flex--top gap--small" data-goal-claim="portrait">
+    <span class="grow w--min-0" data-clamp="2">${L('goal_claim')}</span>
+    <span class="no-shrink">+{{ goal.g }} ${L('gold')}</span>
+  </div>{% else %}
   <span class="label lg:title--small grow w--min-0" data-clamp="2">${L('goal')}{{ goal.t | escape }}</span>
-  <span class="label lg:title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>
+  <span class="label lg:title--small no-shrink">{% if goal.n > 1 %}{{ goal.v }}/{{ goal.n }} · {% endif %}{{ goal.g }} ${L('gold')}</span>{% endif %}
 </div>{% endif %}`
 
 /**
