@@ -39,13 +39,13 @@ GEM
     csv (3.3.6)
     diff-lcs (1.6.2)
     drb (2.2.3)
-    faraday (2.14.4)
-      faraday-net_http (>= 2.0, < 3.5)
+    faraday (2.15.0)
+      faraday-net_http (>= 2.0, < 3.6)
       json
       logger
     faraday-multipart (1.2.0)
       multipart-post (~> 2.0)
-    faraday-net_http (3.4.4)
+    faraday-net_http (3.5.0)
       net-http (~> 0.5)
     filewatcher (3.0.1)
       logger (~> 1.7)
@@ -165,7 +165,7 @@ GEM
       redcarpet (~> 3.6)
       rqrcode (~> 3.2)
       tzinfo (~> 2.0)
-    trmnl_preview (0.30.2)
+    trmnl_preview (0.31.0)
       activesupport (~> 8.0)
       capybara (~> 3.40)
       cgi (~> 0.5)
@@ -212,7 +212,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  trmnl_preview (= 0.30.2)
+  trmnl_preview (= 0.31.0)
 
 CHECKSUMS
   activesupport (8.1.4) sha256=891dd3fe43c4fc8391934b237b1189bb1f661c932a84a840043db9d46a4e80df
@@ -230,9 +230,9 @@ CHECKSUMS
   csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
-  faraday (2.14.4) sha256=9bb4408c44621b0dbaaaa39e5dbfc4dbe58cc6751b6eb94d16ae9e1f2f2fab6e
+  faraday (2.15.0) sha256=3be0eff0187ed913a1b4f679e9fcfe845b542cdd4f75b76cd6181a4ae1335fff
   faraday-multipart (1.2.0) sha256=7d89a949693714176f612323ca13746a2ded204031a6ba528adee788694ef757
-  faraday-net_http (3.4.4) sha256=0e78af151747ed1b00f33e25973b4bc220d7f16c00c39676817c8b12331eb588
+  faraday-net_http (3.5.0) sha256=2e7094c34e38754ee048cc3df47376f8657005d9375f8473bce1c3b526a22e36
   filewatcher (3.0.1) sha256=b0f51e568cf112f72392053ae5ff5afa267592489091ee9f93c20fc275597f5a
   hashie (5.1.0) sha256=c266471896f323c446ea8207f8ffac985d2718df0a0ba98651a3057096ca3870
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
@@ -289,7 +289,7 @@ CHECKSUMS
   tilt (2.9.0) sha256=da5735d0280bba96e9a91041bb14aee435ccad5c17b0fa519249ae543d9aa3a5
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
   trmnl-liquid (0.8.2) sha256=ad47dc74afed5e2dffedee35928739950e6435584e004d340e48428860b25232
-  trmnl_preview (0.30.2) sha256=a1289887aebac5314a788258d7b66f2e805c0808fd28ca99b360ceffc094d639
+  trmnl_preview (0.31.0) sha256=c10534eb436f9eb764935eab0ff71b4bde059ceffb4f6c6314138497251c35d8
   tzinfo (2.0.6) sha256=8daf828cc77bcf7d63b0e3bdb6caa47e2272dcfaf4fbfe46f8c3a9df087a829b
   tzinfo-data (1.2026.5) sha256=0bdc3c5a540b1704f73a7b5c9be5c90bd0a5866c8e9e8e8a7885977d23a81645
   uri (1.1.2) sha256=89292e98eabbef6248b0a0ed5e7e398e152f83f17560023a6d94a7f492b169fb

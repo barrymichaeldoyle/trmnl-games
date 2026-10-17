@@ -49,7 +49,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 60
+export const TEMPLATE_VERSION = 61
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -150,6 +150,15 @@ const scene = (field: SceneField, large = field === 'scene_url' ? 'scene_url_lar
 /** The rune rule across the full width of its column. */
 const divider = `
   <div class="flex flex--row flex--center-y gap--none stretch-x" data-rune-rule="true">${runeRule}</div>`
+
+/**
+ * D180: while a weekly keepsake waits and no urgent code is up, every standing code (the bag link, the home link and the
+ * OG's corner code) opens the keepsake's claim link instead, at the same size, and captions that name a code show it.
+ * A hidden title bar then still leaves a way to the keepsake. Older envelopes without the field keep their codes.
+ */
+const KEEPSAKE_ASSIGNS = `{% assign keepsake_waiting = false %}{% if qr_base == "" and keepsake_qr_base and keepsake_qr_base != "" and desk_keepsake_code %}{% assign keepsake_waiting = true %}{% if companion_qr_base != "" %}{% assign companion_qr_base = keepsake_qr_base %}{% endif %}{% if home_qr_base != "" %}{% assign home_qr_base = keepsake_qr_base %}{% endif %}{% if corner_qr_base != "" %}{% assign corner_qr_base = keepsake_corner_qr_base %}{% endif %}{% endif %}`
+/** The waiting keepsake's code under its QR, in place of the standing code's caption. */
+const keepsakeCaption = (classes: string) => `<span class="${classes} text--bold" data-keepsake-caption="true">${L('keepsake')} <span class="inline-block">{{ desk_keepsake_code | escape }}</span></span>`
 
 /**
  * HUD marks assigned once per layout (`hud_heart_full`...). Drawn at twice their grid so the X, where the framework
@@ -427,8 +436,10 @@ const fitStories = `<script>
   };
   const fit = () => {
     const layout = Array.from(view.querySelectorAll('.layout')).find(el => el.getClientRects().length > 0);
+    // A player can hide the title bar (TRMNL keeps its space but draws nothing), so the layout alone bounds the fit then.
     const footer = Array.from(view.querySelectorAll('.title_bar')).find(el => el.getClientRects().length > 0);
-    if (!layout || !footer) return;
+    const footerTop = footer ? footer.getBoundingClientRect().top : Infinity;
+    if (!layout) return;
     view.querySelectorAll('[data-adaptive-story]').forEach(resetAdaptive);
     // Undo the last run's giving way (below) before measuring anything.
     view.querySelectorAll('[data-gave-way]').forEach(el => {
@@ -495,7 +506,7 @@ const fitStories = `<script>
       view.querySelectorAll('[data-home-qr], [data-companion-qr]:not([data-urgent])').forEach(code => { if (code.getClientRects().length) giveWay(code); });
     }
     // The title bar: a keepsake code the bar truncates takes the title's place, then drops the word "code".
-    const instance = footer.querySelector('.instance');
+    const instance = footer && footer.querySelector('.instance');
     if (scaled && instance && instance.scrollWidth > instance.clientWidth + 1) {
       const title = footer.querySelector('.title');
       if (title) giveWay(title);
@@ -585,7 +596,7 @@ const fitStories = `<script>
       // The most notable fact always stays, even where the name and hours already take the rows on their own.
       row.dataset.recapFit = count === 1 || row.getBoundingClientRect().height <= limit ? 'complete' : 'over';
     });
-    const layoutBottom = Math.min(footer.getBoundingClientRect().top, layout.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(layout).paddingBottom) || 0));
+    const layoutBottom = Math.min(footerTop, viewBox.bottom, layout.getBoundingClientRect().bottom - (parseFloat(getComputedStyle(layout).paddingBottom) || 0));
     // Boards in a bounded slot (the X half's, under its scene): drop trailing rows, and the rule above each, until the
     // board ends inside the slot, keeping the hero's own row.
     view.querySelectorAll('[data-fit-rows]').forEach(board => {
@@ -680,7 +691,7 @@ const fitStories = `<script>
     // of all, the urgent code's caption and then the hearts may go too, so a bag-full panel keeps its code on the screen.
     const ribbon = Array.from(view.querySelectorAll('[data-recap-ribbon]')).find(el => el.getClientRects().length > 0);
     const spill = () => {
-      const floor = Math.min(footer.getBoundingClientRect().top, viewBox.bottom);
+      const floor = Math.min(footer ? footer.getBoundingClientRect().top : Infinity, viewBox.bottom);
       const ribbonTop = ribbon ? ribbon.getBoundingClientRect().top : Infinity;
       return Array.from(layout.querySelectorAll('span, img, div')).filter(el => el.getClientRects().length > 0 && el.getBoundingClientRect().height > 0 && !el.closest('[data-story-list]') && !el.querySelector('[data-story-list]')).reduce((sum, el) => sum + Math.max(0, el.getBoundingClientRect().bottom - (ribbon && !ribbon.contains(el) ? Math.min(floor, ribbonTop) : floor)), 0);
     };
@@ -814,7 +825,7 @@ const qrImage = (scale: number, largeScale: number, field = 'qr_base') =>
  * The full layouts' standing link (D88): a small unlabelled code to the companion home in the top-right corner. A full
  * bag takes it away, since the bag-full panel carries its own code.
  */
-const homeQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="no-shrink" data-home-qr="true">${qrImage(2, 3, 'home_qr_base')}</div>{% endif %}`
+const homeQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-home-qr="true">${qrImage(2, 3, 'home_qr_base')}{% if keepsake_waiting %}${keepsakeCaption('label lg:title--small text--center')}{% endif %}</div>{% endif %}`
 
 /**
  * A full bag (D88, D171): the adventure view gives way to this panel. The code is the largest each screen serves and
@@ -848,7 +859,7 @@ const bagTakeover = (column: boolean) => `
 const bagQr = (scale = 3, largeScale = 4, caption = true) => `
   {% if qr_base != "" or companion_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x flex--top gap--xsmall" data-companion-qr="true"{% if qr_base != "" %} data-urgent="true"{% endif %}>
     {% if qr_base != "" %}${qrImage(scale, largeScale)}<span class="label lg:title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>
-    {% else %}${qrImage(scale, largeScale, 'companion_qr_base')}${caption ? `<span class="label lg:title--small">${L('your_bag')}</span>` : ''}{% endif %}
+    {% else %}${qrImage(scale, largeScale, 'companion_qr_base')}${caption ? `{% if keepsake_waiting %}${keepsakeCaption('label lg:title--small text--center')}{% else %}<span class="label lg:title--small">${L('your_bag')}</span>{% endif %}` : ''}{% endif %}
   </div>{% endif %}`
 
 /**
@@ -940,7 +951,7 @@ const oriented = (classes: string, landscape: string, portrait: string, bar: str
 const qrFooter = (scale = 3, largeScale = 4, classes = '', standingScale = scale) => `
   {% if qr_base != "" or companion_qr_base != "" %}<div class="${classes}no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x" data-companion-qr="true"{% if qr_base != "" %} data-urgent="true"{% endif %}>
     {% if qr_base != "" %}<div class="no-shrink">${qrImage(scale, largeScale)}</div><span class="label lg:title--small grow" data-clamp="3">{{ qr_label | escape }}</span>
-    {% else %}<div class="no-shrink">${qrImage(standingScale, largeScale, 'companion_qr_base')}</div><span class="label lg:title--small grow">${L('your_bag')}</span>{% endif %}
+    {% else %}<div class="no-shrink">${qrImage(standingScale, largeScale, 'companion_qr_base')}</div>{% if keepsake_waiting %}${keepsakeCaption('label lg:title--small grow')}{% else %}<span class="label lg:title--small grow">${L('your_bag')}</span>{% endif %}{% endif %}
   </div>{% endif %}`
 
 /**
@@ -948,7 +959,7 @@ const qrFooter = (scale = 3, largeScale = 4, classes = '', standingScale = scale
  * corner, the screen's margin standing in for its top and right quiet zone, so the hearts and XP keep clear of it while
  * the gear line runs on underneath; the X keeps its 3x code at the end of the header row.
  */
-const cornerQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="hidden lg:block no-shrink" data-home-qr="true"><img class="image" src="{{ home_qr_base }}/3.png" alt=""></div>` +
+const cornerQr = `{% if qr_base == "" and home_qr_base != "" %}<div class="hidden lg:block no-shrink" data-home-qr="true"><div class="flex flex--col flex--center-x gap--xsmall"><img class="image" src="{{ home_qr_base }}/3.png" alt="">{% if keepsake_waiting %}${keepsakeCaption('title--small text--center')}{% endif %}</div></div>` +
   `{% if corner_qr_base != "" %}<div class="lg:hidden absolute top--0 right--0" data-home-qr="corner"><img class="image" src="{{ corner_qr_base }}/2.png" alt=""></div>{% endif %}{% endif %}`
 
 /**
@@ -984,7 +995,7 @@ const xStackedHeader = (clamp: number, gear = gearLine) => `<div class="flex fle
  * The X header's code: the urgent code with its label when there is one, else the standing bag code. Unlabelled, as
  * in the full layout's corner (D88).
  */
-const xCode = `{% if qr_base != "" or companion_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall w--[96px]" data-companion-qr="true"{% if qr_base != "" %} data-urgent="true"{% endif %}>{% if qr_base != "" %}<img class="image" src="{{ qr_base }}/3.png" alt=""><span class="title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>{% else %}<img class="image" src="{{ companion_qr_base }}/3.png" alt="">{% endif %}</div>{% endif %}`
+const xCode = `{% if qr_base != "" or companion_qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall w--[96px]" data-companion-qr="true"{% if qr_base != "" %} data-urgent="true"{% endif %}>{% if qr_base != "" %}<img class="image" src="{{ qr_base }}/3.png" alt=""><span class="title--small text--center" data-clamp="2">{{ qr_label | escape }}</span>{% else %}<img class="image" src="{{ companion_qr_base }}/3.png" alt="">{% if keepsake_waiting %}${keepsakeCaption('title--small text--center')}{% endif %}{% endif %}</div>{% endif %}`
 /** The standing bag code hung in a scene's corner, like the full portrait's (D93); an urgent code keeps its own block. */
 const xSceneCode = `{% if qr_base == "" and companion_qr_base != "" %}<div class="absolute top--0 right--0 flex bg--black p--1" data-companion-qr="true"><img class="image" src="{{ companion_qr_base }}/3.png" alt=""></div>{% endif %}`
 const xScene = (field: SceneField, code = '') => `{% if ${field} != "" %}<div class="relative no-shrink" data-scene-row="x" data-scene-art="true"><img class="image" src="{{ ${field} }}" alt="">${code}</div>{% endif %}`
@@ -1235,7 +1246,7 @@ const fullPortrait = `
   {% unless attention %}${recapRibbon}{% endunless %}
   {% endif %}`
 
-export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen = "${glyphUri('todoOpen', 16)}" %}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--xsmall lg:gap--small', `
+export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen = "${glyphUri('todoOpen', 16)}" %}${HUD_ASSIGNS}${KEEPSAKE_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--xsmall lg:gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('full')}
   {% else %}
   <div class="relative no-shrink flex flex--row flex--top gap--medium stretch-x">
@@ -1284,7 +1295,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   {% endif %}
 `, fullPortrait, titleBar)}${fitStories}`
 
-export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
+export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${KEEPSAKE_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('halfHorizontal')}
   {% elsif qr_base != "" %}${bagTakeover(false)}
   {% else %}
@@ -1303,9 +1314,9 @@ export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${or
   {% endif %}
 `, halfHorizontalPortrait, titleBar)}${fitStories}`
 
-export const markupHalfVertical = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small lg:gap--medium', halfVerticalLandscape, halfVerticalPortrait, titleBar, titleBarNarrow)}${fitStories}`
+export const markupHalfVertical = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${KEEPSAKE_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small lg:gap--medium', halfVerticalLandscape, halfVerticalPortrait, titleBar, titleBarNarrow)}${fitStories}`
 
-export const markupQuadrant = `${glyphAssigns([16])}${HUD_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
+export const markupQuadrant = `${glyphAssigns([16])}${HUD_ASSIGNS}${KEEPSAKE_ASSIGNS}${oriented('layout layout--col layout--top layout--stretch-x gap--small', `
   {% if status == "unlinked" or first_run %}${welcome('quadrant')}
   {% elsif qr_base != "" %}${bagTakeover(true)}
   {% else %}

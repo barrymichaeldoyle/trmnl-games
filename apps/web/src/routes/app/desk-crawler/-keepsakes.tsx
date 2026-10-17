@@ -2,7 +2,7 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { useMutation } from 'convex/react'
 import { ConvexError } from 'convex/values'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { DESK_KEEPSAKES, EASTER_EGG_KEEPSAKE, KEEPSAKES_OPEN_AT, keepsakesOpen, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
@@ -54,11 +54,15 @@ function useKeepsakeClaim() {
 
   async function claim(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    await submit(code)
+  }
+
+  async function submit(value: string) {
     if (inFlight.current) return
     setError(null)
     setMessage(null)
     if (!online) { setError(t.offline); return }
-    const normalized = code.trim().toUpperCase().replace(/[\s-]/g, '')
+    const normalized = value.trim().toUpperCase().replace(/[\s-]/g, '')
     const letterCode = Date.now() < LETTER_CODES_UNTIL && /^[A-HJ-NP-Z2-9]{8}$/.test(normalized)
     if (!/^\d{6}$/.test(normalized) && !letterCode) { setError(t.enterSixDigits); return }
     inFlight.current = true
@@ -86,7 +90,7 @@ function useKeepsakeClaim() {
     finally { inFlight.current = false; setPending(false) }
   }
 
-  return { collection, collectedThisWeek, open, next, code, edit, claim, pending, error, message, earned }
+  return { collection, collectedThisWeek, open, next, code, edit, claim, submit, pending, error, message, earned }
 }
 
 type KeepsakeClaim = ReturnType<typeof useKeepsakeClaim>
@@ -109,16 +113,32 @@ function KeepsakeCodeForm({ form, inputId }: { form: KeepsakeClaim; inputId: str
  * form itself, so the trip to the device pays off without a detour to
  * Settings. Hidden when there is nothing to collect or no connection to show
  * a code; stays to confirm a claim made from it until the next visit.
+ * D180: `scanned` is a code from the screen's keepsake QR. Once the collection loads it is entered and sent once, the
+ * address drops it (so a reload or the history never sends it again), and the callout stays to show how it went.
  */
-export function KeepsakeCallout() {
+export function KeepsakeCallout({ scanned }: { scanned?: string }) {
   const form = useKeepsakeClaim()
   const { collection, next, earned } = form
   // Closed by default on every screen: the game screen stays in the first viewport and the code is two taps away.
   const [open, setOpen] = useState(false)
+  const [fromScan, setFromScan] = useState(false)
+  const sent = useRef(false)
+  const navigate = useNavigate()
   const t = useT(dcCareerMessages)
   const c = useContent()
+  const ready = collection !== undefined && collection !== null
+  useEffect(() => {
+    if (!scanned || sent.current || !ready) return
+    sent.current = true
+    void navigate({ to: '/app/desk-crawler', search: {}, replace: true })
+    if (!collection.connected || !form.open) return
+    setFromScan(true)
+    setOpen(true)
+    form.edit(scanned)
+    void form.submit(scanned)
+  }, [scanned, ready, collection, form, navigate])
   if (!collection?.connected || !form.open) return null
-  if (form.collectedThisWeek && !earned) return null
+  if (form.collectedThisWeek && !earned && !(fromScan && (form.message || form.error || form.pending))) return null
   const shown = earned ?? next
   return <section aria-labelledby="keepsake-callout-title" className="flex min-w-0 flex-col border-[3px] border-night bg-panel outline-4 outline-gold">
     {/* The title keeps at least a word's width: where the button no longer fits beside it, the button takes its own full row. */}

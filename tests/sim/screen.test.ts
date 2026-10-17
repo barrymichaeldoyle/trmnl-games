@@ -107,6 +107,29 @@ describe('companion QR in every view', () => {
   const base = 'https://art.test/art/qr/v3'
   const liquid = new Liquid({ timezoneOffset: 0 })
 
+  it('turns every standing code into the waiting keepsake\'s claim link with its code, but never an urgent one (D180)', async () => {
+    const standing = { companion_qr_base: `${base}/bag`, home_qr_base: `${base}/home`, corner_qr_base: `${base}/corner` }
+    const keepsake = { desk_keepsake_code: '482 917', keepsake_qr_base: `${base}/keepsake/482917`, keepsake_corner_qr_base: `${base}/keepsake-corner/482917` }
+    for (const [layout, markup] of Object.entries(screenMarkup)) {
+      const html = markupOnly(await liquid.parseAndRender(markup, { ...payload(), ...standing, ...keepsake }))
+      expect(html, layout).toContain(`${base}/keepsake`)
+      expect(html, layout).not.toMatch(new RegExp(`${base}/(bag|home|corner)/`))
+      expect(html, layout).toContain('data-keepsake-caption="true">Keepsake <span class="inline-block">482 917</span>')
+      expect(html, layout).not.toContain('Your bag')
+      // A full bag's code still wins; the title bar keeps the code.
+      const urgent = markupOnly(await liquid.parseAndRender(markup, { ...payload(), ...standing, ...keepsake, qr_base: `${base}/bag`, qr_label: 'Scan to open your bag' }))
+      expect(urgent, layout).not.toContain(`${base}/keepsake`)
+      expect(urgent, layout).not.toContain('data-keepsake-caption')
+      expect(urgent, layout).toContain('482 917')
+      // An envelope from before D180 (a code, no QR field) keeps the standing codes.
+      const older = markupOnly(await liquid.parseAndRender(markup, { ...payload(), ...standing, desk_keepsake_code: '482 917' }))
+      expect(older, layout).not.toContain(`${base}/keepsake`)
+      expect(older, layout).not.toContain('data-keepsake-caption')
+    }
+    const corner = await liquid.parseAndRender(screenMarkup.markup, { ...payload(), ...standing, ...keepsake })
+    expect(corner).toContain(`data-home-qr="corner"><img class="image" src="${base}/keepsake-corner/482917/2.png"`)
+  })
+
   it('keeps a small unlabelled home code in the full layout and a full bag panel in its place (D88)', async () => {
     const standing = await liquid.parseAndRender(screenMarkup.markup, { ...payload(), companion_qr_base: `${base}/bag`, home_qr_base: `${base}/app` })
     expect(standing).toContain(`src="${base}/app/2.png"`)

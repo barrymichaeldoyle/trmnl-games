@@ -26,6 +26,18 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-17',
     changes: [
       {
+        title: 'Scan the screen to collect your keepsake',
+        body: 'While a keepsake waits, the QR code on your TRMNL collects it: scan it with your phone and it goes straight onto your shelf. The code is printed beside the QR where there is room, so it shows even with the title bar turned off.',
+        fr: { title: 'Scannez l’écran pour récupérer votre souvenir', body: 'Tant qu’un souvenir attend, le QR code de votre TRMNL le récupère : scannez-le avec votre téléphone et il rejoint directement votre étagère. Le code est imprimé à côté du QR quand il y a la place, donc il reste visible même sans barre de titre.' },
+        de: { title: 'Scanne den Bildschirm, um dein Andenken abzuholen', body: 'Solange ein Andenken wartet, holt es der QR-Code auf deinem TRMNL ab: Scanne ihn mit dem Handy, und es landet direkt in deinem Regal. Wo Platz ist, steht der Code neben dem QR, also auch bei ausgeblendeter Titelleiste.' },
+      },
+      {
+        title: 'Desk Crawler fits its screen with the title bar hidden',
+        body: 'With the TRMNL title bar turned off, older adventure entries ran under the leaderboard and the recap. The screen now drops the oldest entries to fit, as it does with the bar shown.',
+        fr: { title: 'Desk Crawler tient dans l’écran sans barre de titre', body: 'Quand la barre de titre TRMNL était masquée, les anciennes aventures passaient sous le classement et le récapitulatif. L’écran retire maintenant les plus anciennes pour tenir, comme avec la barre affichée.' },
+        de: { title: 'Desk Crawler passt auch ohne Titelleiste auf den Bildschirm', body: 'Bei ausgeblendeter TRMNL-Titelleiste liefen ältere Abenteuer unter die Rangliste und die Zusammenfassung. Jetzt lässt der Bildschirm die ältesten Einträge weg, damit alles passt, wie mit sichtbarer Leiste.' },
+      },
+      {
         title: 'Career unlocks are listed by level',
         body: 'On the Career page, What opens when now lists each feature from the lowest unlock level to the highest, so you can see what comes next in order.',
         fr: { title: 'Les déblocages de carrière sont listés par niveau', body: 'Sur la page Carrière, Ce qui s’ouvre et quand liste maintenant chaque fonction du niveau le plus bas au plus élevé, pour voir ce qui vient ensuite dans l’ordre.' },

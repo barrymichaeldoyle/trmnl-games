@@ -49,7 +49,7 @@ const notify = () => listeners.forEach((l) => l());
 const subscribe = (l) => { listeners.add(l); window.addEventListener('popstate', notify); return () => { listeners.delete(l); window.removeEventListener('popstate', notify) } };
 const snapshot = () => location.pathname + location.search + location.hash;
 export const useLocation = (options) => { const key = useSyncExternalStore(subscribe, snapshot, snapshot); const loc = { pathname: location.pathname, search: location.search, hash: location.hash, href: key }; return options?.select ? options.select(loc) : loc };
-export const createFileRoute = () => (options) => ({ options, useParams: () => { const parts = location.pathname.replace(/\\/$/, '').split('/'); return parts[3] === 'lives' ? { alias: decodeURIComponent(parts[2]), n: parts[4] } : { alias: decodeURIComponent(parts.pop()) } } });
+export const createFileRoute = () => (options) => ({ options, useSearch: () => { const search = Object.fromEntries(new URLSearchParams(location.search)); return options.validateSearch ? options.validateSearch(search) : search }, useParams: () => { const parts = location.pathname.replace(/\\/$/, '').split('/'); return parts[3] === 'lives' ? { alias: decodeURIComponent(parts[2]), n: parts[4] } : { alias: decodeURIComponent(parts.pop()) } } });
 export const createRootRouteWithContext = () => (options) => ({ options });
 export const notFound = () => new Error('not found');
 export const redirect = () => new Error('redirect');

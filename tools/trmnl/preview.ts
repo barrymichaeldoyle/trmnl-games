@@ -18,7 +18,7 @@ import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { renderScenePng } from '@trmnl-games/desk-crawler/art/route'
-import { DEFAULT_COMPANION_ORIGIN, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
+import { DEFAULT_COMPANION_ORIGIN, keepsakeQrFields, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
 import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
 import { KEEPSAKE_FREE_SCENARIOS, NO_OFFSET_SCENARIOS, PREVIEW_KEEPSAKE_CODE, PREVIEW_NOW, PREVIEW_UTC_OFFSET, previewScenarios, withOvernightRecap } from '@trmnl-games/desk-crawler/templates/previewScenarios'
 
@@ -74,7 +74,9 @@ for (const [state, scenario] of Object.entries(previewStates)) {
   const payload = occasion === null ? built : { ...built, ...Object.fromEntries((['scene_url', 'scene_url_small', 'scene_url_large', 'scene_url_medium'] as const).map((key) => [key, built[key].replace(/\/(?:plain|[a-z0-9_]+)\/(?=[a-z_]+\/(?:none|monster-|elite-|prop-))/, `/${occasion}/`)])) }
   if (process.argv.includes('--recap')) writeFileSync(`.previews/${name}--payload.json`, JSON.stringify(payload, null, 2))
   for (const layout of Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]) {
-    const context = { ...payload, desk_keepsake_code: KEEPSAKE_FREE_SCENARIOS.has(state) ? null : deskKeepsakeCode, utc_offset: NO_OFFSET_SCENARIOS.has(state) ? null : utcOffset }
+    const keepsakeCode = KEEPSAKE_FREE_SCENARIOS.has(state) ? null : deskKeepsakeCode
+    // D180: the envelope's keepsake QR beside the code, as the screen route sends it.
+    const context = { ...payload, desk_keepsake_code: keepsakeCode, ...keepsakeQrFields(keepsakeCode, artBaseUrl), utc_offset: NO_OFFSET_SCENARIOS.has(state) ? null : utcOffset }
     if (contextsIndex >= 0) contexts.push({ name, layout, context })
     const inner = withLocalArt(await liquid.parseAndRender(screenMarkup[layout], context))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {

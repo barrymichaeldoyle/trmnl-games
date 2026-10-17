@@ -5,7 +5,9 @@
  * (`~/Library/Caches/ms-playwright`, installed by the Playwright MCP or `npx playwright install chromium`), waits for
  * the framework to settle, then records layout checks and optional screenshots. It approximates TRMNL's renderer;
  * real-device renders stay the acceptance gate.
- * Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>] [--full-screen]   (run from the repository root)
+ * Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>] [--full-screen] [--no-title-bar]   (run from the repository root)
+ * `--no-title-bar` hides every title bar the way a player's display setting does (its space stays, nothing draws), so
+ * the fitter must bound the layout without one: on 2026-10-17 a hidden bar stopped it entirely (template v61).
  */
 import { chromium } from 'playwright-core'
 import { readdirSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -18,6 +20,7 @@ if (!outJson || outJson.startsWith('--')) throw new Error('Usage: pnpm sweep:trm
 const shotsIndex = process.argv.indexOf('--shots')
 const shotsDir = shotsIndex >= 0 ? process.argv[shotsIndex + 1] : null
 const fullScreen = process.argv.includes('--full-screen')
+const noTitleBar = process.argv.includes('--no-title-bar')
 const filterIndex = process.argv.indexOf('--filter')
 const filter = filterIndex >= 0 ? process.argv[filterIndex + 1] : null
 const previews = join(process.cwd(), '.previews')
@@ -30,7 +33,7 @@ const SIZES = {
 const server = createServer(async (req, res) => {
   try {
     const file = decodeURIComponent(new URL(req.url, 'http://x').pathname.slice(1))
-    const body = await readFile(join(previews, file))
+    const body = noTitleBar ? (await readFile(join(previews, file), 'utf8')).replace('</head>', '<style>.title_bar{display:none !important}</style></head>') : await readFile(join(previews, file))
     res.setHeader('content-type', 'text/html; charset=utf-8')
     res.end(body)
   } catch {
@@ -69,13 +72,13 @@ for (const file of files.sort()) {
     process.stdout.write(`retry ${file}: ${error.message}\n`)
     await bounded()
   })
-  const result = await page.evaluate(() => {
+  const result = await page.evaluate((noTitleBar) => {
     const view = document.querySelector('.view')
     const footer = Array.from(document.querySelectorAll('.title_bar')).find((el) => el.getClientRects().length > 0)
     const layoutEl = Array.from(document.querySelectorAll('.layout')).find((el) => el.getClientRects().length > 0)
-    if (!view || !footer || !layoutEl) return { error: 'missing view, layout or footer' }
+    if (!view || (!footer && !noTitleBar) || !layoutEl) return { error: 'missing view, layout or footer' }
     const v = view.getBoundingClientRect()
-    const bound = Math.min(footer.getBoundingClientRect().top, v.bottom)
+    const bound = Math.min(footer ? footer.getBoundingClientRect().top : Infinity, v.bottom)
     const visible = (e) => e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden'
     const overflow = Array.from(layoutEl.querySelectorAll('span,img,div')).filter(visible).filter((e) => {
       const r = e.getBoundingClientRect()
@@ -93,7 +96,7 @@ for (const file of files.sort()) {
     const chips = Array.from(layoutEl.querySelectorAll('.label--outline')).filter(visible).length
     // The title bar sits outside the layout: its title, instance text and icon must stay inside the view (D115 found a
     // fly code running off a narrow portrait bar that the layout checks could not see).
-    const titleOverflow = Array.from(footer.querySelectorAll('span,img')).filter(visible).filter((e) => {
+    const titleOverflow = Array.from(footer ? footer.querySelectorAll('span,img') : []).filter(visible).filter((e) => {
       const r = e.getBoundingClientRect()
       // The framework ellipsizes `.instance` text, which hides a code's last digits, so any truncated instance fails.
       const truncated = e.tagName === 'SPAN' && e.scrollWidth > e.clientWidth + 2 && (e.classList.contains('instance') || getComputedStyle(e).textOverflow !== 'ellipsis')
@@ -120,7 +123,7 @@ for (const file of files.sort()) {
     }).map((e) => ({ text: e.innerText.slice(0, 40), right: e.getBoundingClientRect().right }))
     const adaptiveStories = Array.from(layoutEl.querySelectorAll('[data-adaptive-story]')).filter(visible).map(el => ({ arrangement: el.dataset.storyArrangement, text: el.querySelector('[data-adaptive-text]').innerText, metadataRows: Array.from(el.querySelectorAll('[data-story-time]')).filter(visible).length }));
     return { adaptiveStories, bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, underBoard, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
-  })
+  }, noTitleBar)
   // Regression for the X side view: an inner ledger can outgrow its fixed flex slot during reflow.
   // Grow only the inner box, rerun the real fitter, then restore it before taking the normal screenshot.
   const slotStress = device === 'x' && layout === 'markup_half_vertical' ? await page.evaluate(() => {

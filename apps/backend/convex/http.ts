@@ -6,7 +6,7 @@ import { verifySvix } from './lib/svix'
 import { renderScenePng } from '@trmnl-games/desk-crawler/art/route'
 import { renderHeroCardPng } from '@trmnl-games/desk-crawler/art/heroCard'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
-import { DEFAULT_COMPANION_ORIGIN, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
+import { DEFAULT_COMPANION_ORIGIN, keepsakeQrFields, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
 import { parseUtcOffset, screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
 import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templates/screen'
@@ -176,7 +176,9 @@ http.route({
     if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
     // Telemetry only: a failed write never fails a valid screen.
     if (result.screenServedFor !== undefined) { try { await ctx.runMutation(internal.trmnl.recordScreenServed, { instanceId: result.screenServedFor, at: now }) } catch { /* next request retries */ } }
-    return json(200, { ...screenMarkup, merge_variables: { ...sceneUrlsAt(result.payload, now, utcOffset), desk_keepsake_code: result.keepsakeCode, utc_offset: utcOffset } })
+    // D180: a waiting keepsake's code also rides in the standing QR, so a hidden title bar never hides the claim.
+    const keepsakeQr = keepsakeQrFields(result.keepsakeCode, process.env.CONVEX_SITE_URL ?? null)
+    return json(200, { ...screenMarkup, merge_variables: { ...sceneUrlsAt(result.payload, now, utcOffset), desk_keepsake_code: result.keepsakeCode, ...keepsakeQr, utc_offset: utcOffset } })
   }),
 })
 

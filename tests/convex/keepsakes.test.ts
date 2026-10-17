@@ -26,7 +26,7 @@ async function installation(t: T, heroId: Id<'heroes'>, uuid = UUID, token = TOK
 async function envelope(t: T, uuid = UUID, token = TOKEN) {
   const response = await t.fetch('/trmnl/v1/screen', { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ user_uuid: uuid }).toString() })
   expect(response.status).toBe(200)
-  return await response.json() as { merge_variables: { desk_keepsake_code: string | null }; markup: string }
+  return await response.json() as { merge_variables: { desk_keepsake_code: string | null; keepsake_qr_base: string; keepsake_corner_qr_base: string }; markup: string }
 }
 
 describe('weekly TRMNL keepsakes', () => {
@@ -55,6 +55,16 @@ describe('weekly TRMNL keepsakes', () => {
     expect((await t.fetch('/trmnl/v1/screen', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `user_uuid=${UUID}` })).status).toBe(404)
     expect(await t.query(api.keepsakes.mine, {})).toBeNull()
     expect(await t.withIdentity({ issuer: 'issuer', subject: 'Nobody' }).query(api.keepsakes.mine, {})).toBeNull()
+  })
+
+  it('sends the code\'s claim QR beside it, and nothing once the week\'s keepsake is collected (D180)', async () => {
+    vi.stubEnv('CONVEX_SITE_URL', 'https://site.test')
+    const { merge_variables: vars } = await envelope(t)
+    const digits = vars.desk_keepsake_code!.replace(' ', '')
+    expect(vars.keepsake_qr_base).toBe(`https://site.test/art/qr/v3/keepsake/${digits}`)
+    expect(vars.keepsake_corner_qr_base).toBe(`https://site.test/art/qr/v3/keepsake-corner/${digits}`)
+    expect(await owner().mutation(api.keepsakes.claim, { operationId: 'qr-claim-1', code: digits })).toMatchObject({ outcome: 'claimed' })
+    expect((await envelope(t)).merge_variables).toMatchObject({ desk_keepsake_code: null, keepsake_qr_base: '', keepsake_corner_qr_base: '' })
   })
 
   it('records a served screen at most once an hour, and the hero says TRMNL has fetched one after the Save', async () => {

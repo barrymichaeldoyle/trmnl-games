@@ -41,7 +41,29 @@ export function parseQrPath(path: string): { target: QrTarget; scale: number } |
   return { target, scale }
 }
 
+/**
+ * D180: while a weekly keepsake waits, the standing codes open `/k/<code>`, which claims it on the companion. Only six
+ * digits are encoded, so the route still mints nothing but links into the companion. The URL is no longer than the
+ * `/dc` link's 25 modules, so the code takes any standing code's place at the same size. `corner` is cut like D108's.
+ */
+const KEEPSAKE_DIGITS = /^\d{6}$/
+export const keepsakeQrBasePath = (code: string, corner = false) => {
+  const digits = code.replace(/\D/g, '')
+  return KEEPSAKE_DIGITS.test(digits) ? `/art/qr/v${QR_VERSION}/${corner ? 'keepsake-corner' : 'keepsake'}/${digits}` : null
+}
+
+export function parseKeepsakeQrPath(path: string): { digits: string; corner: boolean; scale: number } | null {
+  const match = /^\/art\/qr\/v(\d+)\/(keepsake|keepsake-corner)\/(\d{6})\/(\d)\.png$/.exec(path)
+  if (!match || Number(match[1]) !== QR_VERSION || !QR_SCALES.has(Number(match[4]))) return null
+  return { digits: match[3]!, corner: match[2] === 'keepsake-corner', scale: Number(match[4]) }
+}
+
 export function renderQrPng(path: string, origin: string): Uint8Array | null {
+  const keepsake = parseKeepsakeQrPath(path)
+  if (keepsake) {
+    const { size, ink } = qrInk(`${origin}/k/${keepsake.digits}`, keepsake.scale, keepsake.corner)
+    return encodePng1Bit(size, size, ink)
+  }
   const parsed = parseQrPath(path)
   if (!parsed) return null
   const { size, ink } = qrInk(`${origin}${QR_TARGETS[parsed.target]}`, parsed.scale, CORNER_TARGETS.has(parsed.target))
@@ -49,3 +71,10 @@ export function renderQrPng(path: string, origin: string): Uint8Array | null {
 }
 
 export { qrInk }
+
+/** D180: the merge variables the screen envelope adds beside `desk_keepsake_code`; empty without a code or art origin. */
+export function keepsakeQrFields(code: string | null, artBaseUrl: string | null): { keepsake_qr_base: string; keepsake_corner_qr_base: string } {
+  const base = code && artBaseUrl ? keepsakeQrBasePath(code) : null
+  const corner = code && artBaseUrl ? keepsakeQrBasePath(code, true) : null
+  return { keepsake_qr_base: base ? `${artBaseUrl}${base}` : '', keepsake_corner_qr_base: corner ? `${artBaseUrl}${corner}` : '' }
+}

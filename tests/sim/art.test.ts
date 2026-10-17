@@ -198,6 +198,27 @@ describe('companion QR codes', () => {
     }
   })
 
+  it('draws a waiting keepsake\'s claim link at the home code\'s size, and only for six digits (D180)', async () => {
+    const { default: jsQR } = await import('jsqr')
+    const { keepsakeQrBasePath, keepsakeQrFields, parseKeepsakeQrPath, qrInk, renderQrPng } = await import('@trmnl-games/desk-crawler/art/qr')
+    expect(keepsakeQrBasePath('482 917')).toBe('/art/qr/v3/keepsake/482917')
+    expect(keepsakeQrBasePath('482 917', true)).toBe('/art/qr/v3/keepsake-corner/482917')
+    expect(keepsakeQrBasePath('48291')).toBeNull()
+    expect(parseKeepsakeQrPath('/art/qr/v3/keepsake/482917/3.png')).toEqual({ digits: '482917', corner: false, scale: 3 })
+    for (const bad of ['/art/qr/v3/keepsake/48291/3.png', '/art/qr/v3/keepsake/4829170/3.png', '/art/qr/v3/keepsake/abcdef/3.png', '/art/qr/v3/keepsake/482917/9.png', '/art/qr/v2/keepsake/482917/3.png']) {
+      expect(renderQrPng(bad, 'https://trmnlgames.com')).toBeNull()
+    }
+    expect(renderQrPng('/art/qr/v3/keepsake-corner/482917/2.png', 'https://trmnlgames.com')).not.toBeNull()
+    expect(keepsakeQrFields('482 917', 'https://site.test')).toEqual({ keepsake_qr_base: 'https://site.test/art/qr/v3/keepsake/482917', keepsake_corner_qr_base: 'https://site.test/art/qr/v3/keepsake-corner/482917' })
+    expect(keepsakeQrFields(null, 'https://site.test')).toEqual({ keepsake_qr_base: '', keepsake_corner_qr_base: '' })
+    // No larger than the `/dc` home code, so it takes any standing code's place, and it scans to the short link.
+    const { size, ink } = qrInk('https://trmnlgames.com/k/482917', 2)
+    expect(size).toBe(qrInk('https://trmnlgames.com/dc', 2).size)
+    const rgba = new Uint8ClampedArray(size * size * 4)
+    for (let i = 0; i < ink.length; i += 1) rgba.fill(ink[i] ? 0 : 255, i * 4, i * 4 + 3), (rgba[i * 4 + 3] = 255)
+    expect(jsQR(rgba, size, size)?.data).toBe('https://trmnlgames.com/k/482917')
+  })
+
   it('draws the home and corner codes from the short link, the corner one smaller and quiet only left and below (D108)', async () => {
     const { default: jsQR } = await import('jsqr')
     const { qrInk, renderQrPng } = await import('@trmnl-games/desk-crawler/art/qr')

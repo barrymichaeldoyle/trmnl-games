@@ -36,6 +36,7 @@ import { Route as GamesPaperLivesRouteImport } from './routes/games/paper-lives'
 import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
 import { Route as HelpPaperLivesRouteImport } from './routes/help/paper-lives'
+import { Route as KCodeRouteImport } from './routes/k.$code'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
 import { Route as AppDeskCrawlerIndexRouteImport } from './routes/app/desk-crawler/index'
 import { Route as AppDeskCrawlerAchievementsRouteImport } from './routes/app/desk-crawler/achievements'
@@ -205,6 +206,11 @@ const HelpIdleAnglerRoute = HelpIdleAnglerRouteImport.update({
 const HelpPaperLivesRoute = HelpPaperLivesRouteImport.update({
   id: '/help/paper-lives',
   path: '/help/paper-lives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KCodeRoute = KCodeRouteImport.update({
+  id: '/k/$code',
+  path: '/k/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileAliasRoute = ProfileAliasRouteImport.update({
@@ -421,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
+  '/k/$code': typeof KCodeRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -481,6 +488,7 @@ export interface FileRoutesByTo {
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
+  '/k/$code': typeof KCodeRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -546,6 +554,7 @@ export interface FileRoutesById {
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
+  '/k/$code': typeof KCodeRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -612,6 +621,7 @@ export interface FileRouteTypes {
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/help/paper-lives'
+    | '/k/$code'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -672,6 +682,7 @@ export interface FileRouteTypes {
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/help/paper-lives'
+    | '/k/$code'
     | '/profile/$alias'
     | '/app'
     | '/app/desk-crawler/achievements'
@@ -736,6 +747,7 @@ export interface FileRouteTypes {
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/help/paper-lives'
+    | '/k/$code'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -798,6 +810,7 @@ export interface RootRouteChildren {
   HelpDeskCrawlerRoute: typeof HelpDeskCrawlerRoute
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
   HelpPaperLivesRoute: typeof HelpPaperLivesRoute
+  KCodeRoute: typeof KCodeRoute
   ProfileAliasRoute: typeof ProfileAliasRoute
   DeskCrawlerHeroesAliasRoute: typeof DeskCrawlerHeroesAliasRoute
   ConnectTrmnlDeskCrawlerInstallRoute: typeof ConnectTrmnlDeskCrawlerInstallRoute
@@ -998,6 +1011,13 @@ declare module '@tanstack/react-router' {
       path: '/help/paper-lives'
       fullPath: '/help/paper-lives'
       preLoaderRoute: typeof HelpPaperLivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/k/$code': {
+      id: '/k/$code'
+      path: '/k/$code'
+      fullPath: '/k/$code'
+      preLoaderRoute: typeof KCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$alias': {
@@ -1370,6 +1390,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpDeskCrawlerRoute: HelpDeskCrawlerRoute,
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
   HelpPaperLivesRoute: HelpPaperLivesRoute,
+  KCodeRoute: KCodeRoute,
   ProfileAliasRoute: ProfileAliasRoute,
   DeskCrawlerHeroesAliasRoute: DeskCrawlerHeroesAliasRoute,
   ConnectTrmnlDeskCrawlerInstallRoute: ConnectTrmnlDeskCrawlerInstallRoute,

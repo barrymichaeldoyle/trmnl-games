@@ -1,5 +1,7 @@
 # TRMNL layout evidence: A10 (in progress)
 
+Template v61 (2026-10-17): [fitter runs with the title bar hidden](hidden-title-bar.md).
+
 Template v59 (2026-10-16): [vertical half overlap fix and portrait companion preview](vertical-half-overlap.md).
 
 ## Next-tick fix, template v16 (2026-10-04)
