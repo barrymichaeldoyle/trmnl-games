@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-17',
     changes: [
       {
+        title: 'More of the adventure log fits in the full landscape layout',
+        body: 'In the full landscape layout, the newest entry now keeps its XP, gold, HP and time on its own line when they fit, and the changes on older entries take only the room they need. Fewer entries wrap, so the log shows one or two more.',
+        fr: { title: 'Le journal d’aventure en montre plus en paysage plein écran', body: 'En paysage plein écran, l’entrée la plus récente garde son XP, son or, ses PV et son heure sur sa propre ligne quand ils tiennent, et les gains des entrées plus anciennes ne prennent que la place nécessaire. Moins d’entrées passent à la ligne, donc le journal en montre une ou deux de plus.' },
+        de: { title: 'Im vollen Querformat passt mehr vom Abenteuerprotokoll', body: 'Im vollen Querformat behält der neueste Eintrag XP, Gold, LP und Uhrzeit in seiner eigenen Zeile, wenn sie passen, und die Änderungen älterer Einträge nehmen nur so viel Platz wie nötig. Weniger Einträge brechen um, also zeigt das Protokoll ein oder zwei mehr.' },
+      },
+      {
         title: 'Desk Crawler’s marks show under the Dark theme',
         body: 'With your TRMNL set to the Dark theme, the hearts, XP bar, gold and potion marks, log icons and the rule under the scene used to vanish. They now draw in the theme’s ink, so they show on every theme.',
         fr: { title: 'Les symboles de Desk Crawler s’affichent avec le thème Sombre', body: 'Avec votre TRMNL réglé sur le thème Sombre, les cœurs, la barre d’XP, les symboles d’or et de potions, les icônes du journal et la ligne sous la scène disparaissaient. Ils s’affichent maintenant dans l’encre du thème, donc sur tous les thèmes.' },

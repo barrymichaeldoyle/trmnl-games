@@ -1,5 +1,7 @@
 # TRMNL layout evidence: A10 (in progress)
 
+Template v64 (2026-10-17): the full landscape ledger uses the portrait's adaptive rows (D183 in decisions.md); 912 of 912 normal previews pass.
+
 Template v63 (2026-10-17): [device marks follow the TRMNL theme's ink](dark-theme-marks.md).
 
 Template v62 (2026-10-17): the bag-full panel fits every slot (see the D171 follow-up in decisions.md); 72 of 72 bag previews pass with and without the title bar.

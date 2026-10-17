@@ -1,4 +1,6 @@
 /**
+ * Template v64 gives the full landscape ledger the portrait's adaptive rows: changes packed at their natural width and
+ * the newest story on one line with its changes and time whenever they fit (D183).
  * Template v60 gives full portrait a screen-wide ledger followed by goal/tasks on the left and a compact board on
  * the right on X. Its five-row window keeps the hero visible; the OG retains its compact two-column board.
  * Four self-contained TRMNL layouts. Template v59 bounds stories to their allocated column and the board below, and refits after fonts settle. Template v58 makes a full bag the whole view on every layout, with the largest bag code, the slot count and a held find (D171). Template v57 reads its own words from the payload's `labels`, in the owner's
@@ -49,7 +51,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 63
+export const TEMPLATE_VERSION = 64
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -355,17 +357,18 @@ const chipColumns = (visibility = 'hidden lg:flex', others = true) => `${chipSor
  * story line has no room for it. A zero-gap grid keeps the chips directly beneath the story. `inline` moves the chips
  * onto the story's own line, right-aligned before the time, so each entry is one line and the chips line up as a
  * column: on the X only (`'lg'`, the full portrait) or everywhere (`'all'`, the full landscape, whose OG ledger spans
- * the screen's width).
+ * the screen's width). `adaptive` (both full layouts, D183) lets the fitter pack the changes and try the newest story on
+ * one line; `ogMeta` adds the OG portrait's metadata row under the story.
  */
 type ChipsInline = false | 'lg' | 'all'
-const logLine = (entry: string, classes: string, clamp: number, size: number, fit: number, wrapper = 'block', timeBelow = false, inline: ChipsInline = false, leadMeta = false, ogMeta = false) => {
+const logLine = (entry: string, classes: string, clamp: number, size: number, fit: number, wrapper = 'block', timeBelow = false, inline: ChipsInline = false, leadMeta = false, ogMeta = false, adaptive = ogMeta) => {
   // On the X alone the inline forms swap in with `lg:` classes; everywhere, they replace the stacked forms outright.
   // `lg:flex` brings the framework's default gap and outranks gap classes, so `'all'` pairs it with `flex` to keep the
   // X's spacing exactly as the X-only form draws it.
   const onlyX = (lg: string) => (inline === 'all' ? '' : lg)
   const shown = inline === 'all' ? 'flex lg:flex' : 'hidden lg:flex'
   // A live entry (the travel line, D91) says its time in the story; the column is for when something happened.
-  const timeSpan = (extra = '') => `{% if line_timed %}<span class="${extra}label lg:title--small no-shrink${ogMeta ? ' pl--2' : ''}" data-story-time="true">{{ ${entry}.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
+  const timeSpan = (extra = '') => `{% if line_timed %}<span class="${extra}label lg:title--small no-shrink${adaptive ? ' pl--2' : ''}" data-story-time="true">{{ ${entry}.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
   // The newest story in the inline ledgers (`leadMeta`) is larger: it keeps the whole width, and its changes and time
   // take the line below in the same columns as the rows beneath, rather than squeezing it into three lines.
   const lead = inline !== false && leadMeta
@@ -382,7 +385,7 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   // never clamps mid-name; `line_full` keeps the labels for the X.
   const compactSwap = `{% assign line_full = nil %}{% if ${entry}.c and line_plain.size > ${lineFit} %}{% assign line_full = line_story %}{% assign line_story = ${entry}.c %}{% assign line_plain = line_story %}{% endif %}`
   const inlineChips = inline && !lead ? `{% if ${hasChanges} %}${othersBelow ? chipColumns(shown, false) : columns}{% endif %}` : ''
-  const storySpan = `<span${ogMeta ? ' data-adaptive-text="true"' : ''} class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
+  const storySpan = `<span${adaptive ? ' data-adaptive-text="true"' : ''} class="${classes} grow" ${fitClamp('line_plain', clamp, lineFit)}>${storyText}</span>`
   // Sorted before the row opens, so a row with changes under its story aligns to the story's first line, not its middle.
   const sortFirst = othersBelow ? `{% assign chip_words = "" %}{% assign chip_marked = "" %}{% if ${hasChanges} %}${chipSort}{% endif %}` : ''
   const story = othersBelow ? `<div class="grow w--min-0">${storySpan.replace('<span ', '<span data-story-text="true" ')}{% if chip_words != "" or chip_marked != "" %}<div class="hidden{% if chip_words != "" %} lg:flex{% endif %} flex--row flex--wrap flex--left flex--center-y gap--small pt--1" data-story-chips-other="true"{% if chip_words != "" %} data-words="true"{% endif %}>{% if chip_marked != "" %}<span class="hidden flex--row flex--wrap flex--center-y gap--small" data-marked-below="true">{{ chip_marked }}</span>{% endif %}{{ chip_words }}</div>{% endif %}</div>` : storySpan
@@ -391,7 +394,7 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   // OG full portrait keeps event icon, deltas and timestamp on one metadata row below the full-width story.
   const ogMetadata = `<div class="lg:hidden flex flex--row flex--left flex--center-y gap--small pt--1" data-story-meta="og"><div class="no-shrink">${logIcon(`${entry}.k`, 16)}</div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${changes}</div>${timeSpan()}</div>`
   const stacked = ogMeta ? ogMetadata : `{% if ${timeBelow ? `line_timed or ${hasChanges}` : hasChanges} %}<div class="${inline ? 'lg:hidden ' : ''}flex flex--row flex--left flex--top gap--xsmall pt--1" data-story-changes="true"><div class="no-shrink w--[${size}px]"></div><div class="grow w--min-0 flex flex--row flex--wrap flex--left flex--center-y gap--small">${timeBelow ? time : ''}${changes}</div></div>{% endif %}`
-  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none"${ogMeta ? ' data-adaptive-story="true"' : ''}>${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"${othersBelow ? ' data-ledger-row="true"' : ''}${ogMeta ? ' data-adaptive-main="true"' : ''}><div class="${ogMeta ? 'hidden lg:block ' : ''}no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
+  return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none"${adaptive ? ' data-adaptive-story="true"' : ''}>${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"${othersBelow ? ' data-ledger-row="true"' : ''}${adaptive ? ' data-adaptive-main="true"' : ''}><div class="${ogMeta ? 'hidden lg:block ' : ''}no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
 }
 
 /** The status line, its clamp fitted like log lines. */
@@ -409,9 +412,9 @@ const celebrationBadge = (classes: string) => `
  * Whole story/stat pairs; the fitter keeps the longest newest-first prefix that fits. `rowFit` is the plain length the
  * older one-line entries may reach before the OG clamps them; the full landscape's screen-wide ledger allows more.
  */
-const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelow = false, inline: ChipsInline = false, rowFit = 28, ogMeta = false) => `
+const storyList = (clamp: number, classes: string, size = 16, fit = 60, timeBelow = false, inline: ChipsInline = false, rowFit = 28, ogMeta = false, adaptive = ogMeta) => `
   <div class="grow stretch-x" data-story-list="true">
-    {% for entry in log %}{% unless attention and forloop.index > 1 %}{% if forloop.first %}${logLine('entry', classes, clamp, size, fit, 'block', timeBelow, inline, true, ogMeta)}{% else %}${logLine('entry', 'label lg:title--small', 1, 16, rowFit, inline ? `block pt--1 ${inline === 'all' ? '' : 'lg:'}pt--0.5` : 'block pt--1', timeBelow, inline, false, ogMeta)}{% endif %}{% endunless %}{% endfor %}
+    {% for entry in log %}{% unless attention and forloop.index > 1 %}{% if forloop.first %}${logLine('entry', classes, clamp, size, fit, 'block', timeBelow, inline, true, ogMeta, adaptive)}{% else %}${logLine('entry', 'label lg:title--small', 1, 16, rowFit, inline ? `block pt--1 ${inline === 'all' ? '' : 'lg:'}pt--0.5` : 'block pt--1', timeBelow, inline, false, ogMeta, adaptive)}{% endif %}{% endunless %}{% endfor %}
     {% if log.size == 0 %}<span class="label lg:title--small">${L('first_soon')}</span>{% endif %}
   </div>`
 
@@ -516,7 +519,7 @@ const fitStories = `<script>
       const word = instance.querySelector('[data-keepsake-word]');
       if (word && instance.scrollWidth > instance.clientWidth + 1) giveWay(word);
     }
-    // Full portrait uses natural-width changes, without empty stat placeholders; other ledgers retain their columns.
+    // The full layouts' ledgers use natural-width changes, without empty stat placeholders; other ledgers retain their columns.
     layout.querySelectorAll('[data-adaptive-story] [data-chip-cell]').forEach(cell => {
       Array.from(cell.classList).filter(cls => cls.startsWith('w--[')).forEach(cls => cell.classList.remove(cls));
       cell.classList.toggle('hidden', !cell.querySelector('[data-change]'));
@@ -560,12 +563,12 @@ const fitStories = `<script>
       const text = root.querySelector('[data-adaptive-text]');
       const og = root.querySelector('[data-story-meta="og"]');
       const x = root.querySelector('[data-story-lead-meta]');
-      if (!main || !text || !og) return;
-      const small = og.getClientRects().length > 0;
+      if (!main || !text) return;
+      const small = !!og && og.getClientRects().length > 0;
       const meta = small ? og : x;
       const icon = main.firstElementChild;
-      const metaIcon = og.firstElementChild;
-      const changed = [main, icon, metaIcon, ...(meta ? [meta] : [])];
+      const metaIcon = og && og.firstElementChild;
+      const changed = [main, icon, ...(metaIcon ? [metaIcon] : []), ...(meta ? [meta] : [])];
       adaptiveStates.set(root, { classes: changed.map(el => [el, el.className]), meta, parent: meta && meta.parentElement, next: meta && meta.nextSibling });
       if (small) { icon.classList.remove('hidden'); metaIcon.classList.add('hidden'); }
       main.classList.remove('flex--top'); main.classList.add('flex--center-y');
@@ -1294,7 +1297,7 @@ export const markupFull = `${glyphAssigns([16, 24])}{% assign glyph16_todoOpen =
   <div class="grid grow h--full h--min-0 stretch-x gap--small lg:gap--large pt--1 lg:pt--2" data-story-columns="true">
     <div class="col--span-12 lg:col--span-8 flex flex--col flex--left flex--top gap--xsmall lg:gap--small h--full">
       ${attention('label lg:title--small', 2, true)}
-      {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 64, false, 'all', 74)}
+      {% unless recap %}${celebrationBadge('label lg:title--small')}{% endunless %}${storyList(2, 'title', 24, 64, false, 'all', 74, false, true)}
       ${goalLine}
     </div>
     <div class="hidden lg:block col--span-4"><div class="flex flex--row flex--stretch-y gap--medium h--full" data-board-column="true">

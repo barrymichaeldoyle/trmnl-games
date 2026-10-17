@@ -477,6 +477,12 @@ describe('log lines (D44)', () => {
     const wide = landscape!.split('The floor heard it.')[1]!.split('border--h-30')[0]!
     expect(wide).toMatch(/<div class="flex lg:flex flex--row flex--right flex--center-y gap--xsmall" data-story-lead-meta="true"><span class="flex lg:flex flex--row[^"]*" data-story-chips-inline="true">/)
     expect(landscape).not.toContain('data-story-changes')
+    // Like the portrait, every landscape entry is marked for the fitter to pack its changes and try the newest on one row.
+    expect(wide).toMatch(/<span class="label lg:title--small no-shrink pl--2" data-story-time="true">10:19<\/span><\/div>/)
+    const entries = landscape!.split('data-story-list="true"')[1]!.split('data-goal-line')[0]!
+    expect(entries.match(/data-adaptive-story="true"/g)).toHaveLength(entries.match(/data-adaptive-main="true"/g)!.length)
+    expect(entries.match(/data-adaptive-text="true"/g)!.length).toBeGreaterThan(1)
+    expect(entries).not.toContain('data-story-meta="og"')
     expect(lead.indexOf('data-story-chips-inline')).toBeGreaterThan(lead.indexOf('data-story-lead-meta'))
   })
 
