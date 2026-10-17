@@ -13,7 +13,7 @@ import { deriveStats } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { eventById, optionOf, resolveEffect } from '@trmnl-games/desk-crawler/sim/core/choice'
 import { effectById, effectiveStats, liveEffects, withEffect } from '@trmnl-games/desk-crawler/sim/core/modifiers'
-import type { ContentCatalog, UnlockableFeature } from '@trmnl-games/desk-crawler/sim/core/types'
+import type { ContentCatalog } from '@trmnl-games/desk-crawler/sim/core/types'
 import { starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { awardAfterIntent } from './lib/achievements'
 import { readWorld } from './world'
@@ -31,7 +31,7 @@ import { worldContent } from './world'
 import { screenFetchedAfterInstall } from './trmnlPayload'
 import { toHeroState } from './sim/runs/adapter'
 import { loreView } from '@trmnl-games/desk-crawler/sim/core/biomes'
-import { claimReward, currentRung, FEATURES, FEATURE_LABEL, measureRung, unlocked, unlockLevel } from '@trmnl-games/desk-crawler/sim/core/career'
+import { claimReward, currentRung, measureRung, unlocked, unlockLevel, unlocksView } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 import { isBagFull } from '@trmnl-games/desk-crawler/sim/core/bag'
@@ -419,14 +419,6 @@ async function rosterSummary(ctx: QueryCtx, content: ContentCatalog, hero: Doc<'
   const heroes = await ctx.db.query('heroes').withIndex('by_userId_and_isActive', (q) => q.eq('userId', hero.userId)).take(4)
   const warrior = heroes.find((entry) => entry.class === 'warrior')
   return { unlockLevel: at, open: warrior !== undefined && warrior.level >= at, heroes: heroes.length, warriorLevel: warrior?.level ?? null }
-}
-
-/** P35: each gated feature with its level and whether this hero has it; null under a catalog without unlocks. */
-function unlocksView(content: ContentCatalog, level: number) {
-  if (content.unlocks === undefined) return null
-  // P37: the roster opens per account on the Warrior's level, so `heroes.roster` reports it, not this per-hero list.
-  // D141: a feature the pinned catalog never opens (meetings before v20) is left out.
-  return FEATURES.filter((feature): feature is Exclude<UnlockableFeature, 'roster'> => feature !== 'roster' && unlockLevel(content, feature) !== undefined).map((feature) => ({ feature, label: FEATURE_LABEL[feature], level: unlockLevel(content, feature)!, unlocked: unlocked(content, level, feature) }))
 }
 
 /** v1.2: show or hide the hero's public profile page. Public until the owner hides it (D144). */

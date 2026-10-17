@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { applyItemChanges } from '@trmnl-games/desk-crawler/sim/core/apply'
-import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, remapRung, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
+import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, remapRung, unlocked, unlocksView } from '@trmnl-games/desk-crawler/sim/core/career'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { maxHp, xpToLeave } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -80,6 +80,29 @@ describe('feature unlocks (P35)', () => {
     expect(canRaid(catalogs.v6, 20)).toBe(false)
     expect(effectiveStance(v12, { level: 2, stance: 'bold' })).toBeUndefined()
     expect(effectiveStance(v12, { level: 3, stance: 'bold' })).toBe('bold')
+  })
+
+  it('lists companion unlocks by resolved level, keeping FEATURES order on a tie', () => {
+    expect(unlocksView(v11, 1)).toBeNull()
+    expect(unlocksView(v12, 4)?.map((entry) => [entry.feature, entry.level, entry.unlocked])).toEqual([
+      ['todo', 2, true],
+      ['stances', 3, true],
+      ['choices', 5, false],
+      ['merchant', 6, false],
+      ['raids', 7, false],
+    ])
+    // v15 moves stances to 7; the list follows that resolved level, not v12 declaration order.
+    expect(unlocksView(catalogs.v15, 1)?.map((entry) => entry.feature)).toEqual(['todo', 'choices', 'merchant', 'stances', 'raids'])
+    // v24: meetings ties todo at 2, workbench at 4, stances ties raids at 7.
+    expect(unlocksView(catalogs.v24, 1)?.map((entry) => [entry.feature, entry.level])).toEqual([
+      ['todo', 2],
+      ['meetings', 2],
+      ['workbench', 4],
+      ['choices', 5],
+      ['merchant', 6],
+      ['stances', 7],
+      ['raids', 7],
+    ])
   })
 
   it('writes no to-do list, merchant, choice or raid for a level-1 hero', { timeout: 30_000 }, () => {

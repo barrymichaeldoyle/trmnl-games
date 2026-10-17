@@ -169,6 +169,7 @@ describe('career ladder backend (P35)', () => {
     expect(view.career!.rungs[5]).toMatchObject({ id: 'level_4', state: 'current' })
     // The stance card's floor line reads which biome is safe.
     expect(view.biomes.map((biome) => [biome.id, biome.safe])).toEqual([['office_cubicles', true], ['server_room', false], ['cafeteria_depths', false]])
+    expect(view.unlocks.map((entry) => entry.feature)).toEqual(['todo', 'choices', 'merchant', 'stances', 'raids'])
   })
 
   it('moves every hero to the same rung by id when the world switches from v16 to v17, and back (D135)', { timeout: 30_000 }, async () => {

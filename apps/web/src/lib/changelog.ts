@@ -23,6 +23,17 @@ export const changeIn = (change: Change, locale: Locale): { title: string; body:
 
 export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-17',
+    changes: [
+      {
+        title: 'Career unlocks are listed by level',
+        body: 'On the Career page, What opens when now lists each feature from the lowest unlock level to the highest, so you can see what comes next in order.',
+        fr: { title: 'Les déblocages de carrière sont listés par niveau', body: 'Sur la page Carrière, Ce qui s’ouvre et quand liste maintenant chaque fonction du niveau le plus bas au plus élevé, pour voir ce qui vient ensuite dans l’ordre.' },
+        de: { title: 'Karriere-Freischaltungen stehen nach Stufe', body: 'Auf der Karriereseite listet Was wann öffnet jede Funktion jetzt von der niedrigsten Freischaltstufe zur höchsten, damit du der Reihe nach siehst, was als Nächstes kommt.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-16',
     changes: [
       {
