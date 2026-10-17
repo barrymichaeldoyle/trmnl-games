@@ -5,12 +5,17 @@
  * (`~/Library/Caches/ms-playwright`, installed by the Playwright MCP or `npx playwright install chromium`), waits for
  * the framework to settle, then records layout checks and optional screenshots. It approximates TRMNL's renderer;
  * real-device renders stay the acceptance gate.
- * Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>] [--full-screen] [--no-title-bar]   (run from the repository root)
+ * Usage: pnpm sweep:trmnl <outJson> [--shots <dir>] [--filter <substring>] [--full-screen] [--no-title-bar] [--jobs <n>] [--fixed-wait]
+ * (run from the repository root, or from a directory whose `.previews` holds the pages to sweep)
+ * `--jobs` sets how many pages load at once, each in its own browser context (default: the cores less two, at most six).
+ * Each page counts as settled once its fitted layout is unchanged across two frame pairs (at most two seconds);
+ * `--fixed-wait` restores the old fixed 400 ms wait, to compare a run against it.
  * `--no-title-bar` hides every title bar the way a player's display setting does (its space stays, nothing draws), so
  * the fitter must bound the layout without one: on 2026-10-17 a hidden bar stopped it entirely (template v61).
  */
 import { chromium } from 'playwright-core'
 import { readdirSync, mkdirSync, writeFileSync } from 'node:fs'
+import { cpus } from 'node:os'
 import { join } from 'node:path'
 import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
@@ -23,6 +28,9 @@ const fullScreen = process.argv.includes('--full-screen')
 const noTitleBar = process.argv.includes('--no-title-bar')
 const filterIndex = process.argv.indexOf('--filter')
 const filter = filterIndex >= 0 ? process.argv[filterIndex + 1] : null
+const jobsIndex = process.argv.indexOf('--jobs')
+const jobs = jobsIndex >= 0 ? Math.max(1, Number(process.argv[jobsIndex + 1]) || 1) : Math.max(1, Math.min(6, cpus().length - 2))
+const fixedWait = process.argv.includes('--fixed-wait')
 const previews = join(process.cwd(), '.previews')
 const SIZES = {
   og: { markup: [800, 480], markup_half_horizontal: [800, 240], markup_half_vertical: [400, 480], markup_quadrant: [400, 240] },
@@ -49,9 +57,28 @@ if (shotsDir) mkdirSync(shotsDir, { recursive: true })
 const browser = await chromium.launch()
 const results = []
 let failures = 0
-const context = await browser.newContext({ deviceScaleFactor: 1 })
-const page = await context.newPage()
-for (const file of files.sort()) {
+/**
+ * Waits until the fitted layout stops changing: the fitter's counts and markers, hidden elements, the view's text (the
+ * clamps cut it) and unloaded images must read the same in two samples taken two frames apart. Capped at two seconds.
+ */
+const untilSettled = async () => {
+  const frames = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  const signature = () => {
+    const marks = Array.from(document.querySelectorAll('[data-story-list], [data-fit-rows], [data-recap-items], [data-adaptive-story], [data-gave-way]'))
+      .map((el) => [el.dataset.storyCount, el.dataset.rowCount, el.dataset.recapCount, el.dataset.storyArrangement, el.dataset.gaveWay, Math.round(el.getBoundingClientRect().height)].join(','))
+    return `${marks.join('|')}#${document.querySelectorAll('.hidden').length}#${document.querySelector('.view')?.innerText.length ?? 0}#${Array.from(document.images).filter((img) => !img.complete).length}`
+  }
+  const start = performance.now()
+  let last = signature()
+  for (;;) {
+    await frames()
+    const now = signature()
+    if (now === last || performance.now() - start > 2000) return
+    last = now
+  }
+}
+/** One preview on a worker's page: load and settle it, run the checks, record the result and any screenshot. */
+async function sweepOne(page, file) {
   const [state, deviceOrient, layoutExt] = file.split('--')
   const layout = layoutExt.replace('.html', '')
   const portrait = deviceOrient.endsWith('-portrait')
@@ -65,7 +92,8 @@ for (const file of files.sort()) {
     await page.goto(`http://127.0.0.1:${port}/${file}`, { waitUntil: 'load', timeout: 60000 })
     await page.waitForFunction(() => window.TRMNL_PLUGINS_READY === true, null, { timeout: 20000 }).catch(() => {})
     await page.evaluate(() => document.fonts.ready)
-    await page.waitForTimeout(400); await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))))
+    if (fixedWait) { await page.waitForTimeout(400); await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))) }
+    else await page.evaluate(untilSettled)
   }
   const bounded = () => Promise.race([settle(), new Promise((_, reject) => setTimeout(() => reject(new Error(`timed out loading ${file}`)), 90000))])
   await bounded().catch(async (error) => {
@@ -155,6 +183,16 @@ for (const file of files.sort()) {
   if (shotsDir) await page.locator(fullScreen ? '.screen' : '.view').first().screenshot({ path: join(shotsDir, file.replace('.html', '.png')) })
   process.stdout.write(`${ok ? 'ok  ' : 'FAIL'} ${file}\n`)
 }
+// Each worker has its own context and page and takes the next file from one queue; results are sorted afterwards.
+const queue = files.sort()
+let next = 0
+await Promise.all(Array.from({ length: Math.min(jobs, queue.length) }, async () => {
+  const context = await browser.newContext({ deviceScaleFactor: 1 })
+  const page = await context.newPage()
+  while (next < queue.length) await sweepOne(page, queue[next++])
+  await context.close()
+}))
+results.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0))
 await browser.close()
 server.close()
 writeFileSync(outJson, JSON.stringify({ total: results.length, failures, results }, null, 1))
