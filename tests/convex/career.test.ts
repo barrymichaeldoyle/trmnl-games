@@ -116,7 +116,7 @@ describe('career ladder backend (P35)', () => {
     await runTick(t)
     const view = await as(t, 'Di').query(api.heroes.mine, {})
     // Everything up to the first trip was done before the ladder: the current goal is the Laptop Backpack.
-    expect(view.career.current).toMatchObject({ id: 'laptop_backpack', title: 'Buy the Laptop Backpack', gold: 30, companion: true, value: 10, target: 13 })
+    expect(view.career.current).toMatchObject({ id: 'laptop_backpack', title: 'Buy the Laptop Backpack', gold: 30, companion: true, value: 10, target: 13, shop: { place: 'bag', price: 100 } })
     expect(view.career.rungs.filter((r: { state: string }) => r.state === 'done').map((r: { id: string; reachedAt: number | null }) => [r.id, r.reachedAt])).toEqual([['first_win', null], ['equip_find', null], ['level_2', null], ['three_tasks', null], ['first_sale', null], ['pick_stance', null], ['level_4', null], ['first_trip', null]])
     expect(view.unlocks).toEqual([
       { feature: 'todo', label: 'the to-do list', level: 2, unlocked: true },

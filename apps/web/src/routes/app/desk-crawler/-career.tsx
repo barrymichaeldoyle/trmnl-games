@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
-import { Button } from '../../../lib/ui'
+import { BUTTON_PRIMARY, Button } from '../../../lib/ui'
 import { Glyph, SectionTitle } from '../../../lib/glyphs'
 import { LocalTime } from '../../../lib/localTime'
 import { captureAnalytics } from '../../../lib/analytics'
@@ -17,7 +17,7 @@ export type CareerView = {
   total: number
   /** D129: rewards waiting for the Claim button, oldest first. */
   unclaimed?: Array<{ id: string; title: string; gold: number; at: number | null }>
-  current: { id: string; title: string; blurb: string; gold: number; companion: boolean; value: number; target: number } | null
+  current: { id: string; title: string; blurb: string; gold: number; companion: boolean; value: number; target: number; shop?: { place: 'bag' | 'pouch'; price: number | null; affordable: boolean } | null } | null
   rungs: Array<{ id: string; title: string; blurb: string; gold: number; companion: boolean; state: 'done' | 'current' | 'ahead'; reachedAt: number | null }>
 }
 
@@ -27,6 +27,8 @@ export type UnlockView = Array<{ feature: 'todo' | 'meetings' | 'workbench' | 's
 
 /** How many rungs the Career page previews past the current one; the rest stay a "?" like unearned achievements. */
 const PREVIEW = 2
+const BAG_GOALS = new Set(['laptop_backpack', 'rolling_suitcase', 'gym_duffel'])
+const POUCH_GOALS = new Set(['lunchbox'])
 
 // French and German short months end in a full stop ("13 oct."), which would double the sentence's own.
 const reachedOn = (tag: string) => (date: Date) => date.toLocaleDateString(tag, { day: 'numeric', month: tag.startsWith('en') ? 'short' : 'long' })
@@ -35,17 +37,24 @@ const TAGS = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' } as const
 /**
  * The hero page's goal card (P35, D129): rewards waiting to be claimed come first, one at a time with a Claim button
  * that pops confetti and pays the gold; then the one thing to do next, its office blurb, the gold it will set aside
- * and, where the rung counts something, how far along it is. A goal finished in the companion is marked off in that
- * same action. A goal the hero finishes while adventuring is marked off on that adventure. Only the gold waits here.
+ * and, where the rung counts something, how far along it is. A bag or pouch goal links to the Bag page. It is not
+ * called done, and the reward is not described as waiting, until Claim is actually there.
  */
-export function GoalCard({ career, level, notify }: { career: CareerView; level: number; notify?: (feedback: { error: string | null; message: string | null }) => void }) {
+export function GoalCard({ career, level, gold = 0, holding, notify }: { career: CareerView; level: number; gold?: number; holding?: { capacity: number; pouchCap: number; nextBagId: string | null; nextPouchId: string | null; nextPrice: number | null } | null; notify?: (feedback: { error: string | null; message: string | null }) => void }) {
   const goal = career.current
   const waiting = career.unclaimed ?? []
   const claim = useIntent(api.heroes.claimGoal, notify ? { onFeedback: notify } : {})
   const [burst, fireBurst] = useBurst()
+  const place = goal?.shop?.place ?? (goal !== null && BAG_GOALS.has(goal.id) ? 'bag' : goal !== null && POUCH_GOALS.has(goal.id) ? 'pouch' : null)
+  // The Bag page is still selling this goal's tier, including when the goal's own number has already run ahead of the bag.
+  const selling = goal !== null && holding != null && ((place === 'bag' && holding.nextBagId === goal.id) || (place === 'pouch' && holding.nextPouchId === goal.id))
+  const forSale = selling || goal?.shop?.price != null
+  const value = place === 'bag' && holding ? holding.capacity : place === 'pouch' && holding ? holding.pouchCap : goal?.value ?? 0
   const counted = goal !== null && goal.target > 1
-  const met = goal !== null && goal.value >= goal.target
-  const pct = goal === null ? 0 : Math.max(0, Math.min(100, Math.round((Math.min(goal.value, goal.target) * 100) / Math.max(1, goal.target))))
+  const met = goal !== null && !forSale && value >= goal.target
+  const price = selling ? holding?.nextPrice ?? goal?.shop?.price ?? null : goal?.shop?.price ?? null
+  const affordable = forSale && price != null && gold >= price
+  const pct = goal === null ? 0 : Math.max(0, Math.min(100, Math.round((Math.min(value, goal.target) * 100) / Math.max(1, goal.target))))
   const reward = waiting[0]
   const t = useT(dcCareerMessages)
   const c = useContent()
@@ -75,14 +84,19 @@ export function GoalCard({ career, level, notify }: { career: CareerView; level:
       ) : goal ? (
         <>
           <p className="font-display text-2xl leading-tight font-bold">{c.text(goal.title)}</p>
-          <p className="text-sm">{met ? t.marked : c.text(goal.blurb)}</p>
+          <p className="text-sm">{met ? t.marksNext : c.text(goal.blurb)}</p>
+          {place ? (
+            <Link to="/app/desk-crawler/inventory" hash={place === 'pouch' ? 'pouch' : 'bags'} className={affordable ? `w-full no-underline sm:w-auto ${BUTTON_PRIMARY}` : 'inline-flex min-h-11 items-center self-start font-semibold underline underline-offset-4'}>
+              {forSale ? (affordable ? t.buyItNow : t.buyIt) : t.openBagPage}
+            </Link>
+          ) : null}
           <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
             <span className="text-gold-ink">{t.gold(n(goal.gold))}</span>
-            {counted ? <span className="text-muted">{t.of(n(Math.min(goal.value, goal.target)), n(goal.target))}</span> : null}
-            {met ? null : goal.companion ? <span className="text-muted">{t.doneHere}</span> : <span className="text-muted">{t.whileAdventuring}</span>}
+            {counted ? <span className="text-muted">{t.of(n(Math.min(value, goal.target)), n(goal.target))}</span> : null}
+            {met || forSale ? null : goal.companion ? <span className="text-muted">{t.doneHere}</span> : <span className="text-muted">{t.whileAdventuring}</span>}
           </p>
           {counted ? (
-            <div role="meter" aria-label={t.progress} aria-valuemin={0} aria-valuemax={goal.target} aria-valuenow={Math.min(goal.value, goal.target)} className="h-3 overflow-hidden border-2 border-night bg-night">
+            <div role="meter" aria-label={t.progress} aria-valuemin={0} aria-valuemax={goal.target} aria-valuenow={Math.min(value, goal.target)} className="h-3 overflow-hidden border-2 border-night bg-night">
               <div className="h-full bg-gold shadow-[inset_0_2px_0_rgb(255_255_255/0.35)]" style={{ width: `${pct}%` }} />
             </div>
           ) : null}

@@ -32,7 +32,6 @@ function Settings() {
   const [askPause, setAskPause] = useState(false)
   const [disconnectId, setDisconnectId] = useState<string | null>(null)
   const resume = useIntent(api.heroes.resume, { onFeedback: notify })
-  const bagResume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
   // Visibility is a stored preference, so the card flips on the tap and rolls back if the save fails.
   const profile = useIntent(api.heroes.setPublicProfile, {
     onFeedback: notify,
@@ -65,15 +64,8 @@ function Settings() {
               {t.resumeAdventures}
             </Button>
           </>
-        ) : hero.status === 'sleeping' && hero.wakeAtTick !== null ? (
-          <p>{t.resumesNext}</p>
-        ) : hero.status === 'sleeping' && bag?.canResume ? (
-          <>
-            <p>{t.bagHasRoom}</p>
-            <Button className="mt-3" icon="play" pending={bagResume.pending} busyLabel={t.resuming} disabled={!healthy} onClick={() => bagResume.run({}, t.resumed)}>
-              {t.resumeAdventures}
-            </Button>
-          </>
+        ) : hero.status === 'sleeping' && (hero.wakeAtTick !== null || bag?.canResume) ? (
+          <p>{hero.wakeAtTick !== null ? t.resumesNext : t.bagHasRoom}</p>
         ) : hero.status === 'sleeping' ? (
           bag ? <p>{t.stoppedFullBag}<Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.makeRoom}</Link>.</p> : null
         ) : (

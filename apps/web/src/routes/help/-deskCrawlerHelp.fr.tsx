@@ -205,9 +205,9 @@ export const fr: HelpPage = {
       <ol className="[&_li]:list-decimal">
         <li>Ouvrez Sac dans le compagnon. Équipez les améliorations et vendez l’équipement en trop pour faire de la place.</li>
         <li>Si une trouvaille est mise de côté, choisissez Récupérer la trouvaille. Laissez au moins une place libre après l’avoir récupérée pour que les aventures reprennent.</li>
-        <li>Choisissez Reprendre les aventures. Vous pouvez choisir en même temps une destination débloquée. Votre héros repart en moins de 15 minutes.</li>
+        <li>Une fois une place libre et plus rien en attente, les aventures reprennent toutes seules en moins de 15 minutes. Vous pouvez encore choisir une autre zone débloquée sur la page Sac avant cela.</li>
       </ol>
-      <p>Équiper un objet ne libère pas de place. Vendre de l’équipement ou récupérer une trouvaille ne réveille pas votre héros automatiquement. Le sommeil dû au sac n’a rien à voir avec le mode veille de votre TRMNL ; un écran en veille n’arrête jamais le jeu.</p>
+      <p>Équiper un objet ne libère pas de place. Vendre de l’équipement, récupérer une trouvaille ou acheter un plus grand sac le fait : les aventures reprennent toutes seules. Le sommeil dû au sac n’a rien à voir avec le mode veille de votre TRMNL ; un écran en veille n’arrête jamais le jeu.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Démontage et établi</h2>
         <p>{F.workbench.level !== undefined ? `À partir du niveau ${F.workbench.level}, l’` : 'L’'}équipement en trop a deux façons de quitter le sac : le vendre contre de l’or, ou le démonter en matériaux sur la page Sac. Le démontage rapporte selon le palier où la pièce a été trouvée, en unités du matériau de sa rareté : {F.workbench.materials.map((m) => `${name(m.name).toLowerCase()} pour l’équipement ${m.rarities.map((r) => rarityFr[r] ?? r).join(' et ')}`).join(', ')}. L’équipement épique rapporte {F.workbench.epicMultiplier} fois plus. Les matériaux ne prennent pas de place dans le sac et ne se vendent jamais. L’équipement n’est démonté que si vous le choisissez.{F.workbench.level !== undefined ? ` Avant le niveau ${F.workbench.level}, vendez le surplus : la première amélioration demande de toute façon le niveau ${F.workbench.level}.` : ''}</p>

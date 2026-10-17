@@ -142,7 +142,6 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const potion = useIntent(api.inventory.usePotion, { onFeedback: notify })
   const pause = useIntent(api.heroes.pause, { onFeedback: notify })
   const resume = useIntent(api.heroes.resume, { onFeedback: notify })
-  const bagResume = useIntent(api.inventory.resumeAdventures, { onFeedback: notify })
   // The stance is a stored preference: once confirmed it shows as chosen at once, and rolls back if the save fails.
   const stance = useIntent(api.heroes.setStance, {
     onFeedback: notify,
@@ -178,22 +177,19 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const commands = useFocusWithin<HTMLElement>(hero.status)
 
   const bagReady = bag?.canResume === true
+  const holding = bag ? { capacity: bag.capacity as number, pouchCap: (bag.pouch?.cap ?? 0) as number, nextBagId: (bag.ladder?.next?.id ?? null) as string | null, nextPouchId: (bag.pouch?.next?.id ?? null) as string | null, nextPrice: (bag.ladder?.next?.id === hero.career?.current?.id ? bag.ladder?.next?.price : bag.pouch?.next?.id === hero.career?.current?.id ? bag.pouch?.next?.price : null) as number | null } : null
   const waking = hero.status === 'sleeping' && hero.wakeAtTick !== null
-  const stopNote = hero.status === 'paused' || (hero.status === 'sleeping' && bagReady) ? t.resumeToTravel : waking ? t.resumesNext : hero.status === 'sleeping' ? t.roomToTravel : hero.status === 'dead' ? t.deadTravel : null
+  const stopNote = hero.status === 'paused' ? t.resumeToTravel : waking || bagReady ? t.resumesNext : hero.status === 'sleeping' ? t.roomToTravel : hero.status === 'dead' ? t.deadTravel : null
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
-      {hero.career ? <GoalCard career={hero.career} level={hero.level} notify={notify} /> : null}
+      {hero.career ? <GoalCard career={hero.career} level={hero.level} gold={hero.gold} holding={holding} notify={notify} /> : null}
       {hero.roster ? <RosterCard roster={hero.roster} name={hero.name} className={hero.className ?? 'Warrior'} /> : null}
       <section ref={commands} aria-label={t.commands} className="flex flex-col gap-2">
-        {canDrink || hero.status === 'paused' || (hero.status === 'sleeping' && !waking) ? (
+        {canDrink || hero.status === 'paused' || (hero.status === 'sleeping' && !waking && !bagReady) ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.
           <div className="grid gap-2 sm:flex sm:flex-wrap">
-            {hero.status === 'sleeping' && !waking && bagReady ? (
-              <Button icon="play" pending={bagResume.pending} busyLabel={t.resuming} disabled={!healthy} onClick={() => bagResume.run({}, t.resumed)}>
-                {t.resume}
-              </Button>
-            ) : hero.status === 'sleeping' && !waking && bag && !bagReady ? (
+            {hero.status === 'sleeping' && !waking && bag && !bagReady ? (
               <Link to="/app/desk-crawler/inventory" className={`inline-flex min-h-11 items-center justify-center gap-2.5 px-4 ${BUTTON_PRIMARY}`}>
                 <Glyph name="bag" />{t.openBag}
               </Link>

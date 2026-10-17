@@ -90,7 +90,7 @@ D54 adds optional stored combat `gearRarity`, copied by the persistence adapter 
 
 ## Score and held-ID adapter ownership
 
-The core returns held-create intent and sleep status, never a database ID for that find. Adapter allocates the item and writes `heldItemId` atomically. Manual claim clears it; core may not replace an existing held item. Core may clear a due `wakeAtTick` but never wake from a visit/poll alone.
+The core returns held-create intent and sleep status, never a database ID for that find. Adapter allocates the item and writes `heldItemId` atomically. Manual claim clears it; core may not replace an existing held item. Core clears a due `wakeAtTick`, and also wakes a sleeping hero with a free slot and nothing held when no wake was scheduled (D179). A visit or poll alone never wakes anyone.
 
 D111 widened this to the desk drawer (a `drawer` create destination under content v8 to v10, appended to `heroes.drawer` by the adapter). D123 removed it: the core returns only `bag` or `held` destinations again, a due wake requires the held slot empty and a free bag slot, and stored logs with the legacy `drawer` destination or `drawerFind` flag still validate but are read as ordinary loot lines.
 

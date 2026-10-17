@@ -185,9 +185,12 @@ class TickRun {
       case 'paused':
         return this.finish('paused')
       case 'sleeping': {
-        if (h.wakeAtTick === undefined || input.tick < h.wakeAtTick) return this.finish('sleeping')
+        const due = h.wakeAtTick !== undefined && input.tick >= h.wakeAtTick
+        const bagReady = h.heldItemId === undefined && !isBagFull(h, input.inventory)
+        // A future wake stays asleep. No wake at all still wakes once the bag is sorted (D179).
+        if (!due && !(h.wakeAtTick === undefined && bagReady)) return this.finish('sleeping')
         // Waking needs the held slot clear and a free bag slot for the next find.
-        if (h.heldItemId !== undefined || isBagFull(h, input.inventory)) {
+        if (!bagReady) {
           throw new SimulationInvariantError('WAKE_PRECONDITION', 'wake is due but the held slot is not clear or the bag is full')
         }
         delete h.wakeAtTick

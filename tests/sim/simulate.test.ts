@@ -45,6 +45,23 @@ describe('waiting states', () => {
     expect(result.nextHero).toEqual(hero)
   })
 
+  it('wakes a sorted bag on its own when no wake was scheduled (D179)', () => {
+    const { hero, inventory } = baseState({ status: 'sleeping' })
+    const { wakeAtTick: _wake, ...asleep } = hero
+    const result = run(asleep, inventory, 10, 3)
+    expect(result.metrics.wakes).toBe(1)
+    expect(result.nextHero.status).not.toBe('sleeping')
+    expect(result.nextHero.wakeAtTick).toBeUndefined()
+  })
+
+  it('stays asleep when the bag is full and no wake was scheduled', () => {
+    const { hero, inventory } = baseState({ status: 'sleeping' })
+    const { wakeAtTick: _wake, ...asleep } = hero
+    const result = run(asleep, fillBag(inventory, hero.bagCapacity + 2), 10)
+    expect(result.disposition).toBe('sleeping')
+    expect(result.event).toBeUndefined()
+  })
+
   it('wakes into an ordinary encounter when no destination is pending', () => {
     const { hero, inventory } = baseState({ status: 'sleeping', wakeAtTick: 10 })
     const result = run(hero, inventory, 10, 3)

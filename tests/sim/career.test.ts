@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { validateCatalog } from '@trmnl-games/desk-crawler/content/validate'
 import { applyItemChanges } from '@trmnl-games/desk-crawler/sim/core/apply'
-import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, remapRung, unlocked, unlocksView } from '@trmnl-games/desk-crawler/sim/core/career'
+import { canRaid, careerLine, careerProblems, claimReward, currentRung, effectiveStance, firstOpenRung, guaranteeDue, liveRung, measureRung, remapRung, rungSatisfied, unlocked, unlocksView } from '@trmnl-games/desk-crawler/sim/core/career'
 import { simulateHero, SIMULATION_VERSION } from '@trmnl-games/desk-crawler/sim/core/simulate'
 import { starterHero, starterKit } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { maxHp, xpToLeave } from '@trmnl-games/desk-crawler/sim/core/stats'
@@ -500,5 +500,65 @@ describe('the workbench opens at level 4 (D155, content v23)', () => {
     // Rolling back: a hero on the salvage goal under v23 meets the goals v22 puts before it.
     expect(remapRung(to, from, index(v23, 'first_salvage'), unmet(['first_salvage', 'first_trip']))).toBe(index(v22, 'first_trip'))
     expect(remapRung(to, from, index(v23, 'first_upgrade'), unmet(['first_upgrade']))).toBe(index(v22, 'first_upgrade'))
+  })
+})
+
+describe('level goals before locked goals (D178, content v25)', () => {
+  const v24 = catalogs.v24
+  const v25 = catalogs.v25
+  const ids = (content: ContentCatalog) => content.career!.rungs.map((r) => r.id)
+  const index = (content: ContentCatalog, id: string) => ids(content).indexOf(id)
+  const unmet = (open: string[]) => (rung: { id: string }) => open.includes(rung.id)
+
+  it('inserts a level goal immediately before each goal the hero cannot start yet', () => {
+    expect(validateCatalog(v25)).toEqual([])
+    const before = new Map([
+      ['level_5', 'first_decision'],
+      ['level_6', 'merchant_meet'],
+      ['level_8', 'cafeteria_win'],
+      ['level_16', 'garage_win'],
+    ])
+    let order = ids(v24)
+    for (const [id, next] of before) {
+      const at = order.indexOf(next)
+      order = [...order.slice(0, at), id, ...order.slice(at)]
+    }
+    expect(ids(v25)).toEqual(order)
+    expect(v25.career!.rungs.find((r) => r.id === 'level_5')).toMatchObject({ title: 'Reach level 5', gold: 30, predicate: { kind: 'level', atLeast: 5 } })
+    expect(v25.career!.rungs.find((r) => r.id === 'level_6')).toMatchObject({ gold: 40, predicate: { atLeast: 6 } })
+    expect(v25.career!.rungs.find((r) => r.id === 'level_8')).toMatchObject({ gold: 50, predicate: { atLeast: 8 } })
+    expect(v25.career!.rungs.find((r) => r.id === 'level_16')).toMatchObject({ gold: 150, predicate: { atLeast: 16 } })
+  })
+
+  it('names the office-decision goal once level 5 is reached', () => {
+    const { hero: h, inventory } = hero({ level: 4, xp: xpToLeave(4) - 1, career: { rung: index(v25, 'level_5'), startedTick: 0, reached: [] } })
+    const result = find(h, inventory, 10, (r) => (r.event?.detail.levelsGained ?? 0) > 0, v25)
+    expect(careerLines(result).map((e) => e.summary)).toContain('Goal reached: Reach level 5. Next: Answer an office decision.')
+    expect(result.nextHero.career!.rung).toBe(index(v25, 'first_decision'))
+    expect(result.nextHero.level).toBeGreaterThanOrEqual(5)
+  })
+
+  it('remaps a hero waiting on a locked goal onto the level goal, and skips one it has passed', () => {
+    const from = v24.career!
+    const to = v25.career!
+    const waiting = (id: string, level: number) => {
+      const { hero: h } = hero({ level, career: { rung: index(v24, id), startedTick: 0, reached: [] } })
+      return remapRung(from, to, index(v24, id), (entry) => !rungSatisfied(entry, h, v25))
+    }
+    expect(waiting('first_decision', 4)).toBe(index(v25, 'level_5'))
+    expect(waiting('first_decision', 5)).toBe(index(v25, 'first_decision'))
+    expect(waiting('merchant_meet', 5)).toBe(index(v25, 'level_6'))
+    expect(waiting('merchant_meet', 6)).toBe(index(v25, 'merchant_meet'))
+    expect(waiting('cafeteria_win', 7)).toBe(index(v25, 'level_8'))
+    expect(waiting('cafeteria_win', 8)).toBe(index(v25, 'cafeteria_win'))
+    expect(waiting('garage_win', 12)).toBe(index(v25, 'level_16'))
+    expect(waiting('garage_win', 16)).toBe(index(v25, 'garage_win'))
+    // Already past the garage: the new level goals stay behind, unpaid.
+    expect(remapRung(from, to, index(v24, 'gym_duffel'), unmet(['gym_duffel', 'level_16', 'level_5']))).toBe(index(v25, 'gym_duffel'))
+    // Rolling back lands a pointer on a new goal on the goal it was guarding.
+    expect(remapRung(to, from, index(v25, 'level_5'))).toBe(index(v24, 'first_decision'))
+    expect(remapRung(to, from, index(v25, 'level_6'))).toBe(index(v24, 'merchant_meet'))
+    expect(remapRung(to, from, index(v25, 'level_8'))).toBe(index(v24, 'cafeteria_win'))
+    expect(remapRung(to, from, index(v25, 'level_16'))).toBe(index(v24, 'garage_win'))
   })
 })

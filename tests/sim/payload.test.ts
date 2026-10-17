@@ -62,6 +62,9 @@ describe('first-run and companion QR fields', () => {
 
   it('points a full bag at the bag, and setup at the companion', () => {
     expect(pick(buildPayload({ ...input, hero: { ...input.hero!, status: 'sleeping' }, heldItemName: 'Rare Mace' })).qr_base).toBe('https://art.test/art/qr/v3/bag')
+    expect(pick(buildPayload({ ...input, hero: { ...input.hero!, status: 'sleeping' }, bagUsed: 30, bagCapacity: 30 })).qr_base).toBe('https://art.test/art/qr/v3/bag')
+    const sorted = buildPayload({ ...input, hero: { ...input.hero!, status: 'sleeping' }, logs: [{ at: NOW - 60_000, kind: 'combat', summary: 'Beat a Paper Imp. +8 XP, +3 gold.' }] }) as { qr_base: string; status_label: string; attention: string | null }
+    expect(sorted).toMatchObject({ qr_base: '', status_label: 'Adventures resume soon', attention: null })
     expect(pick(buildPayload({ ...input, hero: null }))).toMatchObject({ status: 'unlinked', first_run: false, qr_base: 'https://art.test/art/qr/v3/app' })
   })
 

@@ -200,7 +200,18 @@ function Inventory() {
       </header>
       {hero.status === 'sleeping' ? (
         <Card title={hero.wakeAtTick !== null ? t.resumingNext : plan ? (plan.claim ? t.findWaiting : t.resumeAdventures) : t.resumeAdventures}>
-          {hero.wakeAtTick !== null ? <ResumeAt /> : plan ? <>
+          {hero.wakeAtTick !== null ? <>
+            <ResumeAt />
+            <label className="mt-4 flex flex-col gap-2 text-sm">
+              <span className="font-semibold">{t.resumeIn}</span>
+              <select value={destination} disabled={busy || !manageable} onChange={(event) => setDestination(event.target.value)} className="pixel-select min-h-11 border-2 border-edge pr-9 pl-3 text-base">
+                <option value="">{c.name(hero.biomes.find((biome: Biome) => biome.id === hero.biomeId)?.name ?? '') || t.currentArea}</option>
+                {hero.biomes.filter((biome: Biome) => biome.unlocked && biome.id !== hero.biomeId).map((biome: Biome) => <option key={biome.id} value={biome.id}>{c.name(biome.name)}</option>)}
+              </select>
+            </label>
+            {destination ? <Button className="mt-3" pending={resume.pending} busyLabel={t.scheduling} disabled={!manageable || busy} onClick={() => resume.run({ biomeId: destination }, t.resumingOnNext)}>{t.resumeAdventures}</Button> : null}
+            {destination ? <p className="mt-2 text-sm text-muted">{t.setsOut}</p> : null}
+          </> : plan ? <>
             <p>{plan.claim && held ? <><strong>{c.name(held.label)}</strong>{t.didntFit}</> : t.bagStopped}</p>
             {plan.sell.length > 0 ? <p className="mt-2 text-sm">{t.sellWeakest(plan.sell.map((item) => c.name(item.label)).join(', '), plan.gold)}</p> : null}
             {plan.sell.length > 0
@@ -215,7 +226,7 @@ function Inventory() {
                 {hero.biomes.filter((biome: Biome) => biome.unlocked && biome.id !== hero.biomeId).map((biome: Biome) => <option key={biome.id} value={biome.id}>{c.name(biome.name)}</option>)}
               </select>
             </label>
-            <Button className="mt-3" pending={resume.pending} busyLabel={t.scheduling} disabled={!manageable || busy || !bag.canResume} onClick={() => resume.run(destination ? { biomeId: destination } : {}, t.resumingOnNext)}>{t.resumeAdventures}</Button>
+            {destination ? <Button className="mt-3" pending={resume.pending} busyLabel={t.scheduling} disabled={!manageable || busy || !bag.canResume} onClick={() => resume.run({ biomeId: destination }, t.resumingOnNext)}>{t.resumeAdventures}</Button> : <p className="mt-3 text-sm text-muted">{t.resumingOnNext}</p>}
             {destination ? <p className="mt-2 text-sm text-muted">{t.setsOut}</p> : null}
           </>}
         </Card>
@@ -280,8 +291,8 @@ function Inventory() {
       {workbench ? <Workbench rules={workbench} materials={materials} equipped={[equippedOf('weapon'), equippedOf('armor')]} hero={hero} disabled={!manageable || busy} intents={{ upgrade, chooseAffix }} /> : null}
       {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} discountPct={bag.ladder.merchantDiscountPct} disabled={!manageable || busy} intent={buyOffer} /> : null}
       <div className="grid gap-8 sm:grid-cols-2">
-        <BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} />
-        <PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} />
+        <div id="bags"><BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} /></div>
+        <div id="pouch"><PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} /></div>
         {bag.nameTag ? <NameTag tag={bag.nameTag} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyNameTag} /> : null}
         {bag.makeover ? <Makeover makeover={bag.makeover} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyMakeover} /> : null}
       </div>

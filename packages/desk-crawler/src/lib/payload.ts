@@ -400,8 +400,10 @@ export function buildPayload(input: PayloadInput) {
         etaLabel = words.resumeAt
       } else if (input.heldItemName) {
         statusLabel = words.bagFullHolding
-      } else {
+      } else if (input.bagUsed >= input.bagCapacity) {
         statusLabel = words.bagFullFree
+      } else {
+        statusLabel = words.resumeSoon
       }
       break
   }
@@ -416,17 +418,18 @@ export function buildPayload(input: PayloadInput) {
     return { at: iso(arrivesAt), u: Math.floor(arrivesAt / 1000), t: formatLocal(arrivesAt, input.timezone, locale).label, k: 'travel', s: story, n: story, d: '', live: true }
   })()
 
+  const bagBlocking = hero.status === 'sleeping' && hero.wakeAtTick === undefined && (Boolean(input.heldItemName) || input.bagUsed >= input.bagCapacity)
   let attention: string | null = null
   if (hero.quarantined || servicePaused) attention = words.serviceCheck
   else if (stale) attention = words.delayed
   else if (hero.status === 'dead') attention = words.revives
-  else if (hero.status === 'sleeping' && hero.wakeAtTick === undefined) attention = words.makeRoom
+  else if (bagBlocking) attention = words.makeRoom
   // D78: a merchant visit is a cheerful notice, never an attention line (attention collapses the stories), and only while its offers are open.
   const tickNow = world?.currentTick ?? hero.lastTick
   // D79 outranks D78: a decision waiting is the more useful line; neither ever outranks a problem.
   const notice = attention !== null ? null : hero.choiceExpiresAtTick !== undefined && hero.choiceExpiresAtTick > tickNow ? words.decisionWaiting : hero.merchantExpiresAtTick !== undefined && hero.merchantExpiresAtTick > tickNow ? words.merchantVisiting : null
 
-  const needsBag = hero.status === 'sleeping' && hero.wakeAtTick === undefined && !hero.quarantined && !servicePaused
+  const needsBag = bagBlocking && !hero.quarantined && !servicePaused
   // A brand-new hero has no adventures yet: the screen welcomes them and links the companion.
   const firstRun = input.logs.length === 0 && attention === null && (hero.status === 'exploring' || hero.status === 'resting')
   // D42: when the next scheduled tick starts (UTC seconds), only while this hero will take part in it.

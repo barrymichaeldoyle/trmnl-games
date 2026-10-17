@@ -51,6 +51,12 @@ describe('hourly leaderboard publication', () => {
   it('leaves long-dormant heroes off recent boards but keeps them on lifetime', async () => {
     await seedWorld(t, { lastPublishedAt: PUBLISH_SLOT - HOUR - 1000 })
     const sleeper = await seedHero(t, { status: 'sleeping' })
+    // D179: only a sleeper still blocked by a full bag stays dormant.
+    await t.run(async (ctx) => {
+      const hero = (await ctx.db.get(sleeper))!
+      const { _id, _creationTime, ...spare } = (await ctx.db.get(hero.weaponId!))!
+      for (let i = 0; i < hero.bagCapacity; i++) await ctx.db.insert('items', spare)
+    })
     await seedHero(t)
     await runTick(t)
     const ranks = await t.run(async (ctx) => await ctx.db.query('heroRanks').collect())

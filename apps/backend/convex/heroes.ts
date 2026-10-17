@@ -34,7 +34,8 @@ import { loreView } from '@trmnl-games/desk-crawler/sim/core/biomes'
 import { claimReward, currentRung, measureRung, unlocked, unlockLevel, unlocksView } from '@trmnl-games/desk-crawler/sim/core/career'
 import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
-import { isBagFull } from '@trmnl-games/desk-crawler/sim/core/bag'
+import { isBagFull, nextTier } from '@trmnl-games/desk-crawler/sim/core/bag'
+import { nextPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
 
 const intentResult = intentReturns({
   operationId: v.string(),
@@ -382,6 +383,25 @@ export const claimGoal = mutation({
     }),
 })
 
+/**
+ * A bag or pouch goal is bought on the Bag page. `price` is the next tier's price while the hero is still short of
+ * the goal; null once the bag or pouch is already big enough, so the card can link there without calling it done.
+ */
+function shopFor(content: ContentCatalog, hero: Doc<'heroes'>, rung: NonNullable<ContentCatalog['career']>['rungs'][number]): { place: 'bag' | 'pouch'; price: number | null; affordable: boolean } | null {
+  const predicate = rung.predicate
+  if (predicate.kind === 'bag') {
+    const owned = hero.bagCapacity >= predicate.atLeast
+    const price = owned ? null : nextTier(content, hero)?.price ?? null
+    return { place: 'bag', price, affordable: price !== null && hero.gold >= price }
+  }
+  if (predicate.kind === 'pouch') {
+    const owned = potionCap(content, hero) >= predicate.atLeast
+    const price = owned ? null : nextPouchTier(content, { level: hero.level, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) })?.price ?? null
+    return { place: 'pouch', price, affordable: price !== null && hero.gold >= price }
+  }
+  return null
+}
+
 /** P35: the companion's goal line and Career page. Null under a catalog without a ladder or before the hero's first evaluation under it. */
 function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const rules = content.career
@@ -398,7 +418,7 @@ function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
     total: shown.length,
     // D129: rewards waiting for the Claim button, oldest first.
     unclaimed: (state.unclaimed ?? []).map((reward) => ({ id: reward.id, title: titleOf(reward.id), gold: reward.gold, at: reward.at ?? null })),
-    current: rung === undefined ? null : { id: rung.id, title: rung.title, blurb: rung.blurb, gold: rung.gold, companion: rung.companion ?? false, ...measureRung(rung.predicate, heroState, content) },
+    current: rung === undefined ? null : { id: rung.id, title: rung.title, blurb: rung.blurb, gold: rung.gold, companion: rung.companion ?? false, shop: shopFor(content, hero, rung), ...measureRung(rung.predicate, heroState, content) },
     // Every rung in order: done before the ladder arrived (no tick), reached under it (with its tick), current, or ahead.
     rungs: shown.map(({ entry, index }) => ({
       id: entry.id,

@@ -25,6 +25,7 @@ import { runBatch, startRun, watchdogStep, type SubjectStep } from '../../lib/en
 import { accumulatorOf, addBucket, creditTick, foldScore } from '../../lib/engine/scores'
 import { shouldPublish as engineShouldPublish } from '@trmnl-games/engine/schedule'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
+import { isBagFull } from '@trmnl-games/desk-crawler/sim/core/bag'
 
 export { SLOT_MS, SLOT_OFFSET_MS, wallSlotFor }
 export { PAGE_SIZE, STALL_MS, MAX_RECOVERY_ATTEMPTS } from '../../lib/engine/runner'
@@ -73,9 +74,18 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
   if (owner === null || (await currentHero(ctx, owner))?._id !== hero._id) return
   counts.eligible += 1
 
-  const dormant = hero.status === 'paused' || (hero.status === 'sleeping' && hero.wakeAtTick === undefined)
+  // D32: paused heroes, and sleepers still blocked by a full bag or a held find, cannot change without an intent.
+  // D179: a sleeper whose bag is already sorted wakes on this tick, so they are not dormant.
+  let dormant = hero.status === 'paused' || (hero.status === 'sleeping' && hero.wakeAtTick === undefined)
+  if (dormant && hero.status === 'sleeping' && hero.heldItemId === undefined && !run.publishes) {
+    const held = await ctx.db.query('items').withIndex('by_heroId', (q) => q.eq('heroId', hero._id)).take(INVENTORY_READ)
+    const ready = !isBagFull(
+      { bagCapacity: hero.bagCapacity, heldItemId: hero.heldItemId, weaponId: hero.weaponId, armorId: hero.armorId },
+      held.map((item) => ({ id: item._id, kind: item.kind })),
+    )
+    if (ready) dormant = false
+  }
   if (dormant && !run.publishes) {
-    // D32: no state can change without an intent, so skip all reads/writes between publications.
     counts.skippedDormant += 1
     return
   }

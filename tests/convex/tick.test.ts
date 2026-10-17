@@ -233,12 +233,24 @@ describe('tick scheduler', () => {
     await t.run(async (ctx) => {
       await ctx.db.insert('worldState', { key: 'world', currentTick: 0, activeContentVersion: 'v1', activeSimulationVersion: 1, worldSeed: 'seed', ticksPaused: false, maintenanceMode: false, createdAt: Date.now(), lastPublishedAt: Date.UTC(2026, 9, 3, 9, 45), schemaVersion: 1 })
     })
-    const sleeper = await seedHero(t, { status: 'sleeping' })
+    const sleeper = await seedHero(t, { status: 'sleeping', bagCapacity: 0 })
     await runTick(t)
     const hero = await t.run(async (ctx) => await ctx.db.get(sleeper))
     expect(hero?.lastTick).toBe(0)
     const run = await t.run(async (ctx) => await ctx.db.query('simulationRuns').first())
     expect(run?.skippedDormant).toBe(1)
+  })
+
+  it('wakes a sleeping hero whose bag already has room (D179)', async () => {
+    await t.run(async (ctx) => {
+      await ctx.db.insert('worldState', { key: 'world', currentTick: 0, activeContentVersion: 'v1', activeSimulationVersion: 1, worldSeed: 'seed', ticksPaused: false, maintenanceMode: false, createdAt: Date.now(), lastPublishedAt: Date.UTC(2026, 9, 3, 9, 45), schemaVersion: 1 })
+    })
+    const sleeper = await seedHero(t, { status: 'sleeping' })
+    await runTick(t)
+    const hero = await t.run(async (ctx) => await ctx.db.get(sleeper))
+    expect(hero?.lastTick).toBe(1)
+    expect(hero?.status).not.toBe('sleeping')
+    expect(hero?.wakeAtTick).toBeUndefined()
   })
 
   it('folds hourly score on publication runs', async () => {

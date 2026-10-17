@@ -204,9 +204,9 @@ export const de: HelpPage = {
       <ol className="[&_li]:list-decimal">
         <li>Öffne Tasche in der Begleit-App. Rüste Verbesserungen aus und verkaufe übrige Ausrüstung, um Platz zu schaffen.</li>
         <li>Liegt ein Fund zurück, wähle Fund abholen. Lass danach mindestens einen Platz frei, damit die Abenteuer weitergehen können.</li>
-        <li>Wähle Abenteuer fortsetzen. Du kannst gleichzeitig ein freigeschaltetes Ziel wählen. Dein Held zieht innerhalb von 15 Minuten wieder los.</li>
+        <li>Sobald ein Platz frei ist und nichts mehr wartet, gehen die Abenteuer von allein innerhalb von 15 Minuten weiter. Vorher kannst du auf der Taschen-Seite noch ein anderes freigeschaltetes Gebiet wählen.</li>
       </ol>
-      <p>Ausrüsten macht keinen Platz frei. Verkaufen oder einen Fund abholen weckt deinen Helden nicht automatisch. Der Taschenschlaf hat nichts mit dem Schlafmodus deines TRMNL zu tun; ein schlafendes Display hält das Spiel nie an.</p>
+      <p>Ausrüsten macht keinen Platz frei. Verkaufen, einen Fund abholen oder eine größere Tasche kaufen schon: Die Abenteuer gehen von allein weiter. Der Taschenschlaf hat nichts mit dem Schlafmodus deines TRMNL zu tun; ein schlafendes Display hält das Spiel nie an.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Zerlegen und Werkbank</h2>
         <p>{F.workbench.level !== undefined ? `Ab Stufe ${F.workbench.level} hat übrige Ausrüstung` : 'Übrige Ausrüstung hat'} zwei Wege aus der Tasche: für Gold verkaufen oder auf der Taschen-Seite in Material zerlegen. Zerlegen bringt so viel wie die Stufe, auf der das Teil gefunden wurde, in Einheiten des Materials seiner Seltenheit: {F.workbench.materials.map((m) => `${name(m.name)} aus ${m.rarities.map((r) => rarityDe[r] ?? r).join(' und ')} Ausrüstung`).join(', ')}. Epische Ausrüstung bringt das {F.workbench.epicMultiplier}-Fache. Material braucht keinen Taschenplatz und wird nie verkauft. Ausrüstung wird nur zerlegt, wenn du es willst.{F.workbench.level !== undefined ? ` Vor Stufe ${F.workbench.level} verkaufst du Übriges besser: Die erste Verbesserung braucht ohnehin Stufe ${F.workbench.level}.` : ''}</p>

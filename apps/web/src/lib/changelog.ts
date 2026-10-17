@@ -37,10 +37,28 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        title: 'A sorted bag starts the next adventure',
+        body: 'When your bag has a free slot and nothing is waiting, adventures resume on their own within 15 minutes. You do not need to tap Resume. You can still pick another area from the bag page before the next adventure. If your bag was already sorted, the next adventure picks up where you left off.',
+        fr: { title: 'Un sac rangé relance la prochaine aventure', body: 'Quand votre sac a une place libre et que rien n’attend, les aventures reprennent toutes seules en moins de 15 minutes. Inutile d’appuyer sur Reprendre. Vous pouvez encore choisir une autre zone depuis la page Sac avant la prochaine aventure. Si votre sac était déjà rangé, la prochaine aventure reprend là où vous en étiez.' },
+        de: { title: 'Eine sortierte Tasche startet das nächste Abenteuer', body: 'Hat deine Tasche einen freien Platz und wartet nichts, gehen die Abenteuer von allein innerhalb von 15 Minuten weiter. Du musst nicht auf Fortsetzen tippen. Vor dem nächsten Abenteuer kannst du auf der Taschen-Seite noch ein anderes Gebiet wählen. War deine Tasche schon sortiert, geht es beim nächsten Abenteuer weiter, wo du aufgehört hast.' },
+      },
+      {
+        title: 'A level goal before each locked one',
+        body: 'Office decisions wait until level 5, so Reach level 5 comes first and shows your progress. The wandering merchant at level 6, the Cafeteria at level 8 and the Parking Garage at level 16 get the same. If you were waiting on one of those, that level is your goal now.',
+        fr: { title: 'Un objectif de niveau avant chaque chose encore fermée', body: 'Les décisions du bureau attendent le niveau 5, alors Atteignez le niveau 5 passe devant et montre votre progression. Le marchand ambulant au niveau 6, la Cafétéria au niveau 8 et le Parking souterrain au niveau 16 aussi. Si vous attendiez l’un d’eux, ce niveau est maintenant votre objectif.' },
+        de: { title: 'Ein Stufen-Ziel vor dem, was noch zu ist', body: 'Büro-Entscheidungen warten bis Stufe 5, also kommt Erreiche Stufe 5 zuerst und zeigt deinen Fortschritt. Der fahrende Händler auf Stufe 6, die Kantinentiefen auf Stufe 8 und die Tiefgarage auf Stufe 16 ebenso. Wenn du auf eines davon gewartet hast, ist diese Stufe jetzt dein Ziel.' },
+      },
+      {
         title: 'More room for portrait adventures',
         body: 'On full-screen portrait displays, the event log uses the whole width. Your goal and today’s tasks sit together below it, beside a compact leaderboard that keeps your own row in view. Available on TRMNL X. On both X and OG portrait screens, health and gear line up beneath the hero, with the QR code at the top right. Portrait events fit on one row when there is room for the icon, full story, closely grouped stats and a separate timestamp; longer stories keep the details below. A vertical rule separates the goal and tasks from the leaderboard.',
         fr: { title: 'Plus de place pour les aventures en portrait', body: 'En plein écran portrait, le journal occupe toute la largeur. Votre objectif et les tâches du jour sont regroupés dessous, à côté d’un classement compact qui garde votre ligne visible. Disponible sur TRMNL X. Sur les écrans portrait X et OG, la santé et l’équipement s’alignent sous le héros, avec le code QR en haut à droite. En portrait, les événements tiennent sur une ligne si l’icône, le récit complet, les statistiques regroupées et l’heure bien séparée y entrent ; sinon les détails restent dessous. Un trait vertical sépare l’objectif et les tâches du classement.' },
         de: { title: 'Mehr Platz für Abenteuer im Hochformat', body: 'Im Vollbild-Hochformat nutzt das Protokoll die ganze Breite. Dein Ziel und die heutigen Aufgaben stehen darunter zusammen, neben einer kompakten Rangliste, die deine eigene Zeile sichtbar hält. Verfügbar auf TRMNL X. Im Hochformat auf X und OG stehen Gesundheit und Ausrüstung links unter dem Helden, der QR-Code oben rechts. Im Hochformat stehen Ereignissymbol, vollständiger Text, eng gruppierte Werte und eine deutlich abgesetzte Uhrzeit in einer Zeile, wenn alles hineinpasst; sonst bleiben die Details darunter. Eine senkrechte Linie trennt Ziel und Aufgaben von der Rangliste.' },
+      },
+      {
+        title: 'Buy-a-bag goals link to the Bag page',
+        body: 'A goal like the Laptop Backpack no longer says it is done, or that the reward is waiting, before you have bought the bag. When you have the gold, the goal links straight to the Bag page.',
+        fr: { title: 'Les objectifs d’achat mènent à la page Sac', body: 'Un objectif comme le sac à dos pour ordinateur ne dit plus qu’il est fait, ni que la récompense attend, avant l’achat. Quand vous avez l’or, l’objectif mène directement à la page Sac.' },
+        de: { title: 'Kauf-Ziele führen zur Seite Tasche', body: 'Ein Ziel wie der Laptop-Rucksack sagt nicht mehr, es sei geschafft oder die Belohnung warte, bevor du die Tasche gekauft hast. Wenn du das Gold hast, führt das Ziel direkt zur Seite Tasche.' },
       },
       {
         title: 'Equipping gear and switching to Bold mark the goal done right away',

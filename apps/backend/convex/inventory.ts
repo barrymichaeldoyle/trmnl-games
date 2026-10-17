@@ -62,6 +62,26 @@ const asBagHero = (hero: Doc<'heroes'>): Pick<HeroState, 'heldItemId' | 'weaponI
 const asSnapshots = (items: Doc<'items'>[]) => items.map((item) => ({ id: item._id as string, kind: item.kind }))
 const bagFull = (hero: Doc<'heroes'>, items: Doc<'items'>[]) => isBagFull(asBagHero(hero), asSnapshots(items))
 
+/**
+ * D179: sorting the bag out is the resume. A sleeping hero with a free slot and nothing held
+ * wakes on the next adventure, in the current area. Filling the bag again, or holding a find,
+ * drops a wake that is not due yet so the next tick does not quarantine them.
+ */
+async function syncBagSleep(ctx: MutationCtx, heroId: Id<'heroes'>): Promise<void> {
+  const hero = await ctx.db.get(heroId)
+  if (!hero || hero.status !== 'sleeping') return
+  const ready = hero.heldItemId === undefined && !bagFull(hero, await heroItems(ctx, hero._id))
+  if (ready) {
+    if (hero.wakeAtTick !== undefined) return
+    const world = await readWorld(ctx)
+    await ctx.db.patch(hero._id, { wakeAtTick: (world?.currentTick ?? 0) + 1 })
+    await commandLog(ctx, hero, 'resume_adventures', 'Adventures resume within 15 minutes.')
+    return
+  }
+  if (hero.wakeAtTick === undefined && hero.targetBiomeId === undefined) return
+  await ctx.db.patch(hero._id, { wakeAtTick: undefined, targetBiomeId: undefined })
+}
+
 /** The bag ladder as the companion shows it (D61): current bag, next bag and how to get it. */
 function bagLadderView(content: ContentCatalog, hero: Doc<'heroes'>) {
   const ladder = content.bagLadder
@@ -371,6 +391,7 @@ export const equip = mutation({
       await ctx.db.patch(hero._id, { [slot]: item._id, counters: { ...withCounterDefaults(hero.counters), itemsEquipped: (hero.counters.itemsEquipped ?? 0) + 1 } })
       await commandLog(ctx, hero, 'equip', `Equipped the ${itemLabel(item)}.`)
       await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+      await syncBagSleep(ctx, hero._id)
       return { changed: true }
     }),
 })
@@ -387,6 +408,7 @@ export const unequip = mutation({
       // D61: unequipped gear needs a bag slot of its own.
       if (bagFull(hero, await heroItems(ctx, hero._id))) throw appError('BAG_FULL', 'Free a bag slot to unequip this.')
       await ctx.db.patch(hero._id, { [field]: undefined })
+      await syncBagSleep(ctx, hero._id)
       return { changed: true }
     }),
 })
@@ -418,6 +440,7 @@ export const sell = mutation({
       const { gold, items } = await sellItems(ctx, hero, [args.itemId])
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'sell', `Sold the ${itemLabel(items[0]!)}.`, { xpEarned: 0, gold, hp: 0 })
       await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+      await syncBagSleep(ctx, hero._id)
       return { changed: true, gold, count: 1 }
     }),
 })
@@ -433,6 +456,7 @@ export const sellMany = mutation({
       const { gold } = await sellItems(ctx, hero, args.itemIds)
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'sell_many', `Sold ${args.itemIds.length} items.`, { xpEarned: 0, gold, hp: 0 })
       await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+      await syncBagSleep(ctx, hero._id)
       return { changed: true, gold, count: args.itemIds.length }
     }),
 })
@@ -451,6 +475,7 @@ export const claimHeld = mutation({
       if (bagFull(hero, items)) throw appError('BAG_FULL', 'Free a bag slot to claim the find.')
       await ctx.db.patch(hero._id, { heldItemId: undefined })
       await commandLog(ctx, hero, 'claim_held', held ? `Claimed the ${itemLabel(held)}.` : 'Claimed the held find.')
+      await syncBagSleep(ctx, hero._id)
       return { changed: true }
     }),
 })
@@ -566,6 +591,7 @@ export const buyBag = mutation({
       await ctx.db.patch(hero._id, { gold: hero.gold - tier.price, bagCapacity: tier.capacity })
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'buy_bag', `Bought a [[${tier.name}]]. Bag holds ${tier.capacity}.`, { xpEarned: 0, gold: -tier.price, hp: 0 }, { bagSlots: tier.capacity - from })
       await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
+      await syncBagSleep(ctx, hero._id)
       return { changed: true, gold: -tier.price, count: tier.capacity }
     }),
 })
@@ -679,6 +705,7 @@ export const buyOffer = mutation({
       await ctx.db.patch(hero._id, patch)
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'buy_offer', summary, { xpEarned: 0, gold: -offer.price, hp: 0 }, offer.id === 'potions' ? { potionsBought: offer.quantity } : offer.id === 'bag' ? { bagSlots: count - hero.bagCapacity } : {})
       await awardAfterIntent(ctx, hero, content, tick)
+      if (offer.id === 'bag') await syncBagSleep(ctx, hero._id)
       return { changed: true, gold: -offer.price, count }
     }),
 })
@@ -717,6 +744,7 @@ export const salvageMany = mutation({
       const what = chosen.length === 1 ? `the ${itemLabel(chosen[0]!)}` : `${chosen.length} items`
       await commandLog(ctx, (await ctx.db.get(hero._id))!, 'salvage_many', `Salvaged ${what} for ${materialsText(content, yielded)}.`, { xpEarned: 0, gold: 0, hp: 0 }, { materials: yielded })
       await awardAfterIntent(ctx, hero, content, await currentTick(ctx))
+      await syncBagSleep(ctx, hero._id)
       return { changed: true, count: chosen.length }
     }),
 })

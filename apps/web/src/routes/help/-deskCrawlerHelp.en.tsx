@@ -200,9 +200,9 @@ export const en: HelpPage = {
       <ol className="[&_li]:list-decimal">
         <li>Open Bag in the companion. Equip any upgrades and sell spare gear to free space.</li>
         <li>If a find is being held, choose Claim find. Leave at least one free slot after claiming it so adventures can resume.</li>
-        <li>Choose Resume adventures. You can pick an unlocked destination at the same time. Your hero sets off again within 15 minutes.</li>
+        <li>Once a slot is free and nothing is waiting, adventures resume on their own within 15 minutes. You can still pick another unlocked area from the bag page before then.</li>
       </ol>
-      <p>Equipping gear does not free a slot. Selling gear or claiming a find does not wake your hero automatically. Bag sleep is separate from your TRMNL’s Sleep Mode; a sleeping display never stops the game.</p>
+      <p>Equipping gear does not free a slot. Selling gear, claiming a find, or buying a bigger bag does: adventures resume on their own. Bag sleep is separate from your TRMNL’s Sleep Mode; a sleeping display never stops the game.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
         <p>{F.workbench.level !== undefined ? `From level ${F.workbench.level}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {F.workbench.materials.map((m) => `${m.name} from ${m.rarities.join(' and ')} gear`).join(', ')}. Epic gear pays {F.workbench.epicMultiplier} times as much. Materials take no bag space and are never sold. Gear is only salvaged when you choose to.{F.workbench.level !== undefined ? ` Before level ${F.workbench.level}, sell your spares: the first upgrade needs level ${F.workbench.level} anyway.` : ''}</p>

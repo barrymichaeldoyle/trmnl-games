@@ -28,6 +28,13 @@ function hero(overrides: Partial<HeroState> = {}): { hero: HeroState; inventory:
   return { hero: { ...starterHero('hero1', v9, 0), weaponId: 'i000', armorId: 'i001', ...overrides }, inventory }
 }
 
+/** A hero whose bag is full of spare gear, so a sleeper stays asleep (D179). */
+function fullBag(overrides: Partial<HeroState> = {}): { hero: HeroState; inventory: ItemSnapshot[] } {
+  const state = hero(overrides)
+  const spares = Array.from({ length: state.hero.bagCapacity }, (_, i) => ({ ...state.inventory[0]!, id: `s${i}` }))
+  return { hero: state.hero, inventory: [...state.inventory, ...spares] }
+}
+
 const task = (overrides: Partial<TodoTask> = {}): TodoTask => ({ templateId: 'defeat_any', target: 5, progress: 0, reward: 35, addedTick: 0, refillsSeen: 0, ...overrides })
 
 /** A list written at the 07:00 UTC stand-up of day 0. */
@@ -277,7 +284,7 @@ describe('the stand-up (P31)', () => {
     expect(run(dead.hero, dead.inventory, tick, 1).nextHero.todo!.lastRefillTick).toBe(tickAt(0, 7))
     const paused = hero({ status: 'paused', pausedFromStatus: 'exploring', todo: finished() })
     expect(run(paused.hero, paused.inventory, tick, 1).nextHero.todo!.lastRefillTick).toBe(tickAt(0, 7))
-    const sleeping = hero({ status: 'sleeping', todo: finished() })
+    const sleeping = fullBag({ status: 'sleeping', todo: finished() })
     const result = run(sleeping.hero, sleeping.inventory, tick, 1)
     expect(result.nextHero.todo!.lastRefillTick).toBe(tick)
     expect(result.event).toBeUndefined()
@@ -286,7 +293,7 @@ describe('the stand-up (P31)', () => {
 
   it('does not age a task through a morning the hero sleeps on a full bag', () => {
     const stuck = list([task({ refillsSeen: 1 }), task({ templateId: 'find_gear', target: 2 }), task({ templateId: 'explore_biome', biomeId: 'office_cubicles', target: 30 })])
-    const { hero: h, inventory } = hero({ status: 'sleeping', todo: stuck })
+    const { hero: h, inventory } = fullBag({ status: 'sleeping', todo: stuck })
     const result = run(h, inventory, tickAt(1, 7), 2)
     expect(result.nextHero.todo!.tasks).toEqual(stuck.tasks)
     expect(result.nextHero.todo!.lastRefillTick).toBe(tickAt(1, 7))

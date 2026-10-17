@@ -146,6 +146,15 @@ describe('player intents', () => {
     expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ status: 'travelling', targetBiomeId: 'server_room', arriveAtTick: 2 })
   })
 
+  it('resumes on its own once a sale leaves a free slot and nothing held (D179)', async () => {
+    const heroId = await seedHero(t, { level: 4, hp: 136, status: 'sleeping' }, 'Ana')
+    const [spare] = await addGear(t, heroId, 6)
+    const user = as(t, 'Ana')
+    const before = await user.mutation(api.inventory.sell, { operationId: opId(), itemId: spare! })
+    expect(before).toMatchObject({ changed: true })
+    expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ status: 'sleeping', wakeAtTick: 1 })
+  })
+
   it('sells the weakest spares, claims the held find and resumes in one step', async () => {
     const heroId = await seedHero(t, { level: 4, hp: 136, status: 'sleeping' }, 'Ana')
     await addGear(t, heroId, 6)
