@@ -62,13 +62,15 @@ describe('starting a life', () => {
     expect(starterLife(content, 42)).toEqual(starterLife(content, 42))
   })
 
-  it('names and pronouns can change only in the first year', () => {
+  it('name and sex can change only while an infant (D182)', () => {
     const life = born()
     const renamed = rename(life, 'Maud')
     expect(renamed.ok && renamed.life.first).toBe('Maud')
     const she = setPronouns(life, 'she')
     expect(she.ok && she.life.pronouns).toBe('she')
-    const older = { ...life, counters: { ...life.counters, yearsLived: 1 } }
+    const toddler = { ...life, age: 3, counters: { ...life.counters, yearsLived: 3 } }
+    expect(rename(toddler, 'Maud').ok).toBe(true)
+    const older = { ...life, age: 6, stage: 'child' as const, counters: { ...life.counters, yearsLived: 6 } }
     expect(rename(older, 'Maud').ok).toBe(false)
     expect(setPronouns(older, 'he').ok).toBe(false)
   })

@@ -1,6 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import type { PortraitKey } from '@trmnl-games/paper-lives/art/portrait'
 import { preload } from '../../../lib/preload'
@@ -8,6 +9,7 @@ import { Photos, Portrait, type LifeView, type PhotoView } from '../../../lib/pa
 import { Card } from '../../../lib/ui'
 import { useAnalyticsView } from '../../../lib/analyticsProvider'
 import { PhotoClaim } from './-photos'
+import { StoryList } from './-story'
 
 /**
  * The Album (paper-lives.md "Companion"): this week's photo, finished lives newest first with their photos, the family
@@ -58,6 +60,7 @@ function AlbumPage() {
                 </details>
               ) : null}
               {life.photos.length > 0 ? <div className="mt-3"><Photos photos={life.photos} label={`Photos of ${life.name}`} /></div> : null}
+              <WholeStory ordinal={life.ordinal} name={life.name} />
               {album.publicProfile ? <Link to="/profile/$alias/lives/$n" params={{ alias: album.alias, n: String(life.ordinal) }} className="mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4">Public page</Link> : null}
             </Card>
           </li>
@@ -90,5 +93,16 @@ function AlbumPage() {
         )}
       </Card>
     </>
+  )
+}
+
+/** A finished life's every line, read on request so the album stays light (D182). */
+function WholeStory({ ordinal, name }: { ordinal: number; name: string }) {
+  const [open, setOpen] = useState(false)
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className="mt-2 flex min-h-11 items-center text-sm font-semibold underline underline-offset-4">Read the whole story</button>
+  return (
+    <section aria-label={`The story of ${name}`} className="mt-3 border-t border-rule pt-3">
+      <StoryList names={[name.split(' ')[0]!]} ordinal={ordinal} />
+    </section>
   )
 }

@@ -1,7 +1,7 @@
 import { createRng, pickOne, pickWeighted, type Rng } from '@trmnl-games/engine/rng'
 import { endLife } from './death'
 import { addHistory, addPerson, applyEffects, bump, changesOf, offerJob, PRIORITY, retire, updatePerson, type Candidate } from './effects'
-import { clampStat, drawPerson, healthTargetAt, holds, living, moneyBand, PaperLivesInvariantError, partnerOf, permilleAt, personAge, seasonAt, stageFor, tiltPercent, tilts } from './rules'
+import { clampStat, drawPerson, healthTargetAt, holds, living, moneyBand, PaperLivesInvariantError, partnerOf, permilleAt, personAge, seasonAt, settleGender, stageFor, tiltPercent, tilts } from './rules'
 import { fill } from './text'
 import type { DecisionDef, EventDef, LifeEvent, LifeState, OptionDef, PaperLivesCatalog, PendingDecision, Person, Rarity, Season, StatId, StreamName, TickInput, TickResult } from './types'
 
@@ -121,8 +121,9 @@ function offeredEvent(life: LifeState, def: DecisionDef, pending: PendingDecisio
 
 export function simulateLife(input: TickInput): TickResult {
   const { content } = input
-  const life = input.life
-  if (life.status !== 'living') return { life, events: [], disposition: 'idle' }
+  if (input.life.status !== 'living') return { life: input.life, events: [], disposition: 'idle' }
+  // Content v5: a life from an earlier catalog becomes a girl or a boy before anything else happens to it.
+  const life = settleGender(input.life, content)
   const rngs = rngsFor(input)
   if (life.stage === 'infant') return infantYear(life, content, rngs)
   const elapsed = life.year.elapsed + 1
@@ -284,7 +285,7 @@ function checks(life: LifeState, content: PaperLivesCatalog, cands: Candidate[],
   }
   if (life.education === 'university' && life.age >= 21) {
     life = { ...life, education: 'degree' }
-    say(PRIORITY.other, 'book', line(life, pickOne(rngs.narrative, L.universityDone), content), 'a degree')
+    say(PRIORITY.other, 'book', line(life, pickOne(rngs.narrative, withParent(life, content, L.universityDone)), content), 'a degree')
   }
   // Work: offers from 18 while unemployed; retirement at 70.
   if (life.age >= 18 && life.job === undefined && !life.retired && life.education !== 'university' && rng.int(1, 100) <= t.jobOfferPercent) {
@@ -333,7 +334,8 @@ function checks(life: LifeState, content: PaperLivesCatalog, cands: Candidate[],
   }
   // Children for a couple open to them; grandchildren once a child is over 25.
   const couple = partnerOf(life)
-  if (couple && life.flags.includes('family_open') && life.age >= 22 && life.age <= 44 && living(life, 'child').length < t.maxChildren && rng.int(1, 100) <= t.childPercent) {
+  // Content v5: a baby arrives for a married couple, never with someone just met after a parting.
+  if (couple && (!t.childrenNeedMarriage || couple.step === 'married') && life.flags.includes('family_open') && life.age >= 22 && life.age <= 44 && living(life, 'child').length < t.maxChildren && rng.int(1, 100) <= t.childPercent) {
     const added = addPerson(life, 'child', life.age, rng.int(70, 90), rng, content)
     life = bump(added.life, { childrenRaised: 1 })
     say(PRIORITY.family, 'pram', personLine(life, pickOne(rngs.narrative, L.childBorn), added.person, content), 'a baby')
@@ -385,6 +387,8 @@ function yearBoundary(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): 
     if (person) life = updatePerson(life, person.id, (p) => addHistory(p, `${life.age}: ${summary}`))
     if (def.major) life = highlight(life, summary)
     const note = line(life, option.note, content, { ...(person ? { person: person.name } : {}), ...applied.slots })
+    // Content v5: what was chosen stays readable, so a marathon run rules out a "first 10k" later.
+    if (content.tuning.optionSeen) life = markSeen(life, `${def.id}:${option.id}`)
     cands.push({ priority: PRIORITY.decision, kind: 'decision_resolved', glyph: def.glyph, summary, note, ...(def.major ? { major: true } : {}), ...(changes ? { changes } : {}) }, ...applied.extra)
   }
   // 2. Drift, then 3. the yearly checks.
@@ -393,7 +397,7 @@ function yearBoundary(life: LifeState, content: PaperLivesCatalog, rngs: Rngs): 
   // 4. Mortality.
   if (dies(life, content, rngs.mortality)) {
     const ended = endLife(life, content, rngs)
-    const written = pickLines(cands, BOUNDARY_LINES - 1)
+    const written = pickLines(cands, BOUNDARY_LINES - 1, content)
     const events: LifeEvent[] = [...written.map((c) => toEvent(c, life.age)), { kind: 'death', glyph: 'candle', age: life.age, summary: ended.life.death!.line }]
     return { life: ended.life, events, disposition: 'died', record: ended.record }
   }
@@ -427,8 +431,23 @@ function dies(life: LifeState, content: PaperLivesCatalog, rng: Rng): boolean {
   return rng.int(1, 1000) <= mortalityPermille(life, content)
 }
 
-function pickLines(cands: readonly Candidate[], max: number): Candidate[] {
-  return [...cands].sort((a, b) => a.priority - b.priority).slice(0, max)
+/**
+ * The boundary's lines, most important first, at most `max`. Content v5 always keeps the decision and the family
+ * lines (someone met, an engagement, a wedding, a birth, a death), so a partner never appears first at their proposal;
+ * the cap trims only the rest.
+ */
+function pickLines(cands: readonly Candidate[], max: number, content: PaperLivesCatalog): Candidate[] {
+  const sorted = [...cands].sort((a, b) => a.priority - b.priority)
+  if (!content.tuning.keepFamilyLines) return sorted.slice(0, max)
+  const kept = sorted.filter((c) => c.priority <= PRIORITY.family)
+  return [...kept, ...sorted.filter((c) => c.priority > PRIORITY.family).slice(0, Math.max(0, max - kept.length))].sort((a, b) => a.priority - b.priority)
+}
+
+/** Content v5: the lines of a list that can be said now, leaving out those naming {parent} once no parent is alive. */
+function withParent(life: LifeState, content: PaperLivesCatalog, lines: readonly string[]): readonly string[] {
+  if (!content.tuning.livingParentLines || living(life, 'parent').length > 0) return lines
+  const usable = lines.filter((l) => !/\{parent\}/i.test(l))
+  return usable.length > 0 ? usable : lines
 }
 
 function toEvent(c: Candidate, age: number): LifeEvent {
@@ -462,7 +481,7 @@ function newYear(life: LifeState, content: PaperLivesCatalog, rngs: Rngs, events
     if (stageLines) cands.push({ priority: PRIORITY.stage, kind: 'stage', glyph: 'star', summary: line(life, pickOne(rngs.narrative, stageLines), content), note: 'a new chapter' })
   }
   // The closing year's lines and recap, then the new stage's line at the new age.
-  const written = pickLines(cands, BOUNDARY_LINES)
+  const written = pickLines(cands, BOUNDARY_LINES, content)
   events.push(...written.filter((c) => c.kind !== 'stage').map((c) => toEvent(c, ended)))
   if (recap !== undefined && !wasInfant) events.push({ kind: 'recap', glyph: 'none', age: ended, summary: recap })
   events.push(...written.filter((c) => c.kind === 'stage').map((c) => toEvent(c, life.age)))

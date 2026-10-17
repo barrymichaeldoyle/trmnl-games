@@ -474,6 +474,8 @@ export default defineSchema({
     changes: v.optional(plLineChanges),
   })
     .index('by_lifeId_and_at_and_sequence', ['lifeId', 'at', 'sequence'])
+    /** One life's whole story, page by page (D182): the row is reused across lives, so the ordinal picks the life. */
+    .index('by_lifeId_and_ordinal_and_at_and_sequence', ['lifeId', 'ordinal', 'at', 'sequence'])
     .index('by_at', ['at']),
 
   /**

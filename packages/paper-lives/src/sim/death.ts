@@ -75,7 +75,7 @@ export function endLife(life: LifeState, content: PaperLivesCatalog, rngs: Reado
   const epitaph = fill(pickOne(rngs.narrative, epitaphs.filter((e) => e.needs.length >= Math.min(most, 2))).line, life.pronouns, slots)
   const heirs: Heir[] = life.people
     .filter((p) => p.alive && (p.role === 'child' || p.role === 'grandchild'))
-    .map((p) => ({ id: p.id, name: p.name, role: p.role as Heir['role'], age: personAge(life, p), relationship: p.relationship, ...(p.parentId ? { parentId: p.parentId } : {}) }))
+    .map((p) => ({ id: p.id, name: p.name, role: p.role as Heir['role'], age: personAge(life, p), relationship: p.relationship, ...(p.parentId ? { parentId: p.parentId } : {}), ...(content.tuning.gendered && p.gender ? { gender: p.gender } : {}) }))
   const partner = partnerOf(life)
   const record: LifeRecord = {
     first: life.first,

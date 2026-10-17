@@ -16,6 +16,8 @@ export interface LifeView {
     last: string
     pronouns: 'they' | 'she' | 'he'
     canRename: boolean
+    /** A first generation may change the surname too, while an infant (D182). */
+    canRenameLast: boolean
     generation: number
     age: number
     stage: 'infant' | 'child' | 'teen' | 'young' | 'adult' | 'senior'
@@ -76,6 +78,9 @@ export const ROLE_LABEL: Record<Role, string> = {
 }
 
 export const STEP_LABEL = { dating: 'Going out', engaged: 'Engaged', married: 'Married' } as const
+
+/** "girl" or "woman": the character's sex in a word for their age (D182); empty for a `they` life from before content v5. */
+export const sexWord = (pronouns: 'they' | 'she' | 'he', age: number) => (pronouns === 'they' ? '' : pronouns === 'she' ? (age < 18 ? 'girl' : 'woman') : age < 18 ? 'boy' : 'man')
 
 export const STAGE_LABEL = { infant: 'Infant', child: 'Child', teen: 'Teen', young: 'Young adult', adult: 'Adult', senior: 'Senior' } as const
 

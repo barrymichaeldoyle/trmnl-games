@@ -31,14 +31,23 @@ export function requestAgeUp(life: LifeState): ActionResult {
   return { ok: true, life: life.year.ageUpRequested ? life : { ...life, year: { ...life.year, ageUpRequested: true } } }
 }
 
-/** The first name and pronouns can change until the first year closes. */
-export function rename(life: LifeState, first: string): ActionResult {
-  if (life.counters.yearsLived > 0) return fail('TOO_LATE', 'The name is settled after the first year.')
-  return { ok: true, life: { ...life, first } }
+/**
+ * The name and the sex can change while the life is still an infant (ages 0 to 5), before school and before anyone
+ * else's story depends on them. The surname too, for a first generation; a child who carries the story on keeps the
+ * family name.
+ */
+export const canSetUp = (life: LifeState) => life.status !== 'ended' && life.stage === 'infant'
+
+export function rename(life: LifeState, first: string, last?: string): ActionResult {
+  if (!canSetUp(life)) return fail('TOO_LATE', 'The name is settled once school starts.')
+  if (last !== undefined && last !== life.last && life.generation > 1) return fail('FAMILY_NAME', 'The family name carries on from the last life.')
+  return { ok: true, life: { ...life, first, ...(last !== undefined ? { last } : {}) } }
 }
 
+/** A girl or a boy (she or he). `they` was the default before content v5 and can no longer be chosen. */
 export function setPronouns(life: LifeState, pronouns: Pronouns): ActionResult {
-  if (life.counters.yearsLived > 0) return fail('TOO_LATE', 'Pronouns are settled after the first year.')
+  if (!canSetUp(life)) return fail('TOO_LATE', 'This is settled once school starts.')
+  if (pronouns === 'they') return fail('CHOOSE_SEX', 'Choose a girl or a boy.')
   return { ok: true, life: { ...life, pronouns } }
 }
 

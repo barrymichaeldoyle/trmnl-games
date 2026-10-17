@@ -35,6 +35,7 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
   const petIds = new Set(content.pets.map((p) => p.id))
   const decisionIds = new Set(content.decisions.map((d) => d.id))
   const knownSlots = new Set<string>([...PRONOUN_SLOTS, ...VALUE_SLOTS])
+  const seenIds = new Set<string>([...content.events.map((e) => e.id), ...content.decisions.flatMap((d) => [d.id, ...d.options.map((o) => `${d.id}:${o.id}`)])])
 
   const unique = (kind: string, ids: readonly string[]) => {
     const seen = new Set<string>()
@@ -130,6 +131,9 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
     for (const t of [...(when.traits ?? []), ...(when.notTraits ?? [])]) if (!traitIds.has(t)) problem(`${where}: unknown trait ${t}`)
     if (Array.isArray(when.pet)) for (const p of when.pet) if (!petIds.has(p)) problem(`${where}: unknown pet ${p}`)
     if (Array.isArray(when.hobby)) for (const h of when.hobby) if (!hobbyIds.has(h)) problem(`${where}: unknown hobby ${h}`)
+    // From v5 a line can read what the life has seen: an event, a decision, or a decision's resolved option.
+    for (const id of [...(when.seen ?? []), ...(when.notSeen ?? [])]) if (!seenIds.has(id)) problem(`${where}: reads ${id}, which nothing marks seen`)
+    if ((when.seen || when.notSeen) && !content.tuning.optionSeen && [...(when.seen ?? []), ...(when.notSeen ?? [])].some((id) => id.includes(':'))) problem(`${where}: reads a resolved option, which this catalog does not mark`)
   }
   const checkEffects = (where: string, effects: Effects | undefined) => {
     if (!effects) return
@@ -261,6 +265,8 @@ export function validateContent(content: PaperLivesCatalog): ContentReport {
   const firsts = new Set(content.names.first)
   for (const name of [...(content.names.female ?? []), ...(content.names.male ?? [])]) if (!firsts.has(name)) problem(`names: ${name} is sorted but not a first name`)
   for (const name of content.names.female ?? []) if (content.names.male?.includes(name)) problem(`names: ${name} is both female and male`)
+  // From v5 everyone new is named from the list for their gender, so each list must outlast a full family.
+  if (t.gendered) for (const [list, names] of [['female', content.names.female], ['male', content.names.male]] as const) if ((names?.length ?? 0) < 40) problem(`names: ${names?.length ?? 0} ${list} names, want 40 for a gendered catalog`)
   if (content.names.pets.length < 48) problem(`names: ${content.names.pets.length} pet names, want 48`)
 
   const counts: Record<string, number> = {

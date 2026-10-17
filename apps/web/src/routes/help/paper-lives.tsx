@@ -36,7 +36,7 @@ export const Route = createFileRoute('/help/paper-lives')({
         <li>Back in TRMNL, click Save. The first years begin within fifteen minutes.</li>
         <li>Add the plugin to a playlist or a mashup. All four layout sizes are supported in both orientations.</li>
       </ul>
-      <p>In the first year you can change the first name and choose pronouns (they, she or he) on the Life page.</p>
+      <p>While the life is a baby, until school starts at six, you can choose a girl or a boy and change the name on the Life page, even before you save the plugin in TRMNL.</p>
       <h2 id="how-a-year-works">How a year works</h2>
       <p>The first six years pass quickly, one every fifteen minutes. After that, a year lasts at least {hours(t.minYearTicks)} hours. Events happen through the year without you, such as making a friend, catching a cold, getting a raise or the dog getting out. Your screen lists them newest first, under the age they happened at, with this year at the top.</p>
       <p>Everything a year has in store happens in its first {hours(t.minYearTicks)} hours. After that the year is ready: press <strong>Age up</strong> on the Life page and it ends there and then, with its recap and the next year's decision. Press it earlier and it waits until the year is ready. If you are away, the year closes after {hours(t.closeYearTicks)} hours. If you check in often, a life takes about a week. If you never do, it takes about a month.</p>

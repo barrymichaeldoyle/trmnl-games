@@ -107,6 +107,9 @@ export function holds(when: When | undefined, life: LifeState, season?: Season):
   if (when.notFlags && when.notFlags.some((f) => life.flags.includes(f))) return false
   if (when.person && peopleFor(life, when).length === 0) return false
   if (when.will !== undefined && (life.will !== undefined) !== when.will) return false
+  if (when.seen && !when.seen.some((id) => life.seen.includes(id))) return false
+  if (when.notSeen && when.notSeen.some((id) => life.seen.includes(id))) return false
+  if (when.childrenMinAge !== undefined && living(life, 'child').some((c) => personAge(life, c) < when.childrenMinAge!)) return false
   return true
 }
 
@@ -180,6 +183,77 @@ export function genderOf(person: Pick<Person, 'name' | 'gender'> & { readonly id
   let h = 0x811c9dc5
   for (const ch of `${person.id ?? ''}|${person.name}`) h = Math.imul(h ^ ch.codePointAt(0)!, 0x01000193) >>> 0
   return h % 2 === 0 ? 'female' : 'male'
+}
+
+/** The character's gender from their pronouns; none for `they`. */
+export const genderOfPronouns = (pronouns: LifeState['pronouns']): 'female' | 'male' | undefined => (pronouns === 'she' ? 'female' : pronouns === 'he' ? 'male' : undefined)
+export const otherGender = (gender: 'female' | 'male'): 'female' | 'male' => (gender === 'female' ? 'male' : 'female')
+
+/**
+ * Content v5: a life as a girl or a boy, with everyone's gender fixed. A `they` life from an earlier catalog takes the
+ * other sex to the partner it has (or had last), else what its first name says; every person keeps the gender the
+ * companion already showed for them. Lives already settled come back unchanged, so this is safe to run every tick.
+ */
+export function settleGender(life: LifeState, content: PaperLivesCatalog): LifeState {
+  if (!content.tuning.gendered) return life
+  const people = life.people.some((p) => !p.gender) ? life.people.map((p) => (p.gender ? p : { ...p, gender: genderOf(p, content)! })) : life.people
+  if (life.pronouns !== 'they') return people === life.people ? life : { ...life, people }
+  const partner = people.find((p) => p.alive && p.role === 'partner') ?? [...people].reverse().find((p) => p.role === 'former_partner')
+  const gender = partner?.gender ? otherGender(partner.gender) : genderOf({ id: 'self', name: life.first }, content)!
+  return { ...life, people, pronouns: gender === 'female' ? 'she' : 'he' }
+}
+
+/** A person who takes a new name and gender so an earlier life reads as one family (`familyRenames`). */
+export interface FamilyRename {
+  readonly id: string
+  readonly from: string
+  readonly to: string
+  readonly gender: 'female' | 'male'
+}
+
+/**
+ * Content v5's family, for a life begun under an earlier catalog (settled first): a mother and a father, and a
+ * partner of the other sex. The second of two parents of the same sex, and a partner of the character's own, take a
+ * name of the other gender, fixed from the surname and their id, that nobody else in the life has. The caller renames
+ * them in the stored story too (`renameIn`).
+ */
+export function familyRenames(life: LifeState, content: PaperLivesCatalog): FamilyRename[] {
+  const own = genderOfPronouns(life.pronouns)
+  if (!content.tuning.gendered || !own) return []
+  const out: FamilyRename[] = []
+  const taken = new Set([life.first, ...life.people.map((p) => p.name)])
+  const rename = (person: Person, gender: 'female' | 'male') => {
+    const names = (gender === 'female' ? content.names.female : content.names.male) ?? []
+    const pool = names.filter((n) => !taken.has(n))
+    if (pool.length === 0) return
+    let h = 0x811c9dc5
+    for (const ch of `${life.last}|${person.id}`) h = Math.imul(h ^ ch.codePointAt(0)!, 0x01000193) >>> 0
+    const to = pool[h % pool.length]!
+    taken.add(to)
+    out.push({ id: person.id, from: person.name, to, gender })
+  }
+  const parents = life.people.filter((p) => p.role === 'parent')
+  if (parents.length === 2 && parents[0]!.gender && parents[0]!.gender === parents[1]!.gender) rename(parents[1]!, otherGender(parents[0]!.gender))
+  const partner = life.people.find((p) => p.alive && p.role === 'partner')
+  if (partner && partner.gender === own) rename(partner, otherGender(own))
+  return out
+}
+
+/** A line with each renamed person's old name, as a whole word, replaced by the new one. */
+export function renameIn(text: string, renames: readonly FamilyRename[]): string {
+  let out = text
+  for (const r of renames) out = out.replace(new RegExp(`(?<![\\p{L}])${r.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}])`, 'gu'), r.to)
+  return out
+}
+
+/** The life with the renames applied to the people, their histories, the highlights and the recap. */
+export function applyRenames(life: LifeState, renames: readonly FamilyRename[]): LifeState {
+  if (renames.length === 0) return life
+  const people = life.people.map((p) => {
+    const r = renames.find((x) => x.id === p.id)
+    return { ...p, ...(r ? { name: r.to, gender: r.gender } : {}), history: p.history.map((h) => renameIn(h, renames)) }
+  })
+  return { ...life, people, highlights: life.highlights.map((h) => renameIn(h, renames)), ...(life.recap !== undefined ? { recap: renameIn(life.recap, renames) } : {}) }
 }
 
 const FAMILY: Partial<Record<Role, readonly [female: string, male: string, either: string]>> = {

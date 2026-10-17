@@ -1,5 +1,5 @@
 import { pickOne, pickWeighted, type Rng } from '@trmnl-games/engine/rng'
-import { clampStat, living, partnerOf, PaperLivesInvariantError, stageFor, tierCap } from './rules'
+import { clampStat, genderOfPronouns, living, otherGender, partnerOf, PaperLivesInvariantError, stageFor, tierCap } from './rules'
 import type { Effects, Glyph, JobDef, LifeCounters, LifeState, LineChanges, PaperLivesCatalog, Person, Role, StatId } from './types'
 
 /** A story line waiting for the boundary's three-line cap (paper-lives.md "The year"). Lower priority writes first. */
@@ -48,11 +48,23 @@ export function updatePerson(life: LifeState, id: string, update: (p: Person) =>
   return { ...life, people: life.people.map((p) => (p.id === id ? update(p) : p)) }
 }
 
-/** Draw a first name nobody in the life already has. One draw. */
-export function drawName(rng: Rng, content: PaperLivesCatalog, life: Pick<LifeState, 'people' | 'first'>): string {
+/** Draw a first name nobody in the life already has, from the names for that gender when one is given. One draw. */
+export function drawName(rng: Rng, content: PaperLivesCatalog, life: Pick<LifeState, 'people' | 'first'>, gender?: 'female' | 'male'): string {
+  const names = (gender === 'female' ? content.names.female : gender === 'male' ? content.names.male : undefined) ?? content.names.first
   const taken = new Set([life.first, ...life.people.map((p) => p.name)])
-  const pool = content.names.first.filter((n) => !taken.has(n))
-  return pickOne(rng, pool.length > 0 ? pool : content.names.first)
+  const pool = names.filter((n) => !taken.has(n))
+  return pickOne(rng, pool.length > 0 ? pool : names)
+}
+
+/**
+ * Content v5: the gender of someone new. A partner is of the other sex to the character; anyone else is drawn, one
+ * draw. Earlier catalogs draw nothing here, so their replays do not change.
+ */
+export function newPersonGender(life: Pick<LifeState, 'pronouns'>, role: Role, rng: Rng, content: PaperLivesCatalog): 'female' | 'male' | undefined {
+  if (!content.tuning.gendered) return undefined
+  const own = genderOfPronouns(life.pronouns)
+  if (role === 'partner' && own) return otherGender(own)
+  return rng.int(0, 1) === 0 ? 'female' : 'male'
 }
 
 /**
@@ -60,7 +72,8 @@ export function drawName(rng: Rng, content: PaperLivesCatalog, life: Pick<LifeSt
  * (paper-lives.md "People and the pet"). Returns the person who ends up in the story.
  */
 export function addPerson(life: LifeState, role: Role, bornAt: number, relationship: number, rng: Rng, content: PaperLivesCatalog, extra: Partial<Person> = {}): { life: LifeState; person: Person } {
-  const name = drawName(rng, content, life)
+  const gender = newPersonGender(life, role, rng, content)
+  const name = drawName(rng, content, life, gender)
   if (life.people.length >= content.tuning.maxPeople) {
     // Fold: the line still reads with the new name nowhere stored; an existing friend takes the warmth.
     const fold = living(life, 'friend')[0] ?? living(life, 'colleague')[0]
@@ -72,7 +85,7 @@ export function addPerson(life: LifeState, role: Role, bornAt: number, relations
     const leaving = life.people.find((p) => !p.alive && (p.role === 'friend' || p.role === 'colleague')) ?? life.people.find((p) => p.role === 'friend' || p.role === 'colleague' || p.role === 'former_partner')
     if (leaving) life = { ...life, people: life.people.filter((p) => p.id !== leaving.id) }
   }
-  const person: Person = { id: `p${life.nextPersonId}`, name, role, bornAt, metAt: life.age, relationship, alive: true, history: [], ...extra }
+  const person: Person = { id: `p${life.nextPersonId}`, name, role, bornAt, metAt: life.age, relationship, alive: true, history: [], ...(gender ? { gender } : {}), ...extra }
   return { life: { ...life, people: [...life.people, person], nextPersonId: life.nextPersonId + 1 }, person }
 }
 

@@ -1,6 +1,6 @@
 import { createRng, pickOne, type Rng } from '@trmnl-games/engine/rng'
 import { drawName, offerJob } from './effects'
-import { clampStat, healthTargetAt, PaperLivesInvariantError, STATS, stageFor, tiltPercent } from './rules'
+import { clampStat, genderOf, genderOfPronouns, healthTargetAt, otherGender, PaperLivesInvariantError, STATS, stageFor, tiltPercent } from './rules'
 import { fill } from './text'
 import type { Education, LifeCounters, LifeRecord, LifeState, PaperLivesCatalog, Person, Stats } from './types'
 
@@ -77,6 +77,7 @@ function blank(content: PaperLivesCatalog, first: string, last: string, traits: 
 
 /** A stranger at birth: a new family, generation 1 (paper-lives.md "The life and its starting state"). */
 export function starterLife(content: PaperLivesCatalog, birthSeed: number): { life: LifeState; firstLog: string } {
+  if (content.tuning.gendered) return gendered(content, birthSeed)
   const rng = createRng(birthSeed)
   const first = pickOne(rng, content.names.first)
   const last = pickOne(rng, content.names.last)
@@ -98,6 +99,32 @@ export function starterLife(content: PaperLivesCatalog, birthSeed: number): { li
 
 
 /**
+ * Content v5's birth: a girl or a boy with a name to match, a mother and a father (in either order), and perhaps an
+ * older sister or brother. The player can change the name and the sex while the life is still an infant.
+ */
+function gendered(content: PaperLivesCatalog, birthSeed: number): { life: LifeState; firstLog: string } {
+  const rng = createRng(birthSeed)
+  const gender = rng.int(0, 1) === 0 ? 'female' : 'male'
+  const first = drawName(rng, content, { first: '', people: [] }, gender)
+  const last = pickOne(rng, content.names.last)
+  const traits = drawTraits(rng, content)
+  let life: LifeState = { ...blank(content, first, last, traits, drawStats(rng), 1), pronouns: gender === 'female' ? 'she' : 'he' }
+  const people: Person[] = []
+  const add = (role: Person['role'], bornAt: number, relationship: number, person: 'female' | 'male') => {
+    const name = drawName(rng, content, { first, people }, person)
+    people.push({ id: `p${people.length + 1}`, name, role, bornAt, metAt: 0, relationship, alive: true, gender: person, history: [] })
+  }
+  const parent = rng.int(0, 1) === 0 ? 'female' : 'male'
+  add('parent', -rng.int(24, 38), rng.int(60, 85), parent)
+  add('parent', -rng.int(24, 38), rng.int(60, 85), otherGender(parent))
+  if (rng.int(1, 5) <= 2) add('sibling', -rng.int(1, 7), rng.int(50, 75), rng.int(0, 1) === 0 ? 'female' : 'male')
+  life = { ...life, people, nextPersonId: people.length + 1 }
+  const season = (['spring', 'summer', 'autumn', 'winter'] as const)[rng.int(0, 3)]!
+  const firstLog = fill(content.lines.firstLog, life.pronouns, { first, last, weekday: pickOne(rng, WEEKDAYS), season, parent: people[0]!.name })
+  return { life, firstLog }
+}
+
+/**
  * The next life as one of the deceased's children (paper-lives.md "The will, death and the next life"):
  * the surname, their age at the death, the siblings, their own children, what the will left them.
  */
@@ -112,15 +139,20 @@ export function beginChild(record: LifeRecord, heirId: string, content: PaperLiv
   const target = healthTargetAt(age, content.tuning.healthDrift, content.tuning.healthTarget, tiltPercent({ traits }, content, 'health'))
   const stats: Stats = { ...drawn, health: age < 6 ? drawn.health : Math.max(10, clampStat(target + (drawn.health - 50) / 2)) }
   let life = blank(content, heir.name, record.last, traits, stats, record.generation + 1)
+  // Content v5: the heir is the daughter or son the last life knew, and the other parent is of the other sex.
+  const heirGender = content.tuning.gendered ? (heir.gender ?? genderOf({ id: heir.id, name: heir.name }, content)) : undefined
+  if (heirGender) life = { ...life, pronouns: heirGender === 'female' ? 'she' : 'he' }
   const people: Person[] = []
-  const push = (name: string, role: Person['role'], bornAt: number, relationship: number, alive = true) => people.push({ id: `p${people.length + 1}`, name, role, bornAt, metAt: Math.max(0, bornAt), relationship, alive, history: [] })
+  const push = (name: string, role: Person['role'], bornAt: number, relationship: number, alive = true, gender?: 'female' | 'male') => people.push({ id: `p${people.length + 1}`, name, role, bornAt, metAt: Math.max(0, bornAt), relationship, alive, ...(content.tuning.gendered && gender ? { gender } : {}), history: [] })
   push(record.first, 'parent', -(record.age - age), heir.relationship, false)
   // Content v2: the parent who was the last character is a mother or father by the pronouns that life chose.
   if (content.version >= 2 && record.pronouns !== 'they') people[0] = { ...people[0]!, gender: record.pronouns === 'she' ? 'female' : 'male' }
   if (record.partner) push(record.partner.name, 'parent', -(record.partner.age - age), record.partner.relationship)
-  for (const sibling of record.heirs.filter((h) => h.role === 'child' && h.id !== heir.id)) push(sibling.name, 'sibling', age - sibling.age, sibling.relationship)
+  const lastGender = genderOfPronouns(record.pronouns)
+  if (content.tuning.gendered && record.partner && lastGender) people[1] = { ...people[1]!, gender: otherGender(lastGender) }
+  for (const sibling of record.heirs.filter((h) => h.role === 'child' && h.id !== heir.id)) push(sibling.name, 'sibling', age - sibling.age, sibling.relationship, true, sibling.gender)
   const own = record.heirs.filter((h) => h.role === 'grandchild' && h.parentId === heir.id)
-  for (const child of own) push(child.name, 'child', age - child.age, child.relationship)
+  for (const child of own) push(child.name, 'child', age - child.age, child.relationship, true, child.gender)
   const bequest = record.bequests.find((b) => b.personId === heir.id)
   const house = bequest?.house && record.house !== undefined ? record.house : undefined
   const education: Education = age < 6 ? 'none' : age < 18 ? 'school' : (['degree', 'trade', 'work'] as const)[rng.int(0, 2)]!

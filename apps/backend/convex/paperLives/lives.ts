@@ -1,7 +1,9 @@
 import { v } from 'convex/values'
+import { paginationOptsValidator } from 'convex/server'
 import { contentV1, contentV2 } from '@trmnl-games/paper-lives/content'
 import {
   beginChild,
+  canSetUp,
   choose as chooseOption,
   decisionOf,
   familyLabel,
@@ -14,6 +16,7 @@ import {
   resume as resumeLife,
   seasonAt,
   setPronouns as setLifePronouns,
+  settleGender,
   simulateLife,
   PaperLivesInvariantError,
   slotsFor,
@@ -85,14 +88,25 @@ async function applyAction(ctx: MutationCtx, life: Doc<'lives'>, result: ActionR
   return { changed: true }
 }
 
-function lifeIntent(operation: string, act: (ctx: MutationCtx, life: Doc<'lives'>, content: PaperLivesCatalog, input: Record<string, unknown>) => Promise<IntentResult>) {
+function lifeIntent(operation: string, act: (ctx: MutationCtx, life: Doc<'lives'>, content: PaperLivesCatalog, input: Record<string, unknown>) => Promise<IntentResult>, opts: { beforeActivation?: boolean } = {}) {
   return async (ctx: MutationCtx, operationId: string, input: Record<string, unknown>) =>
     await runIntent(ctx, operationId, operation, input, async (user) => {
-      const life = await playableLife(ctx, user)
+      const life = opts.beforeActivation ? await setupLife(ctx, user) : await playableLife(ctx, user)
       const { content } = await worldContentOf(ctx)
       return await act(ctx, life, content, input)
     })
 }
+
+/** The name and the sex can be set while the baby waits for TRMNL too (D182): the setup is the first thing a player sees. */
+async function setupLife(ctx: QueryCtx, user: Doc<'users'>): Promise<Doc<'lives'>> {
+  const life = await currentLife(ctx, user)
+  if (life === null) throw appError('HERO_NOT_FOUND', 'No life yet.')
+  if (life.simulationState === 'quarantined') throw appError('SERVICE_PAUSED', 'This life is paused for a service check.')
+  return life
+}
+
+/** The stored life as the current catalog reads it: a v4 `they` life is a girl or a boy from content v5 on. */
+const settledLife = (doc: Doc<'lives'>, content: PaperLivesCatalog) => settleGender(toLifeState(doc), content)
 
 const intentResult = intentReturns({ operationId: v.string(), changed: v.boolean() })
 const strip = (r: (IntentResult & { operationId: string }) | IntentRefusal) => (isIntentRefusal(r) ? r : { operationId: r.operationId, changed: r.changed })
@@ -139,21 +153,38 @@ export const ageUp = mutation({
     ),
 })
 
-/** Change the first name, in the first year only, under the hero-name rules. */
+/**
+ * Name the baby: the first name, and the surname for a first generation, while the life is an infant (ages 0 to 5),
+ * under the hero-name rules. Allowed before TRMNL is saved, so a player can set the life up while it waits.
+ */
 export const rename = mutation({
-  args: { operationId: v.string(), first: v.string() },
+  args: { operationId: v.string(), first: v.string(), last: v.optional(v.string()) },
   returns: intentResult,
-  handler: async (ctx, { operationId, first }) => {
+  handler: async (ctx, { operationId, first, last }) => {
     const name = validateName(first, HERO_NAME_RULE)
     if (!name.ok) throw appError('INVALID_INPUT', `First name: ${name.reason}`)
-    return strip(await lifeIntent('paperLives.rename', async (ctx, life, _c, i) => await applyAction(ctx, life, renameLife(toLifeState(life), i.first as string), `Named ${i.first as string}.`))(ctx, operationId, { first: name.value }))
+    const surname = last === undefined ? undefined : validateName(last, HERO_NAME_RULE)
+    if (surname && !surname.ok) throw appError('INVALID_INPUT', `Surname: ${surname.reason}`)
+    const input = { first: name.value, ...(surname?.ok ? { last: surname.value } : {}) }
+    return strip(
+      await lifeIntent(
+        'paperLives.rename',
+        async (ctx, life, content, i) => {
+          const result = renameLife(settledLife(life, content), i.first as string, i.last as string | undefined)
+          return await applyAction(ctx, life, result, result.ok ? `Named ${result.life.first} ${result.life.last}.` : undefined)
+        },
+        { beforeActivation: true },
+      )(ctx, operationId, input),
+    )
   },
 })
 
+/** A girl or a boy, while the life is an infant (D182). `they` is refused: partners are of the other sex from content v5. */
 export const setPronouns = mutation({
   args: { operationId: v.string(), pronouns },
   returns: intentResult,
-  handler: async (ctx, { operationId, pronouns: chosen }) => strip(await lifeIntent('paperLives.setPronouns', async (ctx, life, _c, i) => await applyAction(ctx, life, setLifePronouns(toLifeState(life), i.pronouns as LifeState['pronouns'])))(ctx, operationId, { pronouns: chosen })),
+  handler: async (ctx, { operationId, pronouns: chosen }) =>
+    strip(await lifeIntent('paperLives.setPronouns', async (ctx, life, content, i) => await applyAction(ctx, life, setLifePronouns(settledLife(life, content), i.pronouns as LifeState['pronouns'])), { beforeActivation: true })(ctx, operationId, { pronouns: chosen })),
 })
 
 export const pause = mutation({
@@ -265,7 +296,7 @@ export const view = query({
     if (user === null || doc === null) return { gameState: profile?.state ?? null, life: null }
     const { world, content } = await worldContentOf(ctx)
     const now = Date.now()
-    const life = toLifeState(doc)
+    const life = settledLife(doc, content)
     const slots = slotsFor(life, content)
     const pending = life.year.pending
     const def = pending ? decisionOf(content, pending.decisionId) : null
@@ -285,7 +316,9 @@ export const view = query({
         first: life.first,
         last: life.last,
         pronouns: life.pronouns,
-        canRename: life.counters.yearsLived === 0,
+        // The name and the sex stay open while the life is an infant; the surname only for a first generation.
+        canRename: canSetUp(life),
+        canRenameLast: canSetUp(life) && life.generation === 1,
         generation: life.generation,
         age: life.age,
         stage: life.stage,
@@ -346,5 +379,29 @@ export const view = query({
       nextTickAt: PAPER_LIVES_SCHEDULE.nextSlotAfter(now),
       worldTick: world?.currentTick ?? 0,
     }
+  },
+})
+
+/**
+ * One life's whole story, newest first, a page at a time (D182): the current life by default, or a finished one of
+ * the owner's by its ordinal. The Life page and the Album read it; the `view` keeps its 40 newest lines for the
+ * year's look back.
+ */
+export const story = query({
+  args: { paginationOpts: paginationOptsValidator, ordinal: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, { paginationOpts, ordinal }) => {
+    const user = await currentUser(ctx)
+    const doc = await currentLife(ctx, user)
+    const empty = { page: [], isDone: true, continueCursor: '' }
+    if (doc === null) return empty
+    const n = ordinal ?? doc.ordinal
+    if (!Number.isInteger(n) || n < 1 || n > doc.ordinal) return empty
+    const result = await ctx.db
+      .query('plTickLogs')
+      .withIndex('by_lifeId_and_ordinal_and_at_and_sequence', (q) => q.eq('lifeId', doc._id).eq('ordinal', n))
+      .order('desc')
+      .paginate(paginationOpts)
+    return { ...result, page: result.page.map((l) => ({ id: l._id, at: l.at, kind: l.kind, glyph: l.glyph, age: l.age, summary: l.summary, remarkable: l.remarkable === true, major: l.major === true, changes: l.changes ?? null })) }
   },
 })

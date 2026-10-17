@@ -121,6 +121,12 @@ export interface When {
   readonly personMinRelationship?: number
   readonly personMaxRelationship?: number
   readonly will?: boolean
+  /** Content v5: any of these ids is in the life's `seen` list (an event, a decision, or `decision:option` once resolved). */
+  readonly seen?: readonly string[]
+  /** Content v5: none of these ids is in the life's `seen` list, so a first 10k never follows a marathon. */
+  readonly notSeen?: readonly string[]
+  /** Content v5: every living child is at least this old (the children grown and gone). */
+  readonly childrenMinAge?: number
 }
 
 export interface Effects {
@@ -288,6 +294,20 @@ export interface PaperLivesCatalog {
 
 /** Every number the harness tunes (paper-lives.md "Work slices", L1). */
 export interface Tuning {
+  /**
+   * Content v5: every life is a girl or a boy (she or he), every person has a fixed gender with a name to match,
+   * parents are a mother and a father, and partners are of the other sex. A v4 life that reaches v5 as `they`
+   * is settled once (`settleGender`).
+   */
+  readonly gendered?: boolean
+  /** Content v5: the year's family lines (meeting someone, an engagement, a birth, a death) are always written; the boundary's cap limits the rest. */
+  readonly keepFamilyLines?: boolean
+  /** Content v5: system lines that name {parent} are skipped once no parent is alive, so a dead parent never sits in the second row. */
+  readonly livingParentLines?: boolean
+  /** Content v5: a resolved decision marks `decision:option` as seen, so later content can read what was chosen. */
+  readonly optionSeen?: boolean
+  /** Content v5: babies arrive only for a married couple (v1 to v4 let any partner, even a new one, bring a baby). */
+  readonly childrenNeedMarriage?: boolean
   /** Content v2: nobody is engaged before this age (v1 has no floor, so teenagers could marry at 18). */
   readonly proposalMinAge?: number
   /** Content v2: a decision an event opens is about the person the event named (v1 drew again). */
@@ -498,6 +518,8 @@ export interface Heir {
   readonly age: number
   readonly relationship: number
   readonly parentId?: string
+  /** Content v5: the heir's gender, so the next life is a daughter or a son as the story knew them. */
+  readonly gender?: 'female' | 'male'
 }
 
 export interface LifeRecord {

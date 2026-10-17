@@ -29,6 +29,7 @@
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
  *   year=early (content v3: a year not ready yet, Queue Age up)   year=queued (the same, queued)
+ *   story=long (D182: a story longer than one page, for Show earlier years)
  *   photos=done (L6: this week's photo taken)   photos=none (no photos, no TRMNL connected)   alerts=on also turns on Paper Lives' three kinds
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.
  */
@@ -416,7 +417,14 @@ const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('
 export const useMutation = () => useCallback(Object.assign(async () => settle(), { withOptimisticUpdate() { return this } }), []);
 export const useAction = () => useCallback(async () => settle(), []);
 export const useConvexAuth = () => ({ isLoading: false, isAuthenticated: true });
-export const usePaginatedQuery = (fn, args, { initialNumItems }) => { const [count, setCount] = useState(initialNumItems); const page = data.log.slice(0, count); return { results: page, status: page.length < data.log.length ? 'CanLoadMore' : 'Exhausted', loadMore: (n) => setCount((c) => c + n) } };
+// Paper Lives' story (D182) pages the fixture life's lines; story=long repeats them back to birth so "Show earlier years" shows.
+const plStory = () => {
+  const logs = (paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult).logs ?? []
+  if (params.get('story') !== 'long') return logs
+  const top = logs[0]?.age ?? 0
+  return Array.from({ length: Math.max(1, top) }, (_, back) => logs.map((l) => ({ ...l, id: l.id + '-' + back, age: l.age - back * 2 }))).flat().filter((l) => l.age >= 0)
+}
+export const usePaginatedQuery = (fn, args, { initialNumItems }) => { const [count, setCount] = useState(initialNumItems); const all = String(fn) === 'paperLives/lives:story' ? plStory(args) : data.log; const page = all.slice(0, count); return { results: page, status: page.length < all.length ? 'CanLoadMore' : 'Exhausted', loadMore: (n) => setCount((c) => c + n) } };
 export const getFunctionName = (fn) => String(fn);
 export class ConvexError extends Error { constructor(data) { super(typeof data === 'string' ? data : data?.message); this.data = data } }
 export const paginationOptsValidator = {};

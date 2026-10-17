@@ -40,7 +40,7 @@ describe('Paper Lives tick on the shared engine (D159, L2)', () => {
     expect(await link(t, 'Ana', 'pl-tok-ana')).toEqual({ activationState: 'pending_trmnl', heroCreated: true })
     const pending = await t.run(async (ctx) => ({ lives: await ctx.db.query('lives').collect(), profile: await ctx.db.query('paperLivesProfiles').first(), logs: await ctx.db.query('plTickLogs').collect() }))
     expect(pending.lives).toHaveLength(1)
-    expect(pending.lives[0]).toMatchObject({ activationState: 'pending_trmnl', ordinal: 1, life: { age: 0, stage: 'infant', status: 'living', pronouns: 'they' } })
+    expect(pending.lives[0]).toMatchObject({ activationState: 'pending_trmnl', ordinal: 1, life: { age: 0, stage: 'infant', status: 'living', pronouns: expect.stringMatching(/^(she|he)$/) } })
     expect(pending.lives[0]!.life.traits).toHaveLength(2)
     expect(pending.lives[0]!.life.people.filter((p) => p.role === 'parent')).toHaveLength(2)
     expect(pending.profile?.lifeId).toBe(pending.lives[0]!._id)

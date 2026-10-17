@@ -10,6 +10,7 @@ import { seo } from '../../lib/seo'
 import { Card, LoadingState } from '../../lib/ui'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import type { LifeView } from '../../lib/paperLives'
+import { BabySetup } from './paper-lives/-setup'
 
 /**
  * Paper Lives companion shell (paper-lives.md "Companion", D159): the lifecycle gate (not-found for anyone who cannot
@@ -54,11 +55,12 @@ function Shell() {
   }
   if (view.life.activationState === 'pending_trmnl' && !settings) {
     return (
-      <>{banner}<main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
+      <>{banner}<main id="main" className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
         <Card title="Save in TRMNL to start">
           <p>{view.life.first} {view.life.last} is about to be born. Back in TRMNL, click <strong>Save</strong> on the Paper Lives plugin and the first years begin.</p>
           <Link to="/help/paper-lives" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Help with setup</Link>
         </Card>
+        {view.life.canRename ? <BabySetup view={view} waiting /> : null}
       </main></>
     )
   }

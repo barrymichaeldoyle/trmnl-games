@@ -1,12 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { ACTIVE_CONTENT, contentV3, contentV4 } from '@trmnl-games/paper-lives/content'
+import { contentV3, contentV4 } from '@trmnl-games/paper-lives/content'
 import { validateContent } from '@trmnl-games/paper-lives/content/validate'
 import { simulateLifeRun, POLICIES } from '../../tools/balance/paper-lives'
 
 /** Choices that come back (Barry found a life dry, 2026-10-15): flags on childhood and teen options, and follow-ups. */
 describe('Paper Lives content v4', () => {
-  it('is active, passes the validator and keeps every v3 id', () => {
-    expect(ACTIVE_CONTENT).toBe('v4')
+  it('passes the validator and keeps every v3 id', () => {
     expect(validateContent(contentV4).problems).toEqual([])
     const ids = new Set([...contentV4.events, ...contentV4.decisions].map((x) => x.id))
     for (const x of [...contentV3.events, ...contentV3.decisions]) expect(ids.has(x.id)).toBe(true)

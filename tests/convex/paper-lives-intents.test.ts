@@ -4,7 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api } from '@trmnl-games/backend/api'
 import schema from '../../apps/backend/convex/schema'
 import type { T } from './helpers'
+import { zeroCounters } from '@trmnl-games/paper-lives/sim'
 import { lifeOf, nextPaperLivesTick, seedLife } from './paperLivesHelpers'
+
+const zero = zeroCounters()
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
 let op = 0
@@ -39,15 +42,21 @@ describe('Paper Lives intents (D159, L2)', () => {
     expect(life.life.counters.decisionsChosen).toBe(1)
   })
 
-  it('renames and sets pronouns in the first year only, under the name rules', async () => {
-    await seedLife(t, {}, 'Bo')
+  it('names the baby and sets a girl or a boy while an infant, before TRMNL is saved too (D182)', async () => {
+    await seedLife(t, {}, 'Bo', { activationState: 'pending_trmnl' })
     await expect(as('Bo').mutation(api.paperLives.lives.rename, { operationId: opId(), first: 'X' })).rejects.toThrow('First name')
-    expect(await as('Bo').mutation(api.paperLives.lives.rename, { operationId: opId(), first: 'Maud' })).toMatchObject({ changed: true })
+    expect(await as('Bo').mutation(api.paperLives.lives.rename, { operationId: opId(), first: 'Maud', last: 'Okafor' })).toMatchObject({ changed: true })
     expect(await as('Bo').mutation(api.paperLives.lives.setPronouns, { operationId: opId(), pronouns: 'she' })).toMatchObject({ changed: true })
+    expect(await as('Bo').mutation(api.paperLives.lives.setPronouns, { operationId: opId(), pronouns: 'they' })).toMatchObject({ ok: false, message: expect.stringContaining('girl or a boy') })
     const view = await as('Bo').query(api.paperLives.lives.view, {})
-    expect(view.life).toMatchObject({ first: 'Maud', pronouns: 'she', canRename: true })
+    expect(view.life).toMatchObject({ first: 'Maud', last: 'Okafor', pronouns: 'she', canRename: true, canRenameLast: true })
+  })
+
+  it('settles the name once school starts', async () => {
+    await seedLife(t, { age: 5, counters: { ...zero, yearsLived: 5 } }, 'Bea')
+    expect(await as('Bea').mutation(api.paperLives.lives.rename, { operationId: opId(), first: 'Ida' })).toMatchObject({ changed: true })
     await nextPaperLivesTick(t)
-    expect(await as('Bo').mutation(api.paperLives.lives.rename, { operationId: opId(), first: 'Ida' })).toMatchObject({ ok: false, message: expect.stringContaining('settled') })
+    expect(await as('Bea').mutation(api.paperLives.lives.rename, { operationId: opId(), first: 'Maud' })).toMatchObject({ ok: false, message: expect.stringContaining('settled') })
   })
 
   it('pauses and resumes without catch-up', async () => {

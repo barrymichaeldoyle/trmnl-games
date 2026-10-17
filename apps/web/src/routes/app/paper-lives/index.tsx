@@ -3,13 +3,14 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
-import { HERO_NAME_RULE, validateName } from '@trmnl-games/platform'
 import { captureAnalytics } from '../../../lib/analytics'
 import { useIntent } from '../../../lib/intent'
 import { LocalTime, useHydrated } from '../../../lib/localTime'
 import { preload } from '../../../lib/preload'
-import { changeWords, money, Named, namesIn, Portrait, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
+import { money, Named, namesIn, Portrait, sexWord, STAGE_LABEL, type LifeView } from '../../../lib/paperLives'
 import { ActionFeedback, Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
+import { BabySetup } from './-setup'
+import { Changes, StoryList } from './-story'
 
 /** The Life page (paper-lives.md "Companion"): the character, the year card and its decision, the memorial and the next life, the recent story. */
 export const Route = createFileRoute('/app/paper-lives/')({
@@ -20,32 +21,6 @@ export const Route = createFileRoute('/app/paper-lives/')({
 const clock = (date: Date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 const time = (at: number) => <LocalTime at={at} format={clock} />
 const SEASON = { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' } as const
-type Log = NonNullable<LifeView['logs']>[number]
-
-/**
- * The story as rows, newest first: quiet lines, prompts and year recaps left out (the recap would sit in the next
- * year's group, and "Last year" already says it), achievements unlocked together on one row
- * ("3 achievements: …"), and each age shown once, on the first row of its year.
- */
-function storyRows(logs: readonly Log[]): Array<Log & { newAge: boolean }> {
-  const rows: Log[] = []
-  for (const log of logs) {
-    if (log.kind === 'decision_offered' || log.kind === 'ambient' || log.kind === 'recap') continue
-    const last = rows.at(-1)
-    if (log.kind === 'achievement' && last?.kind === 'achievement' && last.age === log.age) {
-      const names = [...(last.summary.match(/^\d+ achievements: (.*)$/)?.[1]?.split(', ') ?? [last.summary.replace(/^Achievement: /, '')]), log.summary.replace(/^Achievement: /, '')]
-      rows[rows.length - 1] = { ...last, summary: `${names.length} achievements: ${names.join(', ')}` }
-    } else rows.push(log)
-  }
-  return rows.slice(0, 20).map((row, i, all) => ({ ...row, newAge: i === 0 || all[i - 1]!.age !== row.age }))
-}
-
-/** What a line changed, on its own line under the words, in the muted ink. */
-function Changes({ log }: { log: Log }) {
-  const words = changeWords(log.changes)
-  return words ? <span className="block text-xs text-muted">{words}</span> : null
-}
-
 /** "in 1 h 20 min" until a moment, kept current each minute; hidden until the browser owns the page. */
 function Until({ at }: { at: number }) {
   const hydrated = useHydrated()
@@ -84,10 +59,12 @@ function LifePage() {
   const generation = `${ORDINALS[life.generation - 1] ?? `${life.generation}th`} generation`
   return (
     <>
+      {life.canRename && !ended ? <BabySetup view={view} notify={notify} /> : null}
+
       <section aria-labelledby="life-title" className="flex flex-col gap-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h1 id="life-title" className="font-display text-3xl font-bold">{life.first} {life.last}</h1>
-          <span className="text-sm text-muted">{ended ? <>Died at {life.age}</> : <>Age {life.age} · {STAGE_LABEL[life.stage]}</>} · {generation}</span>
+          <span className="text-sm text-muted">{ended ? <>Died at {life.age}</> : <>Age {life.age} · {STAGE_LABEL[life.stage]}</>}{sexWord(life.pronouns, life.age) ? <> · {sexWord(life.pronouns, life.age).replace(/^./, (c) => c.toUpperCase())}</> : null} · {generation}</span>
         </div>
         <div className="flex flex-wrap items-end gap-4">
           <Portrait portrait={life.portrait} scale={4} label={`${life.first} ${life.last}${ended ? ', in a frame' : `, aged ${life.age}`}`} />
@@ -108,7 +85,6 @@ function LifePage() {
         {!ended ? <p className="text-sm"><span className="text-muted">Money</span> <strong className="tabular-nums">{money(life.gold)}</strong></p> : null}
       </section>
 
-      {life.canRename && !ended ? <FirstYear view={view} notify={notify} /> : null}
 
       {ended ? <Memorial view={view} notify={notify} /> : null}
 
@@ -190,51 +166,10 @@ function LifePage() {
       {life.recap && !ended ? <p className="text-sm"><span className="text-muted">Last year:</span> <Named text={life.recap.replace(/^Age \d+: /, '')} names={names} /></p> : null}
 
       <Card title="The story so far">
-        {storyRows(view.logs ?? []).length === 0 ? <p className="text-muted">Nothing yet. The first lines arrive within fifteen minutes.</p> : null}
-        <ol className="flex flex-col gap-1.5">
-          {storyRows(view.logs ?? []).map((row) => (
-            <li key={row.id} className={`text-sm ${row.newAge ? 'mt-3 first:mt-0' : ''}`}>
-              {row.newAge ? <p className="mb-1 text-xs font-semibold text-muted">Age {row.age}{row.age === life.age && !ended ? ' · this year' : ''}</p> : null}
-              <span className={`${row.kind === 'death' || row.remarkable ? 'font-semibold' : ''} ${row.kind === 'achievement' ? 'text-gold-ink' : ''}`}><Named text={row.summary} names={names} /></span>
-              <Changes log={row} />
-            </li>
-          ))}
-        </ol>
+        <StoryList names={names} {...(ended ? {} : { currentAge: life.age })} />
       </Card>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>
-  )
-}
-
-/** The first year: the first name can change and pronouns can be chosen, until the first year closes. */
-function FirstYear({ view, notify }: { view: LifeView; notify: (feedback: { error: string | null; message: string | null }) => void }) {
-  const life = view.life!
-  const [first, setFirst] = useState(life.first)
-  const rename = useIntent(api.paperLives.lives.rename, { onFeedback: notify })
-  const pronouns = useIntent(api.paperLives.lives.setPronouns, { onFeedback: notify })
-  const checked = validateName(first, HERO_NAME_RULE)
-  return (
-    <Card title="Name and pronouns">
-      <p className="text-sm text-muted">You can change these until the first year closes.</p>
-      <label className="mt-3 flex flex-col gap-1">
-        <span className="text-sm font-semibold">First name</span>
-        <input value={first} onChange={(event) => setFirst(event.target.value)} maxLength={HERO_NAME_RULE.max} className="min-h-11 border-2 border-edge bg-ground px-3 text-base" autoComplete="off" />
-      </label>
-      {!checked.ok && first !== life.first ? <p className="mt-1 text-sm text-hp-ink">{checked.reason}</p> : null}
-      <div className="mt-3">
-        <Button variant="secondary" disabled={!checked.ok || first.trim() === life.first} pending={rename.pending} onClick={() => { if (checked.ok) void rename.run({ first: checked.value }, `Named ${checked.value}.`) }}>Save name</Button>
-      </div>
-      <fieldset className="mt-4">
-        <legend className="text-sm font-semibold">Pronouns</legend>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {(['they', 'she', 'he'] as const).map((choice) => (
-            <Button key={choice} variant={life.pronouns === choice ? 'primary' : 'secondary'} aria-pressed={life.pronouns === choice} disabled={pronouns.pending} onClick={() => { if (life.pronouns !== choice) void pronouns.run({ pronouns: choice }, 'Pronouns saved.') }}>
-              {choice === 'they' ? 'They' : choice === 'she' ? 'She' : 'He'}
-            </Button>
-          ))}
-        </div>
-      </fieldset>
-    </Card>
   )
 }
 

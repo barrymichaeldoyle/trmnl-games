@@ -152,7 +152,7 @@ export const lifeRecordFields = {
   will: v.optional(willKind),
   bequests: v.array(v.object({ personId: v.string(), gold: v.number(), house: v.boolean() })),
   highlights: v.array(v.string()),
-  heirs: v.array(v.object({ id: v.string(), name: v.string(), role: v.union(v.literal('child'), v.literal('grandchild')), age: v.number(), relationship: v.number(), parentId: v.optional(v.string()) })),
+  heirs: v.array(v.object({ id: v.string(), name: v.string(), role: v.union(v.literal('child'), v.literal('grandchild')), age: v.number(), relationship: v.number(), parentId: v.optional(v.string()), gender: v.optional(v.union(v.literal('female'), v.literal('male'))) })),
   partner: v.optional(v.object({ name: v.string(), age: v.number(), relationship: v.number() })),
   /** Set once the next life has begun from this record. */
   continuedBy: v.optional(v.union(v.literal('child'), v.literal('stranger'))),
