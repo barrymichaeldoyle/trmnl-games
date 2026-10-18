@@ -76,6 +76,8 @@ export function measureRung(predicate: CareerPredicate, hero: HeroState, content
     }
     case 'stance':
       return { value: (effectiveStance(content, hero) ?? 'balanced') === predicate.stance ? 1 : 0, target: 1 }
+    case 'stanceChosen':
+      return { value: effectiveStance(content, hero) === undefined ? 0 : 1, target: 1 }
   }
 }
 

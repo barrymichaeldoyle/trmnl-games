@@ -247,11 +247,15 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
   // P35: the once-only companion deeds. The stance pick keeps the cohort's sustain (balanced unless --stance).
   if (content.stances !== undefined && unlocked(content, h.level, 'stances') && counters.stanceChanges === 0) counters.stanceChanges = 1
   // D135: a stance goal is met by switching for an adventure or more; the next visit after it switches back to `home`.
+  // D192: under a ladder that asks for a chosen stance, the visiting player picks the cohort's (Balanced by default)
+  // once stances open and keeps it; Balanced chosen plays exactly like no stance, so the pick changes no outcome.
   const goal = currentRung(content, h)?.predicate
+  const picks = content.career?.rungs.some((rung) => rung.predicate.kind === 'stanceChosen') === true && unlocked(content, h.level, 'stances')
+  const keep = home ?? (picks ? 'balanced' : undefined)
   if (goal?.kind === 'stance' && unlocked(content, h.level, 'stances')) h.stance = goal.stance
-  else if (h.stance !== home) {
-    if (home === undefined) delete h.stance
-    else h.stance = home
+  else if (h.stance !== keep) {
+    if (keep === undefined) delete h.stance
+    else h.stance = keep
   }
   if (h.choice !== undefined && content.choices !== undefined) {
     const event = eventById(content, h.choice.eventId)

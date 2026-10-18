@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-18',
     changes: [
       {
+        title: 'Choose your own stance',
+        body: 'When stances open at level 7, your hero now starts with none chosen and plays Balanced until you pick. A new goal asks you to choose one, and any of the three counts, Balanced included. It takes the place of the old goal that asked for Bold.',
+        fr: { title: 'Choisissez votre posture', body: 'Quand les postures s’ouvrent au niveau 7, votre héros commence sans posture et joue Équilibré jusqu’à votre choix. Un nouvel objectif vous demande d’en choisir une, et n’importe laquelle des trois compte, Équilibré compris. Il remplace l’ancien objectif qui demandait Audacieux.' },
+        de: { title: 'Wähle deine Haltung selbst', body: 'Wenn die Haltungen auf Stufe 7 freigeschaltet werden, hat dein Held zunächst keine und spielt Ausgewogen, bis du wählst. Ein neues Ziel bittet dich, eine zu wählen, und jede der drei zählt, auch Ausgewogen. Es ersetzt das alte Ziel, das Draufgängerisch verlangte.' },
+      },
+      {
         title: 'A tidier companion',
         body: 'Rankings open on the 7-day board, the same one your TRMNL shows. The Career page folds the goals you have done, so it opens on the current one. The name tag and makeover moved to the More tab, next to your names, and Pause moved there too. The Bag tab counts the spares waiting to be sold or salvaged.',
         fr: { title: 'Un compagnon plus clair', body: 'Les classements s’ouvrent sur le classement sur 7 jours, le même que sur votre TRMNL. La page Carrière replie les objectifs atteints et s’ouvre sur l’objectif en cours. Le badge nominatif et le relooking sont passés dans l’onglet Plus, à côté de vos noms, tout comme la pause. L’onglet Sac compte les objets en trop à vendre ou recycler.' },

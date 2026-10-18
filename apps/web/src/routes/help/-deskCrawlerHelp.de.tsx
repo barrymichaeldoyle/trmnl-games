@@ -81,6 +81,7 @@ export const de: HelpPage = {
           <ul>
             <li>Die Seite Karriere unter Mehr listet die {F.career.goals} Ziele der Reihe nach, mit dem Datum, an dem du jedes erreicht hast. Ein Ziel, das du schon erfüllt hattest, als die Leiter kam, zählt als erreicht.</li>
             {F.unlocks !== undefined ? <li>Funktionen kommen mit der Stufe, ob du vorbeischaust oder nicht: die To-do-Liste auf Stufe {F.unlocks.todo}, Haltungen auf Stufe {F.unlocks.stances}, Büro-Entscheidungen auf Stufe {F.unlocks.choices}, {F.meetings?.level !== undefined ? `Begegnungen mit Kollegen auf Stufe ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `Zerlegen und Werkbank auf Stufe ${F.workbench.level}, ` : ''}der fahrende Händler auf Stufe {F.unlocks.merchant} und Schreibtisch-Überfälle auf Stufe {F.unlocks.raids}. Dein TRMNL zeigt dann jeweils „Freigeschaltet“. Auch die Etagen öffnen nach Stufe: {FLOORS_LINE}.</li> : null}
+            <li>Wenn die Haltungen freigeschaltet werden, hat dein Held noch keine und spielt Ausgewogen. Ein Ziel bittet dich, eine zu wählen; jede der drei zählt, und du kannst sie später ändern.</li>
             <li>Ein paar frühe Ziele kommen garantiert rechtzeitig: der erste Kampf nach wenigen Abenteuern, ein Ausrüstungsteil im ersten Dutzend und eine erste Entscheidung, ein erster Händler und eine erste Elite etwa einen Tag nach ihrer Stufe. Alles andere ist Glückssache.</li>
           </ul>
         </>

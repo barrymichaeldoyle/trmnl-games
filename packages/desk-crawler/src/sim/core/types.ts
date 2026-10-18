@@ -383,6 +383,8 @@ export type CareerPredicate =
   | { readonly kind: 'biomeWin'; readonly biomeId: string }
   /** The stance the hero plays by right now (Balanced below the stance unlock). */
   | { readonly kind: 'stance'; readonly stance: StanceId }
+  /** D192: the hero has a stance of its own, any of the three, chosen once stances are unlocked. */
+  | { readonly kind: 'stanceChosen' }
 
 /** P35: the lucky event a rung guarantees once the hero has explored `withinTicks` ticks on that rung without it. */
 export type GuaranteedEvent = 'combat' | 'gear' | 'choice' | 'merchant' | 'elite'

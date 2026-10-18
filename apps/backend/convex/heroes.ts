@@ -114,6 +114,8 @@ export const mine = query({
       // D79: the pending choice with its options and what each one would do to this hero right now.
       choice: choiceView(content, hero, potionsHeld(items), world?.currentTick ?? 0),
       stance: hero.stance ?? 'balanced',
+      // D192: false until the player picks one; the hero plays Balanced meanwhile.
+      stanceChosen: hero.stance !== undefined,
       publicProfile: pagePublic(hero),
       // D110: under a catalog with raids, each stance also says how often it raids and how often it wins against a balanced hero.
       stances: Object.values(content.stances ?? {}).map((rule) => ({ id: rule.id, name: rule.name, blurb: rule.blurb, potionBelowPct: rule.autoPotionBelowPct, restBelowPct: rule.restBelowPct, resumeAtPct: rule.resumeExploringAtPct, victoryXpPct: rule.victoryXpPct, ...(content.raids ? { raidsPerDay: Math.round(content.raids.launchPermille[rule.id] * 96) / 1000, raidWinPct: raidWinChance(content, rule.id, 'balanced') } : {}) })),
@@ -307,7 +309,9 @@ export const setStance = mutation({
       // P35: the unlock level belongs to the world's catalog; below it the picker is a locked card, and a stale client gets the level back.
       const live = worldContent(await readWorld(ctx))
       if (!unlocked(live, hero.level, 'stances')) throw appError('LOCKED', `Stances unlock at level ${live.unlocks!.stances}.`)
-      if ((hero.stance ?? 'balanced') === args.stance) return { changed: false }
+      // D192: a hero with no stance of its own plays Balanced, and choosing Balanced is still a choice.
+      if (hero.stance === args.stance) return { changed: false }
+      const first = hero.stance === undefined
       const counters = withCounterDefaults(hero.counters)
       // An achievement the switch itself earned may sit above its line; anything else closes the line.
       const recent = await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id)).order('desc').take(4)
@@ -316,7 +320,7 @@ export const setStance = mutation({
       const tick = (await readWorld(ctx))?.currentTick ?? 0
       if (latest === null || open === undefined) {
         await ctx.db.patch(hero._id, { stance: args.stance, counters: { ...counters, stanceChanges: counters.stanceChanges + 1 } })
-        await commandLog(ctx, hero, 'set_stance', stanceSummary(content, hero.stance ?? 'balanced', args.stance), undefined, { stanceFrom: hero.stance ?? 'balanced' })
+        await commandLog(ctx, hero, 'set_stance', first ? firstStanceSummary(content, args.stance) : stanceSummary(content, hero.stance ?? 'balanced', args.stance), undefined, { stanceFrom: hero.stance ?? 'balanced' })
       } else if (open === args.stance) {
         await ctx.db.patch(hero._id, { stance: args.stance, counters: { ...counters, stanceChanges: Math.max(0, counters.stanceChanges - 1) } })
         await ctx.db.delete(latest._id)
@@ -484,6 +488,8 @@ export const setPublicProfile = mutation({
 
 const stanceSummary = (content: ContentCatalog, from: (typeof STANCE_IDS)[number], to: (typeof STANCE_IDS)[number]) =>
   `Stance set to [[${content.stances?.[to]?.name ?? to}]] from ${(content.stances?.[from]?.name ?? from).toLowerCase()}.`
+/** D192: the first stance a hero chooses has nothing to come from. */
+const firstStanceSummary = (content: ContentCatalog, to: (typeof STANCE_IDS)[number]) => `Stance set to [[${content.stances?.[to]?.name ?? to}]].`
 
 /**
  * D163: walk away from a dug-in elite. It leaves at once, with nothing lost but the time spent. A no-op without one,

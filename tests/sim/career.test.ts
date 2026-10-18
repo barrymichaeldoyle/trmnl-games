@@ -562,3 +562,34 @@ describe('level goals before locked goals (D178, content v25)', () => {
     expect(remapRung(to, from, index(v25, 'level_16'))).toBe(index(v24, 'garage_win'))
   })
 })
+
+describe('"Choose a stance" (D192, content v27)', () => {
+  const v27 = catalogs.v27
+  const ids = (content: ContentCatalog) => content.career!.rungs.map((rung) => rung.id)
+
+  it('is a valid catalog with the goal right before the raid goal and "Switch to Bold" still retired', () => {
+    expect(validateCatalog(v27)).toEqual([])
+    const order = ids(v27)
+    expect(order.indexOf('choose_stance')).toBe(order.indexOf('first_raid') - 1)
+    expect(order.filter((id) => id !== 'choose_stance')).toEqual(ids(catalogs.v26))
+    expect(v27.career!.rungs.find((rung) => rung.id === 'go_bold')).toMatchObject({ retired: true })
+    expect(v27.career!.rungs.find((rung) => rung.id === 'choose_stance')).toMatchObject({ predicate: { kind: 'stanceChosen' }, gold: 20, companion: true, supersedes: 'go_bold' })
+  })
+
+  it('counts any chosen stance once stances are open, and nothing before', () => {
+    const goal = { kind: 'stanceChosen' } as const
+    const at = v27.unlocks!.stances
+    expect(measureRung(goal, hero({ level: at }).hero, v27).value).toBe(0)
+    for (const stance of ['cautious', 'balanced', 'bold'] as const) expect(measureRung(goal, hero({ level: at, stance }).hero, v27).value).toBe(1)
+    expect(measureRung(goal, hero({ level: at - 1, stance: 'bold' }).hero, v27).value).toBe(0)
+  })
+
+  it('moves a hero waiting on the raid goal without a stance onto the new goal at the switch', () => {
+    const from = v27.career!.rungs.findIndex((rung) => rung.id === 'first_raid')
+    const raid = catalogs.v26.career!.rungs.findIndex((rung) => rung.id === 'first_raid')
+    const { hero: h } = hero({ level: 9 })
+    const open = (rung: { predicate: Parameters<typeof measureRung>[0] }) => measureRung(rung.predicate, h, v27).value < measureRung(rung.predicate, h, v27).target
+    expect(remapRung(catalogs.v26.career!, v27.career!, raid, open)).toBe(from - 1)
+    expect(remapRung(catalogs.v26.career!, v27.career!, raid, () => false)).toBe(from)
+  })
+})

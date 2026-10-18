@@ -82,6 +82,7 @@ export const fr: HelpPage = {
           <ul>
             <li>La page Carrière, sous Plus, liste les {F.career.goals} objectifs dans l’ordre, avec la date à laquelle vous avez atteint chacun. Un objectif déjà rempli quand l’échelle est arrivée compte comme atteint.</li>
             {F.unlocks !== undefined ? <li>Les fonctions arrivent par niveau, que vous passiez ou non : la liste de tâches au niveau {F.unlocks.todo}, les postures au niveau {F.unlocks.stances}, les décisions du bureau au niveau {F.unlocks.choices}, {F.meetings?.level !== undefined ? `les rencontres entre collègues au niveau ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `le démontage et l’établi au niveau ${F.workbench.level}, ` : ''}le marchand ambulant au niveau {F.unlocks.merchant} et les raids de bureau au niveau {F.unlocks.raids}. Votre TRMNL indique « Débloqué » à chaque fois. Les étages s’ouvrent aussi par niveau : {FLOORS_LINE}.</li> : null}
+            <li>Quand les postures s’ouvrent, votre héros n’en a aucune et joue Équilibré. Un objectif vous demande d’en choisir une ; n’importe laquelle des trois compte, et vous pourrez en changer ensuite.</li>
             <li>Quelques premiers objectifs arrivent à coup sûr à temps : le premier combat en quelques aventures, une pièce d’équipement dans la première douzaine, et une première décision, un premier marchand et une première élite dans la journée qui suit leur niveau. Tout le reste dépend du hasard.</li>
           </ul>
         </>

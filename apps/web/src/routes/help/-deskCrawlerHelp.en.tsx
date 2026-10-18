@@ -77,6 +77,7 @@ export const en: HelpPage = {
           <ul>
             <li>The Career page under More lists the {F.career.goals} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
             {F.unlocks !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {F.unlocks.todo}, stances at level {F.unlocks.stances}, office decisions at level {F.unlocks.choices}, {F.meetings?.level !== undefined ? `meetings with coworkers at level ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `salvage and the workbench at level ${F.workbench.level}, ` : ''}the wandering merchant at level {F.unlocks.merchant} and desk raids at level {F.unlocks.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
+            <li>When stances open, your hero has none chosen and plays Balanced. One goal asks you to choose one; any of the three counts, and you can change it later.</li>
             <li>A few early goals are guaranteed to come up in time: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is down to chance.</li>
           </ul>
         </>

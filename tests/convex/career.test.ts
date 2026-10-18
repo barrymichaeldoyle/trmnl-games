@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, internal } from '@trmnl-games/backend/api'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { contentV24 } from '@trmnl-games/desk-crawler/content/v24'
+import { contentV27 } from '@trmnl-games/desk-crawler/content/v27'
 import schema from '../../apps/backend/convex/schema'
 import { runTick, seedHero, seedWorld, type T } from './helpers'
 
@@ -72,7 +73,7 @@ describe('career ladder backend (P35)', () => {
     const after = await heroDoc(t, heroId)
     expect(after.gold).toBe(before + 10)
     expect(after.counters.goldEarned).toBe((hero.counters.goldEarned ?? 0) + 10)
-    expect(after.career?.unclaimed).toBeUndefined()
+    expect(after.career?.unclaimed ?? []).toEqual([])
     expect((await logs(t, heroId)).at(-1)).toMatchObject({ source: 'command', summary: 'Claimed 10 gold for a goal: Win your first fight.', deltas: { gold: 10 } })
     expect(await errorCode(as(t, 'Ana').mutation(api.heroes.claimGoal, { operationId: opId() }))).toBe('NOTHING_TO_CLAIM')
     // The goal line follows its tick's story with the next sequence number.
@@ -229,6 +230,30 @@ describe('career ladder backend (P35)', () => {
     const after = await heroDoc(t, heroId)
     expect(after.career?.reached.filter((entry) => entry.id === 'equip_find')).toHaveLength(1)
     expect(after.career?.unclaimed?.filter((entry) => entry.id === 'equip_find')).toHaveLength(1)
+  })
+
+  it('counts any first stance, Balanced included, for "Choose a stance", and pays nothing after "Switch to Bold" (D192)', { timeout: 30_000 }, async () => {
+    const choose = contentV27.career!.rungs.findIndex((rung) => rung.id === 'choose_stance')
+    await seedWorld(t, { activeContentVersion: 'v27', currentTick: 10 })
+    const heroId = await seedHero(t, { level: 9, career: { rung: choose, startedTick: 0, reached: [] } }, 'Mia')
+    expect(await as(t, 'Mia').query(api.heroes.mine, {})).toMatchObject({ stance: 'balanced', stanceChosen: false })
+    expect(await as(t, 'Mia').mutation(api.heroes.setStance, { operationId: opId(), stance: 'balanced' })).toMatchObject({ changed: true })
+    const chosen = await heroDoc(t, heroId)
+    expect(chosen.stance).toBe('balanced')
+    expect(chosen.career?.reached.map((entry) => entry.id)).toEqual(['choose_stance'])
+    expect(chosen.career?.unclaimed).toEqual([expect.objectContaining({ id: 'choose_stance', gold: 20 })])
+    expect(await as(t, 'Mia').query(api.heroes.mine, {})).toMatchObject({ stanceChosen: true })
+    const lines = await t.run(async (ctx) => await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).collect())
+    expect(lines.map((line) => line.summary)).toContain('Stance set to [[Balanced]].')
+    // Choosing it again changes nothing.
+    expect(await as(t, 'Mia').mutation(api.heroes.setStance, { operationId: opId(), stance: 'balanced' })).toMatchObject({ changed: false })
+
+    // A hero who was paid for "Switch to Bold" reaches the new goal without gold.
+    const paid = await seedHero(t, { level: 9, stance: 'bold', career: { rung: choose, startedTick: 0, reached: [{ id: 'go_bold', tick: 1 }] } }, 'Ned')
+    await as(t, 'Ned').mutation(api.heroes.setStance, { operationId: opId(), stance: 'cautious' })
+    const after = await heroDoc(t, paid)
+    expect(after.career?.reached.map((entry) => entry.id)).toEqual(['go_bold', 'choose_stance'])
+    expect(after.career?.unclaimed ?? []).toEqual([])
   })
 
   it('marks Switch to Bold done when a later switch lands on Bold', { timeout: 30_000 }, async () => {

@@ -46,3 +46,8 @@ npx convex run --prod --inline-query 'const heroes = (await ctx.db.query("heroes
 ```
 
 What to read: whether `companionVisits.never` falls as a share of active heroes (the bag-full alert and device notice bringing passive players back once); whether held finds get sorted (`holdingAFind` against the number with a recent visit); and whether levels keep climbing for heroes that would have slept (most should pass level 4 within a week of installing, against level 3 at day 30 for an unattended hero under v25).
+
+## Content v27: "Choose a stance" (D192)
+
+`pnpm balance --heroes 150 --days 30 --content v27 --json docs/evidence/balance-v27-stance-choice-30-days.json`. The visiting player picks its cohort's stance (Balanced unless `--stance`) once stances open. Level 8 and 12 days, final levels and Cafeteria knockout days match v26 for every cohort (three-day 7.2%, weekly 4.2%); gold at day 30 moves by up to 7% (the weekly bags-first cohort) as the extra 20-gold goal shifts purchases. Rungs reached rise from 24 to 25 for visiting cohorts.
+

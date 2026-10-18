@@ -8,7 +8,7 @@
  * Then open http://127.0.0.1:4197/app/desk-crawler (or /inventory, /log, /leaderboard, /settings, /achievements, /keepsakes, /trmnl). Query parameters:
  *   workbench=1 (D129, default: a few materials and the workbench card)   workbench=rich (every job affordable)   workbench=done (a +3 weapon)   workbench=0 (no workbench)   workbench=locked (D155: below level 4, the locked card)
  *   potions=1 (D131, default: three strengths, a combine affordable)   potions=short (two minors, no Scrap)   potions=one (healing only)   potions=0 (no strengths)
- *   floor=server_room (D132: the hero on another floor)   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
+ *   level=9 (the hero at that level, its unlocks opened)   stance=none|cautious|balanced|bold (D192: none chosen, or one)   floor=server_room (D132: the hero on another floor)   status=paused|sleeping|dead|travelling|resting   held=1 (held find, bag full)   hp=40 (HP percent)   slots=30 (gear count)   merchant=1
  *   choice=1 (pending decision)   effects=1   occasion=1 (D139: Halloween today)   recap=1 (a return tally)   keepsake=done   long=1 (long item names)
  *   achievements=1 (a veteran's achievement shelves over 41 heroes)   fresh=1 (an achievement ten minutes ago, so no hint)   quiet=1 (empty log, no achievements)   ok=1 (mutations succeed)   outcome=invalid_code|already_claimed|easter_egg (with ok=1: a keepsake claim's answer)   egg=1 (the hidden Easter Egg on the shelf)   raids=1 (desk raids on, with a record and raid log lines)   meetings=1 (D141: meetings on, the Coworkers card and meeting log lines)   meetings=none (meetings on, nobody met yet)   public=1 (hero page public)
  *   todo=1 (D112: the to-do list with a done task, an away task and the longest label, plus to-do log lines)   todo=used (the same, swap spent)
@@ -95,6 +95,9 @@ if (hero.status === 'travelling') { hero.targetBiomeId = 'server_room'; hero.arr
 if (hero.status === 'dead') { hero.hp = 0; hero.reviveAtTick = hero.world.currentTick + 3 }
 if (hero.status === 'resting') hero.hp = Math.round(hero.maxHp * 0.4);
 if (params.get('floor')) hero.biomeId = params.get('floor');
+// level=9 lifts the hero to that level and opens what it has reached; stance=none (D192) shows the picker with no stance chosen.
+if (params.get('level')) { hero.level = Number(params.get('level')); hero.unlocks = (hero.unlocks ?? []).map((entry) => ({ ...entry, unlocked: entry.level <= hero.level })) }
+if (params.get('stance') === 'none') { hero.stance = 'balanced'; hero.stanceChosen = false } else if (params.get('stance')) { hero.stance = params.get('stance'); hero.stanceChosen = true }
 // A hero saved in TRMNL an hour ago, for the first-days playlist reminder.
 if (flag('new')) { hero.activatedAt = Date.now() - 3600000; hero.screenServed = false }
 if (params.get('hp')) hero.hp = Math.round(hero.maxHp * Number(params.get('hp')) / 100);

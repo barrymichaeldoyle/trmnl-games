@@ -105,6 +105,8 @@ type HeroView = {
   simulationState: string
   biomes: Biome[]
   stance: StanceId
+  /** D192: false until the player picks a stance; the hero plays Balanced meanwhile. */
+  stanceChosen?: boolean
   stances: Stance[]
   raidsEnabled?: boolean
   /** D112: present once the world runs the to-do list and the hero has one. */
@@ -149,7 +151,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
     onFeedback: notify,
     optimisticUpdate: (store, args) => {
       const current = store.getQuery(api.heroes.mine, {})
-      if (current) store.setQuery(api.heroes.mine, {}, { ...current, stance: args.stance })
+      if (current) store.setQuery(api.heroes.mine, {}, { ...current, stance: args.stance, stanceChosen: true })
     },
   })
   const choose = useIntent(api.heroes.choose, { onFeedback: notify })
@@ -168,7 +170,9 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const healing = fit === null ? 0 : Math.min(hero.maxHp - hero.hp, fit.heals)
   const potionLabel = t.drinkPotion(healing, bag?.potions ?? 0)
   const drink = () => (strengths.length > 1 ? setAsk({ kind: 'potion' }) : potion.run(fit === null ? {} : { templateId: fit.templateId }, t.potionDrunk(fit === null ? t.potion : fit.name, healing)))
-  const chosenStance = hero.stances.find((option) => option.id === hero.stance) ?? null
+  // D192: nothing is pressed until the player picks; an older backend without the flag reads as chosen.
+  const stanceChosen = hero.stanceChosen !== false
+  const chosenStance = stanceChosen ? (hero.stances.find((option) => option.id === hero.stance) ?? null) : null
   // D132: what the stance risks where the hero is now; the safe biome turns a knockout into a rescue.
   const here = hero.biomes.find((biome) => biome.id === hero.biomeId)
   const safeBiome = hero.biomes.find((biome) => biome.safe)
@@ -257,14 +261,17 @@ function HeroSheet({ hero }: { hero: HeroView }) {
           {/* Toggle buttons, like the ranking period: each is one Tab stop, and a busy choice keeps its focus (aria-disabled). */}
           <div role="group" aria-label={t.stance} className="flex border-2 border-edge">
             {hero.stances.map((option) => {
-              const chosen = option.id === hero.stance
+              const chosen = stanceChosen && option.id === hero.stance
+              // Picking the stance the hero already plays by changes nothing in play, so it needs no confirming.
+              const pick = () => (!stanceChosen && option.id === hero.stance ? void stance.run({ stance: option.id }, t.stanceFromNext(option.name)) : setAsk({ kind: 'stance', id: option.id }))
               return (
-                <button key={option.id} type="button" aria-pressed={chosen} aria-disabled={stance.pending || undefined} disabled={!healthy} onClick={() => { if (chosen || stance.pending) return; setAsk({ kind: 'stance', id: option.id }) }} className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 py-2 label-px uppercase tracking-wide not-last:border-r-2 not-last:border-edge not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink disabled:text-muted'}`}>
+                <button key={option.id} type="button" aria-pressed={chosen} aria-disabled={stance.pending || undefined} disabled={!healthy} onClick={() => { if (chosen || stance.pending) return; pick() }} className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 py-2 label-px uppercase tracking-wide not-last:border-r-2 not-last:border-edge not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink disabled:text-muted'}`}>
                   {c.text(option.name)}
                 </button>
               )
             })}
           </div>
+          {!stanceChosen ? <p className="min-h-10 text-sm" aria-live="polite">{t.noStanceYet}</p> : null}
           {chosenStance ? (
             <p className="min-h-10 text-sm" aria-live="polite">
               <strong>{c.text(chosenStance.name)}.</strong> {c.text(chosenStance.blurb)}{' '}

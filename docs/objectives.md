@@ -145,6 +145,8 @@ counters.careerRungs, counters.itemsEquipped                                    
 
 12. **"Switch to Bold" is retired (D190, content v26).** The harness traced a three-to-four-fold rise in Cafeteria knockouts for players who visit every few days to v17, whose only change was this goal and "Reach level 7": the goal lands one level before the Cafeteria opens, and the hero stays Bold into it. The rung keeps its index as retired, so heroes who reached it keep it and a pointer on it moves to the raid goal without gold ([evidence](evidence/full-bag.md)).
 
+13. **"Choose a stance" (D192, content v27).** When stances unlock the hero has none chosen and plays Balanced; the goal asks the player to pick one, any of the three, so it teaches the stances without steering anyone into Bold. Predicate kind `stanceChosen` (the hero has a stance of its own once stances are open). It sits where "Switch to Bold" was and supersedes it.
+
 ## Open points for Barry (settled 2026-10-12)
 
 All four settled as recommended when Barry handed over the decision: level gates, the raid gate protecting new heroes, no backfill line, and the proposed bounds (the decision guarantee now repeats, above).
