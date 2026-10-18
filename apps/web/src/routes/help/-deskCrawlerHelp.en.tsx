@@ -193,7 +193,7 @@ export const en: HelpPage = {
         <li><strong>Thrifty</strong> loses 5 points less gold when things go wrong: a retreat loses no gold instead of 5%, and a knockout loses 5% instead of 10%.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
-      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero holds the next piece it finds for you and keeps adventuring. While that piece waits, any further finds stay behind, so your hero never stops; it just stops collecting gear until you make room.</p>
+      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero holds the next piece it finds for you and keeps adventuring. While that piece waits, further finds stay behind until you make room.</p>
       <h2 id="bigger-bags">Bigger bags</h2>
       <p>Your bag grows with gold. {F.tote ? `Your hero finds a ${F.tote.name} (${F.tote.size}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(F.shopBags)}, up to {F.topBag} slots. There are no level requirements, and bags never drop as loot.</p>
       <ol className="[&_li]:list-decimal">
@@ -201,7 +201,7 @@ export const en: HelpPage = {
         <li>If a find is being held, choose Claim find. Leave at least one free slot after claiming it so adventures can resume.</li>
         <li>Once a slot is free and nothing is waiting, adventures resume on their own within 15 minutes. You can still pick another unlocked area from the bag page before then.</li>
       </ol>
-      <p>Equipping gear does not free a slot. Selling or salvaging gear, or buying a bigger bag, does, and the held find moves into the bag by itself. The Bag page can also sell your weakest spare and keep the find in one tap. Your TRMNL’s Sleep Mode never stops the game either.</p>
+      <p>Equipping gear does not free a slot. Selling or salvaging gear, or buying a bigger bag, does, and the held find moves into the bag at once. The Bag page can also sell your weakest spare and keep the find in one tap. Your TRMNL’s Sleep Mode never stops the game either.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
         <p>{F.workbench.level !== undefined ? `From level ${F.workbench.level}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {F.workbench.materials.map((m) => `${m.name} from ${m.rarities.join(' and ')} gear`).join(', ')}. Epic gear pays {F.workbench.epicMultiplier} times as much. Materials take no bag space and are never sold. Gear is only salvaged when you choose to.{F.workbench.level !== undefined ? ` Before level ${F.workbench.level}, sell your spares: the first upgrade needs level ${F.workbench.level} anyway.` : ''}</p>

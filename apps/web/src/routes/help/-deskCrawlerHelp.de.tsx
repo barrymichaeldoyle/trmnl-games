@@ -197,7 +197,7 @@ export const de: HelpPage = {
         <li><strong>Sparsam</strong> verliert 5 Punkte weniger Gold, wenn etwas schiefgeht: Ein Rückzug kostet kein Gold statt 5 %, ein K. o. 5 % statt 10 %.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">Wenn die Tasche voll ist</h2>
-      <p>Ein neuer Held beginnt mit einer kleinen Papiertüte für 6 Ausrüstungsteile. Angelegte Ausrüstung und Tränke brauchen keinen Platz. Ist die Tasche voll, legt dein Held das nächste gefundene Teil für dich zurück und zieht weiter. Solange es wartet, bleiben weitere Funde liegen: Dein Held hält nie an, er sammelt nur keine Ausrüstung mehr, bis du Platz schaffst.</p>
+      <p>Ein neuer Held beginnt mit einer kleinen Papiertüte für 6 Ausrüstungsteile. Angelegte Ausrüstung und Tränke brauchen keinen Platz. Ist die Tasche voll, legt dein Held das nächste gefundene Teil für dich zurück und zieht weiter. Solange es wartet, bleiben weitere Funde liegen, bis du Platz schaffst.</p>
       <h2 id="bigger-bags">Größere Taschen</h2>
       <p>Deine Tasche wächst mit Gold. {F.tote ? `In den ersten paar Stunden findet dein Held ${t.nameWith(F.tote.name, 'einen')} (${F.tote.size}). ` : ''}Danach kaufst du größere Taschen auf der Taschen-Seite, eine nach der anderen: {rungs(F.shopBags)}, bis zu {F.topBag} Plätze. Es gibt keine Stufenanforderungen, und Taschen fallen nie als Beute.</p>
       <ol className="[&_li]:list-decimal">
@@ -205,7 +205,7 @@ export const de: HelpPage = {
         <li>Liegt ein Fund zurück, wähle Fund abholen. Lass danach mindestens einen Platz frei, damit die Abenteuer weitergehen können.</li>
         <li>Sobald ein Platz frei ist und nichts mehr wartet, gehen die Abenteuer von allein innerhalb von 15 Minuten weiter. Vorher kannst du auf der Taschen-Seite noch ein anderes freigeschaltetes Gebiet wählen.</li>
       </ol>
-      <p>Ausrüsten macht keinen Platz frei. Verkaufen, Zerlegen oder eine größere Tasche kaufen schon, und der zurückgelegte Fund kommt von allein in die Tasche. Die Taschen-Seite kann auch dein schwächstes Ersatzstück verkaufen und den Fund mit einem Tipp behalten. Auch der Schlafmodus deines TRMNL hält das Spiel nie an.</p>
+      <p>Ausrüsten macht keinen Platz frei. Verkaufen, Zerlegen oder eine größere Tasche kaufen schon, und der zurückgelegte Fund kommt sofort in die Tasche. Die Taschen-Seite kann auch dein schwächstes Ersatzstück verkaufen und den Fund mit einem Tipp behalten. Auch der Schlafmodus deines TRMNL hält das Spiel nie an.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Zerlegen und Werkbank</h2>
         <p>{F.workbench.level !== undefined ? `Ab Stufe ${F.workbench.level} hat übrige Ausrüstung` : 'Übrige Ausrüstung hat'} zwei Wege aus der Tasche: für Gold verkaufen oder auf der Taschen-Seite in Material zerlegen. Zerlegen bringt so viel wie die Stufe, auf der das Teil gefunden wurde, in Einheiten des Materials seiner Seltenheit: {F.workbench.materials.map((m) => `${name(m.name)} aus ${m.rarities.map((r) => rarityDe[r] ?? r).join(' und ')} Ausrüstung`).join(', ')}. Epische Ausrüstung bringt das {F.workbench.epicMultiplier}-Fache. Material braucht keinen Taschenplatz und wird nie verkauft. Ausrüstung wird nur zerlegt, wenn du es willst.{F.workbench.level !== undefined ? ` Vor Stufe ${F.workbench.level} verkaufst du Übriges besser: Die erste Verbesserung braucht ohnehin Stufe ${F.workbench.level}.` : ''}</p>
