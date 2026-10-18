@@ -15,7 +15,7 @@ import { latestLogQuery } from './-queries'
 import { KeepsakeCallout } from './-keepsakes'
 import { TodoCard, type TodoView } from './-todo'
 import { ComingUp, GoalCard, type CareerView, type UnlockView } from './-career'
-import { ConfirmSheet, Consequences, PauseConsequences } from './-confirm'
+import { ConfirmSheet, Consequences } from './-confirm'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
 import { RosterCard } from './-rosterCard'
@@ -143,7 +143,6 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const { notice, notify, dismiss } = useNotice()
   const travel = useIntent(api.heroes.changeBiome, { onFeedback: notify })
   const potion = useIntent(api.inventory.usePotion, { onFeedback: notify })
-  const pause = useIntent(api.heroes.pause, { onFeedback: notify })
   const resume = useIntent(api.heroes.resume, { onFeedback: notify })
   // The stance is a stored preference: once confirmed it shows as chosen at once, and rolls back if the save fails.
   const stance = useIntent(api.heroes.setStance, {
@@ -159,7 +158,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const canAct = healthy && (hero.status === 'exploring' || hero.status === 'resting')
   // D118: a travelling hero can drink too, so it arrives ready.
   const canDrink = canAct || (healthy && hero.status === 'travelling')
-  // Anything that could set the hero back or slow it down asks first (the to-do swap, pause, travel, stance, a costly decision).
+  // Anything that could set the hero back or slow it down asks first (the to-do swap, travel, stance, a costly decision). Pause lives on the More tab (D191).
   const [ask, setAsk] = useState<Ask | null>(null)
   const close = () => setAsk(null)
   // D131: the strengths in the pouch. One strength drinks at once; more than one opens a picker. The button's figure
@@ -176,7 +175,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const stanceRisk = here === undefined || safeBiome === undefined ? null : here.safe ? t.stanceRiskSafe(here.name) : t.stanceRisk(safeBiome.name)
   // P35: a feature the hero's level has not reached shows as a locked card where its card will be.
   const locked = (feature: UnlockView[number]['feature']) => hero.unlocks?.find((entry) => entry.feature === feature && !entry.unlocked) ?? null
-  // Pause and Resume swap places when they succeed; focus follows to whichever command takes over.
+  // Resume replaces the commands when it succeeds; focus follows to whichever command takes over.
   const commands = useFocusWithin<HTMLElement>(hero.status)
 
   const bagReady = bag?.canResume === true
@@ -206,11 +205,6 @@ function HeroSheet({ hero }: { hero: HeroView }) {
             {canDrink && hero.hp < hero.maxHp && bag?.potions ? (
               <Button icon="potion" pending={potion.pending} busyLabel={t.drinking} onClick={drink}>
                 {potionLabel}
-              </Button>
-            ) : null}
-            {canAct ? (
-              <Button icon="pause" variant="secondary" pending={pause.pending} busyLabel={t.pausing} onClick={() => setAsk({ kind: 'pause' })}>
-                {t.pause}
               </Button>
             ) : null}
           </div>
@@ -315,14 +309,14 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         {!canAct && hero.status !== 'travelling' && stopNote ? <p className="mt-3 text-sm text-muted">{stopNote}</p> : null}
       </section>
 
-      <AskSheets ask={ask} hero={hero} close={close} intents={{ pause, travel, stance, choose, potion, walkAway }} strengths={strengths} />
+      <AskSheets ask={ask} hero={hero} close={close} intents={{ travel, stance, choose, potion, walkAway }} strengths={strengths} />
 
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </div>
   )
 }
 
-type Ask = { kind: 'pause' } | { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string } | { kind: 'potion' } | { kind: 'walkAway' }
+type Ask = { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string } | { kind: 'potion' } | { kind: 'walkAway' }
 type Run<A> = { pending: boolean; run: (args: A, message?: string) => Promise<boolean> }
 /** D131: one potion strength in the pouch, with the HP one drink restores for this hero. */
 type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
@@ -332,19 +326,12 @@ type PotionRow = { templateId: string; name: string; healPct: number; heals: num
  * The confirmations for the Hero page's commands that could cost progress or pace. Each says what the action costs and
  * whether it can be undone; only its confirm button commits.
  */
-function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { pause: Run<Record<string, never>>; travel: Run<{ biomeId: string; leaveStandoff?: boolean }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }>; walkAway: Run<Record<string, never>> }; strengths: readonly PotionRow[] }) {
+function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { travel: Run<{ biomeId: string; leaveStandoff?: boolean }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }>; walkAway: Run<Record<string, never>> }; strengths: readonly PotionRow[] }) {
   const healthy = hero.simulationState !== 'quarantined'
   const t = useT(dcHeroMessages)
   const c = useContent()
   const here = hero.biomes.findIndex((b) => b.id === hero.biomeId)
   const common = { onClose: close, disabled: !healthy }
-  if (ask?.kind === 'pause') {
-    return (
-      <ConfirmSheet open title={t.pauseTitle} confirmLabel={t.pauseConfirm} busyLabel={t.pausing} cancelLabel={t.keepAdventuring} pending={intents.pause.pending} {...common} onConfirm={async () => { if (await intents.pause.run({}, t.paused)) close() }}>
-        <PauseConsequences />
-      </ConfirmSheet>
-    )
-  }
   if (ask?.kind === 'travel') {
     const index = hero.biomes.findIndex((b) => b.id === ask.biomeId)
     const destination = hero.biomes[index]

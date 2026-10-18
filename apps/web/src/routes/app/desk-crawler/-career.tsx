@@ -142,45 +142,52 @@ export function ComingUp({ unlocks, roster }: { unlocks?: UnlockView | null; ros
  * features this hero's level has opened and the level each of the others arrives at.
  */
 export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerView; unlocks: UnlockView | null; floors?: ReadonlyArray<{ name: string; unlockLevel: number }> }) {
-  const reached = career.rungs.filter((rung) => rung.state === 'done').length
   const t = useT(dcCareerMessages)
   const c = useContent()
   const locale = useLocale()
+  const done = career.rungs.map((rung, index) => ({ rung, index })).filter(({ rung }) => rung.state === 'done')
+  const open = career.rungs.map((rung, index) => ({ rung, index })).filter(({ rung }) => rung.state !== 'done')
+  const step = (rung: CareerView['rungs'][number], index: number) => {
+    const hidden = rung.state === 'ahead' && index > career.rung + PREVIEW
+    return (
+      <li key={rung.id} aria-current={rung.state === 'current' ? 'step' : undefined} className={`grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 border-t-2 border-dashed border-rule py-3 first:border-t-0 ${rung.state === 'ahead' ? 'text-muted' : ''}`}>
+        <span aria-hidden="true" className={`grid size-8 place-items-center border-2 ${rung.state === 'done' ? 'border-night bg-gold text-night' : rung.state === 'current' ? 'border-night bg-night text-gold-ink' : 'border-dashed border-faint text-muted'}`}>
+          {rung.state === 'done' ? <PixelIcon kind="todo" plain /> : <span className="hud text-hud-sm">{hidden ? '?' : index + 1}</span>}
+        </span>
+        {hidden ? (
+          <p className="pt-1.5 text-sm"><span className="sr-only">{t.rung(index + 1)}</span>{t.notYet}</p>
+        ) : (
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="pt-1 font-semibold">
+              <span className="sr-only">{rung.state === 'done' ? t.reachedLabel : rung.state === 'current' ? t.currentGoal : t.ahead}</span>
+              {c.text(rung.title)}
+            </p>
+            <p className="text-sm">{c.text(rung.blurb)}</p>
+            <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
+              <span className={rung.state === 'ahead' ? '' : 'text-gold-ink'}>{t.gold(formatNumber(locale, rung.gold))}</span>
+              {rung.companion ? <span className="text-muted">{t.inCompanion}</span> : null}
+              {rung.state === 'done' ? rung.reachedAt !== null ? <LocalTime at={rung.reachedAt} format={reachedOn(TAGS[locale])} className="text-xp-ink" /> : <span className="text-muted">{t.beforeLadder}</span> : null}
+            </p>
+          </div>
+        )}
+      </li>
+    )
+  }
   return (
     <div className="flex min-w-0 flex-col gap-8">
       <section aria-labelledby="career-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4">
           <SectionTitle id="career-title" glyph="career" as="h1">{t.career}</SectionTitle>
-          <p className="text-sm text-muted">{t.reached(reached, career.total)}</p>
+          <p className="text-sm text-muted">{t.reached(done.length, career.total)}</p>
         </div>
         <p className="text-sm">{t.ladderIntro}</p>
+        {/* D191: the goals already done fold away, so the page opens on the current goal. */}
+        {done.length > 0 ? <details className="border-t-2 border-dashed border-rule pt-3">
+          <summary className="min-h-11 cursor-pointer font-semibold">{t.doneGoals(done.length)}</summary>
+          <ol className="flex flex-col">{done.map(({ rung, index }) => step(rung, index))}</ol>
+        </details> : null}
         <ol className="flex flex-col">
-          {career.rungs.map((rung, index) => {
-            const hidden = rung.state === 'ahead' && index > career.rung + PREVIEW
-            return (
-              <li key={rung.id} aria-current={rung.state === 'current' ? 'step' : undefined} className={`grid min-w-0 grid-cols-[2rem_minmax(0,1fr)] items-start gap-x-3 border-t-2 border-dashed border-rule py-3 first:border-t-0 ${rung.state === 'ahead' ? 'text-muted' : ''}`}>
-                <span aria-hidden="true" className={`grid size-8 place-items-center border-2 ${rung.state === 'done' ? 'border-night bg-gold text-night' : rung.state === 'current' ? 'border-night bg-night text-gold-ink' : 'border-dashed border-faint text-muted'}`}>
-                  {rung.state === 'done' ? <PixelIcon kind="todo" plain /> : <span className="hud text-hud-sm">{hidden ? '?' : index + 1}</span>}
-                </span>
-                {hidden ? (
-                  <p className="pt-1.5 text-sm"><span className="sr-only">{t.rung(index + 1)}</span>{t.notYet}</p>
-                ) : (
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <p className="pt-1 font-semibold">
-                      <span className="sr-only">{rung.state === 'done' ? t.reachedLabel : rung.state === 'current' ? t.currentGoal : t.ahead}</span>
-                      {c.text(rung.title)}
-                    </p>
-                    <p className="text-sm">{c.text(rung.blurb)}</p>
-                    <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
-                      <span className={rung.state === 'ahead' ? '' : 'text-gold-ink'}>{t.gold(formatNumber(locale, rung.gold))}</span>
-                      {rung.companion ? <span className="text-muted">{t.inCompanion}</span> : null}
-                      {rung.state === 'done' ? rung.reachedAt !== null ? <LocalTime at={rung.reachedAt} format={reachedOn(TAGS[locale])} className="text-xp-ink" /> : <span className="text-muted">{t.beforeLadder}</span> : null}
-                    </p>
-                  </div>
-                )}
-              </li>
-            )
-          })}
+          {open.map(({ rung, index }) => step(rung, index))}
         </ol>
       </section>
 

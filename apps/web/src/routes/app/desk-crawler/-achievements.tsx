@@ -186,7 +186,9 @@ function Summary({ view, earned, onOpen }: { view: View; earned: EarnedFamily[];
   // Only what the last hourly tally has counted: one earned since then would read as held by nobody.
   const counted = (f: EarnedFamily) => (view.rarity?.counts[f.earned.id] ?? 0) > 0
   const share = (f: EarnedFamily) => (view.rarity && view.rarity.totalPlayers > 0 ? (view.rarity.counts[f.earned.id] ?? 0) / view.rarity.totalPlayers : 1)
-  const rarest = view.rarity ? earned.filter(counted).reduce<EarnedFamily | null>((best, f) => (best === null || share(f) < share(best) ? f : best), null) : null
+  // D191: only an uncommon-or-rarer one is worth calling the rarest; with nothing but commons the row hides.
+  const notCommon = (f: EarnedFamily) => rarityOf(f.earned.id, view.rarity, t)?.band !== 'common'
+  const rarest = view.rarity ? earned.filter((f) => counted(f) && notCommon(f)).reduce<EarnedFamily | null>((best, f) => (best === null || share(f) < share(best) ? f : best), null) : null
   const latest = earned.reduce<EarnedFamily | null>((best, f) => ((f.earned.unlockedAt ?? 0) > (best?.earned.unlockedAt ?? 0) ? f : best), null)
   // The next tier nearest to coming, by share of its target: something to look forward to, never a task.
   const progress = (f: EarnedFamily) => (f.next && f.target > 0 ? Math.min(f.value, f.target) / f.target : -1)
@@ -198,7 +200,6 @@ function Summary({ view, earned, onOpen }: { view: View; earned: EarnedFamily[];
   return (
     <div className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <Meter label={t.found} value={earned.length} max={view.families.length} tone="gold" />
-      <p className="-mt-1 text-xs text-muted tabular-nums">{t.tiersEarned(view.unlocked.length, ACHIEVEMENTS.length)}</p>
       {earned.length === 0 ? <p className="text-sm">{t.firstOne}</p> : null}
       {rows.length > 0 ? (
         <dl className="grid gap-x-6 min-[480px]:grid-cols-2 sm:grid-cols-3">

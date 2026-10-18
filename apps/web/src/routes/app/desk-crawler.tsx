@@ -96,8 +96,8 @@ function SignedInApp() {
             <span className="ml-3 text-xs text-gold-ink">Desk Crawler</span>
           </li>
           {NAV.map((item) => {
-            // The Bag tab carries how many slots are used as a badge, like a notification count.
-            const count = item.to === '/app/desk-crawler/inventory' ? bagUsed : undefined
+            // The Bag tab carries how many spares wait to be sold or salvaged, like a notification count; none, no badge.
+            const count = item.to === '/app/desk-crawler/inventory' && bagUsed !== undefined && bagUsed > 0 ? bagUsed : undefined
             const dot = item.to === '/app/desk-crawler' && rewardWaiting
             return (
               <li key={item.to} className="flex-1">

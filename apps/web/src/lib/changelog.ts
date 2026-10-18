@@ -26,6 +26,12 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-18',
     changes: [
       {
+        title: 'A tidier companion',
+        body: 'Rankings open on the 7-day board, the same one your TRMNL shows. The Career page folds the goals you have done, so it opens on the current one. The name tag and makeover moved to the More tab, next to your names, and Pause moved there too. The Bag tab counts the spares waiting to be sold or salvaged.',
+        fr: { title: 'Un compagnon plus clair', body: 'Les classements s’ouvrent sur le classement sur 7 jours, le même que sur votre TRMNL. La page Carrière replie les objectifs atteints et s’ouvre sur l’objectif en cours. Le badge nominatif et le relooking sont passés dans l’onglet Plus, à côté de vos noms, tout comme la pause. L’onglet Sac compte les objets en trop à vendre ou recycler.' },
+        de: { title: 'Eine aufgeräumtere Begleit-App', body: 'Die Ranglisten öffnen mit der 7-Tage-Rangliste, derselben wie auf deinem TRMNL. Die Karriereseite klappt erreichte Ziele ein und öffnet beim aktuellen Ziel. Namensschild und Umstyling sind in den Tab Mehr gezogen, neben deine Namen, und die Pause ebenfalls. Der Taschen-Tab zählt die Ersatzstücke, die du verkaufen oder zerlegen kannst.' },
+      },
+      {
         title: 'A full bag no longer stops your hero',
         body: 'When the bag fills up, your hero holds the next find for you and keeps adventuring, earning XP and gold as usual. Further finds stay behind until you make room, and your TRMNL keeps showing the adventure with a short note about the bag. Selling or salvaging a spare moves the held find into the bag, and the Bag page can do it in one tap.',
         fr: { title: 'Un sac plein n’arrête plus votre héros', body: 'Quand le sac est plein, votre héros vous garde la prochaine trouvaille et continue l’aventure, en gagnant XP et or comme d’habitude. Les trouvailles suivantes restent sur place jusqu’à ce que vous fassiez de la place, et votre TRMNL continue d’afficher l’aventure avec une courte note sur le sac. Vendre ou recycler un objet en trop fait passer la trouvaille dans le sac, et la page Sac peut le faire en une touche.' },

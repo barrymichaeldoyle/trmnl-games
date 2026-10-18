@@ -16,11 +16,12 @@ import { Records } from './-records'
 import { FollowingCard } from './-following'
 import { useShownName } from './-withName'
 
-export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcLogMessages, locale).rankingsTitle, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_24h' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
+export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcLogMessages, locale).rankingsTitle, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_7d' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
 
 type Board = 'recent_7d' | 'recent_24h' | 'overall'
 // Labels short enough to sit on one line in a third of a phone screen. Shortest period first; it opens the page.
-const TABS: Board[] = ['recent_24h', 'recent_7d', 'overall']
+// D191: the seven-day board leads, the one the TRMNL shows, so both report the same rank.
+const TABS: Board[] = ['recent_7d', 'recent_24h', 'overall']
 
 /** Player names are often one long token ("Marcus_the_Bold"): offer a line break after each underscore before any mid-word break. */
 const breakable = (name: string) => name.split(/(?<=_)/).flatMap((part, index) => (index ? [<wbr key={index} />, part] : [part]))
@@ -54,7 +55,7 @@ function RankRow({ row, own, board }: { row: Row; own: boolean; board: Board }) 
 }
 
 function Leaderboard() {
-  const [board, setBoard] = useState<Board>('recent_24h')
+  const [board, setBoard] = useState<Board>('recent_7d')
   const [cohortKey, setCohortKey] = useState<string | undefined>(undefined)
   const t = useT(dcLogMessages)
   const locale = useLocale()

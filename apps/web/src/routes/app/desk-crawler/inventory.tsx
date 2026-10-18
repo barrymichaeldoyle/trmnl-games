@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { nextSlotAfter } from '@trmnl-games/desk-crawler/sim/schedule'
 import { api } from '@trmnl-games/backend/api'
 import { HERO_NAME_RULE } from '@trmnl-games/platform'
@@ -19,6 +19,7 @@ import { RARITY_TONE } from '../../../lib/palette'
 import { EmptySlot, Gem, PotionSlot, Sheet, SheetTitle, Slot, SlotPreview } from './-bagSlots'
 import { useNow } from './-pulse'
 import { ConfirmButtons, ConfirmSheet, Consequences } from './-confirm'
+import { BuySheet, Price, type PurchaseIntent } from './-shop'
 import { WithName } from './-withName'
 import { formatNumber, formatTime, messagesFor, useLocale, useT } from '../../../lib/i18n'
 import { useContent } from '../../../lib/useContent'
@@ -110,8 +111,6 @@ function Inventory() {
   const buyBag = useIntent(api.inventory.buyBag, { onFeedback: notify })
   const buyPouch = useIntent(api.inventory.buyPouch, { onFeedback: notify })
   const buyOffer = useIntent(api.inventory.buyOffer, { onFeedback: notify })
-  const buyNameTag = useIntent(api.inventory.buyNameTag, { onFeedback: notify })
-  const buyMakeover = useIntent(api.inventory.buyMakeover, { onFeedback: notify })
   const t = useT(dcBagMessages)
   const c = useContent()
   const statLabel = (item: Gear) => t.stat[item.kind]
@@ -136,7 +135,7 @@ function Inventory() {
   const reviewing = review === null ? null : review.kind === 'sell' ? sellMany : salvageMany
   const equippedOf = (kind: Gear['kind']) => gear.find((item) => item.equipped && item.kind === kind) ?? null
   const deltaOf = (item: Gear) => { const current = equippedOf(item.kind); return statOf(item) - (current ? statOf(current) : 0) }
-  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || clearResume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending || buyNameTag.pending || buyMakeover.pending
+  const busy = equip.pending || unequip.pending || sellMany.pending || salvageMany.pending || upgrade.pending || chooseAffix.pending || combine.pending || claim.pending || resume.pending || clearResume.pending || buyBag.pending || buyPouch.pending || buyOffer.pending
   // D131: the strengths in the pouch and the combine recipe; one row and no recipe under a catalog without strengths.
   const potionRows = bag.potionRows as PotionRow[]
   const potionCombine = bag.potionCombine as Combine | null
@@ -305,9 +304,8 @@ function Inventory() {
       {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} discountPct={bag.ladder.merchantDiscountPct} disabled={!manageable || busy} intent={buyOffer} /> : null}
       <div className="grid gap-8 sm:grid-cols-2">
         <div id="bags"><BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} /></div>
-        <div id="pouch"><PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} /></div>
-        {bag.nameTag ? <NameTag tag={bag.nameTag} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyNameTag} /> : null}
-        {bag.makeover ? <Makeover makeover={bag.makeover} heroName={hero.name} gold={hero.gold} disabled={busy} intent={buyMakeover} /> : null}
+        {/* A pouch with nothing bigger to buy has nothing to act on, so its card hides (D167). */}
+        {bag.pouch.next ? <div id="pouch"><PotionPouch pouch={bag.pouch} potions={bag.potions} gold={hero.gold} disabled={!manageable || busy} intent={buyPouch} /></div> : null}
       </div>
 
       {mode !== 'browse' ? <div className="window sticky bottom-0 z-20 -mx-3 px-3 pt-3 min-[375px]:-mx-4 min-[375px]:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0">
@@ -471,14 +469,6 @@ function MilestoneLine({ milestone, findable }: { milestone: string | null; find
 }
 type Offer = { id: 'potions' | 'pouch' | 'bag'; name: string; quantity: number; price: number; tierId?: string }
 type Visit = { offers: Offer[]; expiresAtTick: number; ticksLeft: number; biomeId: string }
-type PurchaseIntent<A> = { pending: boolean; error?: string | null; run: (args: A, message?: string) => Promise<boolean> }
-
-/** D156: a price the hero cannot pay yet, as plain text where the Buy button will be, so no dead button sits on the page. */
-function Price({ price, gold, className = '' }: { price: number; gold: number; className?: string }) {
-  const t = useT(dcBagMessages)
-  const [amount, rest] = t.priceToGo(price, gold)
-  return <p className={`text-sm tabular-nums ${className}`}><span className="font-semibold text-gold-ink">{amount}</span>{rest}</p>
-}
 
 /** D77/D122: the potion pouch, its next tier and how to get it, beside the bag ladder. */
 function PotionPouch({ pouch, potions, gold, disabled, intent }: { pouch: Pouch; potions: number; gold: number; disabled: boolean; intent: PurchaseIntent<{ tierId: string }> }) {
@@ -527,65 +517,6 @@ function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: 
     {visit.offers.some((offer) => gold < offer.price) ? <p className="mt-2 text-sm tabular-nums">{have[0]}<span className="text-gold-ink">{have[1]}</span>{have[2]}</p> : null}
     <BuySheet open={asking !== null} title={asking ? t.buyOffer(asking.name) : ''} price={asking?.price ?? 0} gold={gold} pending={intent.pending} onClose={() => setAsking(null)} onConfirm={() => (asking ? intent.run({ offerId: asking.id }, t.offerBought(asking.name)) : Promise.resolve(false))}>
       <li>{t.sellsOnce}</li>
-    </BuySheet>
-  </Card>
-}
-
-/** Every purchase asks first: a stray tap only opens this sheet, which says what changes and the gold left. */
-function BuySheet({ open, title, price, gold, pending, onConfirm, onClose, children }: { open: boolean; title: string; price: number; gold: number; pending: boolean; onConfirm: () => Promise<boolean>; onClose: () => void; children: ReactNode }) {
-  const t = useT(dcBagMessages)
-  return (
-    <ConfirmSheet open={open} title={title} confirmLabel={t.buyFor(price)} busyLabel={t.buying} cancelLabel={t.cancel} pending={pending} onClose={onClose} onConfirm={async () => { if (pending) return; await onConfirm(); onClose() }}>
-      <Consequences>
-        {children}
-        <li>{t.costs(price)}</li>
-        <li>{t.remaining(gold - price)}</li>
-      </Consequences>
-    </ConfirmSheet>
-  )
-}
-
-/** D142: one "Hi, my name is" name tag in stock a day; buying it renames the current hero. */
-function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { price: number; inStockAt: number | null }; heroName: string; gold: number; disabled: boolean; intent: PurchaseIntent<{ name: string }> }) {
-  const [name, setName] = useState('')
-  const [asking, setAsking] = useState(false)
-  const inStock = tag.inStockAt === null || tag.inStockAt <= Date.now()
-  const affordable = gold >= tag.price
-  const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null && name.trim() !== heroName
-  const t = useT(dcBagMessages)
-  const locale = useLocale()
-  return <Card title={t.nameTag} icon="tag">
-    <p>{t.nameTagBody}</p>
-    {inStock && !affordable ? <><Price price={tag.price} gold={gold} className="mt-3" /><p className="mt-1 text-sm text-muted">{t.oneADay}</p></> : inStock ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (valid && affordable) setAsking(true) }}>
-      <NameField label={t.newNameFor(heroName)} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={intent.pending} />
-      <Button type="submit" disabled={disabled || !valid} pending={intent.pending} icon="coin" busyLabel={t.buying}>{t.buyFor(tag.price)}</Button>
-      <p className="text-sm text-muted">{t.oneADay}</p>
-    </form> : <p className="mt-3 text-sm text-muted">{t.tagSold(new Date(tag.inStockAt!).toLocaleString(locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' }))}</p>}
-    <BuySheet open={asking} title={t.renameTitle(heroName, name.trim())} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, t.renamed(name.trim())); if (done) setName(''); return done }}>
-      <li>{t.goesBy(heroName, name.trim())}</li>
-      <li>{t.nextTag}</li>
-    </BuySheet>
-  </Card>
-}
-
-/** D149: a makeover switches the current hero's gender for gold, any time. Purely cosmetic. */
-function Makeover({ makeover, heroName, gold, disabled, intent }: { makeover: { price: number; gender: HeroGender }; heroName: string; gold: number; disabled: boolean; intent: PurchaseIntent<{ gender: HeroGender }> }) {
-  const [gender, setGender] = useState<HeroGender>(makeover.gender)
-  const [asking, setAsking] = useState(false)
-  useEffect(() => setGender(makeover.gender), [makeover.gender])
-  const affordable = gold >= makeover.price
-  const changed = gender !== makeover.gender
-  const t = useT(dcBagMessages)
-  return <Card title={t.makeover} icon="hero">
-    <p>{t.makeoverBody(heroName)}</p>
-    {affordable ? <form className="mt-3 flex flex-col gap-2" onSubmit={(event) => { event.preventDefault(); if (changed) setAsking(true) }}>
-      <GenderPicker small value={gender} onChange={setGender} disabled={intent.pending} />
-      {/* The button waits for a different look to be picked, so it never offers to buy the one the hero has. */}
-      {changed ? <Button type="submit" disabled={disabled} pending={intent.pending} icon="coin" busyLabel={t.buying}>{t.buyFor(makeover.price)}</Button> : <p className="text-sm text-muted">{t.pickLook}</p>}
-    </form> : <Price price={makeover.price} gold={gold} className="mt-3" />}
-    <BuySheet open={asking} title={t.makeTitle(heroName, gender)} price={makeover.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => await intent.run({ gender }, t.newLook(heroName))}>
-      <li>{t.onlyLook}</li>
-      <li>{t.changeBackFor(makeover.price)}</li>
     </BuySheet>
   </Card>
 }
@@ -698,7 +629,7 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
 function shortText(step: Step, hero: { level: number; gold: number }, materials: readonly Material[], t: T): string {
   if (step.requiredLevel > hero.level) return t.stepNeedsLevel(step.label, step.requiredLevel)
   if (Object.keys(step.shortfall).length > 0) return t.needsMore(materialsText(step.shortfall, materials, t))
-  return t.youHaveGold(hero.gold)
+  return t.goldToGo(step.gold - hero.gold)
 }
 
 /** A piece's own figure stays neutral; only a comparison takes a colour (green better, red worse). */
