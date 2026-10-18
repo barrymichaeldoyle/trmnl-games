@@ -20,7 +20,10 @@ describe('Paper Lives intents (D159, L2)', () => {
     vi.setSystemTime(Date.UTC(2026, 10, 2, 6, 10, 3))
     t = convexTest(schema, modules)
   })
-  afterEach(() => vi.useRealTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
 
   const as = (alias: string) => t.withIdentity({ issuer: 'issuer', subject: alias })
 
@@ -71,6 +74,9 @@ describe('Paper Lives intents (D159, L2)', () => {
   })
 
   it('begins the next life as a child with the inheritance, or as a stranger, in place', async () => {
+    // The world seed comes from Math.random, and the last thirty-odd years differ with it: some runs spend the whole
+    // fortune and leave a will of 0. Pinned, the run is the same every time and the will leaves gold.
+    vi.spyOn(Math, 'random').mockReturnValue(0.42)
     const lifeId = await seedLife(
       t,
       {
@@ -94,8 +100,10 @@ describe('Paper Lives intents (D159, L2)', () => {
     const child = await lifeOf(t, lifeId)
     expect(child).toMatchObject({ ordinal: 2, life: { first: 'Ada', status: 'living', generation: 2 } })
     expect(child.life.age).toBeGreaterThanOrEqual(66)
-    expect(child.life.gold).toBeGreaterThan(0)
     const record = await t.run(async (ctx) => await ctx.db.query('lifeRecords').first())
+    // The heir starts with exactly their bequest.
+    expect(child.life.gold).toBeGreaterThan(0)
+    expect(child.life.gold).toBe(record?.bequests.find((bequest) => bequest.personId === 'c1')?.gold)
     expect(record?.continuedBy).toBe('child')
     // The child's life goes on from the next tick.
     await nextPaperLivesTick(t)
