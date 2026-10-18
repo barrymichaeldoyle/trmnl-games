@@ -212,12 +212,14 @@ describe('player intents', () => {
     expect((await t.run(async (ctx) => await ctx.db.get(heroId)))?.status).toBe('exploring')
   })
 
-  it('switches stance as a policy in any status, counts the switch, and treats the current stance as a no-op (D76)', async () => {
+  it('switches stance as a policy in any status, counts the switch, and treats the current stance as a no-op (D76, D192)', async () => {
     const heroId = await seedHero(t, {}, 'Ana')
     const user = as(t, 'Ana')
     const view = (await user.query(api.heroes.mine, {})) as { stance: string; stances: Array<{ id: string; potionBelowPct: number }> }
     expect(view.stance).toBe('balanced')
     expect(view.stances.map((s) => s.id)).toEqual(['cautious', 'balanced', 'bold'])
+    // D192: a hero with no stance of its own plays Balanced; choosing Balanced is a choice, and only then a no-op.
+    expect(await user.mutation(api.heroes.setStance, { operationId: opId(), stance: 'balanced' })).toMatchObject({ changed: true })
     expect(await user.mutation(api.heroes.setStance, { operationId: opId(), stance: 'balanced' })).toMatchObject({ changed: false })
     expect(await user.mutation(api.heroes.setStance, { operationId: opId(), stance: 'bold' })).toMatchObject({ changed: true })
     const hero = await t.run(async (ctx) => await ctx.db.get(heroId))
