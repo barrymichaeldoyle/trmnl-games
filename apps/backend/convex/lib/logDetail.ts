@@ -60,7 +60,7 @@ const outcome = v.union(
     templateId: v.optional(v.string()),
     rarity: v.optional(rarity),
     // `drawer` is legacy (D111, removed in D123): logs written under content v8 to v10 may carry it.
-    destination: v.optional(v.union(v.literal('bag'), v.literal('drawer'), v.literal('held'))),
+    destination: v.optional(v.union(v.literal('bag'), v.literal('drawer'), v.literal('held'), v.literal('left'))),
     goldGranted: v.number(),
     jackpot: v.boolean(),
     potionFullFallback: v.boolean(),

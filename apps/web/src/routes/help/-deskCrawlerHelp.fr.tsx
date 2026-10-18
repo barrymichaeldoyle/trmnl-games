@@ -82,7 +82,6 @@ export const fr: HelpPage = {
           <ul>
             <li>La page Carrière, sous Plus, liste les {F.career.goals} objectifs dans l’ordre, avec la date à laquelle vous avez atteint chacun. Un objectif déjà rempli quand l’échelle est arrivée compte comme atteint.</li>
             {F.unlocks !== undefined ? <li>Les fonctions arrivent par niveau, que vous passiez ou non : la liste de tâches au niveau {F.unlocks.todo}, les postures au niveau {F.unlocks.stances}, les décisions du bureau au niveau {F.unlocks.choices}, {F.meetings?.level !== undefined ? `les rencontres entre collègues au niveau ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `le démontage et l’établi au niveau ${F.workbench.level}, ` : ''}le marchand ambulant au niveau {F.unlocks.merchant} et les raids de bureau au niveau {F.unlocks.raids}. Votre TRMNL indique « Débloqué » à chaque fois. Les étages s’ouvrent aussi par niveau : {FLOORS_LINE}.</li> : null}
-            <li>Un objectif vous demande de passer en posture Audacieuse, qui pille deux fois plus souvent qu’Équilibrée. Une fois l’objectif validé, vous pouvez revenir en arrière.</li>
             <li>Quelques premiers objectifs arrivent à coup sûr à temps : le premier combat en quelques aventures, une pièce d’équipement dans la première douzaine, et une première décision, un premier marchand et une première élite dans la journée qui suit leur niveau. Tout le reste dépend du hasard.</li>
           </ul>
         </>
@@ -199,7 +198,7 @@ export const fr: HelpPage = {
         <li><strong>Économe</strong> perd 5 points d’or en moins quand ça tourne mal : une retraite ne coûte plus d’or au lieu de 5 %, et un K.-O. coûte 5 % au lieu de 10 %.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">Quand le sac est plein</h2>
-      <p>Un nouveau héros commence avec un petit sac en papier de 6 places. L’équipement porté et les potions ne prennent pas de place. Quand le sac est plein, votre héros continue l’aventure jusqu’à trouver une autre pièce. Cette pièce est mise de côté pour vous, et votre héros dort jusqu’à ce que vous fassiez de la place.</p>
+      <p>Un nouveau héros commence avec un petit sac en papier de 6 places. L’équipement porté et les potions ne prennent pas de place. Quand le sac est plein, votre héros met de côté pour vous la prochaine pièce trouvée et continue l’aventure. Tant qu’elle attend, les trouvailles suivantes restent sur place : votre héros ne s’arrête jamais, il cesse seulement de ramasser de l’équipement jusqu’à ce que vous fassiez de la place.</p>
       <h2 id="bigger-bags">Sacs plus grands</h2>
       <p>Votre sac grandit avec l’or. {F.tote ? `Votre héros trouve ${t.nameWith(F.tote.name, 'un')} (${F.tote.size}) dans les deux premières heures environ. ` : ''}Ensuite, les sacs plus grands s’achètent sur la page Sac, un à la fois : {rungs(F.shopBags)}, jusqu’à {F.topBag} places. Il n’y a pas de niveau requis, et les sacs ne tombent jamais en butin.</p>
       <ol className="[&_li]:list-decimal">
@@ -207,7 +206,7 @@ export const fr: HelpPage = {
         <li>Si une trouvaille est mise de côté, choisissez Récupérer la trouvaille. Laissez au moins une place libre après l’avoir récupérée pour que les aventures reprennent.</li>
         <li>Une fois une place libre et plus rien en attente, les aventures reprennent toutes seules en moins de 15 minutes. Vous pouvez encore choisir une autre zone débloquée sur la page Sac avant cela.</li>
       </ol>
-      <p>Équiper un objet ne libère pas de place. Vendre de l’équipement, récupérer une trouvaille ou acheter un plus grand sac le fait : les aventures reprennent toutes seules. Le sommeil dû au sac n’a rien à voir avec le mode veille de votre TRMNL ; un écran en veille n’arrête jamais le jeu.</p>
+      <p>Équiper un objet ne libère pas de place. Vendre ou recycler de l’équipement, ou acheter un plus grand sac, le fait, et la trouvaille mise de côté passe toute seule dans le sac. La page Sac peut aussi vendre votre objet le plus faible en trop et garder la trouvaille en une touche. Le mode veille de votre TRMNL n’arrête jamais le jeu non plus.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Démontage et établi</h2>
         <p>{F.workbench.level !== undefined ? `À partir du niveau ${F.workbench.level}, l’` : 'L’'}équipement en trop a deux façons de quitter le sac : le vendre contre de l’or, ou le démonter en matériaux sur la page Sac. Le démontage rapporte selon le palier où la pièce a été trouvée, en unités du matériau de sa rareté : {F.workbench.materials.map((m) => `${name(m.name).toLowerCase()} pour l’équipement ${m.rarities.map((r) => rarityFr[r] ?? r).join(' et ')}`).join(', ')}. L’équipement épique rapporte {F.workbench.epicMultiplier} fois plus. Les matériaux ne prennent pas de place dans le sac et ne se vendent jamais. L’équipement n’est démonté que si vous le choisissez.{F.workbench.level !== undefined ? ` Avant le niveau ${F.workbench.level}, vendez le surplus : la première amélioration demande de toute façon le niveau ${F.workbench.level}.` : ''}</p>
@@ -232,10 +231,10 @@ export const fr: HelpPage = {
       <h2 id="alerts">Alertes</h2>
       <p>Votre TRMNL est le moyen principal de suivre votre héros, mais les Réglages peuvent aussi envoyer une notification sur votre téléphone dans deux cas, chacun désactivé tant que vous ne l’activez pas :</p>
       <ul>
-        <li><strong>Héros endormi :</strong> le sac est plein et les aventures sont arrêtées. L’alerte arrive une demi-heure après le début de la sieste, pour ne rien envoyer si vous triez déjà le sac, et une seule fois par sieste.</li>
+        <li><strong>Sac plein :</strong> le sac est plein et votre héros vous garde une trouvaille. L’alerte arrive une demi-heure après que le sac s’est rempli, pour ne rien envoyer si vous le triez déjà, et une seule fois chaque fois qu’il se remplit.</li>
         <li><strong>Bonne affaire chez le marchand :</strong> un marchand vend le prochain sac ou la prochaine pochette{F.merchantOff > 0 ? ` à −${F.merchantOff} %` : ''} et votre héros a l’or. Au plus une fois par jour. Un marchand qui ne vend que des potions n’en envoie jamais.</li>
       </ul>
-      <p>Vous recevez au plus deux alertes par jour. Les heures calmes vont de 21:00 à 08:00 sauf si vous les changez : une alerte de sieste attend leur fin, et une bonne affaire qui arrive pendant ces heures est ignorée. Avant l’envoi, le jeu vérifie que l’alerte tient toujours, pour ne jamais vous parler d’une sieste déjà terminée ou d’une offre disparue. Les décisions, raids, K.-O., montées de niveau et souvenirs n’envoient jamais d’alerte.</p>
+      <p>Vous recevez au plus deux alertes par jour. Les heures calmes vont de 21:00 à 08:00 sauf si vous les changez : une alerte de sac plein attend leur fin, et une bonne affaire qui arrive pendant ces heures est ignorée. Avant l’envoi, le jeu vérifie que l’alerte tient toujours, pour ne jamais vous parler d’un sac déjà trié ou d’une offre disparue. Les décisions, raids, K.-O., montées de niveau et souvenirs n’envoient jamais d’alerte.</p>
       <p>Choisissez Autoriser sur cet appareil dans les Réglages, puis acceptez la demande de votre navigateur. Sur iPhone et iPad, ajoutez d’abord TRMNL Games à votre écran d’accueil (Partager, puis Sur l’écran d’accueil) et ouvrez-le depuis là. Chaque appareil autorisé est listé dans les Réglages avec un bouton Retirer ; retirer le dernier désactive les alertes.</p>
       <h2 id="troubleshooting">Dépannage</h2>
       <h3 id="not-on-your-screen">Votre héros n’apparaît pas à l’écran</h3>

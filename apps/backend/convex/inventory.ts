@@ -68,8 +68,18 @@ const bagFull = (hero: Doc<'heroes'>, items: Doc<'items'>[]) => isBagFull(asBagH
  * drops a wake that is not due yet so the next tick does not quarantine them.
  */
 async function syncBagSleep(ctx: MutationCtx, heroId: Id<'heroes'>): Promise<void> {
-  const hero = await ctx.db.get(heroId)
-  if (!hero || hero.status !== 'sleeping') return
+  let hero = await ctx.db.get(heroId)
+  if (!hero) return
+  const items = await heroItems(ctx, hero._id)
+  // D189: a slot that frees up takes the held find at once, so making room is all the player has to do.
+  if (hero.heldItemId !== undefined && !bagFull(hero, items)) {
+    const heldId = hero.heldItemId
+    const held = items.find((item) => item._id === heldId)
+    await ctx.db.patch(hero._id, { heldItemId: undefined })
+    await commandLog(ctx, hero, 'claim_held', held ? `Claimed the ${itemLabel(held)}.` : 'Claimed the held find.')
+    hero = (await ctx.db.get(heroId))!
+  }
+  if (hero.status !== 'sleeping') return
   const ready = hero.heldItemId === undefined && !bagFull(hero, await heroItems(ctx, hero._id))
   if (ready) {
     if (hero.wakeAtTick !== undefined) return
@@ -249,6 +259,8 @@ export const mine = query({
       potionCombine: workbenchOpen ? combineView(content, items, held) : null,
       canResume: hero.status === 'sleeping' && hero.heldItemId === undefined && !bagFull(hero, items) && hero.wakeAtTick === undefined,
       resumePlan: hero.status === 'sleeping' && hero.wakeAtTick === undefined && !(hero.heldItemId === undefined && !bagFull(hero, items)) ? resumePlanView(hero, items) : null,
+      // D189: an awake hero holding a find (v26 keeps going on a full bag) gets the same one-tap plan, without a resume.
+      keepPlan: hero.status !== 'sleeping' && hero.heldItemId !== undefined ? resumePlanView(hero, items, 0) : null,
       gear: items
         .filter((item) => isGear(item.kind))
         .map((item) => ({
@@ -468,7 +480,7 @@ export const claimHeld = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.claimHeld', {}, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (hero.status !== 'sleeping' || hero.heldItemId === undefined) throw appError('INVALID_STATE', 'There is no held find to claim.')
+      if (hero.heldItemId === undefined) throw appError('INVALID_STATE', 'There is no held find to claim.')
       const items = await heroItems(ctx, hero._id)
       const heldId = hero.heldItemId
       const held = items.find((item) => item._id === heldId)
@@ -518,11 +530,13 @@ export const clearAndResume = mutation({
   handler: async (ctx, args) =>
     await runIntent(ctx, args.operationId, 'inventory.clearAndResume', { itemIds: [...args.itemIds] }, async (user) => {
       const hero = await requirePlayableHero(ctx, user)
-      if (hero.status !== 'sleeping' || hero.wakeAtTick !== undefined) throw appError('INVALID_STATE', 'Your hero is not waiting on a full bag.')
+      // D189: an awake hero holding a find sorts the bag the same way; it just has nothing to resume.
+      const awake = hero.status !== 'sleeping'
+      if (awake ? hero.heldItemId === undefined : hero.wakeAtTick !== undefined) throw appError('INVALID_STATE', 'Your hero is not waiting on a full bag.')
       const items = await heroItems(ctx, hero._id)
       const free = hero.bagCapacity - bagUsed(asBagHero(hero), asSnapshots(items))
       const holding = hero.heldItemId !== undefined
-      const count = Math.max(0, (holding ? 1 : 0) + 1 - free)
+      const count = Math.max(0, (holding ? 1 : 0) + (awake ? 0 : 1) - free)
       const needed = weakestSpares(hero, items, count)
       if (needed.length < count) throw appError('BAG_FULL', 'Nothing left to sell. Free a slot another way.')
       const wanted = [...args.itemIds].map(String).sort().join(',')
@@ -540,6 +554,10 @@ export const clearAndResume = mutation({
         await ctx.db.patch(hero._id, { heldItemId: undefined })
         await commandLog(ctx, (await ctx.db.get(hero._id))!, 'claim_held', held ? `Claimed the ${itemLabel(held)}.` : 'Claimed the held find.')
       }
+      if (awake) {
+        await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+        return { changed: true, gold, count: needed.length }
+      }
       const world = await readWorld(ctx)
       const wakeAtTick = (world?.currentTick ?? 0) + 1
       await ctx.db.patch(hero._id, { wakeAtTick })
@@ -550,10 +568,11 @@ export const clearAndResume = mutation({
 })
 
 /** What to sell and whether to claim so one tap can put the hero back on the road. */
-function resumePlanView(hero: Doc<'heroes'>, items: Doc<'items'>[]) {
+function resumePlanView(hero: Doc<'heroes'>, items: Doc<'items'>[], spare = 1) {
   const free = hero.bagCapacity - bagUsed(asBagHero(hero), asSnapshots(items))
   const holding = hero.heldItemId !== undefined
-  const count = Math.max(0, (holding ? 1 : 0) + 1 - free)
+  // `spare`: the slot a sleeper needs left free for its next find; an awake hero only needs room for the held one.
+  const count = Math.max(0, (holding ? 1 : 0) + spare - free)
   const sell = weakestSpares(hero, items, count)
   return {
     sell: sell.map((item) => ({ id: item._id, label: itemLabel(item), saleValue: item.saleValue })),

@@ -250,7 +250,8 @@ export const claimDue = internalMutation({
       if (hero === null || hero._id !== row.heroId) { await skip(row, 'hero_gone'); continue }
       name = hero.name
       if (row.kind === 'asleep') {
-        if (hero.status !== 'sleeping' || hero.wakeAtTick !== undefined) { await skip(row, 'woke'); continue }
+        // D189: the bag is sorted once a wake is set, or nothing is held and the hero is not asleep on it.
+        if (hero.wakeAtTick !== undefined || (hero.heldItemId === undefined && hero.status !== 'sleeping')) { await skip(row, 'woke'); continue }
       } else {
         const visit = hero.merchant
         const offer = visit?.offers.find((candidate) => candidate.id === row.offerId)

@@ -32,6 +32,8 @@ export interface DeviceWords {
   readonly signIn: string
   readonly decisionWaiting: string
   readonly merchantVisiting: string
+  /** D189: an awake hero holding a find on a full bag (v26), a notice rather than an attention line. */
+  readonly bagFullKeepGoing: string
   readonly achievement: (title: string) => string
   readonly levelUp: (level: number) => string
   readonly eliteDefeated: string
@@ -140,6 +142,7 @@ const en: DeviceWords = {
   signIn: 'Sign in to the companion, then save this plugin in TRMNL.',
   decisionWaiting: 'A decision is waiting in the companion.',
   merchantVisiting: 'Merchant visiting. Shop in the companion soon.',
+  bagFullKeepGoing: 'Bag full. New finds stay behind until you make room.',
   achievement: (title) => `Achievement: ${title}`,
   levelUp: (level) => `Level up! Now level ${level}`,
   eliteDefeated: 'Elite defeated!',
@@ -212,6 +215,7 @@ const fr: DeviceWords = {
   signIn: 'Connectez-vous au compagnon, puis enregistrez ce plugin dans TRMNL.',
   decisionWaiting: 'Une décision vous attend dans le compagnon.',
   merchantVisiting: 'Un marchand est de passage. Faites vos achats dans le compagnon.',
+  bagFullKeepGoing: 'Sac plein. Les nouvelles trouvailles restent sur place jusqu’à ce que vous fassiez de la place.',
   achievement: (title) => `Succès : ${title}`,
   levelUp: (level) => `Niveau supérieur ! Niveau ${level}`,
   eliteDefeated: 'Élite vaincue !',
@@ -284,6 +288,7 @@ const de: DeviceWords = {
   signIn: 'Melde dich in der Begleit-App an und speichere dann dieses Plugin in TRMNL.',
   decisionWaiting: 'In der Begleit-App wartet eine Entscheidung.',
   merchantVisiting: 'Ein Händler ist da. Kauf bald in der Begleit-App ein.',
+  bagFullKeepGoing: 'Tasche voll. Neue Funde bleiben liegen, bis du Platz schaffst.',
   achievement: (title) => `Erfolg: ${title}`,
   levelUp: (level) => `Stufenaufstieg! Jetzt Stufe ${level}`,
   eliteDefeated: 'Elite besiegt!',

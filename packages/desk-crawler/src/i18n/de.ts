@@ -1367,6 +1367,7 @@ export const de: DeDictionary = {
     "Found a {item}! Bag holds {capacity}.": "Gefunden: {nom:item}! Die Tasche fasst {capacity}.",
     "Found a {item}! Holds {capacity} potions.": "Gefunden: {nom:item}! Fasst {capacity} Tränke.",
     "Bag full. Holding it until you make room.": "Tasche voll. Zurückgelegt, bis du Platz schaffst.",
+    "Bag full, so it stayed behind.": "Tasche voll, also blieb der Fund liegen.",
     "Unwrapped a gift.": "Ein Geschenk ausgepackt.",
     "A raid on {rival} went wrong.": "Ein Überfall auf {rival} ging schief.",
     "{rival}'s raid went wrong.": "Der Überfall von {rival} ging schief.",

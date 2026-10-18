@@ -23,6 +23,23 @@ export const changeIn = (change: Change, locale: Locale): { title: string; body:
 
 export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-18',
+    changes: [
+      {
+        title: 'A full bag no longer stops your hero',
+        body: 'When the bag fills up, your hero holds the next find for you and keeps adventuring, earning XP and gold as usual. Further finds stay behind until you make room, and your TRMNL keeps showing the adventure with a short note about the bag. Selling or salvaging a spare moves the held find into the bag by itself, and the Bag page can do it in one tap.',
+        fr: { title: 'Un sac plein n’arrête plus votre héros', body: 'Quand le sac est plein, votre héros vous garde la prochaine trouvaille et continue l’aventure, en gagnant XP et or comme d’habitude. Les trouvailles suivantes restent sur place jusqu’à ce que vous fassiez de la place, et votre TRMNL continue d’afficher l’aventure avec une courte note sur le sac. Vendre ou recycler un objet en trop fait passer la trouvaille dans le sac toute seule, et la page Sac peut le faire en une touche.' },
+        de: { title: 'Eine volle Tasche hält deinen Helden nicht mehr an', body: 'Ist die Tasche voll, legt dein Held den nächsten Fund für dich zurück und zieht weiter, mit XP und Gold wie gewohnt. Weitere Funde bleiben liegen, bis du Platz schaffst, und dein TRMNL zeigt weiter das Abenteuer mit einem kurzen Hinweis zur Tasche. Verkaufen oder Zerlegen eines Ersatzstücks bringt den Fund von allein in die Tasche, und die Taschen-Seite erledigt das mit einem Tipp.' },
+      },
+      {
+        title: 'No more goal asking you to switch to Bold',
+        body: 'The “Switch to Bold” goal sent heroes into the Cafeteria Depths on the riskiest stance, and many were knocked out there. It is gone from the ladder: a hero waiting on it moves on to the desk raid goal. Heroes who already reached it keep it.',
+        fr: { title: 'Plus d’objectif pour passer en Audacieux', body: 'L’objectif « Passez en Audacieux » envoyait les héros dans les Profondeurs de la cafétéria avec la posture la plus risquée, et beaucoup y étaient mis K.-O. Il quitte l’échelle : un héros qui l’attendait passe à l’objectif de raid de bureau. Les héros qui l’avaient atteint le gardent.' },
+        de: { title: 'Kein Ziel mehr, auf Draufgängerisch zu wechseln', body: 'Das Ziel „Wechsle zu Draufgängerisch“ schickte Helden mit der riskantesten Haltung in die Kantinentiefen, und viele gingen dort K. o. Es ist von der Leiter verschwunden: Ein Held, der darauf wartete, geht weiter zum Ziel für Schreibtisch-Überfälle. Helden, die es schon erreicht haben, behalten es.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-17',
     changes: [
       {

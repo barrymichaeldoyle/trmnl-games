@@ -175,6 +175,33 @@ describe('player intents', () => {
     expect(hero?.status).toBe('sleeping')
   })
 
+  it('lets an awake hero holding a find sell to keep it, and takes the find into the first slot that frees (D189)', async () => {
+    const heroId = await seedHero(t, { level: 4, hp: 136, status: 'exploring' }, 'Ana')
+    const spares = await addGear(t, heroId, 6)
+    const [held] = await addGear(t, heroId, 1)
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { heldItemId: held }))
+    const user = as(t, 'Ana')
+    const view = (await user.query(api.inventory.mine, {})) as { resumePlan: unknown; keepPlan: { sell: { id: Id<'items'>; saleValue: number }[]; claim: boolean; gold: number } | null }
+    expect(view.resumePlan).toBeNull()
+    expect(view.keepPlan).toMatchObject({ claim: true })
+    expect(view.keepPlan!.sell).toHaveLength(1)
+    const kept = await user.mutation(api.inventory.clearAndResume, { operationId: opId(), itemIds: view.keepPlan!.sell.map((item) => item.id) })
+    expect(kept).toMatchObject({ changed: true, gold: view.keepPlan!.gold, count: 1 })
+    let hero = await t.run(async (ctx) => await ctx.db.get(heroId))
+    expect(hero).toMatchObject({ status: 'exploring' })
+    expect(hero?.heldItemId).toBeUndefined()
+    expect(hero?.wakeAtTick).toBeUndefined()
+
+    // Hold another find, then free a slot by hand: the find moves in by itself.
+    const [next] = await addGear(t, heroId, 1)
+    await t.run(async (ctx) => await ctx.db.patch(heroId, { heldItemId: next }))
+    const spare = spares.find((id) => id !== view.keepPlan!.sell[0]!.id)!
+    await user.mutation(api.inventory.sell, { operationId: opId(), itemId: spare })
+    hero = await t.run(async (ctx) => await ctx.db.get(heroId))
+    expect(hero?.heldItemId).toBeUndefined()
+    expect(hero?.status).toBe('exploring')
+  })
+
   it('pauses and resumes without catch-up, and potions respect full HP', async () => {
     const heroId = await seedHero(t, {}, 'Ana')
     const user = as(t, 'Ana')

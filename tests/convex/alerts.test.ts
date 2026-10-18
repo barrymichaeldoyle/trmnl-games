@@ -182,7 +182,7 @@ describe('alerts backend (P33)', () => {
     expect(rows).toHaveLength(1)
     expect(rows[0]).toMatchObject({ kind: 'asleep', eventTick: hero.lastTick, state: 'sent', attempts: 1 })
     expect(sent).toHaveLength(1)
-    expect(JSON.parse(sent[0]!.payload)).toMatchObject({ body: "Baz's bag is full, so they've stopped for a nap. Make room to send them back out.", url: '/app/desk-crawler/inventory?alert=asleep' })
+    expect(JSON.parse(sent[0]!.payload)).toMatchObject({ body: 'Baz is holding a new find for you. Make room in the bag so the next ones are not left behind.', url: '/app/desk-crawler/inventory?alert=asleep' })
   })
 
   /** Insert an outbox row due now for the hero. */
@@ -293,8 +293,8 @@ describe('alerts backend (P33)', () => {
 
 describe('alert copy (D169)', () => {
   it('sends Desk Crawler alerts in the owner’s language', () => {
-    expect(alertMessage({ kind: 'asleep', offerName: undefined }, 'Baz', 'fr').title).toBe('Baz fait la sieste')
+    expect(alertMessage({ kind: 'asleep', offerName: undefined }, 'Baz', 'fr').title).toBe('Le sac de Baz est plein')
     expect(alertMessage({ kind: 'merchant', offerName: 'Messenger Bag' }, 'Baz', 'de').body).toContain('eine Kuriertasche')
-    expect(alertMessage({ kind: 'asleep', offerName: undefined }, 'Baz').title).toBe('Baz is napping')
+    expect(alertMessage({ kind: 'asleep', offerName: undefined }, 'Baz').title).toBe("Baz's bag is full")
   })
 })

@@ -68,6 +68,11 @@ describe('first-run and companion QR fields', () => {
     expect(pick(buildPayload({ ...input, hero: null }))).toMatchObject({ status: 'unlinked', first_run: false, qr_base: 'https://art.test/art/qr/v3/app' })
   })
 
+  it('keeps the story on screen for an awake hero holding a find, with a notice instead of the bag panel (D189)', () => {
+    const p = buildPayload({ ...input, heldItemName: 'Rare Mace', bagUsed: 30, bagCapacity: 30, logs: [{ at: NOW - 60_000, kind: 'combat', summary: 'Beat a Paper Imp. +8 XP, +3 gold.' }] }) as { qr_base: string; attention: string | null; notice: string | null; status: string }
+    expect(p).toMatchObject({ status: 'exploring', qr_base: '', attention: null, notice: 'Bag full. New finds stay behind until you make room.' })
+  })
+
   it('always links an active hero to the bag, with nothing needing doing', () => {
     const p = pick(buildPayload({ ...input, logs: [{ at: NOW - 60_000, kind: 'combat', summary: 'Beat a Paper Imp. +8 XP, +3 gold.' }] }))
     expect(p).toMatchObject({ qr_base: '', companion_qr_base: 'https://art.test/art/qr/v3/bag' })

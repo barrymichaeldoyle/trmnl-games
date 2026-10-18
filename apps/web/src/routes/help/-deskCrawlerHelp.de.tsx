@@ -81,7 +81,6 @@ export const de: HelpPage = {
           <ul>
             <li>Die Seite Karriere unter Mehr listet die {F.career.goals} Ziele der Reihe nach, mit dem Datum, an dem du jedes erreicht hast. Ein Ziel, das du schon erfüllt hattest, als die Leiter kam, zählt als erreicht.</li>
             {F.unlocks !== undefined ? <li>Funktionen kommen mit der Stufe, ob du vorbeischaust oder nicht: die To-do-Liste auf Stufe {F.unlocks.todo}, Haltungen auf Stufe {F.unlocks.stances}, Büro-Entscheidungen auf Stufe {F.unlocks.choices}, {F.meetings?.level !== undefined ? `Begegnungen mit Kollegen auf Stufe ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `Zerlegen und Werkbank auf Stufe ${F.workbench.level}, ` : ''}der fahrende Händler auf Stufe {F.unlocks.merchant} und Schreibtisch-Überfälle auf Stufe {F.unlocks.raids}. Dein TRMNL zeigt dann jeweils „Freigeschaltet“. Auch die Etagen öffnen nach Stufe: {FLOORS_LINE}.</li> : null}
-            <li>Ein Ziel verlangt, die Haltung auf Draufgängerisch zu stellen, die doppelt so oft überfällt wie Ausgewogen. Sobald es zählt, kannst du zurückwechseln.</li>
             <li>Ein paar frühe Ziele kommen garantiert rechtzeitig: der erste Kampf nach wenigen Abenteuern, ein Ausrüstungsteil im ersten Dutzend und eine erste Entscheidung, ein erster Händler und eine erste Elite etwa einen Tag nach ihrer Stufe. Alles andere ist Glückssache.</li>
           </ul>
         </>
@@ -198,7 +197,7 @@ export const de: HelpPage = {
         <li><strong>Sparsam</strong> verliert 5 Punkte weniger Gold, wenn etwas schiefgeht: Ein Rückzug kostet kein Gold statt 5 %, ein K. o. 5 % statt 10 %.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">Wenn die Tasche voll ist</h2>
-      <p>Ein neuer Held beginnt mit einer kleinen Papiertüte für 6 Ausrüstungsteile. Angelegte Ausrüstung und Tränke brauchen keinen Platz. Ist die Tasche voll, macht dein Held weiter, bis er ein weiteres Teil findet. Dieses Teil wird für dich zurückgelegt, und dein Held schläft, bis du Platz schaffst.</p>
+      <p>Ein neuer Held beginnt mit einer kleinen Papiertüte für 6 Ausrüstungsteile. Angelegte Ausrüstung und Tränke brauchen keinen Platz. Ist die Tasche voll, legt dein Held das nächste gefundene Teil für dich zurück und zieht weiter. Solange es wartet, bleiben weitere Funde liegen: Dein Held hält nie an, er sammelt nur keine Ausrüstung mehr, bis du Platz schaffst.</p>
       <h2 id="bigger-bags">Größere Taschen</h2>
       <p>Deine Tasche wächst mit Gold. {F.tote ? `In den ersten paar Stunden findet dein Held ${t.nameWith(F.tote.name, 'einen')} (${F.tote.size}). ` : ''}Danach kaufst du größere Taschen auf der Taschen-Seite, eine nach der anderen: {rungs(F.shopBags)}, bis zu {F.topBag} Plätze. Es gibt keine Stufenanforderungen, und Taschen fallen nie als Beute.</p>
       <ol className="[&_li]:list-decimal">
@@ -206,7 +205,7 @@ export const de: HelpPage = {
         <li>Liegt ein Fund zurück, wähle Fund abholen. Lass danach mindestens einen Platz frei, damit die Abenteuer weitergehen können.</li>
         <li>Sobald ein Platz frei ist und nichts mehr wartet, gehen die Abenteuer von allein innerhalb von 15 Minuten weiter. Vorher kannst du auf der Taschen-Seite noch ein anderes freigeschaltetes Gebiet wählen.</li>
       </ol>
-      <p>Ausrüsten macht keinen Platz frei. Verkaufen, einen Fund abholen oder eine größere Tasche kaufen schon: Die Abenteuer gehen von allein weiter. Der Taschenschlaf hat nichts mit dem Schlafmodus deines TRMNL zu tun; ein schlafendes Display hält das Spiel nie an.</p>
+      <p>Ausrüsten macht keinen Platz frei. Verkaufen, Zerlegen oder eine größere Tasche kaufen schon, und der zurückgelegte Fund kommt von allein in die Tasche. Die Taschen-Seite kann auch dein schwächstes Ersatzstück verkaufen und den Fund mit einem Tipp behalten. Auch der Schlafmodus deines TRMNL hält das Spiel nie an.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Zerlegen und Werkbank</h2>
         <p>{F.workbench.level !== undefined ? `Ab Stufe ${F.workbench.level} hat übrige Ausrüstung` : 'Übrige Ausrüstung hat'} zwei Wege aus der Tasche: für Gold verkaufen oder auf der Taschen-Seite in Material zerlegen. Zerlegen bringt so viel wie die Stufe, auf der das Teil gefunden wurde, in Einheiten des Materials seiner Seltenheit: {F.workbench.materials.map((m) => `${name(m.name)} aus ${m.rarities.map((r) => rarityDe[r] ?? r).join(' und ')} Ausrüstung`).join(', ')}. Epische Ausrüstung bringt das {F.workbench.epicMultiplier}-Fache. Material braucht keinen Taschenplatz und wird nie verkauft. Ausrüstung wird nur zerlegt, wenn du es willst.{F.workbench.level !== undefined ? ` Vor Stufe ${F.workbench.level} verkaufst du Übriges besser: Die erste Verbesserung braucht ohnehin Stufe ${F.workbench.level}.` : ''}</p>
@@ -231,10 +230,10 @@ export const de: HelpPage = {
       <h2 id="alerts">Benachrichtigungen</h2>
       <p>Dein TRMNL ist der wichtigste Weg, deinen Helden im Blick zu behalten, aber die Einstellungen können in zwei Fällen auch eine Benachrichtigung aufs Handy schicken, jede aus, bis du sie einschaltest:</p>
       <ul>
-        <li><strong>Held schläft:</strong> Die Tasche ist voll und die Abenteuer stehen. Sie kommt eine halbe Stunde nach Beginn des Nickerchens, damit nichts ankommt, wenn du die Tasche schon sortierst, und einmal pro Nickerchen.</li>
+        <li><strong>Tasche voll:</strong> Die Tasche ist voll und dein Held hebt einen Fund für dich auf. Sie kommt eine halbe Stunde, nachdem die Tasche voll wurde, damit nichts ankommt, wenn du sie schon sortierst, und einmal, jedes Mal wenn sie voll wird.</li>
         <li><strong>Händlerangebot:</strong> Ein Händler verkauft die nächste Tasche oder den nächsten Beutel{F.merchantOff > 0 ? ` mit ${F.merchantOff} % Rabatt` : ''}, und dein Held hat das Gold. Höchstens einmal am Tag. Ein Händler, der nur Tränke hat, schickt nie eine.</li>
       </ul>
-      <p>Du bekommst höchstens zwei Benachrichtigungen am Tag. Die Ruhezeiten gehen von 21:00 bis 08:00, außer du änderst sie: Eine Schlaf-Benachrichtigung wartet bis zu ihrem Ende, und ein Händlerangebot in dieser Zeit wird übersprungen. Vor dem Senden prüft das Spiel, ob die Benachrichtigung noch stimmt, damit du nie von einem schon beendeten Nickerchen oder einem verschwundenen Angebot hörst. Entscheidungen, Überfälle, K. o.s, Stufenaufstiege und Andenken lösen nie Benachrichtigungen aus.</p>
+      <p>Du bekommst höchstens zwei Benachrichtigungen am Tag. Die Ruhezeiten gehen von 21:00 bis 08:00, außer du änderst sie: Eine Tasche-voll-Benachrichtigung wartet bis zu ihrem Ende, und ein Händlerangebot in dieser Zeit wird übersprungen. Vor dem Senden prüft das Spiel, ob die Benachrichtigung noch stimmt, damit du nie von einer schon sortierten Tasche oder einem verschwundenen Angebot hörst. Entscheidungen, Überfälle, K. o.s, Stufenaufstiege und Andenken lösen nie Benachrichtigungen aus.</p>
       <p>Wähle in den Einstellungen Auf diesem Gerät erlauben und bestätige dann die Abfrage deines Browsers. Auf iPhone und iPad füge TRMNL Games zuerst zum Home-Bildschirm hinzu (Teilen, dann Zum Home-Bildschirm) und öffne es von dort. Jedes erlaubte Gerät steht in den Einstellungen mit einem Knopf Entfernen; das letzte zu entfernen schaltet die Benachrichtigungen aus.</p>
       <h2 id="troubleshooting">Fehlerbehebung</h2>
       <h3 id="not-on-your-screen">Dein Held ist nicht auf dem Bildschirm</h3>

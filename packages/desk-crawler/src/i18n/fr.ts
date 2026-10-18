@@ -1367,6 +1367,7 @@ export const fr: FrDictionary = {
     "Found a {item}! Bag holds {capacity}.": "A trouvé {un:item} ! Le sac contient {capacity} places.",
     "Found a {item}! Holds {capacity} potions.": "A trouvé {un:item} ! Capacité : {capacity} potions.",
     "Bag full. Holding it until you make room.": "Sac plein. Mis de côté jusqu’à ce que vous fassiez de la place.",
+    "Bag full, so it stayed behind.": "Sac plein, la trouvaille est restée sur place.",
     "Unwrapped a gift.": "A déballé un cadeau.",
     "A raid on {rival} went wrong.": "Un raid sur {rival} a mal tourné.",
     "{rival}'s raid went wrong.": "Le raid de {rival} a mal tourné.",

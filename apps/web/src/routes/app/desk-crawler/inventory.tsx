@@ -147,7 +147,12 @@ function Inventory() {
   const filling = bag.used >= Math.ceil(bag.capacity * 0.8)
   // A held find needs a free bag slot to be claimed.
   const claimBlocked = full
-  const plan = bag.resumePlan as { sell: { id: Id<'items'>; label: string; saleValue: number }[]; gold: number; claim: boolean } | null
+  type SortPlan = { sell: { id: Id<'items'>; label: string; saleValue: number }[]; gold: number; claim: boolean }
+  const plan = bag.resumePlan as SortPlan | null
+  // D189: an awake hero holding a find (v26) gets the same one-tap sale, with nothing to resume.
+  const keepPlan = bag.keepPlan as SortPlan | null | undefined
+  const sortPlan = plan ?? (held ? keepPlan ?? null : null)
+  const keeping = plan === null && sortPlan !== null
   const opened = openId === 'potions' ? null : gear.find((item) => item.id === openId) ?? null
   const slotLabel = (item: Gear) => {
     const delta = deltaOf(item)
@@ -230,15 +235,23 @@ function Inventory() {
             {destination ? <p className="mt-2 text-sm text-muted">{t.setsOut}</p> : null}
           </>}
         </Card>
+      ) : held && keeping ? (
+        <Card title={t.bagFullTitle}>
+          <p>{t.keepingGoing(held.label)}</p>
+          {sortPlan.sell.length > 0 ? <>
+            <p className="mt-2 text-sm">{t.sellToKeep(sortPlan.sell.map((item) => c.name(item.label)).join(', '), sortPlan.gold)}</p>
+            <Button className="mt-3" disabled={!manageable || busy} onClick={() => setClearing(true)}>{t.sellAndKeep}</Button>
+          </> : null}
+        </Card>
       ) : null}
-      {plan && plan.sell.length > 0 ? (
-        <ConfirmSheet open={clearing} title={t.makeRoomResume} confirmLabel={plan.claim ? t.sellClaimResume : t.sellAndResume} busyLabel={t.scheduling} cancelLabel={t.keepThem} pending={clearResume.pending} disabled={!manageable} onClose={() => setClearing(false)} onConfirm={async () => {
-          const done = await clearResume.run({ itemIds: plan.sell.map((item) => item.id) }, t.resumingOnNext)
+      {sortPlan && sortPlan.sell.length > 0 ? (
+        <ConfirmSheet open={clearing} title={keeping ? t.makeRoomKeep : t.makeRoomResume} confirmLabel={keeping ? t.sellAndKeep : sortPlan.claim ? t.sellClaimResume : t.sellAndResume} busyLabel={keeping ? t.claiming : t.scheduling} cancelLabel={t.keepThem} pending={clearResume.pending} disabled={!manageable} onClose={() => setClearing(false)} onConfirm={async () => {
+          const done = await clearResume.run({ itemIds: sortPlan.sell.map((item) => item.id) }, keeping && held ? t.keptMessage(held.label) : t.resumingOnNext)
           if (done) setClearing(false)
         }}>
           <Consequences>
-            <li>{t.sellWeakest(plan.sell.map((item) => c.name(item.label)).join(', '), plan.gold)}</li>
-            {plan.claim && held ? <li>{t.claimMessage(held.label)}</li> : null}
+            <li>{keeping ? t.sellToKeep(sortPlan.sell.map((item) => c.name(item.label)).join(', '), sortPlan.gold) : t.sellWeakest(sortPlan.sell.map((item) => c.name(item.label)).join(', '), sortPlan.gold)}</li>
+            {!keeping && sortPlan.claim && held ? <li>{t.claimMessage(held.label)}</li> : null}
           </Consequences>
           <ErrorNote message={clearResume.error} />
         </ConfirmSheet>

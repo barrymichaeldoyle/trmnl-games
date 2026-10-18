@@ -72,15 +72,16 @@ describe('salvage and the workbench (D129, content v13)', () => {
     const after = await heroDoc(t, heroId)
     expect(after.counters.itemsSalvaged).toBe(3)
     expect(after.gold).toBe(hero.gold)
-    expect((await logs(t, heroId)).map((log) => log.summary)).toEqual(['Salvaged 3 items for 1 Scrap, 2 Parts and 9 Components.'])
+    // D189: the freed slots take the held find at once, and a sleeper with room wakes.
+    expect((await logs(t, heroId)).map((log) => log.summary)).toEqual(['Salvaged 3 items for 1 Scrap, 2 Parts and 9 Components.', 'Claimed the Letter Opener.', 'Adventures resume within 15 minutes.'])
     const view = await user.query(api.inventory.mine, {})
     expect(view.materials).toEqual([
       { id: 'scrap', name: 'Scrap', glyph: 'scrap', count: 1 },
       { id: 'parts', name: 'Parts', glyph: 'parts', count: 2 },
       { id: 'components', name: 'Components', glyph: 'components', count: 9 },
     ])
-    // Materials take no bag slot and never appear as gear; the held find sits outside the bag until claimed.
-    expect(view.used).toBe(0)
+    // Materials take no bag slot and never appear as gear; the claimed find is the one piece in the bag.
+    expect(view.used).toBe(1)
     expect(view.gear.every((g: { kind: string }) => g.kind !== 'material')).toBe(true)
   })
 

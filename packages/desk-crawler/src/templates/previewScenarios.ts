@@ -157,6 +157,8 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     dead: { ...base, hero: hero({ status: 'dead', hp: 0, reviveAtTick: 125 }), latestEvent: { kind: 'death', outcome: { variant: 'combat', monsterId: 'firewall_gremlin', elite: false } }, logs: [{ at: NOW - 7 * 60_000, kind: 'death', summary: 'Flattened by a [[Firewall Gremlin]]. Lost 64 gold.', deltas: { xpEarned: 0, gold: -64, hp: -118 } }, ...base.logs] },
     travelling: { ...base, hero: hero({ status: 'travelling', targetBiomeId: 'cafeteria_depths', arriveAtTick: 121 }), latestEvent: { kind: 'system' }, logs: [{ at: NOW - 3 * 60_000, kind: 'system', summary: 'Set off for the Cafeteria Depths.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs] },
     sleeping: { ...base, hero: hero({ status: 'sleeping' }), heldItemName: 'Rare Spork Halberd', bagUsed: 20, latestEvent: { kind: 'loot', outcome: { variant: 'loot', found: 'gear' } }, logs: [{ at: NOW - 7 * 60_000, kind: 'loot', summary: 'Found a [[Rare Spork Halberd]]. Bag full. Holding it until you make room.' }, ...base.logs] },
+    // D189: v26 keeps going on a full bag; the held find waits and a later find stays behind.
+    bagKeepGoing: { ...base, heldItemName: 'Rare Spork Halberd', bagUsed: 20, logs: [{ at: NOW - 7 * 60_000, kind: 'loot', summary: 'Pulled a [[Common Desk Fan Shield]] out of a cable tray. Bag full, so it stayed behind.', deltas: { xpEarned: 0, gold: 0, hp: 0 } }, ...base.logs] },
     paused: { ...base, hero: hero({ status: 'paused' }), ranking: ranked({ rank: null, rankDelta: null, status: 'dormant', score: null }) },
     quarantined: { ...base, hero: hero({ quarantined: true }) },
     // D79: a pending choice shows the decision notice; the offer is the newest story.

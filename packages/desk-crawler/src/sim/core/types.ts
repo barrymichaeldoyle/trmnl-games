@@ -813,6 +813,12 @@ export interface ContentCatalog {
   readonly lostProperty?: LostPropertyRule
   /** Absent before v24 (D163): elites never dig in, and no dig-in draw. */
   readonly standoff?: StandoffRule
+  /**
+   * D189 (v26): a full bag never stops the hero. The first find that does not fit is held as before, but the hero
+   * keeps exploring; while a find is held and the bag is full, later finds stay behind. Absent: the find is held and
+   * the hero sleeps until the player makes room (D18/D19). A sleeper under a catalog with this rule wakes next tick.
+   */
+  readonly keepGoingWhenFull?: true
   /** Absent before v9 (P31): without it a hero has no to-do list and draws nothing from the `quest` stream. */
   readonly todo?: TodoRule
   /** Absent before v12 (P35): every feature is on from level 1. */
@@ -1109,8 +1115,8 @@ export type OutcomeDetail =
       readonly found: 'gear' | 'potion' | 'gold' | 'bag' | 'pouch'
       readonly templateId?: string
       readonly rarity?: Rarity
-      /** `drawer` is a legacy stored value (D111, removed in D123); the simulator writes only `bag` or `held`. */
-      readonly destination?: 'bag' | 'held' | 'drawer'
+      /** `drawer` is a legacy stored value (D111, removed in D123). `left` (D189): the bag was full and a find was already held, so it stayed behind. */
+      readonly destination?: 'bag' | 'held' | 'drawer' | 'left'
       readonly goldGranted: number
       readonly jackpot: boolean
       readonly potionFullFallback: boolean

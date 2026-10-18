@@ -430,7 +430,9 @@ export function buildPayload(input: PayloadInput) {
   // D78: a merchant visit is a cheerful notice, never an attention line (attention collapses the stories), and only while its offers are open.
   const tickNow = world?.currentTick ?? hero.lastTick
   // D79 outranks D78: a decision waiting is the more useful line; neither ever outranks a problem.
-  const notice = attention !== null ? null : hero.choiceExpiresAtTick !== undefined && hero.choiceExpiresAtTick > tickNow ? words.decisionWaiting : hero.merchantExpiresAtTick !== undefined && hero.merchantExpiresAtTick > tickNow ? words.merchantVisiting : null
+  // D189: under v26 a full bag holding a find does not stop the hero, so it is a notice, ahead of the decision and merchant.
+  const keepingGoing = hero.status !== 'sleeping' && Boolean(input.heldItemName)
+  const notice = attention !== null ? null : keepingGoing ? words.bagFullKeepGoing : hero.choiceExpiresAtTick !== undefined && hero.choiceExpiresAtTick > tickNow ? words.decisionWaiting : hero.merchantExpiresAtTick !== undefined && hero.merchantExpiresAtTick > tickNow ? words.merchantVisiting : null
 
   const needsBag = bagBlocking && !hero.quarantined && !servicePaused
   // A brand-new hero has no adventures yet: the screen welcomes them and links the companion.

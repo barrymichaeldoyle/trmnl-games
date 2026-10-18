@@ -89,7 +89,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alerts',
     loadingAlerts: 'Loading alerts…',
-    kinds: { asleep: { name: 'Hero asleep', blurb: 'The bag is full and adventures have stopped. Once per nap.' }, merchant: { name: 'Merchant deal', blurb: 'A bag or pouch you can afford is on sale for about an hour. At most once a day.' } },
+    kinds: { asleep: { name: 'Bag full', blurb: 'The bag is full and your hero is holding a find for you. Once each time it fills.' }, merchant: { name: 'Merchant deal', blurb: 'A bag or pouch you can afford is on sale for about an hour. At most once a day.' } },
     intro: 'Get a nudge on this phone when your hero needs you.',
     quietNote: 'During quiet hours, nap alerts wait until morning and merchant deals are skipped.',
     offByDefault: ' Off by default. At most two alerts a day across all your games.',
@@ -215,7 +215,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alertes',
     loadingAlerts: 'Chargement des alertes…',
-    kinds: { asleep: { name: 'Héros endormi', blurb: 'Le sac est plein et les aventures sont arrêtées. Une fois par sieste.' }, merchant: { name: 'Bonne affaire du marchand', blurb: 'Un sac ou une pochette à votre portée est en promo pendant environ une heure. Au plus une fois par jour.' } },
+    kinds: { asleep: { name: 'Sac plein', blurb: 'Le sac est plein et votre héros vous garde une trouvaille. Une fois chaque fois qu’il se remplit.' }, merchant: { name: 'Bonne affaire du marchand', blurb: 'Un sac ou une pochette à votre portée est en promo pendant environ une heure. Au plus une fois par jour.' } },
     intro: 'Recevez un petit rappel sur ce téléphone quand votre héros a besoin de vous.',
     quietNote: 'Pendant les heures calmes, les alertes de sieste attendent le matin et les bonnes affaires sont ignorées.',
     offByDefault: ' Désactivées par défaut. Au plus deux alertes par jour pour tous vos jeux.',
@@ -340,7 +340,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Benachrichtigungen',
     loadingAlerts: 'Benachrichtigungen werden geladen …',
-    kinds: { asleep: { name: 'Held schläft', blurb: 'Die Tasche ist voll und die Abenteuer haben gestoppt. Einmal pro Nickerchen.' }, merchant: { name: 'Händlerangebot', blurb: 'Eine Tasche oder ein Beutel, den du dir leisten kannst, ist etwa eine Stunde lang im Angebot. Höchstens einmal am Tag.' } },
+    kinds: { asleep: { name: 'Tasche voll', blurb: 'Die Tasche ist voll und dein Held hebt einen Fund für dich auf. Einmal, jedes Mal wenn sie voll wird.' }, merchant: { name: 'Händlerangebot', blurb: 'Eine Tasche oder ein Beutel, den du dir leisten kannst, ist etwa eine Stunde lang im Angebot. Höchstens einmal am Tag.' } },
     intro: 'Lass dich auf diesem Handy anstupsen, wenn dein Held dich braucht.',
     quietNote: 'Während der Ruhezeiten warten Nickerchen-Benachrichtigungen bis zum Morgen, und Händlerangebote fallen weg.',
     offByDefault: ' Standardmäßig aus. Höchstens zwei Benachrichtigungen am Tag über alle deine Spiele.',

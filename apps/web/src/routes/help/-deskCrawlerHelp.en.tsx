@@ -77,7 +77,6 @@ export const en: HelpPage = {
           <ul>
             <li>The Career page under More lists the {F.career.goals} goals in order, with the date you reached each. A goal you had already done when the ladder arrived counts as reached.</li>
             {F.unlocks !== undefined ? <li>Features arrive by level, whether or not you visit: the to-do list at level {F.unlocks.todo}, stances at level {F.unlocks.stances}, office decisions at level {F.unlocks.choices}, {F.meetings?.level !== undefined ? `meetings with coworkers at level ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `salvage and the workbench at level ${F.workbench.level}, ` : ''}the wandering merchant at level {F.unlocks.merchant} and desk raids at level {F.unlocks.raids}. Your TRMNL says “Unlocked” when one does. The floors open by level too: {FLOORS_LINE}.</li> : null}
-            <li>One goal asks you to switch your stance to Bold, which raids twice as often as Balanced. Once it counts, you can switch back.</li>
             <li>A few early goals are guaranteed to come up in time: the first fight within a handful of adventures, a piece of gear within the first dozen, and a first decision, merchant and elite within a day or so of their level. Everything else is down to chance.</li>
           </ul>
         </>
@@ -194,7 +193,7 @@ export const en: HelpPage = {
         <li><strong>Thrifty</strong> loses 5 points less gold when things go wrong: a retreat loses no gold instead of 5%, and a knockout loses 5% instead of 10%.</li>
       </ul>
       <h2 id="when-your-bag-fills-up">When your bag fills up</h2>
-      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero keeps adventuring until it finds another piece. That piece is held for you, and your hero sleeps until you make room.</p>
+      <p>A new hero starts with a small paper bag that holds 6 pieces of gear. Equipped gear and potions don’t take up space. When the bag is full, your hero holds the next piece it finds for you and keeps adventuring. While that piece waits, any further finds stay behind, so your hero never stops; it just stops collecting gear until you make room.</p>
       <h2 id="bigger-bags">Bigger bags</h2>
       <p>Your bag grows with gold. {F.tote ? `Your hero finds a ${F.tote.name} (${F.tote.size}) within the first couple of hours. ` : ''}After that, bigger bags are bought on the Bag page, one at a time: {rungs(F.shopBags)}, up to {F.topBag} slots. There are no level requirements, and bags never drop as loot.</p>
       <ol className="[&_li]:list-decimal">
@@ -202,7 +201,7 @@ export const en: HelpPage = {
         <li>If a find is being held, choose Claim find. Leave at least one free slot after claiming it so adventures can resume.</li>
         <li>Once a slot is free and nothing is waiting, adventures resume on their own within 15 minutes. You can still pick another unlocked area from the bag page before then.</li>
       </ol>
-      <p>Equipping gear does not free a slot. Selling gear, claiming a find, or buying a bigger bag does: adventures resume on their own. Bag sleep is separate from your TRMNL’s Sleep Mode; a sleeping display never stops the game.</p>
+      <p>Equipping gear does not free a slot. Selling or salvaging gear, or buying a bigger bag, does, and the held find moves into the bag by itself. The Bag page can also sell your weakest spare and keep the find in one tap. Your TRMNL’s Sleep Mode never stops the game either.</p>
       {F.workbench !== undefined ? <>
         <h2 id="salvage-and-the-workbench">Salvage and the workbench</h2>
         <p>{F.workbench.level !== undefined ? `From level ${F.workbench.level}, s` : 'S'}pare gear has two ways out of the bag: sell it for gold, or salvage it for materials on the Bag page. Salvage pays the tier the piece was found at, in units of its rarity’s material: {F.workbench.materials.map((m) => `${m.name} from ${m.rarities.join(' and ')} gear`).join(', ')}. Epic gear pays {F.workbench.epicMultiplier} times as much. Materials take no bag space and are never sold. Gear is only salvaged when you choose to.{F.workbench.level !== undefined ? ` Before level ${F.workbench.level}, sell your spares: the first upgrade needs level ${F.workbench.level} anyway.` : ''}</p>
@@ -227,10 +226,10 @@ export const en: HelpPage = {
       <h2 id="alerts">Alerts</h2>
       <p>Your TRMNL is the main way to keep up with your hero, but Settings can also send a phone notification in two cases, each off until you turn it on:</p>
       <ul>
-        <li><strong>Hero asleep:</strong> the bag is full and adventures have stopped. It comes half an hour after the nap starts, so nothing arrives if you are already sorting out the bag, and once per nap.</li>
+        <li><strong>Bag full:</strong> the bag is full and your hero is holding a find for you. It comes half an hour after the bag fills, so nothing arrives if you are already sorting it out, and once each time it fills.</li>
         <li><strong>Merchant deal:</strong> a merchant is selling the next bag or pouch{F.merchantOff > 0 ? ` at ${F.merchantOff}% off` : ''} and your hero has the gold. At most once a day. A merchant with only potions never sends one.</li>
       </ul>
-      <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a nap alert waits until they end, and a merchant deal that turns up then is skipped. Before sending, the game checks that the alert still holds, so you never hear about a nap that is already over or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>
+      <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a bag-full alert waits until they end, and a merchant deal that turns up then is skipped. Before sending, the game checks that the alert still holds, so you never hear about a bag you have already sorted or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>
       <p>Choose Allow on this device in Settings, then accept your browser’s prompt. On iPhone and iPad, first add TRMNL Games to your Home Screen (Share, then Add to Home Screen) and open it from there. Each device you allow is listed in Settings with a Remove button; removing the last one turns alerts off.</p>
       <h2 id="troubleshooting">Troubleshooting</h2>
       <h3 id="not-on-your-screen">Your hero isn't on your screen</h3>

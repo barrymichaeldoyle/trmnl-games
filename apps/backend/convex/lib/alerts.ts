@@ -101,7 +101,10 @@ export async function queueAlerts(ctx: MutationCtx, args: { owner: Doc<'users'>;
   const prefs = owner.alerts
   if (prefs === undefined) return
   const rows: Array<Pick<Doc<'alertOutbox'>, 'kind' | 'notBefore'> & { offerId?: 'bag' | 'pouch'; offerName?: string }> = []
-  if (prefs.asleep && hero.status !== 'sleeping' && result.nextHero.status === 'sleeping') rows.push({ kind: 'asleep', notBefore: now + ALERTS.asleepDelayMs })
+  // D189: the `asleep` switch is the full-bag alert. It fires when the hero falls asleep on a full bag (older catalogs)
+  // or the bag starts holding a find, which under v26 no longer stops the hero.
+  const filled = (hero.status !== 'sleeping' && result.nextHero.status === 'sleeping') || (hero.heldItemId === undefined && (result.metrics?.heldFinds ?? 0) > 0)
+  if (prefs.asleep && filled) rows.push({ kind: 'asleep', notBefore: now + ALERTS.asleepDelayMs })
   if (prefs.merchant) {
     const deal = merchantDeal(result)
     if (deal !== undefined) rows.push({ kind: 'merchant', notBefore: now, offerId: deal.id, offerName: deal.name })
@@ -212,15 +215,15 @@ const de = contentTranslator('de')
 /** D169: Desk Crawler's two alerts in the owner's language (lib/trmnlUser.ts `deviceLocale`). */
 const DESK_ALERTS: Readonly<Record<Locale, { asleep: (hero: string) => { title: string; body: string }; merchant: (hero: string, offer: string | null) => { title: string; body: string } }>> = {
   en: {
-    asleep: (hero) => ({ title: `${hero} is napping`, body: `${hero}'s bag is full, so they've stopped for a nap. Make room to send them back out.` }),
+    asleep: (hero) => ({ title: `${hero}'s bag is full`, body: `${hero} is holding a new find for you. Make room in the bag so the next ones are not left behind.` }),
     merchant: (hero, offer) => ({ title: 'A merchant is visiting', body: `A merchant is offering ${hero} a ${offer ?? 'bigger bag'} at a discount, and they have the gold. The offer lasts about an hour.` }),
   },
   fr: {
-    asleep: (hero) => ({ title: `${hero} fait la sieste`, body: `Le sac de ${hero} est plein : c’est l’heure de la sieste. Faites de la place pour repartir à l’aventure.` }),
+    asleep: (hero) => ({ title: `Le sac de ${hero} est plein`, body: `${hero} vous garde une nouvelle trouvaille. Faites de la place dans le sac pour ne pas laisser les suivantes derrière.` }),
     merchant: (hero, offer) => ({ title: 'Un marchand est de passage', body: `Un marchand propose ${offer === null ? 'un sac plus grand' : fr.nameWith(offer, 'un')} à prix réduit à ${hero}, qui a l’or nécessaire. L’offre dure environ une heure.` }),
   },
   de: {
-    asleep: (hero) => ({ title: `${hero} macht ein Nickerchen`, body: `Die Tasche von ${hero} ist voll, also ist Nickerchen angesagt. Schaff Platz, damit es weitergeht.` }),
+    asleep: (hero) => ({ title: `Die Tasche von ${hero} ist voll`, body: `${hero} hebt einen neuen Fund für dich auf. Schaff Platz in der Tasche, damit die nächsten nicht liegen bleiben.` }),
     merchant: (hero, offer) => ({ title: 'Ein Händler ist da', body: `Ein Händler bietet ${hero} ${offer === null ? 'eine größere Tasche' : de.nameWith(offer, 'einen')} günstiger an, und das Gold reicht. Das Angebot gilt etwa eine Stunde.` }),
   },
 }

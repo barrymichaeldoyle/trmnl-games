@@ -187,10 +187,12 @@ class TickRun {
       case 'sleeping': {
         const due = h.wakeAtTick !== undefined && input.tick >= h.wakeAtTick
         const bagReady = h.heldItemId === undefined && !isBagFull(h, input.inventory)
+        // D189: under a catalog where a full bag never stops the hero, a sleeper from an older catalog wakes now.
+        const keepGoing = this.content.keepGoingWhenFull === true
         // A future wake stays asleep. No wake at all still wakes once the bag is sorted (D179).
-        if (!due && !(h.wakeAtTick === undefined && bagReady)) return this.finish('sleeping')
-        // Waking needs the held slot clear and a free bag slot for the next find.
-        if (!bagReady) {
+        if (!keepGoing && !due && !(h.wakeAtTick === undefined && bagReady)) return this.finish('sleeping')
+        // Waking needs the held slot clear and a free bag slot for the next find, unless a full bag keeps going.
+        if (!bagReady && !keepGoing) {
           throw new SimulationInvariantError('WAKE_PRECONDITION', 'wake is due but the held slot is not clear or the bag is full')
         }
         delete h.wakeAtTick
@@ -618,7 +620,8 @@ class TickRun {
         if (found === 'gear') {
           gear = this.generateGear(gearTierOf(biome))
           // D145: an ordinary find may be another player's spare instead; every fresh-item draw above is still taken.
-          if (forced === undefined && !gift) {
+          // D189: a find that will stay behind leaves the spare lying on the floor for someone else.
+          if (forced === undefined && !gift && !this.leavesFindsBehind()) {
             const spare = this.takeSpare()
             if (spare !== undefined) {
               gear = spare.item
@@ -761,15 +764,20 @@ class TickRun {
       const affix = affixById(content, gear.affixId)
       const item = `${affix ? `${affix.name} ` : ''}${rarityLabel(gear.rarity)} ${gear.name}`
       // A find that overflows the bag is held and the hero sleeps until the player makes room (D18/D19, D123).
-      heldFind = isBagFull(h, input.inventory)
-      const destination = heldFind ? 'held' : 'bag'
-      this.changes.push({ type: 'create', destination, item: gear, ...(spareOwner === undefined ? {} : { spare: true as const }) })
-      if (heldFind) {
-        h.status = 'sleeping'
+      // D189: under v26 the hero keeps going instead, and with a find already held a further one stays behind.
+      const leftBehind = this.leavesFindsBehind()
+      heldFind = !leftBehind && isBagFull(h, input.inventory)
+      const destination = leftBehind ? 'left' : heldFind ? 'held' : 'bag'
+      if (!leftBehind) this.changes.push({ type: 'create', destination: heldFind ? 'held' : 'bag', item: gear, ...(spareOwner === undefined ? {} : { spare: true as const }) })
+      if (leftBehind) consequences.unshift('Bag full, so it stayed behind.')
+      else if (heldFind) {
         this.metrics.heldFinds = 1
-        this.metrics.sleepStarts = 1
-        disposition = 'inventory_sleep_started'
         consequences.unshift('Bag full. Holding it until you make room.')
+        if (content.keepGoingWhenFull !== true) {
+          h.status = 'sleeping'
+          this.metrics.sleepStarts = 1
+          disposition = 'inventory_sleep_started'
+        }
       }
       if (outcome.variant === 'loot' && gift) {
         // The mark makes it once per occurrence, whatever else the tick did.
@@ -890,6 +898,11 @@ class TickRun {
    * D145 finder side: the adapter's spare, when the graveyard stream's look hit, becomes this tick's gear find. A
    * spare of the hero's own, or one the catalog cannot rebuild, leaves the fresh find standing.
    */
+  /** D189: the bag is full and a find is already held, so under a catalog that keeps going a new find stays behind. */
+  private leavesFindsBehind(): boolean {
+    return this.content.keepGoingWhenFull === true && this.h.heldItemId !== undefined && isBagFull(this.h, this.input.inventory)
+  }
+
   private takeSpare(): { item: NewItem; owner: { rivalHeroId: string; rivalName: string } } | undefined {
     const { h, content, input } = this
     const spare = input.lostSpare
