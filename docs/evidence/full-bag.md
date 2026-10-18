@@ -29,3 +29,7 @@ Cafeteria knockout days per cohort across content versions, 100 heroes, 30 days,
 | v25 | 9.0% | 14.1% | 24.6% |
 
 v16's rise is the denominator: the same number of knockout days over fewer Cafeteria days, because heroes move on to the Archive at level 12. v17 adds real knockouts, and v17's only change is the two inserted goals; the jump stays when every cohort is pinned to Balanced (`--stance balanced`), so it is the Bold goal and not the stance choice. The harness switches back to the cohort's stance on the visit after the goal, which flatters real players who may never switch back.
+
+## Switch
+
+Barry switched production from v25 to v26 on 2026-10-18 with `npx convex run world:setActiveContentVersion '{"contentVersion":"v26"}' --prod`, which answered `{"from":"v25","to":"v26","heroesMoved":0}`: no rung was inserted, so no pointer moved. Heroes asleep on a full bag wake on their next adventure.
