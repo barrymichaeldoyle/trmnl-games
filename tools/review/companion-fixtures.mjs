@@ -115,10 +115,10 @@ const two = rosterMode === 'two' || rosterMode === 'undo';
 if (rosterMode === 'locked') hero.level = 4;
 if (two) { hero.name = 'Vex'; hero.level = 3; hero.class = 'rogue'; hero.className = 'Rogue' } else { hero.class = 'warrior'; hero.className = 'Warrior' }
 hero.roster = rosterMode ? { unlockLevel: 6, open: rosterMode !== 'locked', heroes: two ? 2 : 1, warriorLevel: rosterMode === 'locked' ? 4 : 9 } : null;
-const warriorRow = { id: 'w1', name: two ? 'Pip' : hero.name, class: 'warrior', className: 'Warrior', level: rosterMode === 'locked' ? 4 : 9, status: 'exploring', hp: 172, maxHp: 196, gold: 1840, biome: 'Cafeteria Depths', current: !two, parkedFor: two ? 52 : null };
+const warriorRow = { id: 'w1', name: two ? 'Pip' : hero.name, class: 'warrior', className: 'Warrior', level: rosterMode === 'locked' ? 4 : 9, status: 'exploring', hp: 172, maxHp: 196, gold: 1840, biome: 'Cafeteria Depths', biomeId: 'cafeteria_depths', scenePath: hero.scenePath, current: !two, parkedFor: two ? 52 : null };
 data.roster = rosterMode ? {
   available: true, open: rosterMode !== 'locked', unlockLevel: 6, warriorLevel: warriorRow.level,
-  heroes: two ? [warriorRow, { id: 'r1', name: 'Vex', class: 'rogue', className: 'Rogue', level: 3, status: 'exploring', hp: 107, maxHp: 111, gold: 64, biome: 'Office Cubicles', current: true, parkedFor: null }] : [warriorRow],
+  heroes: two ? [warriorRow, { id: 'r1', name: 'Vex', class: 'rogue', className: 'Rogue', level: 3, status: 'exploring', hp: 107, maxHp: 111, gold: 64, biome: 'Office Cubicles', biomeId: 'office_cubicles', scenePath: hero.scenePath, current: true, parkedFor: null }] : [warriorRow],
   classes: [{ ...warriorRule, recruited: true }, { ...rogueRule, recruited: two }],
   canPark: true, nextAt: two ? Date.now() + 36e5 * 21 : null, undoHeroId: rosterMode === 'undo' ? 'w1' : null, undoUntil: rosterMode === 'undo' ? Date.now() + 6e5 : null,
 } : { available: false, open: false, unlockLevel: null, warriorLevel: null, heroes: [], classes: [], canPark: true, nextAt: null, undoHeroId: null, undoUntil: null };

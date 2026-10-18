@@ -17,11 +17,20 @@ import { contentV25 } from './v25'
  * before the Cafeteria Depths, and the harness counted three to four times as
  * many Cafeteria knockouts for players who visit every few days. Rungs are
  * never reordered, so it is retired: heroes who reached it keep it, and a
- * pointer on it moves on to the raid goal. Everything else is v25.
+ * pointer on it moves on to the raid goal. "Sell a piece of gear" no
+ * longer says a full bag stops the adventures. Everything else is v25.
  */
 export const contentV26: ContentCatalog = {
   ...contentV25,
   contentVersion: 'v26',
   keepGoingWhenFull: true,
-  career: { rungs: contentV25.career!.rungs.map((rung) => (rung.id === 'go_bold' ? { ...rung, retired: true as const } : rung)) },
+  career: {
+    rungs: contentV25.career!.rungs.map((rung) =>
+      rung.id === 'go_bold'
+        ? { ...rung, retired: true as const }
+        : rung.id === 'first_sale'
+          ? { ...rung, blurb: 'Spare gear is gold on the Bag page, and a full bag leaves new finds behind.' }
+          : rung,
+    ),
+  },
 }

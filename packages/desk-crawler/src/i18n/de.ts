@@ -425,6 +425,7 @@ export const de: DeDictionary = {
     "Finish three to-do tasks": "Erledige drei Aufgaben",
     "The morning stand-up hands out small jobs. Your hero ticks them off by itself.": "Das Morgen-Stand-up verteilt kleine Aufgaben. Dein Held hakt sie selbst ab.",
     "Sell a piece of gear": "Verkaufe ein Ausrüstungsteil",
+    "Spare gear is gold on the Bag page, and a full bag leaves new finds behind.": "Übrige Ausrüstung ist Gold wert auf der Taschen-Seite, und eine volle Tasche lässt neue Funde liegen.",
     "Spare gear is gold on the Bag page, and a bag that stays full stops the adventures.": "Übrige Ausrüstung ist Gold wert auf der Taschen-Seite, und eine Tasche, die voll bleibt, stoppt die Abenteuer.",
     "Pick a stance": "Wähle eine Haltung",
     "Cautious, Balanced or Bold: how far your hero pushes before it rests.": "Vorsichtig, Ausgewogen oder Draufgängerisch: wie weit dein Held geht, bevor er sich ausruht.",

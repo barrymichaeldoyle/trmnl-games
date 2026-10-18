@@ -56,7 +56,7 @@ function Landing() {
           </Topic>
           <Topic id="gear-heading" glyph="cog" tone="text-rare-ink" title="Gear, bags and the workbench" help="salvage-and-the-workbench">
             <p>Gear comes as common, uncommon, rare or epic. Rare and epic pieces carry a trait: Vampiric heals after every win, Lucky adds gold, Sturdy takes less damage from traps and Thrifty loses less when things go wrong.</p>
-            <p>When the bag fills, your hero naps until you make room. Sell spare gear for gold, or salvage it for materials and upgrade the pieces your hero wears. Bigger bags and potion pouches are bought with gold, and a wandering merchant sometimes sells items at a discount.</p>
+            <p>When the bag fills, your hero holds one find and leaves the rest behind until you make room. Sell spare gear for gold, or salvage it for materials and upgrade the pieces your hero wears. Bigger bags and potion pouches are bought with gold, and a wandering merchant sometimes sells items at a discount.</p>
           </Topic>
           <Topic id="players-heading" glyph="sword" tone="text-hp-ink" title="Other players" help="desk-raids">
             <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. Stance tilts the odds of winning, and nobody chooses who gets raided. The loser hands over 5% of its gold.</p>

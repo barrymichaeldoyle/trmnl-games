@@ -425,6 +425,7 @@ export const fr: FrDictionary = {
     "Finish three to-do tasks": "Terminez trois tâches",
     "The morning stand-up hands out small jobs. Your hero ticks them off by itself.": "Le stand-up du matin distribue de petites tâches. Votre héros les coche tout seul.",
     "Sell a piece of gear": "Vendez une pièce d’équipement",
+    "Spare gear is gold on the Bag page, and a full bag leaves new finds behind.": "L’équipement en trop, c’est de l’or sur la page Sac, et un sac plein laisse les nouvelles trouvailles sur place.",
     "Spare gear is gold on the Bag page, and a bag that stays full stops the adventures.": "L’équipement en trop, c’est de l’or sur la page Sac, et un sac qui reste plein arrête les aventures.",
     "Pick a stance": "Choisissez une posture",
     "Cautious, Balanced or Bold: how far your hero pushes before it rests.": "Prudent, Équilibré ou Audacieux : jusqu’où votre héros pousse avant de se reposer.",
