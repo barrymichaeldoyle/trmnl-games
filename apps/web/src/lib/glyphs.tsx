@@ -53,7 +53,7 @@ export function Glyph({ name, size = 16, className = '' }: { name: GlyphName; si
 }
 
 /** A page section's Pixelify heading with its glyph in the stat's ink, so a long page has landmarks to scan for. */
-export function SectionTitle({ id, glyph, tone = 'text-gold-ink', size = 'text-3xl', as: Heading = 'h2', children }: { id?: string; glyph: GlyphName; tone?: string; size?: string; as?: 'h1' | 'h2'; children: ReactNode }) {
+export function SectionTitle({ id, glyph, tone = 'text-gold-ink', size = 'text-3xl', as: Heading = 'h2', children }: { id?: string; glyph: GlyphName; tone?: string; size?: string; as?: 'h1' | 'h2' | 'h3'; children: ReactNode }) {
   return (
     <Heading id={id} className={`flex items-center gap-3 font-display font-bold ${size}`}>
       <Glyph name={glyph} size={24} className={tone} />

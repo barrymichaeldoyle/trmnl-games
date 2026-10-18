@@ -2,14 +2,14 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
-import { tierLabel } from '@trmnl-games/desk-crawler/content/achievements'
 import { SiteShell } from '../../lib/prose'
 import { artUrl } from '../../lib/intent'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 import { Button, Card, NoticeBar, useNotice } from '../../lib/ui'
 import { useIntent } from '../../lib/intent'
-import { Rarity } from '../app/desk-crawler/-achievements'
+import { TrophyCase } from '../app/desk-crawler/-achievements'
 import { WithName } from '../app/desk-crawler/-withName'
+import { Glyph, SectionTitle } from '../../lib/glyphs'
 import { RARITY_TONE } from '../../lib/palette'
 import { formatDate, formatNumber, messagesFor, useLocale, useT } from '../../lib/i18n'
 import { useContent } from '../../lib/useContent'
@@ -66,6 +66,7 @@ function HeroProfile() {
   return (
     <SiteShell>
       <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-8 px-4 py-10">
+        <BackToHero />
         {profile ? <Found profile={profile} /> : (
           <header className="flex flex-col gap-3">
             <h1 className="font-display text-3xl font-bold">{t.noHero}</h1>
@@ -78,6 +79,19 @@ function HeroProfile() {
         </div>
       </main>
     </SiteShell>
+  )
+}
+
+/** A signed-in player reading a hero page gets one tap back to their own hero (the page has no HUD nav); visitors see nothing. */
+function BackToHero() {
+  const { data } = useQuery(convexQuery(api.heroes.mine, {}))
+  const hero = data as { name: string } | null | undefined
+  const t = useT(publicPagesMessages)
+  if (!hero) return null
+  return (
+    <Link to="/app/desk-crawler" className="-mb-4 inline-flex min-h-11 items-center gap-2 self-start font-semibold text-gold-ink underline-offset-4 hover:underline">
+      <Glyph name="play" size={8} className="rotate-180" />{t.backToHero(hero.name)}
+    </Link>
   )
 }
 
@@ -124,23 +138,10 @@ function Found({ profile }: { profile: Profile }) {
           </ul>
         </Card>
       ) : null}
-      <Card title={t.achievements(profile.achievementCount)}>
-        {profile.achievements.length === 0 ? <p>{t.noAchievements}</p> : (
-          <ul className="flex flex-col gap-3">
-            {profile.achievements.map((achievement) => (
-              <li key={achievement.id} className="flex min-w-0 flex-col gap-1 border-[3px] border-night bg-panel p-3">
-                <p className="flex flex-wrap items-baseline gap-x-2">
-                  <strong>{c.text(achievement.name)}</strong>
-                  {achievement.tier > 1 ? <span className="hud text-hud-sm text-gold-ink">{tierLabel(achievement.tier)}</span> : null}
-                  <span className="text-xs text-muted">{c.text(achievement.family)}</span>
-                </p>
-                <p className="text-sm">{c.text(achievement.blurb)}</p>
-                <Rarity id={achievement.id} rarity={profile.rarity} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+      <section aria-labelledby="achievements-title" className="flex min-w-0 flex-col gap-4">
+        <SectionTitle id="achievements-title" glyph="achievement" size="text-2xl">{t.achievements(profile.achievementCount)}</SectionTitle>
+        {profile.achievements.length === 0 ? <p className="text-muted">{t.noAchievements}</p> : <TrophyCase achievements={profile.achievements} rarity={profile.rarity} />}
+      </section>
     </>
   )
 }

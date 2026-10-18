@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@trmnl-games/backend/api'
-import { ACHIEVEMENTS, RARITY_PERCENT_MIN_POPULATION, rarityBand, tierLabel, type RarityBand } from '@trmnl-games/desk-crawler/content/achievements'
+import { ACHIEVEMENTS, ACHIEVEMENT_BY_ID, ACHIEVEMENT_FAMILIES, RARITY_PERCENT_MIN_POPULATION, rarityBand, tierLabel, type RarityBand } from '@trmnl-games/desk-crawler/content/achievements'
 import { useState, type ReactNode } from 'react'
 import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
 import { Button, Meter } from '../../../lib/ui'
@@ -36,7 +36,7 @@ const compact = (locale: Locale) => new Intl.NumberFormat(INTL_TAG[locale], { no
 
 const earnedOn = (locale: Locale) => (date: Date) => formatDate(locale, date, { day: 'numeric', month: 'short' })
 
-export function Rarity({ id, rarity }: { id: string; rarity: View['rarity'] }) {
+function Rarity({ id, rarity }: { id: string; rarity: View['rarity'] }) {
   const t = useT(dcAchievementsMessages)
   const r = rarityOf(id, rarity, t)
   if (!r) return <span className="text-xs text-muted">{t.rarityLater}</span>
@@ -111,7 +111,7 @@ function EarnedTile({ family, rarity, onOpen }: { family: EarnedFamily; rarity: 
           <Glyph name={familyGlyph(family)} />
           {family.tiers > 1 ? <span className="hud absolute -top-2 -right-3 border-2 border-night bg-night px-0.5 text-[0.5rem] leading-3 text-gold-ink">{tierLabel(family.earned.tier)}</span> : null}
         </span>
-        <span className="line-clamp-2 text-sm leading-tight font-semibold [overflow-wrap:anywhere]">{name}</span>
+        <span className="line-clamp-2 text-sm leading-tight font-semibold hyphens-auto [overflow-wrap:anywhere]">{name}</span>
         <span aria-hidden="true" className="mt-auto flex w-full flex-col items-center gap-1.5">
           {family.tiers > 1 ? <TierPips tier={family.earned.tier} tiers={family.tiers} /> : null}
           {family.next ? (
@@ -145,7 +145,7 @@ function LockedTile({ family, rarity }: { family: Family; rarity: View['rarity']
 }
 
 /** One earned achievement's details: what it is, its rarity, when it came and how far the next tier is. */
-function EarnedSheet({ family, rarity, onClose }: { family: EarnedFamily | null; rarity: View['rarity']; onClose: () => void }) {
+function EarnedSheet({ family, rarity, onClose, showcase = false }: { family: EarnedFamily | null; rarity: View['rarity']; onClose: () => void; showcase?: boolean }) {
   const t = useT(dcAchievementsMessages)
   const c = useContent()
   const locale = useLocale()
@@ -168,7 +168,8 @@ function EarnedSheet({ family, rarity, onClose }: { family: EarnedFamily | null;
             <Rarity id={family.earned.id} rarity={rarity} />
             {family.earned.unlockedAt ? <span className="text-xs tabular-nums text-muted">{t.earned}<LocalTime at={family.earned.unlockedAt} format={earnedOn(locale)} /></span> : null}
           </div>
-          {family.next ? <Meter label={t.tier(tierLabel(family.next.tier))} value={Math.min(family.value, family.target)} max={family.target} tone="gold" /> : family.tiers > 1 ? <p className="text-sm text-muted">{t.topTier}</p> : null}
+          {/* Another hero's progress toward the next tier is theirs; the showcase shows only what is earned. */}
+          {showcase ? null : family.next ? <Meter label={t.tier(tierLabel(family.next.tier))} value={Math.min(family.value, family.target)} max={family.target} tone="gold" /> : family.tiers > 1 ? <p className="text-sm text-muted">{t.topTier}</p> : null}
           <Button variant="secondary" className="mt-1" allowOffline onClick={onClose}>{t.close}</Button>
         </div>
       ) : null}
@@ -252,6 +253,56 @@ export function Achievements() {
         )
       })}
       <EarnedSheet family={opened} rarity={view.rarity} onClose={() => setOpenId(null)} />
+    </div>
+  )
+}
+
+type Shown = { id: string; tier: number; name: string; blurb: string }
+
+const tiersOf = (family: string) => ACHIEVEMENTS.filter((def) => def.family === family).length
+
+/**
+ * A public hero page's achievements (D187): the owner's badges and shelves, earned families only, read-only. The three
+ * rarest lead in their own case once rarity is published; a badge opens its sheet without the next tier's progress.
+ */
+export function TrophyCase({ achievements, rarity }: { achievements: Shown[]; rarity: View['rarity'] }) {
+  const [openId, setOpenId] = useState<string | null>(null)
+  const t = useT(dcAchievementsMessages)
+  const c = useContent()
+  const families = achievements.flatMap((shown): EarnedFamily[] => {
+    const family = ACHIEVEMENT_FAMILIES.find((f) => f.id === ACHIEVEMENT_BY_ID.get(shown.id)?.family)
+    if (!family) return []
+    return [{ family: family.id, name: family.name, category: family.category, tier: shown.tier, tiers: tiersOf(family.id), earned: { ...shown, unlockedAt: null }, next: null, value: 0, target: 0 }]
+  })
+  const held = (f: EarnedFamily) => rarity?.counts[f.earned.id] ?? Infinity
+  // Rarest first among the uncommon and up; a case of commons would be no showcase.
+  const rarest = rarity ? [...families].filter((f) => { const r = rarityOf(f.earned.id, rarity, t); return r !== null && r.band !== 'common' }).sort((a, b) => held(a) - held(b)).slice(0, 3) : []
+  const opened = families.find((f) => f.family === openId) ?? null
+  return (
+    <div className="flex min-w-0 flex-col gap-6">
+      {rarest.length > 0 ? (
+        <section aria-labelledby="rarest-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
+          <h3 id="rarest-title" className="flex items-center gap-2 label-px text-muted"><Glyph name="crown" className="shrink-0 text-rare-ink" />{t.rarest}</h3>
+          <ul className="grid grid-cols-3 gap-2">
+            {rarest.map((family) => <EarnedTile key={family.family} family={family} rarity={rarity} onOpen={() => setOpenId(family.family)} />)}
+          </ul>
+        </section>
+      ) : null}
+      {shelvesOf(families).map((shelf) => {
+        const id = `shelf-${shelf.category.replace(/\W+/g, '-').toLowerCase()}`
+        return (
+          <section key={shelf.category} aria-labelledby={id} className="flex min-w-0 flex-col gap-3">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+              <SectionTitle id={id} glyph={shelf.glyph} tone={shelf.tone} size="text-xl" as="h3">{shelfTitle(shelf.category, t, c)}</SectionTitle>
+              <span className="text-sm text-muted tabular-nums">{shelf.families.length}</span>
+            </div>
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-2">
+              {(shelf.families as EarnedFamily[]).map((family) => <EarnedTile key={family.family} family={family} rarity={rarity} onOpen={() => setOpenId(family.family)} />)}
+            </ul>
+          </section>
+        )
+      })}
+      <EarnedSheet family={opened} rarity={rarity} onClose={() => setOpenId(null)} showcase />
     </div>
   )
 }

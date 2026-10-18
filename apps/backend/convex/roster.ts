@@ -11,6 +11,9 @@ import { commandLog, currentUser, intentReturns, requirePlayableHero, runIntent 
 import { HERO_NAME_RULE, validateName } from './lib/names'
 import { readWorld, worldContent } from './world'
 import { heroGender } from './schema'
+import { FULL_SCALE } from '@trmnl-games/desk-crawler/art/scene'
+import { sceneFor, scenePath } from '@trmnl-games/desk-crawler/art/sceneKey'
+import { sceneOccasion } from '@trmnl-games/desk-crawler/payload'
 
 /**
  * The hero roster (P37, D136): one hero per class per account, one current hero at a time. The others are parked:
@@ -72,6 +75,11 @@ async function unpark(ctx: MutationCtx, hero: Doc<'heroes'>, tick: number) {
   await commandLog(ctx, hero, 'unpark_hero', 'Back at the desk, right where you left off.')
 }
 
+function rosterScene(content: ContentCatalog, hero: Doc<'heroes'>, now: number, utcOffset: number | undefined) {
+  const scene = sceneFor(hero.isActive ? hero.status : 'resting', hero.wakeAtTick !== undefined, null, hero.class, hero.gender)
+  return scenePath(hero.biomeId, scene.pose, scene.subject, FULL_SCALE, 'day', sceneOccasion(content, now, utcOffset))
+}
+
 /** P37: the Roster page. Null before the account has a hero. */
 export const mine = query({
   args: { now: v.number() },
@@ -101,6 +109,9 @@ export const mine = query({
         maxHp: heroMaxHp(content, hero),
         gold: hero.gold,
         biome: content.biomes.find((biome) => biome.id === hero.biomeId)?.name ?? hero.biomeId,
+        biomeId: hero.biomeId,
+        // D188: each hero's own scene for the character select; a parked hero rests at the desk while it waits.
+        scenePath: rosterScene(content, hero, now, user.trmnlUtcOffset),
         current: hero._id === current._id,
         // Parked for this many adventures (ticks), or null for the current hero.
         parkedFor: hero._id === current._id || hero.parkedAtTick === undefined ? null : Math.max(0, tick - hero.parkedAtTick),
