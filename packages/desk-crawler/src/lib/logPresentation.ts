@@ -7,6 +7,12 @@ const CHIP_WORDS: Readonly<Record<Locale, { gold: string; hp: string; xp: string
   en: { gold: 'gold', hp: 'HP', xp: 'XP', fromPotion: (hp) => `${hp} from potion`, bagSlots: (n) => (n === 1 ? 'bag slot' : 'bag slots'), pouch: (n) => `Pouch holds ${n}`, offers: (n) => `${n} ${n === 1 ? 'offer' : 'offers'} open`, noEffect: 'No effect' },
   fr: { gold: 'or', hp: 'PV', xp: 'XP', fromPotion: (hp) => `${hp} grâce à la potion`, bagSlots: (n) => (n === 1 ? 'place de sac' : 'places de sac'), pouch: (n) => `Pochette : ${n}`, offers: (n) => `${n} ${n === 1 ? 'offre ouverte' : 'offres ouvertes'}`, noEffect: 'Aucun effet' },
   de: { gold: 'Gold', hp: 'LP', xp: 'XP', fromPotion: (hp) => `${hp} durch Trank`, bagSlots: (n) => (n === 1 ? 'Taschenplatz' : 'Taschenplätze'), pouch: (n) => `Beutel fasst ${n}`, offers: (n) => `${n} ${n === 1 ? 'Angebot' : 'Angebote'} offen`, noEffect: 'Keine Wirkung' },
+  es: { gold: 'oro', hp: 'PV', xp: 'XP', fromPotion: (hp) => `${hp} por la poción`, bagSlots: (n) => (n === 1 ? 'hueco en la bolsa' : 'huecos en la bolsa'), pouch: (n) => `Bolsita: ${n}`, offers: (n) => `${n} ${n === 1 ? 'oferta abierta' : 'ofertas abiertas'}`, noEffect: 'Sin efecto' },
+  it: { gold: 'oro', hp: 'PS', xp: 'XP', fromPotion: (hp) => `${hp} dalla pozione`, bagSlots: (n) => (n === 1 ? 'posto nella borsa' : 'posti nella borsa'), pouch: (n) => `Borsello: ${n}`, offers: (n) => `${n} ${n === 1 ? 'offerta aperta' : 'offerte aperte'}`, noEffect: 'Nessun effetto' },
+  pt: { gold: 'ouro', hp: 'PV', xp: 'XP', fromPotion: (hp) => `${hp} da poção`, bagSlots: (n) => (n === 1 ? 'espaço na bolsa' : 'espaços na bolsa'), pouch: (n) => `Bolsinha: ${n}`, offers: (n) => `${n} ${n === 1 ? 'oferta aberta' : 'ofertas abertas'}`, noEffect: 'Sem efeito' },
+  // Polish nouns take a form for 1, for 2–4 (not 12–14) and for the rest.
+  pl: { gold: 'złota', hp: 'PŻ', xp: 'XP', fromPotion: (hp) => `${hp} z mikstury`, bagSlots: (n) => `${n === 1 ? 'miejsce' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'miejsca' : 'miejsc'} w torbie`, pouch: (n) => `Sakiewka: ${n}`, offers: (n) => `Otwarte oferty: ${n}`, noEffect: 'Bez efektu' },
+  nl: { gold: 'goud', hp: 'HP', xp: 'XP', fromPotion: (hp) => `${hp} door drankje`, bagSlots: (n) => (n === 1 ? 'tasplek' : 'tasplekken'), pouch: (n) => `Buidel: ${n}`, offers: (n) => `${n} ${n === 1 ? 'aanbieding' : 'aanbiedingen'} open`, noEffect: 'Geen effect' },
 }
 
 export interface LogDeltas {

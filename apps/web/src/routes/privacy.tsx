@@ -8,9 +8,14 @@ import type { LegalPage } from './-legal'
 import { privacyEn } from './-privacy.en'
 import { privacyFr } from './-privacy.fr'
 import { privacyDe } from './-privacy.de'
+import { privacyEs } from './-privacy.es'
+import { privacyIt } from './-privacy.it'
+import { privacyPt } from './-privacy.pt'
+import { privacyPl } from './-privacy.pl'
+import { privacyNl } from './-privacy.nl'
 
 /** D169: the policy in each language; the English text prevails. */
-const PAGES: Readonly<Record<Locale, LegalPage>> = { en: privacyEn, fr: privacyFr, de: privacyDe }
+const PAGES: Readonly<Record<Locale, LegalPage>> = { en: privacyEn, fr: privacyFr, de: privacyDe, es: privacyEs, it: privacyIt, pt: privacyPt, pl: privacyPl, nl: privacyNl }
 
 /**
  * Idle Angler's and Paper Lives' parts of the policy (D115, D159). Each renders once its game is listed (preview or

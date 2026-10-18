@@ -1,4 +1,5 @@
 import { convexQuery } from '@convex-dev/react-query'
+import { INTL_TAG } from '@trmnl-games/platform'
 import { useQuery } from '@tanstack/react-query'
 import { useMutation } from 'convex/react'
 import { ConvexError } from 'convex/values'
@@ -16,7 +17,6 @@ import { formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { useContent } from '../../../lib/useContent'
 import { dcCareerMessages } from '../../../i18n/dcCareer'
 
-const TAGS = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' } as const
 const arrivesAt = (tag: string) => (date: Date) => date.toLocaleString(tag, { weekday: 'long', hour: 'numeric', minute: '2-digit' })
 const opensOn = (tag: string) => (date: Date) => date.toLocaleString(tag, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' })
 
@@ -184,7 +184,7 @@ export function DeskKeepsakes() {
         <KeepsakeIcon pixels={next.pixels} />
         <div><p className="font-semibold">{collectedThisWeek ? t.comingNext : t.nextKeepsake}{c.text(next.name)}</p><p className="mt-1 text-sm text-muted">{c.text(next.description)}</p></div>
       </div>
-      {!open ? <p className="text-sm font-semibold">{t.startBefore}<LocalTime at={KEEPSAKES_OPEN_AT} format={opensOn(TAGS[locale])} />{t.startAfter}</p> : collectedThisWeek ? <p className="text-sm font-semibold">{t.collectedWeek}{collection.nextAvailableAt ? <>{t.nextArrivesBefore}<LocalTime at={collection.nextAvailableAt} format={arrivesAt(TAGS[locale])} />{t.nextArrivesAfter}</> : t.nextWeek}</p> : <KeepsakeCodeForm form={form} inputId="keepsake-code" />}
+      {!open ? <p className="text-sm font-semibold">{t.startBefore}<LocalTime at={KEEPSAKES_OPEN_AT} format={opensOn(INTL_TAG[locale])} />{t.startAfter}</p> : collectedThisWeek ? <p className="text-sm font-semibold">{t.collectedWeek}{collection.nextAvailableAt ? <>{t.nextArrivesBefore}<LocalTime at={collection.nextAvailableAt} format={arrivesAt(INTL_TAG[locale])} />{t.nextArrivesAfter}</> : t.nextWeek}</p> : <KeepsakeCodeForm form={form} inputId="keepsake-code" />}
       <p id="keepsake-code-help" className="mt-3 max-w-prose text-sm text-muted">{collection.connected ? t.codeSits : t.reconnect}</p>
       <ActionFeedback error={error} message={message} />
       <ul aria-label={t.shelfLabel} className="mt-5 grid grid-cols-1 gap-x-6 gap-y-4 min-[480px]:grid-cols-2 sm:grid-cols-3 sm:gap-y-5">

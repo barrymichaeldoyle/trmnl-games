@@ -106,13 +106,23 @@ function NotFound() {
 
 type ClerkLocalization = ComponentProps<typeof ClerkProvider>['localization']
 
-/** Clerk's own French or German screens, downloaded only for a reader in that language; English is Clerk's default. */
+/** Clerk's own screens in each language we speak, downloaded only for a reader in it; English is Clerk's default. */
+const CLERK_LOCALIZATIONS: Readonly<Record<Exclude<Locale, 'en'>, () => Promise<ClerkLocalization>>> = {
+  fr: () => import('@clerk/localizations/fr-FR').then((m) => m.frFR),
+  de: () => import('@clerk/localizations/de-DE').then((m) => m.deDE),
+  es: () => import('@clerk/localizations/es-ES').then((m) => m.esES),
+  it: () => import('@clerk/localizations/it-IT').then((m) => m.itIT),
+  pt: () => import('@clerk/localizations/pt-BR').then((m) => m.ptBR),
+  pl: () => import('@clerk/localizations/pl-PL').then((m) => m.plPL),
+  nl: () => import('@clerk/localizations/nl-NL').then((m) => m.nlNL),
+}
+/** Loads the reader's Clerk screens (above). */
 function useClerkLocalization(locale: Locale): ClerkLocalization {
   const [loaded, setLoaded] = useState<{ locale: Locale; localization: ClerkLocalization } | null>(null)
   useEffect(() => {
     if (locale === 'en') return
     let live = true
-    const load = locale === 'fr' ? import('@clerk/localizations/fr-FR').then((m) => m.frFR) : import('@clerk/localizations/de-DE').then((m) => m.deDE)
+    const load = CLERK_LOCALIZATIONS[locale]()
     void load.then((localization) => { if (live) setLoaded({ locale, localization }) }).catch(() => {})
     return () => { live = false }
   }, [locale])

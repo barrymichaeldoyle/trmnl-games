@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { HERO_NAME_RULE } from '@trmnl-games/platform'
+import { HERO_NAME_RULE, INTL_TAG } from '@trmnl-games/platform'
 import { NameField, nameProblem } from '../../../lib/nameField'
 import { GenderPicker, type HeroGender } from '../../../lib/genderPicker'
 import { Button, Card } from '../../../lib/ui'
@@ -46,7 +46,7 @@ export function NameTag({ tag, heroName, gold, disabled, intent }: { tag: { pric
       <NameField label={t.newNameFor(heroName)} small rule={HERO_NAME_RULE} noun="hero name" value={name} onChange={setName} disabled={intent.pending} />
       <Button type="submit" disabled={disabled || !valid} pending={intent.pending} icon="coin" busyLabel={t.buying}>{t.buyFor(tag.price)}</Button>
       <p className="text-sm text-muted">{t.oneADay}</p>
-    </form> : <p className="mt-3 text-sm text-muted">{t.tagSold(new Date(tag.inStockAt!).toLocaleString(locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' }))}</p>}
+    </form> : <p className="mt-3 text-sm text-muted">{t.tagSold(new Date(tag.inStockAt!).toLocaleString(INTL_TAG[locale], { weekday: 'short', hour: '2-digit', minute: '2-digit' }))}</p>}
     <BuySheet open={asking} title={t.renameTitle(heroName, name.trim())} price={tag.price} gold={gold} pending={intent.pending} onClose={() => setAsking(false)} onConfirm={async () => { const done = await intent.run({ name: name.trim() }, t.renamed(name.trim())); if (done) setName(''); return done }}>
       <li>{t.goesBy(heroName, name.trim())}</li>
       <li>{t.nextTag}</li>

@@ -7,9 +7,14 @@ import { contentsOf, type HelpPage } from './-deskCrawlerHelp'
 import { en } from './-deskCrawlerHelp.en'
 import { fr } from './-deskCrawlerHelp.fr'
 import { de } from './-deskCrawlerHelp.de'
+import { es } from './-deskCrawlerHelp.es'
+import { it } from './-deskCrawlerHelp.it'
+import { pt } from './-deskCrawlerHelp.pt'
+import { pl } from './-deskCrawlerHelp.pl'
+import { nl } from './-deskCrawlerHelp.nl'
 
 /** D169: the guide is written out in each language; the catalog's numbers come from -deskCrawlerFacts. */
-const PAGES: Readonly<Record<Locale, HelpPage>> = { en, fr, de }
+const PAGES: Readonly<Record<Locale, HelpPage>> = { en, fr, de, es, it, pt, pl, nl }
 
 export const Route = createFileRoute('/help/desk-crawler')({
   head: ({ match: { context: { locale } } }) => seo({ title: PAGES[locale].seoTitle, path: '/help/desk-crawler', description: PAGES[locale].description, image: DESK_CRAWLER_OG, locale }),

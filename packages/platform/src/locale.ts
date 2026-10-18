@@ -1,8 +1,8 @@
 /**
- * D169: the languages TRMNL Games speaks. English is the source; every other locale is a full translation, and a
+ * D169, D192: the languages TRMNL Games speaks. English is the source; every other locale is a full translation, and a
  * missing preference falls back to English.
  */
-export const LOCALES = ['en', 'fr', 'de'] as const
+export const LOCALES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'pl', 'nl'] as const
 export type Locale = (typeof LOCALES)[number]
 export const DEFAULT_LOCALE: Locale = 'en'
 
@@ -13,10 +13,10 @@ export const DEFAULT_LOCALE: Locale = 'en'
 export const LANGUAGES_LIVE: boolean = true
 
 /** Each language named in itself, for the picker. */
-export const LOCALE_NAMES: Readonly<Record<Locale, string>> = { en: 'English', fr: 'Français', de: 'Deutsch' }
+export const LOCALE_NAMES: Readonly<Record<Locale, string>> = { en: 'English', fr: 'Français', de: 'Deutsch', es: 'Español', it: 'Italiano', pt: 'Português', pl: 'Polski', nl: 'Nederlands' }
 
 /** The tag `Intl` formats numbers and dates with: British English matches the site's existing day-month dates. */
-export const INTL_TAG: Readonly<Record<Locale, string>> = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' }
+export const INTL_TAG: Readonly<Record<Locale, string>> = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', it: 'it-IT', pt: 'pt-BR', pl: 'pl-PL', nl: 'nl-NL' }
 
 export const isLocale = (value: unknown): value is Locale => typeof value === 'string' && (LOCALES as readonly string[]).includes(value)
 

@@ -496,7 +496,7 @@ function App() {
 }
 document.body.className = 'bg-ground text-ink';
 const ProfilePage = (lifePage ? PlPublic : Profile).options.component;
-const lang = ['fr', 'de'].includes(new URLSearchParams(location.search).get('lang')) ? new URLSearchParams(location.search).get('lang') : 'en';
+const lang = ['fr', 'de', 'es', 'it', 'pt', 'pl', 'nl'].includes(new URLSearchParams(location.search).get('lang')) ? new URLSearchParams(location.search).get('lang') : 'en';
 document.documentElement.lang = lang;
 createRoot(document.getElementById('root')).render(<LocaleProvider locale={lang}><NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider></LocaleProvider>);
 `)

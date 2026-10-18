@@ -62,7 +62,7 @@ function FloorScene({ id, alt }: { id: string; alt: string }) {
 export function FloorGrid({ headingId, headingLevel: Heading = 'h2' }: { headingId: string; headingLevel?: 'h2' | 'h3' }) {
   const t = useT(pitchMessages)
   const locale = useLocale()
-  // D169: the generated facts carry each floor's French and German names.
+  // D169, D192: the generated facts carry each floor's name in every language.
   const floors = FLOORS.map((floor) => (locale === 'en' ? { ...floor, alt: `A hero fights a ${floor.featured} in the ${floor.name}` } : { ...floor, ...floor[locale] }))
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-6">

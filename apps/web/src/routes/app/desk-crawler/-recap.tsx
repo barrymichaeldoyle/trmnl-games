@@ -1,4 +1,5 @@
 import { convexQuery } from '@convex-dev/react-query'
+import { INTL_TAG } from '@trmnl-games/platform'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useMutation } from 'convex/react'
@@ -8,7 +9,7 @@ import { api } from '@trmnl-games/backend/api'
 import { isRefusal } from '../../../lib/intent'
 import { afterVisibleVisit } from '../../../lib/visibleVisit'
 import { LocalTime } from '../../../lib/localTime'
-import { formatNumber, useLocale, useT } from '../../../lib/i18n'
+import { countForm, formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { dcRecapMessages } from '../../../i18n/dcRecap'
 
 type Summary = {
@@ -130,7 +131,7 @@ function Ledger({ summary }: { summary: Summary }) {
           {t.whileAway}
         </h2>
         <p className="text-sm text-muted">
-          <LocalTime at={summary.baseline.at} format={sinceAt(locale === 'en' ? 'en-GB' : locale === 'fr' ? 'fr-FR' : 'de-DE')} />
+          <LocalTime at={summary.baseline.at} format={sinceAt(INTL_TAG[locale])} />
           {summary.newEvents && !quiet ? t.logEntries(summary.newEvents) : ''}
         </p>
       </div>
@@ -168,7 +169,7 @@ export function ReturnNudge() {
     [summary.counters?.goldEarned ?? 0, 'gold'],
     [summary.counters?.itemsFound ?? 0, 'item'],
     [summary.counters?.deaths ?? 0, 'knockout'],
-  ] as const).filter(([value]) => value > 0).map(([value, key]) => `+${formatNumber(locale, value)} ${t.gains[key][value === 1 ? 0 : 1]}`)
+  ] as const).filter(([value]) => value > 0).map(([value, key]) => `+${formatNumber(locale, value)} ${countForm(t.gains[key], value)}`)
   if (parts.length === 0) return null
   return (
     <Link to="/app/desk-crawler/log" className="block min-h-11 border-[3px] border-gold px-3 py-2 text-sm">
@@ -203,7 +204,7 @@ export function LiveGain() {
     ] as const
   ).filter(([, value]) => value > 0)
   if (gained.length === 0) return null
-  const label = (unit: keyof typeof t.gains, value: number) => t.gains[unit][value === 1 ? 0 : 1]
+  const label = (unit: keyof typeof t.gains, value: number) => countForm(t.gains[unit], value)
   return (
     // Steps in again each time it changes, so a fresh gain while the page is open is noticed.
     <p key={gained.map(([unit, value]) => unit + value).join()} role="status" className="hud notice-rise border-[3px] border-gold px-3 py-2 text-hud-sm text-gold-ink">

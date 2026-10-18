@@ -19,9 +19,9 @@ export function LocaleProvider({ locale, children }: { locale: Locale; children:
 
 export const useLocale = (): Locale => useContext(LocaleContext)
 
-/** A page's copy in every locale; `fr` and `de` must match English's shape, function signatures included. */
+/** A page's copy in every locale; each translation must match English's shape, function signatures included. */
 export type Catalog<T> = Readonly<Record<Locale, T>>
-export const defineMessages = <T,>(catalog: { en: T; fr: NoInfer<T>; de: NoInfer<T> }): Catalog<T> => catalog
+export const defineMessages = <T,>(catalog: { en: T } & { [L in Exclude<Locale, 'en'>]: NoInfer<T> }): Catalog<T> => catalog
 
 /** The current locale's copy from a catalog. */
 export const useT = <T,>(catalog: Catalog<T>): T => catalog[useContext(LocaleContext)]
@@ -59,3 +59,9 @@ export const formatNumber = (locale: Locale, value: number) => value.toLocaleStr
 
 /** A clock time in the reader's language, in their browser's zone. */
 export const formatTime = (locale: Locale, at: number | Date) => new Date(at).toLocaleTimeString(INTL_TAG[locale], { hour: '2-digit', minute: '2-digit' })
+
+/** D192: a Polish count's noun: 1 przedmiot, 2 to 4 (not 12 to 14) przedmioty, otherwise przedmiotów. */
+export const plForm = (n: number, one: string, few: string, many: string) => (n === 1 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many)
+
+/** A count's noun from a catalog's forms: [one, other], or Polish [one, few, many]. */
+export const countForm = (forms: readonly string[], n: number): string => (forms.length === 3 ? plForm(n, forms[0]!, forms[1]!, forms[2]!) : forms[n === 1 ? 0 : 1]!)

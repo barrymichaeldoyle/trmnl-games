@@ -211,8 +211,13 @@ export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>
 
 const fr = contentTranslator('fr')
 const de = contentTranslator('de')
+const es = contentTranslator('es')
+const it = contentTranslator('it')
+const pt = contentTranslator('pt')
+const pl = contentTranslator('pl')
+const nl = contentTranslator('nl')
 
-/** D169: Desk Crawler's two alerts in the owner's language (lib/trmnlUser.ts `deviceLocale`). */
+/** D169, D192: Desk Crawler's two alerts in the owner's language (lib/trmnlUser.ts `deviceLocale`). */
 const DESK_ALERTS: Readonly<Record<Locale, { asleep: (hero: string) => { title: string; body: string }; merchant: (hero: string, offer: string | null) => { title: string; body: string } }>> = {
   en: {
     asleep: (hero) => ({ title: `${hero}'s bag is full`, body: `${hero} is holding a new find for you. Make room in the bag so the next ones are not left behind.` }),
@@ -225,5 +230,25 @@ const DESK_ALERTS: Readonly<Record<Locale, { asleep: (hero: string) => { title: 
   de: {
     asleep: (hero) => ({ title: `Die Tasche von ${hero} ist voll`, body: `${hero} hebt einen neuen Fund für dich auf. Schaff Platz in der Tasche, damit die nächsten nicht liegen bleiben.` }),
     merchant: (hero, offer) => ({ title: 'Ein Händler ist da', body: `Ein Händler bietet ${hero} ${offer === null ? 'eine größere Tasche' : de.nameWith(offer, 'einen')} günstiger an, und das Gold reicht. Das Angebot gilt etwa eine Stunde.` }),
+  },
+  es: {
+    asleep: (hero) => ({ title: `La bolsa de ${hero} está llena`, body: `${hero} te guarda un nuevo hallazgo. Haz sitio en la bolsa para que los siguientes no se queden atrás.` }),
+    merchant: (hero, offer) => ({ title: 'Hay un mercader de paso', body: `Un mercader le ofrece a ${hero} ${offer === null ? 'una bolsa más grande' : es.nameWith(offer, 'un')} con descuento, y le llega el oro. La oferta dura una hora más o menos.` }),
+  },
+  it: {
+    asleep: (hero) => ({ title: `La borsa di ${hero} è piena`, body: `${hero} ti tiene da parte un nuovo ritrovamento. Fai spazio nella borsa perché i prossimi non restino indietro.` }),
+    merchant: (hero, offer) => ({ title: 'C’è un mercante di passaggio', body: `Un mercante offre a ${hero} ${offer === null ? 'una borsa più grande' : it.nameWith(offer, 'un')} a prezzo scontato, e l’oro basta. L’offerta dura circa un’ora.` }),
+  },
+  pt: {
+    asleep: (hero) => ({ title: `A bolsa de ${hero} está cheia`, body: `${hero} está guardando um achado novo para você. Abra espaço na bolsa para os próximos não ficarem para trás.` }),
+    merchant: (hero, offer) => ({ title: 'Um mercador está de passagem', body: `Um mercador está oferecendo ${offer === null ? 'uma bolsa maior' : pt.nameWith(offer, 'um')} com desconto para ${hero}, e o ouro dá. A oferta dura cerca de uma hora.` }),
+  },
+  pl: {
+    asleep: (hero) => ({ title: `Torba bohatera ${hero} jest pełna`, body: `${hero} odkłada dla ciebie nowe znalezisko. Zrób miejsce w torbie, żeby kolejne nie zostały na miejscu.` }),
+    merchant: (hero, offer) => ({ title: 'Wędrowny kupiec jest w pobliżu', body: `Kupiec ma przecenę dla bohatera ${hero}: ${offer === null ? 'większa torba' : pl.name(offer)}. Złota wystarczy. Oferta trwa mniej więcej godzinę.` }),
+  },
+  nl: {
+    asleep: (hero) => ({ title: `De tas van ${hero} is vol`, body: `${hero} bewaart een nieuwe vondst voor je. Maak ruimte in de tas, zodat de volgende niet blijven liggen.` }),
+    merchant: (hero, offer) => ({ title: 'Er is een koopman op bezoek', body: `Een koopman biedt ${hero} ${offer === null ? 'een grotere tas' : nl.nameWith(offer, 'een')} met korting aan, en het goud is er. Het aanbod geldt ongeveer een uur.` }),
   },
 }

@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { INTL_TAG } from '@trmnl-games/platform'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { BUTTON_PRIMARY, Button } from '../../../lib/ui'
@@ -32,7 +33,6 @@ const POUCH_GOALS = new Set(['lunchbox'])
 
 // French and German short months end in a full stop ("13 oct."), which would double the sentence's own.
 const reachedOn = (tag: string) => (date: Date) => date.toLocaleDateString(tag, { day: 'numeric', month: tag.startsWith('en') ? 'short' : 'long' })
-const TAGS = { en: 'en-GB', fr: 'fr-FR', de: 'de-DE' } as const
 
 /**
  * The hero page's goal card (P35, D129): rewards waiting to be claimed come first, one at a time with a Claim button
@@ -72,7 +72,7 @@ export function GoalCard({ career, level, gold = 0, holding, notify }: { career:
       {reward ? (
         <>
           <p className="font-display text-2xl leading-tight font-bold">{c.text(reward.title)}</p>
-          <p className="text-sm">{t.gotThereOn}{reward.at !== null ? <>{t.on}<LocalTime at={reward.at} format={reachedOn(TAGS[locale])} /></> : ''}{t.rewardYours}</p>
+          <p className="text-sm">{t.gotThereOn}{reward.at !== null ? <>{t.on}<LocalTime at={reward.at} format={reachedOn(INTL_TAG[locale])} /></> : ''}{t.rewardYours}</p>
           <div className="flex flex-wrap items-center gap-3">
             <Button className="w-full sm:w-auto" icon="coin" pending={claim.pending} busyLabel={t.claiming} onClick={async () => { if (await claim.run({ rungId: reward.id }, t.claimed(n(reward.gold)))) { fireBurst(); captureAnalytics('goal claimed', { rung: reward.id }) } }}>
               {t.claim(n(reward.gold))}
@@ -166,7 +166,7 @@ export function CareerLadder({ career, unlocks, floors = [] }: { career: CareerV
             <p className="flex flex-wrap items-center gap-x-3 text-xs font-semibold tabular-nums">
               <span className={rung.state === 'ahead' ? '' : 'text-gold-ink'}>{t.gold(formatNumber(locale, rung.gold))}</span>
               {rung.companion ? <span className="text-muted">{t.inCompanion}</span> : null}
-              {rung.state === 'done' ? rung.reachedAt !== null ? <LocalTime at={rung.reachedAt} format={reachedOn(TAGS[locale])} className="text-xp-ink" /> : <span className="text-muted">{t.beforeLadder}</span> : null}
+              {rung.state === 'done' ? rung.reachedAt !== null ? <LocalTime at={rung.reachedAt} format={reachedOn(INTL_TAG[locale])} className="text-xp-ink" /> : <span className="text-muted">{t.beforeLadder}</span> : null}
             </p>
           </div>
         )}

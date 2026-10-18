@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url'
 import { paintedSceneUri } from '../../packages/desk-crawler/src/art/sceneColour'
 import { scenePath } from '../../packages/desk-crawler/src/art/sceneKey'
 import { ACTIVE_CONTENT, catalogs } from '../../packages/desk-crawler/src/content/index'
-import { contentTranslator } from '../../packages/desk-crawler/src/i18n/index'
+import { LOCALES, type Locale } from '../../packages/platform/src/locale'
+import { contentTranslator, type ContentTranslator } from '../../packages/desk-crawler/src/i18n/index'
 import { renderPhrase } from '../../packages/desk-crawler/src/i18n/grammar'
 import { fr } from '../../packages/desk-crawler/src/i18n/fr'
 import { de } from '../../packages/desk-crawler/src/i18n/de'
@@ -30,18 +31,22 @@ const floors = catalog.biomes.map((biome) => {
   if (!uri) throw new Error(`No painted scene for ${biome.id}`)
   writeFileSync(join(outDir, `${biome.id}.png`), Buffer.from(uri.split(',')[1]!, 'base64'))
   const name = (id: string) => catalog.monsters.find((monster) => monster.id === id)?.name ?? id
-  // D169: each floor in French and German too, with the picture's description built with the names' articles.
+  // D169, D192: each floor in every other language too, with the picture's description built with the names' articles.
   const phrase = (dictionary: typeof fr | typeof de, english: string) => ({ head: dictionary.nouns[english]![0], gender: dictionary.nouns[english]![1] })
-  const localized = (locale: 'fr' | 'de') => {
-    const t = contentTranslator(locale)
-    const monster = phrase(locale === 'fr' ? fr : de, name(featured))
-    const floor = phrase(locale === 'fr' ? fr : de, biome.name)
-    const alt = locale === 'fr'
-      ? `Un héros affronte ${renderPhrase('fr', monster, 'un', false)} dans ${renderPhrase('fr', floor, 'le', false)}`
-      : `Ein Held kämpft ${renderPhrase('de', floor, 'im', false)} gegen ${renderPhrase('de', monster, 'einen', false)}`
-    return { name: t.name(biome.name), monsters: biome.monsterIds.map((id) => t.name(name(id))), alt }
+  const describe: Record<Exclude<Locale, 'en'>, (t: ContentTranslator, monster: string, floor: string) => string> = {
+    fr: () => `Un héros affronte ${renderPhrase('fr', phrase(fr, name(featured)), 'un', false)} dans ${renderPhrase('fr', phrase(fr, biome.name), 'le', false)}`,
+    de: () => `Ein Held kämpft ${renderPhrase('de', phrase(de, biome.name), 'im', false)} gegen ${renderPhrase('de', phrase(de, name(featured)), 'einen', false)}`,
+    es: (t, monster, floor) => `Un héroe se enfrenta a ${t.nameWith(monster, 'un')} ${t.nameWith(floor, 'en')}`,
+    it: (t, monster, floor) => `Un eroe affronta ${t.nameWith(monster, 'un')} ${t.nameWith(floor, 'nel')}`,
+    pt: (t, monster, floor) => `Um herói enfrenta ${t.nameWith(monster, 'um')} ${t.nameWith(floor, 'no')}`,
+    pl: (t, monster, floor) => `Bohater walczy z przeciwnikiem: ${t.name(monster)} (${t.name(floor)})`,
+    nl: (t, monster, floor) => `Een held vecht in ${t.nameWith(floor, 'de')} tegen ${t.nameWith(monster, 'een')}`,
   }
-  return { id: biome.id, name: biome.name, level: biome.unlockLevel, featured: name(featured), monsters: biome.monsterIds.map(name), fr: localized('fr'), de: localized('de') }
+  const localized = Object.fromEntries(LOCALES.filter((locale) => locale !== 'en').map((locale) => {
+    const t = contentTranslator(locale)
+    return [locale, { name: t.name(biome.name), monsters: biome.monsterIds.map((id) => t.name(name(id))), alt: describe[locale](t, name(featured), biome.name) }]
+  }))
+  return { id: biome.id, name: biome.name, level: biome.unlockLevel, featured: name(featured), monsters: biome.monsterIds.map(name), ...localized }
 })
 
 const literal = (value: unknown) => JSON.stringify(value, null, 2).replace(/"(\w+)":/g, '$1:').replace(/"/g, "'")

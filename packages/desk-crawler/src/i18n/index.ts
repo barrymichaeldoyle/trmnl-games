@@ -1,7 +1,12 @@
 import { INTL_TAG, type Locale } from '@trmnl-games/platform'
-import { renderPhrase, type DeAdjective, type FrAdjective, type Gender, type GrammarLocale, type NounPhrase } from './grammar'
+import { ADJECTIVES_FIRST, agreement, AGREEMENT_FORMS, DEFAULT_GENDER, renderPhrase, type DeAdjective, type FrAdjective, type Gender, type GrammarLocale, type NlAdjective, type NounPhrase, type PlAdjective, type RomanceAdjective } from './grammar'
 import { fr } from './fr'
 import { de } from './de'
+import { es } from './es'
+import { it } from './it'
+import { pt } from './pt'
+import { pl } from './pl'
+import { nl } from './nl'
 
 /**
  * D169: Desk Crawler's content in other languages. Catalogs, stored logs and item rows hold English, and they stay
@@ -26,6 +31,12 @@ export interface ContentDictionary<A> {
 }
 export type FrDictionary = ContentDictionary<FrAdjective>
 export type DeDictionary = ContentDictionary<DeAdjective>
+/** D192: Spanish, Italian and Portuguese adjectives as [masculine, feminine]; Dutch as [base, inflected]; Polish by gender. */
+export type EsDictionary = ContentDictionary<RomanceAdjective>
+export type ItDictionary = ContentDictionary<RomanceAdjective>
+export type PtDictionary = ContentDictionary<RomanceAdjective>
+export type NlDictionary = ContentDictionary<NlAdjective>
+export type PlDictionary = ContentDictionary<PlAdjective>
 
 export interface ContentTranslator {
   readonly locale: Locale
@@ -108,7 +119,7 @@ interface CompiledTemplate {
 const ITEM_SUFFIX = /(?: (Mk [IVX]+))?(?: (\+\d+))?$/
 const RARITIES = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary']
 
-function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocale & Locale, dictionary: ContentDictionary<A>): ContentTranslator {
+function translatorFor(locale: GrammarLocale & Locale, dictionary: ContentDictionary<unknown>): ContentTranslator {
   const tag = INTL_TAG[locale]
   const numbers = new Intl.NumberFormat(tag, { maximumFractionDigits: 0 })
   const nounsLower = new Map(Object.entries(dictionary.nouns).map(([english, entry]) => [english.toLowerCase(), entry] as const))
@@ -126,11 +137,12 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
   function phraseOf(english: string): NounPhrase | null {
     const exact = dictionary.nouns[english] ?? nounsLower.get(english.toLowerCase())
     const lowerStart = /^[a-z]/.test(english)
-    if (exact) return { head: locale === 'fr' && lowerStart ? exact[0].charAt(0).toLowerCase() + exact[0].slice(1) : exact[0], gender: exact[1] }
+    // Only German keeps a capital on a noun inside a sentence.
+    if (exact) return { head: locale !== 'de' && lowerStart ? exact[0].charAt(0).toLowerCase() + exact[0].slice(1) : exact[0], gender: exact[1] }
     const suffixMatch = english.match(ITEM_SUFFIX)
     const suffix = [suffixMatch?.[1], suffixMatch?.[2]].filter(Boolean).join(' ')
     let rest = suffix ? english.slice(0, english.length - (suffixMatch?.[0].length ?? 0)) : english
-    const words: A[] = []
+    const words: unknown[] = []
     const take = (candidates: readonly string[]) => {
       const found = candidates.find((word) => rest.startsWith(`${word} `))
       if (found === undefined) return undefined
@@ -144,18 +156,19 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
     if (affix !== undefined) words.push(affix)
     if (rarity !== undefined) words.push(rarity)
     const head = base[0]
-    // French reads noun, rarity, affix ("Masse-clavier rare vampirique"); German reads affix, rarity, noun.
-    return locale === 'fr'
-      ? { head, gender: base[1], fr: [...(rarity === undefined ? [] : [rarity as FrAdjective]), ...(affix === undefined ? [] : [affix as FrAdjective])], ...(suffix ? { suffix } : {}) }
-      : { head, gender: base[1], de: words as DeAdjective[], ...(suffix ? { suffix } : {}) }
+    // French, Spanish, Italian and Portuguese read noun, rarity, affix ("Masse-clavier rare vampirique"); German, Dutch
+    // and Polish read affix, rarity, noun.
+    const ordered = ADJECTIVES_FIRST[locale] ? words : [...(rarity === undefined ? [] : [rarity]), ...(affix === undefined ? [] : [affix])]
+    return { head, gender: base[1], [locale]: ordered, ...(suffix ? { suffix } : {}) } as NounPhrase
   }
 
   function fillVar(token: Extract<Token, { kind: 'var' }>, value: string | undefined, context: StoryContext): string {
-    // `{e:name}` is a French agreement ending: "" or "e" or "s" by the noun's gender, or the hero's for `{e:hero}`.
-    if (token.form === 'e') {
-      if (token.name === 'hero') return context.heroGender === 'female' ? 'e' : ''
+    // An agreement ending (`{e:hero}` in French, `{o:monster}` in Spanish, `{a:hero}` in Polish): the ending for the
+    // hero's gender, or for the name's.
+    if (token.form !== undefined && AGREEMENT_FORMS[locale].includes(token.form)) {
+      if (token.name === 'hero') return agreement(locale, token.form, context.heroGender === 'female' ? 'f' : 'm')
       const phrase = value === undefined ? null : phraseOf(value.replace(/^\[\[|\]\]$/g, ''))
-      return phrase?.gender === 'f' ? 'e' : phrase?.gender === 'pl' ? 's' : ''
+      return agreement(locale, token.form, phrase?.gender ?? DEFAULT_GENDER[locale])
     }
     if (value === undefined) return ''
     if (NUMBER_VARS.has(token.name)) {
@@ -169,7 +182,7 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
       const phrase = phraseOf(bare)
       if (phrase) return renderPhrase(locale, phrase, token.form, bold, token.prefix)
       // An unknown name (an item from a newer catalog) keeps its English text, with a neutral article.
-      return renderPhrase(locale, { head: bare, gender: locale === 'fr' ? 'm' : 'n' }, token.form, bold, token.prefix)
+      return renderPhrase(locale, { head: bare, gender: DEFAULT_GENDER[locale] }, token.form, bold, token.prefix)
     }
     if (LIST_VARS.has(token.name)) return listOf(token.name, bare, context)
     const inner = translateText(bare, context)
@@ -190,8 +203,8 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
       if (!match) return translateText(part, context)
       const phrase = phraseOf(match[2]!)
       const shown = phrase ? renderPhrase(locale, phrase, undefined, false) : match[2]!
-      // French counts read in lowercase ("3 débris"); German nouns keep their capital.
-      return `${numbers.format(Number(match[1]))} ${locale === 'fr' ? shown.toLowerCase() : shown}`
+      // Counts read in lowercase ("3 débris"); German nouns keep their capital.
+      return `${numbers.format(Number(match[1]))} ${locale === 'de' ? shown : shown.toLowerCase()}`
     })
     return new Intl.ListFormat(tag, { style: 'long', type: 'conjunction' }).format(parts)
   }
@@ -274,6 +287,8 @@ function translatorFor<A extends FrAdjective | DeAdjective>(locale: GrammarLocal
 const englishNumbers = new Intl.NumberFormat(INTL_TAG.en, { maximumFractionDigits: 0 })
 const english: ContentTranslator = { locale: 'en', text: (text) => text, name: (name) => name, nameWith: (name) => name, story: () => null, number: (value) => englishNumbers.format(value) }
 
+const DICTIONARIES: Readonly<Record<Exclude<Locale, 'en'>, ContentDictionary<unknown>>> = { fr, de, es, it, pt, pl, nl }
+
 const cache = new Map<Locale, ContentTranslator>()
 
 /** The translator for a locale; English passes everything through. Built once per locale and reused. */
@@ -281,8 +296,11 @@ export function contentTranslator(locale: Locale): ContentTranslator {
   if (locale === 'en') return english
   let translator = cache.get(locale)
   if (translator === undefined) {
-    translator = locale === 'fr' ? translatorFor('fr', fr) : translatorFor('de', de)
+    translator = translatorFor(locale, DICTIONARIES[locale])
     cache.set(locale, translator)
   }
   return translator
 }
+
+/** Whether the locale's lines agree with the hero's gender (French, Spanish, Italian, Portuguese and Polish do). */
+export const agreesWithHero = (locale: Locale): boolean => locale !== 'en' && AGREEMENT_FORMS[locale].length > 0

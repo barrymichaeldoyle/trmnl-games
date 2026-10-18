@@ -30,6 +30,56 @@ export const FLOORS = [
         'Staubdämon'
       ],
       alt: 'Ein Held kämpft im Großraumbüro gegen eine Tacker-Mimik'
+    },
+    es: {
+      name: 'Cubículos',
+      monsters: [
+        'Diablillo de papel',
+        'Roomba rebelde',
+        'Mímico grapador',
+        'Demonio de polvo'
+      ],
+      alt: 'Un héroe se enfrenta a un Mímico grapador en los Cubículos'
+    },
+    it: {
+      name: 'Open space',
+      monsters: [
+        'Diavoletto di carta',
+        'Roomba ribelle',
+        'Spillatrice mimetica',
+        'Demone della polvere'
+      ],
+      alt: 'Un eroe affronta una Spillatrice mimetica nell’Open space'
+    },
+    pt: {
+      name: 'Baias do escritório',
+      monsters: [
+        'Diabrete de papel',
+        'Roomba rebelde',
+        'Grampeador mímico',
+        'Demônio da poeira'
+      ],
+      alt: 'Um herói enfrenta um Grampeador mímico nas Baias do escritório'
+    },
+    pl: {
+      name: 'Boksy biurowe',
+      monsters: [
+        'Papierowy chochlik',
+        'Zbuntowana Roomba',
+        'Zszywaczowy mimik',
+        'Kurzowy demon'
+      ],
+      alt: 'Bohater walczy z przeciwnikiem: Zszywaczowy mimik (Boksy biurowe)'
+    },
+    nl: {
+      name: 'Kantoortuin',
+      monsters: [
+        'Papierduiveltje',
+        'Losgeslagen Roomba',
+        'Nietmachinemimic',
+        'Stofdemon'
+      ],
+      alt: 'Een held vecht in de Kantoortuin tegen een Nietmachinemimic'
     }
   },
   {
@@ -62,6 +112,56 @@ export const FLOORS = [
         'Altlast-Großrechner'
       ],
       alt: 'Ein Held kämpft im Serverraum gegen eine Kabelschlange'
+    },
+    es: {
+      name: 'Sala de servidores',
+      monsters: [
+        'Serpiente de cables',
+        'Rack sobrecalentado',
+        'Gremlin cortafuegos',
+        'Mainframe heredado'
+      ],
+      alt: 'Un héroe se enfrenta a una Serpiente de cables en la Sala de servidores'
+    },
+    it: {
+      name: 'Sala server',
+      monsters: [
+        'Serpente di cavi',
+        'Rack surriscaldato',
+        'Gremlin firewall',
+        'Mainframe legacy'
+      ],
+      alt: 'Un eroe affronta un Serpente di cavi nella Sala server'
+    },
+    pt: {
+      name: 'Sala dos servidores',
+      monsters: [
+        'Serpente de cabos',
+        'Rack superaquecido',
+        'Gremlin de firewall',
+        'Mainframe legado'
+      ],
+      alt: 'Um herói enfrenta uma Serpente de cabos na Sala dos servidores'
+    },
+    pl: {
+      name: 'Serwerownia',
+      monsters: [
+        'Kablowy wąż',
+        'Przegrzana szafa',
+        'Gremlin zapory',
+        'Stary mainframe'
+      ],
+      alt: 'Bohater walczy z przeciwnikiem: Kablowy wąż (Serwerownia)'
+    },
+    nl: {
+      name: 'Serverruimte',
+      monsters: [
+        'Kabelslang',
+        'Hitterack',
+        'Firewallgremlin',
+        'Legacy-mainframe'
+      ],
+      alt: 'Een held vecht in de Serverruimte tegen een Kabelslang'
     }
   },
   {
@@ -94,6 +194,56 @@ export const FLOORS = [
         'Reste-Hydra'
       ],
       alt: 'Ein Held kämpft in den Kantinentiefen gegen einen Kaffeeschleim'
+    },
+    es: {
+      name: 'Profundidades de la cafetería',
+      monsters: [
+        'Limo de café',
+        'Gólem de migas',
+        'Espectro del microondas',
+        'Hidra de las sobras'
+      ],
+      alt: 'Un héroe se enfrenta a un Limo de café en las Profundidades de la cafetería'
+    },
+    it: {
+      name: 'Profondità della mensa',
+      monsters: [
+        'Melma di caffè',
+        'Golem di briciole',
+        'Spettro del microonde',
+        'Idra degli avanzi'
+      ],
+      alt: 'Un eroe affronta una Melma di caffè nelle Profondità della mensa'
+    },
+    pt: {
+      name: 'Profundezas do refeitório',
+      monsters: [
+        'Gosma de café',
+        'Golem de migalhas',
+        'Espectro do micro-ondas',
+        'Hidra das sobras'
+      ],
+      alt: 'Um herói enfrenta uma Gosma de café nas Profundezas do refeitório'
+    },
+    pl: {
+      name: 'Czeluści stołówki',
+      monsters: [
+        'Kawowy szlam',
+        'Okruszkowy golem',
+        'Upiór mikrofalówki',
+        'Hydra resztek'
+      ],
+      alt: 'Bohater walczy z przeciwnikiem: Kawowy szlam (Czeluści stołówki)'
+    },
+    nl: {
+      name: 'Kantinediepten',
+      monsters: [
+        'Koffieslijm',
+        'Kruimelgolem',
+        'Magnetronschim',
+        'Restjeshydra'
+      ],
+      alt: 'Een held vecht in de Kantinediepten tegen een Koffieslijm'
     }
   },
   {
@@ -126,6 +276,56 @@ export const FLOORS = [
         'Prüfer'
       ],
       alt: 'Ein Held kämpft im Archiv gegen einen Ordnerkäfer'
+    },
+    es: {
+      name: 'Archivo',
+      monsters: [
+        'Escarabajo archivador',
+        'Acechador de estanterías',
+        'Fantasma del microfilm',
+        'Auditor'
+      ],
+      alt: 'Un héroe se enfrenta a un Escarabajo archivador en el Archivo'
+    },
+    it: {
+      name: 'Archivio',
+      monsters: [
+        'Scarabeo raccoglitore',
+        'Predatore degli scaffali',
+        'Fantasma del microfilm',
+        'Revisore'
+      ],
+      alt: 'Un eroe affronta uno Scarabeo raccoglitore nell’Archivio'
+    },
+    pt: {
+      name: 'Arquivo',
+      monsters: [
+        'Besouro-arquivo',
+        'Espreitador das prateleiras',
+        'Fantasma do microfilme',
+        'Auditor'
+      ],
+      alt: 'Um herói enfrenta um Besouro-arquivo no Arquivo'
+    },
+    pl: {
+      name: 'Archiwum',
+      monsters: [
+        'Segregatorowy żuk',
+        'Czyhacz z regałów',
+        'Widmo mikrofilmu',
+        'Audytor'
+      ],
+      alt: 'Bohater walczy z przeciwnikiem: Segregatorowy żuk (Archiwum)'
+    },
+    nl: {
+      name: 'Archief',
+      monsters: [
+        'Archiefdoostor',
+        'Schappensluiper',
+        'Microfilmspook',
+        'Accountant'
+      ],
+      alt: 'Een held vecht in het Archief tegen een Archiefdoostor'
     }
   },
   {
@@ -158,6 +358,56 @@ export const FLOORS = [
         'Geisterauto'
       ],
       alt: 'Ein Held kämpft in der Tiefgarage gegen ein Geisterauto'
+    },
+    es: {
+      name: 'Aparcamiento subterráneo',
+      monsters: [
+        'Enjambre de carritos',
+        'Mancha de aceite',
+        'Gólem de barrera',
+        'Coche fantasma'
+      ],
+      alt: 'Un héroe se enfrenta a un Coche fantasma en el Aparcamiento subterráneo'
+    },
+    it: {
+      name: 'Parcheggio sotterraneo',
+      monsters: [
+        'Sciame di carrelli',
+        'Chiazza d’olio',
+        'Golem della sbarra',
+        'Auto fantasma'
+      ],
+      alt: 'Un eroe affronta un’Auto fantasma nel Parcheggio sotterraneo'
+    },
+    pt: {
+      name: 'Estacionamento subterrâneo',
+      monsters: [
+        'Enxame de carrinhos',
+        'Mancha de óleo',
+        'Golem da cancela',
+        'Carro fantasma'
+      ],
+      alt: 'Um herói enfrenta um Carro fantasma no Estacionamento subterrâneo'
+    },
+    pl: {
+      name: 'Parking podziemny',
+      monsters: [
+        'Rój wózków',
+        'Plama oleju',
+        'Szlabanowy golem',
+        'Widmowe auto'
+      ],
+      alt: 'Bohater walczy z przeciwnikiem: Widmowe auto (Parking podziemny)'
+    },
+    nl: {
+      name: 'Parkeergarage',
+      monsters: [
+        'Karrenzwerm',
+        'Olievlek',
+        'Slagboomgolem',
+        'Spookauto'
+      ],
+      alt: 'Een held vecht in de Parkeergarage tegen een Spookauto'
     }
   }
 ] as const

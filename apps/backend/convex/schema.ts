@@ -22,7 +22,7 @@ const paperLivesEngine = engineTables(PAPER_LIVES_TABLES, ['events', 'years', 'd
 /** Where a launch-list signup came from: the share link, the signed-out QR pitch, the game page, the home page or a signed-in account. */
 
 /** D169: the languages the games speak (`@trmnl-games/platform` LOCALES). */
-export const locale = v.union(v.literal('en'), v.literal('fr'), v.literal('de'))
+export const locale = v.union(v.literal('en'), v.literal('fr'), v.literal('de'), v.literal('es'), v.literal('it'), v.literal('pt'), v.literal('pl'), v.literal('nl'))
 
 export const heroStatus = v.union(
   v.literal('exploring'),

@@ -9,6 +9,11 @@ const messages = defineMessages({
   en: { label: 'Language' },
   fr: { label: 'Langue' },
   de: { label: 'Sprache' },
+  es: { label: 'Idioma' },
+  it: { label: 'Lingua' },
+  pt: { label: 'Idioma' },
+  pl: { label: 'Język' },
+  nl: { label: 'Taal' },
 })
 
 /**

@@ -7,9 +7,14 @@ import type { LegalPage } from './-legal'
 import { termsEn } from './-terms.en'
 import { termsFr } from './-terms.fr'
 import { termsDe } from './-terms.de'
+import { termsEs } from './-terms.es'
+import { termsIt } from './-terms.it'
+import { termsPt } from './-terms.pt'
+import { termsPl } from './-terms.pl'
+import { termsNl } from './-terms.nl'
 
 /** D169: the terms in each language; the English text prevails. */
-const PAGES: Readonly<Record<Locale, LegalPage>> = { en: termsEn, fr: termsFr, de: termsDe }
+const PAGES: Readonly<Record<Locale, LegalPage>> = { en: termsEn, fr: termsFr, de: termsDe, es: termsEs, it: termsIt, pt: termsPt, pl: termsPl, nl: termsNl }
 
 export const Route = createFileRoute('/terms')({
   head: ({ match: { context: { locale } } }) => seo({ title: PAGES[locale].seoTitle ?? PAGES[locale].title, path: '/terms', description: PAGES[locale].description, locale }),

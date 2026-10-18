@@ -8,7 +8,7 @@
  * `--dump-contexts <file>` also writes each Liquid render context, for tools/trmnl/crosscheck.ts.
  * `--inline-art` draws scenes and codes locally and inlines them, so art changes preview before any deployment serves them.
  * `--occasion <id>` (D139) dresses every scene for one occasion, e.g. `--occasion halloween`.
- * `--locale fr|de` (D169) renders the screen in that language; its pages are named `fr.<state>--…`, so `--filter fr.` sweeps them.
+ * `--locale fr|de|es|it|pt|pl|nl` (D169, D192) renders the screen in that language; its pages are named `fr.<state>--…`, so `--filter fr.` sweeps them.
  * `--theme dark|white-and-red|black-and-yellow` renders under that TRMNL theme; its pages are named `dark.<state>--…`.
  */
 import { isLocale, type Locale } from '@trmnl-games/platform'
