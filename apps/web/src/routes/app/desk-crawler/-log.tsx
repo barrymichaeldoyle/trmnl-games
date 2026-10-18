@@ -1,4 +1,6 @@
 import { usePaginatedQuery } from 'convex/react'
+import { convexQuery } from '@convex-dev/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { LogStory } from './-logStory'
@@ -86,7 +88,9 @@ function group(entries: Entry[], t: T, locale: Locale) {
 }
 
 export function AdventureLog() {
-  const { results, status, loadMore } = usePaginatedQuery(api.heroes.recentLog, {}, { initialNumItems: 40 })
+  // Keyed on the hero, so a recruit or switch starts a fresh page instead of reusing the last hero's cursor.
+  const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
+  const { results, status, loadMore } = usePaginatedQuery(api.heroes.recentLog, hero ? { heroId: hero.id } : 'skip', { initialNumItems: 40 })
   const [filter, setFilter] = useState<FilterKey>('all')
   const [limit, setLimit] = useState(FIRST_VIEW)
   const t = useT(dcLogMessages)

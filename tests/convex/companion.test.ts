@@ -58,7 +58,7 @@ describe('companion hero page data', () => {
       await ctx.db.insert('tickLogs', { heroId, source: 'tick', tick: 3, sequence: 3, at: Date.now() + 1, kind: 'loot', summary: 'Potion pouch full; sold a spare for 5 gold.', detail: { ...detail, potionsUsed: 0, outcome: { variant: 'loot', found: 'gold', goldGranted: 5, jackpot: false, potionFullFallback: true } }, deltas: { xpEarned: 0, gold: 5, hp: 0 } })
     })
     const owner = t.withIdentity({ issuer: 'issuer', subject: 'PotionFinder' })
-    const page = await owner.query(api.heroes.recentLog, { paginationOpts: { numItems: 10, cursor: null } })
+    const page = await owner.query(api.heroes.recentLog, { heroId: (await owner.query(api.heroes.mine, {}))!.id, paginationOpts: { numItems: 10, cursor: null } })
     expect(page.page.map((entry: { deltas: { potionsFound?: number } }) => entry.deltas.potionsFound)).toEqual([0, 1])
     expect(page.page[1]).not.toHaveProperty('detail')
     const preview = await owner.query(api.trmnlPayload.mine, { now: Date.now() })

@@ -191,7 +191,7 @@ describe('lost property backend (D145 L2)', () => {
       await ctx.db.patch(user!._id, { publicAlias: 'Robert', normalizedAlias: 'robert', publicNameVersion: 2 })
     })
     expect((await t.query(api.profiles.view, { alias: 'Ana' })).lostProperty[0].ownerName).toBe('Hidden player')
-    const log = (await asAna.query(api.heroes.recentLog, { paginationOpts: { numItems: 40, cursor: null } })).page as Array<{ kind: string; summary: string }>
+    const log = (await asAna.query(api.heroes.recentLog, { heroId: (await asAna.query(api.heroes.mine, {}))!.id, paginationOpts: { numItems: 40, cursor: null } })).page as Array<{ kind: string; summary: string }>
     expect(log.some((entry) => entry.summary.includes('[[Hidden player]]'))).toBe(true)
   })
 

@@ -125,7 +125,7 @@ describe('meetings backend (D141 M2)', () => {
       await ctx.db.patch(bo!._id, { publicAlias: 'Robert', normalizedAlias: 'robert', publicNameVersion: 2 })
     })
     expect((await ana.query(api.meetings.recent, {}))!.meetings[0]!.rivalName).toBe('Hidden player')
-    const page = (await ana.query(api.heroes.recentLog, { paginationOpts: { numItems: 40, cursor: null } })).page as Array<{ kind: string; summary: string }>
+    const page = (await ana.query(api.heroes.recentLog, { heroId: (await ana.query(api.heroes.mine, {}))!.id, paginationOpts: { numItems: 40, cursor: null } })).page as Array<{ kind: string; summary: string }>
     const lines = page.filter((entry) => entry.kind === 'meeting')
     expect(lines).toHaveLength(1)
     expect(lines[0]!.summary).toContain('[[Hidden player]]')

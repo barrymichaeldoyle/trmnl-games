@@ -151,21 +151,47 @@ export const mine = query({
   },
 })
 
-/** Own log page, newest first. */
+/** A log row as the companion shows it, rival names masked. */
+async function logViews(ctx: QueryCtx, logs: readonly Doc<'tickLogs'>[]) {
+  const summaries = await maskRaidSummaries(ctx, logs)
+  return logs.map((log, index) => ({ id: log._id, at: log.at, tick: log.tick ?? null, kind: log.kind, summary: summaries[index]!, source: log.source, deltas: displayLogDeltas(log) }))
+}
+
+/**
+ * Own log page, newest first, for the hero the caller names. A live subscription re-runs a page from its pinned end
+ * cursor, so a page keyed only on the current hero threw InvalidCursor the moment a recruit or switch changed the hero
+ * under it (TRMNL-GAMES-CONVEX-8). Naming the hero gives each hero its own subscription; a stale one comes back empty.
+ * Optional only for tabs still on a build from before the fix.
+ */
 export const recentLog = query({
-  args: { paginationOpts: paginationOptsValidator },
+  args: { heroId: v.optional(v.id('heroes')), paginationOpts: paginationOptsValidator },
   returns: v.any(),
-  handler: async (ctx, { paginationOpts }) => {
+  handler: async (ctx, { heroId, paginationOpts }) => {
     const user = await currentUser(ctx)
     const hero = await currentHero(ctx, user)
-    if (hero === null) return { page: [], isDone: true, continueCursor: '' }
+    if (hero === null || (heroId !== undefined && hero._id !== heroId)) return { page: [], isDone: true, continueCursor: '' }
     const result = await ctx.db
       .query('tickLogs')
       .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
       .order('desc')
       .paginate(paginationOpts)
-    const summaries = await maskRaidSummaries(ctx, result.page)
-    return { ...result, page: result.page.map((log, index) => ({ id: log._id, at: log.at, tick: log.tick ?? null, kind: log.kind, summary: summaries[index]!, source: log.source, deltas: displayLogDeltas(log) })) }
+    return { ...result, page: await logViews(ctx, result.page) }
+  },
+})
+
+/** The current hero's newest log line, or null: no cursor, so switching heroes cannot break it. */
+export const latestLog = query({
+  args: {},
+  returns: v.any(),
+  handler: async (ctx) => {
+    const hero = await currentHero(ctx, await currentUser(ctx))
+    if (hero === null) return null
+    const log = await ctx.db
+      .query('tickLogs')
+      .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
+      .order('desc')
+      .first()
+    return log === null ? null : (await logViews(ctx, [log]))[0]!
   },
 })
 

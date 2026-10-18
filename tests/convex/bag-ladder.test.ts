@@ -70,7 +70,7 @@ describe('bag ladder intents (D61)', () => {
     const bag = await user.query(api.inventory.mine, {})
     expect(bag.ladder.next).toMatchObject({ id: 'laptop_backpack', buyable: false })
     expect(await errorCode(user.mutation(api.inventory.buyBag, { operationId: opId(), tierId: 'laptop_backpack' }))).toBe('BAG_UNAVAILABLE')
-    const history = await user.query(api.heroes.recentLog, { paginationOpts: { numItems: 5, cursor: null } })
+    const history = await user.query(api.heroes.recentLog, { heroId: (await user.query(api.heroes.mine, {}))!.id, paginationOpts: { numItems: 5, cursor: null } })
     // D65: the purchase also earns "Tote-ally Prepared", logged after the command.
     expect(history.page.find((entry: { kind: string }) => entry.kind !== 'achievement')).toMatchObject({ summary: 'Bought a [[Tote Bag]]. Bag holds 10.', deltas: { gold: -40, bagSlots: 4 } })
     expect(history.page[0]).toMatchObject({ kind: 'achievement', summary: 'Achievement: [[Tote-ally Prepared]]' })

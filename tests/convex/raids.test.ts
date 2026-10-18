@@ -198,7 +198,7 @@ describe('desk raids backend (D110 R2)', () => {
     for (const alias of ['Ana', 'Bo']) await seedHero(t, { level: 5, hp: 60, gold: 400 }, alias)
     for (let slot = 0; slot <= 3; slot += 1) await tickAt(t, slot)
     const ana = t.withIdentity({ issuer: 'issuer', subject: 'Ana' })
-    const page = async () => (await ana.query(api.heroes.recentLog, { paginationOpts: { numItems: 40, cursor: null } })).page as Array<{ kind: string; summary: string }>
+    const page = async () => (await ana.query(api.heroes.recentLog, { heroId: (await ana.query(api.heroes.mine, {}))!.id, paginationOpts: { numItems: 40, cursor: null } })).page as Array<{ kind: string; summary: string }>
     const raidLines = (await page()).filter((entry) => entry.summary.includes('[[Bo]]'))
     expect(raidLines.length).toBeGreaterThan(0)
     await t.run(async (ctx) => {

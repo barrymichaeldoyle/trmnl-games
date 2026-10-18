@@ -73,6 +73,19 @@ describe('hero roster (P37)', () => {
     expect(await errorCode(ana.mutation(api.roster.recruit, { operationId: opId(), heroClass: 'rogue', name: 'Other' }))).toBe('INVALID_STATE')
   })
 
+  it("serves the log by the named hero, so a recruit leaves the last hero's page empty instead of reusing its cursor", { timeout: 30_000 }, async () => {
+    await seedWorld(t, { activeContentVersion: 'v18', currentTick: 40 })
+    const warrior = await seedHero(t, { level: 6, name: 'Tobias' }, 'Ana')
+    const ana = as(t, 'Ana')
+    const page = { numItems: 10, cursor: null }
+    await ana.mutation(api.roster.recruit, { operationId: opId(), heroClass: 'rogue', name: 'Vex' })
+    const rogue = (await heroesOf(t, warrior)).find((hero) => hero.class === 'rogue')!._id
+    // The Warrior's subscription is no longer the current hero's: it comes back empty, not InvalidCursor.
+    expect(await ana.query(api.heroes.recentLog, { heroId: warrior, paginationOpts: page })).toMatchObject({ page: [], isDone: true })
+    const own = await ana.query(api.heroes.recentLog, { heroId: rogue, paginationOpts: page })
+    expect(await ana.query(api.heroes.latestLog, {})).toEqual(own.page[0] ?? null)
+  })
+
   it('switches once a day, with a ten-minute undo back to the hero just left', { timeout: 30_000 }, async () => {
     await seedWorld(t, { activeContentVersion: 'v18', currentTick: 40 })
     const warrior = await seedHero(t, { level: 7, name: 'Tobias' }, 'Ana')

@@ -139,7 +139,7 @@ type LogEntry = { kind: string; summary: string; deltas: LogDeltas }
 /** The newest log line and its gains, in the dialogue strip. */
 function LatestEvent() {
   const { data } = useQuery(latestLogQuery())
-  const latest = ((data as { page?: LogEntry[] } | undefined)?.page ?? [])[0]
+  const latest = data as LogEntry | null | undefined
   const story = useStoryOptions()
   if (!latest) return null
   const { narrative, changes } = logPresentation(latest, story)
