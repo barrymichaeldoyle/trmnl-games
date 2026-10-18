@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { HERO_NAME_RULE } from '@trmnl-games/platform'
 import { useIntent } from '../../../lib/intent'
+import { useHoldReload } from '../../../lib/deployWatch'
 import { NameField, nameProblem } from '../../../lib/nameField'
 import { GenderPicker, type HeroGender } from '../../../lib/genderPicker'
 import { Button, Card } from '../../../lib/ui'
@@ -140,6 +141,7 @@ function RecruitCard({ rule, current, roster, notify }: { rule: RosterView['clas
   const [gender, setGender] = useState<HeroGender>('male')
   const [asking, setAsking] = useState(false)
   const recruit = useIntent(api.roster.recruit, { onFeedback: notify })
+  useHoldReload(name.trim() !== '' || asking || recruit.pending)
   const valid = nameProblem(name, HERO_NAME_RULE, 'hero name') === null
   const blocked = roster.nextAt !== null || !roster.canPark
   const t = useT(dcPagesMessages)

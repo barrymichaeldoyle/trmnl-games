@@ -15,8 +15,23 @@ const reloadOnce = (deployed: string) => {
   window.location.reload()
 }
 
-/** True while the person is typing, so a reload never throws away what they entered. */
+let holds = 0
+
+/**
+ * Hold the return-to-tab reload while `holding` (a half-filled form). Focus alone is not enough: naming a hero, then
+ * tapping the gender picker and switching apps, left focus on a button, so the reload threw the name away.
+ */
+export function useHoldReload(holding: boolean) {
+  useEffect(() => {
+    if (!holding) return
+    holds += 1
+    return () => { holds -= 1 }
+  }, [holding])
+}
+
+/** True while the person is typing or a form holds unsaved input, so a reload never throws away what they entered. */
 const typing = () => {
+  if (holds > 0) return true
   const active = document.activeElement
   return active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || active instanceof HTMLSelectElement || (active instanceof HTMLElement && active.isContentEditable)
 }
