@@ -1,1579 +1,3416 @@
 {
- "me": {
-  "gameState": "active",
-  "hasActiveInstallation": true,
+  "me": {
+    "gameState": "active",
+    "hasActiveInstallation": true,
+    "hero": {
+      "activationState": "active",
+      "name": "Pip",
+      "status": "exploring",
+      "waking": false
+    },
+    "signedIn": true,
+    "user": {
+      "analyticsConsent": false,
+      "nameRepairRequired": false,
+      "publicAlias": "Maximilian_Wolfgangs",
+      "state": "active",
+      "timezone": "Africa/Johannesburg"
+    }
+  },
   "hero": {
-   "activationState": "active",
-   "name": "Pip",
-   "status": "exploring"
+    "activatedAt": 1792314035974,
+    "activationState": "active",
+    "alias": "Maximilian_Wolfgangs",
+    "arriveAtTick": null,
+    "attack": 17,
+    "baseAttack": 16,
+    "baseDefense": 11,
+    "biomeId": "office_cubicles",
+    "biomes": [
+      {
+        "id": "office_cubicles",
+        "name": "Office Cubicles",
+        "safe": true,
+        "unlockLevel": 1,
+        "unlocked": true
+      },
+      {
+        "id": "server_room",
+        "name": "Server Room",
+        "safe": false,
+        "unlockLevel": 4,
+        "unlocked": false
+      },
+      {
+        "id": "cafeteria_depths",
+        "name": "Cafeteria Depths",
+        "safe": false,
+        "unlockLevel": 8,
+        "unlocked": false
+      },
+      {
+        "id": "archive",
+        "name": "Archive",
+        "safe": false,
+        "unlockLevel": 12,
+        "unlocked": false
+      },
+      {
+        "id": "parking_garage",
+        "name": "Parking Garage",
+        "safe": false,
+        "unlockLevel": 16,
+        "unlocked": false
+      }
+    ],
+    "calendar": {
+      "next": {
+        "effect": "+15% gold",
+        "id": "halloween",
+        "inDays": 13,
+        "name": "Halloween"
+      },
+      "today": null
+    },
+    "career": {
+      "current": {
+        "blurb": "The morning stand-up hands out small jobs. Your hero ticks them off by itself.",
+        "companion": false,
+        "gold": 20,
+        "id": "three_tasks",
+        "shop": null,
+        "target": 3,
+        "title": "Finish three to-do tasks",
+        "value": 1
+      },
+      "rung": 3,
+      "rungs": [
+        {
+          "blurb": "Your hero fights whatever it meets in the Office. One win is enough.",
+          "companion": false,
+          "gold": 10,
+          "id": "first_win",
+          "reachedAt": 1792315800000,
+          "state": "done",
+          "title": "Win your first fight"
+        },
+        {
+          "blurb": "Found gear waits in the bag until you put it on. The Bag page does it.",
+          "companion": true,
+          "gold": 15,
+          "id": "equip_find",
+          "reachedAt": 1792342795899,
+          "state": "done",
+          "title": "Equip a piece of gear you found"
+        },
+        {
+          "blurb": "The first promotion comes before lunch.",
+          "companion": false,
+          "gold": 15,
+          "id": "level_2",
+          "reachedAt": 1792342800000,
+          "state": "done",
+          "title": "Reach level 2"
+        },
+        {
+          "blurb": "The morning stand-up hands out small jobs. Your hero ticks them off by itself.",
+          "companion": false,
+          "gold": 20,
+          "id": "three_tasks",
+          "reachedAt": null,
+          "state": "current",
+          "title": "Finish three to-do tasks"
+        },
+        {
+          "blurb": "Spare gear is gold on the Bag page, and a full bag leaves new finds behind.",
+          "companion": true,
+          "gold": 20,
+          "id": "first_sale",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Sell a piece of gear"
+        },
+        {
+          "blurb": "The Server Room opens at level 4.",
+          "companion": false,
+          "gold": 25,
+          "id": "level_4",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 4"
+        },
+        {
+          "blurb": "Spare gear can be stripped for parts on the Bag page instead of sold. The workbench runs on them.",
+          "companion": true,
+          "gold": 60,
+          "id": "first_salvage",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Salvage a piece of gear"
+        },
+        {
+          "blurb": "The fights there are harder and pay more. Travel is on the Hero page.",
+          "companion": true,
+          "gold": 25,
+          "id": "first_trip",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Travel to the Server Room"
+        },
+        {
+          "blurb": "Thirteen slots instead of ten, bought on the Bag page.",
+          "companion": true,
+          "gold": 30,
+          "id": "laptop_backpack",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Buy the Laptop Backpack"
+        },
+        {
+          "blurb": "Office decisions open at level 5.",
+          "companion": false,
+          "gold": 30,
+          "id": "level_5",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 5"
+        },
+        {
+          "blurb": "Now and then a decision turns up on the Hero page. Answer it before time runs out and the default is picked.",
+          "companion": true,
+          "gold": 30,
+          "id": "first_decision",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Answer an office decision"
+        },
+        {
+          "blurb": "Thirty potions instead of twenty, from the Bag page.",
+          "companion": true,
+          "gold": 30,
+          "id": "lunchbox",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Buy the Lunchbox"
+        },
+        {
+          "blurb": "The wandering merchant arrives at level 6.",
+          "companion": false,
+          "gold": 40,
+          "id": "level_6",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 6"
+        },
+        {
+          "blurb": "A merchant passes through for four adventures and sells the next bag or pouch at a discount. Alerts can tell you when.",
+          "companion": false,
+          "gold": 40,
+          "id": "merchant_meet",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Meet the wandering merchant"
+        },
+        {
+          "blurb": "About one fight in thirty is an elite. Elites are tougher and give four times the XP.",
+          "companion": false,
+          "gold": 40,
+          "id": "first_elite",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Beat an elite"
+        },
+        {
+          "blurb": "Desk raids and stances open at level 7.",
+          "companion": false,
+          "gold": 40,
+          "id": "level_7",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 7"
+        },
+        {
+          "blurb": "Heroes raid each other's desks by chance, and your stance moves the odds. Raiding or being raided both count.",
+          "companion": false,
+          "gold": 40,
+          "id": "first_raid",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Take part in a desk raid"
+        },
+        {
+          "blurb": "The Cafeteria Depths open at level 8.",
+          "companion": false,
+          "gold": 50,
+          "id": "level_8",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 8"
+        },
+        {
+          "blurb": "Level 8 opens the Cafeteria. Travel there and beat something.",
+          "companion": true,
+          "gold": 50,
+          "id": "cafeteria_win",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Win a fight in the Cafeteria Depths"
+        },
+        {
+          "blurb": "About a fortnight of stand-ups.",
+          "companion": false,
+          "gold": 50,
+          "id": "tasks_25",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Finish 25 to-do tasks"
+        },
+        {
+          "blurb": "Four finds in a hundred are rare, so this one comes down to luck.",
+          "companion": false,
+          "gold": 60,
+          "id": "rare_find",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Find a rare piece of gear"
+        },
+        {
+          "blurb": "Twenty slots, from the Bag page.",
+          "companion": true,
+          "gold": 100,
+          "id": "rolling_suitcase",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Buy the Rolling Suitcase"
+        },
+        {
+          "blurb": "The top of the ladder, for now.",
+          "companion": false,
+          "gold": 100,
+          "id": "level_12",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 12"
+        },
+        {
+          "blurb": "The workbench on the Bag page raises what your hero wears, for materials and gold.",
+          "companion": true,
+          "gold": 80,
+          "id": "first_upgrade",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Upgrade a piece of gear"
+        },
+        {
+          "blurb": "The last three steps on the workbench. Components are the slow part.",
+          "companion": true,
+          "gold": 150,
+          "id": "reinforce_3",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reinforce an item to +3"
+        },
+        {
+          "blurb": "Level 12 opens the Archive under the cafeteria. Travel there and beat something that was filed.",
+          "companion": true,
+          "gold": 120,
+          "id": "archive_win",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Win a fight in the Archive"
+        },
+        {
+          "blurb": "The Parking Garage opens at level 16.",
+          "companion": false,
+          "gold": 150,
+          "id": "level_16",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Reach level 16"
+        },
+        {
+          "blurb": "Level 16 opens the Parking Garage. Take the ramp down and win once.",
+          "companion": true,
+          "gold": 150,
+          "id": "garage_win",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Win a fight in the Parking Garage"
+        },
+        {
+          "blurb": "Past the Rolling Suitcase, the Bag page sells bigger bags. The Gym Duffel holds 24.",
+          "companion": true,
+          "gold": 150,
+          "id": "gym_duffel",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Buy the Gym Duffel"
+        },
+        {
+          "blurb": "From level 12, on the Cafeteria Depths or deeper, an elite sometimes digs in and takes a few adventures to beat.",
+          "companion": false,
+          "gold": 200,
+          "id": "first_standoff",
+          "reachedAt": null,
+          "state": "ahead",
+          "title": "Beat an elite that dug in"
+        }
+      ],
+      "total": 30,
+      "unclaimed": []
+    },
+    "choice": null,
+    "class": "rogue",
+    "className": "Rogue",
+    "counters": {
+      "careerRungs": 3,
+      "choicesDefaulted": 0,
+      "choicesMade": 0,
+      "combatWins": 14,
+      "deaths": 0,
+      "eliteWins": 0,
+      "epicFinds": 0,
+      "gearUpgraded": 0,
+      "goldEarned": 111,
+      "itemsEquipped": 2,
+      "itemsFound": 4,
+      "itemsSalvaged": 0,
+      "itemsSold": 4,
+      "jackpots": 0,
+      "lostPropertyFound": 0,
+      "meetings": 0,
+      "merchantVisits": 0,
+      "monsterWins": {
+        "dust_daemon": 4,
+        "paper_imp": 3,
+        "rogue_roomba": 4,
+        "stapler_mimic": 3
+      },
+      "occasionsSeen": 0,
+      "potionsCombined": 0,
+      "potionsUsed": 1,
+      "purchases": 0,
+      "raidMishaps": 0,
+      "raidsLaunched": 0,
+      "raidsLost": 0,
+      "raidsRepelled": 0,
+      "raidsWon": 0,
+      "rareFinds": 1,
+      "rescues": 0,
+      "restTicks": 9,
+      "retreats": 0,
+      "stanceChanges": 0,
+      "standoffsWon": 0,
+      "tasksCompleted": 1,
+      "ticksExplored": 41,
+      "topReinforcement": 0,
+      "trapsAvoided": 2,
+      "trips": 0
+    },
+    "defense": 9,
+    "effects": [],
+    "gender": "male",
+    "gold": 111,
+    "hp": 62,
+    "id": "fx0001",
+    "lastTick": 1385,
+    "level": 2,
+    "lifetimeXp": 86,
+    "lore": {
+      "biomes": [
+        {
+          "id": "office_cubicles",
+          "monsters": [
+            {
+              "id": "paper_imp",
+              "name": "Paper Imp",
+              "note": "A memo that got up and walked, held together mostly by staples. It wants to be read and goes to pieces when it is not. The shredder stops it for good. Put it in recycling and it may come back as a different memo.",
+              "open": true,
+              "wins": 3
+            },
+            {
+              "id": "rogue_roomba",
+              "name": "Rogue Roomba",
+              "note": "Facilities bought it to clean the floor. It cleans the floor of anything it can reach, ankles included. Flip it on its back and it beeps until the battery goes, which is about three hours longer than anyone can bear.",
+              "open": true,
+              "wins": 4
+            },
+            {
+              "id": "stapler_mimic",
+              "name": "Stapler Mimic",
+              "note": "It is an ordinary stapler until a hand gets near it. The red ones are the worst, and nobody has ever seen one being bought. Unjam it properly and it goes back to being office supplies for a while.",
+              "open": true,
+              "wins": 3
+            },
+            {
+              "id": "dust_daemon",
+              "name": "Dust Daemon",
+              "note": "It grows behind the monitors when nobody dusts, and it breathes out every time you breathe in. A can of compressed air sends it to the vents, where it waits for the next quiet month.",
+              "open": true,
+              "wins": 4
+            }
+          ],
+          "name": "Office Cubicles",
+          "note": "Where every hero starts, and where every hero wakes up after a bad day. The printer is always jammed and the plant by the window is plastic. Nothing here keeps you down for long, because someone always walks past with a first-aid kit.",
+          "open": true,
+          "safe": true,
+          "unlockLevel": 1
+        },
+        {
+          "id": "server_room",
+          "monsters": [
+            {
+              "id": "cable_serpent",
+              "name": "Cable Serpent",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "overheated_rack",
+              "name": "Overheated Rack",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "firewall_gremlin",
+              "name": "Firewall Gremlin",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "legacy_mainframe",
+              "name": "Legacy Mainframe",
+              "note": null,
+              "open": false,
+              "wins": 0
+            }
+          ],
+          "name": "Server Room",
+          "note": null,
+          "open": false,
+          "safe": false,
+          "unlockLevel": 4
+        },
+        {
+          "id": "cafeteria_depths",
+          "monsters": [
+            {
+              "id": "coffee_slime",
+              "name": "Coffee Slime",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "crumb_golem",
+              "name": "Crumb Golem",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "microwave_wraith",
+              "name": "Microwave Wraith",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "leftovers_hydra",
+              "name": "Leftovers Hydra",
+              "note": null,
+              "open": false,
+              "wins": 0
+            }
+          ],
+          "name": "Cafeteria Depths",
+          "note": null,
+          "open": false,
+          "safe": false,
+          "unlockLevel": 8
+        },
+        {
+          "id": "archive",
+          "monsters": [
+            {
+              "id": "box_file_beetle",
+              "name": "Box File Beetle",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "shelf_lurker",
+              "name": "Shelf Lurker",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "microfilm_phantom",
+              "name": "Microfilm Phantom",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "auditor",
+              "name": "Auditor",
+              "note": null,
+              "open": false,
+              "wins": 0
+            }
+          ],
+          "name": "Archive",
+          "note": null,
+          "open": false,
+          "safe": false,
+          "unlockLevel": 12
+        },
+        {
+          "id": "parking_garage",
+          "monsters": [
+            {
+              "id": "trolley_swarm",
+              "name": "Trolley Swarm",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "oil_slick",
+              "name": "Oil Slick",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "barrier_golem",
+              "name": "Barrier Golem",
+              "note": null,
+              "open": false,
+              "wins": 0
+            },
+            {
+              "id": "ghost_car",
+              "name": "Ghost Car",
+              "note": null,
+              "open": false,
+              "wins": 0
+            }
+          ],
+          "name": "Parking Garage",
+          "note": null,
+          "open": false,
+          "safe": false,
+          "unlockLevel": 16
+        }
+      ],
+      "open": 5,
+      "total": 25
+    },
+    "maxHp": 104,
+    "meetingsEnabled": true,
+    "merchantTicksLeft": null,
+    "name": "Pip",
+    "publicProfile": true,
+    "raidsEnabled": true,
+    "reviveAtTick": null,
+    "roster": {
+      "heroes": 2,
+      "open": true,
+      "unlockLevel": 6,
+      "warriorLevel": 6
+    },
+    "scenePath": "/art/scene/v5/office_cubicles/day/plain/rogue_idle/none/5.png",
+    "screenServed": true,
+    "simulationState": "healthy",
+    "stance": "balanced",
+    "stances": [
+      {
+        "blurb": "Drinks and rests early, and heals up before heading back out. Learns a little less from each win.",
+        "id": "cautious",
+        "name": "Cautious",
+        "potionBelowPct": 65,
+        "raidWinPct": 60,
+        "raidsPerDay": 0.48,
+        "restBelowPct": 50,
+        "resumeAtPct": 90,
+        "victoryXpPct": 90
+      },
+      {
+        "blurb": "The office standard.",
+        "id": "balanced",
+        "name": "Balanced",
+        "potionBelowPct": 50,
+        "raidWinPct": 50,
+        "raidsPerDay": 0.96,
+        "restBelowPct": 35,
+        "resumeAtPct": 75,
+        "victoryXpPct": 100
+      },
+      {
+        "blurb": "Saves potions and keeps exploring on low health, then heads back out as soon as it can stand. Learns more from each win.",
+        "id": "bold",
+        "name": "Bold",
+        "potionBelowPct": 35,
+        "raidWinPct": 45,
+        "raidsPerDay": 1.92,
+        "restBelowPct": 20,
+        "resumeAtPct": 60,
+        "victoryXpPct": 115
+      }
+    ],
+    "standoff": null,
+    "status": "exploring",
+    "targetBiomeId": null,
+    "todo": {
+      "nextStandupAt": 1792386000000,
+      "refillHour": 7,
+      "swapAvailable": true,
+      "tasks": [
+        {
+          "biomeId": null,
+          "done": true,
+          "label": "Find a piece of gear",
+          "local": true,
+          "progress": 1,
+          "reward": 5,
+          "slot": 0,
+          "target": 1,
+          "templateId": "find_gear"
+        },
+        {
+          "biomeId": null,
+          "done": false,
+          "label": "Earn 31 gold adventuring",
+          "local": true,
+          "progress": 18,
+          "reward": 5,
+          "slot": 1,
+          "target": 31,
+          "templateId": "earn_gold"
+        },
+        {
+          "biomeId": "office_cubicles",
+          "done": false,
+          "label": "Explore the [[Office Cubicles]] for 25 adventures",
+          "local": true,
+          "progress": 11,
+          "reward": 5,
+          "slot": 2,
+          "target": 25,
+          "templateId": "explore_biome"
+        }
+      ]
+    },
+    "unlocks": [
+      {
+        "feature": "todo",
+        "label": "the to-do list",
+        "level": 2,
+        "unlocked": true
+      },
+      {
+        "feature": "meetings",
+        "label": "meetings with coworkers",
+        "level": 2,
+        "unlocked": true
+      },
+      {
+        "feature": "workbench",
+        "label": "the workbench",
+        "level": 4,
+        "unlocked": false
+      },
+      {
+        "feature": "choices",
+        "label": "office decisions",
+        "level": 5,
+        "unlocked": false
+      },
+      {
+        "feature": "merchant",
+        "label": "the wandering merchant",
+        "level": 6,
+        "unlocked": false
+      },
+      {
+        "feature": "stances",
+        "label": "stances",
+        "level": 7,
+        "unlocked": false
+      },
+      {
+        "feature": "raids",
+        "label": "desk raids",
+        "level": 7,
+        "unlocked": false
+      }
+    ],
+    "wakeAtTick": null,
+    "world": {
+      "currentTick": 1385,
+      "lastCompletedAt": 1792350907360,
+      "lastCompletedTick": 1385,
+      "lastStartedWallSlot": 1792350900000,
+      "paused": false
+    },
+    "xp": 36,
+    "xpToNext": 151
   },
-  "signedIn": true,
-  "user": {
-   "analyticsConsent": false,
-   "nameRepairRequired": false,
-   "publicAlias": "Maximilian_Wolfgangs",
-   "state": "active",
-   "timezone": "Africa/Johannesburg"
-  }
- },
- "hero": {
-  "activationState": "active",
-  "alias": "Maximilian_Wolfgangs",
-  "arriveAtTick": null,
-  "attack": 21,
-  "baseAttack": 21,
-  "baseDefense": 8,
-  "biomeId": "office_cubicles",
-  "biomes": [
-   {
-    "id": "office_cubicles",
-    "name": "Office Cubicles",
-    "unlockLevel": 1,
-    "unlocked": true,
-    "safe": true
-   },
-   {
-    "id": "server_room",
-    "name": "Server Room",
-    "unlockLevel": 4,
-    "unlocked": true,
-    "safe": false
-   },
-   {
-    "id": "cafeteria_depths",
-    "name": "Cafeteria Depths",
-    "unlockLevel": 8,
-    "unlocked": false,
-    "safe": false
-   }
-  ],
-  "choice": null,
-  "counters": {
-   "choicesDefaulted": 0,
-   "choicesMade": 0,
-   "combatWins": 1,
-   "deaths": 0,
-   "eliteWins": 0,
-   "epicFinds": 0,
-   "goldEarned": 15,
-   "itemsFound": 1,
-   "itemsSold": 2,
-   "jackpots": 0,
-   "merchantVisits": 0,
-   "monsterWins": {
-    "dust_daemon": 1
-   },
-   "potionsUsed": 0,
-   "purchases": 0,
-   "rareFinds": 0,
-   "rescues": 0,
-   "restTicks": 3,
-   "retreats": 0,
-   "stanceChanges": 0,
-   "ticksExplored": 6,
-   "trapsAvoided": 0,
-   "trips": 0,
-   "raidsLaunched": 0,
-   "raidsWon": 0,
-   "raidsRepelled": 0,
-   "raidsLost": 0,
-   "tasksCompleted": 0,
-   "itemsEquipped": 0,
-   "careerRungs": 0,
-   "itemsSalvaged": 0,
-   "gearUpgraded": 0,
-   "topReinforcement": 0,
-   "potionsCombined": 0,
-   "occasionsSeen": 0,
-   "raidMishaps": 0
+  "inventory": {
+    "armorId": "fx0002",
+    "canResume": false,
+    "capacity": 10,
+    "gear": [
+      {
+        "affix": {
+          "blurb": "More gold from wins and finds.",
+          "id": "lucky",
+          "name": "Lucky"
+        },
+        "affixable": false,
+        "attack": 0,
+        "defense": 7,
+        "equipped": true,
+        "held": false,
+        "id": "fx0002",
+        "kind": "armor",
+        "label": "Lucky Rare Lanyard Mail",
+        "name": "Lanyard Mail",
+        "nextStep": null,
+        "rarity": "rare",
+        "reinforced": 0,
+        "requiredLevel": 1,
+        "saleValue": 20,
+        "salvage": {
+          "components": 1
+        },
+        "spareOf": null,
+        "suffix": "",
+        "templateId": "lanyard_mail"
+      },
+      {
+        "affix": null,
+        "affixable": false,
+        "attack": 4,
+        "defense": 0,
+        "equipped": true,
+        "held": false,
+        "id": "fx0003",
+        "kind": "weapon",
+        "label": "Ruler Blade",
+        "name": "Ruler Blade",
+        "nextStep": null,
+        "rarity": "common",
+        "reinforced": 0,
+        "requiredLevel": 1,
+        "saleValue": 5,
+        "salvage": {
+          "scrap": 1
+        },
+        "spareOf": null,
+        "suffix": "",
+        "templateId": "ruler_blade"
+      }
+    ],
+    "heldItemId": null,
+    "keepPlan": null,
+    "ladder": {
+      "findable": false,
+      "merchantDiscountPct": 25,
+      "name": "Tote Bag",
+      "next": {
+        "buyable": true,
+        "capacity": 13,
+        "id": "laptop_backpack",
+        "lockedUntilLevel": null,
+        "milestoneAdventures": null,
+        "milestoneLevel": null,
+        "name": "Laptop Backpack",
+        "price": 100
+      }
+    },
+    "makeover": {
+      "gender": "male",
+      "price": 200
+    },
+    "materials": [],
+    "merchant": null,
+    "nameTag": {
+      "inStockAt": 1792400400822,
+      "price": 200
+    },
+    "potionCombine": null,
+    "potionRows": [
+      {
+        "count": 1,
+        "healPct": 25,
+        "heals": 26,
+        "name": "Minor Potion",
+        "templateId": "minor_potion"
+      },
+      {
+        "count": 4,
+        "healPct": 40,
+        "heals": 42,
+        "name": "Healing Potion",
+        "templateId": "healing_potion"
+      },
+      {
+        "count": 0,
+        "healPct": 60,
+        "heals": 63,
+        "name": "Major Potion",
+        "templateId": "major_potion"
+      }
+    ],
+    "potions": 5,
+    "pouch": {
+      "cap": 20,
+      "findable": false,
+      "merchantDiscountPct": 25,
+      "name": "Thermos",
+      "next": {
+        "buyable": true,
+        "cap": 30,
+        "id": "lunchbox",
+        "lockedUntilLevel": null,
+        "milestoneLevel": null,
+        "name": "Lunchbox",
+        "price": 120
+      }
+    },
+    "resumePlan": null,
+    "used": 0,
+    "weaponId": "fx0003",
+    "workbench": null,
+    "workbenchUnlockLevel": 4
   },
-  "defense": 8,
-  "effects": [],
-  "gold": 15,
-  "hp": 136,
-  "lastTick": 447,
-  "level": 4,
-  "lifetimeXp": 497,
-  "maxHp": 136,
-  "merchantTicksLeft": null,
-  "name": "Pip",
-  "reviveAtTick": null,
-  "scenePath": "/art/scene/v4/office_cubicles/day/rest/prop-campfire/5.png",
-  "simulationState": "healthy",
-  "stance": "balanced",
-  "stances": [
-   {
-    "blurb": "Drinks and rests early, and heals up before heading back out. Learns a little less from each win.",
-    "id": "cautious",
-    "name": "Cautious",
-    "potionBelowPct": 65,
-    "restBelowPct": 50,
-    "resumeAtPct": 90,
-    "victoryXpPct": 90
-   },
-   {
-    "blurb": "The office standard.",
-    "id": "balanced",
-    "name": "Balanced",
-    "potionBelowPct": 50,
-    "restBelowPct": 35,
-    "resumeAtPct": 75,
-    "victoryXpPct": 100
-   },
-   {
-    "blurb": "Saves potions and keeps exploring on low health, then heads back out as soon as it can stand. Learns more from each win.",
-    "id": "bold",
-    "name": "Bold",
-    "potionBelowPct": 35,
-    "restBelowPct": 20,
-    "resumeAtPct": 60,
-    "victoryXpPct": 115
-   }
-  ],
-  "status": "exploring",
-  "targetBiomeId": null,
-  "wakeAtTick": null,
-  "world": {
-   "currentTick": 447,
-   "lastCompletedAt": 1791462648123,
-   "lastCompletedTick": 447,
-   "lastStartedWallSlot": 1791462600000,
-   "paused": false
-  },
-  "xp": 6,
-  "xpToNext": 459
- },
- "inventory": {
-  "armorId": "item1",
-  "canResume": false,
-  "capacity": 13,
-  "gear": [
-   {
-    "affix": null,
-    "attack": 5,
-    "defense": 0,
-    "equipped": true,
-    "held": false,
-    "id": "item0",
-    "kind": "weapon",
-    "label": "Uncommon Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "uncommon",
-    "requiredLevel": 1,
-    "saleValue": 10,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 0,
-    "defense": 2,
-    "equipped": true,
-    "held": false,
-    "id": "item1",
-    "kind": "armor",
-    "label": "Cardigan",
-    "name": "Cardigan",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "cardigan"
-   },
-   {
-    "affix": null,
-    "attack": 5,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item2",
-    "kind": "weapon",
-    "label": "Uncommon Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "uncommon",
-    "requiredLevel": 1,
-    "saleValue": 10,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 3,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item3",
-    "kind": "weapon",
-    "label": "Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 3,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item4",
-    "kind": "weapon",
-    "label": "Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 3,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item5",
-    "kind": "weapon",
-    "label": "Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 3,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item6",
-    "kind": "weapon",
-    "label": "Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 3,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item7",
-    "kind": "weapon",
-    "label": "Ruler Blade",
-    "name": "Ruler Blade",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "ruler_blade"
-   },
-   {
-    "affix": null,
-    "attack": 3,
-    "defense": 0,
-    "equipped": false,
-    "held": false,
-    "id": "item8",
-    "kind": "weapon",
-    "label": "Letter Opener",
-    "name": "Letter Opener",
-    "rarity": "common",
-    "requiredLevel": 1,
-    "saleValue": 5,
-    "templateId": "letter_opener"
-   }
-  ],
-  "heldItemId": null,
-  "ladder": {
-   "findable": false,
-   "merchantDiscountPct": 25,
-   "name": "Laptop Backpack",
-   "next": {
-    "buyable": true,
-    "capacity": 16,
-    "id": "messenger_bag",
-    "lockedUntilLevel": null,
-    "milestoneAdventures": null,
-    "milestoneLevel": null,
-    "name": "Messenger Bag",
-    "price": 300
-   }
-  },
-  "makeover": {
-   "gender": "male",
-   "price": 200
-  },
-  "merchant": null,
-  "potions": 3,
-  "pouch": {
-   "cap": 20,
-   "findable": false,
-   "merchantDiscountPct": 25,
-   "name": "Potion pouch",
-   "next": null
-  },
-  "used": 7,
-  "weaponId": "item0"
- },
- "log": [
-  {
-   "at": 1791462648123,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log0",
-   "kind": "rest",
-   "source": "tick",
-   "summary": "Took a quiet break at full health.",
-   "tick": 447
-  },
-  {
-   "at": 1791461748074,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 6,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log1",
-   "kind": "rest",
-   "source": "tick",
-   "summary": "Ate the last donut in the kitchen. +6 HP.",
-   "tick": 446
-  },
-  {
-   "at": 1791460848140,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log2",
-   "kind": "achievement",
-   "source": "lifecycle",
-   "summary": "Achievement: [[Canned Air]]",
-   "tick": 445
-  },
-  {
-   "at": 1791460848140,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 3,
-    "hp": -6,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 6
-   },
-   "id": "log3",
-   "kind": "combat",
-   "source": "tick",
-   "summary": "Beat a [[Dust Daemon]] near the water cooler. +6 XP, +3 gold.",
-   "tick": 445
-  },
-  {
-   "at": 1791459948117,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 16,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log4",
-   "kind": "rest",
-   "source": "tick",
-   "summary": "Hid in a meeting room nobody booked. +16 HP.",
-   "tick": 444
-  },
-  {
-   "at": 1791459048093,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log5",
-   "kind": "loot",
-   "source": "tick",
-   "summary": "Found a [[Common Letter Opener]] in the supply closet.",
-   "tick": 443
-  },
-  {
-   "at": 1791458148095,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log6",
-   "kind": "achievement",
-   "source": "lifecycle",
-   "summary": "Achievement: [[Backpacker]]",
-   "tick": 442
-  },
-  {
-   "at": 1791458148095,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log7",
-   "kind": "achievement",
-   "source": "lifecycle",
-   "summary": "Achievement: [[Tote-ally Prepared]]",
-   "tick": 442
-  },
-  {
-   "at": 1791458148095,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log8",
-   "kind": "achievement",
-   "source": "lifecycle",
-   "summary": "Achievement: [[First Day]]",
-   "tick": 442
-  },
-  {
-   "at": 1791458148095,
-   "deltas": {
-    "bagSlots": 7,
-    "gold": 2,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log9",
-   "kind": "loot",
-   "source": "tick",
-   "summary": "A forgotten petty-cash envelope held 2 gold. Found a [[Laptop Backpack]]! Bag holds 13.",
-   "tick": 442
-  },
-  {
-   "at": 1791458005974,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log10",
-   "kind": "achievement",
-   "source": "lifecycle",
-   "summary": "Achievement: [[Car Boot Sale]]",
-   "tick": 441
-  },
-  {
-   "at": 1791458005974,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log11",
-   "kind": "achievement",
-   "source": "lifecycle",
-   "summary": "Achievement: [[Promoted]]",
-   "tick": 441
-  },
-  {
-   "at": 1791458005974,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 10,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log12",
-   "kind": "system",
-   "source": "command",
-   "summary": "Sold 2 items.",
-   "tick": null
-  },
-  {
-   "at": 1791457966296,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log13",
-   "kind": "system",
-   "source": "command",
-   "summary": "Equipped the Uncommon Ruler Blade.",
-   "tick": null
-  },
-  {
-   "at": 1791457933173,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log14",
-   "kind": "system",
-   "source": "command",
-   "summary": "Resumed adventures.",
-   "tick": null
-  },
-  {
-   "at": 1791309969033,
-   "deltas": {
-    "bagSlots": 0,
-    "gold": 0,
-    "hp": 0,
-    "offers": 0,
-    "potionHealing": 0,
-    "potionsBought": 0,
-    "potionsFound": 0,
-    "pouchCap": 0,
-    "xpEarned": 0
-   },
-   "id": "log15",
-   "kind": "system",
-   "source": "lifecycle",
-   "summary": "Your shift begins in the [[Office Cubicles]].",
-   "tick": null
-  }
- ],
- "recap": {
-  "baseline": null,
-  "counters": null,
-  "held": false,
-  "levelsGained": null,
-  "newEvents": null,
-  "observed": {
-   "level": 4,
-   "lifetimeXp": 497,
-   "logSequence": 16
-  },
-  "status": "exploring",
-  "unequipped": 7,
-  "xpGained": null
- },
- "achievements": {
-  "catalogVersion": 2,
-  "evaluatedVersion": 2,
-  "families": [
-   {
-    "category": "Office Cubicles monster",
-    "earned": null,
-    "family": "slay_paper_imp",
-    "name": "Paper Imp",
-    "next": {
-     "id": "slay_paper_imp_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Office Cubicles monster",
-    "earned": null,
-    "family": "slay_rogue_roomba",
-    "name": "Rogue Roomba",
-    "next": {
-     "id": "slay_rogue_roomba_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Office Cubicles monster",
-    "earned": null,
-    "family": "slay_stapler_mimic",
-    "name": "Stapler Mimic",
-    "next": {
-     "id": "slay_stapler_mimic_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Office Cubicles monster",
-    "earned": {
-     "blurb": "Cleared one with a blast of canned air.",
-     "id": "slay_dust_daemon_1",
-     "name": "Canned Air",
-     "tier": 1,
-     "unlockedAt": 1791460848140
-    },
-    "family": "slay_dust_daemon",
-    "name": "Dust Daemon",
-    "next": {
-     "id": "slay_dust_daemon_2",
-     "tier": 2
-    },
-    "target": 5,
-    "tier": 1,
-    "tiers": 5,
-    "value": 1
-   },
-   {
-    "category": "Server Room monster",
-    "earned": null,
-    "family": "slay_cable_serpent",
-    "name": "Cable Serpent",
-    "next": {
-     "id": "slay_cable_serpent_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Server Room monster",
-    "earned": null,
-    "family": "slay_overheated_rack",
-    "name": "Overheated Rack",
-    "next": {
-     "id": "slay_overheated_rack_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Server Room monster",
-    "earned": null,
-    "family": "slay_firewall_gremlin",
-    "name": "Firewall Gremlin",
-    "next": {
-     "id": "slay_firewall_gremlin_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Server Room monster",
-    "earned": null,
-    "family": "slay_legacy_mainframe",
-    "name": "Legacy Mainframe",
-    "next": {
-     "id": "slay_legacy_mainframe_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Cafeteria Depths monster",
-    "earned": null,
-    "family": "slay_coffee_slime",
-    "name": "Coffee Slime",
-    "next": {
-     "id": "slay_coffee_slime_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Cafeteria Depths monster",
-    "earned": null,
-    "family": "slay_crumb_golem",
-    "name": "Crumb Golem",
-    "next": {
-     "id": "slay_crumb_golem_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Cafeteria Depths monster",
-    "earned": null,
-    "family": "slay_microwave_wraith",
-    "name": "Microwave Wraith",
-    "next": {
-     "id": "slay_microwave_wraith_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Cafeteria Depths monster",
-    "earned": null,
-    "family": "slay_leftovers_hydra",
-    "name": "Leftovers Hydra",
-    "next": {
-     "id": "slay_leftovers_hydra_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 5,
-    "value": 0
-   },
-   {
-    "category": "Set piece",
-    "earned": null,
-    "family": "office_census",
-    "name": "Office Census",
-    "next": {
-     "id": "office_census",
-     "tier": 1
-    },
-    "target": 12,
-    "tier": 0,
-    "tiers": 1,
-    "value": 1
-   },
-   {
-    "category": "Set piece",
-    "earned": null,
-    "family": "full_tour",
-    "name": "Full Tour",
-    "next": {
-     "id": "full_tour",
-     "tier": 1
-    },
-    "target": 3,
-    "tier": 0,
-    "tiers": 1,
-    "value": 1
-   },
-   {
-    "category": "Set piece",
-    "earned": null,
-    "family": "floor_cleared_1",
-    "name": "Cubicles Cleared",
-    "next": {
-     "id": "floor_cleared_1",
-     "tier": 1
-    },
-    "target": 4,
-    "tier": 0,
-    "tiers": 1,
-    "value": 0
-   },
-   {
-    "category": "Set piece",
-    "earned": null,
-    "family": "floor_cleared_2",
-    "name": "Server Room Cleared",
-    "next": {
-     "id": "floor_cleared_2",
-     "tier": 1
-    },
-    "target": 4,
-    "tier": 0,
-    "tiers": 1,
-    "value": 0
-   },
-   {
-    "category": "Set piece",
-    "earned": null,
-    "family": "floor_cleared_3",
-    "name": "Cafeteria Cleared",
-    "next": {
-     "id": "floor_cleared_3",
-     "tier": 1
-    },
-    "target": 4,
-    "tier": 0,
-    "tiers": 1,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "elites",
-    "name": "Elites",
-    "next": {
-     "id": "elites_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "jackpots",
-    "name": "Jackpots",
-    "next": {
-     "id": "jackpots_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 3,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "rare_finds",
-    "name": "Rare finds",
-    "next": {
-     "id": "rare_finds_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": {
-     "blurb": "Found the kitchen and your desk.",
-     "id": "adventures_1",
-     "name": "First Day",
-     "tier": 1,
-     "unlockedAt": 1791458148095
-    },
-    "family": "adventures",
-    "name": "Adventures",
-    "next": {
-     "id": "adventures_2",
-     "tier": 2
-    },
-    "target": 100,
-    "tier": 1,
-    "tiers": 5,
-    "value": 6
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "finds",
-    "name": "Finds",
-    "next": {
-     "id": "finds_1",
-     "tier": 1
-    },
-    "target": 10,
-    "tier": 0,
-    "tiers": 4,
-    "value": 1
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "gold",
-    "name": "Gold earned",
-    "next": {
-     "id": "gold_1",
-     "tier": 1
-    },
-    "target": 100,
-    "tier": 0,
-    "tiers": 4,
-    "value": 15
-   },
-   {
-    "category": "Lifetime",
-    "earned": {
-     "blurb": "The Server Room is open.",
-     "id": "levels_1",
-     "name": "Promoted",
-     "tier": 1,
-     "unlockedAt": 1791458005974
-    },
-    "family": "levels",
-    "name": "Levels",
-    "next": {
-     "id": "levels_2",
-     "tier": 2
-    },
-    "target": 8,
-    "tier": 1,
-    "tiers": 5,
-    "value": 4
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "knockouts",
-    "name": "Knock-outs",
-    "next": {
-     "id": "knockouts_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "rescues",
-    "name": "Rescues",
-    "next": {
-     "id": "rescues_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 3,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "retreats",
-    "name": "Retreats",
-    "next": {
-     "id": "retreats_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "potions",
-    "name": "Potions",
-    "next": {
-     "id": "potions_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "traps",
-    "name": "Traps avoided",
-    "next": {
-     "id": "traps_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "breaks",
-    "name": "Breaks",
-    "next": {
-     "id": "breaks_1",
-     "tier": 1
-    },
-    "target": 10,
-    "tier": 0,
-    "tiers": 3,
-    "value": 3
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "trips",
-    "name": "Trips",
-    "next": {
-     "id": "trips_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 3,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": {
-     "blurb": "Padded straps and a laptop sleeve.",
-     "id": "bags_2",
-     "name": "Backpacker",
-     "tier": 2,
-     "unlockedAt": 1791458148095
-    },
-    "family": "bags",
-    "name": "Bag ladder",
-    "next": {
-     "id": "bags_3",
-     "tier": 3
-    },
-    "target": 16,
-    "tier": 2,
-    "tiers": 4,
-    "value": 13
-   },
-   {
-    "category": "Lifetime",
-    "earned": {
-     "blurb": "One careful owner.",
-     "id": "sales_1",
-     "name": "Car Boot Sale",
-     "tier": 1,
-     "unlockedAt": 1791458005974
-    },
-    "family": "sales",
-    "name": "Sales",
-    "next": {
-     "id": "sales_2",
-     "tier": 2
-    },
-    "target": 25,
-    "tier": 1,
-    "tiers": 4,
-    "value": 2
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "keepsakes",
-    "name": "Keepsakes",
-    "next": {
-     "id": "keepsakes_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Decisions",
-    "earned": null,
-    "family": "purchases",
-    "name": "Purchases",
-    "next": {
-     "id": "purchases_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 3,
-    "value": 0
-   },
-   {
-    "category": "Decisions",
-    "earned": null,
-    "family": "merchants",
-    "name": "Merchants met",
-    "next": {
-     "id": "merchants_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 3,
-    "value": 0
-   },
-   {
-    "category": "Decisions",
-    "earned": null,
-    "family": "stances",
-    "name": "Stance changes",
-    "next": {
-     "id": "stances_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 3,
-    "value": 0
-   },
-   {
-    "category": "Decisions",
-    "earned": null,
-    "family": "choices",
-    "name": "Decisions made",
-    "next": {
-     "id": "choices_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 4,
-    "value": 0
-   },
-   {
-    "category": "Lifetime",
-    "earned": null,
-    "family": "epics",
-    "name": "Epic finds",
-    "next": {
-     "id": "epics_1",
-     "tier": 1
-    },
-    "target": 1,
-    "tier": 0,
-    "tiers": 2,
-    "value": 0
-   }
-  ],
-  "rarity": {
-   "counts": {
-    "adventures_1": 1,
-    "bags_1": 1,
-    "bags_2": 1,
-    "levels_1": 1,
-    "sales_1": 1
-   },
-   "scoreAt": 1791459900000,
-   "totalPlayers": 1
-  },
-  "unlocked": [
-   {
-    "id": "adventures_1",
-    "unlockedAt": 1791458148095
-   },
-   {
-    "id": "bags_1",
-    "unlockedAt": 1791458148095
-   },
-   {
-    "id": "bags_2",
-    "unlockedAt": 1791458148095
-   },
-   {
-    "id": "levels_1",
-    "unlockedAt": 1791458005974
-   },
-   {
-    "id": "sales_1",
-    "unlockedAt": 1791458005974
-   },
-   {
-    "id": "slay_dust_daemon_1",
-    "unlockedAt": 1791460848140
-   }
-  ]
- },
- "keepsakes": {
-  "connected": true,
-  "lastClaimWeek": null,
-  "nextAvailableAt": null,
-  "totalCollected": 0
- },
- "connections": [
-  {
-   "id": "conn1",
-   "uuid": "749de423-cca9-4bf5-9b03-05147df9414b",
-   "state": "active",
-   "pluginSettingId": "1",
-   "createdAt": 1791059876259
-  }
- ],
- "leaderboard": {
-  "recent_24h": {
-   "asOfTick": 444,
-   "board": "recent_24h",
-   "cohortKey": "4-7",
-   "entries": [
+  "log": [
     {
-     "hero_name": "Stapler Steve",
-     "level": 4,
-     "name": "Quill_Danvers",
-     "rank": 1,
-     "score": 420
+      "at": 1792351702849,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 5,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0004",
+      "kind": "system",
+      "source": "command",
+      "summary": "Sold 1 items.",
+      "tick": null
     },
     {
-     "hero_name": "Lady Lanyard",
-     "level": 5,
-     "name": "Odette",
-     "rank": 2,
-     "score": 389
+      "at": 1792351699950,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 5,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0005",
+      "kind": "system",
+      "source": "command",
+      "summary": "Sold 1 items.",
+      "tick": null
     },
     {
-     "hero_name": "Kevin",
-     "level": 6,
-     "name": "Marcus_the_Bold",
-     "rank": 3,
-     "score": 358
+      "at": 1792351693084,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0006",
+      "kind": "system",
+      "source": "command",
+      "summary": "Equipped the Ruler Blade.",
+      "tick": null
     },
     {
-     "hero_name": "Ms. Sheets",
-     "level": 7,
-     "name": "Sunny_Patel",
-     "rank": 4,
-     "score": 327
+      "at": 1792350907360,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionFound": "healing potion",
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 1,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0007",
+      "kind": "loot",
+      "source": "tick",
+      "summary": "Found a healing potion.",
+      "tick": 1385
     },
     {
-     "hero_name": "Pip",
-     "level": 4,
-     "name": "Maximilian_Wolfgangs",
-     "rank": 5,
-     "score": 296
+      "at": 1792350007336,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 4,
+        "hp": -4,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 7
+      },
+      "id": "fx0008",
+      "kind": "combat",
+      "source": "tick",
+      "summary": "Sent a [[Stapler Mimic]] home early. +7 XP, +4 gold.",
+      "tick": 1384
     },
     {
-     "hero_name": "Toastie",
-     "level": 5,
-     "name": "Toast",
-     "rank": 6,
-     "score": 265
+      "at": 1792349107823,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 4,
+        "hp": -4,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 6
+      },
+      "id": "fx0009",
+      "kind": "combat",
+      "source": "tick",
+      "summary": "Beat [[Stapler Mimic]]. +6 XP, +4 gold. Found a [[Common Lanyard Mail]].",
+      "tick": 1383
     },
     {
-     "hero_name": "Deskbound",
-     "level": 6,
-     "name": "Ravi_K",
-     "rank": 7,
-     "score": 234
+      "at": 1792348206986,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 4,
+        "hp": -10,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 7
+      },
+      "id": "fx0010",
+      "kind": "combat",
+      "source": "tick",
+      "summary": "Banished a [[Dust Daemon]] with a can of air. +7 XP, +4 gold.",
+      "tick": 1382
     },
     {
-     "hero_name": "Pencil",
-     "level": 7,
-     "name": "Lin",
-     "rank": 8,
-     "score": 203
+      "at": 1792347306693,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 5,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0011",
+      "kind": "todo",
+      "source": "tick",
+      "summary": "Ticked off: Find a piece of gear.",
+      "tick": 1381
     },
     {
-     "hero_name": "The Intern",
-     "level": 4,
-     "name": "Ingrid",
-     "rank": 9,
-     "score": 172
+      "at": 1792347306693,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0012",
+      "kind": "loot",
+      "source": "tick",
+      "summary": "Unboxed a [[Common Ruler Blade]] from facilities.",
+      "tick": 1381
     },
     {
-     "hero_name": "Boomer",
-     "level": 5,
-     "name": "Bo_Jangles",
-     "rank": 10,
-     "score": 141
+      "at": 1792346407469,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 2,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0013",
+      "kind": "loot",
+      "source": "tick",
+      "summary": "Found 2 gold in an abandoned desk drawer.",
+      "tick": 1380
     },
     {
-     "hero_name": "Cass",
-     "level": 6,
-     "name": "Cassandra_Wells",
-     "rank": 11,
-     "score": 110
+      "at": 1792345507510,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 2,
+        "hp": -2,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 5
+      },
+      "id": "fx0014",
+      "kind": "combat",
+      "source": "tick",
+      "summary": "A [[Rogue Roomba]] fell behind the cubicle wall. +5 XP, +2 gold.",
+      "tick": 1379
     },
     {
-     "hero_name": "Yusuf II",
-     "level": 7,
-     "name": "Yusuf",
-     "rank": 12,
-     "score": 79
+      "at": 1792344606738,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 2,
+        "hp": -9,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 7
+      },
+      "id": "fx0015",
+      "kind": "combat",
+      "source": "tick",
+      "summary": "Filed a [[Dust Daemon]] under 'defeated'. +7 XP, +2 gold.",
+      "tick": 1378
+    },
+    {
+      "at": 1792343706598,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionFound": "minor potion",
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 1,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0016",
+      "kind": "loot",
+      "source": "tick",
+      "summary": "Found a minor potion in the first-aid kit.",
+      "tick": 1377
+    },
+    {
+      "at": 1792342842889,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 5,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0017",
+      "kind": "system",
+      "source": "command",
+      "summary": "Sold 1 items.",
+      "tick": null
+    },
+    {
+      "at": 1792342819428,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 15,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0018",
+      "kind": "system",
+      "source": "command",
+      "summary": "Claimed 15 gold for a goal: Reach level 2.",
+      "tick": null
+    },
+    {
+      "at": 1792342818048,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 15,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0019",
+      "kind": "system",
+      "source": "command",
+      "summary": "Claimed 15 gold for a goal: Equip a piece of gear you found.",
+      "tick": null
+    },
+    {
+      "at": 1792342812002,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 5,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0020",
+      "kind": "system",
+      "source": "command",
+      "summary": "Sold 1 items.",
+      "tick": null
+    },
+    {
+      "at": 1792342806791,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0021",
+      "kind": "career",
+      "source": "tick",
+      "summary": "Goal reached: Reach level 2. Next: Finish three to-do tasks.",
+      "tick": 1376
+    },
+    {
+      "at": 1792342806791,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0022",
+      "kind": "trap",
+      "source": "tick",
+      "summary": "Spotted a trap and stepped around it.",
+      "tick": 1376
+    },
+    {
+      "at": 1792342795899,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0023",
+      "kind": "career",
+      "source": "command",
+      "summary": "Goal reached: Equip a piece of gear you found. Next: Reach level 2.",
+      "tick": null
+    },
+    {
+      "at": 1792342795899,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0024",
+      "kind": "system",
+      "source": "command",
+      "summary": "Equipped the Lucky Rare Lanyard Mail.",
+      "tick": null
+    },
+    {
+      "at": 1792342788456,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 10,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0025",
+      "kind": "system",
+      "source": "command",
+      "summary": "Claimed 10 gold for a goal: Win your first fight.",
+      "tick": null
+    },
+    {
+      "at": 1792341907599,
+      "deltas": {
+        "bagSlots": 0,
+        "effectGained": "bruised",
+        "gold": 0,
+        "hp": -8,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0026",
+      "kind": "trap",
+      "source": "tick",
+      "summary": "Caught a finger in the paper shredder lid. -8 HP. Bruised for 4 adventures.",
+      "tick": 1375
+    },
+    {
+      "at": 1792341006633,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0027",
+      "kind": "career",
+      "source": "tick",
+      "summary": "Unlocked: meetings with coworkers.",
+      "tick": 1374
+    },
+    {
+      "at": 1792341006633,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0028",
+      "kind": "career",
+      "source": "tick",
+      "summary": "Unlocked: the to-do list.",
+      "tick": 1374
+    },
+    {
+      "at": 1792341006633,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0029",
+      "kind": "todo",
+      "source": "tick",
+      "summary": "Stand-up: 3 new tasks.",
+      "tick": 1374
+    },
+    {
+      "at": 1792341006633,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 2,
+        "hp": 6,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 6
+      },
+      "id": "fx0030",
+      "kind": "levelup",
+      "source": "tick",
+      "summary": "Beat a [[Rogue Roomba]] in the break room. +6 XP, +2 gold. Reached level 2!",
+      "tick": 1374
+    },
+    {
+      "at": 1792340106681,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0031",
+      "kind": "rest",
+      "source": "tick",
+      "summary": "Straightened the mouse mat.",
+      "tick": 1373
+    },
+    {
+      "at": 1792339206754,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 24,
+        "offers": 0,
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 0,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0032",
+      "kind": "rest",
+      "source": "tick",
+      "summary": "Hid in a meeting room nobody booked. +24 HP.",
+      "tick": 1372
+    },
+    {
+      "at": 1792338307416,
+      "deltas": {
+        "bagSlots": 0,
+        "gold": 0,
+        "hp": 0,
+        "offers": 0,
+        "potionFound": "healing potion",
+        "potionHealing": 0,
+        "potionsBought": 0,
+        "potionsFound": 1,
+        "pouchCap": 0,
+        "xpEarned": 0
+      },
+      "id": "fx0033",
+      "kind": "loot",
+      "source": "tick",
+      "summary": "A healing potion rolled out from under a desk.",
+      "tick": 1371
     }
-   ],
-   "globalTotalPlayers": 38,
-   "own": {
-    "rank": 5,
-    "rankDelta": 2,
-    "score": 296
-   },
-   "ownCohortKey": "4-7",
-   "published": true,
-   "scoreAt": 1791459900000,
-   "totalPlayers": 23
+  ],
+  "recap": {
+    "bagReady": false,
+    "baseline": null,
+    "counters": null,
+    "held": false,
+    "levelsGained": null,
+    "newEvents": null,
+    "observed": {
+      "level": 2,
+      "lifetimeXp": 86,
+      "logSequence": 60
+    },
+    "status": "exploring",
+    "unequipped": 0,
+    "waking": false,
+    "xpGained": null
   },
-  "recent_7d": {
-   "asOfTick": 444,
-   "board": "recent_7d",
-   "cohortKey": "4-7",
-   "entries": [
-    {
-     "hero_name": "Stapler Steve",
-     "level": 4,
-     "name": "Quill_Danvers",
-     "rank": 1,
-     "score": 2890
+  "achievements": {
+    "catalogVersion": 13,
+    "evaluatedVersion": 13,
+    "families": [
+      {
+        "category": "Office Cubicles monster",
+        "earned": {
+          "blurb": "Put one in the blue recycling bin.",
+          "id": "slay_paper_imp_2",
+          "name": "Blue Bin Regular",
+          "tier": 2,
+          "unlockedAt": 1792001706394
+        },
+        "family": "slay_paper_imp",
+        "name": "Paper Imp",
+        "next": {
+          "id": "slay_paper_imp_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 3
+      },
+      {
+        "category": "Office Cubicles monster",
+        "earned": {
+          "blurb": "Emptied its dust bin.",
+          "id": "slay_rogue_roomba_2",
+          "name": "Bin Emptier",
+          "tier": 2,
+          "unlockedAt": 1791971107000
+        },
+        "family": "slay_rogue_roomba",
+        "name": "Rogue Roomba",
+        "next": {
+          "id": "slay_rogue_roomba_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 4
+      },
+      {
+        "category": "Office Cubicles monster",
+        "earned": {
+          "blurb": "Pulled the staples out.",
+          "id": "slay_stapler_mimic_2",
+          "name": "Staple Remover",
+          "tier": 2,
+          "unlockedAt": 1791962106266
+        },
+        "family": "slay_stapler_mimic",
+        "name": "Stapler Mimic",
+        "next": {
+          "id": "slay_stapler_mimic_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 3
+      },
+      {
+        "category": "Office Cubicles monster",
+        "earned": {
+          "blurb": "Blew five daemons into the vents.",
+          "id": "slay_dust_daemon_2",
+          "name": "Dust Buster",
+          "tier": 2,
+          "unlockedAt": 1791957606269
+        },
+        "family": "slay_dust_daemon",
+        "name": "Dust Daemon",
+        "next": {
+          "id": "slay_dust_daemon_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 4
+      },
+      {
+        "category": "Server Room monster",
+        "earned": {
+          "blurb": "Tied them up with velcro straps.",
+          "id": "slay_cable_serpent_2",
+          "name": "Cable Manager",
+          "tier": 2,
+          "unlockedAt": 1792180806170
+        },
+        "family": "slay_cable_serpent",
+        "name": "Cable Serpent",
+        "next": {
+          "id": "slay_cable_serpent_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Server Room monster",
+        "earned": {
+          "blurb": "Got the hot aisle venting properly.",
+          "id": "slay_overheated_rack_2",
+          "name": "Vented",
+          "tier": 2,
+          "unlockedAt": 1792176306199
+        },
+        "family": "slay_overheated_rack",
+        "name": "Overheated Rack",
+        "next": {
+          "id": "slay_overheated_rack_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Server Room monster",
+        "earned": {
+          "blurb": "Reboot required.",
+          "id": "slay_firewall_gremlin_2",
+          "name": "Patch Tuesday",
+          "tier": 2,
+          "unlockedAt": 1792170006093
+        },
+        "family": "slay_firewall_gremlin",
+        "name": "Firewall Gremlin",
+        "next": {
+          "id": "slay_firewall_gremlin_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Server Room monster",
+        "earned": {
+          "blurb": "Moved it to the cloud and left the old box plugged in, just in case.",
+          "id": "slay_legacy_mainframe_2",
+          "name": "Migration Lead",
+          "tier": 2,
+          "unlockedAt": 1792217706103
+        },
+        "family": "slay_legacy_mainframe",
+        "name": "Legacy Mainframe",
+        "next": {
+          "id": "slay_legacy_mainframe_3",
+          "tier": 3
+        },
+        "target": 25,
+        "tier": 2,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Cafeteria Depths monster",
+        "earned": null,
+        "family": "slay_coffee_slime",
+        "name": "Coffee Slime",
+        "next": {
+          "id": "slay_coffee_slime_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Cafeteria Depths monster",
+        "earned": null,
+        "family": "slay_crumb_golem",
+        "name": "Crumb Golem",
+        "next": {
+          "id": "slay_crumb_golem_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Cafeteria Depths monster",
+        "earned": null,
+        "family": "slay_microwave_wraith",
+        "name": "Microwave Wraith",
+        "next": {
+          "id": "slay_microwave_wraith_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Cafeteria Depths monster",
+        "earned": null,
+        "family": "slay_leftovers_hydra",
+        "name": "Leftovers Hydra",
+        "next": {
+          "id": "slay_leftovers_hydra_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "office_census",
+        "name": "Office Census",
+        "next": {
+          "id": "office_census",
+          "tier": 1
+        },
+        "target": 20,
+        "tier": 0,
+        "tiers": 1,
+        "value": 4
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "full_tour",
+        "name": "Full Tour",
+        "next": {
+          "id": "full_tour",
+          "tier": 1
+        },
+        "target": 5,
+        "tier": 0,
+        "tiers": 1,
+        "value": 1
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "floor_cleared_1",
+        "name": "Cubicles Cleared",
+        "next": {
+          "id": "floor_cleared_1",
+          "tier": 1
+        },
+        "target": 4,
+        "tier": 0,
+        "tiers": 1,
+        "value": 0
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "floor_cleared_2",
+        "name": "Server Room Cleared",
+        "next": {
+          "id": "floor_cleared_2",
+          "tier": 1
+        },
+        "target": 4,
+        "tier": 0,
+        "tiers": 1,
+        "value": 0
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "floor_cleared_3",
+        "name": "Cafeteria Cleared",
+        "next": {
+          "id": "floor_cleared_3",
+          "tier": 1
+        },
+        "target": 4,
+        "tier": 0,
+        "tiers": 1,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Took down your first elite.",
+          "id": "elites_1",
+          "name": "The Floor Clapped",
+          "tier": 1,
+          "unlockedAt": 1791960306166
+        },
+        "family": "elites",
+        "name": "Elites",
+        "next": {
+          "id": "elites_2",
+          "tier": 2
+        },
+        "target": 5,
+        "tier": 1,
+        "tiers": 4,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Ten times the gold from one find.",
+          "id": "jackpots_1",
+          "name": "Lucky Break",
+          "tier": 1,
+          "unlockedAt": 1792163706082
+        },
+        "family": "jackpots",
+        "name": "Jackpots",
+        "next": {
+          "id": "jackpots_2",
+          "tier": 2
+        },
+        "target": 5,
+        "tier": 1,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Found your first rare piece of gear.",
+          "id": "rare_finds_1",
+          "name": "Shiny",
+          "tier": 1,
+          "unlockedAt": 1792316707242
+        },
+        "family": "rare_finds",
+        "name": "Rare finds",
+        "next": {
+          "id": "rare_finds_2",
+          "tier": 2
+        },
+        "target": 5,
+        "tier": 1,
+        "tiers": 4,
+        "value": 1
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "A day and a bit of adventuring.",
+          "id": "adventures_2",
+          "name": "Probation Passed",
+          "tier": 2,
+          "unlockedAt": 1792008906095
+        },
+        "family": "adventures",
+        "name": "Adventures",
+        "next": {
+          "id": "adventures_3",
+          "tier": 3
+        },
+        "target": 500,
+        "tier": 2,
+        "tiers": 5,
+        "value": 41
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Someone left it on their desk.",
+          "id": "finds_1",
+          "name": "Finders Keepers",
+          "tier": 1,
+          "unlockedAt": 1792126806121
+        },
+        "family": "finds",
+        "name": "Finds",
+        "next": {
+          "id": "finds_2",
+          "tier": 2
+        },
+        "target": 100,
+        "tier": 1,
+        "tiers": 4,
+        "value": 4
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "A thousand gold earned, paid out after three reminders.",
+          "id": "gold_2",
+          "name": "Expense Claim",
+          "tier": 2,
+          "unlockedAt": 1792253706125
+        },
+        "family": "gold",
+        "name": "Gold earned",
+        "next": {
+          "id": "gold_3",
+          "tier": 3
+        },
+        "target": 10000,
+        "tier": 2,
+        "tiers": 4,
+        "value": 111
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "The Server Room is open.",
+          "id": "levels_1",
+          "name": "Promoted",
+          "tier": 1,
+          "unlockedAt": 1792140306790
+        },
+        "family": "levels",
+        "name": "Levels",
+        "next": {
+          "id": "levels_2",
+          "tier": 2
+        },
+        "target": 8,
+        "tier": 1,
+        "tiers": 5,
+        "value": 2
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "knockouts",
+        "name": "Knock-outs",
+        "next": {
+          "id": "knockouts_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 4,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "rescues",
+        "name": "Rescues",
+        "next": {
+          "id": "rescues_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "retreats",
+        "name": "Retreats",
+        "next": {
+          "id": "retreats_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 4,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Facilities put a lock on the first-aid box.",
+          "id": "potions_2",
+          "name": "Kit Raider",
+          "tier": 2,
+          "unlockedAt": 1792221078071
+        },
+        "family": "potions",
+        "name": "Potions",
+        "next": {
+          "id": "potions_3",
+          "tier": 3
+        },
+        "target": 100,
+        "tier": 2,
+        "tiers": 4,
+        "value": 1
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Spotted the trap in time.",
+          "id": "traps_1",
+          "name": "Watch Your Step",
+          "tier": 1,
+          "unlockedAt": 1791939606138
+        },
+        "family": "traps",
+        "name": "Traps avoided",
+        "next": {
+          "id": "traps_2",
+          "tier": 2
+        },
+        "target": 25,
+        "tier": 1,
+        "tiers": 4,
+        "value": 2
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Feet up under the desk.",
+          "id": "breaks_2",
+          "name": "Power Nap",
+          "tier": 2,
+          "unlockedAt": 1792269006177
+        },
+        "family": "breaks",
+        "name": "Breaks",
+        "next": {
+          "id": "breaks_3",
+          "tier": 3
+        },
+        "target": 1000,
+        "tier": 2,
+        "tiers": 3,
+        "value": 9
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Took the stairs to another floor.",
+          "id": "trips_1",
+          "name": "Commuter",
+          "tier": 1,
+          "unlockedAt": 1792147506089
+        },
+        "family": "trips",
+        "name": "Trips",
+        "next": {
+          "id": "trips_2",
+          "tier": 2
+        },
+        "target": 10,
+        "tier": 1,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Worn across the body for maximum urgency.",
+          "id": "bags_3",
+          "name": "Messenger",
+          "tier": 3,
+          "unlockedAt": 1792266378600
+        },
+        "family": "bags",
+        "name": "Bag ladder",
+        "next": {
+          "id": "bags_4",
+          "tier": 4
+        },
+        "target": 20,
+        "tier": 3,
+        "tiers": 4,
+        "value": 10
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "One careful owner.",
+          "id": "sales_1",
+          "name": "Car Boot Sale",
+          "tier": 1,
+          "unlockedAt": 1791926051283
+        },
+        "family": "sales",
+        "name": "Sales",
+        "next": {
+          "id": "sales_2",
+          "tier": 2
+        },
+        "target": 25,
+        "tier": 1,
+        "tiers": 4,
+        "value": 4
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "keepsakes",
+        "name": "Keepsakes",
+        "next": {
+          "id": "keepsakes_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 4,
+        "value": 0
+      },
+      {
+        "category": "Decisions",
+        "earned": null,
+        "family": "purchases",
+        "name": "Purchases",
+        "next": {
+          "id": "purchases_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Decisions",
+        "earned": null,
+        "family": "merchants",
+        "name": "Merchants met",
+        "next": {
+          "id": "merchants_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Decisions",
+        "earned": null,
+        "family": "stances",
+        "name": "Stance changes",
+        "next": {
+          "id": "stances_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Decisions",
+        "earned": {
+          "blurb": "Answered your first decision.",
+          "id": "choices_1",
+          "name": "Decider",
+          "tier": 1,
+          "unlockedAt": 1792266310464
+        },
+        "family": "choices",
+        "name": "Decisions made",
+        "next": {
+          "id": "choices_2",
+          "tier": 2
+        },
+        "target": 5,
+        "tier": 1,
+        "tiers": 4,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "epics",
+        "name": "Epic finds",
+        "next": {
+          "id": "epics_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 2,
+        "value": 0
+      },
+      {
+        "category": "Raids",
+        "earned": null,
+        "family": "office_raider",
+        "name": "Office raider",
+        "next": {
+          "id": "office_raider_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Raids",
+        "earned": null,
+        "family": "desk_defender",
+        "name": "Desk defender",
+        "next": {
+          "id": "desk_defender_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Ten tasks ticked off.",
+          "id": "tasks_done_2",
+          "name": "Inbox Zero-ish",
+          "tier": 2,
+          "unlockedAt": 1792217706103
+        },
+        "family": "tasks_done",
+        "name": "Tasks done",
+        "next": {
+          "id": "tasks_done_3",
+          "tier": 3
+        },
+        "target": 50,
+        "tier": 2,
+        "tiers": 4,
+        "value": 1
+      },
+      {
+        "category": "Lifetime",
+        "earned": {
+          "blurb": "Stripped a piece of gear for parts instead of selling it.",
+          "id": "salvaged_1",
+          "name": "Recycling Bin",
+          "tier": 1,
+          "unlockedAt": 1792150876013
+        },
+        "family": "salvaged",
+        "name": "Salvaged",
+        "next": {
+          "id": "salvaged_2",
+          "tier": 2
+        },
+        "target": 25,
+        "tier": 1,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "workbench",
+        "name": "Workbench",
+        "next": {
+          "id": "workbench_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "mixing",
+        "name": "Potion mixing",
+        "next": {
+          "id": "mixing_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Archive monster",
+        "earned": null,
+        "family": "slay_box_file_beetle",
+        "name": "Box File Beetle",
+        "next": {
+          "id": "slay_box_file_beetle_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Archive monster",
+        "earned": null,
+        "family": "slay_shelf_lurker",
+        "name": "Shelf Lurker",
+        "next": {
+          "id": "slay_shelf_lurker_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Archive monster",
+        "earned": null,
+        "family": "slay_microfilm_phantom",
+        "name": "Microfilm Phantom",
+        "next": {
+          "id": "slay_microfilm_phantom_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Archive monster",
+        "earned": null,
+        "family": "slay_auditor",
+        "name": "Auditor",
+        "next": {
+          "id": "slay_auditor_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Parking Garage monster",
+        "earned": null,
+        "family": "slay_trolley_swarm",
+        "name": "Trolley Swarm",
+        "next": {
+          "id": "slay_trolley_swarm_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Parking Garage monster",
+        "earned": null,
+        "family": "slay_oil_slick",
+        "name": "Oil Slick",
+        "next": {
+          "id": "slay_oil_slick_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Parking Garage monster",
+        "earned": null,
+        "family": "slay_barrier_golem",
+        "name": "Barrier Golem",
+        "next": {
+          "id": "slay_barrier_golem_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Parking Garage monster",
+        "earned": null,
+        "family": "slay_ghost_car",
+        "name": "Ghost Car",
+        "next": {
+          "id": "slay_ghost_car_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 5,
+        "value": 0
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "floor_cleared_4",
+        "name": "Archive Cleared",
+        "next": {
+          "id": "floor_cleared_4",
+          "tier": 1
+        },
+        "target": 4,
+        "tier": 0,
+        "tiers": 1,
+        "value": 0
+      },
+      {
+        "category": "Set piece",
+        "earned": null,
+        "family": "floor_cleared_5",
+        "name": "Garage Cleared",
+        "next": {
+          "id": "floor_cleared_5",
+          "tier": 1
+        },
+        "target": 4,
+        "tier": 0,
+        "tiers": 1,
+        "value": 0
+      },
+      {
+        "category": "Roster",
+        "earned": {
+          "blurb": "Recruited a Rogue.",
+          "id": "rogue_1",
+          "name": "New Hire",
+          "tier": 1,
+          "unlockedAt": 1792314906894
+        },
+        "family": "rogue",
+        "name": "The Rogue",
+        "next": {
+          "id": "rogue_2",
+          "tier": 2
+        },
+        "target": 7,
+        "tier": 1,
+        "tiers": 4,
+        "value": 2
+      },
+      {
+        "category": "Roster",
+        "earned": null,
+        "family": "rogue_raids",
+        "name": "Light Fingers",
+        "next": {
+          "id": "rogue_raids_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Roster",
+        "earned": null,
+        "family": "rogue_gold",
+        "name": "Deep Pockets",
+        "next": {
+          "id": "rogue_gold_1",
+          "tier": 1
+        },
+        "target": 1000,
+        "tier": 0,
+        "tiers": 3,
+        "value": 111
+      },
+      {
+        "category": "Office calendar",
+        "earned": {
+          "blurb": "On duty for an office occasion.",
+          "id": "office_calendar_1",
+          "name": "Signed the Card",
+          "tier": 1,
+          "unlockedAt": 1792101606298
+        },
+        "family": "office_calendar",
+        "name": "Office calendar",
+        "next": {
+          "id": "office_calendar_2",
+          "tier": 2
+        },
+        "target": 6,
+        "tier": 1,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Raids",
+        "earned": null,
+        "family": "thirteenth_floor",
+        "name": "Thirteenth Floor",
+        "next": {
+          "id": "thirteenth_floor",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 1,
+        "value": 0
+      },
+      {
+        "category": "Coworkers",
+        "earned": {
+          "blurb": "Met another hero on the floor.",
+          "id": "networking_1",
+          "name": "Water Cooler Moment",
+          "tier": 1,
+          "unlockedAt": 1792097106338
+        },
+        "family": "networking",
+        "name": "Networking",
+        "next": {
+          "id": "networking_2",
+          "tier": 2
+        },
+        "target": 10,
+        "tier": 1,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Coworkers",
+        "earned": null,
+        "family": "lost_and_found",
+        "name": "Lost and found",
+        "next": {
+          "id": "lost_and_found_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "big_bags",
+        "name": "Bigger bags",
+        "next": {
+          "id": "big_bags_1",
+          "tier": 1
+        },
+        "target": 24,
+        "tier": 0,
+        "tiers": 3,
+        "value": 10
+      },
+      {
+        "category": "Lifetime",
+        "earned": null,
+        "family": "dug_in",
+        "name": "Dug in",
+        "next": {
+          "id": "dug_in_1",
+          "tier": 1
+        },
+        "target": 1,
+        "tier": 0,
+        "tiers": 3,
+        "value": 0
+      }
+    ],
+    "rarity": {
+      "counts": {
+        "adventures_1": 36,
+        "adventures_2": 31,
+        "bags_1": 35,
+        "bags_2": 19,
+        "bags_3": 6,
+        "breaks_1": 34,
+        "breaks_2": 17,
+        "choices_1": 4,
+        "elites_1": 28,
+        "elites_2": 6,
+        "epics_1": 5,
+        "finds_1": 31,
+        "floor_cleared_1": 4,
+        "gold_1": 32,
+        "gold_2": 6,
+        "jackpots_1": 10,
+        "levels_1": 21,
+        "merchants_1": 2,
+        "mixing_1": 2,
+        "networking_1": 24,
+        "office_calendar_1": 31,
+        "potions_1": 20,
+        "potions_2": 7,
+        "rare_finds_1": 21,
+        "rogue_1": 2,
+        "sales_1": 23,
+        "salvaged_1": 12,
+        "slay_cable_serpent_1": 12,
+        "slay_cable_serpent_2": 9,
+        "slay_dust_daemon_1": 35,
+        "slay_dust_daemon_2": 34,
+        "slay_dust_daemon_3": 12,
+        "slay_firewall_gremlin_1": 12,
+        "slay_firewall_gremlin_2": 10,
+        "slay_legacy_mainframe_1": 12,
+        "slay_legacy_mainframe_2": 9,
+        "slay_legacy_mainframe_3": 1,
+        "slay_overheated_rack_1": 12,
+        "slay_overheated_rack_2": 10,
+        "slay_paper_imp_1": 35,
+        "slay_paper_imp_2": 32,
+        "slay_paper_imp_3": 8,
+        "slay_rogue_roomba_1": 35,
+        "slay_rogue_roomba_2": 32,
+        "slay_rogue_roomba_3": 8,
+        "slay_stapler_mimic_1": 36,
+        "slay_stapler_mimic_2": 32,
+        "slay_stapler_mimic_3": 10,
+        "tasks_done_1": 33,
+        "tasks_done_2": 19,
+        "traps_1": 34,
+        "trips_1": 13,
+        "workbench_1": 4
+      },
+      "scoreAt": 1792349100000,
+      "totalPlayers": 36
     },
-    {
-     "hero_name": "Lady Lanyard",
-     "level": 5,
-     "name": "Odette",
-     "rank": 2,
-     "score": 2700
-    },
-    {
-     "hero_name": "Kevin",
-     "level": 6,
-     "name": "Marcus_the_Bold",
-     "rank": 3,
-     "score": 2510
-    },
-    {
-     "hero_name": "Ms. Sheets",
-     "level": 7,
-     "name": "Sunny_Patel",
-     "rank": 4,
-     "score": 2320
-    },
-    {
-     "hero_name": "Pip",
-     "level": 4,
-     "name": "Maximilian_Wolfgangs",
-     "rank": 5,
-     "score": 2130
-    },
-    {
-     "hero_name": "Toastie",
-     "level": 5,
-     "name": "Toast",
-     "rank": 6,
-     "score": 1940
-    },
-    {
-     "hero_name": "Deskbound",
-     "level": 6,
-     "name": "Ravi_K",
-     "rank": 7,
-     "score": 1750
-    },
-    {
-     "hero_name": "Pencil",
-     "level": 7,
-     "name": "Lin",
-     "rank": 8,
-     "score": 1560
-    },
-    {
-     "hero_name": "The Intern",
-     "level": 4,
-     "name": "Ingrid",
-     "rank": 9,
-     "score": 1370
-    },
-    {
-     "hero_name": "Boomer",
-     "level": 5,
-     "name": "Bo_Jangles",
-     "rank": 10,
-     "score": 1180
-    },
-    {
-     "hero_name": "Cass",
-     "level": 6,
-     "name": "Cassandra_Wells",
-     "rank": 11,
-     "score": 990
-    },
-    {
-     "hero_name": "Yusuf II",
-     "level": 7,
-     "name": "Yusuf",
-     "rank": 12,
-     "score": 800
-    }
-   ],
-   "globalTotalPlayers": 38,
-   "own": {
-    "rank": 5,
-    "rankDelta": -1,
-    "score": 2130
-   },
-   "ownCohortKey": "4-7",
-   "published": true,
-   "scoreAt": 1791459900000,
-   "totalPlayers": 23
+    "unlocked": [
+      {
+        "id": "adventures_1",
+        "unlockedAt": 1791919806262
+      },
+      {
+        "id": "adventures_2",
+        "unlockedAt": 1792008906095
+      },
+      {
+        "id": "bags_1",
+        "unlockedAt": 1791924306059
+      },
+      {
+        "id": "bags_2",
+        "unlockedAt": 1792060296374
+      },
+      {
+        "id": "bags_3",
+        "unlockedAt": 1792266378600
+      },
+      {
+        "id": "breaks_1",
+        "unlockedAt": 1791945906168
+      },
+      {
+        "id": "breaks_2",
+        "unlockedAt": 1792269006177
+      },
+      {
+        "id": "choices_1",
+        "unlockedAt": 1792266310464
+      },
+      {
+        "id": "elites_1",
+        "unlockedAt": 1791960306166
+      },
+      {
+        "id": "finds_1",
+        "unlockedAt": 1792126806121
+      },
+      {
+        "id": "gold_1",
+        "unlockedAt": 1791959406073
+      },
+      {
+        "id": "gold_2",
+        "unlockedAt": 1792253706125
+      },
+      {
+        "id": "jackpots_1",
+        "unlockedAt": 1792163706082
+      },
+      {
+        "id": "levels_1",
+        "unlockedAt": 1792140306790
+      },
+      {
+        "id": "networking_1",
+        "unlockedAt": 1792097106338
+      },
+      {
+        "id": "office_calendar_1",
+        "unlockedAt": 1792101606298
+      },
+      {
+        "id": "potions_1",
+        "unlockedAt": 1792149212064
+      },
+      {
+        "id": "potions_2",
+        "unlockedAt": 1792221078071
+      },
+      {
+        "id": "rare_finds_1",
+        "unlockedAt": 1792316707242
+      },
+      {
+        "id": "rogue_1",
+        "unlockedAt": 1792314906894
+      },
+      {
+        "id": "sales_1",
+        "unlockedAt": 1791926051283
+      },
+      {
+        "id": "salvaged_1",
+        "unlockedAt": 1792150876013
+      },
+      {
+        "id": "slay_cable_serpent_1",
+        "unlockedAt": 1792164606074
+      },
+      {
+        "id": "slay_cable_serpent_2",
+        "unlockedAt": 1792180806170
+      },
+      {
+        "id": "slay_dust_daemon_1",
+        "unlockedAt": 1791924306059
+      },
+      {
+        "id": "slay_dust_daemon_2",
+        "unlockedAt": 1791957606269
+      },
+      {
+        "id": "slay_firewall_gremlin_1",
+        "unlockedAt": 1792148406103
+      },
+      {
+        "id": "slay_firewall_gremlin_2",
+        "unlockedAt": 1792170006093
+      },
+      {
+        "id": "slay_legacy_mainframe_1",
+        "unlockedAt": 1792165506069
+      },
+      {
+        "id": "slay_legacy_mainframe_2",
+        "unlockedAt": 1792217706103
+      },
+      {
+        "id": "slay_overheated_rack_1",
+        "unlockedAt": 1792150206102
+      },
+      {
+        "id": "slay_overheated_rack_2",
+        "unlockedAt": 1792176306199
+      },
+      {
+        "id": "slay_paper_imp_1",
+        "unlockedAt": 1791945006375
+      },
+      {
+        "id": "slay_paper_imp_2",
+        "unlockedAt": 1792001706394
+      },
+      {
+        "id": "slay_rogue_roomba_1",
+        "unlockedAt": 1791936006142
+      },
+      {
+        "id": "slay_rogue_roomba_2",
+        "unlockedAt": 1791971107000
+      },
+      {
+        "id": "slay_stapler_mimic_1",
+        "unlockedAt": 1791921606119
+      },
+      {
+        "id": "slay_stapler_mimic_2",
+        "unlockedAt": 1791962106266
+      },
+      {
+        "id": "tasks_done_1",
+        "unlockedAt": 1791959406073
+      },
+      {
+        "id": "tasks_done_2",
+        "unlockedAt": 1792217706103
+      },
+      {
+        "id": "traps_1",
+        "unlockedAt": 1791939606138
+      },
+      {
+        "id": "trips_1",
+        "unlockedAt": 1792147506089
+      }
+    ]
   },
-  "overall": {
-   "asOfTick": 444,
-   "board": "overall",
-   "cohortKey": "all",
-   "entries": [
+  "keepsakes": {
+    "connected": false,
+    "easterEgg": false,
+    "lastClaimWeek": null,
+    "nextAvailableAt": null,
+    "totalCollected": 0
+  },
+  "connections": [
     {
-     "hero_name": "Stapler Steve",
-     "level": 12,
-     "name": "Quill_Danvers",
-     "rank": 1,
-     "score": 0
+      "createdAt": 1791920917715,
+      "id": "fx0034",
+      "pluginSettingId": "505289",
+      "state": "active",
+      "uuid": "749de423-cca9-4bf5-9b03-000000000000"
     },
     {
-     "hero_name": "Lady Lanyard",
-     "level": 11,
-     "name": "Odette",
-     "rank": 2,
-     "score": 0
-    },
-    {
-     "hero_name": "Kevin",
-     "level": 10,
-     "name": "Marcus_the_Bold",
-     "rank": 3,
-     "score": 0
-    },
-    {
-     "hero_name": "Ms. Sheets",
-     "level": 9,
-     "name": "Sunny_Patel",
-     "rank": 4,
-     "score": 0
-    },
-    {
-     "hero_name": "Pip",
-     "level": 8,
-     "name": "Maximilian_Wolfgangs",
-     "rank": 5,
-     "score": 0
-    },
-    {
-     "hero_name": "Toastie",
-     "level": 7,
-     "name": "Toast",
-     "rank": 6,
-     "score": 0
-    },
-    {
-     "hero_name": "Deskbound",
-     "level": 6,
-     "name": "Ravi_K",
-     "rank": 7,
-     "score": 0
-    },
-    {
-     "hero_name": "Pencil",
-     "level": 5,
-     "name": "Lin",
-     "rank": 8,
-     "score": 0
-    },
-    {
-     "hero_name": "The Intern",
-     "level": 4,
-     "name": "Ingrid",
-     "rank": 9,
-     "score": 0
-    },
-    {
-     "hero_name": "Boomer",
-     "level": 3,
-     "name": "Bo_Jangles",
-     "rank": 10,
-     "score": 0
-    },
-    {
-     "hero_name": "Cass",
-     "level": 2,
-     "name": "Cassandra_Wells",
-     "rank": 11,
-     "score": 0
-    },
-    {
-     "hero_name": "Yusuf II",
-     "level": 1,
-     "name": "Yusuf",
-     "rank": 12,
-     "score": 0
+      "createdAt": 1791323043515,
+      "id": "fx0035",
+      "pluginSettingId": "498157",
+      "state": "active",
+      "uuid": "749de423-cca9-4bf5-9b03-000000000001"
     }
-   ],
-   "globalTotalPlayers": 38,
-   "own": {
-    "rank": 5,
-    "rankDelta": null,
-    "score": null
-   },
-   "ownCohortKey": "4-7",
-   "published": true,
-   "scoreAt": 1791459900000,
-   "totalPlayers": 23
+  ],
+  "leaderboard": {
+    "recent_24h": {
+      "asOfTick": 1383,
+      "board": "recent_24h",
+      "cohortKey": "1-3",
+      "entries": [
+        {
+          "hero_name": "Lady Lanyard",
+          "level": 3,
+          "name": "Quill_Danvers",
+          "profile": true,
+          "rank": 1,
+          "score": 187
+        },
+        {
+          "hero_name": "Ms. Sheets",
+          "level": 3,
+          "name": "Marcus_the_Bold",
+          "profile": true,
+          "rank": 2,
+          "score": 171
+        },
+        {
+          "hero_name": "Sir Clips",
+          "level": 2,
+          "name": "Toastie_Fan",
+          "profile": true,
+          "rank": 3,
+          "score": 158
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 2,
+          "name": "Juniper_Vale",
+          "profile": true,
+          "rank": 4,
+          "score": 133
+        },
+        {
+          "hero_name": "Margo",
+          "level": 3,
+          "name": "Bea_Okafor",
+          "profile": true,
+          "rank": 5,
+          "score": 124
+        },
+        {
+          "hero_name": "Pixel",
+          "level": 2,
+          "name": "Mo",
+          "profile": true,
+          "rank": 6,
+          "score": 100
+        },
+        {
+          "hero_name": "Tess",
+          "level": 2,
+          "name": "Pemberton",
+          "profile": true,
+          "rank": 7,
+          "score": 97
+        },
+        {
+          "hero_name": "Pip",
+          "level": 2,
+          "name": "Maximilian_Wolfgangs",
+          "profile": true,
+          "rank": 8,
+          "score": 79
+        },
+        {
+          "hero_name": "Ruth",
+          "level": 1,
+          "name": "Nova_K",
+          "profile": true,
+          "rank": 9,
+          "score": 49
+        },
+        {
+          "hero_name": "Teo",
+          "level": 3,
+          "name": "Teo",
+          "profile": true,
+          "rank": 10,
+          "score": 7
+        },
+        {
+          "hero_name": "Vim",
+          "level": 3,
+          "name": "Wren",
+          "profile": true,
+          "rank": 11,
+          "score": 6
+        },
+        {
+          "hero_name": "Stapler Steve",
+          "level": 2,
+          "name": "Clem",
+          "profile": true,
+          "rank": 12,
+          "score": 6
+        },
+        {
+          "hero_name": "Odette_23",
+          "level": 1,
+          "name": "Odette_23",
+          "profile": true,
+          "rank": 13,
+          "score": 6
+        },
+        {
+          "hero_name": "Ms. Sheets",
+          "level": 3,
+          "name": "Marcus_the_Bold_24",
+          "profile": true,
+          "rank": 14,
+          "score": 0
+        },
+        {
+          "hero_name": "Sir Clips",
+          "level": 3,
+          "name": "Toastie_Fan_26",
+          "profile": true,
+          "rank": 15,
+          "score": 0
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 3,
+          "name": "Juniper_Vale_28",
+          "profile": true,
+          "rank": 16,
+          "score": 0
+        },
+        {
+          "hero_name": "Margo",
+          "level": 3,
+          "name": "Bea_Okafor_30",
+          "profile": true,
+          "rank": 17,
+          "score": 0
+        }
+      ],
+      "globalTotalPlayers": 36,
+      "own": {
+        "rank": 8,
+        "rankDelta": 0,
+        "score": 79
+      },
+      "ownCohortKey": "1-3",
+      "published": true,
+      "scoreAt": 1792349100000,
+      "totalPlayers": 17
+    },
+    "recent_7d": {
+      "asOfTick": 1383,
+      "board": "recent_7d",
+      "cohortKey": "1-3",
+      "entries": [
+        {
+          "hero_name": "Sir Clips",
+          "level": 3,
+          "name": "Toastie_Fan_26",
+          "profile": true,
+          "rank": 1,
+          "score": 489
+        },
+        {
+          "hero_name": "Lady Lanyard",
+          "level": 3,
+          "name": "Quill_Danvers",
+          "profile": true,
+          "rank": 2,
+          "score": 481
+        },
+        {
+          "hero_name": "Margo",
+          "level": 3,
+          "name": "Bea_Okafor_30",
+          "profile": true,
+          "rank": 3,
+          "score": 442
+        },
+        {
+          "hero_name": "Ms. Sheets",
+          "level": 3,
+          "name": "Marcus_the_Bold",
+          "profile": true,
+          "rank": 4,
+          "score": 356
+        },
+        {
+          "hero_name": "Teo",
+          "level": 3,
+          "name": "Teo",
+          "profile": true,
+          "rank": 5,
+          "score": 340
+        },
+        {
+          "hero_name": "Vim",
+          "level": 3,
+          "name": "Wren",
+          "profile": true,
+          "rank": 6,
+          "score": 336
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 3,
+          "name": "Juniper_Vale_28",
+          "profile": true,
+          "rank": 7,
+          "score": 326
+        },
+        {
+          "hero_name": "Margo",
+          "level": 3,
+          "name": "Bea_Okafor",
+          "profile": true,
+          "rank": 8,
+          "score": 278
+        },
+        {
+          "hero_name": "Ms. Sheets",
+          "level": 3,
+          "name": "Marcus_the_Bold_24",
+          "profile": true,
+          "rank": 9,
+          "score": 226
+        },
+        {
+          "hero_name": "Sir Clips",
+          "level": 2,
+          "name": "Toastie_Fan",
+          "profile": true,
+          "rank": 10,
+          "score": 194
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 2,
+          "name": "Juniper_Vale",
+          "profile": true,
+          "rank": 11,
+          "score": 133
+        },
+        {
+          "hero_name": "Stapler Steve",
+          "level": 2,
+          "name": "Clem",
+          "profile": true,
+          "rank": 12,
+          "score": 120
+        },
+        {
+          "hero_name": "Pixel",
+          "level": 2,
+          "name": "Mo",
+          "profile": true,
+          "rank": 13,
+          "score": 100
+        },
+        {
+          "hero_name": "Tess",
+          "level": 2,
+          "name": "Pemberton",
+          "profile": true,
+          "rank": 14,
+          "score": 97
+        },
+        {
+          "hero_name": "Pip",
+          "level": 2,
+          "name": "Maximilian_Wolfgangs",
+          "profile": true,
+          "rank": 15,
+          "score": 79
+        },
+        {
+          "hero_name": "Ruth",
+          "level": 1,
+          "name": "Nova_K",
+          "profile": true,
+          "rank": 16,
+          "score": 49
+        },
+        {
+          "hero_name": "Odette_23",
+          "level": 1,
+          "name": "Odette_23",
+          "profile": true,
+          "rank": 17,
+          "score": 6
+        }
+      ],
+      "globalTotalPlayers": 36,
+      "own": {
+        "rank": 15,
+        "rankDelta": 0,
+        "score": 79
+      },
+      "ownCohortKey": "1-3",
+      "published": true,
+      "scoreAt": 1792349100000,
+      "totalPlayers": 17
+    },
+    "overall": {
+      "asOfTick": 1383,
+      "board": "overall",
+      "cohortKey": "all",
+      "entries": [
+        {
+          "hero_name": "Pixel",
+          "level": 6,
+          "name": "Mo_32",
+          "profile": true,
+          "rank": 1,
+          "score": 0
+        },
+        {
+          "hero_name": "Tess",
+          "level": 5,
+          "name": "Pemberton_34",
+          "profile": true,
+          "rank": 2,
+          "score": 0
+        },
+        {
+          "hero_name": "Ruth",
+          "level": 5,
+          "name": "Nova_K_36",
+          "profile": true,
+          "rank": 3,
+          "score": 0
+        },
+        {
+          "hero_name": "Teo_38",
+          "level": 5,
+          "name": "Teo_38",
+          "profile": true,
+          "rank": 4,
+          "score": 0
+        },
+        {
+          "hero_name": "Vim",
+          "level": 5,
+          "name": "Wren_39",
+          "profile": true,
+          "rank": 5,
+          "score": 0
+        },
+        {
+          "hero_name": "Stapler Ruth",
+          "level": 5,
+          "name": "Clem_41",
+          "profile": true,
+          "rank": 6,
+          "score": 0
+        },
+        {
+          "hero_name": "Kevin",
+          "level": 5,
+          "name": "Odette_43",
+          "profile": true,
+          "rank": 7,
+          "score": 0
+        },
+        {
+          "hero_name": "Toastie",
+          "level": 5,
+          "name": "Sunny_Patel_45",
+          "profile": true,
+          "rank": 8,
+          "score": 0
+        },
+        {
+          "hero_name": "Rook_47",
+          "level": 5,
+          "name": "Rook_47",
+          "profile": true,
+          "rank": 9,
+          "score": 0
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 4,
+          "name": "Juniper_Vale_48",
+          "profile": true,
+          "rank": 10,
+          "score": 0
+        },
+        {
+          "hero_name": "Margo",
+          "level": 4,
+          "name": "Bea_Okafor_50",
+          "profile": true,
+          "rank": 11,
+          "score": 0
+        },
+        {
+          "hero_name": "Pixel",
+          "level": 4,
+          "name": "Mo_52",
+          "profile": true,
+          "rank": 12,
+          "score": 0
+        },
+        {
+          "hero_name": "Tess",
+          "level": 4,
+          "name": "Pemberton_54",
+          "profile": true,
+          "rank": 13,
+          "score": 0
+        },
+        {
+          "hero_name": "Ruth",
+          "level": 4,
+          "name": "Nova_K_56",
+          "profile": true,
+          "rank": 14,
+          "score": 0
+        },
+        {
+          "hero_name": "Nell",
+          "level": 4,
+          "name": "Teo_58",
+          "profile": true,
+          "rank": 15,
+          "score": 0
+        },
+        {
+          "hero_name": "Cass",
+          "level": 4,
+          "name": "Basil_60",
+          "profile": true,
+          "rank": 16,
+          "score": 0
+        },
+        {
+          "hero_name": "Sir Clips",
+          "level": 4,
+          "name": "Quill_Danvers_62",
+          "profile": true,
+          "rank": 17,
+          "score": 0
+        },
+        {
+          "hero_name": "Kevin",
+          "level": 4,
+          "name": "Odette_63",
+          "profile": true,
+          "rank": 18,
+          "score": 0
+        },
+        {
+          "hero_name": "Toastie",
+          "level": 4,
+          "name": "Sunny_Patel_65",
+          "profile": true,
+          "rank": 19,
+          "score": 0
+        },
+        {
+          "hero_name": "Sir Clips",
+          "level": 3,
+          "name": "Toastie_Fan_26",
+          "profile": true,
+          "rank": 20,
+          "score": 0
+        },
+        {
+          "hero_name": "Lady Lanyard",
+          "level": 3,
+          "name": "Quill_Danvers",
+          "profile": true,
+          "rank": 21,
+          "score": 0
+        },
+        {
+          "hero_name": "Margo",
+          "level": 3,
+          "name": "Bea_Okafor_30",
+          "profile": true,
+          "rank": 22,
+          "score": 0
+        },
+        {
+          "hero_name": "Ms. Sheets",
+          "level": 3,
+          "name": "Marcus_the_Bold",
+          "profile": true,
+          "rank": 23,
+          "score": 0
+        },
+        {
+          "hero_name": "Teo",
+          "level": 3,
+          "name": "Teo",
+          "profile": true,
+          "rank": 24,
+          "score": 0
+        },
+        {
+          "hero_name": "Vim",
+          "level": 3,
+          "name": "Wren",
+          "profile": true,
+          "rank": 25,
+          "score": 0
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 3,
+          "name": "Juniper_Vale_28",
+          "profile": true,
+          "rank": 26,
+          "score": 0
+        },
+        {
+          "hero_name": "Margo",
+          "level": 3,
+          "name": "Bea_Okafor",
+          "profile": true,
+          "rank": 27,
+          "score": 0
+        },
+        {
+          "hero_name": "Ms. Sheets",
+          "level": 3,
+          "name": "Marcus_the_Bold_24",
+          "profile": true,
+          "rank": 28,
+          "score": 0
+        },
+        {
+          "hero_name": "Sir Clips",
+          "level": 2,
+          "name": "Toastie_Fan",
+          "profile": true,
+          "rank": 29,
+          "score": 0
+        },
+        {
+          "hero_name": "Biscuit",
+          "level": 2,
+          "name": "Juniper_Vale",
+          "profile": true,
+          "rank": 30,
+          "score": 0
+        },
+        {
+          "hero_name": "Stapler Steve",
+          "level": 2,
+          "name": "Clem",
+          "profile": true,
+          "rank": 31,
+          "score": 0
+        },
+        {
+          "hero_name": "Pixel",
+          "level": 2,
+          "name": "Mo",
+          "profile": true,
+          "rank": 32,
+          "score": 0
+        },
+        {
+          "hero_name": "Tess",
+          "level": 2,
+          "name": "Pemberton",
+          "profile": true,
+          "rank": 33,
+          "score": 0
+        },
+        {
+          "hero_name": "Pip",
+          "level": 2,
+          "name": "Maximilian_Wolfgangs",
+          "profile": true,
+          "rank": 34,
+          "score": 0
+        },
+        {
+          "hero_name": "Ruth",
+          "level": 1,
+          "name": "Nova_K",
+          "profile": true,
+          "rank": 35,
+          "score": 0
+        },
+        {
+          "hero_name": "Odette_23",
+          "level": 1,
+          "name": "Odette_23",
+          "profile": true,
+          "rank": 36,
+          "score": 0
+        }
+      ],
+      "globalTotalPlayers": 36,
+      "own": {
+        "rank": 34,
+        "rankDelta": 0,
+        "score": null
+      },
+      "ownCohortKey": "all",
+      "published": true,
+      "scoreAt": 1792349100000,
+      "totalPlayers": 36
+    }
   }
- }
 }

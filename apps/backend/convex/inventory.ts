@@ -465,8 +465,9 @@ export const sellMany = mutation({
     await runIntent(ctx, args.operationId, 'inventory.sellMany', { itemIds: args.itemIds }, async (user) => {
       if (args.itemIds.length < 1 || args.itemIds.length > BATCH_ITEMS) throw appError('INVALID_INPUT', `Choose between 1 and ${BATCH_ITEMS} items.`)
       const hero = await requirePlayableHero(ctx, user)
-      const { gold } = await sellItems(ctx, hero, args.itemIds)
-      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'sell_many', `Sold ${args.itemIds.length} items.`, { xpEarned: 0, gold, hp: 0 })
+      const { gold, items } = await sellItems(ctx, hero, args.itemIds)
+      // A sale of one names it, like the single sale, rather than "Sold 1 items."
+      await commandLog(ctx, (await ctx.db.get(hero._id))!, 'sell_many', items.length === 1 ? `Sold the ${itemLabel(items[0]!)}.` : `Sold ${items.length} items.`, { xpEarned: 0, gold, hp: 0 })
       await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
       await syncBagSleep(ctx, hero._id)
       return { changed: true, gold, count: args.itemIds.length }
