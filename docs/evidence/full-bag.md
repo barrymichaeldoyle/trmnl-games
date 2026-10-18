@@ -35,3 +35,14 @@ v16's rise is the denominator: the same number of knockout days over fewer Cafet
 Barry switched production from v25 to v26 on 2026-10-18 with `npx convex run world:setActiveContentVersion '{"contentVersion":"v26"}' --prod`, which answered `{"from":"v25","to":"v26","heroesMoved":0}`: no rung was inserted, so no pointer moved. Heroes asleep on a full bag wake on their next adventure.
 
 At tick 1383 (18:45 UTC, 2026-10-18), the first checked run on v26: completed, no hero quarantined, no open incident, no hero asleep, and 11 of 36 active heroes holding a find and adventuring. Under v25 those would have been the heroes asleep on a full bag.
+
+## Readout, around 22 October
+
+Compare with the baseline above (36 heroes, 15 who never opened the companion, 11 holding a find) and the first-day review of 14 October (20 heroes, 11 who had not acted in the companion). Two read-only commands:
+
+```sh
+npx convex run admin:engagement --prod
+npx convex run --prod --inline-query 'const heroes = (await ctx.db.query("heroes").take(1000)).filter((h) => h.activationState === "active"); const levels = {}; for (const h of heroes) levels[h.level] = (levels[h.level] ?? 0) + 1; return { active: heroes.length, sleeping: heroes.filter((h) => h.status === "sleeping").length, holdingAFind: heroes.filter((h) => h.heldItemId !== undefined).length, levels }'
+```
+
+What to read: whether `companionVisits.never` falls as a share of active heroes (the bag-full alert and device notice bringing passive players back once); whether held finds get sorted (`holdingAFind` against the number with a recent visit); and whether levels keep climbing for heroes that would have slept (most should pass level 4 within a week of installing, against level 3 at day 30 for an unattended hero under v25).
