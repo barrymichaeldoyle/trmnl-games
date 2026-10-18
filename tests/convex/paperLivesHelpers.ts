@@ -4,6 +4,9 @@ import { starterLife, type LifeState } from '@trmnl-games/paper-lives/sim'
 import { vi } from 'vitest'
 import { internal } from '@trmnl-games/backend/api'
 import type { T } from './helpers'
+import { PAPER_LIVES_RUNTIME } from '../../apps/backend/convex/paperLives/runtime'
+import { readEngineWorld } from '../../apps/backend/convex/lib/engine/world'
+import { typedTables } from '../../apps/backend/convex/lib/engine/runtime'
 
 let counter = 0
 
@@ -35,6 +38,7 @@ export async function seedLife(t: T, life: Partial<LifeState> = {}, alias = `Lif
 }
 
 export async function runPaperLivesTick(t: T) {
+  await ensureSeededWorld(t)
   const runId = await t.mutation(internal.paperLives.tick.startTick, {})
   await t.finishAllScheduledFunctions(vi.runAllTimers)
   return runId
@@ -47,3 +51,24 @@ export async function nextPaperLivesTick(t: T) {
 }
 
 export const lifeOf = async (t: T, id: Id<'lives'>) => (await t.run(async (ctx) => await ctx.db.get(id)))!
+
+/**
+ * The world as the first tick would create it, but with a fixed seed: the real one comes from Math.random, so a test
+ * that lives many years would play out differently on every run and could fail now and then.
+ */
+async function ensureSeededWorld(t: T) {
+  await t.run(async (ctx) => {
+    if (await readEngineWorld(ctx, PAPER_LIVES_RUNTIME)) return
+    await ctx.db.insert(typedTables(PAPER_LIVES_RUNTIME).world, {
+      key: 'world',
+      currentTick: 0,
+      activeContentVersion: PAPER_LIVES_RUNTIME.initialContentVersion,
+      activeSimulationVersion: PAPER_LIVES_RUNTIME.simulationVersion,
+      worldSeed: '5eed5eed5eed5eed5eed5eed5eed5eed',
+      ticksPaused: false,
+      maintenanceMode: false,
+      createdAt: Date.now(),
+      schemaVersion: 1,
+    })
+  })
+}

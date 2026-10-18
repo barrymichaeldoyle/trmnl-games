@@ -20,10 +20,7 @@ describe('Paper Lives intents (D159, L2)', () => {
     vi.setSystemTime(Date.UTC(2026, 10, 2, 6, 10, 3))
     t = convexTest(schema, modules)
   })
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.restoreAllMocks()
-  })
+  afterEach(() => vi.useRealTimers())
 
   const as = (alias: string) => t.withIdentity({ issuer: 'issuer', subject: alias })
 
@@ -74,9 +71,6 @@ describe('Paper Lives intents (D159, L2)', () => {
   })
 
   it('begins the next life as a child with the inheritance, or as a stranger, in place', async () => {
-    // The world seed comes from Math.random, and the last thirty-odd years differ with it: some runs spend the whole
-    // fortune and leave a will of 0. Pinned, the run is the same every time and the will leaves gold.
-    vi.spyOn(Math, 'random').mockReturnValue(0.42)
     const lifeId = await seedLife(
       t,
       {
