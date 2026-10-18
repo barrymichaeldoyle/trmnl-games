@@ -51,3 +51,5 @@ What to read: whether `companionVisits.never` falls as a share of active heroes 
 
 `pnpm balance --heroes 150 --days 30 --content v27 --json docs/evidence/balance-v27-stance-choice-30-days.json`. The visiting player picks its cohort's stance (Balanced unless `--stance`) once stances open. Level 8 and 12 days, final levels and Cafeteria knockout days match v26 for every cohort (three-day 7.2%, weekly 4.2%); gold at day 30 moves by up to 7% (the weekly bags-first cohort) as the extra 20-gold goal shifts purchases. Rungs reached rise from 24 to 25 for visiting cohorts.
 
+
+Barry switched production from v26 to v27 on 2026-10-18; the switch answered `{"from":"v26","to":"v27","heroesMoved":0}`, since no hero had reached the raid goal.
