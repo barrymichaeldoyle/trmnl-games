@@ -70,7 +70,7 @@ export const dcShellMessages = defineMessages({
   },
   es: {
     title: 'App complementaria',
-    nav: { hero: 'Héroe', bag: 'Bolsa', log: 'Diario', ranks: 'Ranking', more: 'Más' },
+    nav: { hero: 'Héroe', bag: 'Bolsa', log: 'Diario', ranks: 'Tabla', more: 'Más' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} huecos ocupados`,
     rewardReady: ', hay una recompensa de objetivo lista para recoger',
@@ -92,7 +92,7 @@ export const dcShellMessages = defineMessages({
   },
   it: {
     title: 'App di supporto',
-    nav: { hero: 'Eroe', bag: 'Borsa', log: 'Diario', ranks: 'Classifica', more: 'Altro' },
+    nav: { hero: 'Eroe', bag: 'Borsa', log: 'Diario', ranks: 'Podio', more: 'Altro' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} posti occupati`,
     rewardReady: ', un premio dell’obiettivo è pronto da ritirare',
@@ -114,7 +114,7 @@ export const dcShellMessages = defineMessages({
   },
   pt: {
     title: 'App complementar',
-    nav: { hero: 'Herói', bag: 'Bolsa', log: 'Diário', ranks: 'Ranking', more: 'Mais' },
+    nav: { hero: 'Herói', bag: 'Bolsa', log: 'Diário', ranks: 'Placar', more: 'Mais' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} espaços ocupados`,
     rewardReady: ', uma recompensa de objetivo está pronta para resgatar',
@@ -136,7 +136,7 @@ export const dcShellMessages = defineMessages({
   },
   pl: {
     title: 'Aplikacja towarzysząca',
-    nav: { hero: 'Bohater', bag: 'Torba', log: 'Dziennik', ranks: 'Ranking', more: 'Więcej' },
+    nav: { hero: 'Bohater', bag: 'Torba', log: 'Wpisy', ranks: 'Tabela', more: 'Więcej' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, zajęte miejsca: ${n}`,
     rewardReady: ', nagroda za cel czeka na odebranie',
@@ -158,7 +158,7 @@ export const dcShellMessages = defineMessages({
   },
   nl: {
     title: 'Begeleidende app',
-    nav: { hero: 'Held', bag: 'Tas', log: 'Logboek', ranks: 'Ranglijst', more: 'Meer' },
+    nav: { hero: 'Held', bag: 'Tas', log: 'Logboek', ranks: 'Stand', more: 'Meer' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} plekken bezet`,
     rewardReady: ', er ligt een doelbeloning klaar',

@@ -31,7 +31,7 @@ const floors = catalog.biomes.map((biome) => {
   if (!uri) throw new Error(`No painted scene for ${biome.id}`)
   writeFileSync(join(outDir, `${biome.id}.png`), Buffer.from(uri.split(',')[1]!, 'base64'))
   const name = (id: string) => catalog.monsters.find((monster) => monster.id === id)?.name ?? id
-  // D169, D192: each floor in every other language too, with the picture's description built with the names' articles.
+  // D169, D193: each floor in every other language too, with the picture's description built with the names' articles.
   const phrase = (dictionary: typeof fr | typeof de, english: string) => ({ head: dictionary.nouns[english]![0], gender: dictionary.nouns[english]![1] })
   const describe: Record<Exclude<Locale, 'en'>, (t: ContentTranslator, monster: string, floor: string) => string> = {
     fr: () => `Un héros affronte ${renderPhrase('fr', phrase(fr, name(featured)), 'un', false)} dans ${renderPhrase('fr', phrase(fr, biome.name), 'le', false)}`,

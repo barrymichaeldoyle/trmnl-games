@@ -2,7 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import type { Locale } from '@trmnl-games/platform'
 
 /**
- * D169, D192: the backend's player-facing messages (appError, server functions) in every language, keyed by the English
+ * D169, D193: the backend's player-facing messages (appError, server functions) in every language, keyed by the English
  * text the server sends, like the game content. `{name}` slots match any text; slots named for game things (item,
  * biome, tier, potions, affix) translate through the content dictionary. Unknown messages stay English.
  */

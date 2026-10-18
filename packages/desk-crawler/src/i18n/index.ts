@@ -31,7 +31,7 @@ export interface ContentDictionary<A> {
 }
 export type FrDictionary = ContentDictionary<FrAdjective>
 export type DeDictionary = ContentDictionary<DeAdjective>
-/** D192: Spanish, Italian and Portuguese adjectives as [masculine, feminine]; Dutch as [base, inflected]; Polish by gender. */
+/** D193: Spanish, Italian and Portuguese adjectives as [masculine, feminine]; Dutch as [base, inflected]; Polish by gender. */
 export type EsDictionary = ContentDictionary<RomanceAdjective>
 export type ItDictionary = ContentDictionary<RomanceAdjective>
 export type PtDictionary = ContentDictionary<RomanceAdjective>

@@ -1,5 +1,5 @@
 /**
- * D169, D192: the languages TRMNL Games speaks. English is the source; every other locale is a full translation, and a
+ * D169, D193: the languages TRMNL Games speaks. English is the source; every other locale is a full translation, and a
  * missing preference falls back to English.
  */
 export const LOCALES = ['en', 'fr', 'de', 'es', 'it', 'pt', 'pl', 'nl'] as const

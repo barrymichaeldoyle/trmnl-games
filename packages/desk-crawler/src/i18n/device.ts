@@ -347,7 +347,8 @@ const es: DeviceWords = {
   resting: (area) => `Descansa ${area}`,
   arrivalPending: 'Llegada inminente',
   travelling: (area) => `De camino ${area}`,
-  toArriving: (area) => `Rumbo ${area}, llega a las`,
+  // The area comes in its "into" form ("a la [[Sala]]", "al [[Archivo]]"); after "Hacia" it takes the plain article.
+  toArriving: (area) => `Hacia ${area.replace(/^al /, 'el ').replace(/^a /, '')}, llegada`,
   revivalPending: 'Vuelta inminente',
   knockedOutBack: (duration) => `K.O. Vuelve en unos ${duration}`,
   knockedOutBackAt: 'K.O., vuelve a las',
@@ -381,7 +382,7 @@ const es: DeviceWords = {
   waitingFirst: 'Esperando la primera aventura',
   rankingSoon: 'Clasificación en menos de una hora',
   cohort: (key) => `Niveles ${key.replace('-', '–').replace('+', ' y más')}`,
-  nightRecap: 'Resumen de la noche',
+  nightRecap: 'Resumen nocturno',
   dayRecap: 'Resumen del día',
   partial: 'parcial',
   recap: {
@@ -411,7 +412,7 @@ const es: DeviceWords = {
     this_week: 'Esta semana', levels: 'Niveles ', lv: 'Nv ', not_ranked_paused: 'Sin clasificar en pausa', ranking_soon: 'Clasificación en menos de una hora', your_bag: 'Tu bolsa',
     bag_full: 'Bolsa llena', bag_paused: 'Libera un hueco en tu bolsa para seguir con la aventura.', bag_slots: 'huecos', bag_holding: 'Guardando', first_soon: 'La primera aventura empieza pronto.', first_15: 'La primera aventura empieza en menos de 15 minutos.',
     first_15_short: 'Primera aventura en menos de 15 minutos', scan_phone: 'Escanea con el móvil para abrir la app.', scan_phone_short: 'Escanea con el móvil.',
-    scan_manage: 'Escanea para abrir la app: gestiona el equipo y elige dónde explorar.', goal: 'Objetivo: ', goal_claim: '¡Objetivo cumplido! Cobra la recompensa en la app.', todo_today: 'Tareas de hoy', leaves: 'se va a las', keepsake: 'Código', keepsake_word: ' de recuerdo',
+    scan_manage: 'Escanea para abrir la app: gestiona el equipo y elige dónde explorar.', goal: 'Objetivo: ', goal_claim: '¡Objetivo cumplido! Cobra la recompensa en la app.', todo_today: 'Tareas de hoy', leaves: 'se va a las', keepsake: 'Recuerdo', keepsake_word: ':',
   },
 }
 
@@ -454,8 +455,8 @@ const it: DeviceWords = {
   waitingFirst: 'In attesa della prima avventura',
   rankingSoon: 'Classifica entro un’ora',
   cohort: (key) => `Livelli ${key.replace('-', '–').replace('+', ' e oltre')}`,
-  nightRecap: 'Riepilogo della notte',
-  dayRecap: 'Riepilogo del giorno',
+  nightRecap: 'Riepilogo notte',
+  dayRecap: 'Riepilogo giorno',
   partial: 'parziale',
   recap: {
     levels: (c) => `+${n(c, 'livello', 'livelli')}`,
@@ -484,7 +485,7 @@ const it: DeviceWords = {
     this_week: 'Questa settimana', levels: 'Livelli ', lv: 'Liv ', not_ranked_paused: 'Non in classifica durante la pausa', ranking_soon: 'Classifica entro un’ora', your_bag: 'La tua borsa',
     bag_full: 'Borsa piena', bag_paused: 'Libera un posto nella borsa per continuare l’avventura.', bag_slots: 'posti', bag_holding: 'In attesa', first_soon: 'La prima avventura inizia presto.', first_15: 'La prima avventura inizia entro 15 minuti.',
     first_15_short: 'Prima avventura entro 15 minuti', scan_phone: 'Scansiona con il telefono per aprire l’app.', scan_phone_short: 'Scansiona con il telefono.',
-    scan_manage: 'Scansiona per aprire l’app: gestisci l’equipaggiamento e scegli dove esplorare.', goal: 'Obiettivo: ', goal_claim: 'Obiettivo raggiunto! Ritira il premio nell’app.', todo_today: 'Da fare oggi', leaves: 'se ne va alle', keepsake: 'Codice', keepsake_word: ' ricordino',
+    scan_manage: 'Scansiona per aprire l’app: gestisci l’equipaggiamento e scegli dove esplorare.', goal: 'Obiettivo: ', goal_claim: 'Obiettivo raggiunto! Ritira il premio nell’app.', todo_today: 'Da fare oggi', leaves: 'se ne va alle', keepsake: 'Ricordino', keepsake_word: ':',
   },
 }
 
@@ -557,7 +558,7 @@ const pt: DeviceWords = {
     this_week: 'Esta semana', levels: 'Níveis ', lv: 'Nv ', not_ranked_paused: 'Fora do ranking na pausa', ranking_soon: 'Ranking em até uma hora', your_bag: 'Sua bolsa',
     bag_full: 'Bolsa cheia', bag_paused: 'Libere um espaço na bolsa para continuar a aventura.', bag_slots: 'espaços', bag_holding: 'Guardando', first_soon: 'A primeira aventura começa em breve.', first_15: 'A primeira aventura começa em até 15 minutos.',
     first_15_short: 'Primeira aventura em até 15 minutos', scan_phone: 'Escaneie com o celular para abrir o app.', scan_phone_short: 'Escaneie com o celular.',
-    scan_manage: 'Escaneie para abrir o app: cuide do equipamento e escolha onde explorar.', goal: 'Objetivo: ', goal_claim: 'Objetivo alcançado! Resgate a recompensa no app.', todo_today: 'Tarefas de hoje', leaves: 'vai embora às', keepsake: 'Código', keepsake_word: ' de lembrancinha',
+    scan_manage: 'Escaneie para abrir o app: cuide do equipamento e escolha onde explorar.', goal: 'Objetivo: ', goal_claim: 'Objetivo alcançado! Resgate a recompensa no app.', todo_today: 'Tarefas de hoje', leaves: 'vai embora às', keepsake: 'Lembrancinha', keepsake_word: ':',
   },
 }
 
@@ -600,8 +601,8 @@ const pl: DeviceWords = {
   waitingFirst: 'Czekanie na pierwszą przygodę',
   rankingSoon: 'Ranking w ciągu godziny',
   cohort: (key) => `Poziomy ${key.replace('-', '–').replace('+', ' i wyżej')}`,
-  nightRecap: 'Podsumowanie nocy',
-  dayRecap: 'Podsumowanie dnia',
+  nightRecap: 'Noc w skrócie',
+  dayRecap: 'Dzień w skrócie',
   partial: 'częściowe',
   recap: {
     levels: (c) => `+${pln(c, 'poziom', 'poziomy', 'poziomów')}`,

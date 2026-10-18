@@ -82,6 +82,7 @@ export const nl: HelpPage = {
           <ul>
             <li>De Carrièrepagina onder Meer toont de {F.career.goals} doelen op volgorde, met de datum waarop je elk doel haalde. Een doel dat je al had gedaan toen de ladder kwam, telt als bereikt.</li>
             {F.unlocks !== undefined ? <li>Functies komen per niveau, of je nu langskomt of niet: de takenlijst op niveau {F.unlocks.todo}, houdingen op niveau {F.unlocks.stances}, kantoorbeslissingen op niveau {F.unlocks.choices}, {F.meetings?.level !== undefined ? `vergaderingen met collega’s op niveau ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `demonteren en de werkbank op niveau ${F.workbench.level}, ` : ''}de rondtrekkende koopman op niveau {F.unlocks.merchant} en bureauraids op niveau {F.unlocks.raids}. Je TRMNL zegt ‘Ontgrendeld’ als het zover is. Ook de verdiepingen gaan per niveau open: {FLOORS_LINE}.</li> : null}
+            <li>Als de houdingen opengaan, heeft je held er nog geen gekozen en speelt hij Gebalanceerd. Eén doel vraagt je er een te kiezen; elk van de drie telt, en je kunt hem later wijzigen.</li>
             <li>Een paar vroege doelen komen gegarandeerd op tijd: het eerste gevecht binnen een handvol avonturen, een stuk uitrusting binnen het eerste dozijn, en een eerste beslissing, koopman en elite binnen ongeveer een dag na hun niveau. De rest hangt van het toeval af.</li>
           </ul>
         </>

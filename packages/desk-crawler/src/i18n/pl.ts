@@ -1,6 +1,6 @@
 import type { PlDictionary } from './index'
 
-/** D192: Desk Crawler's content in Polish, keyed by the English text (see ./index). Names stay in the nominative; templates are written around them. */
+/** D193: Desk Crawler's content in Polish, keyed by the English text (see ./index). Names stay in the nominative; templates are written around them. */
 export const pl: PlDictionary = {
   nouns: {
     "Paper Imp": ["Papierowy chochlik", "m"],
@@ -618,6 +618,8 @@ export const pl: PlDictionary = {
     "The Parking Garage opens at level 16.": "Parking podziemny otwiera się na poziomie 16.",
     "Reach level 7": "Osiągnij poziom 7",
     "Desk raids and stances open at level 7.": "Napady na biurka i postawy otwierają się na poziomie 7.",
+    "Choose a stance": "Wybierz postawę",
+    "Cautious, Balanced or Bold: how hard your hero pushes before it rests. Pick one on the Hero page.": "Ostrożna, Zrównoważona czy Śmiała: jak daleko bohater się posuwa, zanim odpocznie. Wybierz ją na stronie Bohater.",
     "Switch to Bold": "Przełącz na Śmiałą",
     "Bold launches twice as many desk raids as Balanced. Set it on the Hero page and switch back any time after.": "Śmiała postawa urządza dwa razy więcej napadów na biurka niż Zrównoważona. Ustaw ją na stronie Bohater i wróć, kiedy chcesz.",
     "Warrior": "Wojownik",
@@ -1415,6 +1417,7 @@ export const pl: PlDictionary = {
     "Fitted {affix} to the {item}.": "Dodano {affix}. Przedmiot: {item}.",
     "Set off for the {biome}.": "Wyruszono. Cel: {biome}.",
     "Stance set to {stanceTo} from {stanceFrom}.": "Postawa: {stanceTo} (wcześniej: {stanceFrom}).",
+    "Stance set to {stanceTo}.": "Postawa: {stanceTo}.",
     "Swapped a task: {task}.": "Wymieniono zadanie: {task}.",
     "Claimed {gold} gold for a goal: {goal}.": "Odebrano złoto za cel: {goal}.",
     "Walked away from the elite {monster}.": "Wycofanie się z walki. Przeciwnik: {monster} (elita).",

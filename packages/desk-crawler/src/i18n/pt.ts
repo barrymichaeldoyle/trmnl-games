@@ -1,6 +1,6 @@
 import type { PtDictionary } from './index'
 
-/** D192: Desk Crawler's content in Brazilian Portuguese, keyed by the English text (see ./index). */
+/** D193: Desk Crawler's content in Brazilian Portuguese, keyed by the English text (see ./index). */
 export const pt: PtDictionary = {
   nouns: {
     "Paper Imp": ["Diabrete de papel", "m"],
@@ -618,6 +618,8 @@ export const pt: PtDictionary = {
     "The Parking Garage opens at level 16.": "O Estacionamento subterrâneo abre no nível 16.",
     "Reach level 7": "Chegue ao nível 7",
     "Desk raids and stances open at level 7.": "Os assaltos às mesas e as posturas abrem no nível 7.",
+    "Choose a stance": "Escolha uma postura",
+    "Cautious, Balanced or Bold: how hard your hero pushes before it rests. Pick one on the Hero page.": "Cauteloso, Equilibrado ou Ousado: até onde seu herói vai antes de descansar. Escolha uma na página Herói.",
     "Switch to Bold": "Mude para Ousado",
     "Bold launches twice as many desk raids as Balanced. Set it on the Hero page and switch back any time after.": "Ousado lança o dobro de assaltos às mesas que Equilibrado. Escolha na página Herói e volte quando quiser.",
     "Warrior": "Guerreiro",
@@ -1415,6 +1417,7 @@ export const pt: PtDictionary = {
     "Fitted {affix} to the {item}.": "Aplicou {affix} {no:item}.",
     "Set off for the {biome}.": "Partiu para {o:biome}.",
     "Stance set to {stanceTo} from {stanceFrom}.": "Postura: {stanceTo} (antes: {stanceFrom}).",
+    "Stance set to {stanceTo}.": "Postura: {stanceTo}.",
     "Swapped a task: {task}.": "Trocou uma tarefa: {task}.",
     "Claimed {gold} gold for a goal: {goal}.": "Resgatou ouro por um objetivo: {goal}.",
     "Walked away from the elite {monster}.": "Desistiu {do:monster} de elite.",

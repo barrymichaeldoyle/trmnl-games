@@ -1,6 +1,6 @@
 import type { NlDictionary } from './index'
 
-/** D192: Desk Crawler's content in Dutch, keyed by the English text (see ./index). */
+/** D193: Desk Crawler's content in Dutch, keyed by the English text (see ./index). */
 export const nl: NlDictionary = {
   nouns: {
     "Paper Imp": ["Papierduiveltje", "n"],
@@ -618,6 +618,8 @@ export const nl: NlDictionary = {
     "The Parking Garage opens at level 16.": "De Parkeergarage gaat open op niveau 16.",
     "Reach level 7": "Bereik niveau 7",
     "Desk raids and stances open at level 7.": "Bureau-overvallen en houdingen gaan open op niveau 7.",
+    "Choose a stance": "Kies een houding",
+    "Cautious, Balanced or Bold: how hard your hero pushes before it rests. Pick one on the Hero page.": "Voorzichtig, Gebalanceerd of Roekeloos: hoe ver je held doorgaat voor hij rust. Kies er een op de pagina Held.",
     "Switch to Bold": "Schakel over op Roekeloos",
     "Bold launches twice as many desk raids as Balanced. Set it on the Hero page and switch back any time after.": "Roekeloos doet twee keer zoveel bureau-overvallen als Gebalanceerd. Stel het in op de Held-pagina en schakel daarna terug wanneer je wilt.",
     "Warrior": "Krijger",
@@ -1415,6 +1417,7 @@ export const nl: NlDictionary = {
     "Fitted {affix} to the {item}.": "{affix} aangebracht op {de:item}.",
     "Set off for the {biome}.": "Vertrokken naar {de:biome}.",
     "Stance set to {stanceTo} from {stanceFrom}.": "Houding: {stanceTo} (was: {stanceFrom}).",
+    "Stance set to {stanceTo}.": "Houding: {stanceTo}.",
     "Swapped a task: {task}.": "Een taak gewisseld: {task}.",
     "Claimed {gold} gold for a goal: {goal}.": "Goud opgehaald voor een doel: {goal}.",
     "Walked away from the elite {monster}.": "Bij {de:monster|Elite-} weggelopen.",

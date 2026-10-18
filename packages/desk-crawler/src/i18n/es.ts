@@ -1,6 +1,6 @@
 import type { EsDictionary } from './index'
 
-/** D192: Desk Crawler's content in Spanish, keyed by the English text (see ./index). */
+/** D193: Desk Crawler's content in Spanish, keyed by the English text (see ./index). */
 export const es: EsDictionary = {
   nouns: {
     "Paper Imp": ["Diablillo de papel", "m"],
@@ -618,6 +618,8 @@ export const es: EsDictionary = {
     "The Parking Garage opens at level 16.": "El Aparcamiento subterráneo se abre en el nivel 16.",
     "Reach level 7": "Llega al nivel 7",
     "Desk raids and stances open at level 7.": "Los asaltos a escritorios y las posturas se abren en el nivel 7.",
+    "Choose a stance": "Elige una postura",
+    "Cautious, Balanced or Bold: how hard your hero pushes before it rests. Pick one on the Hero page.": "Prudente, Equilibrado o Audaz: hasta dónde llega tu héroe antes de descansar. Elige una en la página Héroe.",
     "Switch to Bold": "Cambia a Audaz",
     "Bold launches twice as many desk raids as Balanced. Set it on the Hero page and switch back any time after.": "Audaz lanza el doble de asaltos a escritorios que Equilibrado. Ponlo en la página Héroe y vuelve atrás cuando quieras.",
     "Warrior": "Guerrero",
@@ -1415,6 +1417,7 @@ export const es: EsDictionary = {
     "Fitted {affix} to the {item}.": "Añadió {affix} {al:item}.",
     "Set off for the {biome}.": "Salió hacia {el:biome}.",
     "Stance set to {stanceTo} from {stanceFrom}.": "Postura: {stanceTo} (antes: {stanceFrom}).",
+    "Stance set to {stanceTo}.": "Postura: {stanceTo}.",
     "Swapped a task: {task}.": "Tarea cambiada: {task}.",
     "Claimed {gold} gold for a goal: {goal}.": "Cobró oro por un objetivo: {goal}.",
     "Walked away from the elite {monster}.": "Dejó en paz {al:monster} de élite.",

@@ -4,7 +4,7 @@ import { INTL_TAG, type Locale } from '@trmnl-games/platform'
  * Add an entry in the same commit as the change it describes, in every language. No decision numbers or internal names. A later change on
  * the same day goes first in that day's list, so each change keeps its key (see `changeKeys`).
  */
-/** One change in English and every other language (D169, D192): an entry without them fails the typecheck. */
+/** One change in English and every other language (D169, D193): an entry without them fails the typecheck. */
 export interface Change {
   readonly title: string
   readonly body: string
@@ -28,6 +28,22 @@ export const changeIn = (change: Change, locale: Locale): { title: string; body:
 
 export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-19',
+    changes: [
+      {
+        title: 'Desk Crawler speaks five more languages',
+        body: 'The site, the companion and your TRMNL screen now come in Spanish, Italian, Brazilian Portuguese, Polish and Dutch, as well as English, French and German. Pick one at the bottom of any page or under Account; your TRMNL follows your TRMNL account’s language, or the one you pick. Your hero, gear and history carry over, and older stories are translated too.',
+        fr: { title: 'Desk Crawler parle cinq langues de plus', body: 'Le site, le compagnon et votre écran TRMNL existent maintenant en espagnol, italien, portugais du Brésil, polonais et néerlandais, en plus de l’anglais, du français et de l’allemand. Choisissez-en une en bas de n’importe quelle page ou dans Compte ; votre TRMNL suit la langue de votre compte TRMNL, ou celle que vous choisissez. Votre héros, votre équipement et votre historique sont conservés, et les anciennes histoires sont traduites aussi.' },
+        de: { title: 'Desk Crawler spricht fünf weitere Sprachen', body: 'Die Website, die Begleit-App und dein TRMNL-Bildschirm gibt es jetzt auch auf Spanisch, Italienisch, brasilianischem Portugiesisch, Polnisch und Niederländisch, neben Englisch, Französisch und Deutsch. Wähle eine unten auf jeder Seite oder unter Konto; dein TRMNL folgt der Sprache deines TRMNL-Kontos oder der, die du wählst. Held, Ausrüstung und Verlauf bleiben erhalten, und ältere Geschichten werden ebenfalls übersetzt.' },
+        es: { title: 'Desk Crawler habla cinco idiomas más', body: 'El sitio, la app y tu pantalla TRMNL vienen ahora en español, italiano, portugués de Brasil, polaco y neerlandés, además de inglés, francés y alemán. Elige uno al pie de cualquier página o en Cuenta; tu TRMNL sigue el idioma de tu cuenta de TRMNL, o el que elijas. Tu héroe, tu equipo y tu historial se conservan, y las historias antiguas también se traducen.' },
+        it: { title: 'Desk Crawler parla altre cinque lingue', body: 'Il sito, l’app e lo schermo del tuo TRMNL ora sono anche in spagnolo, italiano, portoghese brasiliano, polacco e olandese, oltre che in inglese, francese e tedesco. Scegline una in fondo a ogni pagina o in Account; il tuo TRMNL segue la lingua del tuo account TRMNL, o quella che scegli. Eroe, equipaggiamento e cronologia restano, e anche le storie più vecchie vengono tradotte.' },
+        pt: { title: 'O Desk Crawler fala mais cinco idiomas', body: 'O site, o app e a tela do seu TRMNL agora também vêm em espanhol, italiano, português do Brasil, polonês e holandês, além de inglês, francês e alemão. Escolha um no rodapé de qualquer página ou em Conta; seu TRMNL segue o idioma da sua conta TRMNL, ou o que você escolher. Seu herói, equipamento e histórico continuam, e as histórias antigas também são traduzidas.' },
+        pl: { title: 'Desk Crawler mówi w pięciu kolejnych językach', body: 'Strona, aplikacja i ekran twojego TRMNL są teraz dostępne także po hiszpańsku, włosku, portugalsku (Brazylia), polsku i niderlandzku, obok angielskiego, francuskiego i niemieckiego. Wybierz język na dole dowolnej strony albo w zakładce Konto; twój TRMNL podąża za językiem konta TRMNL albo za tym, który wybierzesz. Bohater, sprzęt i historia zostają, a starsze historie też są tłumaczone.' },
+        nl: { title: 'Desk Crawler spreekt vijf talen meer', body: 'De site, de app en je TRMNL-scherm zijn er nu ook in het Spaans, Italiaans, Braziliaans Portugees, Pools en Nederlands, naast Engels, Frans en Duits. Kies een taal onderaan elke pagina of onder Account; je TRMNL volgt de taal van je TRMNL-account, of de taal die je kiest. Je held, uitrusting en geschiedenis blijven, en oudere verhalen worden ook vertaald.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-18',
     changes: [
       {
@@ -35,6 +51,11 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
         body: 'When stances open at level 7, your hero now starts with none chosen and plays Balanced until you pick. A new goal asks you to choose one, and any of the three counts, Balanced included. It takes the place of the old goal that asked for Bold.',
         fr: { title: 'Choisissez votre posture', body: 'Quand les postures s’ouvrent au niveau 7, votre héros commence sans posture et joue Équilibré jusqu’à votre choix. Un nouvel objectif vous demande d’en choisir une, et n’importe laquelle des trois compte, Équilibré compris. Il remplace l’ancien objectif qui demandait Audacieux.' },
         de: { title: 'Wähle deine Haltung selbst', body: 'Wenn die Haltungen auf Stufe 7 freigeschaltet werden, hat dein Held zunächst keine und spielt Ausgewogen, bis du wählst. Ein neues Ziel bittet dich, eine zu wählen, und jede der drei zählt, auch Ausgewogen. Es ersetzt das alte Ziel, das Draufgängerisch verlangte.' },
+        es: { title: 'Elige tu propia postura', body: 'Cuando las posturas se abren en el nivel 7, tu héroe empieza sin ninguna elegida y juega Equilibrado hasta que eliges. Un objetivo nuevo te pide elegir una, y cualquiera de las tres cuenta, Equilibrado incluido. Sustituye al antiguo objetivo que pedía Audaz.' },
+        it: { title: 'Scegli tu la tattica', body: 'Quando le tattiche si aprono al livello 7, il tuo eroe parte senza averne scelta una e gioca Equilibrato finché non scegli. Un nuovo obiettivo ti chiede di sceglierne una, e vale una qualsiasi delle tre, Equilibrato compreso. Prende il posto del vecchio obiettivo che chiedeva Audace.' },
+        pt: { title: 'Escolha sua própria postura', body: 'Quando as posturas abrem no nível 7, seu herói começa sem nenhuma escolhida e joga Equilibrado até você escolher. Um objetivo novo pede que você escolha uma, e qualquer uma das três vale, inclusive Equilibrado. Ele substitui o antigo objetivo que pedia Ousado.' },
+        pl: { title: 'Sam wybierz postawę', body: 'Gdy na poziomie 7 otwierają się postawy, bohater zaczyna bez wybranej postawy i gra Zrównoważoną, dopóki nie wybierzesz. Nowy cel prosi o wybór jednej i liczy się każda z trzech, także Zrównoważona. Zastępuje dawny cel, który wymagał Śmiałej.' },
+        nl: { title: 'Kies zelf je houding', body: 'Als de houdingen op niveau 7 opengaan, begint je held zonder gekozen houding en speelt hij Gebalanceerd tot jij kiest. Een nieuw doel vraagt je er een te kiezen, en elk van de drie telt, ook Gebalanceerd. Het vervangt het oude doel dat om Roekeloos vroeg.' },
       },
       {
         title: 'A tidier companion',

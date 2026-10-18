@@ -217,7 +217,7 @@ const pt = contentTranslator('pt')
 const pl = contentTranslator('pl')
 const nl = contentTranslator('nl')
 
-/** D169, D192: Desk Crawler's two alerts in the owner's language (lib/trmnlUser.ts `deviceLocale`). */
+/** D169, D193: Desk Crawler's two alerts in the owner's language (lib/trmnlUser.ts `deviceLocale`). */
 const DESK_ALERTS: Readonly<Record<Locale, { asleep: (hero: string) => { title: string; body: string }; merchant: (hero: string, offer: string | null) => { title: string; body: string } }>> = {
   en: {
     asleep: (hero) => ({ title: `${hero}'s bag is full`, body: `${hero} is holding a new find for you. Make room in the bag so the next ones are not left behind.` }),

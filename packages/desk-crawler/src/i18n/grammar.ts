@@ -1,5 +1,5 @@
 /**
- * D169, D192: just enough grammar to put a translated name into a translated sentence. A noun phrase is a head noun
+ * D169, D193: just enough grammar to put a translated name into a translated sentence. A noun phrase is a head noun
  * with its gender and any adjectives; templates ask for it with an article form (`{un:monster}`, `{einen:item}`,
  * `{del:destination}`), and the phrase comes back with the right article, elision, contraction and adjective endings.
  * The name itself keeps the bold marks the English summary gave it; the article stays outside them.

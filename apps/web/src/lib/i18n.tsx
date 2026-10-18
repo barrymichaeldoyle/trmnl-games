@@ -60,7 +60,7 @@ export const formatNumber = (locale: Locale, value: number) => value.toLocaleStr
 /** A clock time in the reader's language, in their browser's zone. */
 export const formatTime = (locale: Locale, at: number | Date) => new Date(at).toLocaleTimeString(INTL_TAG[locale], { hour: '2-digit', minute: '2-digit' })
 
-/** D192: a Polish count's noun: 1 przedmiot, 2 to 4 (not 12 to 14) przedmioty, otherwise przedmiotów. */
+/** D193: a Polish count's noun: 1 przedmiot, 2 to 4 (not 12 to 14) przedmioty, otherwise przedmiotów. */
 export const plForm = (n: number, one: string, few: string, many: string) => (n === 1 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many)
 
 /** A count's noun from a catalog's forms: [one, other], or Polish [one, few, many]. */

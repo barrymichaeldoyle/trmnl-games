@@ -22,7 +22,7 @@ import { buildPayload as buildPaperLivesPayload } from '@trmnl-games/paper-lives
 import type { PreviewLayout } from '@trmnl-games/desk-crawler/templates/preview'
 import { bundle, requireBundle, root } from './bundle'
 
-/** Preview flag sets that together cover every fixture state, with and without a keepsake code, and in every other language (D169, D192). */
+/** Preview flag sets that together cover every fixture state, with and without a keepsake code, and in every other language (D169, D193). */
 const FIXTURE_SETS = [['--recap'], ['--recap', '--keepsakes'], ['--potion-finds'], ['--no-effect'], ['--marketing'], ['--recap', '--locale', 'fr'], ['--recap', '--keepsakes', '--locale', 'de'], ['--recap', '--locale', 'es'], ['--recap', '--keepsakes', '--locale', 'it'], ['--recap', '--locale', 'pt'], ['--recap', '--keepsakes', '--locale', 'pl'], ['--recap', '--locale', 'nl']]
 
 requireBundle()

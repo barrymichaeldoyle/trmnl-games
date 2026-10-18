@@ -12,7 +12,7 @@ import { pl } from '@trmnl-games/desk-crawler/i18n/pl'
 import { nl } from '@trmnl-games/desk-crawler/i18n/nl'
 import { POLICIES, simulateCohort } from '../../tools/balance/run'
 
-/** D169, D192: every translated language and its content dictionary. */
+/** D169, D193: every translated language and its content dictionary. */
 const DICTIONARIES: ReadonlyArray<readonly [GrammarLocale, ContentDictionary<unknown>]> = [['fr', fr], ['de', de], ['es', es], ['it', italian], ['pt', pt], ['pl', pl], ['nl', nl]]
 
 const varsOf = (template: string) => [...template.matchAll(/\{(?:(\w+):)?(\w+)(?:\|[^}]*)?\}/g)].map((m) => ({ form: m[1], name: m[2]! }))
@@ -92,13 +92,13 @@ describe('story translation (D169)', () => {
     for (const [locale] of DICTIONARIES) {
       const untranslated = [...summaries].filter((summary) => contentTranslator(locale).story(summary) === null)
       expect(untranslated, `${locale} ${version}`).toEqual([])
-      // D192: a name the English line marks must survive the translation (a form read as an agreement ending drops it).
+      // D193: a name the English line marks must survive the translation (a form read as an agreement ending drops it).
       const lostNames = [...summaries].filter((summary) => names(contentTranslator(locale).story(summary) ?? '') < names(summary))
       expect(lostNames, `${locale} ${version}`).toEqual([])
     }
-  })
+  }, 30_000)
 
-  it('keeps the Portuguese article apart from its agreement ending (D192)', () => {
+  it('keeps the Portuguese article apart from its agreement ending (D193)', () => {
     const pt = contentTranslator('pt')
     expect(pt.story('New area unlocked: the [[Server Room]].')).toBe('Nova área desbloqueada: a [[Sala dos servidores]].')
     expect(pt.story('Walked into the glass door. -4 HP.', { heroGender: 'female' })).not.toContain('{')

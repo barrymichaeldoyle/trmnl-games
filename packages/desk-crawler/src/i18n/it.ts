@@ -1,6 +1,6 @@
 import type { ItDictionary } from './index'
 
-/** D192: Desk Crawler's content in Italian, keyed by the English text (see ./index). */
+/** D193: Desk Crawler's content in Italian, keyed by the English text (see ./index). */
 export const it: ItDictionary = {
   nouns: {
     "Paper Imp": ["Diavoletto di carta", "m"],
@@ -618,6 +618,8 @@ export const it: ItDictionary = {
     "The Parking Garage opens at level 16.": "Il Parcheggio sotterraneo si apre al livello 16.",
     "Reach level 7": "Raggiungi il livello 7",
     "Desk raids and stances open at level 7.": "Le incursioni alle scrivanie e le tattiche si aprono al livello 7.",
+    "Choose a stance": "Scegli una tattica",
+    "Cautious, Balanced or Bold: how hard your hero pushes before it rests. Pick one on the Hero page.": "Prudente, Equilibrato o Audace: fin dove si spinge il tuo eroe prima di riposare. Scegline una nella pagina Eroe.",
     "Switch to Bold": "Passa ad Audace",
     "Bold launches twice as many desk raids as Balanced. Set it on the Hero page and switch back any time after.": "Audace lancia il doppio delle incursioni alle scrivanie rispetto a Equilibrato. Impostalo nella pagina Eroe e torna indietro quando vuoi.",
     "Warrior": "Guerriero",
@@ -1415,6 +1417,7 @@ export const it: ItDictionary = {
     "Fitted {affix} to the {item}.": "Ha applicato {affix} {al:item}.",
     "Set off for the {biome}.": "Partenza per {il:biome}.",
     "Stance set to {stanceTo} from {stanceFrom}.": "Tattica: {stanceTo} (prima: {stanceFrom}).",
+    "Stance set to {stanceTo}.": "Tattica: {stanceTo}.",
     "Swapped a task: {task}.": "Cosa da fare scambiata: {task}.",
     "Claimed {gold} gold for a goal: {goal}.": "Ha ritirato dell’oro per un obiettivo: {goal}.",
     "Walked away from the elite {monster}.": "Ha lasciato perdere {il:monster} d’élite.",

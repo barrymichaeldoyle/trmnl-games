@@ -5,7 +5,7 @@ import { agreesWithHero } from '@trmnl-games/desk-crawler/i18n'
 import type { PresentationOptions } from '@trmnl-games/desk-crawler/log'
 import { useLocale } from './i18n'
 
-/** D169, D192: how the reader's stories are told: their language, and the hero its participles agree with. */
+/** D169, D193: how the reader's stories are told: their language, and the hero its participles agree with. */
 export function useStoryOptions(): PresentationOptions {
   const locale = useLocale()
   const { data: hero } = useQuery({ ...convexQuery(api.heroes.mine, {}), enabled: agreesWithHero(locale) })

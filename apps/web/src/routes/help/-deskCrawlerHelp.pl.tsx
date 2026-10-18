@@ -87,6 +87,7 @@ export const pl: HelpPage = {
           <ul>
             <li>Strona Kariera w zakładce Więcej wymienia {F.career.goals} celów po kolei, z datą osiągnięcia każdego. Cel zrobiony już przed pojawieniem się drabiny liczy się jako osiągnięty.</li>
             {F.unlocks !== undefined ? <li>Funkcje przychodzą z poziomem, niezależnie od tego, czy tu zaglądasz: lista zadań na poziomie {F.unlocks.todo}, postawy na poziomie {F.unlocks.stances}, decyzje biurowe na poziomie {F.unlocks.choices}, {F.meetings?.level !== undefined ? `spotkania ze współpracownikami na poziomie ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `rozbiórka i warsztat na poziomie ${F.workbench.level}, ` : ''}wędrowny kupiec na poziomie {F.unlocks.merchant} i rajdy na biurka na poziomie {F.unlocks.raids}. TRMNL pokazuje wtedy „Odblokowano”. Piętra też otwierają się z poziomem: {FLOORS_LINE}.</li> : null}
+            <li>Gdy otwierają się postawy, bohater nie ma wybranej żadnej i gra Zrównoważoną. Jeden cel prosi o wybór postawy; liczy się każda z trzech, a później możesz ją zmienić.</li>
             <li>Kilka wczesnych celów ma gwarantowany czas: pierwsza walka w ciągu kilku przygód, element sprzętu w pierwszym tuzinie, a pierwsza decyzja, kupiec i elita w mniej więcej dobę od swojego poziomu. Cała reszta zależy od szczęścia.</li>
           </ul>
         </>
