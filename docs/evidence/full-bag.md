@@ -33,3 +33,5 @@ v16's rise is the denominator: the same number of knockout days over fewer Cafet
 ## Switch
 
 Barry switched production from v25 to v26 on 2026-10-18 with `npx convex run world:setActiveContentVersion '{"contentVersion":"v26"}' --prod`, which answered `{"from":"v25","to":"v26","heroesMoved":0}`: no rung was inserted, so no pointer moved. Heroes asleep on a full bag wake on their next adventure.
+
+At tick 1383 (18:45 UTC, 2026-10-18), the first checked run on v26: completed, no hero quarantined, no open incident, no hero asleep, and 11 of 36 active heroes holding a find and adventuring. Under v25 those would have been the heroes asleep on a full bag.
