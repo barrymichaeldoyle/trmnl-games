@@ -3,7 +3,8 @@
   "workspaces": {
     ".": {
       // Tool scripts run by hand with `pnpm tsx tools/...`.
-      "entry": ["tools/**/*.{ts,mjs}"],
+      // tools/review/capture-companion.js is pasted into the browser console.
+      "entry": ["tools/**/*.{ts,mjs}", "tools/review/capture-companion.js"],
       // tests/web/reconnection-handoff.test.ts mocks these by bare name, which Vitest resolves from the repo root.
       "ignoreDependencies": ["@tanstack/react-start", "@clerk/tanstack-react-start"]
     },
