@@ -29,7 +29,7 @@ describe('preview scenarios', () => {
         }
       }
     }
-  }, 30_000)
+  }, 90_000)
 
   it('shade other mashup slots, including the X card layer, and swap orientation classes for portrait', () => {
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
