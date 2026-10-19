@@ -211,7 +211,7 @@ function AnalyticsLink({ className = FOOTER_LINK }: { className?: string }) {
   return shown ? <li><button type="button" className={className} onClick={openAnalyticsPreferences}>{t.analyticsPreferences}</button></li> : null
 }
 
-export const SUPPORT_EMAIL = 'barry@barrymichaeldoyle.com'
+export { SUPPORT_EMAIL } from './support'
 /** Optional support for the games (D134): a plain link out, with nothing in play attached to it. */
 export const SPONSOR_URL = 'https://github.com/sponsors/barrymichaeldoyle'
 /** Desk Crawler's public marketplace listing (plugin 564): its Install button starts the TRMNL connect flow. */
