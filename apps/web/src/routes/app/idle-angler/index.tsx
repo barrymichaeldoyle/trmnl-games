@@ -15,9 +15,11 @@ import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
 import { LocalTime } from '../../../lib/localTime'
+import { seo } from '../../../lib/seo'
 
 /** The dock: the angler's scene, progress, the bait in use, the waters and the latest stories. The fly box lives in the logbook. */
 export const Route = createFileRoute('/app/idle-angler/')({
+  head: () => seo({ title: 'Dock · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {}), convexQuery(api.idleAngler.payload.preview, {})),
   component: DockPage,
 })
@@ -122,7 +124,7 @@ function DockPage() {
             recap.gotAway ? ['Got away', `${recap.gotAway}, too heavy for the ${angler.rod.name}`] : null,
           ]} />
           {nextRod && rodWouldLand > 0 ? (
-            <p className="mt-3 text-sm">The {nextRod.name} would have landed {rodWouldLand === recap.gotAway ? (rodWouldLand === 1 ? 'it' : 'all of them') : `${rodWouldLand} of them`}. <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{nextRod.price} coins in the shop</Link>.</p>
+            <p className="mt-3 text-sm">The {nextRod.name} would have landed {rodWouldLand === recap.gotAway ? (rodWouldLand === 1 ? 'it' : 'all of them') : `${rodWouldLand} of them`}. <Link to="/app/idle-angler/shop" className="inline-flex items-center gap-1 underline underline-offset-4">In the shop for <Coins n={nextRod.price} /></Link></p>
           ) : null}
         </Card>
       ) : null}

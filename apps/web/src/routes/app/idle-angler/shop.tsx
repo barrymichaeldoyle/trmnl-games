@@ -11,9 +11,11 @@ import { ConfirmSheet } from '../desk-crawler/-confirm'
 import { Coins, Price } from './-coins'
 import { FishList, WaterName, baitCatches } from './-fish'
 import { Rows } from './-rows'
+import { seo } from '../../../lib/seo'
 
 /** The tackle shop: the next rod and cooler, the passes on sale and bait tubs, each at a fixed price and confirmed before buying. */
 export const Route = createFileRoute('/app/idle-angler/shop')({
+  head: () => seo({ title: 'Tackle shop · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {}), convexQuery(api.idleAngler.anglers.logbook, {})),
   component: ShopPage,
 })

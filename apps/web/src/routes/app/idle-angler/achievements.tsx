@@ -4,9 +4,11 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { preload } from '../../../lib/preload'
 import { Card } from '../../../lib/ui'
+import { seo } from '../../../lib/seo'
 
 /** Idle Angler achievements: each family's highest tier, progress to the next and how many anglers hold it. */
 export const Route = createFileRoute('/app/idle-angler/achievements')({
+  head: () => seo({ title: 'Achievements · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.achievements.mine, {})),
   component: AchievementsPage,
 })

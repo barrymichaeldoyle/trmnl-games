@@ -13,6 +13,7 @@ import { Coins, Price } from './-coins'
 import { FishName, FishText } from './-fish'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { Rows } from './-rows'
+import { seo } from '../../../lib/seo'
 
 /**
  * The cooler: choose fish to sell, or sell them all after a confirmation. Nothing is ever sold automatically. The
@@ -20,6 +21,7 @@ import { Rows } from './-rows'
  * cannot fill is nothing to act on.
  */
 export const Route = createFileRoute('/app/idle-angler/cooler')({
+  head: () => seo({ title: 'Cooler · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {})),
   component: CoolerPage,
 })

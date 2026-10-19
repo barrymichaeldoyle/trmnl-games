@@ -14,12 +14,14 @@ import { FishIcon } from './-art'
 import { FishName } from './-fish'
 import { Coins, Price } from './-coins'
 import { Rows } from './-rows'
+import { seo } from '../../../lib/seo'
 
 /**
  * The trophy wall (D162, idle-angler-full.md "The trophy wall"): mounted fish on their pegs, the shelf of Open medals
  * and the rosettes, one per Open entered. Fish are mounted from the cooler; pegs are bought here.
  */
 export const Route = createFileRoute('/app/idle-angler/trophies')({
+  head: () => seo({ title: 'Trophy wall · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.full.trophies, {}), convexQuery(api.idleAngler.anglers.dock, {})),
   component: TrophiesPage,
 })

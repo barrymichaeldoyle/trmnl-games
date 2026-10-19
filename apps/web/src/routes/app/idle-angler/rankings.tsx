@@ -11,12 +11,14 @@ import { FishIcon } from './-art'
 import { Coins } from './-coins'
 import { FishName, WaterName } from './-fish'
 import { LocalTime } from '../../../lib/localTime'
+import { seo } from '../../../lib/seo'
 
 /**
  * Idle Angler rankings (2026-10-10): each water's heaviest fish, this week and of all time. No XP or levels: the fish
  * itself is the score. Opens on the angler's own water.
  */
 export const Route = createFileRoute('/app/idle-angler/rankings')({
+  head: () => seo({ title: 'Rankings · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.leaderboard.view, {}), convexQuery(api.idleAngler.full.opens, {})),
   component: RankingsPage,
 })

@@ -11,9 +11,11 @@ import { Gem, SpriteIcon } from '../desk-crawler/-bagSlots'
 import { FishIcon } from './-art'
 import { FlyBox } from './-flyBox'
 import { WaterName, FishName } from './-fish'
+import { seo } from '../../../lib/seo'
 
 /** The logbook: every species by water, then the fly box. A caught fish shows its count, best weight and where to find it; an unseen one is a silhouette with its bait (epics give nothing away). */
 export const Route = createFileRoute('/app/idle-angler/logbook')({
+  head: () => seo({ title: 'Logbook · Idle Angler', index: false }),
   // D180: a fly QR's six digits, added by the fly box and then dropped from the address.
   validateSearch: (search: Record<string, unknown>): { fly?: string } => (typeof search.fly === 'string' && /^\d{6}$/.test(search.fly) ? { fly: search.fly } : typeof search.fly === 'number' && Number.isInteger(search.fly) && search.fly >= 0 && search.fly < 1e6 ? { fly: String(search.fly).padStart(6, '0') } : {}),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.logbook, {}), convexQuery(api.idleAngler.flies.mine, {})),
