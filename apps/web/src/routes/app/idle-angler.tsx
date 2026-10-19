@@ -10,6 +10,8 @@ import { seo } from '../../lib/seo'
 import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
 import type { Dock } from '../../lib/idleAngler'
 import { useAlertOpened } from './desk-crawler/-alerts'
+import { useT } from '../../lib/i18n'
+import { iaCommon } from '../../i18n/ia'
 
 /**
  * Idle Angler companion shell (idle-angler.md "Companion", D115): the lifecycle gate (not-found for anyone who cannot
@@ -25,31 +27,32 @@ export const Route = createFileRoute('/app/idle-angler')({
 })
 
 const NAV = [
-  { to: '/app/idle-angler', label: 'Dock', glyph: 'hero' },
-  { to: '/app/idle-angler/cooler', label: 'Cooler', glyph: 'bag' },
-  { to: '/app/idle-angler/shop', label: 'Shop', glyph: 'coin' },
-  // Five tabs share a phone's width, so the last two take short names.
-  { to: '/app/idle-angler/logbook', label: 'Log', glyph: 'star' },
-  { to: '/app/idle-angler/settings', label: 'More', glyph: 'cog' },
-] as const satisfies ReadonlyArray<{ to: string; label: string; glyph: GlyphName }>
+  { to: '/app/idle-angler', key: 'dock', glyph: 'hero' },
+  { to: '/app/idle-angler/cooler', key: 'cooler', glyph: 'bag' },
+  { to: '/app/idle-angler/shop', key: 'shop', glyph: 'coin' },
+  // Five tabs share a phone's width, so each label stays about six characters in every language.
+  { to: '/app/idle-angler/logbook', key: 'log', glyph: 'star' },
+  { to: '/app/idle-angler/settings', key: 'more', glyph: 'cog' },
+] as const satisfies ReadonlyArray<{ to: string; key: string; glyph: GlyphName }>
 
 function Shell() {
   const { data, isPending } = useQuery(convexQuery(api.idleAngler.anglers.dock, {}))
   const dock = data as Dock | undefined
+  const t = useT(iaCommon)
   const listing = useGames()
   const status = listing?.games.find((game) => game.slug === 'idle-angler')?.status
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
   // A cooler or bait alert's tap lands here with ?alert=<kind>; counted once the page is ready.
   useAlertOpened(!isPending)
-  const banner = status && status !== 'live' ? <p className="mx-auto mt-3 w-full max-w-3xl px-4 text-sm font-semibold text-muted">{status === 'hidden' ? 'Hidden: only admins can see Idle Angler' : 'Preview: only admins can open Idle Angler'}</p> : null
-  if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label="Loading Idle Angler…" /></main>
-  if (dock?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title="Removing Idle Angler progress"><p>Your account and your other games stay. You can start again from TRMNL once removal finishes.</p></Card></main>
+  const banner = status && status !== 'live' ? <p className="mx-auto mt-3 w-full max-w-3xl px-4 text-sm font-semibold text-muted">{status === 'hidden' ? t.hidden : t.preview}</p> : null
+  if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label={t.loading} /></main>
+  if (dock?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title={t.deletingTitle}><p>{t.deletingBody}</p></Card></main>
   if (!dock?.angler) {
     return (
       <>{banner}<main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
-        <Card title="Start on TRMNL">
-          <p>Install the Idle Angler plugin from the TRMNL marketplace, connect it here, then save it in TRMNL. Your angler casts the first line within fifteen minutes.</p>
-          <Link to="/help/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">How Idle Angler works</Link>
+        <Card title={t.startTitle}>
+          <p>{t.startBody}</p>
+          <Link to="/help/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.howItWorks}</Link>
         </Card>
       </main></>
     )
@@ -57,9 +60,9 @@ function Shell() {
   if (dock.angler.activationState === 'pending_trmnl' && !settings) {
     return (
       <>{banner}<main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
-        <Card title="Save in TRMNL to start">
-          <p>Your angler is ready at the Millpond. Back in TRMNL, click <strong>Save</strong> on the Idle Angler plugin and the first cast follows.</p>
-          <Link to="/help/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Help with setup</Link>
+        <Card title={t.saveTitle}>
+          <p>{t.saveBefore}<strong>{t.saveWord}</strong>{t.saveAfter}</p>
+          <Link to="/help/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.setupHelp}</Link>
         </Card>
       </main></>
     )
@@ -93,9 +96,9 @@ function Shell() {
                     {dot ? <NotifyDot className="absolute -top-1 left-4 sm:hidden" /> : null}
                   </span>
                   <span className="flex items-center">
-                    {item.label}
-                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">, {count} fish</span></> : null}
-                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">, a goal reward is ready to claim</span></> : null}
+                    {t.nav[item.key]}
+                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">{t.fishCount(count)}</span></> : null}
+                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{t.rewardWaiting}</span></> : null}
                   </span>
                 </Link>
               </li>

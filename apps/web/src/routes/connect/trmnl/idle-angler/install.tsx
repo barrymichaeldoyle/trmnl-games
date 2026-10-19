@@ -13,6 +13,8 @@ import { Button, LoadingState } from '../../../../lib/ui'
 import { captureAnalytics, readAnalyticsConsent } from '../../../../lib/analytics'
 import { reportError } from '../../../../lib/errorReporting'
 import { NameField } from '../../../../lib/nameField'
+import { messagesFor, useT } from '../../../../lib/i18n'
+import { iaConnect } from '../../../../i18n/iaConnect'
 
 type Search = { code?: string; installation_callback_url?: string; invalid?: boolean }
 
@@ -36,8 +38,8 @@ export const Route = createFileRoute('/connect/trmnl/idle-angler/install')({
     await requireOpenGame(context, 'idle-angler')
     return await getPendingInstall({ data: { gameSlug: 'idle-angler' } })
   },
-  head: () => {
-    const head = seo({ title: 'Connect TRMNL', index: false })
+  head: ({ match: { context: { locale } } }) => {
+    const head = seo({ title: messagesFor(iaConnect, locale).connectTitle, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: InstallPage,
@@ -46,21 +48,22 @@ export const Route = createFileRoute('/connect/trmnl/idle-angler/install')({
 function InstallPage() {
   const { pending } = Route.useLoaderData()
   const { invalid } = Route.useSearch()
+  const t = useT(iaConnect)
   if (!pending) {
     return (
       <Page>
-        <h1 className="font-display text-3xl font-bold">Connect TRMNL</h1>
-        {invalid ? <p role="alert">That installation link was not valid.</p> : null}
-        <p>Start from the Idle Angler plugin in your TRMNL account and choose Install. TRMNL will bring you back here.</p>
-        <Link to="/help/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">Help with setup</Link>
+        <h1 className="font-display text-3xl font-bold">{t.connectTitle}</h1>
+        {invalid ? <p role="alert">{t.invalidInstall}</p> : null}
+        <p>{t.startFrom}</p>
+        <Link to="/help/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.setupHelp}</Link>
       </Page>
     )
   }
   return (
     <Page>
-      <h1 className="font-display text-3xl font-bold">Connect TRMNL to Idle Angler</h1>
+      <h1 className="font-display text-3xl font-bold">{t.connectToGame}</h1>
       <Show when="signed-out">
-        <p>Sign in or create your TRMNL Games account to continue.</p>
+        <p>{t.signInToContinue}</p>
         <SignIn routing="hash" forceRedirectUrl="/connect/trmnl/idle-angler/install" signUpForceRedirectUrl="/connect/trmnl/idle-angler/install" />
       </Show>
       <Show when="signed-in">
@@ -76,13 +79,14 @@ function ConnectForm() {
   const [error, setError] = useState<string | null>(null)
   const [alias, setAlias] = useState('')
   const inFlight = useRef(false)
-  if (me === undefined) return <LoadingState label="Loading your account…" />
+  const t = useT(iaConnect)
+  if (me === undefined) return <LoadingState label={t.loadingAccount} />
   const needsProfile = !me?.user
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (inFlight.current) return
-    if (!navigator.onLine) { setError('You are offline. Reconnect to continue setup.'); return }
+    if (!navigator.onLine) { setError(t.offline); return }
     inFlight.current = true
     setSubmitting(true)
     setError(null)
@@ -96,7 +100,7 @@ function ConnectForm() {
     } catch (caught) {
       captureAnalytics('installation failed', { game: 'idle-angler', error_code: 'NETWORK_OR_SERVER_ERROR' })
       reportError(caught, 'installation')
-      setError('We couldn’t finish connecting. Check your connection and try again.')
+      setError(t.networkError)
     } finally { inFlight.current = false; setSubmitting(false) }
   }
 
@@ -104,16 +108,16 @@ function ConnectForm() {
     <form onSubmit={onSubmit} data-analytics-private className="flex flex-col gap-4">
       {needsProfile ? (
         <>
-          <p className="border-y border-edge py-3 text-sm">This sign-in has no TRMNL Games account yet, so connecting creates one. If you already play another game, switch account and sign in the way you did before.</p>
-          <NameField label="Public name" note="Your angler's name on leaderboards and TRMNL screens. No contact details." rule={ALIAS_RULE} noun="public name" name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
+          <p className="border-y border-edge py-3 text-sm">{t.newAccount}</p>
+          <NameField label={t.publicName} note={t.publicNameNote} rule={ALIAS_RULE} noun={t.publicNameNoun} name="publicAlias" value={alias} onChange={setAlias} disabled={submitting} />
         </>
       ) : (
-        <p>Signed in as <strong>{me?.user?.publicAlias}</strong>. Your angler fishes under this name.</p>
+        <p>{t.signedInBefore}<strong>{me?.user?.publicAlias}</strong>{t.signedInAfter}</p>
       )}
       <SwitchAccount returnTo="/connect/trmnl/idle-angler/install" />
       {error ? <p role="alert" className="font-semibold text-hp-ink">{error}</p> : null}
-      <Button type="submit" pending={submitting} busyLabel="Connecting…">Connect this TRMNL installation</Button>
-      <p className="text-sm text-muted">Next, TRMNL asks you to save the plugin. Saving starts your angler fishing at the Millpond.</p>
+      <Button type="submit" pending={submitting} busyLabel={t.connecting}>{t.connect}</Button>
+      <p className="text-sm text-muted">{t.nextSave}</p>
     </form>
   )
 }

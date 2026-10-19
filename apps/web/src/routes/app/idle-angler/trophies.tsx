@@ -6,7 +6,7 @@ import { api } from '@trmnl-games/backend/api'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
-import { formatWeight, type Dock } from '../../../lib/idleAngler'
+import type { Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { LocalTime } from '../../../lib/localTime'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
@@ -15,6 +15,10 @@ import { FishName } from './-fish'
 import { Coins, Price } from './-coins'
 import { Rows } from './-rows'
 import { seo } from '../../../lib/seo'
+import { formatDate, useLocale, useT } from '../../../lib/i18n'
+import { iaLog } from '../../../i18n/iaLog'
+import { iaCommon } from '../../../i18n/ia'
+import { useAngler } from '../../../lib/idleAngler'
 
 /**
  * The trophy wall (D162, idle-angler-full.md "The trophy wall"): mounted fish on their pegs, the shelf of Open medals
@@ -29,8 +33,6 @@ export const Route = createFileRoute('/app/idle-angler/trophies')({
 type Trophy = { id: Id<'iaTrophies'>; speciesId: string | null; name: string | null; grams: number | null; water: string; at: number; peg: number | null; place: number | null; period: string | null }
 type Wall = { pegs: number; wall: Trophy[]; medals: Trophy[]; rosettes: number }
 
-const PLACE = ['', 'Gold', 'Silver', 'Bronze']
-const day = (date: Date) => date.toLocaleDateString([], { day: 'numeric', month: 'short' })
 
 function TrophiesPage() {
   const { data } = useQuery(convexQuery(api.idleAngler.full.trophies, {}))
@@ -41,13 +43,19 @@ function TrophiesPage() {
   const takeDown = useIntent(api.idleAngler.full.takeDownTrophy, { onFeedback: notify })
   const pegs = useIntent(api.idleAngler.full.buyMorePegs, { onFeedback: notify })
   const [asking, setAsking] = useState<Trophy | null>(null)
+  const t = useT(iaLog)
+  const common = useT(iaCommon)
+  const words = useAngler()
+  const locale = useLocale()
+  const formatWeight = words.weight
+  const day = (date: Date) => formatDate(locale, date, { day: 'numeric', month: 'short' })
   if (!wall || !dock?.angler) return null
   const full = dock.full
   if (full && !full.features.trophies) {
     return (
       <>
-        <h1 className="font-display text-3xl font-bold">Trophy wall</h1>
-        <Card><p>The wall opens once {full.comingUp?.feature === 'trophies' ? full.comingUp.species : 8} species are in your logbook.</p></Card>
+        <h1 className="font-display text-3xl font-bold">{t.trophyWall}</h1>
+        <Card><p>{t.wallOpens(full.comingUp?.feature === 'trophies' ? full.comingUp.species : 8)}</p></Card>
       </>
     )
   }
@@ -56,38 +64,38 @@ function TrophiesPage() {
   const rule = full?.trophies ?? null
   // Issue #6: a cooler fish already big enough is the first thing to say on an empty wall.
   const trophyInCooler = Object.values(full?.catchActions ?? {}).some((a) => a.mountCost !== null)
-  const cooler = <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">Cooler</Link>
+  const cooler = <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">{t.cooler}</Link>
   return (
     <>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="font-display text-3xl font-bold">Trophy wall</h1>
-        <span className="text-sm text-muted">{wall.wall.length} of {wall.pegs} pegs</span>
+        <h1 className="font-display text-3xl font-bold">{t.trophyWall}</h1>
+        <span className="text-sm text-muted">{t.pegsOf(wall.wall.length, wall.pegs)}</span>
       </div>
-      <Card title="Mounted fish">
-        {wall.wall.length === 0 ? <p>No fish mounted yet. {trophyInCooler ? <>A fish in your cooler is big enough: mount it from the {cooler}.</> : <>Nothing in your cooler is big enough yet{rule ? <>: a fish needs {rule.minPercent}% of its species' top weight. The Logbook shows each one's trophy weight</> : null}.</>}</p> : (
+      <Card title={t.mounted}>
+        {wall.wall.length === 0 ? <p>{t.noneMounted} {trophyInCooler ? <>{t.bigEnough} {cooler}.</> : <>{t.nothingBigEnough}{rule ? t.needsPercent(rule.minPercent) : null}.</>}</p> : (
           <ul className="grid gap-3 sm:grid-cols-2">
-            {wall.wall.map((t) => (
-              <li key={t.id} className="flex items-start gap-3 border border-rule p-3">
-                {t.speciesId ? <FishIcon id={t.speciesId} size="large" scale={2} /> : null}
+            {wall.wall.map((trophy) => (
+              <li key={trophy.id} className="flex items-start gap-3 border border-rule p-3">
+                {trophy.speciesId ? <FishIcon id={trophy.speciesId} size="large" scale={2} /> : null}
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold">{t.speciesId ? <FishName id={t.speciesId}>{t.name}</FishName> : null}</p>
-                  <p className="text-sm">{t.grams ? formatWeight(t.grams) : ''} · {t.water}</p>
-                  <p className="text-sm text-muted">Mounted <LocalTime at={t.at} format={day} /></p>
+                  <p className="font-semibold">{trophy.speciesId ? <FishName id={trophy.speciesId} /> : null}</p>
+                  <p className="text-sm">{trophy.grams ? formatWeight(trophy.grams) : ''} · {words.water(trophy.water)}</p>
+                  <p className="text-sm text-muted">{t.mountedOn} <LocalTime at={trophy.at} format={day} /></p>
                 </div>
-                <Button variant="secondary" disabled={takeDown.pending} onClick={() => setAsking(t)}>Take down</Button>
+                <Button variant="secondary" disabled={takeDown.pending} onClick={() => setAsking(trophy)}>{t.takeDown}</Button>
               </li>
             ))}
           </ul>
         )}
-        {empty > 0 && wall.wall.length > 0 ? <p className="mt-3 text-sm text-muted">{empty} {empty === 1 ? 'peg is' : 'pegs are'} free.</p> : null}
+        {empty > 0 && wall.wall.length > 0 ? <p className="mt-3 text-sm text-muted">{t.freePegs(empty)}</p> : null}
         {next ? (
           // D156/D167: the Buy button with what it adds and costs, or the price and what is still to go.
           <div className="mt-4">
             {dock.angler.gold >= next.price ? (
-              <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={pegs.pending} onClick={() => void pegs.run({}, `The wall now has ${next.pegs} pegs.`)}>
-                {wall.pegs}→{next.pegs} pegs <Coins n={next.price} />
+              <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={pegs.pending} onClick={() => void pegs.run({}, t.pegsNow(next.pegs))}>
+                {t.morePegs(wall.pegs, next.pegs)} <Coins n={next.price} />
               </Button>
-            ) : <><p className="mb-1 text-sm">{wall.pegs}→{next.pegs} pegs</p><Price price={next.price} gold={dock.angler.gold} /></>}
+            ) : <><p className="mb-1 text-sm">{t.morePegs(wall.pegs, next.pegs)}</p><Price price={next.price} gold={dock.angler.gold} /></>}
           </div>
         ) : null}
       </Card>
@@ -95,48 +103,48 @@ function TrophiesPage() {
       {rule ? (
         <Card>
           <details open={wall.wall.length === 0}>
-            <summary className="min-h-11 cursor-pointer py-2 font-semibold">How mounting works</summary>
+            <summary className="min-h-11 cursor-pointer py-2 font-semibold">{t.howMounting}</summary>
             <Rows rows={[
-              ['Which fish', `At least ${rule.minPercent}% of its species' top weight`],
-              ['Where', <>Mount it from the {cooler}</>],
-              ['Cost', <span className="inline-flex flex-wrap items-center gap-x-1">The fish's value + <Coins n={rule.fee} /></span>],
-              ['The fish', "Isn't sold and earns no coins"],
-              ['Pegs', next ? `${wall.pegs} now, more on this page` : `${wall.pegs}, the most the wall takes`],
-              ['Take down', 'Frees the peg, with no refund'],
+              [t.whichFish, t.whichFishValue(rule.minPercent)],
+              [t.where, <>{t.mountFrom} {cooler}</>],
+              [common.cost, <span className="inline-flex flex-wrap items-center gap-x-1">{t.fishValuePlus} <Coins n={rule.fee} /></span>],
+              [t.theFish, t.theFishValue],
+              [t.pegs, t.pegsValue(wall.pegs, Boolean(next))],
+              [t.takeDown, t.takeDownValue],
             ]} />
-            <Link to="/help/idle-angler" hash="the-trophy-wall" className="mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4">More in the help</Link>
+            <Link to="/help/idle-angler" hash="the-trophy-wall" className="mt-2 inline-flex min-h-11 items-center text-sm underline underline-offset-4">{t.moreInHelp}</Link>
           </details>
         </Card>
       ) : null}
-      <Card title="Shelf">
-        <Rows rows={[['Rosettes', `${wall.rosettes}, one for each Open you entered`], ['Medals', `${wall.medals.length}`]]} />
+      <Card title={t.shelf}>
+        <Rows rows={[[t.rosettes, t.rosettesValue(wall.rosettes)], [t.medals, `${wall.medals.length}`]]} />
         {wall.medals.length > 0 ? (
           <ul className="mt-3 flex flex-col">
             {wall.medals.map((m) => (
               <li key={m.id} className="flex items-center gap-3 border-b border-rule py-2 last:border-b-0">
-                <span className={`w-16 shrink-0 font-semibold ${m.place === 1 ? 'text-gold-ink' : 'text-ink'}`}>{PLACE[m.place ?? 0]}</span>
-                <span className="min-w-0 flex-1 text-sm">{m.speciesId ? <FishName id={m.speciesId}>{m.name}</FishName> : null} Open at {m.water}{m.grams ? `, ${formatWeight(m.grams)}` : ''}</span>
+                <span className={`w-16 shrink-0 font-semibold ${m.place === 1 ? 'text-gold-ink' : 'text-ink'}`}>{t.place[m.place ?? 0]}</span>
+                <span className="min-w-0 flex-1 text-sm">{m.speciesId ? <FishName id={m.speciesId} /> : null} · {t.openAt(words.water(m.water))}{m.grams ? `, ${formatWeight(m.grams)}` : ''}</span>
                 <span className="shrink-0 text-sm text-muted">{m.period ? m.period.slice(1) : ''}</span>
               </li>
             ))}
           </ul>
-        ) : <p className="mt-3 text-sm text-muted">The top three at each water's weekend Open take a medal and coins on Monday.</p>}
+        ) : <p className="mt-3 text-sm text-muted">{t.noMedals}</p>}
       </Card>
       <ConfirmSheet
         open={asking !== null}
-        title={asking?.name ? `Take the ${asking.name} down?` : 'Take it down?'}
-        confirmLabel="Take down"
-        busyLabel="Taking down…"
-        cancelLabel="Keep it"
+        title={t.takeDownTitle(asking?.speciesId ? words.species(asking.speciesId) : null)}
+        confirmLabel={t.takeDown}
+        busyLabel={t.takingDown}
+        cancelLabel={t.keepIt}
         pending={takeDown.pending}
         onClose={() => setAsking(null)}
         onConfirm={async () => {
           if (!asking) return
-          await takeDown.run({ trophyId: asking.id }, 'Taken down. The peg is free.')
+          await takeDown.run({ trophyId: asking.id }, t.takenDown)
           setAsking(null)
         }}
       >
-        <p>Frees the peg. The fish is gone and the mounting cost isn't refunded.</p>
+        <p>{t.takeDownBody}</p>
       </ConfirmSheet>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>

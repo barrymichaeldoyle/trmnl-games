@@ -1,4 +1,9 @@
 import type { Id } from '@trmnl-games/backend/data-model'
+import { anglerWords, type AnglerWords } from '@trmnl-games/idle-angler/i18n'
+import { useLocale } from './i18n'
+
+/** D200: Idle Angler's game words (fish, waters, baits, goals, stories) in the reader's language. */
+export const useAngler = (): AnglerWords => anglerWords(useLocale())
 
 /** The client's view of `idleAngler.anglers.dock` (idle-angler.md "Companion"). */
 export interface Dock {
@@ -70,12 +75,6 @@ export function readyOrders(dock: Dock): Array<{ order: FullDock['orders'][numbe
   })
 }
 
-export const formatWeight = (grams: number) => (grams >= 1000 ? `${(Math.round(grams / 100) / 10).toFixed(1)} kg` : `${grams} g`)
-
-export const BAND_LABEL: Record<string, string> = { dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' }
-export const WEATHER_LABEL: Record<string, string> = { clear: 'Clear', overcast: 'Overcast', rain: 'Rain', wind: 'Wind', fog: 'Fog' }
-export const BAIT_LABEL: Record<string, string> = { worms: 'Worms', bread: 'Bread', maggots: 'Maggots', spinner: 'Spinner', ragworm: 'Ragworm', strip: 'Mackerel strip', boilies: 'Boilies', deadbait: 'Deadbait' }
-export const SEASON_LABEL: Record<string, string> = { spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter' }
 
 /** The companion page a goal points at. */
 export const GOAL_PAGE: Record<string, '/app/idle-angler' | '/app/idle-angler/cooler' | '/app/idle-angler/shop' | '/app/idle-angler/trophies'> = { dock: '/app/idle-angler', cooler: '/app/idle-angler/cooler', shop: '/app/idle-angler/shop', log: '/app/idle-angler/trophies' }
