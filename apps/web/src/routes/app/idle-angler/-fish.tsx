@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from 'react'
 import { contentV2 } from '@trmnl-games/idle-angler/content'
+import { sortByRarity } from '@trmnl-games/idle-angler/content/order'
 import { RARITY_TONE } from '../../../lib/palette'
 
 const byId = new Map(contentV2.species.map((s) => [s.id, s]))
@@ -28,7 +29,7 @@ export function FishText({ text }: { text: string }) {
 
 /** Who takes a bait, split into the fish that take nothing else and the rest; only fish in `seen` are named. */
 export function baitCatches(bait: string, seen: ReadonlySet<string>) {
-  const takers = contentV2.species.filter((s) => s.baits.includes(bait as never))
+  const takers = sortByRarity(contentV2.species.filter((s) => s.baits.includes(bait as never)))
   const group = (rows: typeof takers) => ({ ids: rows.filter((s) => seen.has(s.id)).map((s) => s.id), unseen: rows.filter((s) => !seen.has(s.id)).length })
   return { only: group(takers.filter((s) => s.baits.length === 1)), also: group(takers.filter((s) => s.baits.length > 1)) }
 }

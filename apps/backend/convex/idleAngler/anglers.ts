@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
+import { sortByRarity } from '@trmnl-games/idle-angler/content/order'
 import { activeBait, baitOf, bitePermille, canFish, coolerOf, forecastBlock, nextTitle, rodOf, speciesLogged, titleFor, unlocked, waterOf, type AnglerState, type IdleAnglerCatalog, type WaterId } from '@trmnl-games/idle-angler/sim'
 import { buyAccess, buyBait, buyCooler, buyRod, nextAccess, nextCooler, nextRod, sell, setBait, travel, tubsThatFit, type ShopResult } from '@trmnl-games/idle-angler/sim/shop'
 import { conditionsAt } from '@trmnl-games/idle-angler/sim/simulate'
@@ -321,15 +322,14 @@ export const logbook = query({
     const trophyRule = content.trophies && unlocked(content, toAnglerState(angler), 'trophies') ? content.trophies : null
     return content.waters.map((w) => ({
       water: { id: w.id, name: w.name },
-      species: content.species
-        .filter((s) => s.water === w.id)
-        .map((s) => {
-          const entry = angler.logbook[s.id]
-          return entry
-            ? { id: s.id, seen: true as const, name: s.name, rarity: s.rarity, count: entry.count, bestGrams: entry.bestGrams, maxGrams: s.maxGrams, trophyGrams: trophyRule ? Math.ceil((s.maxGrams * trophyRule.minPercent) / 100) : null, baits: s.baits, times: s.times ?? null, weather: s.weather ?? null, seasons: s.seasons ?? null }
-            // An uncaught fish hints its bait, except the epics, which stay a puzzle.
-            : { id: s.id, seen: false as const, rarity: s.rarity, baits: s.rarity === 'epic' ? null : s.baits }
-        }),
+      // Issue #10: rarest last, whatever order the catalog appended its season visitors in.
+      species: sortByRarity(content.species.filter((s) => s.water === w.id)).map((s) => {
+        const entry = angler.logbook[s.id]
+        return entry
+          ? { id: s.id, seen: true as const, name: s.name, rarity: s.rarity, count: entry.count, bestGrams: entry.bestGrams, maxGrams: s.maxGrams, trophyGrams: trophyRule ? Math.ceil((s.maxGrams * trophyRule.minPercent) / 100) : null, baits: s.baits, times: s.times ?? null, weather: s.weather ?? null, seasons: s.seasons ?? null }
+          // An uncaught fish hints its bait, except the epics, which stay a puzzle.
+          : { id: s.id, seen: false as const, rarity: s.rarity, baits: s.rarity === 'epic' ? null : s.baits }
+      }),
     }))
   },
 })

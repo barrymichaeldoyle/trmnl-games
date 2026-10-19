@@ -37,6 +37,15 @@ describe('Idle Angler, the full game (D162, F2)', () => {
       return ids
     })
 
+  it('lists each water in the logbook common to epic, with v2 season visitors among their own rarity (issue #10)', async () => {
+    await seedAngler(t, { logbook: logbookOf(['sea_trout']) }, 'Pat')
+    const book = (await as('Pat').query(api.idleAngler.anglers.logbook, {}))!
+    const ids = (water: string) => book.find((w: { water: { id: string } }) => w.water.id === water)!.species.map((s: { id: string }) => s.id)
+    expect(ids('river_bend').slice(-2)).toEqual(['sea_trout', 'salmon'])
+    expect(ids('harbour_pier').indexOf('garfish')).toBeLessThan(ids('harbour_pier').indexOf('sea_bass'))
+    expect(ids('harbour_pier').at(-1)).toBe('thornback_ray')
+  })
+
   it('puts three orders on the slate once orders unlock, and the Dock shows them with the fish that fit', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(['minnow', 'roach', 'rudd', 'perch']) }, 'Pat')
     await nextIdleAnglerTick(t)

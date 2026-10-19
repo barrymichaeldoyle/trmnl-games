@@ -1,4 +1,5 @@
 import type { AnglerCounters, IdleAnglerCatalog } from '../sim/types'
+import { speciesByWater } from './order'
 import { contentV2 } from './v2'
 
 /**
@@ -112,8 +113,8 @@ const FAMILIES: AchievementDef[] = [
   ]),
 ]
 
-/** Two tiers per species: the first one caught, and a specimen over three quarters of the species' largest size. */
-const SPECIES: AchievementDef[] = contentV2.species.flatMap((s) => [
+/** Two tiers per species: the first one caught, and a specimen over three quarters of the species' largest size. Listed by water and rarest last, as the logbook reads (issue #10). */
+const SPECIES: AchievementDef[] = speciesByWater(contentV2).flatMap((s) => [
   { id: `first_${s.id}`, family: `species_${s.id}`, familyName: s.name, category: 'Species' as const, tier: 1, name: `First ${s.name}`, blurb: `A ${s.name} in the logbook.`, predicate: { kind: 'first' as const, speciesId: s.id } },
   { id: `specimen_${s.id}`, family: `species_${s.id}`, familyName: s.name, category: 'Species' as const, tier: 2, name: `Specimen ${s.name}`, blurb: `A ${s.name} over ${Math.round(((s.maxGrams * 0.75) / 1000) * 10) / 10} kg.`, predicate: { kind: 'specimen' as const, speciesId: s.id, grams: Math.ceil(s.maxGrams * 0.75) } },
 ])
