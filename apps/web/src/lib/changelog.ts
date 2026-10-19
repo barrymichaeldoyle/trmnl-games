@@ -31,6 +31,17 @@ export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-19',
     changes: [
       {
+        title: 'The keepsake code under the QR has its space back',
+        body: 'When a keepsake is waiting, the caption under the QR code on your TRMNL ran the label into the code, as in “Keepsake482 917”. It now reads “Keepsake 482 917”.',
+        fr: { title: 'Le code souvenir sous le QR retrouve son espace', body: 'Quand un souvenir attend, la légende sous le QR code de votre TRMNL collait l’étiquette au code, comme « Code482 917 ». Elle affiche maintenant « Code 482 917 ».' },
+        de: { title: 'Der Andenken-Code unter dem QR hat wieder sein Leerzeichen', body: 'Wenn ein Andenken wartet, klebte die Beschriftung unter dem QR-Code auf deinem TRMNL am Code, etwa „Andenken482 917“. Jetzt steht dort „Andenken 482 917“.' },
+        es: { title: 'El código de recuerdo bajo el QR recupera su espacio', body: 'Cuando espera un recuerdo, el texto bajo el código QR de tu TRMNL pegaba la etiqueta al código, como «Recuerdo482 917». Ahora pone «Recuerdo 482 917».' },
+        it: { title: 'Il codice ricordino sotto il QR ha di nuovo il suo spazio', body: 'Quando un ricordino aspetta, la didascalia sotto il QR del tuo TRMNL attaccava l’etichetta al codice, come «Ricordino482 917». Ora si legge «Ricordino 482 917».' },
+        pt: { title: 'O código da lembrança embaixo do QR tem o espaço de volta', body: 'Quando uma lembrança está esperando, a legenda embaixo do QR no seu TRMNL grudava o rótulo no código, como “Lembrança482 917”. Agora aparece “Lembrança 482 917”.' },
+        pl: { title: 'Kod pamiątki pod kodem QR odzyskał spację', body: 'Gdy czeka pamiątka, podpis pod kodem QR na twoim TRMNL sklejał etykietę z kodem, na przykład „Kod482 917”. Teraz widać „Kod 482 917”.' },
+        nl: { title: 'De aandenken-code onder de QR heeft zijn spatie terug', body: 'Als er een aandenken wacht, plakte het bijschrift onder de QR-code op je TRMNL het label aan de code, zoals ‘Aandenken482 917’. Nu staat er ‘Aandenken 482 917’.' },
+      },
+      {
         title: 'Desk Crawler speaks five more languages',
         body: 'The site, the companion and your TRMNL screen now come in Spanish, Italian, Brazilian Portuguese, Polish and Dutch, as well as English, French and German. Pick one at the bottom of any page or under Account; your TRMNL follows your TRMNL account’s language, or the one you pick. Your hero, gear and history carry over, and older stories are translated too.',
         fr: { title: 'Desk Crawler parle cinq langues de plus', body: 'Le site, le compagnon et votre écran TRMNL existent maintenant en espagnol, italien, portugais du Brésil, polonais et néerlandais, en plus de l’anglais, du français et de l’allemand. Choisissez-en une en bas de n’importe quelle page ou dans Compte ; votre TRMNL suit la langue de votre compte TRMNL, ou celle que vous choisissez. Votre héros, votre équipement et votre historique sont conservés, et les anciennes histoires sont traduites aussi.' },

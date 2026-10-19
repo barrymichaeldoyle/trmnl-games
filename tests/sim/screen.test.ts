@@ -114,7 +114,7 @@ describe('companion QR in every view', () => {
       const html = markupOnly(await liquid.parseAndRender(markup, { ...payload(), ...standing, ...keepsake }))
       expect(html, layout).toContain(`${base}/keepsake`)
       expect(html, layout).not.toMatch(new RegExp(`${base}/(bag|home|corner)/`))
-      expect(html, layout).toContain('data-keepsake-caption="true">Keepsake <span class="inline-block">482 917</span>')
+      expect(html, layout).toContain('data-keepsake-caption="true">Keepsake&nbsp;<span class="inline-block">482 917</span>')
       expect(html, layout).not.toContain('Your bag')
       // A full bag's code still wins; the title bar keeps the code.
       const urgent = markupOnly(await liquid.parseAndRender(markup, { ...payload(), ...standing, ...keepsake, qr_base: `${base}/bag`, qr_label: 'Scan to open your bag' }))

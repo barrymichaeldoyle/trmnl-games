@@ -52,7 +52,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 65
+export const TEMPLATE_VERSION = 66
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -164,7 +164,9 @@ const divider = `
  */
 const KEEPSAKE_ASSIGNS = `{% assign keepsake_waiting = false %}{% if qr_base == "" and keepsake_qr_base and keepsake_qr_base != "" and desk_keepsake_code %}{% assign keepsake_waiting = true %}{% if companion_qr_base != "" %}{% assign companion_qr_base = keepsake_qr_base %}{% endif %}{% if home_qr_base != "" %}{% assign home_qr_base = keepsake_qr_base %}{% endif %}{% if corner_qr_base != "" %}{% assign corner_qr_base = keepsake_corner_qr_base %}{% endif %}{% endif %}`
 /** The waiting keepsake's code under its QR, in place of the standing code's caption. */
-const keepsakeCaption = (classes: string) => `<span class="${classes} text--bold" data-keepsake-caption="true">${L('keepsake')} <span class="inline-block">{{ desk_keepsake_code | escape }}</span></span>`
+// D194: `.label` lays out as flex, which drops an ordinary space between the label and the code's box, so there it is a
+// non-breaking one; a title caption keeps the ordinary space, where the code can wrap under a long label.
+const keepsakeCaption = (classes: string) => `<span class="${classes} text--bold" data-keepsake-caption="true">${L('keepsake')}${classes.split(' ').includes('label') ? '&nbsp;' : ' '}<span class="inline-block">{{ desk_keepsake_code | escape }}</span></span>`
 
 /**
  * HUD marks assigned once per layout (`hud_heart_full`...). Drawn at twice their grid so the X, where the framework
