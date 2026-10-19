@@ -2,7 +2,7 @@ import { currentHero, gameProfile } from './lib/gameProfile'
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
 import { mutation, query, type QueryCtx } from './_generated/server'
-import type { Doc } from './_generated/dataModel'
+import type { Doc, Id } from './_generated/dataModel'
 import { ACTIVE_CONTENT, catalogs } from '@trmnl-games/desk-crawler/content'
 import { isGear } from '@trmnl-games/desk-crawler/sim/core/workbench'
 import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
@@ -159,24 +159,33 @@ async function logViews(ctx: QueryCtx, logs: readonly Doc<'tickLogs'>[]) {
   return logs.map((log, index) => ({ id: log._id, at: log.at, tick: log.tick ?? null, kind: log.kind, summary: summaries[index]!, source: log.source, deltas: displayLogDeltas(log) }))
 }
 
+/** Whether the caller may read this hero's log: one of their own heroes, current or parked, while their game is open. */
+async function ownsHero(ctx: QueryCtx, user: Doc<'users'> | null, heroId: Id<'heroes'>) {
+  if (!user || user.state !== 'active') return false
+  if ((await gameProfile(ctx, user._id))?.state === 'deleting') return false
+  return (await ctx.db.get(heroId))?.userId === user._id
+}
+
 /**
- * Own log page, newest first, for the hero the caller names. A live subscription re-runs a page from its pinned end
- * cursor, so a page keyed only on the current hero threw InvalidCursor the moment a recruit or switch changed the hero
- * under it (TRMNL-GAMES-CONVEX-8). Naming the hero gives each hero its own subscription; a stale one comes back empty.
- * Optional only for tabs still on a build from before the fix.
+ * Own log page, newest first, for the hero the caller names, current or parked. A live subscription re-runs a page from
+ * its pinned end cursor, and a cursor only fits the query that made it, so a page whose range followed the current hero,
+ * or that swapped between a stand-in and a real page, threw InvalidCursor around a recruit or switch
+ * (TRMNL-GAMES-CONVEX-8). Every call for a named hero now runs the same range on that hero's log, and a hero that isn't
+ * the caller's comes back as an empty page. `heroId` is optional only for tabs still on a build from before D185.
  */
 export const recentLog = query({
   args: { heroId: v.optional(v.id('heroes')), paginationOpts: paginationOptsValidator },
   returns: v.any(),
   handler: async (ctx, { heroId, paginationOpts }) => {
     const user = await currentUser(ctx)
-    const hero = await currentHero(ctx, user)
-    if (hero === null || (heroId !== undefined && hero._id !== heroId)) return { page: [], isDone: true, continueCursor: '' }
+    const logHeroId = heroId ?? (await currentHero(ctx, user))?._id
+    if (logHeroId === undefined) return { page: [], isDone: true, continueCursor: '' }
     const result = await ctx.db
       .query('tickLogs')
-      .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', hero._id))
+      .withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', logHeroId))
       .order('desc')
       .paginate(paginationOpts)
+    if (heroId !== undefined && !(await ownsHero(ctx, user, heroId))) return { ...result, page: [] }
     return { ...result, page: await logViews(ctx, result.page) }
   },
 })

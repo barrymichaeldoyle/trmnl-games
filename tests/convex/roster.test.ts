@@ -73,17 +73,33 @@ describe('hero roster (P37)', () => {
     expect(await errorCode(ana.mutation(api.roster.recruit, { operationId: opId(), heroClass: 'rogue', name: 'Other' }))).toBe('INVALID_STATE')
   })
 
-  it("serves the log by the named hero, so a recruit leaves the last hero's page empty instead of reusing its cursor", { timeout: 30_000 }, async () => {
+  it('serves the log of the hero the page names, current or parked, so a recruit or switch never changes a page under its cursor', { timeout: 30_000 }, async () => {
     await seedWorld(t, { activeContentVersion: 'v18', currentTick: 40 })
-    const warrior = await seedHero(t, { level: 6, name: 'Tobias' }, 'Ana')
+    const warrior = await seedHero(t, { level: 7, name: 'Tobias' }, 'Ana')
+    await t.run(async (ctx) => {
+      await ctx.db.insert('tickLogs', { heroId: warrior, source: 'tick', sequence: 0, tick: 39, at: SLOT - 60_000, kind: 'rest', summary: 'Rested at the desk.', detail: { v: 1, operation: 'x' }, deltas: { xpEarned: 0, gold: 0, hp: 0 } })
+    })
     const ana = as(t, 'Ana')
-    const page = { numItems: 10, cursor: null }
     await ana.mutation(api.roster.recruit, { operationId: opId(), heroClass: 'rogue', name: 'Vex' })
     const rogue = (await heroesOf(t, warrior)).find((hero) => hero.class === 'rogue')!._id
-    // The Warrior's subscription is no longer the current hero's: it comes back empty, not InvalidCursor.
-    expect(await ana.query(api.heroes.recentLog, { heroId: warrior, paginationOpts: page })).toMatchObject({ page: [], isDone: true })
-    const own = await ana.query(api.heroes.recentLog, { heroId: rogue, paginationOpts: page })
-    expect(await ana.query(api.heroes.latestLog, {})).toEqual(own.page[0] ?? null)
+    const first = { numItems: 10, cursor: null }
+    // The parked Warrior's page is still the Warrior's log, with a real cursor.
+    const parked = await ana.query(api.heroes.recentLog, { heroId: warrior, paginationOpts: first })
+    expect(parked.page.map((row: { summary: string }) => row.summary)).toEqual(['Clocked out. [[Vex]] takes the desk.', 'Rested at the desk.'])
+    // TRMNL-GAMES-CONVEX-8: a live page re-runs from its pinned end cursor. Switching back to the Warrior used to turn
+    // the same page from an empty stand-in (cursor "") into the real query, which then refused that cursor.
+    vi.setSystemTime(SLOT + 5 * 60_000)
+    await ana.mutation(api.roster.switchHero, { operationId: opId(), heroId: warrior })
+    const rerun = await ana.query(api.heroes.recentLog, { heroId: warrior, paginationOpts: { ...first, endCursor: parked.continueCursor } })
+    // The first page grows by the switch's own line on top and keeps everything it had.
+    expect(rerun.page.slice(1)).toEqual(parked.page)
+    expect(await ana.query(api.heroes.latestLog, {})).toEqual(rerun.page[0])
+    // The Rogue's page, now parked, still reads its own log, and another player's hero reads nothing.
+    const rogues = (await ana.query(api.heroes.recentLog, { heroId: rogue, paginationOpts: first })).page
+    expect(rogues.map((row: { summary: string }) => row.summary)).not.toContain('Rested at the desk.')
+    await seedHero(t, { level: 3, name: 'Bo' }, 'Ben')
+    const bens = (await as(t, 'Ben').query(api.heroes.mine, {}))!.id
+    expect(await ana.query(api.heroes.recentLog, { heroId: bens, paginationOpts: first })).toMatchObject({ page: [], isDone: true })
   })
 
   it('switches once a day, with a ten-minute undo back to the hero just left', { timeout: 30_000 }, async () => {
