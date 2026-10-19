@@ -6,7 +6,7 @@ import { games } from '@trmnl-games/platform'
 import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
-import { formatWeight } from '../../lib/idleAngler'
+import { anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { FishIcon } from '../app/idle-angler/-art'
 import { FishName } from '../app/idle-angler/-fish'
 import { formatDate, messagesFor, useLocale, useT } from '../../lib/i18n'
@@ -36,6 +36,7 @@ function ProfilePage() {
   const profile = data as Profile | undefined
   const t = useT(publicPagesMessages)
   const locale = useLocale()
+  const words = anglerWords(locale)
   const since = (at: number) => formatDate(locale, at, { year: 'numeric', month: 'long', day: 'numeric' })
   return (
     <SiteShell>
@@ -50,12 +51,12 @@ function ProfilePage() {
             <h1 className="font-display text-4xl font-bold">{profile.alias}</h1>
             {profile.games.map((game) => (
               <Card key={game.slug} title={games[game.slug].name}>
-                <p className="text-lg">{game.slug === 'desk-crawler' ? t.heroLevel(game.name, game.level) : game.slug === 'paper-lives' ? (game.life?.status === 'ended' ? `${game.name}, remembered` : `${game.name}, ${game.life?.age}${game.life?.job ? `, ${game.life.job.toLowerCase()}` : ''}`) : `${game.title ?? 'Angler'}`}</p>
+                <p className="text-lg">{game.slug === 'desk-crawler' ? t.heroLevel(game.name, game.level) : game.slug === 'paper-lives' ? (game.life?.status === 'ended' ? `${game.name}, remembered` : `${game.name}, ${game.life?.age}${game.life?.job ? `, ${game.life.job.toLowerCase()}` : ''}`) : (game.title ? words.title(game.title) : games[game.slug].name)}</p>
                 <p className="text-sm text-muted">
                   {t.playingSince(since(game.since))}
                   {game.rank ? t.rankAllTime(game.rank.rank, game.rank.totalPlayers) : ''}{t.achievementCount(game.achievements)}
-                  {game.species !== undefined ? ` · ${game.species} species logged` : ''}
-                  {game.medals ? ` · ${game.medals} ${game.medals === 1 ? 'medal' : 'medals'}` : ''}
+                  {game.species !== undefined ? t.anglerSpecies(game.species) : ''}
+                  {game.medals ? t.anglerMedals(game.medals) : ''}
                   {game.life ? ` · ${game.life.lives} ${game.life.lives === 1 ? 'life' : 'lives'} lived${game.life.longest ? `, the longest ${game.life.longest} years` : ''}` : ''}
                 </p>
                 {game.life?.traits.length ? <p className="text-sm text-muted">{game.life.traits.join(' · ')}</p> : null}
@@ -68,7 +69,7 @@ function ProfilePage() {
                 ) : null}
                 {game.wall && game.wall.length > 0 ? (
                   <ul className="mt-3 flex flex-wrap gap-3" aria-label="Trophy wall">
-                    {game.wall.map((t, i) => <li key={i} className="flex items-center gap-2 text-sm"><FishIcon id={t.speciesId} scale={2} /><span><FishName id={t.speciesId} /> {formatWeight(t.grams)}</span></li>)}
+                    {game.wall.map((t, i) => <li key={i} className="flex items-center gap-2 text-sm"><FishIcon id={t.speciesId} scale={2} /><span><FishName id={t.speciesId} /> {words.weight(t.grams)}</span></li>)}
                   </ul>
                 ) : null}
                 {game.page ? <Link to={game.page} className="mt-2 inline-flex min-h-11 items-center underline underline-offset-4">{t.heroPage}</Link> : null}
