@@ -70,3 +70,15 @@ export function FishList({ ids, unseen }: { ids: string[]; unseen: number }) {
   if (unseen > 0) parts.push(<span key="unseen" className="text-muted">{ids.length > 0 ? t.moreNotCaught(unseen) : t.fishNotCaught(unseen)}</span>)
   return <>{parts.map((part, i) => <Fragment key={i}>{i > 0 ? ', ' : ''}{part}</Fragment>)}</>
 }
+
+/**
+ * D200: the water a gate counts species from, in the language's "from" form with the name in bold ("von der
+ * Flussbiegung", "du Méandre"). English, and Polish (whose form inflects the name), keep the bare name.
+ */
+export function FromWater({ id }: { id: string }) {
+  const words = useAngler()
+  const water = words.waterName(id)
+  const at = water.of.indexOf(water.name)
+  if (words.locale === 'en' || at < 0) return <WaterName id={id} />
+  return <>{water.of.slice(0, at)}<WaterName id={id} />{water.of.slice(at + water.name.length)}</>
+}

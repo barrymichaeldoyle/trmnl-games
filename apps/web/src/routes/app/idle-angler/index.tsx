@@ -9,7 +9,7 @@ import { preload } from '../../../lib/preload'
 import { readyOrders, useAngler, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
 import { FishIcon, Scene } from './-art'
-import { FishName, FishText, WaterName } from './-fish'
+import { FishName, FishText, FromWater, WaterName } from './-fish'
 import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
@@ -201,17 +201,6 @@ function DockPage() {
 }
 
 /** The scene from the dock alone: the water the angler fishes or heads to, its band and weather, and the pose the latest story calls for. */
-/**
- * D200: the water a gate counts species from, in the language's "from" form with the name in bold ("von der
- * Flussbiegung", "du Méandre"). English, and Polish (whose form inflects the name), keep the bare name.
- */
-function FromWater({ id }: { id: string }) {
-  const words = useAngler()
-  const water = words.waterName(id)
-  const at = water.of.indexOf(water.name)
-  if (words.locale === 'en' || at < 0) return <WaterName id={id} />
-  return <>{water.of.slice(0, at)}<WaterName id={id} />{water.of.slice(at + water.name.length)}</>
-}
 
 function sceneFromDock(dock: Dock): SceneKey | null {
   const angler = dock.angler

@@ -9,7 +9,7 @@ import { useAngler, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
 import { Coins, Price } from './-coins'
-import { FishList, WaterName, baitCatches } from './-fish'
+import { FishList, FromWater, WaterName, baitCatches } from './-fish'
 import { Rows } from './-rows'
 import { seo } from '../../../lib/seo'
 import { useT } from '../../../lib/i18n'
@@ -152,8 +152,8 @@ function ShopPage() {
                   <p className="font-semibold">{words.pass(item.id)}</p>
                   {/* Once the logbook has the species the water needs, say so instead of restating the requirement. */}
                   <p className="text-sm text-muted">{t.letsYouFish} <WaterName id={item.water} />{!gate ? '.' : missing > 0
-                    ? <>{t.onceSpecies(gate.species, gate.logged)[0]}<WaterName id={gate.waterId} />{t.onceSpecies(gate.species, gate.logged)[1]}</>
-                    : <>{t.logbookHas(gate.species)[0]}<WaterName id={gate.waterId} />{t.logbookHas(gate.species)[1]}</>}</p>
+                    ? <>{t.onceSpecies(gate.species, gate.logged)[0]}<FromWater id={gate.waterId} />{t.onceSpecies(gate.species, gate.logged)[1]}</>
+                    : <>{t.logbookHas(gate.species)[0]}<FromWater id={gate.waterId} />{t.logbookHas(gate.species)[1]}</>}</p>
                 </div>
                 {item.owned ? <span className="text-sm font-semibold text-xp-ink">{t.owned}</span> : buy(item.price, () => setOffer({ title: t.buyTitle(words.pass(item.id)), price: item.price, rows: [[t.opens, water], [t.fishThere, gate && missing > 0 ? t.afterMore(missing, words.water(gate.waterId)) : t.straightAway]], buy: () => access.run({ access: item.id }, t.bought(words.pass(item.id))) }))}
               </li>
