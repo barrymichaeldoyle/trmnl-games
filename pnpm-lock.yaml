@@ -256,6 +256,9 @@ importers:
       '@trmnl-games/engine':
         specifier: workspace:*
         version: link:../engine
+      '@trmnl-games/platform':
+        specifier: workspace:*
+        version: link:../platform
     devDependencies:
       typescript:
         specifier: ~6.0.3

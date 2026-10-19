@@ -15,7 +15,7 @@ import { IDLE_ANGLER_RUNTIME, IDLE_ANGLER_SCHEDULE } from './runtime'
 import { readDeviceBoard } from './leaderboard'
 import { deviceFlyCode, flyTotal } from './flies'
 import { flyForClaim } from '@trmnl-games/idle-angler/content/flies'
-import { trmnlUserChanged } from '../lib/trmnlUser'
+import { deviceLocale, trmnlUserChanged } from '../lib/trmnlUser'
 
 /**
  * Idle Angler's device payload for one authorized installation (trmnl.md "Query read budget"): fixed reads,
@@ -83,6 +83,7 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
     weather,
     band,
     artBaseUrl: process.env.CONVEX_SITE_URL ?? null,
+    locale: deviceLocale(user),
     board: angler && angler.activationState === 'active' ? await readDeviceBoard(ctx, angler, now) : null,
     stories: logs.map((log) => ({ kind: log.kind, summary: log.summary, at: log.at, ...(log.detail.speciesId === undefined ? {} : { speciesId: log.detail.speciesId }), ...(log.detail.grams === undefined ? {} : { grams: log.detail.grams }), ...(log.kind === 'achievement' && log.detail.name !== undefined ? { title: log.detail.name } : {}) })),
   })

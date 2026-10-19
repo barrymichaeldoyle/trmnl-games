@@ -94,7 +94,7 @@ export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerP
     achievements: {
       ...b,
       stories: [
-        { kind: 'ambient', summary: 'Midges hang over the water.', at: minutes(2) },
+        { kind: 'ambient', summary: 'Midges hang over the margin.', at: minutes(2) },
         { kind: 'achievement', summary: 'Achievement: Specimen Perch', title: 'Specimen Perch', at: minutes(62) },
         { kind: 'achievement', summary: 'Achievement: First Perch', title: 'First Perch', at: minutes(62) },
         { kind: 'achievement', summary: 'Achievement: A Kilo Fish', title: 'A Kilo Fish', at: minutes(62) },

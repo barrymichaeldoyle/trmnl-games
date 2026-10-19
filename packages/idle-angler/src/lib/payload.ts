@@ -1,7 +1,8 @@
+import type { Locale } from '@trmnl-games/platform'
 import { fishBase, qrBase, sceneBase } from '../art/route'
+import { anglerWords } from '../i18n'
 import { poseFor } from '../art/scene'
 import { WEATHER_WORD } from '../sim/conditions'
-import { formatWeight } from '../sim/progress'
 import { nextTitle, titleFor } from '../sim/titles'
 import { seasonAt } from '../sim/seasons'
 import type { AnglerStatus, BaitClass, IdleAnglerCatalog, TimeBand, WaterId, Weather } from '../sim/types'
@@ -60,7 +61,7 @@ const STORY_RANK: Readonly<Record<string, number>> = { catch: 0, release: 0, got
  * leads them, and its achievements share one line. Otherwise a catch that earned a level and three achievements fell
  * sixth, off every layout and out of the scene's hands (Barry, 2026-10-10: "it doesn't show logs of fish that I caught").
  */
-export function deviceStories(stories: readonly PayloadStory[]): PayloadStory[] {
+export function deviceStories(stories: readonly PayloadStory[], tell: (summary: string) => string = (summary) => summary, combine: (count: number, names: string) => string = (count, names) => `${count} achievements: ${names}`): PayloadStory[] {
   const out: PayloadStory[] = []
   for (let start = 0; start < stories.length; ) {
     let end = start
@@ -72,10 +73,10 @@ export function deviceStories(stories: readonly PayloadStory[]): PayloadStory[] 
       .map(({ story }) => story)
     const earned = group.filter((story) => story.kind === 'achievement')
     for (const story of group) {
-      if (story.kind !== 'achievement') out.push(story)
+      if (story.kind !== 'achievement') out.push({ ...story, summary: tell(story.summary) })
       else if (story === earned[0]) {
         const names = earned.map((a) => a.title ?? a.summary.replace(/^Achievement: /, '').replace(/\.$/, ''))
-        out.push(earned.length === 1 ? story : { kind: 'achievement', at: story.at, summary: `${earned.length} achievements: ${names.join(', ')}` })
+        out.push(earned.length === 1 ? { ...story, summary: tell(story.summary) } : { kind: 'achievement', at: story.at, summary: combine(earned.length, names.join(', ')) })
       }
     }
     start = end
@@ -97,6 +98,8 @@ export interface IdleAnglerPayloadInput {
   readonly artBaseUrl: string | null
   /** This week's heaviest fish at the angler's water (records.ts); null leaves the board off. */
   readonly board?: PayloadBoard | null
+  /** D200: the owner's language for everything the screen says; English when absent. */
+  readonly locale?: Locale
 }
 
 export interface PayloadBoard {
@@ -118,18 +121,23 @@ const BAND_WORD: Readonly<Record<TimeBand, string>> = { dawn: 'dawn', day: 'day'
 
 export function buildPayload(input: IdleAnglerPayloadInput) {
   const { content, now, world, angler } = input
+  const words = anglerWords(input.locale ?? 'en')
+  const say = words.lang.device
+  const formatWeight = words.weight
+  const labels = say.labels
   const stale = world !== null && now - (world.lastCompletedAt ?? world.createdAt) > STALE_AFTER_MS
   const servicePaused = world?.paused ?? false
-  const conditions = `${BAND_WORD[input.band]}, ${WEATHER_WORD[input.weather]}`
+  const conditions = input.locale && input.locale !== 'en' ? `${words.band(input.band).toLowerCase()}, ${words.weather(input.weather).toLowerCase()}` : `${BAND_WORD[input.band]}, ${WEATHER_WORD[input.weather]}`
   if (angler === null || angler.activationState !== 'active') {
     return {
       v: PAYLOAD_VERSION,
       game: 'idle-angler' as const,
       data_state: servicePaused ? ('service_paused' as const) : ('unlinked' as const),
       status: angler === null ? ('unlinked' as const) : ('pending' as const),
-      status_label: angler === null ? 'Not set up yet' : 'Waiting for TRMNL Save',
+      status_label: angler === null ? say.notSetUp : say.waitingForSave,
       alias: angler?.alias ?? null,
-      attention: servicePaused ? 'Idle Angler is down for maintenance.' : 'Sign in to the companion, then save this plugin in TRMNL.',
+      attention: servicePaused ? say.maintenance : say.signIn,
+      labels,
       qr: 'app' as const,
       qr_base: input.artBaseUrl && !servicePaused ? `${input.artBaseUrl}${qrBase('home')}` : '',
       scene_base: '',
@@ -146,24 +154,24 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
   const hook = angler.baitOnHook ? content.baits.find((b) => b.class === angler.baitOnHook) : undefined
   const hookUnits = hook ? (angler.bait[hook.class] ?? 0) : 0
   const hookUsedHere = hook !== undefined && water.baits.includes(hook.class) && hookUnits > 0
-  const statusLabel = angler.status === 'paused' ? 'Fishing paused' : destination ? `Heading to ${destination.name}` : `Casting at ${water.the}`
+  const statusLabel = angler.status === 'paused' ? say.paused : destination ? say.heading(words.waterName(destination.id)) : say.casting(words.waterName(water.id))
   let attention: string | null = null
   /** Which mark leads the attention line (template v2). */
   let attentionKind: 'service' | 'cooler' | 'bait' | 'goal' | null = null
   const waiting = angler.goalWaiting && angler.goalWaiting.count > 0 ? angler.goalWaiting : null
-  if (angler.quarantined || servicePaused) [attention, attentionKind] = ['Paused for a service check.', 'service']
-  else if (stale) [attention, attentionKind] = ['Updates are delayed.', 'service']
-  else if (coolerFull) [attention, attentionKind] = ['Cooler full. Sell in the companion.', 'cooler']
-  else if (!hookUsedHere) [attention, attentionKind] = [hook && hookUnits === 0 ? `Out of ${hook.name.toLowerCase()}, fishing a bare hook.` : 'Fishing a bare hook.', 'bait']
+  if (angler.quarantined || servicePaused) [attention, attentionKind] = [say.serviceCheck, 'service']
+  else if (stale) [attention, attentionKind] = [say.delayed, 'service']
+  else if (coolerFull) [attention, attentionKind] = [say.coolerFull, 'cooler']
+  else if (!hookUsedHere) [attention, attentionKind] = [hook && hookUnits === 0 ? say.outOf(words.bait(hook.class)) : say.bareHook, 'bait']
   // Issue #8: a waiting reward is the quietest call to the companion, so anything that stops the fishing goes first.
-  else if (waiting) [attention, attentionKind] = [`${waiting.count > 1 ? `${waiting.count} goals` : 'Goal'} reached! Claim ${waiting.coins} coins in the companion.`, 'goal']
-  const stories = deviceStories(input.stories).slice(0, MAX_STORIES)
+  else if (waiting) [attention, attentionKind] = [say.goalWaiting(waiting.count, waiting.coins), 'goal']
+  const stories = deviceStories(input.stories.map((story) => (story.title ? { ...story, title: words.achievementName(story.title) } : story)), words.story, words.lang.tell.achievements).slice(0, MAX_STORIES)
   // Twelve-hour recap: fish landed (kept or released), the heaviest, and any that got away.
   const recent = input.stories.filter((story) => now - story.at <= RECAP_MS)
   const landed = recent.filter((story) => story.kind === 'catch' || story.kind === 'release')
   const best = landed.reduce<PayloadStory | null>((top, story) => (story.grams !== undefined && (top === null || story.grams > (top.grams ?? 0)) ? story : top), null)
   const gotAway = recent.filter((story) => story.kind === 'got_away').length
-  const bestName = best?.speciesId ? content.species.find((s) => s.id === best.speciesId)?.name : undefined
+  const bestName = best?.speciesId && content.species.some((s) => s.id === best.speciesId) ? words.species(best.speciesId) : undefined
   const recapParts = [`${landed.length} ${landed.length === 1 ? 'fish' : 'fish'}`, ...(best && bestName && best.grams !== undefined ? [`best ${formatWeight(best.grams)} ${bestName}`] : []), ...(gotAway ? [`${gotAway} got away`] : [])]
   const recap = landed.length + gotAway > 0 ? `Last 12 hours: ${recapParts.join(', ')}` : null
   // The same facts one by one, each behind its mark on the device (template v2).
@@ -171,21 +179,21 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     recap === null
       ? null
       : [
-          { k: 'catch', text: `${landed.length} fish` },
-          ...(best && bestName && best.grams !== undefined ? [{ k: 'best', text: `Best ${formatWeight(best.grams)} ${bestName}` }] : []),
-          ...(gotAway ? [{ k: 'got_away', text: `${gotAway} got away` }] : []),
+          { k: 'catch', text: say.fish(landed.length) },
+          ...(best && bestName && best.grams !== undefined ? [{ k: 'best', text: say.best(formatWeight(best.grams), bestName) }] : []),
+          ...(gotAway ? [{ k: 'got_away', text: say.gotAway(gotAway) }] : []),
         ]
   const latest = stories[0]
   const latestCatch =
     latest && (latest.kind === 'catch' || latest.kind === 'release') && latest.speciesId
-      ? { species_id: latest.speciesId, name: content.species.find((s) => s.id === latest.speciesId)?.name ?? latest.speciesId, weight_label: latest.grams === undefined ? null : formatWeight(latest.grams) }
+      ? { species_id: latest.speciesId, name: content.species.some((s) => s.id === latest.speciesId) ? words.species(latest.speciesId) : latest.speciesId, weight_label: latest.grams === undefined ? null : formatWeight(latest.grams) }
       : null
   // The newest fish landed among the stories shown, for the catch panel (template v2).
   const newest = stories.find((story) => (story.kind === 'catch' || story.kind === 'release') && story.speciesId !== undefined)
   const newestSpecies = newest ? content.species.find((s) => s.id === newest.speciesId) : undefined
   const newestCatch =
     newest && newestSpecies
-      ? { name: newestSpecies.name, weight_label: newest.grams === undefined ? null : formatWeight(newest.grams), released: newest.kind === 'release', fish_base: input.artBaseUrl ? `${input.artBaseUrl}${fishBase(newestSpecies.id)}` : '' }
+      ? { name: words.species(newestSpecies.id), weight_label: newest.grams === undefined ? null : formatWeight(newest.grams), released: newest.kind === 'release', fish_base: input.artBaseUrl ? `${input.artBaseUrl}${fishBase(newestSpecies.id)}` : '' }
       : null
   // Standing (titles.ts): the title, and the ticks filled toward the next one by species logged.
   const title = titleFor(angler.speciesLogged)
@@ -203,26 +211,30 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     status,
     status_label: statusLabel,
     conditions_label: conditions,
+    // D200: the time of day and weather as the screen labels them; the template falls back to the ids, capitalised.
+    band_label: words.band(input.band),
+    weather_label: words.weather(input.weather),
+    labels,
     season,
-    goal_line: angler.goal ?? null,
+    goal_line: angler.goal ? words.goal(angler.goal) : null,
     // Issue #8: the X's goal row shows the waiting coins instead of the next goal until they are claimed.
-    goal_claim: waiting,
+    goal_claim: waiting ? { ...waiting, label: say.goalWaiting(waiting.count, waiting.coins) } : null,
     weather: input.weather,
     band: input.band,
     alias: angler.alias,
-    title: title.name,
+    title: words.title(title.id),
     title_pct: titlePct,
     title_next_at: next?.species ?? null,
     gold: angler.gold,
     water_id: water.id,
-    water_name: water.name,
-    rod_name: rod.name,
+    water_name: words.water(water.id),
+    rod_name: words.rod(rod.name),
     cooler_used: input.coolerUsed,
     cooler_capacity: cooler.capacity,
     cooler_full: coolerFull,
     cooler_label: `${input.coolerUsed}/${cooler.capacity}`,
-    bait_label: hookUsedHere ? `${hook!.name} ${hookUnits}` : 'Bare hook',
-    bait_name: hookUsedHere ? hook!.name : 'Bare hook',
+    bait_label: hookUsedHere ? `${words.bait(hook!.class)} ${hookUnits}` : words.lang.bareHook.name,
+    bait_name: hookUsedHere ? words.bait(hook!.class) : words.lang.bareHook.name,
     bait_count: hookUsedHere ? hookUnits : null,
     species_logged: angler.speciesLogged,
     species_total: content.species.length,
@@ -232,8 +244,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     // This week's heaviest fish at this water: the first rows, then the angler's own when it is further down.
     board: input.board
       ? {
-          label: 'This week',
-          rank_label: input.board.ownGrams == null ? 'No fish here this week yet' : input.board.rank === null ? `Your best ${formatWeight(input.board.ownGrams)}` : `#${input.board.rank}, best ${formatWeight(input.board.ownGrams)}`,
+          label: say.thisWeek,
+          rank_label: input.board.ownGrams == null ? say.noFishYet : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)),
           rows: [
             ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), weight_label: formatWeight(row.grams), own: row.own })),
             ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, name_short: shortName(angler.alias), weight_label: formatWeight(input.board.ownGrams), own: true }] : []),

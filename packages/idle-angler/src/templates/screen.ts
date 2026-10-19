@@ -25,13 +25,21 @@
  * (`data-give-way`) so the newest story still shows.
  * Template v12 (issue #8, D196): a goal reward waiting for the companion's Claim button leads the attention line behind
  * the star when nothing more pressing does, and the X's goal row inverts to the waiting coins until they are claimed.
+ * Template v14 (D200): the screen speaks the owner's language. Its own words come from the payload's `labels`, read
+ * with the English as the default, and the time of day and weather from `band_label` and `weather_label`. The
+ * landscape half-horizontal info column gives way like the X's lists when a longer language overfills it.
  * Template v13 (D199): a dot between the angler's name and title, which ran together as one name ("Wren Master Angler"),
  * and the newest catch's name without a clamp: the clamp measured its column before the layout settled and cut
  * "Barbel" to "Bar..." with the column empty beside it. Species names are at most thirteen characters.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
+import { en } from '../i18n/en'
+import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 13
+export const TEMPLATE_VERSION = 14
+
+/** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
+const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -61,7 +69,7 @@ const row = (inner: string, data: string) => `<div class="flex flex--row flex--w
 const conditionMarks =
   `{% if band %}{% case band %}{% when "dawn" %}{% assign m_band = m_dawn %}{% when "dusk" %}{% assign m_band = m_dusk %}{% when "night" %}{% assign m_band = m_night %}{% else %}{% assign m_band = m_day %}{% endcase %}` +
   `{% case weather %}{% when "overcast" %}{% assign m_weather = m_overcast %}{% when "rain" %}{% assign m_weather = m_rain %}{% when "wind" %}{% assign m_weather = m_wind %}{% when "fog" %}{% assign m_weather = m_fog %}{% else %}{% assign m_weather = m_clear %}{% endcase %}` +
-  `${counter('m_band', '{{ band | capitalize }}', ' data-band="{{ band }}" data-give-way="2"')}${counter('m_weather', '{{ weather | capitalize }}', ' data-weather="{{ weather }}" data-give-way="1"')}{% endif %}`
+  `${counter('m_band', '{% if band_label %}{{ band_label | escape }}{% else %}{{ band | capitalize }}{% endif %}', ' data-band="{{ band }}" data-give-way="2"')}${counter('m_weather', '{% if weather_label %}{{ weather_label | escape }}{% else %}{{ weather | capitalize }}{% endif %}', ' data-weather="{{ weather }}" data-give-way="1"')}{% endif %}`
 
 /** Where the angler is: the one counter that can be long ("Heading to the Harbour Pier"), so it may wrap to two lines. */
 const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0" data-place="true"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
@@ -76,7 +84,7 @@ const statusRow = (withConditions = true) => row(`${place}${withConditions ? con
 const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
   `{% if cooler_label %}${row(
     counter('m_cooler', '{{ cooler_label }}', ' data-cooler="{{ cooler_label }}" data-give-way="5"') +
-      (fit === 'compact' ? '' : counter('m_hook', '{% if bait_count %}{{ bait_name | escape }} {{ bait_count }}{% else %}Bare hook{% endif %}', ' data-bait="true" data-give-way="4"')) +
+      (fit === 'compact' ? '' : counter('m_hook', '{% if bait_count %}{{ bait_name | escape }} {{ bait_count }}{% else %}{{ bait_name | default: "Bare hook" | escape }}{% endif %}', ' data-bait="true" data-give-way="4"')) +
       counter('m_coin', '{{ gold }}', ' data-give-way="6"') +
       (fit === 'all' ? counter('m_book', '{{ species_logged }}/{{ species_total }}', ' data-logbook="true" data-give-way="3"') : ''),
     'data-counters="true"',
@@ -97,7 +105,7 @@ const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
 <div class="title_bar ${orientation === 'landscape' ? 'portrait:hidden' : 'landscape:hidden'}">
   <img class="image image-stroke ${ADAPTIVE}" src="${TITLE_ICON}" alt="">
   <span class="title${narrow ? '{% if fly_code %} hidden lg:inline-block{% endif %}' : ''}">Idle Angler</span>
-  {% if fly_code %}<span class="instance">${narrow ? 'Fly' : 'Fly code'} {{ fly_code | escape }}</span>{% endif %}
+  {% if fly_code %}<span class="instance">${narrow ? L('fly') : L('fly_code')} {{ fly_code | escape }}</span>{% endif %}
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
@@ -123,7 +131,7 @@ const scene = (og: readonly [width: number, scale: number], x: readonly [width: 
 const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_base and fly_qr_base != "" and qr_base != "" and qr != "cooler" %}{% assign fly_waiting = true %}{% assign qr_base = fly_qr_base %}{% endif %}`
 
 const qr = (og: number, x: number) =>
-  `{% if qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">{% if fly_waiting %}<span class="${LABEL} text--center text--bold" data-fly-caption="true">Fly&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}</div>{% endif %}`
+  `{% if qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">{% if fly_waiting %}<span class="${LABEL} text--center text--bold" data-fly-caption="true">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}</div>{% endif %}`
 
 /** The angler's name, then the title beside it behind a dot (v13), so "Wren · Old Hand" does not read as one name. */
 const nameLine = (classes = 'title title--small') =>
@@ -144,7 +152,7 @@ const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !=
  * (issue #8) the row inverts to them instead, unless the attention line above already says so.
  */
 const goal = () =>
-  `{% if goal_claim %}{% unless attention_kind == "goal" %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal-claim="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small label--inverted w--min-0" data-clamp="1">{% if goal_claim.count > 1 %}{{ goal_claim.count }} goals{% else %}Goal{% endif %} reached! Claim {{ goal_claim.coins }} coins in the companion.</span></div>{% endunless %}{% elsif goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">Goal: {{ goal_line | escape }}</span></div>{% endif %}`
+  `{% if goal_claim %}{% unless attention_kind == "goal" %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal-claim="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small label--inverted w--min-0" data-clamp="1">{% if goal_claim.label %}{{ goal_claim.label | escape }}{% else %}{% if goal_claim.count > 1 %}{{ goal_claim.count }} goals{% else %}Goal{% endif %} reached! Claim {{ goal_claim.coins }} coins in the companion.{% endif %}</span></div>{% endunless %}{% elsif goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">${L('goal')} {{ goal_line | escape }}</span></div>{% endif %}`
 
 /**
  * The newest stories, each behind its glyph. Template v7: `limit` is the most a layout may show; the stories are a
@@ -172,7 +180,24 @@ const fitStories = `<script>
 (() => {
   const view = document.currentScript.closest('.view');
   if (!view) return;
-  const fit = () => view.querySelectorAll('[data-fit-stories]').forEach((list) => {
+  const fit = () => { fitColumns(); fitLists(); };
+  // Template v14: a column marked data-fit-column that overflows its height (a longer language on the narrowest
+  // layouts) hides its give-way counters, the lowest number first, until it fits.
+  const fitColumns = () => view.querySelectorAll('[data-fit-column]').forEach((column) => {
+    if (!column.getClientRects().length) return;
+    const extras = Array.from(column.querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
+    extras.forEach((extra) => extra.classList.remove('hidden'));
+    const room = column.closest('.layout').getBoundingClientRect().height;
+    const span = () => {
+      const shown = Array.from(column.children).filter((child) => child.getClientRects().length && child.getBoundingClientRect().height > 0);
+      return shown.length ? shown[shown.length - 1].getBoundingClientRect().bottom - shown[0].getBoundingClientRect().top : 0;
+    };
+    for (const extra of extras) {
+      if (span() <= room + 0.5) break;
+      extra.classList.add('hidden');
+    }
+  });
+  const fitLists = () => view.querySelectorAll('[data-fit-stories]').forEach((list) => {
     if (!list.getClientRects().length) return;
     const items = Array.from(list.querySelectorAll('.item'));
     const extras = Array.from(list.closest('.layout').querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
@@ -216,7 +241,7 @@ const board = (rows: number) =>
  */
 const recap = () =>
   `{% if recap_items %}<div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div>` +
-  `<div class="pt--2 flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x"><span class="${LABEL} text--bold no-shrink">Last 12 hours</span>` +
+  `<div class="pt--2 flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x"><span class="${LABEL} text--bold no-shrink">${L('last_12_hours')}</span>` +
   `{% for item in recap_items %}{% case item.k %}{% when "best" %}{% assign m_recap = m_trophy %}{% when "got_away" %}{% assign m_recap = m_got_away %}{% else %}{% assign m_recap = m_catch %}{% endcase %}` +
   `<div class="flex flex--row flex--center-y gap--[3px] no-shrink" data-recap-item="{{ item.k }}"><img class="${ICON}" src="{{ m_recap }}" alt=""><span class="${LABEL}">{{ item.text | escape }}</span></div>{% endfor %}</div></div>{% endif %}`
 
@@ -227,7 +252,7 @@ const recap = () =>
 const catchPanel = (og: number, x: number) =>
   `{% if newest_catch %}<div class="flex flex--row flex--left flex--center-y gap--medium stretch-x no-shrink" data-catch="true">` +
   `{% if newest_catch.fish_base != "" %}<div class="no-shrink"><img class="image lg:hidden" src="{{ newest_catch.fish_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ newest_catch.fish_base }}/${x}.png" alt=""></div>{% endif %}` +
-  `<div class="flex flex--col flex--left gap--xsmall grow w--min-0"><span class="${LABEL}">{% if newest_catch.released %}Released{% else %}Newest catch{% endif %}</span>` +
+  `<div class="flex flex--col flex--left gap--xsmall grow w--min-0"><span class="${LABEL}">{% if newest_catch.released %}${L('released')}{% else %}${L('newest_catch')}{% endif %}</span>` +
   `<span class="title title--small">{{ newest_catch.name | escape }}</span>{% if newest_catch.weight_label %}<span class="${LABEL}">{{ newest_catch.weight_label }}</span>{% endif %}</div></div>{% endif %}`
 
 /** Before activation: what to do next and the code to the companion. */
@@ -235,8 +260,8 @@ const welcome = (compact: boolean) => `
   <div class="flex flex--${compact ? 'row' : 'col'} flex--center-x flex--center-y gap--medium stretch-x grow">
     ${qr(compact ? 2 : 3, compact ? 3 : 5)}
     <div class="flex flex--col flex--center-x gap--xsmall">
-      <span class="${compact ? 'title title--small' : 'title'} lg:title--large">{% if status == "pending" %}{{ alias | escape }} is ready to fish{% elsif data_state == "service_paused" %}Back soon{% else %}Finish setting up{% endif %}</span>
-      <span class="label lg:title--small text--center" data-clamp="3">{% if status == "pending" %}Save the plugin in TRMNL. The first cast is within 15 minutes.{% else %}{{ attention | escape }}{% endif %}</span>
+      <span class="${compact ? 'title title--small' : 'title'} lg:title--large">{% if status == "pending" %}{% assign ready_name = alias | escape %}{{ labels.ready | default: "${en.device.labels.ready}" | replace: "%name%", ready_name }}{% elsif data_state == "service_paused" %}${L('back_soon')}{% else %}${L('finish_setup')}{% endif %}</span>
+      <span class="label lg:title--small text--center" data-clamp="3">{% if status == "pending" %}${L('save_plugin')}{% else %}{{ attention | escape }}{% endif %}</span>
       <span class="label lg:title--small">trmnlgames.com</span>
     </div>
   </div>`
@@ -276,7 +301,7 @@ const halfHorizontal = oriented(
   'layout layout--row layout--left layout--stretch-y gap--medium',
   ready(`
     <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [152, 4])}</div>
-    <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
+    <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full" data-fit-column="true">
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
       ${statusRow()}
       ${counters('short')}

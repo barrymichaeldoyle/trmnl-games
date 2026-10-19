@@ -203,10 +203,22 @@ export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: s
 
 /** One sentence in the game's voice, with nothing private on a lock screen, and the page it opens. */
 export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>, heroName: string, locale: Locale = 'en'): { title: string; body: string; url: string } {
-  if (row.kind === 'cooler_full') return { title: 'Your cooler is full', body: 'New catches are being released. Sell some fish to make room.', url: '/app/idle-angler/cooler?alert=cooler_full' }
-  if (row.kind === 'bait_out') return { title: 'Out of bait', body: 'Your angler is fishing a bare hook. Restock in the tackle shop.', url: '/app/idle-angler/shop?alert=bait_out' }
+  if (row.kind === 'cooler_full') return { ...ANGLER_ALERTS[locale].coolerFull, url: '/app/idle-angler/cooler?alert=cooler_full' }
+  if (row.kind === 'bait_out') return { ...ANGLER_ALERTS[locale].baitOut, url: '/app/idle-angler/shop?alert=bait_out' }
   if (row.kind === 'asleep') return { ...DESK_ALERTS[locale].asleep(heroName), url: '/app/desk-crawler/inventory?alert=asleep' }
   return { ...DESK_ALERTS[locale].merchant(heroName, row.offerName ?? null), url: '/app/desk-crawler/inventory?alert=merchant' }
+}
+
+/** D200: Idle Angler's two alerts in the owner's language. */
+const ANGLER_ALERTS: Readonly<Record<Locale, { coolerFull: { title: string; body: string }; baitOut: { title: string; body: string } }>> = {
+  en: { coolerFull: { title: 'Your cooler is full', body: 'New catches are being released. Sell some fish to make room.' }, baitOut: { title: 'Out of bait', body: 'Your angler is fishing a bare hook. Restock in the tackle shop.' } },
+  fr: { coolerFull: { title: 'Votre glacière est pleine', body: 'Les nouvelles prises retournent à l’eau. Vendez des poissons pour faire de la place.' }, baitOut: { title: 'Plus d’appât', body: 'Votre pêcheur pêche à l’hameçon nu. Réapprovisionnez-vous au magasin.' } },
+  de: { coolerFull: { title: 'Deine Kühlbox ist voll', body: 'Neue Fänge werden freigelassen. Verkaufe ein paar Fische, um Platz zu schaffen.' }, baitOut: { title: 'Kein Köder mehr', body: 'Dein Angler fischt mit blankem Haken. Kauf im Angelladen nach.' } },
+  es: { coolerFull: { title: 'Tu nevera está llena', body: 'Las nuevas capturas vuelven al agua. Vende algunos peces para hacer sitio.' }, baitOut: { title: 'Sin cebo', body: 'Tu pescador pesca con el anzuelo vacío. Repón en la tienda.' } },
+  it: { coolerFull: { title: 'Il tuo frigo è pieno', body: 'Le nuove catture tornano in acqua. Vendi qualche pesce per fare spazio.' }, baitOut: { title: 'Esca finita', body: 'Il tuo pescatore pesca con l’amo nudo. Fai scorta nel negozio.' } },
+  pt: { coolerFull: { title: 'Seu cooler está cheio', body: 'As novas capturas estão voltando para a água. Venda alguns peixes para abrir espaço.' }, baitOut: { title: 'Sem isca', body: 'Seu pescador está pescando com o anzol vazio. Reabasteça na loja.' } },
+  pl: { coolerFull: { title: 'Lodówka jest pełna', body: 'Nowe ryby wracają do wody. Sprzedaj kilka, żeby zrobić miejsce.' }, baitOut: { title: 'Koniec przynęty', body: 'Twój wędkarz łowi na goły haczyk. Uzupełnij zapasy w sklepie.' } },
+  nl: { coolerFull: { title: 'Je koelbox is vol', body: 'Nieuwe vangsten worden teruggezet. Verkoop wat vis om ruimte te maken.' }, baitOut: { title: 'Geen aas meer', body: 'Je visser vist met een kale haak. Vul je voorraad aan in de winkel.' } },
 }
 
 const fr = contentTranslator('fr')

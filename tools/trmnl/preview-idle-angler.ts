@@ -6,6 +6,7 @@
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { Liquid } from 'liquidjs'
+import { isLocale } from '@trmnl-games/platform'
 import { buildPayload } from '@trmnl-games/idle-angler/payload'
 import { flyQrBase, renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import { screenMarkup } from '@trmnl-games/idle-angler/templates/screen'
@@ -34,9 +35,12 @@ const filter = process.argv.includes('--filter') ? process.argv[process.argv.ind
 // `--theme dark|white-and-red|black-and-yellow` renders under that TRMNL theme, as pages named `<theme>.ia-<state>--…`.
 const themeArg = process.argv.includes('--theme') ? process.argv[process.argv.indexOf('--theme') + 1] : undefined
 const theme: PreviewTheme | undefined = isPreviewTheme(themeArg) ? themeArg : undefined
+// D200: `--locale fr` renders the screens in that language, as pages named `ia-<state>--…` prefixed with `fr.`.
+const localeArg = process.argv.includes('--locale') ? process.argv[process.argv.indexOf('--locale') + 1] : undefined
+const locale = isLocale(localeArg) ? localeArg : undefined
 for (const [name, input] of Object.entries(previewScenarios(LOCAL))) {
   if (filter && !name.includes(filter)) continue
-  const payload = buildPayload(input)
+  const payload = buildPayload({ ...input, ...(locale ? { locale } : {}) })
   for (const layout of Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]) {
     // The weekly fly code sits in the title bar on every fishing screen (it is the longest title-bar text).
     // `--no-fly` renders listing images without a code.
@@ -46,7 +50,7 @@ for (const [name, input] of Object.entries(previewScenarios(LOCAL))) {
     const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, fly_code: flyCode, fly_qr_base: flyQr ? `${LOCAL}${flyQr}` : '' }))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
       for (const portrait of [false, true]) {
-        const file = `.previews/${theme ? `${theme}.` : ''}ia-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`
+        const file = `.previews/${locale ? `${locale}.` : ''}${theme ? `${theme}.` : ''}ia-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`
         writeFileSync(file, previewDocument(inner, device, layout, `Idle Angler · ${name} · ${device}${portrait ? ' portrait' : ''} · ${PREVIEW_LAYOUTS[layout].label}`, { portrait, theme }))
         written += 1
       }
