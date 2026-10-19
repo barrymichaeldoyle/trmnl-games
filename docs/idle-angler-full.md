@@ -282,6 +282,8 @@ Content and art are the long poles. F1's numbers decide every price above, so F1
 
 - 2026-10-14, F6: Barry switched production to content v2 (`setActiveContentVersion` returned v1 to v2). The game stays hidden; F7 (play-test, featured image, submission) is next.
 
+- 2026-10-19, F7 play-test (D199): a first-day run of 300 new anglers on content v4, never visiting, landed the first fish at a median of 1h15m, and 54% landed nothing in the first hour, so a reviewer's first screens after Save were mostly scenery. Content v5 starts a new angler on "Land your first fish" and forces a landable bite until it is met, so every new angler lands a fish on the first cast and has the goal's reward waiting; day-one totals are unchanged (median 14 landed, cooler full at 8 hours). Template v13 puts a dot between the name and title and stops the X's newest-catch name being cut short. The game page sample and the featured image candidate are redrawn from a content v2 `listing` preview state (17 of 58 species, a goal line, autumn leaves).
+
 ## Still not in the game
 
 - Raids and meetings between anglers, prestige, XP and levels.

@@ -119,5 +119,7 @@ export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerP
     goalWaiting: v2At(b, V2_SUMMER, { angler: { ...angler, speciesLogged: 22, goal: 'Book a deep-sea charter', goalWaiting: { count: 1, coins: 150 } }, stories: [{ kind: 'goal', summary: 'Goal reached: Win a medal in an Open. Next: Book a deep-sea charter.', at: minutes(2) }, ...stories.slice(1)] }),
     goalWaitingFull: v2At(b, V2_SUMMER, { angler: { ...angler, speciesLogged: 22, goal: 'Book a deep-sea charter', goalWaiting: { count: 2, coins: 1250 } }, coolerUsed: 18, stories: [{ kind: 'goal', summary: 'Goal reached: Win a medal in an Open. Next: Book a deep-sea charter.', at: minutes(2) }, ...stories.slice(1)] }),
     unlinked: { ...b, angler: null, stories: [] },
+    // D199: the game page's sample and the listing's featured image, on the full game's catalog in an autumn week.
+    listing: v2At(b, PREVIEW_NOW, { angler: { ...angler, goal: 'Catch a fish in the rain' }, stories: [stories[0]!, { kind: 'goal', summary: 'Goal reached: Log eight species. Next: Catch a fish in the rain.', at: minutes(5) }, ...stories.slice(1)] }),
   }
 }

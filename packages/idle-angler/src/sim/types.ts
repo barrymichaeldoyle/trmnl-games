@@ -135,6 +135,8 @@ export interface IdleAnglerCatalog {
   readonly claimGoals?: boolean
   /** v4 (issue #8): a reached goal moves the pointer one goal on, so a later goal already met is reached, logged and claimable at the next evaluation instead of passed over unpaid. */
   readonly stepGoals?: boolean
+  /** v5 (D199): a new angler starts on the first goal rather than waiting for its first evaluation to backfill one, so that goal's guarantee and reward apply from the first cast. */
+  readonly starterGoal?: boolean
   /** Species logged at which each feature opens. */
   readonly unlocks?: Readonly<Record<FeatureId, number>>
   readonly opens?: OpensRule

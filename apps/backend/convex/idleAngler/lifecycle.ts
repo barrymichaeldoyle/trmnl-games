@@ -31,6 +31,7 @@ export async function prepareAngler(ctx: MutationCtx, user: Doc<'users'>, now: n
     logbook: {},
     counters: base.counters,
     quietTicks: 0,
+    ...(base.goal === undefined ? {} : { goal: base.goal }),
     eligibleFromTick: world.currentTick + 1,
     lastTick: world.currentTick,
     lastProgressTick: world.currentTick,

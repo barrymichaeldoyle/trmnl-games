@@ -192,9 +192,13 @@ function cast(input: CastInput): CastResult {
   }
 
   angler = { ...angler, quietTicks: 0, counters: bump(angler.counters, { bites: 1 }) }
-  const species = pickWeighted(createRng(input.streams.species), pool)
-  const grams = drawGrams(createRng(input.streams.size), species, bait)
   const rod = rodOf(content, angler.rodTier)
+  // v5 (D199): a goal's guaranteed bite is a fish the rod can land, so "Land your first fish" lands one on the first cast.
+  const landable = forced && content.starterGoal === true
+  const fits = landable ? pool.filter(([s]) => s.minGrams <= rod.limitGrams) : pool
+  const species = pickWeighted(createRng(input.streams.species), fits.length > 0 ? fits : pool)
+  const drawn = drawGrams(createRng(input.streams.size), species, bait)
+  const grams = landable ? Math.min(drawn, rod.limitGrams) : drawn
   const capacity = coolerOf(content, angler.coolerTier).capacity
   const kept = input.coolerCount < capacity
   const escapes = grams > rod.limitGrams

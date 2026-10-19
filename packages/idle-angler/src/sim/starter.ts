@@ -31,6 +31,8 @@ export function starterAngler(content: IdleAnglerCatalog, tick: number): AnglerS
     logbook: {},
     counters: zeroCounters(),
     quietTicks: 0,
+    // v5 (D199): on the first goal from the start, so its guarantee bites on the first cast and its reward is earned.
+    ...(content.starterGoal && content.goals ? { goal: { rung: 0, castsAtStart: 0 } } : {}),
   }
 }
 

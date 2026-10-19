@@ -50,6 +50,19 @@ describe('Idle Angler TRMNL lifecycle (D115, S2)', () => {
     expect(await t.run(async (ctx) => (await ctx.db.query('anglers').first())!.counters.casts)).toBe(1)
   })
 
+  it('lands a fish on a new angler\'s first cast under content v5, with the first goal reached and its reward waiting (D199)', async () => {
+    await t.mutation(internal.idleAngler.operations.setActiveContentVersion, { contentVersion: 'v5' })
+    await link(t, 'Ana', 'ia-tok-ana')
+    expect(await t.run(async (ctx) => (await ctx.db.query('anglers').first())!.goal)).toEqual({ rung: 0, castsAtStart: 0 })
+    await confirm(t, 'ia-tok-ana', UUID_A)
+    await nextIdleAnglerTick(t)
+    const angler = await t.run(async (ctx) => (await ctx.db.query('anglers').first())!)
+    expect(angler.counters).toMatchObject({ casts: 1, fishCaught: 1 })
+    expect(angler.goal).toMatchObject({ rung: 1, unclaimed: [{ id: 'first_fish', coins: 10 }] })
+    const lines = await t.run(async (ctx) => await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', angler._id)).collect())
+    expect(lines.map((l) => l.kind)).toEqual(expect.arrayContaining(['catch', 'goal']))
+  })
+
   it('serves the screen for an active installation and 404s for anything else', async () => {
     await link(t, 'Ana', 'ia-tok-ana')
     await confirm(t, 'ia-tok-ana', UUID_A)

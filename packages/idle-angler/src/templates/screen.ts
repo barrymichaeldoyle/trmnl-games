@@ -25,10 +25,13 @@
  * (`data-give-way`) so the newest story still shows.
  * Template v12 (issue #8, D196): a goal reward waiting for the companion's Claim button leads the attention line behind
  * the star when nothing more pressing does, and the X's goal row inverts to the waiting coins until they are claimed.
+ * Template v13 (D199): a dot between the angler's name and title, which ran together as one name ("Wren Master Angler"),
+ * and the newest catch's name without a clamp: the clamp measured its column before the layout settled and cut
+ * "Barbel" to "Bar..." with the column empty beside it. Species names are at most thirteen characters.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 12
+export const TEMPLATE_VERSION = 13
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -122,9 +125,9 @@ const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_b
 const qr = (og: number, x: number) =>
   `{% if qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">{% if fly_waiting %}<span class="${LABEL} text--center text--bold" data-fly-caption="true">Fly&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}</div>{% endif %}`
 
-/** The angler's name, then the title beside it. */
+/** The angler's name, then the title beside it behind a dot (v13), so "Wren · Old Hand" does not read as one name. */
 const nameLine = (classes = 'title title--small') =>
-  `<span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">{{ title | escape }}</span>{% endif %}`
+  `<span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}`
 
 /** The cooler, bait or service line, inverted behind its mark so it reads first. */
 const attention = (clamp = 2) =>
@@ -225,7 +228,7 @@ const catchPanel = (og: number, x: number) =>
   `{% if newest_catch %}<div class="flex flex--row flex--left flex--center-y gap--medium stretch-x no-shrink" data-catch="true">` +
   `{% if newest_catch.fish_base != "" %}<div class="no-shrink"><img class="image lg:hidden" src="{{ newest_catch.fish_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ newest_catch.fish_base }}/${x}.png" alt=""></div>{% endif %}` +
   `<div class="flex flex--col flex--left gap--xsmall grow w--min-0"><span class="${LABEL}">{% if newest_catch.released %}Released{% else %}Newest catch{% endif %}</span>` +
-  `<span class="title title--small" data-clamp="1">{{ newest_catch.name | escape }}</span>{% if newest_catch.weight_label %}<span class="${LABEL}">{{ newest_catch.weight_label }}</span>{% endif %}</div></div>{% endif %}`
+  `<span class="title title--small">{{ newest_catch.name | escape }}</span>{% if newest_catch.weight_label %}<span class="${LABEL}">{{ newest_catch.weight_label }}</span>{% endif %}</div></div>{% endif %}`
 
 /** Before activation: what to do next and the code to the companion. */
 const welcome = (compact: boolean) => `

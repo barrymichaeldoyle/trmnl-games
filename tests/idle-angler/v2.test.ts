@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { contentV1, contentV2, contentV3, contentV4 } from '@trmnl-games/idle-angler/content'
+import { contentV1, contentV2, contentV3, contentV4, contentV5 } from '@trmnl-games/idle-angler/content'
 import {
   bitePermille,
   claimGoalReward,
@@ -317,6 +317,28 @@ describe('claimable goals (content v3)', () => {
     const paid = evaluateGoal(contentV2, { ...backfilled, counters: { ...backfilled.counters, fishCaught: 1 } })
     expect(paid.angler).toMatchObject({ gold: 10 })
     expect(paid.angler.goal?.unclaimed).toBeUndefined()
+  })
+})
+
+describe('a fish on the first cast (content v5, D199)', () => {
+  const firstCast = (catalog: typeof contentV5, seed: number) => {
+    const tickAt = SPRING + seed * 15 * 60_000
+    return simulateAngler({ angler: starterAngler(catalog, 0), coolerCount: 0, tick: 1, tickAt, weather: forecast(`s${seed}`, waterOf(catalog, 'millpond'), tickAt, catalog), content: catalog, streams: deriveAnglerSeeds(`s${seed}`, `a${seed}`, 1, 1) })
+  }
+
+  it('starts a new angler on the first goal, so every first cast lands a fish and reaches it', () => {
+    expect(starterAngler(contentV5, 0).goal).toEqual({ rung: 0, castsAtStart: 0 })
+    for (let seed = 0; seed < 96; seed++) {
+      const result = firstCast(contentV5, seed)
+      expect(result.metrics.landed).toBe(1)
+      expect(result.angler.goal).toMatchObject({ rung: 1, unclaimed: [{ id: 'first_fish', coins: 10 }] })
+    }
+  })
+
+  it('leaves v4 starting without a goal, so its replays are unchanged', () => {
+    expect(starterAngler(contentV4, 0).goal).toBeUndefined()
+    const landed = Array.from({ length: 96 }, (_, seed) => firstCast(contentV4, seed).metrics.landed).filter(Boolean).length
+    expect(landed).toBeLessThan(96)
   })
 })
 
