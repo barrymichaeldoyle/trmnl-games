@@ -38,6 +38,8 @@ export interface PayloadAngler {
   readonly fly?: string | null
   /** D162: the current goal's line under content v2; absent under v1. */
   readonly goal?: string | null
+  /** Issue #8: reached goals whose coins wait for the companion's Claim button (v3 on); absent or null when none wait. */
+  readonly goalWaiting?: { readonly count: number; readonly coins: number } | null
 }
 
 export interface PayloadStory {
@@ -147,11 +149,14 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
   const statusLabel = angler.status === 'paused' ? 'Fishing paused' : destination ? `Heading to ${destination.name}` : `Casting at ${water.the}`
   let attention: string | null = null
   /** Which mark leads the attention line (template v2). */
-  let attentionKind: 'service' | 'cooler' | 'bait' | null = null
+  let attentionKind: 'service' | 'cooler' | 'bait' | 'goal' | null = null
+  const waiting = angler.goalWaiting && angler.goalWaiting.count > 0 ? angler.goalWaiting : null
   if (angler.quarantined || servicePaused) [attention, attentionKind] = ['Paused for a service check.', 'service']
   else if (stale) [attention, attentionKind] = ['Updates are delayed.', 'service']
   else if (coolerFull) [attention, attentionKind] = ['Cooler full. Sell in the companion.', 'cooler']
   else if (!hookUsedHere) [attention, attentionKind] = [hook && hookUnits === 0 ? `Out of ${hook.name.toLowerCase()}, fishing a bare hook.` : 'Fishing a bare hook.', 'bait']
+  // Issue #8: a waiting reward is the quietest call to the companion, so anything that stops the fishing goes first.
+  else if (waiting) [attention, attentionKind] = [`${waiting.count > 1 ? `${waiting.count} goals` : 'Goal'} reached! Claim ${waiting.coins} coins in the companion.`, 'goal']
   const stories = deviceStories(input.stories).slice(0, MAX_STORIES)
   // Twelve-hour recap: fish landed (kept or released), the heaviest, and any that got away.
   const recent = input.stories.filter((story) => now - story.at <= RECAP_MS)
@@ -200,6 +205,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     conditions_label: conditions,
     season,
     goal_line: angler.goal ?? null,
+    // Issue #8: the X's goal row shows the waiting coins instead of the next goal until they are claimed.
+    goal_claim: waiting,
     weather: input.weather,
     band: input.band,
     alias: angler.alias,

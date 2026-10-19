@@ -133,6 +133,8 @@ export interface IdleAnglerCatalog {
   readonly goals?: readonly GoalDef[]
   /** v3: a reached goal sets its coins aside for the Claim button instead of paying them on the spot (Desk Crawler's D129). */
   readonly claimGoals?: boolean
+  /** v4 (issue #8): a reached goal moves the pointer one goal on, so a later goal already met is reached, logged and claimable at the next evaluation instead of passed over unpaid. */
+  readonly stepGoals?: boolean
   /** Species logged at which each feature opens. */
   readonly unlocks?: Readonly<Record<FeatureId, number>>
   readonly opens?: OpensRule

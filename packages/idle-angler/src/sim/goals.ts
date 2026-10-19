@@ -99,14 +99,15 @@ export function goalLine(content: IdleAnglerCatalog, angler: AnglerState): strin
 /**
  * The goal step at the end of an evaluation. The first evaluation under a catalog with goals backfills the pointer to
  * the first unmet goal, paying and logging nothing (D128's backfill). After that, a met current goal pays its coins,
- * logs one line naming the next goal and moves the pointer past every goal already met.
+ * logs one line naming the next goal and moves the pointer past every goal already met. From v4 the pointer moves one
+ * goal at a time, as Desk Crawler's ladder does, so each goal met along the way is reached on its own evaluation.
  */
 export function evaluateGoal(content: IdleAnglerCatalog, angler: AnglerState): { angler: AnglerState; event?: TickEvent } {
   if (!content.goals) return { angler }
   if (!angler.goal) return { angler: { ...angler, goal: { rung: firstUnmet(content, angler), castsAtStart: angler.counters.casts } } }
   const goal = currentGoal(content, angler)
   if (!goal || !goalMet(content, angler, goal.predicate)) return { angler }
-  const rung = firstUnmet(content, angler, angler.goal.rung + 1)
+  const rung = content.stepGoals ? angler.goal.rung + 1 : firstUnmet(content, angler, angler.goal.rung + 1)
   // v3 sets the coins aside until the player claims them (D129's shape); earlier catalogs pay on the spot.
   const waiting: UnclaimedGoal[] = content.claimGoals && goal.coins > 0 ? [...(angler.goal.unclaimed ?? []), { id: goal.id, coins: goal.coins }] : (angler.goal.unclaimed ?? [])
   const next: AnglerState = {
@@ -140,6 +141,12 @@ export function claimGoalReward(content: IdleAnglerCatalog, angler: AnglerState,
       counters: { ...angler.counters, goldEarned: angler.counters.goldEarned + reward.coins },
     },
   }
+}
+
+/** How many goal rewards wait for the Claim button and their coins together, for the device (issue #8); null for none. */
+export function goalWaiting(unclaimed: readonly UnclaimedGoal[] | undefined): { count: number; coins: number } | null {
+  if (!unclaimed || unclaimed.length === 0) return null
+  return { count: unclaimed.length, coins: unclaimed.reduce((sum, entry) => sum + entry.coins, 0) }
 }
 
 /** Whether the current goal's guarantee forces this cast's bite. */

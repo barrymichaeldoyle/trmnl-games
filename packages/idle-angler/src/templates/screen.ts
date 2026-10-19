@@ -23,10 +23,12 @@
  * (`screen--scale-xlarge`) no longer cuts the last stories in half.
  * Template v9 (2026-10-14): where a large device scale leaves no room for a single story, the lesser counters give way
  * (`data-give-way`) so the newest story still shows.
+ * Template v12 (issue #8, D196): a goal reward waiting for the companion's Claim button leads the attention line behind
+ * the star when nothing more pressing does, and the X's goal row inverts to the waiting coins until they are claimed.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 
-export const TEMPLATE_VERSION = 11
+export const TEMPLATE_VERSION = 12
 
 const svgDataUri = (svg: string) => `data:image/svg+xml;base64,${btoa(svg)}`
 
@@ -126,7 +128,7 @@ const nameLine = (classes = 'title title--small') =>
 
 /** The cooler, bait or service line, inverted behind its mark so it reads first. */
 const attention = (clamp = 2) =>
-  `{% if attention %}{% case attention_kind %}{% when "cooler" %}{% assign m_attention = m_cooler %}{% when "bait" %}{% assign m_attention = m_bait_out %}{% else %}{% assign m_attention = m_system %}{% endcase %}` +
+  `{% if attention %}{% case attention_kind %}{% when "cooler" %}{% assign m_attention = m_cooler %}{% when "bait" %}{% assign m_attention = m_bait_out %}{% when "goal" %}{% assign m_attention = m_star %}{% else %}{% assign m_attention = m_system %}{% endcase %}` +
   `<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-attention="{{ attention_kind }}"><img class="${ICON}" src="{{ m_attention }}" alt=""><span class="${LABEL} label--inverted" data-clamp="${clamp}">{{ attention | escape }}</span></div>{% endif %}`
 
 /** One story's glyph: its kind's, a star for a milestone or a goal (D162), the trophy for an Open, a fish for a run, a dot for anything else. */
@@ -134,9 +136,12 @@ const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !=
   .map((kind) => `{% when "${kind}" %}{% assign m_story = m_${kind} %}`)
   .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% when "goal" %}{% assign m_story = m_star %}{% when "open" %}{% assign m_story = m_achievement %}{% when "run" %}{% assign m_story = m_catch %}{% else %}{% assign m_story = m_system %}{% endcase %}`
 
-/** D162: the current goal behind the star; under content v1 there is none and nothing renders. */
+/**
+ * D162: the current goal behind the star; under content v1 there is none and nothing renders. While goal rewards wait
+ * (issue #8) the row inverts to them instead, unless the attention line above already says so.
+ */
 const goal = () =>
-  `{% if goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">Goal: {{ goal_line | escape }}</span></div>{% endif %}`
+  `{% if goal_claim %}{% unless attention_kind == "goal" %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal-claim="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small label--inverted w--min-0" data-clamp="1">{% if goal_claim.count > 1 %}{{ goal_claim.count }} goals{% else %}Goal{% endif %} reached! Claim {{ goal_claim.coins }} coins in the companion.</span></div>{% endunless %}{% elsif goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">Goal: {{ goal_line | escape }}</span></div>{% endif %}`
 
 /**
  * The newest stories, each behind its glyph. Template v7: `limit` is the most a layout may show; the stories are a

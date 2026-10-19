@@ -38,6 +38,8 @@ Idle Angler grows from three waters and a shop into a fishing year. A **goal** a
 
 The shape is Desk Crawler's career ladder (D128, [spec](objectives.md)). There is one current goal per angler. Reaching it pays a few coins, writes a log line, takes the celebration badge and moves the pointer to the next goal that is not already met. Goals never fail, never expire and never send an alert. Companion goals alternate with goals the angler meets on its own, so a device-only player always sees progress.
 
+From content v3 (D166) a reached goal's coins wait on the Dock for a Claim button and a burst of confetti, as Desk Crawler's do. From content v4 (D196, issue #8) the pointer moves one goal at a time, so a goal already met when the one before it is reached is reached at the next evaluation, with its own line and its own reward. While rewards wait, the device's attention line says "Goal reached! Claim N coins in the companion." when nothing more pressing holds it, and the X's goal row shows the same in place of the next goal (template v12).
+
 **Unlocks follow species logged**, because Idle Angler has no levels (D116). Unlocks are predicates over the logbook, so they are retroactive and need no migration, as D128's are.
 
 | Feature | Opens at | Daily player reaches it | Three-day player |

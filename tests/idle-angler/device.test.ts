@@ -162,6 +162,12 @@ describe('Idle Angler payload', () => {
     expect(buildPayload(scenarios.paused!).scene_base).toContain('/paused/none/red_tag')
   })
 
+  it('calls a waiting goal reward to the companion after anything that stops the fishing (issue #8)', () => {
+    expect(buildPayload(scenarios.goalWaiting!)).toMatchObject({ attention: 'Goal reached! Claim 150 coins in the companion.', attention_kind: 'goal', goal_claim: { count: 1, coins: 150 } })
+    expect(buildPayload(scenarios.goalWaitingFull!)).toMatchObject({ attention_kind: 'cooler', goal_claim: { count: 2, coins: 1250 } })
+    expect(buildPayload(scenarios.heronLake!)).toMatchObject({ goal_claim: null })
+  })
+
   it('asks for setup before the angler is active', () => {
     expect(buildPayload(scenarios.pending!)).toMatchObject({ status: 'pending', status_label: 'Waiting for TRMNL Save', alias: 'Wren', scene_base: '' })
     expect(buildPayload(scenarios.unlinked!)).toMatchObject({ status: 'unlinked', alias: null })
@@ -226,6 +232,21 @@ describe('Idle Angler markup', () => {
     expect(buildPayload(scenarios.unranked!).board?.rank_label).toBe('No fish here this week yet')
     const full = await liquid.parseAndRender(screenMarkup.markup, { ...buildPayload(scenarios.coolerFull!), fly_code: null })
     expect(full).toContain('data-attention="cooler"')
+  })
+
+  it('shows a waiting goal reward once in every layout, and the next goal again once it is claimed (issue #8)', async () => {
+    for (const [layout, markup] of Object.entries(screenMarkup)) {
+      const one = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.goalWaiting!), fly_code: null })
+      expect(one, layout).toContain('data-attention="goal"')
+      expect(one, layout).not.toContain('data-goal-claim')
+      expect(one, layout).not.toContain('Goal: Book a deep-sea charter')
+    }
+    const full = await liquid.parseAndRender(screenMarkup.markup, { ...buildPayload(scenarios.goalWaitingFull!), fly_code: null })
+    expect(full).toContain('data-attention="cooler"')
+    expect(full).toMatch(/data-goal-claim="true"[^]*2 goals reached! Claim 1250 coins in the companion\./)
+    const claimed = await liquid.parseAndRender(screenMarkup.markup, { ...buildPayload(scenarios.medal!), fly_code: null })
+    expect(claimed).not.toContain('data-goal-claim')
+    expect(claimed).toContain('Goal: Book a deep-sea charter')
   })
 
   it('turns the dock code into the waiting fly\'s claim link with its code, but never a full cooler\'s (D180)', async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { contentV1, contentV2, contentV3 } from '@trmnl-games/idle-angler/content'
+import { contentV1, contentV2, contentV3, contentV4 } from '@trmnl-games/idle-angler/content'
 import {
   bitePermille,
   claimGoalReward,
@@ -8,6 +8,7 @@ import {
   entersOpen,
   evaluateGoal,
   goalProgress,
+  goalWaiting,
   fillOrder,
   openPeriod,
   openTarget,
@@ -316,5 +317,40 @@ describe('claimable goals (content v3)', () => {
     const paid = evaluateGoal(contentV2, { ...backfilled, counters: { ...backfilled.counters, fishCaught: 1 } })
     expect(paid.angler).toMatchObject({ gold: 10 })
     expect(paid.angler.goal?.unclaimed).toBeUndefined()
+  })
+})
+
+describe('goals one at a time (content v4, issue #8)', () => {
+  const metTwice = (content: typeof contentV4) => {
+    const backfilled = evaluateGoal(content, starterAngler(content, 0)).angler
+    return { ...backfilled, counters: { ...backfilled.counters, fishCaught: 1, fishSold: 1 } }
+  }
+
+  it('reaches two goals met by one cast on consecutive evaluations, each with its own line and reward', () => {
+    const first = evaluateGoal(contentV4, metTwice(contentV4))
+    expect(first.event).toMatchObject({ summary: 'Goal reached: Land your first fish. Next: Sell a fish.', deltas: { gold: 0 } })
+    const second = evaluateGoal(contentV4, first.angler)
+    expect(second.event).toMatchObject({ summary: 'Goal reached: Sell a fish. Next: Buy a tub of bread.', deltas: { gold: 0 } })
+    expect(second.angler).toMatchObject({ gold: 0, goal: { rung: 2, unclaimed: [{ id: 'first_fish', coins: 10 }, { id: 'first_sale', coins: 10 }] }, counters: { goalsReached: 2 } })
+    expect(evaluateGoal(contentV4, second.angler).event).toBeUndefined()
+    expect(goalWaiting(second.angler.goal?.unclaimed)).toEqual({ count: 2, coins: 20 })
+  })
+
+  it('leaves v3 passing over a goal already met, so its replays are unchanged', () => {
+    const jumped = evaluateGoal(contentV3, metTwice(contentV3))
+    expect(jumped.angler.goal).toMatchObject({ rung: 2, unclaimed: [{ id: 'first_fish', coins: 10 }] })
+  })
+
+  it('backfills a first evaluation without paying or setting anything aside', () => {
+    const angler = starterAngler(contentV4, 0)
+    const backfilled = evaluateGoal(contentV4, { ...angler, counters: { ...angler.counters, fishCaught: 3, fishSold: 2 } })
+    expect(backfilled.event).toBeUndefined()
+    expect(backfilled.angler).toMatchObject({ gold: angler.gold, goal: { rung: 2 } })
+    expect(backfilled.angler.goal?.unclaimed).toBeUndefined()
+  })
+
+  it('still pays a waiting reward after a rollback to v2', () => {
+    const { angler } = evaluateGoal(contentV4, metTwice(contentV4))
+    expect(claimGoalReward(contentV2, angler)).toMatchObject({ ok: true, reward: { id: 'first_fish' }, angler: { gold: 10 } })
   })
 })
