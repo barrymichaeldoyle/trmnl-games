@@ -82,7 +82,7 @@ export const nl: HelpPage = {
           <ul>
             <li>De Carrièrepagina onder Meer toont de {F.career.goals} doelen op volgorde, met de datum waarop je elk doel haalde. Een doel dat je al had gedaan toen de ladder kwam, telt als bereikt.</li>
             {F.unlocks !== undefined ? <li>Functies komen per niveau, of je nu langskomt of niet: de takenlijst op niveau {F.unlocks.todo}, houdingen op niveau {F.unlocks.stances}, kantoorbeslissingen op niveau {F.unlocks.choices}, {F.meetings?.level !== undefined ? `vergaderingen met collega’s op niveau ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `demonteren en de werkbank op niveau ${F.workbench.level}, ` : ''}de rondtrekkende koopman op niveau {F.unlocks.merchant} en bureauraids op niveau {F.unlocks.raids}. Je TRMNL zegt ‘Ontgrendeld’ als het zover is. Ook de verdiepingen gaan per niveau open: {FLOORS_LINE}.</li> : null}
-            <li>Als de houdingen opengaan, heeft je held er nog geen gekozen en speelt hij Gebalanceerd. Eén doel vraagt je er een te kiezen; elk van de drie telt, en je kunt hem later wijzigen.</li>
+            <li>Als de houdingen opengaan, heeft je held er nog geen gekozen en speelt hij Evenwichtig. Eén doel vraagt je er een te kiezen; elk van de drie telt, en je kunt hem later wijzigen.</li>
             <li>Een paar vroege doelen komen gegarandeerd op tijd: het eerste gevecht binnen een handvol avonturen, een stuk uitrusting binnen het eerste dozijn, en een eerste beslissing, koopman en elite binnen ongeveer een dag na hun niveau. De rest hangt van het toeval af.</li>
           </ul>
         </>
@@ -101,21 +101,21 @@ export const nl: HelpPage = {
         </>
       ) : null}
       <h2 id="stances">Houdingen</h2>
-      <p>Kies op de pagina Held hoe voorzichtig je held is.{arrives('stances')} De houding geldt vanaf het volgende avontuur, en je kunt hem altijd wijzigen. Je TRMNL toont hem naast de tasteller, onder een meter met de naald laag voor Voorzichtig, in het midden voor Gebalanceerd en hoog voor Roekeloos.</p>
+      <p>Kies op de pagina Held hoe voorzichtig je held is.{arrives('stances')} De houding geldt vanaf het volgende avontuur, en je kunt hem altijd wijzigen. Je TRMNL toont hem naast de tasteller, onder een meter met de naald laag voor Veilig, in het midden voor Evenwichtig en hoog voor Roekeloos.</p>
       <ul>
-        <li><strong>Voorzichtig</strong> drinkt een drankje onder 65% HP, rust onder 50% en gaat weer op pad bij 90%. Krijgt 90% van de gewone XP uit overwinningen.</li>
-        <li><strong>Gebalanceerd</strong>, de standaard, drinkt onder 50%, rust onder 35% en gaat weer op pad bij 75%, met de gewone XP.</li>
+        <li><strong>Veilig</strong> drinkt een drankje onder 65% HP, rust onder 50% en gaat weer op pad bij 90%. Krijgt 90% van de gewone XP uit overwinningen.</li>
+        <li><strong>Evenwichtig</strong>, de standaard, drinkt onder 50%, rust onder 35% en gaat weer op pad bij 75%, met de gewone XP.</li>
         <li><strong>Roekeloos</strong> drinkt onder 35%, rust onder 20% en gaat weer op pad bij 60%. Krijgt 115% XP uit overwinningen, maar gaat vaker knock-out.</li>
       </ul>
       <p>In {floor(F.floors[0]?.name ?? '')} kan een held niet knock-out gaan, dus daar loopt Roekeloos geen risico. Op elke andere verdieping kost een knock-out goud en gaat je held terug naar {floor(F.floors[0]?.name ?? '')}, en Roekeloos gaat het vaakst knock-out.</p>
       <h2 id="desk-raids">Bureauraids</h2>
       <p>Tijdens het verkennen overvallen helden soms elkaars bureaus. Elke actieve held{F.unlocks === undefined ? '' : ` vanaf niveau ${F.unlocks.raids}`} doet automatisch raids en wordt automatisch overvallen. Je kunt geen raid starten en geen doelwit kiezen.{F.unlocks === undefined ? '' : ` Onder niveau ${F.unlocks.raids} doet een held geen raids en wordt hij niet overvallen.`} De raid staat in het avonturenlogboek van beide helden met de openbare naam van de andere speler, en de pagina Held houdt de raids van je held bij.</p>
       <ul>
-        <li>Wie wint is een muntworp, die alleen de houding verschuift. Niveau, uitrusting en effecten tellen nooit. Voorzichtig telt 10 punten bij aan zijn kant, Gebalanceerd niets en Roekeloos haalt er 5 af, bij aanvallen en verdedigen.</li>
-        <li>Hoe vaak je held een raid doet, hangt ook van de houding af: Voorzichtig ongeveer om de dag verkennen, Gebalanceerd ongeveer één keer per dag, Roekeloos ongeveer twee keer per dag.</li>
+        <li>Wie wint is een muntworp, die alleen de houding verschuift. Niveau, uitrusting en effecten tellen nooit. Veilig telt 10 punten bij aan zijn kant, Evenwichtig niets en Roekeloos haalt er 5 af, bij aanvallen en verdedigen.</li>
+        <li>Hoe vaak je held een raid doet, hangt ook van de houding af: Veilig ongeveer om de dag verkennen, Evenwichtig ongeveer één keer per dag, Roekeloos ongeveer twee keer per dag.</li>
         <li>De verliezer geeft 5% van zijn goud aan de winnaar, dus goud wisselt alleen van eigenaar. Beide verliezen gezondheid: de verliezer 30% van zijn maximale HP, de winnaar 10%. Uitrusting met {t.text('Thrifty')} haalt zijn punten van het goudverlies af.</li>
         <li>Een raid kan een held knock-out slaan, net als een gevecht; in {floor(F.floors[0]?.name ?? '')} wordt je held dan gered. Raids vinden alleen helden die verkennen of rusten, en een overvallen held wordt zo’n zes uur met rust gelaten.</li>
-        <li>Wil je minder raids verliezen, kies dan Voorzichtig, dat de minste raids doet en het vaakst wint.</li>
+        <li>Wil je minder raids verliezen, kies dan Veilig, dat de minste raids doet en het vaakst wint.</li>
       </ul>
       {F.meetings !== undefined ? (
         <>

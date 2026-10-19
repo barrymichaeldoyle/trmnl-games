@@ -87,7 +87,7 @@ export const pl: HelpPage = {
           <ul>
             <li>Strona Kariera w zakładce Więcej wymienia {F.career.goals} celów po kolei, z datą osiągnięcia każdego. Cel zrobiony już przed pojawieniem się drabiny liczy się jako osiągnięty.</li>
             {F.unlocks !== undefined ? <li>Funkcje przychodzą z poziomem, niezależnie od tego, czy tu zaglądasz: lista zadań na poziomie {F.unlocks.todo}, postawy na poziomie {F.unlocks.stances}, decyzje biurowe na poziomie {F.unlocks.choices}, {F.meetings?.level !== undefined ? `spotkania ze współpracownikami na poziomie ${F.meetings.level}, ` : ''}{F.workbench?.level !== undefined ? `rozbiórka i warsztat na poziomie ${F.workbench.level}, ` : ''}wędrowny kupiec na poziomie {F.unlocks.merchant} i rajdy na biurka na poziomie {F.unlocks.raids}. TRMNL pokazuje wtedy „Odblokowano”. Piętra też otwierają się z poziomem: {FLOORS_LINE}.</li> : null}
-            <li>Gdy otwierają się postawy, bohater nie ma wybranej żadnej i gra Zrównoważoną. Jeden cel prosi o wybór postawy; liczy się każda z trzech, a później możesz ją zmienić.</li>
+            <li>Gdy otwierają się postawy, bohater nie ma wybranej żadnej i gra Wyważoną. Jeden cel prosi o wybór postawy; liczy się każda z trzech, a później możesz ją zmienić.</li>
             <li>Kilka wczesnych celów ma gwarantowany czas: pierwsza walka w ciągu kilku przygód, element sprzętu w pierwszym tuzinie, a pierwsza decyzja, kupiec i elita w mniej więcej dobę od swojego poziomu. Cała reszta zależy od szczęścia.</li>
           </ul>
         </>
@@ -106,18 +106,18 @@ export const pl: HelpPage = {
         </>
       ) : null}
       <h2 id="stances">Postawy</h2>
-      <p>Na stronie Bohater wybierz, jak ostrożny jest bohater.{arrives('stances')} Postawa działa od następnej przygody i możesz ją zmienić w każdej chwili. TRMNL pokazuje ją obok licznika torby, pod wskaźnikiem, którego igła stoi nisko przy Ostrożnej, pośrodku przy Zrównoważonej i wysoko przy Śmiałej.</p>
+      <p>Na stronie Bohater wybierz, jak ostrożny jest bohater.{arrives('stances')} Postawa działa od następnej przygody i możesz ją zmienić w każdej chwili. TRMNL pokazuje ją obok licznika torby, pod wskaźnikiem, którego igła stoi nisko przy Ostrożnej, pośrodku przy Wyważonej i wysoko przy Śmiałej.</p>
       <ul>
         <li><strong>Ostrożna</strong> pije miksturę poniżej 65% PŻ, odpoczywa poniżej 50% i rusza znowu przy 90%. Daje 90% zwykłego XP za wygrane.</li>
-        <li><strong>Zrównoważona</strong>, domyślna, pije poniżej 50%, odpoczywa poniżej 35% i rusza znowu przy 75%, ze zwykłym XP.</li>
+        <li><strong>Wyważona</strong>, domyślna, pije poniżej 50%, odpoczywa poniżej 35% i rusza znowu przy 75%, ze zwykłym XP.</li>
         <li><strong>Śmiała</strong> pije poniżej 35%, odpoczywa poniżej 20% i rusza znowu przy 60%. Daje 115% XP za wygrane, ale częściej kończy się nokautem.</li>
       </ul>
       <p>Na pierwszym piętrze ({name(F.floors[0]?.name ?? '')}) bohater nie może dostać nokautu, więc Śmiała nic tam nie ryzykuje. Na każdym innym piętrze nokaut kosztuje złoto i odsyła bohatera z powrotem na pierwsze piętro, a Śmiała dostaje nokaut najczęściej.</p>
       <h2 id="desk-raids">Rajdy na biurka</h2>
       <p>Podczas eksploracji bohaterowie czasem robią sobie nawzajem rajdy na biurka. Każdy aktywny bohater{F.unlocks === undefined ? '' : ` od poziomu ${F.unlocks.raids}`} robi rajdy i jest ich celem automatycznie. Nie możesz zacząć rajdu ani wybrać celu.{F.unlocks === undefined ? '' : ` Poniżej poziomu ${F.unlocks.raids} bohater ani nie robi rajdów, ani nie jest ich celem.`} Rajd pojawia się w dziennikach przygód obu bohaterów z nazwą publiczną drugiego gracza, a strona Bohater prowadzi rejestr rajdów twojego bohatera.</p>
       <ul>
-        <li>Kto wygra, rozstrzyga rzut monetą, który przesuwa tylko postawa. Poziom, sprzęt i efekty nigdy się nie liczą. Ostrożna dodaje 10 punktów po swojej stronie, Zrównoważona nic, a Śmiała odejmuje 5, zarówno w ataku, jak i w obronie.</li>
-        <li>Częstotliwość rajdów też zależy od postawy: Ostrożna mniej więcej co drugi dzień eksploracji, Zrównoważona mniej więcej raz dziennie, Śmiała mniej więcej dwa razy dziennie.</li>
+        <li>Kto wygra, rozstrzyga rzut monetą, który przesuwa tylko postawa. Poziom, sprzęt i efekty nigdy się nie liczą. Ostrożna dodaje 10 punktów po swojej stronie, Wyważona nic, a Śmiała odejmuje 5, zarówno w ataku, jak i w obronie.</li>
+        <li>Częstotliwość rajdów też zależy od postawy: Ostrożna mniej więcej co drugi dzień eksploracji, Wyważona mniej więcej raz dziennie, Śmiała mniej więcej dwa razy dziennie.</li>
         <li>Przegrany oddaje zwycięzcy 5% swojego złota, więc złoto tylko zmienia właściciela. Obaj tracą zdrowie: przegrany 30% maksymalnych PŻ, zwycięzca 10%. Sprzęt z cechą {t.text('Thrifty')} odejmuje swoje punkty od straty złota.</li>
         <li>Rajd może skończyć się nokautem, tak jak walka; na pierwszym piętrze bohater zostaje wtedy uratowany. Rajdy trafiają tylko na bohaterów, którzy eksplorują lub odpoczywają, a bohater po rajdzie ma spokój przez mniej więcej sześć godzin.</li>
         <li>Jeśli wolisz przegrywać mniej rajdów, wybierz Ostrożną, która rzadziej rusza i częściej wygrywa.</li>
