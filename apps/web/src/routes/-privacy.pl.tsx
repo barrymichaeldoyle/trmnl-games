@@ -43,6 +43,7 @@ export const privacyPl: LegalPage = {
         <li>Krótkotrwałe zapisy techniczne, takie jak liczniki limitów i potwierdzenia zduplikowanych żądań.</li>
         <li>Gdy prosisz o usunięcie konta: twój zweryfikowany główny e-mail, skrót linku potwierdzającego i stan doręczenia. Link wygasa po 30 minutach; wygasłe prośby są usuwane podczas codziennego sprzątania.</li>
         <li>Lista premierowa Desk Crawler zawierała adresy e-mail na potrzeby jednego maila, wysłanego, gdy Desk Crawler trafi do sklepu TRMNL. Ten mail wyszedł 13 października 2026, wszystkie adresy zostały usunięte, a lista jest zamknięta.</li>
+        <li>Przypomnienie o bohaterze: jeśli twój bohater w Desk Crawler działa od dwóch dni, a aplikacja Desk Crawler nie została ani razu otwarta, wysyłamy jeden mail na twój zweryfikowany główny adres z informacją, co tam czeka, i linkiem do rezygnacji. Adres jest pobierany z Clerk w chwili wysyłki i nie jest przechowywany. Zapisujemy tylko datę wysyłki albo to, że nie chcesz takich maili.</li>
         <li>Jeśli wyślesz opinię: twoją wiadomość, stronę, z której ją wysłano, twoją nazwę publiczną i link do konta. Trafia ona e-mailem do twórcy, z twoim zweryfikowanym głównym e-mailem jako adresem odpowiedzi.</li>
       </ul>
 
@@ -77,7 +78,7 @@ export const privacyPl: LegalPage = {
         <li><strong>PostHog EU</strong> obsługuje opcjonalną analitykę użycia, raporty błędów i zamaskowane nagrania sesji na potrzeby wsparcia i ulepszania produktu.</li>
         <li><strong>Sentry</strong> (Stany Zjednoczone) dostaje raporty błędów z serwera naszej strony i backendu gry, a także z twojej przeglądarki, jeśli zgodzisz się na analitykę, abyśmy mogli znajdować i naprawiać błędy. Raport zawiera ścieżkę strony lub nazwę funkcji gry, która zawiodła, oraz techniczne szczegóły błędu. Nigdy nie zawiera twojego konta, adresu e-mail, adresu IP, plików cookie, treści formularzy, parametrów zapytań w adresach URL ani kodów i tokenów instalacji.</li>
         <li><strong>Usługa push twojej przeglądarki</strong> (Google dla Chrome i Androida, Apple dla Safari, Mozilla dla Firefoksa) dostarcza alerty Desk Crawler, jeśli je włączysz. Dostaje alert zaszyfrowany, więc nie może go odczytać, razem z adresem push utworzonym przez przeglądarkę.</li>
-        <li><strong>Resend</strong> dostarcza mail z potwierdzeniem usunięcia konta na twój zweryfikowany główny adres, mail premierowy (wysłany raz, 13 października 2026) oraz opinie, które wysyłasz twórcy. Dostaje te adresy i treść maili.</li>
+        <li><strong>Resend</strong> dostarcza mail z potwierdzeniem usunięcia konta na twój zweryfikowany główny adres, mail premierowy (wysłany raz, 13 października 2026) oraz opinie, które wysyłasz twórcy. Dostaje te adresy i treść maili. Dostarcza też jedyne przypomnienie o bohaterze.</li>
       </ul>
 
       <h2>Jak długo przechowujemy dane</h2>
@@ -86,6 +87,7 @@ export const privacyPl: LegalPage = {
         <li>Szczegółowy dziennik przygód: trzy dni. Podsumowania przebiegów: 30 dni. Niedawne XP do rankingów: siedem dni.</li>
         <li>Potwierdzenia zduplikowanych żądań: 24 godziny. Próby połączenia z TRMNL: krócej niż dobę.</li>
         <li>Lista premierowa: usunięta po wysłaniu maila premierowego 13 października 2026. Nie przechowujemy żadnej kopii.</li>
+        <li>Przypomnienie o bohaterze: data wysyłki albo twoja rezygnacja, do usunięcia konta.</li>
         <li>Opinie: dopóki nie usuniesz konta albo krócej na prośbę. Kopie wysłane już e-mailem do twórcy usuwamy na prośbę.</li>
         <li>Ustawienia alertów i urządzenia: dopóki nie wyłączysz alertów, nie usuniesz urządzenia albo nie usuniesz Desk Crawler lub konta. Urządzenie, którego adres push przestaje działać, jest usuwane automatycznie. Zapisy pojedynczych alertów: siedem dni.</li>
         <li>Kopie zapasowe: mniej więcej tydzień, po którym usunięte dane znikają i z nich.</li>

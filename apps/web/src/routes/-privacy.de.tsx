@@ -43,6 +43,7 @@ export const privacyDe: LegalPage = {
         <li>Kurzlebige Betriebsdaten wie Zähler zur Ratenbegrenzung und Belege für doppelte Anfragen.</li>
         <li>Wenn du die Kontolöschung anforderst: deine bestätigte Haupt-E-Mail-Adresse, einen Hash des Bestätigungslinks und den Zustellstatus. Der Link läuft nach 30 Minuten ab; abgelaufene Anfragen entfernt eine tägliche Bereinigung.</li>
         <li>Die Desk-Crawler-Startliste enthielt E-Mail-Adressen für eine einzige E-Mail, als Desk Crawler in den TRMNL-Marktplatz kam. Diese E-Mail ging am 13. Oktober 2026 raus, jede Adresse wurde gelöscht, und die Liste ist geschlossen.</li>
+        <li>Die Helden-Erinnerung: Wenn dein Desk-Crawler-Held seit zwei Tagen unterwegs ist und du die Desk-Crawler-App nie geöffnet hast, schicken wir eine einzige E-Mail an deine bestätigte Hauptadresse, die sagt, was dort auf dich wartet, mit einem Link zum Abbestellen. Die Adresse wird beim Versand bei Clerk abgefragt und nicht gespeichert. Wir behalten nur, wann sie verschickt wurde oder dass du keine willst.</li>
         <li>Wenn du Feedback sendest: deine Nachricht, die Seite, von der du sie gesendet hast, deinen öffentlichen Namen und einen Link zu deinem Konto. Sie geht per E-Mail an den Entwickler, mit deiner bestätigten Haupt-E-Mail-Adresse als Antwortadresse.</li>
       </ul>
 
@@ -69,7 +70,7 @@ export const privacyDe: LegalPage = {
         <li><strong>PostHog EU</strong> verarbeitet optionale Nutzungsanalyse, Fehlerberichte und maskierte Sitzungsaufzeichnungen für Support und Produktverbesserungen.</li>
         <li><strong>Sentry</strong> (USA) erhält Fehlerberichte vom Server unserer Website und vom Spiel-Backend, und von deinem Browser, wenn du Analyse erlaubst, damit wir Fehler finden und beheben können. Ein Bericht enthält den Seitenpfad oder den Namen der fehlgeschlagenen Spielfunktion und die technischen Details des Fehlers. Er enthält nie dein Konto, deine E-Mail-Adresse, IP-Adresse, Cookies, Formularinhalte, URL-Parameter oder Installationscodes und -tokens.</li>
         <li><strong>Der Push-Dienst deines Browsers</strong> (Google für Chrome und Android, Apple für Safari, Mozilla für Firefox) stellt Desk-Crawler-Benachrichtigungen zu, wenn du sie einschaltest. Er erhält die Benachrichtigung verschlüsselt, kann sie also nicht lesen, zusammen mit der Push-Adresse, die dein Browser erstellt hat.</li>
-        <li><strong>Resend</strong> stellt die E-Mail zur Kontolöschung an deine bestätigte Hauptadresse zu, die Start-E-Mail (einmal gesendet, am 13. Oktober 2026) und Feedback, das du an den Entwickler schickst. Es erhält diese Adressen und die Inhalte der E-Mails.</li>
+        <li><strong>Resend</strong> stellt die E-Mail zur Kontolöschung an deine bestätigte Hauptadresse zu, die Start-E-Mail (einmal gesendet, am 13. Oktober 2026) und Feedback, das du an den Entwickler schickst. Es erhält diese Adressen und die Inhalte der E-Mails. Er stellt auch die einzige Helden-Erinnerung zu.</li>
       </ul>
 
       <h2>Wie lange wir es behalten</h2>
@@ -78,6 +79,7 @@ export const privacyDe: LegalPage = {
         <li>Ausführliches Abenteuerlog: drei Tage. Lauf-Zusammenfassungen: 30 Tage. Jüngste XP für Ranglisten: sieben Tage.</li>
         <li>Belege für doppelte Anfragen: 24 Stunden. TRMNL-Verbindungsversuche: unter einem Tag.</li>
         <li>Startliste: gelöscht, als die Start-E-Mail am 13. Oktober 2026 rausging. Wir behalten keine Kopie.</li>
+        <li>Helden-Erinnerung: wann sie verschickt wurde oder dass du keine willst, bis du dein Konto löschst.</li>
         <li>Feedback: bis du dein Konto löschst, oder früher auf Anfrage. Bereits an den Entwickler gemailte Kopien werden auf Anfrage gelöscht.</li>
         <li>Benachrichtigungseinstellungen und Geräte: bis du Benachrichtigungen ausschaltest, das Gerät entfernst oder Desk Crawler oder dein Konto löschst. Ein Gerät, dessen Push-Adresse nicht mehr funktioniert, wird automatisch entfernt. Liste der einzelnen Benachrichtigungen: sieben Tage.</li>
         <li>Sicherungen: etwa eine Woche, danach sind gelöschte Daten auch daraus verschwunden.</li>

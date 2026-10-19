@@ -43,6 +43,7 @@ export const privacyNl: LegalPage = {
         <li>Kortlevende operationele gegevens, zoals tellers voor gebruikslimieten en bewijzen van dubbele verzoeken.</li>
         <li>Als je om verwijdering van je account vraagt: je geverifieerde primaire e-mailadres, een hash van de bevestigingslink en de afleverstatus. De link verloopt na 30 minuten; verlopen verzoeken worden bij de dagelijkse opschoning verwijderd.</li>
         <li>De lanceringslijst van Desk Crawler bevatte e-mailadressen voor één e-mail toen Desk Crawler in de TRMNL-marketplace kwam. Die e-mail is op 13 oktober 2026 verstuurd, elk adres is verwijderd en de lijst is gesloten.</li>
+        <li>De heldherinnering: als je Desk Crawler-held al twee dagen bezig is en je de Desk Crawler-app nooit hebt geopend, sturen we één e-mail naar je geverifieerde primaire adres met wat daar op je wacht, en een link om het te stoppen. Het adres wordt bij het versturen bij Clerk opgehaald en niet bewaard. We bewaren alleen wanneer hij is verstuurd, of dat je hem niet wilt.</li>
         <li>Als je feedback stuurt: je bericht, de pagina waarvandaan je het stuurde, je openbare naam en een link naar je account. Het gaat per e-mail naar de ontwikkelaar, met je geverifieerde primaire e-mailadres als antwoordadres.</li>
       </ul>
 
@@ -77,7 +78,7 @@ export const privacyNl: LegalPage = {
         <li><strong>PostHog EU</strong> verzorgt optionele gebruiksanalytics, foutrapporten en gemaskeerde sessieopnames voor support en productverbeteringen.</li>
         <li><strong>Sentry</strong> (Verenigde Staten) ontvangt foutrapporten van de server van onze website en de backend van het spel, en van je browser als je analytics toestaat, zodat we bugs kunnen vinden en oplossen. Een rapport bevat het paginapad of de naam van de spelfunctie die misging, en de technische details van de fout. Het bevat nooit je account, e-mailadres, IP-adres, cookies, formulierinhoud, querystrings van URL’s of installatiecodes en -tokens.</li>
         <li><strong>De pushdienst van je browser</strong> (Google voor Chrome en Android, Apple voor Safari, Mozilla voor Firefox) bezorgt Desk Crawler-meldingen als je die aanzet. Hij ontvangt de melding versleuteld, dus hij kan hem niet lezen, samen met het pushadres dat je browser maakte.</li>
-        <li><strong>Resend</strong> bezorgt de e-mail om verwijdering van je account te bevestigen op je geverifieerde primaire adres, de lanceringsmail (één keer verstuurd, op 13 oktober 2026) en feedback die je naar de ontwikkelaar stuurt. Resend ontvangt die adressen en de inhoud van de e-mails.</li>
+        <li><strong>Resend</strong> bezorgt de e-mail om verwijdering van je account te bevestigen op je geverifieerde primaire adres, de lanceringsmail (één keer verstuurd, op 13 oktober 2026) en feedback die je naar de ontwikkelaar stuurt. Resend ontvangt die adressen en de inhoud van de e-mails. Het bezorgt ook de ene heldherinnering.</li>
       </ul>
 
       <h2>Hoe lang we het bewaren</h2>
@@ -86,6 +87,7 @@ export const privacyNl: LegalPage = {
         <li>Gedetailleerd avonturenlogboek: drie dagen. Samenvattingen van runs: 30 dagen. Recente XP voor ranglijsten: zeven dagen.</li>
         <li>Bewijzen van dubbele verzoeken: 24 uur. Pogingen om TRMNL te koppelen: minder dan een dag.</li>
         <li>Lanceringslijst: verwijderd toen de lanceringsmail op 13 oktober 2026 uitging. We bewaren geen kopie.</li>
+        <li>Heldherinnering: wanneer hij is verstuurd, of dat je hem niet wilt, tot je je account verwijdert.</li>
         <li>Feedback: tot je je account verwijdert, of eerder op verzoek. Kopieën die al naar de ontwikkelaar zijn gemaild, worden op verzoek verwijderd.</li>
         <li>Meldingsinstellingen en apparaten: tot je meldingen uitzet, het apparaat verwijdert, of Desk Crawler of je account verwijdert. Een apparaat waarvan het pushadres niet meer werkt, wordt automatisch verwijderd. Gegevens van afzonderlijke meldingen: zeven dagen.</li>
         <li>Back-ups: ongeveer een week, daarna zijn verwijderde gegevens er ook uit.</li>

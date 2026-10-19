@@ -43,6 +43,7 @@ export const privacyPt: LegalPage = {
         <li>Registros operacionais de curta duração, como contadores de limite de uso e recibos de pedidos duplicados.</li>
         <li>Quando você pede a exclusão da conta: seu e-mail principal verificado, um hash do link de confirmação e o status de entrega. O link expira depois de 30 minutos; pedidos expirados são removidos na limpeza diária.</li>
         <li>A lista de lançamento do Desk Crawler guardava endereços de e-mail para um único e-mail quando o Desk Crawler chegasse à loja do TRMNL. Esse e-mail foi enviado em 13 de outubro de 2026, todos os endereços foram excluídos e a lista está fechada.</li>
+        <li>O lembrete do herói: se o seu herói do Desk Crawler está em jogo há dois dias e você nunca abriu o app do Desk Crawler, enviamos um único e-mail para seu endereço principal verificado dizendo o que espera por você lá, com um link para parar. O endereço é lido do Clerk no envio e não é guardado. Guardamos só quando foi enviado, ou que você pediu para não receber.</li>
         <li>Se você enviar feedback: sua mensagem, a página de onde enviou, seu nome público e um link para sua conta. Ele vai por e-mail para o desenvolvedor, com seu e-mail principal verificado como endereço de resposta.</li>
       </ul>
 
@@ -77,7 +78,7 @@ export const privacyPt: LegalPage = {
         <li><strong>PostHog EU</strong> cuida da análise de uso opcional, dos relatórios de erro e das gravações de sessão mascaradas para suporte e melhorias do produto.</li>
         <li><strong>Sentry</strong> (Estados Unidos) recebe relatórios de erro do servidor do nosso site e do backend do jogo, e do seu navegador se você permitir a análise, para encontrarmos e corrigirmos bugs. Um relatório traz o caminho da página ou o nome da função do jogo que falhou, e os detalhes técnicos do erro. Ele nunca inclui sua conta, seu e-mail, seu endereço IP, cookies, conteúdo de formulários, query strings de URL nem códigos e tokens de instalação.</li>
         <li><strong>O serviço push do seu navegador</strong> (Google para Chrome e Android, Apple para Safari, Mozilla para Firefox) entrega os alertas do Desk Crawler se você ligá-los. Ele recebe o alerta criptografado, então não consegue lê-lo, junto com o endereço push que seu navegador criou.</li>
-        <li><strong>Resend</strong> entrega o e-mail de confirmação de exclusão da conta para seu endereço principal verificado, o e-mail de lançamento (enviado uma vez, em 13 de outubro de 2026) e o feedback que você envia ao desenvolvedor. Ele recebe esses endereços e o conteúdo dos e-mails.</li>
+        <li><strong>Resend</strong> entrega o e-mail de confirmação de exclusão da conta para seu endereço principal verificado, o e-mail de lançamento (enviado uma vez, em 13 de outubro de 2026) e o feedback que você envia ao desenvolvedor. Ele recebe esses endereços e o conteúdo dos e-mails. Ele também entrega o único lembrete do herói.</li>
       </ul>
 
       <h2>Por quanto tempo guardamos</h2>
@@ -86,6 +87,7 @@ export const privacyPt: LegalPage = {
         <li>Diário de aventuras detalhado: três dias. Resumos de execução: 30 dias. XP recente para rankings: sete dias.</li>
         <li>Recibos de pedidos duplicados: 24 horas. Tentativas de conexão com o TRMNL: menos de um dia.</li>
         <li>Lista de lançamento: excluída quando o e-mail de lançamento saiu, em 13 de outubro de 2026. Não guardamos nenhuma cópia.</li>
+        <li>Lembrete do herói: quando foi enviado, ou que você pediu para não receber, até você excluir sua conta.</li>
         <li>Feedback: até você excluir sua conta, ou antes, se pedir. Cópias já enviadas por e-mail ao desenvolvedor são excluídas a pedido.</li>
         <li>Configurações de alertas e dispositivos: até você desligar os alertas, remover o dispositivo ou excluir o Desk Crawler ou sua conta. Um dispositivo cujo endereço push para de funcionar é removido automaticamente. Registros de alertas individuais: sete dias.</li>
         <li>Backups: cerca de uma semana; depois disso, os dados excluídos somem deles também.</li>

@@ -28,4 +28,7 @@ crons.daily('retention cleanup', { hourUTC: 3, minuteUTC: 5 }, internal.maintena
 /** The day's engagement report kept for trends (D197), just before midnight UTC and away from every tick slot. */
 crons.cron('engagement snapshot', '52 23 * * *', internal.admin.snapshotEngagement, {})
 
+/** D198: the one reminder to owners who never opened the companion, mid-morning in Europe; sends nothing until HERO_REMINDERS=on. */
+crons.cron('hero reminders', '7 9 * * *', internal.heroReminder.queueDaily, {})
+
 export default crons

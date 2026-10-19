@@ -43,6 +43,7 @@ export const privacyEs: LegalPage = {
         <li>Registros operativos de corta duración, como contadores de límite de uso y recibos de solicitudes duplicadas.</li>
         <li>Cuando pides borrar tu cuenta: tu correo principal verificado, un hash del enlace de confirmación y el estado de entrega. El enlace caduca a los 30 minutos; las solicitudes caducadas se eliminan en la limpieza diaria.</li>
         <li>La lista de lanzamiento de Desk Crawler guardaba direcciones de correo para un único correo cuando Desk Crawler llegara a la tienda de TRMNL. Ese correo se envió el 13 de octubre de 2026, todas las direcciones se borraron y la lista está cerrada.</li>
+        <li>El recordatorio del héroe: si tu héroe de Desk Crawler lleva dos días en marcha y nunca has abierto la app de Desk Crawler, enviamos un único correo a tu dirección principal verificada contando lo que te espera allí, con un enlace para pararlo. La dirección se lee de Clerk al enviarlo y no se guarda. Solo guardamos cuándo se envió, o que pediste no recibirlo.</li>
         <li>Si envías comentarios: tu mensaje, la página desde la que lo enviaste, tu nombre público y un enlace a tu cuenta. Se envía por correo al desarrollador con tu correo principal verificado como dirección de respuesta.</li>
       </ul>
 
@@ -77,7 +78,7 @@ export const privacyEs: LegalPage = {
         <li><strong>PostHog EU</strong> gestiona la analítica de uso opcional, los informes de errores y las grabaciones de sesión enmascaradas para soporte y mejoras del producto.</li>
         <li><strong>Sentry</strong> (Estados Unidos) recibe informes de errores del servidor de nuestra web y del backend del juego, y de tu navegador si permites la analítica, para que podamos encontrar y arreglar fallos. Un informe contiene la ruta de la página o el nombre de la función del juego que falló, y los detalles técnicos del error. Nunca incluye tu cuenta, tu correo, tu dirección IP, cookies, contenido de formularios, cadenas de consulta de URL ni códigos y tokens de instalación.</li>
         <li><strong>El servicio push de tu navegador</strong> (Google para Chrome y Android, Apple para Safari, Mozilla para Firefox) entrega las alertas de Desk Crawler si las activas. Recibe la alerta cifrada, así que no puede leerla, junto con la dirección push que creó tu navegador.</li>
-        <li><strong>Resend</strong> entrega el correo de confirmación de borrado de cuenta a tu dirección principal verificada, el correo de lanzamiento (enviado una vez, el 13 de octubre de 2026) y los comentarios que envías al desarrollador. Recibe esas direcciones y el contenido de los correos.</li>
+        <li><strong>Resend</strong> entrega el correo de confirmación de borrado de cuenta a tu dirección principal verificada, el correo de lanzamiento (enviado una vez, el 13 de octubre de 2026) y los comentarios que envías al desarrollador. Recibe esas direcciones y el contenido de los correos. También entrega el único recordatorio del héroe.</li>
       </ul>
 
       <h2>Cuánto tiempo lo guardamos</h2>
@@ -86,6 +87,7 @@ export const privacyEs: LegalPage = {
         <li>Diario de aventuras detallado: tres días. Resúmenes de ejecución: 30 días. XP reciente para las clasificaciones: siete días.</li>
         <li>Recibos de solicitudes duplicadas: 24 horas. Intentos de conexión con TRMNL: menos de un día.</li>
         <li>Lista de lanzamiento: borrada cuando se envió el correo de lanzamiento el 13 de octubre de 2026. No guardamos ninguna copia.</li>
+        <li>Recordatorio del héroe: cuándo se envió, o que pediste no recibirlo, hasta que borres tu cuenta.</li>
         <li>Comentarios: hasta que borres tu cuenta, o antes si lo pides. Las copias ya enviadas por correo al desarrollador se borran si lo pides.</li>
         <li>Ajustes de alertas y dispositivos: hasta que desactives las alertas, quites el dispositivo o borres Desk Crawler o tu cuenta. Un dispositivo cuya dirección push deja de funcionar se quita automáticamente. Registros de alertas individuales: siete días.</li>
         <li>Copias de seguridad: más o menos una semana, después de la cual los datos borrados también desaparecen de ellas.</li>

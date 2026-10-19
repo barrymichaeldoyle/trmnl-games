@@ -43,6 +43,7 @@ export const privacyIt: LegalPage = {
         <li>Dati operativi di breve durata, come contatori dei limiti di frequenza e ricevute delle richieste duplicate.</li>
         <li>Quando chiedi di eliminare l’account: la tua e-mail principale verificata, un hash del link di conferma e lo stato di consegna. Il link scade dopo 30 minuti; le richieste scadute vengono rimosse dalla pulizia quotidiana.</li>
         <li>La lista di lancio di Desk Crawler conteneva indirizzi e-mail per un’unica e-mail all’arrivo di Desk Crawler nel marketplace TRMNL. Quell’e-mail è partita il 13 ottobre 2026, ogni indirizzo è stato eliminato e la lista è chiusa.</li>
+        <li>Il promemoria dell’eroe: se il tuo eroe di Desk Crawler è in gioco da due giorni e non hai mai aperto l’app di Desk Crawler, inviamo un’unica e-mail al tuo indirizzo principale verificato per dirti cosa ti aspetta lì, con un link per fermarla. L’indirizzo viene letto da Clerk al momento dell’invio e non viene conservato. Teniamo solo quando è stata inviata, o che hai chiesto di non riceverla.</li>
         <li>Se mandi un feedback: il tuo messaggio, la pagina da cui l’hai inviato, il tuo nome pubblico e un link al tuo account. Viene inviato per e-mail allo sviluppatore con la tua e-mail principale verificata come indirizzo di risposta.</li>
       </ul>
 
@@ -77,7 +78,7 @@ export const privacyIt: LegalPage = {
         <li><strong>PostHog EU</strong> gestisce l’analisi d’uso facoltativa, le segnalazioni di errore e le registrazioni di sessione mascherate per l’assistenza e il miglioramento del prodotto.</li>
         <li><strong>Sentry</strong> (Stati Uniti) riceve segnalazioni di errore dal server del sito e dal backend del gioco, e dal tuo browser se consenti l’analisi, per trovare e correggere i bug. Una segnalazione contiene il percorso della pagina o il nome della funzione di gioco che ha fallito, e i dettagli tecnici dell’errore. Non include mai il tuo account, l’e-mail, l’indirizzo IP, i cookie, il contenuto dei moduli, le stringhe di query degli URL né codici e token di installazione.</li>
         <li><strong>Il servizio push del tuo browser</strong> (Google per Chrome e Android, Apple per Safari, Mozilla per Firefox) consegna gli avvisi di Desk Crawler se li attivi. Riceve l’avviso cifrato, quindi non può leggerlo, insieme all’indirizzo push creato dal browser.</li>
-        <li><strong>Resend</strong> consegna l’e-mail di conferma dell’eliminazione dell’account al tuo indirizzo principale verificato, l’e-mail di lancio (inviata una sola volta, il 13 ottobre 2026) e i feedback che mandi allo sviluppatore. Riceve quegli indirizzi e il contenuto delle e-mail.</li>
+        <li><strong>Resend</strong> consegna l’e-mail di conferma dell’eliminazione dell’account al tuo indirizzo principale verificato, l’e-mail di lancio (inviata una sola volta, il 13 ottobre 2026) e i feedback che mandi allo sviluppatore. Riceve quegli indirizzi e il contenuto delle e-mail. Consegna anche l’unico promemoria dell’eroe.</li>
       </ul>
 
       <h2>Per quanto tempo li conserviamo</h2>
@@ -86,6 +87,7 @@ export const privacyIt: LegalPage = {
         <li>Diario delle avventure dettagliato: tre giorni. Riepiloghi delle esecuzioni: 30 giorni. XP recente per le classifiche: sette giorni.</li>
         <li>Ricevute delle richieste duplicate: 24 ore. Tentativi di collegamento a TRMNL: meno di un giorno.</li>
         <li>Lista di lancio: eliminata quando è partita l’e-mail di lancio il 13 ottobre 2026. Non ne conserviamo copie.</li>
+        <li>Promemoria dell’eroe: quando è stato inviato, o che hai chiesto di non riceverlo, finché non elimini l’account.</li>
         <li>Feedback: finché non elimini l’account, o prima su richiesta. Le copie già inviate per e-mail allo sviluppatore vengono eliminate su richiesta.</li>
         <li>Impostazioni degli avvisi e dispositivi: finché non spegni gli avvisi, rimuovi il dispositivo o elimini Desk Crawler o l’account. Un dispositivo il cui indirizzo push smette di funzionare viene rimosso in automatico. Registri dei singoli avvisi: sette giorni.</li>
         <li>Backup: circa una settimana, dopo la quale i dati eliminati spariscono anche da lì.</li>

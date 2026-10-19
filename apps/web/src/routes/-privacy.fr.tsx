@@ -43,6 +43,7 @@ export const privacyFr: LegalPage = {
         <li>Des données techniques de courte durée, comme des compteurs de limitation de débit et des reçus de requêtes en double.</li>
         <li>Quand vous demandez la suppression de votre compte : votre adresse e-mail principale vérifiée, une empreinte du lien de confirmation et l’état de l’envoi. Le lien expire au bout de 30 minutes ; les demandes expirées sont effacées par un nettoyage quotidien.</li>
         <li>La liste de lancement de Desk Crawler contenait des adresses e-mail pour un seul e-mail, envoyé à l’arrivée de Desk Crawler sur la boutique TRMNL. Cet e-mail est parti le 13 octobre 2026, toutes les adresses ont été supprimées et la liste est close.</li>
+        <li>Le rappel du héros : si votre héros Desk Crawler joue depuis deux jours et que vous n’avez jamais ouvert l’application Desk Crawler, nous envoyons un seul e-mail à votre adresse principale vérifiée pour dire ce qui vous y attend, avec un lien pour l’arrêter. L’adresse est lue chez Clerk au moment de l’envoi et n’est pas conservée. Nous gardons seulement la date d’envoi, ou le fait que vous ne voulez pas le recevoir.</li>
         <li>Si vous envoyez un retour : votre message, la page d’où vous l’avez envoyé, votre nom public et un lien vers votre compte. Il est envoyé par e-mail au développeur avec votre adresse e-mail principale vérifiée comme adresse de réponse.</li>
       </ul>
 
@@ -69,7 +70,7 @@ export const privacyFr: LegalPage = {
         <li><strong>PostHog UE</strong> traite la mesure d’audience facultative, les rapports d’erreur et les enregistrements de session masqués, pour l’assistance et l’amélioration du produit.</li>
         <li><strong>Sentry</strong> (États-Unis) reçoit les rapports d’erreur du serveur de notre site et du backend du jeu, et de votre navigateur si vous acceptez la mesure d’audience, pour que nous puissions trouver et corriger les bugs. Un rapport contient le chemin de la page ou le nom de la fonction du jeu qui a échoué, et les détails techniques de l’erreur. Il ne contient jamais votre compte, votre adresse e-mail, votre adresse IP, vos cookies, le contenu des formulaires, les paramètres d’URL, ni les codes et jetons d’installation.</li>
         <li><strong>Le service de notifications de votre navigateur</strong> (Google pour Chrome et Android, Apple pour Safari, Mozilla pour Firefox) délivre les alertes Desk Crawler si vous les activez. Il reçoit l’alerte chiffrée, sans pouvoir la lire, avec l’adresse de notification créée par votre navigateur.</li>
-        <li><strong>Resend</strong> délivre l’e-mail de confirmation de suppression du compte à votre adresse principale vérifiée, l’e-mail de lancement (envoyé une fois, le 13 octobre 2026) et les retours que vous envoyez au développeur. Il reçoit ces adresses et le contenu des e-mails.</li>
+        <li><strong>Resend</strong> délivre l’e-mail de confirmation de suppression du compte à votre adresse principale vérifiée, l’e-mail de lancement (envoyé une fois, le 13 octobre 2026) et les retours que vous envoyez au développeur. Il reçoit ces adresses et le contenu des e-mails. Il délivre aussi l’unique rappel du héros.</li>
       </ul>
 
       <h2>Durée de conservation</h2>
@@ -78,6 +79,7 @@ export const privacyFr: LegalPage = {
         <li>Journal d’aventure détaillé : trois jours. Résumés des tours : 30 jours. XP récente pour les classements : sept jours.</li>
         <li>Reçus de requêtes en double : 24 heures. Tentatives de connexion TRMNL : moins d’un jour.</li>
         <li>Liste de lancement : supprimée lors de l’envoi de l’e-mail de lancement, le 13 octobre 2026. Nous n’en gardons aucune copie.</li>
+        <li>Rappel du héros : la date d’envoi, ou votre refus, jusqu’à la suppression de votre compte.</li>
         <li>Retours : jusqu’à la suppression de votre compte, ou plus tôt sur demande. Les copies déjà envoyées par e-mail au développeur sont supprimées sur demande.</li>
         <li>Réglages et appareils d’alerte : jusqu’à ce que vous désactiviez les alertes, retiriez l’appareil, ou supprimiez Desk Crawler ou votre compte. Un appareil dont l’adresse de notification ne fonctionne plus est retiré automatiquement. Historique des alertes : sept jours.</li>
         <li>Sauvegardes : environ une semaine, après quoi les données supprimées en disparaissent aussi.</li>

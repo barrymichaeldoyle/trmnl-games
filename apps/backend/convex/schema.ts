@@ -542,6 +542,9 @@ export default defineSchema({
     language: v.optional(locale),
     /** P33: opt-in push alerts; absent means every kind off. Quiet hours are whole hours in `timezone`. */
     alerts: v.optional(alertPreferences),
+    /** D198: when the one hero reminder email went out (or was claimed for sending), and when the owner asked for none. */
+    heroReminderSentAt: v.optional(v.number()),
+    heroReminderStoppedAt: v.optional(v.number()),
     /** D154: the key (YYYY-MM-DD.NN) of the newest What's new change the owner dismissed; absent means none since joining. */
     whatsNewSeen: v.optional(v.string()),
   })
