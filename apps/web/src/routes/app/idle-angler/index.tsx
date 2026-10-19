@@ -171,7 +171,7 @@ function DockPage() {
                     <p className="text-sm text-muted">{t.baitList(water.baits.filter((b) => b !== 'deadbait' || !full || full.features.deadbait).map((b) => words.bait(b)).join(', '))}</p>
                     {held(water).length === 0 ? <p className="text-sm text-hp-ink">{t.noneOfItsBait}</p> : null}
                   </>
-                ) : water.closed ? <p className="text-sm text-muted">{t.winterOnly}</p> : water.charter ? <p className="text-sm text-muted">{t.charterLine} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.bookInShop}</Link>.</p> : <p className="text-sm text-muted">{water.opensAfter ? <>{t.opensOnce(water.opensAfter.species, Math.min(water.opensAfter.logged, water.opensAfter.species))[0]}<WaterName id={water.opensAfter.waterId} />{t.opensOnce(water.opensAfter.species, Math.min(water.opensAfter.logged, water.opensAfter.species))[1]}</> : t.opensLater}{water.access ? t.withPass(words.pass(water.access)) : ''}.</p>}
+                ) : water.closed ? <p className="text-sm text-muted">{t.winterOnly}</p> : water.charter ? <p className="text-sm text-muted">{t.charterLine} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.bookInShop}</Link>.</p> : <p className="text-sm text-muted">{water.opensAfter ? <>{t.opensOnce(water.opensAfter.species, Math.min(water.opensAfter.logged, water.opensAfter.species))[0]}<FromWater id={water.opensAfter.waterId} />{t.opensOnce(water.opensAfter.species, Math.min(water.opensAfter.logged, water.opensAfter.species))[1]}</> : t.opensLater}{water.access ? t.withPass(words.pass(water.access)) : ''}.</p>}
               </div>
               {water.open && water.id !== angler.waterId && water.id !== angler.travelTo ? (
                 <Button variant="secondary" disabled={travel.pending} onClick={() => {
@@ -201,6 +201,18 @@ function DockPage() {
 }
 
 /** The scene from the dock alone: the water the angler fishes or heads to, its band and weather, and the pose the latest story calls for. */
+/**
+ * D200: the water a gate counts species from, in the language's "from" form with the name in bold ("von der
+ * Flussbiegung", "du Méandre"). English, and Polish (whose form inflects the name), keep the bare name.
+ */
+function FromWater({ id }: { id: string }) {
+  const words = useAngler()
+  const water = words.waterName(id)
+  const at = water.of.indexOf(water.name)
+  if (words.locale === 'en' || at < 0) return <WaterName id={id} />
+  return <>{water.of.slice(0, at)}<WaterName id={id} />{water.of.slice(at + water.name.length)}</>
+}
+
 function sceneFromDock(dock: Dock): SceneKey | null {
   const angler = dock.angler
   const water = dock.waters?.find((w) => w.id === (angler?.travelTo ?? angler?.waterId))
