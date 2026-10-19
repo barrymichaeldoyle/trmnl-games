@@ -42,12 +42,12 @@ function Shell() {
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
   const banner = status && status !== 'live' ? <p className="mx-auto mt-3 w-full max-w-3xl px-4 text-sm font-semibold text-muted">{status === 'hidden' ? 'Hidden: only admins can see Paper Lives' : 'Preview: only admins can open Paper Lives'}</p> : null
   if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label="Loading Paper Lives…" /></main>
-  if (view?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title="Removing Paper Lives progress"><p>Your account and your other games stay. You can start again from TRMNL once removal finishes.</p></Card></main>
+  if (view?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title="Deleting your Paper Lives progress"><p>Your account and your other games stay. Once it’s done, you can start again from TRMNL.</p></Card></main>
   if (!view?.life) {
     return (
       <>{banner}<main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
         <Card title="Start on TRMNL">
-          <p>Install the Paper Lives plugin from the TRMNL marketplace, connect it here, then save it in TRMNL. A life begins within fifteen minutes.</p>
+          <p>Install the Paper Lives plugin from the TRMNL marketplace, connect it here, then save it in TRMNL. Your first life will start within fifteen minutes.</p>
           <Link to="/help/paper-lives" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">How Paper Lives works</Link>
         </Card>
       </main></>
@@ -56,8 +56,8 @@ function Shell() {
   if (view.life.activationState === 'pending_trmnl' && !settings) {
     return (
       <>{banner}<main id="main" className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8">
-        <Card title="Save in TRMNL to start">
-          <p>{view.life.first} {view.life.last} is about to be born. Back in TRMNL, click <strong>Save</strong> on the Paper Lives plugin and the first years begin.</p>
+        <Card title="One more step in TRMNL">
+          <p>{view.life.first} {view.life.last} is almost here. Click <strong>Save</strong> on the Paper Lives plugin in TRMNL and their life will begin.</p>
           <Link to="/help/paper-lives" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">Help with setup</Link>
         </Card>
         {view.life.canRename ? <BabySetup view={view} waiting /> : null}

@@ -36,7 +36,7 @@ function WorkPage() {
       <Card title="Work">
         <Rows rows={[
           ['Education', EDUCATION_LABEL[work.education] ?? work.education],
-          ['Job', work.job ? <><strong>{work.job.name}</strong>{work.job.since !== null ? <span className="text-muted"> since age {work.job.since}</span> : null}</> : work.retired ? 'Retired' : life.age < 18 ? 'Not yet' : 'Between jobs'],
+          ['Job', work.job ? <><strong>{work.job.name}</strong>{work.job.since !== null ? <span className="text-muted"> since age {work.job.since}</span> : null}</> : work.retired ? 'Retired' : life.age < 18 ? 'Too young to work' : 'Between jobs'],
           work.job ? ['Tier', `${work.job.tier} of 5`] : null,
           ['Hobby', work.hobby ?? 'None yet'],
         ]} />
@@ -46,15 +46,15 @@ function WorkPage() {
           ['Savings', <strong className="tabular-nums">{money(life.gold)}</strong>],
           ['Income a year', <span className="tabular-nums">{money(work.income)}</span>],
           ['Living cost a year', <span className="tabular-nums">{money(work.livingCost)}</span>],
-          ['Each year', <span className={`tabular-nums ${net < 0 ? 'text-hp-ink' : ''}`}>{net >= 0 ? `+${money(net)}` : money(net)}</span>],
+          ['Left over each year', <span className={`tabular-nums ${net < 0 ? 'text-hp-ink' : ''}`}>{net >= 0 ? `+${money(net)}` : money(net)}</span>],
         ]} />
-        <p className="mt-3 text-sm text-muted">Money never falls below -2,000.</p>
+        <p className="mt-3 text-sm text-muted">Savings can dip to -2,000 but never lower.</p>
       </Card>
       <Card title="Home">
         <Rows rows={[
           ['Home', HOME_LABEL[work.home]],
           work.house ? ['House', work.house.charAt(0).toUpperCase() + work.house.slice(1)] : null,
-          ['Will', work.will ? WILL_LABEL[work.will] : life.age >= 60 ? 'Not written yet' : 'Offered from 60'],
+          ['Will', work.will ? WILL_LABEL[work.will] : life.age >= 60 ? 'Not written yet' : 'Can be written from 60'],
         ]} />
       </Card>
     </>

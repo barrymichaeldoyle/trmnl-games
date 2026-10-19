@@ -17,8 +17,8 @@ export const Route = createFileRoute('/app/paper-lives/settings')({
 })
 
 const PAPER_LIVES_ALERTS: readonly AlertKindCopy[] = [
-  { id: 'majorDecision', name: 'Big decision', blurb: 'A marriage, a move, a job or the will is waiting and the year can close. Once per decision.' },
-  { id: 'lifeEnded', name: 'Life ended', blurb: 'The character has died and the next life can begin. Waits until quiet hours end.' },
+  { id: 'majorDecision', name: 'Big decision', blurb: 'A big choice like a marriage, a move, a job or the will needs you before the year ends. One alert per decision.' },
+  { id: 'lifeEnded', name: 'Life ended', blurb: 'Your character has died and the next life is ready to start. Sent after quiet hours.' },
   { id: 'newArrival', name: 'New baby', blurb: 'A child or grandchild joins the family. Skipped during quiet hours.' },
 ]
 
@@ -59,10 +59,10 @@ function SettingsPage() {
       <h2 className="font-display text-2xl font-bold">Settings</h2>
       {active && life.status !== 'ended' ? (
         <Card title="Pause">
-          <p>{life.status === 'paused' ? 'The life is paused. No years pass until you resume, and the year picks up where it stopped.' : 'A year passes every few hours, day and night.'}</p>
+          <p>{life.status === 'paused' ? `${life.first}’s life is on hold. When you resume, the year will pick up right where it left off.` : `${life.first} grows a year older every few hours, day and night.`}</p>
           <div className="mt-3">
             {life.status === 'paused'
-              ? <Button pending={resume.pending} onClick={() => void resume.run({}, 'The life goes on.')}>Resume</Button>
+              ? <Button pending={resume.pending} onClick={() => void resume.run({}, `Welcome back. ${life.first}’s year carries on.`)}>Resume</Button>
               : <Button variant="secondary" disabled={pause.pending} onClick={() => setAskingPause(true)}>Pause this life</Button>}
           </div>
           <ActionFeedback error={pause.error ?? resume.error} message={pause.message ?? resume.message} />
@@ -70,7 +70,7 @@ function SettingsPage() {
       ) : null}
       {active ? (
         <Card title="Public profile">
-          <p>{life.publicProfile ? 'Your current life and your finished lives show on your public profile.' : 'Paper Lives is hidden from your public profile.'} The boards always show your public name.</p>
+          <p>{life.publicProfile ? 'Your current life and your finished lives show on your public profile.' : 'Paper Lives is hidden from your public profile.'} Rankings always show your public name.</p>
           <div className="mt-3">
             <Button variant={life.publicProfile ? 'quiet' : 'secondary'} pending={profile.pending} onClick={() => void profile.run({ visible: !life.publicProfile }, life.publicProfile ? 'Paper Lives is hidden from your profile.' : 'Paper Lives now shows on your profile.')}>
               {life.publicProfile ? 'Hide from my profile' : 'Show on my profile'}
@@ -79,7 +79,7 @@ function SettingsPage() {
           <ActionFeedback error={profile.error} message={profile.message} />
         </Card>
       ) : null}
-      {active ? <AlertsCard notify={notify} kinds={PAPER_LIVES_ALERTS} intro="Get a nudge on this phone when something big happens in the life." quietNote="During quiet hours, decisions and deaths wait until morning and births are skipped. A decision that closes overnight is dropped." /> : null}
+      {active ? <AlertsCard notify={notify} kinds={PAPER_LIVES_ALERTS} intro={life.status === 'ended' ? 'Get a nudge on this phone when something big happens in your character’s life.' : `Get a nudge on this phone when something big happens in ${life.first}’s life.`} quietNote="During quiet hours, decision and death alerts wait until morning, and birth alerts are skipped. If a decision closes overnight, you won’t get an alert for it." /> : null}
       <Card title="Delete Paper Lives progress">
         <p>This removes the current life, every finished life in the album with its photos, your Paper Lives achievements and your Paper Lives connections. Your TRMNL Games account and your other games stay. It cannot be undone.</p>
         <label className="mt-3 flex flex-col gap-1">
@@ -107,8 +107,8 @@ function SettingsPage() {
         }}
       >
         <Consequences>
-          <li>No years pass and nothing happens until you resume.</li>
-          <li>The year keeps its place, and any open decision waits.</li>
+          <li>Time stops for {life.first} until you resume.</li>
+          <li>Any choice you haven’t made yet will wait for you.</li>
           <li>Resume any time from this page.</li>
         </Consequences>
       </ConfirmSheet>

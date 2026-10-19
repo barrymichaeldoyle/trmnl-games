@@ -38,7 +38,7 @@ function RankingsPage() {
         {(['week', 'all'] as const).map((p) => <Button key={p} variant={period === p ? 'primary' : 'secondary'} aria-pressed={period === p} onClick={() => setPeriod(p)}>{p === 'week' ? 'This week' : 'All time'}</Button>)}
       </div>
       <Card title={`${BOARD_LABEL[board]}, ${period === 'week' ? 'this week' : 'all time'}`}>
-        {view && period === 'week' ? <p className="mb-3 text-sm text-muted">The week starts again <LocalTime at={view.weekEndsAt} format={(d) => d.toLocaleDateString([], { weekday: 'long' })} />. Only finished lives rank.</p> : <p className="mb-3 text-sm text-muted">Only finished lives rank, each player’s best.</p>}
+        {view && period === 'week' ? <p className="mb-3 text-sm text-muted">A new week starts on <LocalTime at={view.weekEndsAt} format={(d) => d.toLocaleDateString([], { weekday: 'long' })} />. Only finished lives are ranked.</p> : <p className="mb-3 text-sm text-muted">Each player’s best finished life.</p>}
         {view && view.entries.length === 0 ? <p className="text-muted">No finished lives yet.</p> : null}
         <ol className="flex flex-col">
           {(view?.entries ?? []).map((row) => (
@@ -48,8 +48,8 @@ function RankingsPage() {
             </li>
           ))}
         </ol>
-        {view?.own && view.own.rank === null ? <p className="mt-3 text-sm">Your best: {show(board, view.own.value)}, further down the board.</p> : null}
-        {view && !view.own ? <p className="mt-3 text-sm text-muted">You have no finished life on this board yet.</p> : null}
+        {view?.own && view.own.rank === null ? <p className="mt-3 text-sm">Your best: {show(board, view.own.value)}, just outside the list.</p> : null}
+        {view && !view.own ? <p className="mt-3 text-sm text-muted">Finish a life to show up here.</p> : null}
       </Card>
     </>
   )

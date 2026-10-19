@@ -46,10 +46,10 @@ export function PhotoClaim({ name }: { name: string }) {
       await submission.current.run({ code: normalized }, async (input) => {
         const result = await mutate(input)
         if (isRefusal(result)) { setError(result.message); return }
-        if (result.outcome === 'invalid_code') setError('That code doesn’t match your TRMNL connection. Check the digits on your screen, or wait for its next refresh.')
+        if (result.outcome === 'invalid_code') setError('That code doesn’t match. Check the digits on your TRMNL, or try again after it refreshes.')
         else if (result.outcome === 'already_claimed') setMessage('This week’s photo is already in the album.')
         else {
-          setMessage(`Photo taken. ${name} is in the album at this age now.`)
+          setMessage('Photo taken and added to the album.')
           setCode('')
           captureAnalytics('photo taken', { total: result.totalCollected })
         }
@@ -60,11 +60,11 @@ export function PhotoClaim({ name }: { name: string }) {
 
   return (
     <Card title="Photos">
-      <p>Each week your TRMNL shows a <strong>Photo code</strong> in its title bar. Enter it to take a photo of {name} as they are this week. Photos stay in the album after the life ends.</p>
+      <p>Each week your TRMNL shows a <strong>Photo code</strong> in its title bar. Enter it here to take a photo of {name} this week. Photos stay in the album after the life ends.</p>
       {!book.living ? (
         <p className="mt-3 text-sm text-muted">Begin the next life to take this week’s photo.</p>
       ) : book.claimedThisWeek ? (
-        <p className="mt-3 text-sm font-semibold">This week’s photo is in the album. A new code appears on {book.nextAvailableAt ? <LocalTime at={book.nextAvailableAt} format={weekday} /> : null}.</p>
+        <p className="mt-3 text-sm font-semibold">You’ve taken this week’s photo. A new code will show up on {book.nextAvailableAt ? <LocalTime at={book.nextAvailableAt} format={weekday} /> : null}.</p>
       ) : book.connected ? (
         <form onSubmit={submit} className="mt-3 flex flex-wrap items-end gap-3">
           <label className="flex flex-col gap-1">
@@ -74,7 +74,7 @@ export function PhotoClaim({ name }: { name: string }) {
           <Button type="submit" disabled={code.replace(/\s/g, '').length !== 6} pending={pending} busyLabel="Checking…">Take the photo</Button>
         </form>
       ) : (
-        <p className="mt-3 text-sm text-muted">Connect a TRMNL with Paper Lives to see this week’s code.</p>
+        <p className="mt-3 text-sm text-muted">Connect your TRMNL to get this week’s code.</p>
       )}
       <ActionFeedback error={error} message={message} />
       {book.photos.length > 0 ? <div className="mt-4"><Photos photos={book.photos} label={`Photos of ${name}`} /></div> : null}

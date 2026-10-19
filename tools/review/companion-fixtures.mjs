@@ -28,7 +28,7 @@
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
  *   | paused | memorial (ended, heirs) | long (worst-case names) | pending | none; /profile/<alias>/lives/1 serves a public life page. Fixtures come
  *   from the real backend: PL_FIXTURES=1 npx vitest run tests/convex/paper-lives-fixtures.test.ts
- *   year=early (content v3: a year not ready yet, Queue Age up)   year=queued (the same, queued)
+ *   year=early (content v3: a year not ready yet, Age up when ready)   year=queued (the same, queued)
  *   story=long (D182: a story longer than one page, for Show earlier years)
  *   photos=done (L6: this week's photo taken)   photos=none (no photos, no TRMNL connected)   alerts=on also turns on Paper Lives' three kinds
  * The dev deployment's scene art is used when apps/web/.env.local sets VITE_CONVEX_SITE_URL.

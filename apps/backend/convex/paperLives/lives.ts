@@ -239,9 +239,9 @@ export const begin = mutation({
   handler: async (ctx, { operationId, kind, personId }) =>
     strip(
       await lifeIntent('paperLives.begin', async (ctx, life, content, i) => {
-        if (life.life.status !== 'ended') throw appError('INVALID_STATE', 'This life is still being lived.')
+        if (life.life.status !== 'ended') throw appError('INVALID_STATE', "This life isn't over yet.")
         const record = await recordOf(ctx, life.userId, life.ordinal)
-        if (record === null) throw appError('INVALID_STATE', 'This life is still being written. Try again shortly.')
+        if (record === null) throw appError('INVALID_STATE', 'Still adding this life to the album. Try again in a moment.')
         const world = await readEngineWorld(ctx, PAPER_LIVES_RUNTIME)
         const seed = deriveLifeSeeds(world?.worldSeed ?? 'world', `${life._id}:${life.ordinal + 1}`, world?.currentTick ?? 0, PAPER_LIVES_RUNTIME.simulationVersion).birth
         let next
@@ -249,7 +249,7 @@ export const begin = mutation({
           const children = record.heirs.filter((h) => h.role === 'child')
           // The oldest by default, or the player's choice.
           const heir = i.personId === undefined ? [...children].sort((a, b) => b.age - a.age)[0] : children.find((h) => h.id === i.personId)
-          if (!heir) throw appError('INVALID_INPUT', 'That child cannot take up the story.')
+          if (!heir) throw appError('INVALID_INPUT', "That child can't carry on the story.")
           next = beginChild(toLifeRecord(record), heir.id, content, seed)
         } else {
           next = starterLife(content, seed)
@@ -348,7 +348,7 @@ export const view = query({
                     major: def.major,
                     chosen: pending.chosen ?? null,
                     default: def.default,
-                    options: def.options.map((o) => ({ id: o.id, label: filled(o.label), open: optionOpen(life, o), reason: optionOpen(life, o) ? null : (o.gateReason ?? 'Not open to this life.') })),
+                    options: def.options.map((o) => ({ id: o.id, label: filled(o.label), open: optionOpen(life, o), reason: optionOpen(life, o) ? null : (o.gateReason ?? 'Not possible in this life.') })),
                   }
                 : null,
             },

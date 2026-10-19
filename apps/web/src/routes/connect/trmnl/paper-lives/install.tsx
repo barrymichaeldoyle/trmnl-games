@@ -112,8 +112,8 @@ function ConnectForm() {
       )}
       <SwitchAccount returnTo="/connect/trmnl/paper-lives/install" />
       {error ? <p role="alert" className="font-semibold text-hp-ink">{error}</p> : null}
-      <Button type="submit" pending={submitting} busyLabel="Connecting…">Connect this TRMNL installation</Button>
-      <p className="text-sm text-muted">Next, TRMNL asks you to save the plugin. Saving starts the first life: a baby is born within fifteen minutes.</p>
+      <Button type="submit" pending={submitting} busyLabel="Connecting…">Connect TRMNL</Button>
+      <p className="text-sm text-muted">Next, TRMNL will ask you to save the plugin. Once you do, your first baby will be born within fifteen minutes.</p>
     </form>
   )
 }

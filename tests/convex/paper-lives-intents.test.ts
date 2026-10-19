@@ -85,11 +85,11 @@ describe('Paper Lives intents (D159, L2)', () => {
       },
       'Di',
     )
-    expect(await as('Di').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'stranger' })).toMatchObject({ ok: false, message: expect.stringContaining('still being lived') })
+    expect(await as('Di').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'stranger' })).toMatchObject({ ok: false, message: expect.stringContaining("isn't over yet") })
     for (let i = 0; i < 400 && (await lifeOf(t, lifeId)).life.status !== 'ended'; i += 1) await nextPaperLivesTick(t)
     const memorial = await as('Di').query(api.paperLives.lives.view, {})
     expect(memorial.memorial).toMatchObject({ recorded: true, heirs: [{ id: 'c1', name: 'Ada' }, { id: 'c2', name: 'Bea' }] })
-    expect(await as('Di').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'child', personId: 'nobody' })).toMatchObject({ ok: false, message: expect.stringContaining('cannot take up the story') })
+    expect(await as('Di').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'child', personId: 'nobody' })).toMatchObject({ ok: false, message: expect.stringContaining("can't carry on the story") })
     expect(await as('Di').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'child' })).toMatchObject({ changed: true })
     const child = await lifeOf(t, lifeId)
     expect(child).toMatchObject({ ordinal: 2, life: { first: 'Ada', status: 'living', generation: 2 } })
@@ -107,7 +107,7 @@ describe('Paper Lives intents (D159, L2)', () => {
   it('begins a stranger at birth when there is no child to carry on', async () => {
     const lifeId = await seedLife(t, { age: 100, stage: 'senior', stats: { health: 0, happiness: 60, smarts: 50, charm: 50 }, people: [] }, 'Fay')
     for (let i = 0; i < 400 && (await lifeOf(t, lifeId)).life.status !== 'ended'; i += 1) await nextPaperLivesTick(t)
-    expect(await as('Fay').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'child' })).toMatchObject({ ok: false, message: expect.stringContaining('cannot take up the story') })
+    expect(await as('Fay').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'child' })).toMatchObject({ ok: false, message: expect.stringContaining("can't carry on the story") })
     expect(await as('Fay').mutation(api.paperLives.lives.begin, { operationId: opId(), kind: 'stranger' })).toMatchObject({ changed: true })
     const next = await lifeOf(t, lifeId)
     expect(next).toMatchObject({ ordinal: 2, life: { age: 0, stage: 'infant', generation: 1, status: 'living' } })

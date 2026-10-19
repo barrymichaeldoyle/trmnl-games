@@ -26,19 +26,19 @@ export function BabySetup({ view, notify, waiting = false }: { view: LifeView; n
   const save = () => {
     if (!firstChecked.ok || (life.canRenameLast && !lastChecked.ok)) return
     const surname = life.canRenameLast && lastChecked.ok ? lastChecked.value : undefined
-    void rename.run({ first: firstChecked.value, ...(surname ? { last: surname } : {}) }, `Named ${firstChecked.value} ${surname ?? life.last}.`)
+    void rename.run({ first: firstChecked.value, ...(surname ? { last: surname } : {}) }, `Welcome, ${firstChecked.value} ${surname ?? life.last}!`)
   }
   return (
     <Card title={waiting ? 'Your baby is on the way' : 'Your baby'}>
       <p className="text-sm">
         {parents.length > 0 ? <>Born to {parents.map((p, i) => <span key={p.id}>{i > 0 ? ' and ' : ''}<strong>{p.name}</strong>{p.label ? <span className="text-muted"> ({p.label.toLowerCase()})</span> : null}</span>)}. </> : null}
-        Choose a girl or a boy and a name. You can change these until school starts at six.
+        Pick a girl or a boy and choose a name. You can change both until {life.first} starts school at six.
       </p>
       <fieldset className="mt-4">
         <legend className="text-sm font-semibold">A girl or a boy</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {(['she', 'he'] as const).map((choice) => (
-            <Button key={choice} variant={life.pronouns === choice ? 'primary' : 'secondary'} aria-pressed={life.pronouns === choice} disabled={sex.pending} onClick={() => { if (life.pronouns !== choice) void sex.run({ pronouns: choice }, choice === 'she' ? 'A girl.' : 'A boy.') }}>
+            <Button key={choice} variant={life.pronouns === choice ? 'primary' : 'secondary'} aria-pressed={life.pronouns === choice} disabled={sex.pending} onClick={() => { if (life.pronouns !== choice) void sex.run({ pronouns: choice }, choice === 'she' ? 'It’s a girl!' : 'It’s a boy!') }}>
               {choice === 'she' ? 'Girl' : 'Boy'}
             </Button>
           ))}

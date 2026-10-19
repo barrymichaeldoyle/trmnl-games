@@ -88,7 +88,7 @@ function Connection({ uuid }: { uuid: string }) {
     <Card title="This installation">
       {instance.state === 'active' ? (
         <p>
-          Showing <strong>{heroName ?? 'your character'}</strong>'s life on your TRMNL. The years pass whether or not the screen is connected.
+          <strong>{heroName ?? 'Your character'}</strong>’s life is on your TRMNL. The years keep passing even when the screen is offline.
         </p>
       ) : (
         <p>This installation is disconnected. Install Paper Lives again from TRMNL to reconnect it.</p>

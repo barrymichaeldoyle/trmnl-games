@@ -32,7 +32,7 @@ function Until({ at }: { at: number }) {
   if (!hydrated) return null
   const minutes = Math.max(1, Math.ceil((at - now) / 60_000))
   const hours = Math.floor(minutes / 60)
-  return <span className="text-muted">({hours > 0 ? `in ${hours} h ${minutes % 60} min` : `in ${minutes} min`})</span>
+  return <>{hours > 0 ? `in ${hours} h ${minutes % 60} min` : `in ${minutes} min`}</>
 }
 
 const ORDINALS = ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth']
@@ -56,6 +56,7 @@ function LifePage() {
   // A year is ready once its two-hour minimum is reached at the next tick; Age up then ends it on the spot.
   const ready = year !== null && year.elapsed + 1 >= year.minimum
   const lastYear = agedFrom !== null && life.age === agedFrom + 1 ? (view.logs ?? []).filter((log) => log.age === agedFrom && (log.kind === 'event' || log.kind === 'decision_resolved' || log.kind === 'check')).reverse() : null
+  const next = life.age + 1
   const generation = `${ORDINALS[life.generation - 1] ?? `${life.generation}th`} generation`
   return (
     <>
@@ -90,13 +91,13 @@ function LifePage() {
 
       {!ended && life.stage === 'infant' ? (
         <Card title="The first years">
-          <p>The first six years pass quickly, one every fifteen minutes. School starts at six, and the first decisions come after that.</p>
+          <p>{life.first} will grow a year older every fifteen minutes until six. Then school starts and the first decisions come along.</p>
         </Card>
       ) : null}
 
       {!ended && life.status === 'paused' ? (
         <Card title="Life paused">
-          <p>No years pass while the life is paused. <Link to="/app/paper-lives/settings" className="underline underline-offset-4">Resume on the More page</Link>.</p>
+          <p>{life.first}’s life is on hold. No time will pass until you <Link to="/app/paper-lives/settings" className="underline underline-offset-4">resume it on the More page</Link>.</p>
         </Card>
       ) : null}
 
@@ -104,16 +105,16 @@ function LifePage() {
         <Card title={`${life.first} is ${life.age}`}>
           {lastYear.length > 0 ? (
             <>
-              <p className="text-sm text-muted">Age {agedFrom}, looking back:</p>
+              <p className="text-sm text-muted">What happened at {agedFrom}:</p>
               <ol className="mt-2 flex flex-col gap-1 text-sm">{lastYear.map((log) => <li key={log.id}><Named text={log.summary} names={names} /><Changes log={log} /></li>)}</ol>
             </>
-          ) : <p className="text-sm text-muted">A quiet year, and a new one begins.</p>}
+          ) : <p className="text-sm text-muted">A quiet year. On to {life.age}.</p>}
           <div className="mt-3"><Button variant="quiet" onClick={() => setAgedFrom(null)}>Carry on</Button></div>
         </Card>
       ) : null}
 
       {year && life.status === 'living' ? (
-        <Card title={`Age ${life.age}, ${year.yearEnd ? 'the year’s end' : SEASON[year.season].toLowerCase()}`}>
+        <Card title={`Age ${life.age} · ${year.yearEnd ? `nearly ${next}` : SEASON[year.season]}`}>
           {decision ? (
             <div className="flex flex-col gap-3">
               <p className="text-lg font-semibold"><Named text={decision.prompt} names={names} />{decision.major ? <span className="ml-2 align-middle text-sm font-normal text-gold-ink">A big decision</span> : null}</p>
@@ -126,36 +127,36 @@ function LifePage() {
                         variant={chosen ? 'primary' : 'secondary'}
                         aria-pressed={chosen}
                         disabled={!option.open || choose.pending}
-                        onClick={() => { if (!chosen) void choose.run({ decisionId: decision.id, optionId: option.id }, `Choice saved. It happens when the year ends.`).then((done) => { if (done) captureAnalytics('decision chosen', { major: decision.major }) }) }}
+                        onClick={() => { if (!chosen) void choose.run({ decisionId: decision.id, optionId: option.id }, `Choice saved. It will happen when ${life.first} turns ${next}, and you can change it until then.`).then((done) => { if (done) captureAnalytics('decision chosen', { major: decision.major }) }) }}
                       >
                         {option.label}
                       </Button>
                       {!option.open && option.reason ? <span className="text-sm text-muted">{option.reason}</span> : null}
-                      {option.id === decision.default && !decision.chosen ? <span className="text-sm text-muted">What happens if you choose nothing.</span> : null}
+                      {option.id === decision.default && !decision.chosen ? <span className="text-sm text-muted">Happens if you don’t choose</span> : null}
                     </li>
                   )
                 })}
               </ul>
             </div>
           ) : (
-            <p>No decision this year.</p>
+            <p>Nothing to decide this year.</p>
           )}
           <div className="mt-4 flex flex-col gap-2 border-t border-rule pt-3">
             {ready ? (
               <>
                 <div>
-                  <Button pending={ageUp.pending} busyLabel="Ageing up…" onClick={() => { const from = life.age; void ageUp.run({}, 'A new year begins.').then((done) => { if (done) { setAgedFrom(from); captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) } }) }}>Age up to {life.age + 1}</Button>
+                  <Button pending={ageUp.pending} busyLabel="Ageing up…" onClick={() => { const from = life.age; void ageUp.run({}, `${life.first} just turned ${next}.`).then((done) => { if (done) { setAgedFrom(from); captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) } }) }}>Turn {next} now</Button>
                 </div>
-                <p className="text-sm text-muted">Everything this year had in store has happened. Age up now, or the year closes by itself at {time(year.closesAt)}{decision && !decision.chosen ? ', with the gentle choice' : ''}.</p>
+                <p className="text-sm text-muted">{life.first} is ready to turn {next}. If you wait, it will happen on its own at {time(year.closesAt)}.{decision && !decision.chosen ? ' If you haven’t chosen by then, the quiet option will happen.' : ''}</p>
               </>
             ) : year.ageUpRequested ? (
-              <p className="text-sm"><span className="font-semibold">Age up is queued for {time(year.minimumAt)}</span> <Until at={year.minimumAt} />. The rest of the year plays out first.</p>
+              <p className="text-sm"><span className="font-semibold">{life.first} turns {next} <Until at={year.minimumAt} /></span> (at {time(year.minimumAt)}). The rest of this year will play out first.</p>
             ) : (
               <>
                 <div>
-                  <Button variant="secondary" pending={ageUp.pending} onClick={() => void ageUp.run({}, 'Queued. The birthday comes once the year is ready.').then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Queue Age up</Button>
+                  <Button variant="secondary" pending={ageUp.pending} onClick={() => void ageUp.run({}, `Got it. ${life.first} will turn ${next} as soon as the year is ready.`).then((done) => { if (done) captureAnalytics('aged up', { elapsed: elapsedBand(year.elapsed) }) })}>Age up when ready</Button>
                 </div>
-                <p className="text-sm text-muted">This year is still happening. It is ready to end at {time(year.minimumAt)} <Until at={year.minimumAt} />, and closes by itself at {time(year.closesAt)} if you are away.</p>
+                <p className="text-sm text-muted"><span className="font-semibold">Ready to turn {next} <Until at={year.minimumAt} /></span> (at {time(year.minimumAt)}). If you’re away, it will happen on its own at {time(year.closesAt)}.</p>
               </>
             )}
             <ActionFeedback error={ageUp.error ?? choose.error} message={null} />
@@ -187,15 +188,15 @@ function Memorial({ view, notify }: { view: LifeView; notify: (feedback: { error
       </Card>
       <Card title="The next life">
         {!memorial.recorded ? (
-          <p>The album is being written. The next life can begin in a moment.</p>
+          <p>Adding this life to the album. You can start the next one in a moment.</p>
         ) : (
           <div className="flex flex-col gap-3">
-            {heirs.length > 0 ? <p>Carry on as one of the children, with the family name and what the will left them, or start again as a stranger.</p> : <p>There is no child to carry on, so the next life starts as a stranger, at birth.</p>}
+            {heirs.length > 0 ? <p>Pick a child to carry on the story. They’ll keep the family name and whatever the will left them. Or start fresh with a new baby.</p> : <p>There are no children to carry on the story, so the next life will start fresh as a new baby.</p>}
             <ul className="flex flex-col gap-2">
               {heirs.map((heir) => (
-                <li key={heir.id}><Button variant="secondary" pending={begin.pending} onClick={() => void begin.run({ kind: 'child', personId: heir.id }, `${heir.name} takes up the story.`)}>Carry on as {heir.name}, {heir.age}</Button></li>
+                <li key={heir.id}><Button variant="secondary" pending={begin.pending} onClick={() => void begin.run({ kind: 'child', personId: heir.id }, `${heir.name} carries on the story.`)}>Carry on as {heir.name}, {heir.age}</Button></li>
               ))}
-              <li><Button variant={heirs.length > 0 ? 'quiet' : 'primary'} pending={begin.pending} onClick={() => void begin.run({ kind: 'stranger' }, 'A new life begins.')}>Start a stranger’s life</Button></li>
+              <li><Button variant={heirs.length > 0 ? 'quiet' : 'primary'} pending={begin.pending} onClick={() => void begin.run({ kind: 'stranger' }, 'A new life begins.')}>Start fresh with a new baby</Button></li>
             </ul>
             <ActionFeedback error={begin.error} message={null} />
           </div>

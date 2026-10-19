@@ -60,7 +60,7 @@ function AchievementsPage() {
                     <span className="text-sm text-muted">{f.earned ? `Tier ${f.earned.tier} of ${f.tiers}` : 'Not yet'}{f.earned && rarity(f.earned.id) !== null ? ` · ${rarity(f.earned.id)}% of players` : ''}</span>
                   </p>
                   {f.earned ? <p className="text-sm text-muted">{f.earned.blurb}</p> : null}
-                  {f.next ? <p className="text-sm">Next: {f.next.name} · {Math.min(f.value, f.target).toLocaleString('en-GB')} of {f.target.toLocaleString('en-GB')}</p> : <p className="text-sm text-xp-ink">Every tier earned.</p>}
+                  {f.next ? <p className="text-sm">Next: {f.next.name} · {Math.min(f.value, f.target).toLocaleString('en-GB')} of {f.target.toLocaleString('en-GB')}</p> : <p className="text-sm text-xp-ink">All tiers earned.</p>}
                 </li>
               ))}
             </ul>

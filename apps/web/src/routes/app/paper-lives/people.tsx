@@ -27,14 +27,14 @@ function PeoplePage() {
   return (
     <>
       <h1 className="font-display text-3xl font-bold">People</h1>
-      {living.length === 0 && !view.pet ? <p className="text-muted">Nobody yet. People arrive as the years go by.</p> : null}
+      {living.length === 0 && !view.pet ? <p className="text-muted">No one yet. People will come into {view.life?.first}’s life as the years go by.</p> : null}
       <ul className="flex flex-col gap-4">
         {living.map((person) => (
           <li key={person.id}>
             <Card>
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-display text-xl font-bold">{person.name}</h2>
-                <span className="text-sm text-muted"><span className="font-semibold text-ink">{label(person)}</span> · {person.age < 0 ? 'not born yet' : `age ${person.age}`}</span>
+                <span className="text-sm text-muted"><span className="font-semibold text-ink">{label(person)}</span> · {person.age < 0 ? 'due soon' : `age ${person.age}`}</span>
               </div>
               <div className="mt-2"><Meter label="Relationship" value={person.relationship} max={100} tone="gold" /></div>
               {person.history.length > 0 ? (

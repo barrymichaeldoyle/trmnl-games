@@ -39,7 +39,7 @@ function AlbumPage() {
     <>
       <h1 className="font-display text-3xl font-bold">Album</h1>
       {first ? <PhotoClaim name={first} /> : null}
-      {album.lives.length === 0 ? <p className="text-muted">No finished lives yet. When a life ends, it becomes a page here with its epitaph and key moments.</p> : null}
+      {album.lives.length === 0 ? <p className="text-muted">No finished lives yet. When a life ends, it will get its own page here with an epitaph and key moments.</p> : null}
       <ul className="flex flex-col gap-4">
         {album.lives.map((life) => (
           <li key={life.ordinal}>
@@ -68,7 +68,7 @@ function AlbumPage() {
       </ul>
       {album.tree.length > 0 ? (
         <Card title="Family tree">
-          <p className="mb-3 text-sm text-muted">Each child who carried the story on sits under the life before.</p>
+          <p className="mb-3 text-sm text-muted">Each child who carried on the story appears under their parent.</p>
           <ul className="flex flex-col gap-1">
             {album.tree.map((row) => (
               <li key={row.ordinal} className="text-sm" style={{ paddingLeft: `${Math.min(row.depth, 8) * 1}rem` }}>
@@ -80,7 +80,7 @@ function AlbumPage() {
       ) : null}
       <Card title="Following">
         {album.following.length === 0 ? (
-          <p className="text-sm text-muted">Follow a player from their public profile and their current life shows here.</p>
+          <p className="text-sm text-muted">Follow players from their public profiles to see their current lives here.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {album.following.map((row) => (

@@ -39,14 +39,14 @@ export function Changes({ log }: { log: Log }) {
 export function StoryList({ names, ordinal, currentAge }: { names: readonly string[]; ordinal?: number; currentAge?: number }) {
   const { results, status, loadMore } = usePaginatedQuery(api.paperLives.lives.story, ordinal === undefined ? {} : { ordinal }, { initialNumItems: PAGE })
   const rows = storyRows(results as Log[])
-  if (status === 'LoadingFirstPage') return <p className="text-muted" role="status">Reading the story…</p>
+  if (status === 'LoadingFirstPage') return <p className="text-muted" role="status">Loading the story…</p>
   return (
     <>
-      {rows.length === 0 ? <p className="text-muted">Nothing yet. The first lines arrive within fifteen minutes.</p> : null}
+      {rows.length === 0 ? <p className="text-muted">Nothing yet. The story will start within fifteen minutes.</p> : null}
       <ol className="flex flex-col gap-1.5">
         {rows.map((row) => (
           <li key={row.id} className={`text-sm ${row.newAge ? 'mt-3 first:mt-0' : ''}`}>
-            {row.newAge ? <p className="mb-1 text-xs font-semibold text-muted">Age {row.age}{row.age === currentAge ? ' · this year' : ''}</p> : null}
+            {row.newAge ? <p className="mb-1 text-xs font-semibold text-muted">Age {row.age}{row.age === currentAge ? ' · now' : ''}</p> : null}
             <span className={`${row.kind === 'death' || row.remarkable ? 'font-semibold' : ''} ${row.kind === 'achievement' ? 'text-gold-ink' : ''}`}><Named text={row.summary} names={names} /></span>
             <Changes log={row} />
           </li>
@@ -54,9 +54,9 @@ export function StoryList({ names, ordinal, currentAge }: { names: readonly stri
       </ol>
       {status === 'CanLoadMore' || status === 'LoadingMore' ? (
         <div className="mt-4">
-          <Button variant="secondary" pending={status === 'LoadingMore'} busyLabel="Reading back…" onClick={() => loadMore(PAGE)}>Show earlier years</Button>
+          <Button variant="secondary" pending={status === 'LoadingMore'} busyLabel="Loading…" onClick={() => loadMore(PAGE)}>Show earlier years</Button>
         </div>
-      ) : rows.length > 0 ? <p className="mt-4 text-xs text-muted">The beginning of the story.</p> : null}
+      ) : rows.length > 0 ? <p className="mt-4 text-xs text-muted">That’s where it all began.</p> : null}
     </>
   )
 }
