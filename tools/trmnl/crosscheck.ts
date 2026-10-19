@@ -53,15 +53,22 @@ try {
   )
 
   // TRMNL renders in UTC; the preview's liquidjs and the Ruby process both use it.
-  const renderRuby = (templates: Record<string, string>, set: typeof cases) => {
+  const renderRubyChunk = (templates: Record<string, string>, set: typeof cases) => {
     const ruby = bundle(['exec', 'ruby', join(root, 'tools/trmnl/crosscheck.rb')], {
       input: JSON.stringify({ templates, cases: set }),
       stdio: ['pipe', 'pipe', 'inherit'],
       maxBuffer: 256 * 1024 * 1024,
       env: { TZ: 'UTC' },
     })
-    if (ruby.status !== 0) throw new Error('Ruby render failed')
+    if (ruby.status !== 0) throw new Error(`Ruby render failed${ruby.error ? `: ${ruby.error.message}` : ''}`)
     return JSON.parse(ruby.stdout.toString()) as Record<string, string>
+  }
+  // D193: twelve fixture sets in eight languages outgrow one process's output buffer, so the cases go in chunks.
+  const RUBY_CHUNK = 300
+  const renderRuby = (templates: Record<string, string>, set: typeof cases) => {
+    const html: Record<string, string> = {}
+    for (let start = 0; start < set.length; start += RUBY_CHUNK) Object.assign(html, renderRubyChunk(templates, set.slice(start, start + RUBY_CHUNK)))
+    return html
   }
   const rubyHtml = { ...renderRuby(screenMarkup, cases), ...renderRuby(idleAnglerMarkup, idleAnglerCases), ...renderRuby(paperLivesMarkup, paperLivesCases) }
 
