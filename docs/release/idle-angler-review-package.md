@@ -1,6 +1,6 @@
 # Idle Angler marketplace review package (draft)
 
-**Status (2026-10-19): ready for Barry's go.** Plugin 568 exists in TRMNL, private, with its icon and URLs; Desk Crawler's listing is approved and live, so the condition in [the S7 checklist](../idle-angler.md#s7-checklist-barry) ("after Desk Crawler is approved") holds. Submitting, the listing edits below, the video and the email are Barry's actions (or need his explicit go for each).
+**Status (2026-10-19): ready for Barry's go.** Translated into all eight languages the site speaks (D200). Plugin 568 exists in TRMNL, private, with its icon and URLs; Desk Crawler's listing is approved and live, so the condition in [the S7 checklist](../idle-angler.md#s7-checklist-barry) ("after Desk Crawler is approved") holds. Submitting, the listing edits below, the video and the email are Barry's actions (or need his explicit go for each).
 
 ## Listing
 
@@ -39,5 +39,5 @@ Idle Angler is a fishing game for a glance. The angler casts every 15 minutes on
 
 ## Known limits at submission
 
-- **English only.** The site, Desk Crawler and its screens speak eight languages (D169, D193); Idle Angler's device, companion and help are English (docs/i18n.md). A French or German player sees the site chrome in their language around English Idle Angler pages.
+- **Eight languages** (D200): the screen, alerts, companion, help, game page and server messages follow the player's language, as Desk Crawler's do.
 - Creator Fund eligibility is unconfirmed, as it was for Desk Crawler; budgeted at zero payouts.
