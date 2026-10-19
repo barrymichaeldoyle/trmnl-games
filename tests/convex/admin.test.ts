@@ -74,5 +74,20 @@ describe('owner-run moderation (D23)', () => {
       potionCap: { 30: 1, default: 1 },
       analyticsConsent: { declined: 1, unset: 2 },
     })
+    // Both heroes started this week: one has opened the companion, today.
+    expect(Object.values(stats.retention)).toEqual([{ heroes: 2, visitedEver: 1, visited7Days: 1 }])
+  })
+
+  it('keeps one engagement report a day and reads the trend back newest first (D197)', async () => {
+    await seedHero(t, {})
+    await t.mutation(internal.admin.snapshotEngagement, {})
+    await t.mutation(internal.admin.snapshotEngagement, {})
+    vi.advanceTimersByTime(24 * 60 * 60 * 1000)
+    await seedHero(t, {})
+    await t.mutation(internal.admin.snapshotEngagement, {})
+    const history = await t.query(internal.admin.engagementHistory, { days: 7 })
+    expect(history.days.map((d: { heroes: number }) => d.heroes)).toEqual([2, 1])
+    expect(history.days[0]).toMatchObject({ visited1Day: 0, neverVisited: 2 })
+    expect(Object.values(history.retention).reduce((sum: number, week) => sum + (week as { heroes: number }).heroes, 0)).toBe(2)
   })
 })

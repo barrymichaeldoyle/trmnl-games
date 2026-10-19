@@ -25,4 +25,7 @@ crons.daily('platform tally', { hourUTC: 3, minuteUTC: 27 }, internal.platformPr
 /** Bounded retention cleanup (data-model.md), away from tick slots. */
 crons.daily('retention cleanup', { hourUTC: 3, minuteUTC: 5 }, internal.maintenance.cleanup, {})
 
+/** The day's engagement report kept for trends (D197), just before midnight UTC and away from every tick slot. */
+crons.cron('engagement snapshot', '52 23 * * *', internal.admin.snapshotEngagement, {})
+
 export default crons

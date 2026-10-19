@@ -989,6 +989,12 @@ export default defineSchema({
     .index('by_runId_and_state', ['runId', 'state'])
     .index('by_state_and_openedAt', ['state', 'openedAt']),
 
+  /** D197: one engagement report a day (aggregates over all heroes, nothing per player), for trends and retention. */
+  engagementSnapshots: defineTable({
+    day: v.string(),
+    at: v.number(),
+    report: v.any(),
+  }).index('by_day', ['day']),
   adminAuditEvents: defineTable({
     actorRef: v.string(),
     action: v.string(),

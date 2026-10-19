@@ -62,49 +62,105 @@ const DAY_MS = 24 * 60 * 60 * 1000
 /**
  * Operator view of v1.1 engagement for every active hero, consent or not:
  * `npx convex run --prod admin:engagement`. Reads lifetime counters only (no
- * logs); stops at 5,000 heroes and says so with `truncated`.
+ * logs); stops at 5,000 heroes and says so with `truncated`. A copy is kept each day (`engagementSnapshots`) so trends
+ * and week-by-week retention can be read back with `admin:engagementHistory`.
  */
 export const engagement = internalQuery({
   args: {},
   returns: v.any(),
   handler: async (ctx) => {
-    const scanned = await ctx.db.query('heroes').withIndex('by_createdAt').take(ENGAGEMENT_SCAN)
-    const heroes = scanned.filter((h) => h.isActive && h.activationState === 'active')
+    return await engagementReport(ctx, Date.now())
+  },
+})
+
+/** The Monday (UTC) of the week a hero started, for the retention cohorts. */
+const weekOf = (hero: Doc<'heroes'>) => {
+  const start = new Date(hero.activatedAt ?? hero.createdAt)
+  start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7))
+  return start.toISOString().slice(0, 10)
+}
+
+async function engagementReport(ctx: QueryCtx, now: number) {
+  const scanned = await ctx.db.query('heroes').withIndex('by_createdAt').take(ENGAGEMENT_SCAN)
+  const heroes = scanned.filter((h) => h.isActive && h.activationState === 'active')
+  const tally = (values: (string | number)[]) => values.reduce<Record<string, number>>((acc, key) => ({ ...acc, [key]: (acc[key] ?? 0) + 1 }), {})
+  const sum = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.reduce((total, h) => total + (pick(h.counters) ?? 0), 0)
+  const reached = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.filter((h) => (pick(h.counters) ?? 0) > 0).length
+  const visitedWithin = (days: number) => heroes.filter((h) => h.companionVisitBaseline && now - h.companionVisitBaseline.at <= days * DAY_MS).length
+  const users = await ctx.db.query('users').withIndex('by_state', (q) => q.eq('state', 'active')).take(ENGAGEMENT_SCAN)
+  const localeOf = new Map(users.flatMap((u) => (u.trmnlLocale === undefined ? [] : [[u._id, u.trmnlLocale] as const])))
+  return {
+    truncated: scanned.length === ENGAGEMENT_SCAN,
+    activeHeroes: heroes.length,
+    companionVisits: { within1Day: visitedWithin(1), within7Days: visitedWithin(7), never: heroes.filter((h) => !h.companionVisitBaseline).length },
+    stances: tally(heroes.map((h) => h.stance ?? 'balanced')),
+    stanceChanges: { total: sum((c) => c.stanceChanges), heroes: reached((c) => c.stanceChanges) },
+    choices: { made: sum((c) => c.choicesMade), defaulted: sum((c) => c.choicesDefaulted), heroesWhoChose: reached((c) => c.choicesMade), pending: heroes.filter((h) => h.choice).length },
+    merchant: { visits: sum((c) => c.merchantVisits), purchases: sum((c) => c.purchases), heroesMet: reached((c) => c.merchantVisits), heroesBought: reached((c) => c.purchases), open: heroes.filter((h) => h.merchant).length },
+    bagCapacity: tally(heroes.map((h) => h.bagCapacity)),
+    potionCap: tally(heroes.map((h) => h.potionCap ?? 'default')),
+    epicFinds: { total: sum((c) => c.epicFinds), heroes: reached((c) => c.epicFinds) },
+    // D110: raids from both sides; launched minus won is failed raids.
+    raids: { launched: sum((c) => c.raidsLaunched), won: sum((c) => c.raidsWon), repelled: sum((c) => c.raidsRepelled), lost: sum((c) => c.raidsLost), heroesRaiding: reached((c) => c.raidsLaunched), heroesRaided: heroes.filter((h) => (h.counters.raidsRepelled ?? 0) + (h.counters.raidsLost ?? 0) > 0).length },
+    // D112: to-do tasks ticked off, and how many heroes have finished one.
+    tasks: { completed: sum((c) => c.tasksCompleted), heroes: reached((c) => c.tasksCompleted) },
+    // P35: career rungs reached under the ladder, equips, and where heroes stand on it.
+    career: { rungs: sum((c) => c.careerRungs), heroes: reached((c) => c.careerRungs), equips: sum((c) => c.itemsEquipped), standing: tally(heroes.map((h) => h.career?.rung ?? 'none')) },
+    // D139: occasions announced to heroes, Friday the 13th mishaps, and the last occurrence each hero saw.
+    occasions: { seen: sum((c) => c.occasionsSeen), heroes: reached((c) => c.occasionsSeen), mishaps: sum((c) => c.raidMishaps), heroesInAMishap: reached((c) => c.raidMishaps), lastSeen: tally(heroes.map((h) => h.occasion?.key ?? 'none')) },
+    // D141: meetings from either side (each meeting counts once per hero), and how many heroes have met someone.
+    meetings: { sides: sum((c) => c.meetings), heroes: reached((c) => c.meetings) },
+    // D145: other players' spares found, and how many heroes have found one.
+    lostProperty: { found: sum((c) => c.lostPropertyFound), heroes: reached((c) => c.lostPropertyFound) },
+    // D163: dug-in elites beaten, how many heroes have beaten one, and how many are dug in now.
+    standoffs: { won: sum((c) => c.standoffsWon), heroes: reached((c) => c.standoffsWon), open: heroes.filter((h) => h.standoff).length },
+    analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
+    // D168: the TRMNL locale of each active hero's owner, from screen requests; `unknown` until their screen next refreshes.
+    locales: tally(heroes.map((h) => localeOf.get(h.userId) ?? 'unknown')),
+    // Each activation week's heroes, how many have ever opened the companion and how many did in the last 7 days.
+    retention: Object.fromEntries([...new Set(heroes.map(weekOf))].sort().map((week) => {
+      const cohort = heroes.filter((h) => weekOf(h) === week)
+      return [week, { heroes: cohort.length, visitedEver: cohort.filter((h) => h.companionVisitBaseline).length, visited7Days: cohort.filter((h) => h.companionVisitBaseline && now - h.companionVisitBaseline.at <= 7 * DAY_MS).length }]
+    })),
+  }
+}
+
+/** Daily, just before midnight UTC: keep that day's engagement report (aggregates only, no player data). */
+export const snapshotEngagement = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
     const now = Date.now()
-    const tally = (values: (string | number)[]) => values.reduce<Record<string, number>>((acc, key) => ({ ...acc, [key]: (acc[key] ?? 0) + 1 }), {})
-    const sum = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.reduce((total, h) => total + (pick(h.counters) ?? 0), 0)
-    const reached = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.filter((h) => (pick(h.counters) ?? 0) > 0).length
-    const visitedWithin = (days: number) => heroes.filter((h) => h.companionVisitBaseline && now - h.companionVisitBaseline.at <= days * DAY_MS).length
-    const users = await ctx.db.query('users').withIndex('by_state', (q) => q.eq('state', 'active')).take(ENGAGEMENT_SCAN)
-    const localeOf = new Map(users.flatMap((u) => (u.trmnlLocale === undefined ? [] : [[u._id, u.trmnlLocale] as const])))
+    const day = new Date(now).toISOString().slice(0, 10)
+    const report = await engagementReport(ctx, now)
+    const existing = await ctx.db.query('engagementSnapshots').withIndex('by_day', (q) => q.eq('day', day)).unique()
+    if (existing) await ctx.db.replace('engagementSnapshots', existing._id, { day, at: now, report })
+    else await ctx.db.insert('engagementSnapshots', { day, at: now, report })
+    return null
+  },
+})
+
+/**
+ * The kept reports, newest first, as one trend line per day plus the latest retention table:
+ * `npx convex run --prod admin:engagementHistory '{"days":14}'`.
+ */
+export const engagementHistory = internalQuery({
+  args: { days: v.optional(v.number()) },
+  returns: v.any(),
+  handler: async (ctx, { days = 14 }) => {
+    const rows = await ctx.db.query('engagementSnapshots').withIndex('by_day').order('desc').take(Math.max(1, Math.min(days, 366)))
     return {
-      truncated: scanned.length === ENGAGEMENT_SCAN,
-      activeHeroes: heroes.length,
-      companionVisits: { within1Day: visitedWithin(1), within7Days: visitedWithin(7), never: heroes.filter((h) => !h.companionVisitBaseline).length },
-      stances: tally(heroes.map((h) => h.stance ?? 'balanced')),
-      stanceChanges: { total: sum((c) => c.stanceChanges), heroes: reached((c) => c.stanceChanges) },
-      choices: { made: sum((c) => c.choicesMade), defaulted: sum((c) => c.choicesDefaulted), heroesWhoChose: reached((c) => c.choicesMade), pending: heroes.filter((h) => h.choice).length },
-      merchant: { visits: sum((c) => c.merchantVisits), purchases: sum((c) => c.purchases), heroesMet: reached((c) => c.merchantVisits), heroesBought: reached((c) => c.purchases), open: heroes.filter((h) => h.merchant).length },
-      bagCapacity: tally(heroes.map((h) => h.bagCapacity)),
-      potionCap: tally(heroes.map((h) => h.potionCap ?? 'default')),
-      epicFinds: { total: sum((c) => c.epicFinds), heroes: reached((c) => c.epicFinds) },
-      // D110: raids from both sides; launched minus won is failed raids.
-      raids: { launched: sum((c) => c.raidsLaunched), won: sum((c) => c.raidsWon), repelled: sum((c) => c.raidsRepelled), lost: sum((c) => c.raidsLost), heroesRaiding: reached((c) => c.raidsLaunched), heroesRaided: heroes.filter((h) => (h.counters.raidsRepelled ?? 0) + (h.counters.raidsLost ?? 0) > 0).length },
-      // D112: to-do tasks ticked off, and how many heroes have finished one.
-      tasks: { completed: sum((c) => c.tasksCompleted), heroes: reached((c) => c.tasksCompleted) },
-      // P35: career rungs reached under the ladder, equips, and where heroes stand on it.
-      career: { rungs: sum((c) => c.careerRungs), heroes: reached((c) => c.careerRungs), equips: sum((c) => c.itemsEquipped), standing: tally(heroes.map((h) => h.career?.rung ?? 'none')) },
-      // D139: occasions announced to heroes, Friday the 13th mishaps, and the last occurrence each hero saw.
-      occasions: { seen: sum((c) => c.occasionsSeen), heroes: reached((c) => c.occasionsSeen), mishaps: sum((c) => c.raidMishaps), heroesInAMishap: reached((c) => c.raidMishaps), lastSeen: tally(heroes.map((h) => h.occasion?.key ?? 'none')) },
-      // D141: meetings from either side (each meeting counts once per hero), and how many heroes have met someone.
-      meetings: { sides: sum((c) => c.meetings), heroes: reached((c) => c.meetings) },
-      // D145: other players' spares found, and how many heroes have found one.
-      lostProperty: { found: sum((c) => c.lostPropertyFound), heroes: reached((c) => c.lostPropertyFound) },
-      // D163: dug-in elites beaten, how many heroes have beaten one, and how many are dug in now.
-      standoffs: { won: sum((c) => c.standoffsWon), heroes: reached((c) => c.standoffsWon), open: heroes.filter((h) => h.standoff).length },
-      analyticsConsent: tally(users.map((u) => (u.analyticsConsent === undefined ? 'unset' : u.analyticsConsent ? 'allowed' : 'declined'))),
-      // D168: the TRMNL locale of each active hero's owner, from screen requests; `unknown` until their screen next refreshes.
-      locales: tally(heroes.map((h) => localeOf.get(h.userId) ?? 'unknown')),
+      days: rows.map(({ day, report }) => ({
+        day,
+        heroes: report.activeHeroes,
+        visited1Day: report.companionVisits.within1Day,
+        visited7Days: report.companionVisits.within7Days,
+        neverVisited: report.companionVisits.never,
+        careerRungs: report.career.rungs,
+        tasks: report.tasks.completed,
+        raids: report.raids.launched,
+      })),
+      retention: rows[0]?.report.retention ?? null,
     }
   },
 })
