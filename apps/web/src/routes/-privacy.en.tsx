@@ -125,9 +125,9 @@ export const privacyEn: LegalPage = {
   IdleAngler: () => (
     <>
       <h2>Idle Angler</h2>
-      <p>Idle Angler stores your angler: gold, the water and bait, your cooler, your logbook of species and best weights, your fishing history, your heaviest fish at each water, achievements and fly box. Your heaviest fish appear under your public name on Idle Angler's leaderboards and on other players' TRMNL screens. Unless you hide Idle Angler from your public profile in Idle Angler settings, anyone with the link sees your title, start date, achievement count and species logged.</p>
+      <p>Idle Angler stores your angler: coins, the water and bait, your cooler, your logbook of species and best weights, your fishing history, your heaviest fish at each water and in each weekend Open, your fishmonger orders, trophy wall and medals, achievements and fly box. Your heaviest fish appear under your public name on Idle Angler's leaderboards and Open results and on other players' TRMNL screens. Unless you hide Idle Angler from your public profile in Idle Angler settings, anyone with the link sees your title, start date, achievement count, species logged, medal count and the fish on your trophy wall.</p>
       <p>If you turn on Idle Angler alerts, they use the same devices and quiet hours as your other games' alerts. The weekly fly code on your TRMNL is keyed to your installation and never shown in the companion.</p>
-      <p>In <Link to="/app/idle-angler/settings">Idle Angler settings</Link>, Delete Idle Angler progress removes your angler, cooler, logbook, leaderboard records, fly box, achievements, Idle Angler connections and Idle Angler alert settings. Your account and other games stay. Deleting your TRMNL Games account removes Idle Angler with everything else.</p>
+      <p>In <Link to="/app/idle-angler/settings">Idle Angler settings</Link>, Delete Idle Angler progress removes your angler, cooler, logbook, leaderboard and Open records, trophy wall and medals, fly box, achievements, Idle Angler connections and Idle Angler alert settings. Your account and other games stay. Deleting your TRMNL Games account removes Idle Angler with everything else.</p>
     </>
   ),
   PaperLives: () => (

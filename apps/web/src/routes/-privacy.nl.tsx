@@ -126,9 +126,9 @@ export const privacyNl: LegalPage = {
   IdleAngler: () => (
     <>
       <h2>Idle Angler</h2>
-      <p>Idle Angler bewaart je visser: goud, het water en het aas, je koelbox, je logboek van soorten en beste gewichten, je visgeschiedenis, je zwaarste vis per water, prestaties en vliegendoos. Je zwaarste vissen staan onder je openbare naam in de ranglijsten van Idle Angler en op de TRMNL-schermen van andere spelers. Tenzij je Idle Angler in de instellingen van Idle Angler verbergt op je openbare profiel, ziet iedereen met de link je titel, startdatum, aantal prestaties en gelogde soorten.</p>
+      <p>Idle Angler bewaart je visser: munten, het water en het aas, je koelbox, je logboek van soorten en beste gewichten, je visgeschiedenis, je zwaarste vis per water en per weekend-Open, je bestellingen van de visboer, trofeeënwand en medailles, prestaties en vliegendoos. Je zwaarste vissen staan onder je openbare naam in de ranglijsten en Open-uitslagen van Idle Angler en op de TRMNL-schermen van andere spelers. Tenzij je Idle Angler in de instellingen van Idle Angler verbergt op je openbare profiel, ziet iedereen met de link je titel, startdatum, aantal prestaties, gelogde soorten, aantal medailles en de vissen op je trofeeënwand.</p>
       <p>Zet je meldingen van Idle Angler aan, dan gebruiken die dezelfde apparaten en stille uren als de meldingen van je andere spellen. De wekelijkse vliegcode op je TRMNL hoort bij je installatie en wordt nooit in de app getoond.</p>
-      <p>In de <Link to="/app/idle-angler/settings">instellingen van Idle Angler</Link> verwijdert Voortgang in Idle Angler verwijderen je visser, koelbox, logboek, ranglijstrecords, vliegendoos, prestaties, Idle Angler-koppelingen en meldingsinstellingen van Idle Angler. Je account en andere spellen blijven. Je TRMNL Games-account verwijderen wist Idle Angler samen met al het andere.</p>
+      <p>In de <Link to="/app/idle-angler/settings">instellingen van Idle Angler</Link> verwijdert Voortgang in Idle Angler verwijderen je visser, koelbox, logboek, ranglijst- en Open-records, trofeeënwand en medailles, vliegendoos, prestaties, Idle Angler-koppelingen en meldingsinstellingen van Idle Angler. Je account en andere spellen blijven. Je TRMNL Games-account verwijderen wist Idle Angler samen met al het andere.</p>
     </>
   ),
   PaperLives: () => (

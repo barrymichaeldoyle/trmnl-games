@@ -126,9 +126,9 @@ export const privacyPl: LegalPage = {
   IdleAngler: () => (
     <>
       <h2>Idle Angler</h2>
-      <p>Idle Angler przechowuje twojego wędkarza: złoto, łowisko i przynętę, lodówkę, rejestr gatunków i najlepszych wag, historię połowów, najcięższą rybę z każdego łowiska, osiągnięcia i pudełko na muchy. Twoje najcięższe ryby pojawiają się pod twoją nazwą publiczną w rankingach Idle Angler i na ekranach TRMNL innych graczy. Jeśli nie ukryjesz Idle Angler w profilu publicznym w ustawieniach Idle Angler, każdy, kto ma link, widzi twój tytuł, datę rozpoczęcia, liczbę osiągnięć i zapisane gatunki.</p>
+      <p>Idle Angler przechowuje twojego wędkarza: monety, łowisko i przynętę, lodówkę, rejestr gatunków i najlepszych wag, historię połowów, najcięższą rybę z każdego łowiska i każdych weekendowych zawodów Open, zamówienia rybaka, ścianę trofeów i medale, osiągnięcia i pudełko na muchy. Twoje najcięższe ryby pojawiają się pod twoją nazwą publiczną w rankingach i wynikach zawodów Open w Idle Angler oraz na ekranach TRMNL innych graczy. Jeśli nie ukryjesz Idle Angler w profilu publicznym w ustawieniach Idle Angler, każdy, kto ma link, widzi twój tytuł, datę rozpoczęcia, liczbę osiągnięć, zapisane gatunki, liczbę medali i ryby na twojej ścianie trofeów.</p>
       <p>Jeśli włączysz alerty Idle Angler, korzystają z tych samych urządzeń i godzin ciszy co alerty innych twoich gier. Cotygodniowy kod muchy na twoim TRMNL jest powiązany z instalacją i nigdy nie pojawia się w aplikacji.</p>
-      <p>W <Link to="/app/idle-angler/settings">ustawieniach Idle Angler</Link> opcja „Usuń postępy w Idle Angler” usuwa twojego wędkarza, lodówkę, rejestr, wpisy w rankingach, pudełko na muchy, osiągnięcia, połączenia Idle Angler i ustawienia alertów Idle Angler. Konto i inne gry zostają. Usunięcie konta TRMNL Games usuwa Idle Angler razem z całą resztą.</p>
+      <p>W <Link to="/app/idle-angler/settings">ustawieniach Idle Angler</Link> opcja „Usuń postępy w Idle Angler” usuwa twojego wędkarza, lodówkę, rejestr, wpisy w rankingach i zawodach Open, ścianę trofeów i medale, pudełko na muchy, osiągnięcia, połączenia Idle Angler i ustawienia alertów Idle Angler. Konto i inne gry zostają. Usunięcie konta TRMNL Games usuwa Idle Angler razem z całą resztą.</p>
     </>
   ),
   PaperLives: () => (
