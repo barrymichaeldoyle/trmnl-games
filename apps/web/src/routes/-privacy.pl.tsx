@@ -25,7 +25,7 @@ export const privacyPl: LegalPage = {
         Twój bohater w Desk Crawler ma stronę publiczną: każdy, kto ma link, widzi twoją nazwę publiczną, imię bohatera, jego poziom, miejsce w rankingu, obecne piętro i datę rozpoczęcia, kilka liczników oraz twoje osiągnięcia. Złoto, dziennik przygód i dane konta pozostają prywatne, podobnie jak twój sprzęt, z wyjątkiem zapasów innych graczy, które trzyma twój bohater i które są widoczne z ich podpisami. Strona jest domyślnie włączona. Opcja „Ukryj moją stronę bohatera” w Ustawieniach od razu ją ukrywa, a pokazać ją ponownie możesz w każdej chwili.
       </p>
       <p>
-        Zalogowani gracze mogą obserwować publiczną stronę bohatera. Przechowujemy, kto kogo obserwuje, aby ich aplikacja mogła wymienić obserwowanych graczy. Nikt nie dostaje powiadomienia, że jest obserwowany, a żadna strona nie pokazuje, kto obserwuje gracza, z wyjątkiem tego, że gracz wybrany przez kogoś na rywala widzi, kto go wybrał. Jeśli zmienisz nazwę publiczną, ukryjesz stronę lub usuniesz postępy, inni gracze przestają widzieć twojego bohatera na swojej liście, a usunięcie kasuje te zapisy.
+        Zalogowani gracze mogą obserwować publiczną stronę bohatera. Przechowujemy, kto kogo obserwuje, aby ich aplikacja mogła wymienić obserwowanych graczy. Nikt nie dostaje powiadomienia, że jest obserwowany, a żadna strona nie pokazuje, kto obserwuje gracza. Jeśli zmienisz nazwę publiczną, ukryjesz stronę lub usuniesz postępy, inni gracze przestają widzieć twojego bohatera na swojej liście, a usunięcie kasuje te zapisy.
       </p>
 
       <h2>Co przechowujemy</h2>

@@ -81,7 +81,7 @@ Fields: `ownerHeroId`, `ownerUserId`, `biomeId`, `shard`, `templateId`, `kind: w
 
 ### `follows` (D143)
 
-Fields: `userId` (the follower), `followedUserId`, `followedNameVersion` (the followed player's public-name version when followed; a mismatch reads as gone, so a rename ends the follow), `rival?: true` (at most one per follower), `raidsWon?`, `raidsLost?` (rival raids from the follower's side), `createdAt`. Indexes: `by_userId_and_followedUserId` (the owner's list, at most 20 rows) and `by_followedUserId_and_rival` (deletion, and the "named you their rival" list; no query lists plain followers). The `raids` ledger gains `rival?: true` for a raid the rival roll aimed. Desk Crawler progress deletion and account deletion remove both directions in batches. See [friends](friends.md).
+Fields: `userId` (the follower), `followedUserId`, `followedNameVersion` (the followed player's public-name version when followed; a mismatch reads as gone, so a rename ends the follow), `createdAt`, and the retired `rival?`, `raidsWon?` and `raidsLost?` (D143's rival, removed in D205 on 2026-10-20: never written since, kept for the rows that have them). Indexes: `by_userId_and_followedUserId` (the owner's list, at most 20 rows) and `by_followedUserId` (deletion; no query lists followers). The `raids` ledger keeps a retired `rival?: true` on rows the rival roll aimed before D205. Desk Crawler progress deletion and account deletion remove both directions in batches. See [friends](friends.md).
 
 ### `raids` (D110)
 

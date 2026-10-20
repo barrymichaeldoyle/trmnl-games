@@ -25,7 +25,7 @@ export const privacyNl: LegalPage = {
         Je Desk Crawler-held heeft een openbare pagina: iedereen met de link ziet je openbare naam, de naam van je held, zijn niveau, plek, huidige verdieping en startdatum, een paar totalen en je prestaties. Goud, het avonturenlogboek en je accountgegevens blijven privé, net als je uitrusting, behalve reserves van andere spelers die je held vasthoudt, die met hun namen worden getoond. De pagina staat standaard aan. Mijn heldenpagina verbergen in Instellingen verbergt hem meteen, en je kunt hem altijd weer tonen.
       </p>
       <p>
-        Ingelogde spelers kunnen een openbare heldenpagina volgen. We bewaren wie wie volgt, zodat hun app de spelers kan tonen die ze volgen. Niemand krijgt te horen dat hij gevolgd wordt, en geen enkele pagina toont wie een speler volgt, behalve dat een speler die door iemand als rivaal is gekozen, ziet wie dat was. Wijzig je je openbare naam, verberg je je pagina of verwijder je je voortgang, dan zien andere spelers je held niet meer in hun lijst, en verwijderen wist die gegevens.
+        Ingelogde spelers kunnen een openbare heldenpagina volgen. We bewaren wie wie volgt, zodat hun app de spelers kan tonen die ze volgen. Niemand krijgt te horen dat hij gevolgd wordt, en geen enkele pagina toont wie een speler volgt. Wijzig je je openbare naam, verberg je je pagina of verwijder je je voortgang, dan zien andere spelers je held niet meer in hun lijst, en verwijderen wist die gegevens.
       </p>
 
       <h2>Wat we bewaren</h2>

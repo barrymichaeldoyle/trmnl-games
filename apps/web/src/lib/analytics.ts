@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'install link opened' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'makeover bought' | 'public name changed' | 'hero followed' | 'hero unfollowed' | 'rival set' | 'decision chosen' | 'aged up' | 'next life started' | 'album viewed' | 'life page viewed' | 'rankings viewed' | 'photo taken' | 'launch list joined' | 'launch list left'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'install link opened' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'makeover bought' | 'public name changed' | 'hero followed' | 'hero unfollowed' | 'decision chosen' | 'aged up' | 'next life started' | 'album viewed' | 'life page viewed' | 'rankings viewed' | 'photo taken' | 'launch list joined' | 'launch list left'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {
@@ -180,10 +180,9 @@ const SPECIAL_EVENTS: Record<string, (args: Record<string, unknown>) => [Analyti
   'inventory:buyNameTag': () => ['name tag bought', {}],
   'inventory:buyMakeover': () => ['makeover bought', {}],
   'users:changePublicName': () => ['public name changed', {}],
-  // D143: following and rivals, measured for adoption; never who.
+  // D143: following, measured for adoption; never who.
   'follows:follow': () => ['hero followed', {}],
   'follows:unfollow': () => ['hero unfollowed', {}],
-  'follows:setRival': (args) => ['rival set', { change: args.followId === null ? 'cleared' : 'set' }],
   // D159: how the next life starts, as a child or a stranger; never who.
   'paperLives/lives:begin': (args) => ['next life started', { kind: String(args.kind ?? '') }],
 }

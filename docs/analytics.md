@@ -43,7 +43,6 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `public name changed` | Browser, after `users.changePublicName` commits (D142) | none; never the name |
 | `hero followed` | Browser, after `follows.follow` commits from a public hero page (D143) | none; never who |
 | `hero unfollowed` | Browser, after `follows.unfollow` commits (D143) | none; never who |
-| `rival set` | Browser, after `follows.setRival` commits (D143) | `change` (`set` or `cleared`); never who |
 | `bag bought` | Browser, after `inventory.buyBag` commits (D61) | `tier` |
 | `install link opened` | Browser, on a click of a link to the marketplace listing (D147) | `place` (`home`, `home end`, `landing`, `landing end`, `qr pitch`, `start card`, `sign-in page`, `footer`) |
 | `waitlist joined` | Retired with the launch-list forms (D147); was sent after `waitlist.join` or `waitlist.joinWithAccount` succeeded (D105) | `source` (`notify`, `pitch`, `landing`, `home`, `account`); `place` (`top`, or `footer` / `end` for the second form on the home and game pages, D137; absent for `account`); never the email |

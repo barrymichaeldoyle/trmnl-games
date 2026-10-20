@@ -25,7 +25,7 @@ export const privacyPt: LegalPage = {
         Seu herói do Desk Crawler tem uma página pública: qualquer pessoa com o link vê seu nome público, o nome do seu herói, nível, posição, andar atual e data de início, alguns totais e suas conquistas. Ouro, diário de aventuras e dados da conta continuam privados, assim como seu equipamento, exceto os reservas de outros jogadores que seu herói guarda, que aparecem com os nomes deles. A página vem ativada. Ocultar minha página de herói, nas Configurações, a oculta na hora, e você pode mostrá-la de novo quando quiser.
       </p>
       <p>
-        Jogadores conectados podem seguir uma página pública de herói. Guardamos quem segue quem para o app deles poder listar os jogadores que seguem. Ninguém é avisado de que foi seguido, e nenhuma página mostra quem segue um jogador, exceto que um jogador escolhido como rival de alguém vê quem o escolheu. Se você trocar seu nome público, ocultar sua página ou excluir seu progresso, outros jogadores deixam de ver seu herói na lista deles, e a exclusão remove esses registros.
+        Jogadores conectados podem seguir uma página pública de herói. Guardamos quem segue quem para o app deles poder listar os jogadores que seguem. Ninguém é avisado de que foi seguido, e nenhuma página mostra quem segue um jogador. Se você trocar seu nome público, ocultar sua página ou excluir seu progresso, outros jogadores deixam de ver seu herói na lista deles, e a exclusão remove esses registros.
       </p>
 
       <h2>O que guardamos</h2>

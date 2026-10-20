@@ -24,7 +24,7 @@ export const privacyEn: LegalPage = {
         Your Desk Crawler hero has a public page: anyone with the link can see your public name, your hero's name, level, rank, current floor and start date, a few lifetime counts and your achievements. Gold, the adventure log and your account details stay private, and so does your gear, except other players' spares your hero holds, which show with the names on them. The page is on by default. Hide my hero page in Settings hides it straight away, and you can show it again at any time.
       </p>
       <p>
-        Signed-in players can follow a public hero page. We store who follows whom so their companion can list the players they follow. Nobody is told they were followed, and no page shows who follows a player, except that a player named as someone's rival sees who named them. If you change your public name, hide your page or delete your progress, other players stop seeing your hero in their list, and deleting removes those records.
+        Signed-in players can follow a public hero page. We store who follows whom so their companion can list the players they follow. Nobody is told they were followed, and no page shows who follows a player. If you change your public name, hide your page or delete your progress, other players stop seeing your hero in their list, and deleting removes those records.
       </p>
 
       <h2>What we store</h2>

@@ -12,7 +12,7 @@ export interface HelpPage {
 
 type SectionId = (typeof SECTIONS)[number]
 
-const SECTIONS = ['getting-started', 'if-the-qr-sends-you-back-to-setup', 'how-time-works', 'floors', 'desk-keepsakes', 'career', 'heroes-and-classes', 'stances', 'desk-raids', 'meetings', 'lost-property', 'to-do-list', 'potions', 'the-wandering-merchant', 'decisions', 'effects', 'office-calendar', 'rare-and-epic-gear', 'when-your-bag-fills-up', 'bigger-bags', 'salvage-and-the-workbench', 'getting-knocked-out', 'recaps', 'understanding-rankings', 'sharing-your-hero', 'following-and-rivals', 'names', 'gender', 'alerts', 'troubleshooting', 'disconnecting-and-removing', 'help'] as const
+const SECTIONS = ['getting-started', 'if-the-qr-sends-you-back-to-setup', 'how-time-works', 'floors', 'desk-keepsakes', 'career', 'heroes-and-classes', 'stances', 'desk-raids', 'meetings', 'lost-property', 'to-do-list', 'potions', 'the-wandering-merchant', 'decisions', 'effects', 'office-calendar', 'rare-and-epic-gear', 'when-your-bag-fills-up', 'bigger-bags', 'salvage-and-the-workbench', 'getting-knocked-out', 'recaps', 'understanding-rankings', 'sharing-your-hero', 'following', 'names', 'gender', 'alerts', 'troubleshooting', 'disconnecting-and-removing', 'help'] as const
 
 /** Sections the active catalog has no rule for are left out of the page and its jump list. */
 const PRESENT: Partial<Record<SectionId, boolean>> = {

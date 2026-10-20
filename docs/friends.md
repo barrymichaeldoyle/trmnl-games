@@ -1,5 +1,7 @@
 # Friends and rivals (P40)
 
+**Rivals removed (D205, 2026-10-20).** Barry found the one-way rival mechanic too confusing and had it removed from every game, with raids random again ("anyone can raid anyone"). Everything below about the rival, rival raids, the head-to-head line, "Named you their rival" and Rival back describes what shipped from 2026-10-13 to 2026-10-20 and is kept as the record; following itself is unchanged and live. The schema keeps the retired `rival`, `raidsWon` and `raidsLost` fields unread.
+
 Proposed and approved 2026-10-13 as D143. Barry picked the roadmap's v1.2 "Friends/rivals" row as the next feature and left the open questions to the lead ("you can decide how to best handle the questions"). [Settled points](#settled-points) records each decision.
 
 Companions: [roadmap](roadmap.md) (the v1.2 row: "public-profile privacy and moderation; no friend requirement to progress"), [decisions](decisions.md) (D109 public profiles, D110 raids, D141 meetings, D142 names), [leaderboards](leaderboards.md) (name masking) and [companion](companion.md).

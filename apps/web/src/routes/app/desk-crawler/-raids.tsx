@@ -65,8 +65,6 @@ export function Raids({ enabled }: { enabled: boolean }) {
                 <p className="pt-1 break-words"><WithName text={t.raidLine[describe(raid)]} name={raid.rivalName} profile={raid.profile} /></p>
                 <p className="flex flex-wrap gap-x-3 text-xs font-semibold tabular-nums">
                   <span className={raid.won ? 'text-xp-ink' : 'text-hp-ink'}>{raid.mishap ? t.mishap : raid.won ? t.raidWon : t.raidLost}</span>
-                  {/* D143: a raid that went after the raider's rival, told on both sides. */}
-                  {raid.rival ? <span className="text-gold-ink">{raid.role === 'raider' ? t.yourRival : t.theirRival}</span> : null}
                   <LocalTime className="text-muted" at={raid.at} format={when(locale)} />
                   <span className="text-gold-ink">{raid.won ? '+' : '−'}{t.gold(formatNumber(locale, raid.gold))}</span>
                   {raid.hpLost !== null ? <span className="text-hp-ink">{t.hp(raid.hpLost)}</span> : null}

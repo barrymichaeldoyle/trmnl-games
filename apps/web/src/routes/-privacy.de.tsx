@@ -25,7 +25,7 @@ export const privacyDe: LegalPage = {
         Dein Desk-Crawler-Held hat eine öffentliche Seite: Wer den Link hat, sieht deinen öffentlichen Namen, Namen, Stufe, Rang, aktuelle Etage und Startdatum deines Helden, ein paar Gesamtzähler und deine Erfolge. Gold, das Abenteuerlog und deine Kontodaten bleiben privat, ebenso deine Ausrüstung, außer Ersatzstücken anderer Spieler, die dein Held hat; die erscheinen mit den Namen darauf. Die Seite ist standardmäßig an. Meine Heldenseite verbergen in den Einstellungen verbirgt sie sofort, und du kannst sie jederzeit wieder zeigen.
       </p>
       <p>
-        Angemeldete Spieler können einer öffentlichen Heldenseite folgen. Wir speichern, wer wem folgt, damit ihre Begleit-App die Spieler auflisten kann, denen sie folgen. Niemand erfährt, dass ihm gefolgt wird, und keine Seite zeigt, wer einem Spieler folgt, außer dass ein als Rivale markierter Spieler sieht, wer ihn markiert hat. Änderst du deinen öffentlichen Namen, verbirgst deine Seite oder löschst deinen Fortschritt, sehen andere Spieler deinen Helden nicht mehr in ihrer Liste, und beim Löschen werden diese Einträge entfernt.
+        Angemeldete Spieler können einer öffentlichen Heldenseite folgen. Wir speichern, wer wem folgt, damit ihre Begleit-App die Spieler auflisten kann, denen sie folgen. Niemand erfährt, dass ihm gefolgt wird, und keine Seite zeigt, wer einem Spieler folgt. Änderst du deinen öffentlichen Namen, verbirgst deine Seite oder löschst deinen Fortschritt, sehen andere Spieler deinen Helden nicht mehr in ihrer Liste, und beim Löschen werden diese Einträge entfernt.
       </p>
 
       <h2>Was wir speichern</h2>

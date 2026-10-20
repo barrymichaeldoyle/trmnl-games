@@ -25,7 +25,7 @@ export const privacyIt: LegalPage = {
         Il tuo eroe di Desk Crawler ha una pagina pubblica: chiunque abbia il link può vedere il tuo nome pubblico, il nome del tuo eroe, livello, posizione, piano attuale e data di inizio, alcuni totali e i tuoi obiettivi. Oro, diario delle avventure e dati dell’account restano privati, e così il tuo equipaggiamento, tranne i doppioni di altri giocatori che il tuo eroe tiene, che compaiono con i loro nomi. La pagina è attiva di default. Nascondi la mia pagina eroe, nelle Impostazioni, la nasconde subito, e puoi mostrarla di nuovo quando vuoi.
       </p>
       <p>
-        I giocatori che hanno effettuato l’accesso possono seguire una pagina eroe pubblica. Conserviamo chi segue chi, così la loro app può elencare i giocatori che seguono. Nessuno viene avvisato di essere seguito, e nessuna pagina mostra chi segue un giocatore, tranne che un giocatore scelto come rivale vede chi l’ha scelto. Se cambi il nome pubblico, nascondi la pagina o elimini i tuoi progressi, gli altri giocatori non vedono più il tuo eroe nella loro lista, e l’eliminazione cancella quei dati.
+        I giocatori che hanno effettuato l’accesso possono seguire una pagina eroe pubblica. Conserviamo chi segue chi, così la loro app può elencare i giocatori che seguono. Nessuno viene avvisato di essere seguito, e nessuna pagina mostra chi segue un giocatore. Se cambi il nome pubblico, nascondi la pagina o elimini i tuoi progressi, gli altri giocatori non vedono più il tuo eroe nella loro lista, e l’eliminazione cancella quei dati.
       </p>
 
       <h2>Cosa conserviamo</h2>

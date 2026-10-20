@@ -6,7 +6,6 @@ import { classRule } from '@trmnl-games/desk-crawler/sim/core/stats'
 import type { RaidPlan } from '@trmnl-games/desk-crawler/sim/core/raid'
 import type { ContentCatalog, IncomingRaid, RaidTarget, SimulationResult } from '@trmnl-games/desk-crawler/sim/core/types'
 import { effectiveStance, unlocked } from '@trmnl-games/desk-crawler/sim/core/career'
-import { MAX_FOLLOWS } from '../follows'
 import { pagePublic } from './publicPage'
 
 /**
@@ -25,8 +24,6 @@ export interface RaidPick {
   readonly poolRowId: Id<'raidPool'>
   readonly targetHeroId: Id<'heroes'>
   readonly targetUser: Doc<'users'>
-  /** D143: set when the target is the raider's rival, so the ledger row and the follow's head-to-head record it. */
-  readonly rivalFollowId?: Id<'follows'>
 }
 
 export interface PendingRaid {
@@ -43,23 +40,12 @@ export async function joinRaidPool(ctx: MutationCtx, hero: Doc<'heroes'>): Promi
 }
 
 /**
- * D143: the share of raid launches that go after the raider's rival first, when the owner has one and it can be
- * raided right now. It reads the uniform target shard instead of a new draw, so the raid stream and the simulator are
- * unchanged; it only changes who, never how often. A test can raise it.
- */
-export const RIVAL_RAID = { pct: 50 }
-
-/**
- * The raid target: the owner's rival on a rival roll (D143) when it can be raided, otherwise the first pool row at or
- * after `plan.shard`, wrapping once. Only that one row is tried; when its hero is not raidable right now the raid draw
+ * The raid target: the first pool row at or after `plan.shard`, wrapping once (D205: the D143 rival roll is gone, so
+ * every raid is a pool pick). Only that one row is tried; when its hero is not raidable right now the raid draw
  * is spent and the tick plays its ordinary encounter. A row whose hero is gone or retired is removed on the way, so
  * the pool does not fill with empty desks.
  */
 export async function pickRaidTarget(ctx: MutationCtx, raider: Doc<'heroes'>, plan: RaidPlan, tick: number, content: ContentCatalog): Promise<RaidPick | undefined> {
-  if (plan.shard % 100 < RIVAL_RAID.pct) {
-    const rival = await pickRival(ctx, raider, tick, content)
-    if (rival !== undefined) return rival
-  }
   const row =
     (await ctx.db.query('raidPool').withIndex('by_shard', (q) => q.gte('shard', plan.shard)).first()) ??
     (await ctx.db.query('raidPool').withIndex('by_shard').first())
@@ -73,26 +59,7 @@ export async function pickRaidTarget(ctx: MutationCtx, raider: Doc<'heroes'>, pl
   return await raidable(ctx, row, hero, tick, content)
 }
 
-/**
- * D143: the raider's owner's rival as a target, when the follow is still current (same public-name version), the
- * rival's page is public and its current hero passes every check a pool pick does. At most the owner's 20 follow rows,
- * the rival's owner, profile, hero and pool row.
- */
-async function pickRival(ctx: MutationCtx, raider: Doc<'heroes'>, tick: number, content: ContentCatalog): Promise<RaidPick | undefined> {
-  const follows = await ctx.db.query('follows').withIndex('by_userId_and_followedUserId', (q) => q.eq('userId', raider.userId)).take(MAX_FOLLOWS)
-  const follow = follows.find((row) => row.rival === true)
-  if (follow === undefined) return undefined
-  const owner = await ctx.db.get(follow.followedUserId)
-  if (owner === null || owner.publicNameVersion !== follow.followedNameVersion) return undefined
-  const hero = await currentHero(ctx, owner)
-  if (hero === null || hero._id === raider._id || !pagePublic(hero) || hero.raidPoolId === undefined) return undefined
-  const row = await ctx.db.get(hero.raidPoolId)
-  if (row === null) return undefined
-  const pick = await raidable(ctx, row, hero, tick, content)
-  return pick === undefined ? undefined : { ...pick, rivalFollowId: follow._id }
-}
-
-/** The pick for a pool row's hero when it can be raided right now, or undefined; shared by the pool and rival paths. */
+/** The pick for a pool row's hero when it can be raided right now, or undefined. */
 async function raidable(ctx: MutationCtx, row: Doc<'raidPool'>, hero: Doc<'heroes'>, tick: number, content: ContentCatalog): Promise<RaidPick | undefined> {
   if (!hero.isActive || hero.activationState !== 'active' || hero.simulationState !== 'healthy' || hero.eligibleFromTick > tick) return undefined
   if (hero.status !== 'exploring' && hero.status !== 'resting') return undefined
@@ -158,12 +125,8 @@ export async function settleRaids(
         raiderHpLost: outcome?.variant === 'raid' ? outcome.hpLost : 0,
         targetHpPct: launch.targetHpPct,
         ...(launch.mishap ? { mishap: true as const } : {}),
-        ...(pick.rivalFollowId ? { rival: true as const } : {}),
         state: 'pending',
       })
-      // D143: the rival head-to-head on the follow row, from the raider's side.
-      const follow = pick.rivalFollowId ? await ctx.db.get(pick.rivalFollowId) : null
-      if (follow !== null) await ctx.db.patch(follow._id, launch.raiderWon ? { raidsWon: (follow.raidsWon ?? 0) + 1 } : { raidsLost: (follow.raidsLost ?? 0) + 1 })
       await ctx.db.patch(pick.poolRowId, { raidedAtTick: tick, shard: plan.reshard })
     }
   }
@@ -227,7 +190,6 @@ export async function recentRaids(ctx: QueryCtx, heroId: Id<'heroes'>, limit: nu
         hpLost: role === 'raider' ? row.raiderHpLost : (row.targetHpLost ?? null),
         pending: row.state === 'pending',
         ...(row.mishap ? { mishap: true as const } : {}),
-        ...(row.rival ? { rival: true as const } : {}),
       }
     }),
   )

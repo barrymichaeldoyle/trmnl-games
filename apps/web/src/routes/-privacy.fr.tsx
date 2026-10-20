@@ -25,7 +25,7 @@ export const privacyFr: LegalPage = {
         Votre héros Desk Crawler a une page publique : toute personne disposant du lien voit votre nom public, le nom de votre héros, son niveau, son rang, son étage actuel et sa date de départ, quelques compteurs à vie et vos succès. L’or, le journal d’aventure et les informations de votre compte restent privés, de même que votre équipement, sauf les doubles d’autres joueurs que garde votre héros, affichés avec les noms qu’ils portent. La page est activée par défaut. Masquer ma page de héros, dans les Réglages, la masque immédiatement, et vous pouvez la réafficher à tout moment.
       </p>
       <p>
-        Les joueurs connectés peuvent suivre une page publique de héros. Nous conservons qui suit qui pour que leur compagnon puisse lister les joueurs qu’ils suivent. Personne n’est prévenu d’être suivi, et aucune page ne montre qui suit un joueur, sauf qu’un joueur désigné comme rival voit qui l’a désigné. Si vous changez de nom public, masquez votre page ou supprimez votre progression, les autres joueurs ne voient plus votre héros dans leur liste, et la suppression efface ces données.
+        Les joueurs connectés peuvent suivre une page publique de héros. Nous conservons qui suit qui pour que leur compagnon puisse lister les joueurs qu’ils suivent. Personne n’est prévenu d’être suivi, et aucune page ne montre qui suit un joueur. Si vous changez de nom public, masquez votre page ou supprimez votre progression, les autres joueurs ne voient plus votre héros dans leur liste, et la suppression efface ces données.
       </p>
 
       <h2>Ce que nous conservons</h2>

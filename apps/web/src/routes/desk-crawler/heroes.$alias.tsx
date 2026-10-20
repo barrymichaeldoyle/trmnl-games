@@ -147,18 +147,17 @@ function Found({ profile }: { profile: Profile }) {
 }
 
 /**
- * D143: Follow, then Following with Make rival and Unfollow, for a signed-in player with a hero. Nothing for a
- * visitor, on your own page, or when the page can't be followed. A follow is silent; a rival is told on their card.
+ * D143: Follow, then Following with Unfollow, for a signed-in player with a hero. Nothing for a visitor, on your own
+ * page, or when the page can't be followed. A follow is silent (the rival went in D205).
  */
 function FollowControls({ alias }: { alias: string }) {
   const { data: status } = useQuery(convexQuery(api.follows.status, { alias }))
   const { notice, notify, dismiss } = useNotice()
   const follow = useIntent(api.follows.follow, { onFeedback: notify })
   const unfollow = useIntent(api.follows.unfollow, { onFeedback: notify })
-  const rival = useIntent(api.follows.setRival, { onFeedback: notify })
   const t = useT(publicPagesMessages)
   if (!status) return null
-  const busy = follow.pending || unfollow.pending || rival.pending
+  const busy = follow.pending || unfollow.pending
   return (
     <div className="flex flex-col gap-2">
       {status.followId === null ? (
@@ -168,9 +167,8 @@ function FollowControls({ alias }: { alias: string }) {
         </>
       ) : (
         <>
-          <p className="font-semibold">{status.rival ? t.followingRival(alias) : t.followingAlias(alias)}</p>
+          <p className="font-semibold">{t.followingAlias(alias)}</p>
           <div className="-ml-3 flex flex-wrap gap-x-2 min-[375px]:-ml-4">
-            <Button variant="quiet" disabled={busy} onClick={() => rival.run({ followId: status.rival ? null : status.followId }, status.rival ? t.rivalCleared : t.isYourRival(alias))}>{status.rival ? t.clearRival : t.makeRival}</Button>
             <Button variant="quiet" disabled={busy} onClick={() => unfollow.run({ followId: status.followId! }, t.unfollowed(alias))}>{t.unfollow}</Button>
             <Link to="/app/desk-crawler/leaderboard" className="inline-flex min-h-11 items-center font-semibold text-muted underline underline-offset-4">{t.everyoneYouFollow}</Link>
           </div>
