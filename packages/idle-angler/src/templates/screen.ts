@@ -46,7 +46,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 19
+export const TEMPLATE_VERSION = 20
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -123,7 +123,7 @@ const titleBar = (orientation: 'landscape' | 'portrait', narrow = false, short =
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
-const oriented = (classes: string, landscape: string, portrait: string, narrow = false) => `${ASSIGNS}${FLY_ASSIGNS}${fitStories}
+const oriented = (classes: string, landscape: string, portrait: string, narrow = false) => `${ASSIGNS}${FLY_ASSIGNS}${aliasStyle}${fitStories}
 <div class="${classes} portrait:hidden">${landscape}
 </div>${titleBar('landscape', false, narrow)}
 <div class="${classes} landscape:hidden">${portrait}
@@ -156,9 +156,12 @@ const qr = (og: number, x: number, beside = false) => {
  * Template v17: the pair sits 4px apart in its own row, so the space before the dot matches the one after it (the
  * row around it is a wider gap apart, which the X widened further). Template v18: where the pair does not fit on one
  * line (a narrow column at a large device scale) the title wraps under the name, rather than squeezing the name away.
+ * Template v20: the name ellipsizes by CSS (`aliasStyle`) rather than the framework's single-line clamp, which rounds the
+ * box width down and the text width up, so on the X (drawn at 1.8x) a two-letter name whose scaled width lands just
+ * above a whole pixel ("Mo" at 44.3px) failed its own fit test and became an ellipsis (found on Little Plot, D206).
  */
 const nameLine = (classes = 'title title--small') =>
-  `<div class="flex flex--row flex--wrap flex--left flex--center-y gap--[4px] w--min-0"><span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}</div>`
+  `<div class="flex flex--row flex--wrap flex--left flex--center-y gap--[4px] w--min-0"><span class="${classes} w--min-0" data-alias="true">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}</div>`
 
 /** The cooler, bait or service line, inverted behind its mark so it reads first. */
 const attention = (clamp = 2) =>
@@ -216,6 +219,8 @@ const stories = (limit: number, clamp = 1, classes = 'description lg:title--smal
  * what made the room stays hidden (the X's board, beside the list, never gives it any). Nothing spills or lacks a story
  * at the normal scale, so this only changes a scaled screen.
  */
+const aliasStyle = `<style>[data-alias]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>`
+
 const fitStories = `<script>
 (() => {
   const view = document.currentScript.closest('.view');
