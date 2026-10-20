@@ -109,7 +109,7 @@ describe('Idle Angler payload', () => {
     const english = buildPayload(scenarios.listing!)
     const french = buildPayload({ ...scenarios.listing!, locale: 'fr' })
     expect(english.status_label).toBe('Casting at River Bend')
-    expect(french).toMatchObject({ status_label: 'Pêche au Méandre', band_label: 'Crépuscule', weather_label: 'Couvert', title: 'Main sûre', goal_line: 'Prendre un poisson sous la pluie', board: { label: 'Cette semaine', rank_label: 'N° 3, record 1,9 kg' } })
+    expect(french).toMatchObject({ status_label: 'Pêche au Méandre', band_label: 'Crépuscule', weather_label: 'Couvert', title: 'Spécialiste', goal_line: 'Prendre un poisson sous la pluie', board: { label: 'Cette semaine', rank_label: 'N° 3, record 1,9 kg' } })
     expect(french.stories[0]!.summary).toBe('Un barbeau de 1,9 kg a mordu aux asticots au crépuscule. Nouveau record personnel.')
     const html = await new Liquid().parseAndRender(screenMarkup.markup, french)
     expect(html).toContain('12 dernières heures')
