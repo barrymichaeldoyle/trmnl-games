@@ -281,7 +281,7 @@ describe('Idle Angler markup', () => {
       const html = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.catch!), ...fly })
       expect(html, layout).toContain('src="https://art.test/art/ia/qr/v1/fly/482917/')
       expect(html, layout).not.toMatch(/qr\/v1\/home\//)
-      expect(html, layout).toContain('data-fly-caption="true">Fly&nbsp;482&nbsp;917</span>')
+      expect(html, layout).toMatch(/data-fly-caption="true"[^>]*>Fly&nbsp;482&nbsp;917<\/span>/)
       const cooler = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.coolerFull!), ...fly })
       expect(cooler, layout).not.toContain('qr/v1/fly/')
       expect(cooler, layout).not.toContain('data-fly-caption')

@@ -30,6 +30,9 @@
  * landscape half-horizontal info column gives way like the X's lists when a longer language overfills it.
  * Template v16 (D204): under content v6 the header's title is the rank at the angler's water and its ticks count that
  * water's species (`title_logged`); the logbook counter still counts them all.
+ * Template v19 (D208): the OG's landscape full stories in the label font, the board there a little wider with whole
+ * names clipped at its real width, the fly caption beside the code in the portrait quarter and side, and the place and
+ * caption able to give way at a large device scale, so every previewed scale fits.
  * Template v17 (2026-10-20): the OG's story lists are fitted by measurement like the X's, so they keep a story the
  * framework's overflow engine dropped (it planned with a 10px gap between stories where the list has 3px).
  * Template v15 (2026-10-20): a time on every story, the goal set apart under its own pennant and shown on the OG
@@ -43,7 +46,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 18
+export const TEMPLATE_VERSION = 19
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -83,7 +86,7 @@ const conditionMarks =
   `${counter('m_band', '{% if band_label %}{{ band_label | escape }}{% else %}{{ band | capitalize }}{% endif %}', ' data-band="{{ band }}" data-give-way="2"')}${counter('m_weather', '{% if weather_label %}{{ weather_label | escape }}{% else %}{{ weather | capitalize }}{% endif %}', ' data-weather="{{ weather }}" data-give-way="1"')}{% endif %}`
 
 /** Where the angler is: the one counter that can be long ("Heading to the Harbour Pier"), so it may wrap to two lines. */
-const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0 pr--3" data-place="true"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
+const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0 pr--3" data-place="true" data-give-way="6.5"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
 
 /** Where the angler is, then the conditions. */
 const statusRow = (withConditions = true) => row(`${place}${withConditions ? conditionMarks : ''}`, 'data-status-row="true"')
@@ -143,7 +146,7 @@ const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_b
 
 /** Template v18: `beside` sets the fly caption to the code's left, at its foot, so a short header is not made taller by it. */
 const qr = (og: number, x: number, beside = false) => {
-  const caption = `{% if fly_waiting %}<span class="${LABEL} ${beside ? 'text--right' : 'text--center'} text--bold" data-fly-caption="true">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}`
+  const caption = `{% if fly_waiting %}<span class="${LABEL} ${beside ? 'text--right' : 'text--center'} text--bold" data-fly-caption="true" data-give-way="6.8">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}`
   const code = `<img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">`
   return `{% if qr_base != "" %}<div class="no-shrink flex ${beside ? 'flex--row flex--bottom gap--small' : 'flex--col flex--center-x gap--xsmall'}" data-companion-qr="true">${beside ? caption + code : code + caption}</div>{% endif %}`
 }
@@ -151,10 +154,11 @@ const qr = (og: number, x: number, beside = false) => {
 /**
  * The angler's name, then the title beside it behind a dot (v13), so "Wren · Old Hand" does not read as one name.
  * Template v17: the pair sits 4px apart in its own row, so the space before the dot matches the one after it (the
- * row around it is a wider gap apart, which the X widened further).
+ * row around it is a wider gap apart, which the X widened further). Template v18: where the pair does not fit on one
+ * line (a narrow column at a large device scale) the title wraps under the name, rather than squeezing the name away.
  */
 const nameLine = (classes = 'title title--small') =>
-  `<div class="flex flex--row flex--left flex--center-y gap--[4px] w--min-0"><span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}</div>`
+  `<div class="flex flex--row flex--wrap flex--left flex--center-y gap--[4px] w--min-0"><span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}</div>`
 
 /** The cooler, bait or service line, inverted behind its mark so it reads first. */
 const attention = (clamp = 2) =>
@@ -207,7 +211,8 @@ const stories = (limit: number, clamp = 1, classes = 'description lg:title--smal
  * v14 a column that spilled. Template v17 makes that one pass per layout: while anything spills below the layout, or
  * not one story fits under no attention line, the extras step aside, the lowest number first (the newest-catch panel,
  * which repeats the newest story; the board; the twelve-hour recap; weather, time of day, logbook, bait, cooler, gold;
- * the scene last). Then each comes back, the last hidden first, unless that spills again or leaves no story, so only
+ * the place, then the code's fly caption (the title bar shows the code too), both since v18, so an attention line in a
+ * quarter at 1.5x still shows; the scene last). Then each comes back, the last hidden first, unless that spills again or leaves no story, so only
  * what made the room stays hidden (the X's board, beside the list, never gives it any). Nothing spills or lacks a story
  * at the normal scale, so this only changes a scaled screen.
  */
@@ -328,8 +333,8 @@ const header = (qrOg: number, qrX: number, beside = false) => `
 const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
   ready(`${header(2, 3, true)}
-    <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
-    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${goal()}${stories(16)}</div>
+    <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([144, 4], [144, 4], '')}<div class="grow w--min-0">${board(5, true)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
+    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${goal()}${stories(16, 1, 'label lg:title--small')}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
       <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
@@ -389,7 +394,7 @@ const halfVertical = oriented(
     ${attention(3)}
     ${stories(16, 3, 'description')}
     ${board(5)}
-    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, welcome({ art: scene([205, 1], [177, 2]), arrange: 'col', qrOg: 3, qrX: 5 })),
+    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4, true)}</div>`, welcome({ art: scene([205, 1], [177, 2]), arrange: 'col', qrOg: 3, qrX: 5 })),
   true,
 )
 
@@ -412,7 +417,7 @@ const quadrant = oriented(
     ${counters('compact')}
     ${attention(3)}
     ${stories(16, 3, 'description')}
-    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, welcome({ arrange: 'col', qrOg: 2, qrX: 3, small: true })),
+    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4, true)}</div>`, welcome({ arrange: 'col', qrOg: 2, qrX: 3, small: true })),
   true,
 )
 
