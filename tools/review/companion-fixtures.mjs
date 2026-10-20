@@ -365,6 +365,8 @@ if (params.get('ranks')) {
 }
 const queries = {
   'users:me': () => data.me,
+  // D210: onlist=1 puts the signed-in player on Idle Angler's launch list.
+  'launchList:mine': () => params.get('onlist') === '1',
   'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }, { slug: 'paper-lives', status: 'hidden', canOpen: true }] }),
   'paperLives/lives:view': () => {
     if (params.get('pl') === 'none') return { gameState: null, life: null }
@@ -492,6 +494,10 @@ import { Route as PlAlbum } from '../../apps/web/src/routes/app/paper-lives/albu
 import { Route as PlRankings } from '../../apps/web/src/routes/app/paper-lives/rankings';
 import { Route as PlAchievements } from '../../apps/web/src/routes/app/paper-lives/achievements';
 import { Route as PlPublic } from '../../apps/web/src/routes/profile/$alias_.lives.$n';
+import { Route as Home } from '../../apps/web/src/routes/index';
+import { Route as Library } from '../../apps/web/src/routes/app/index';
+import { Route as DcGame } from '../../apps/web/src/routes/games/desk-crawler';
+import { Route as IaGame } from '../../apps/web/src/routes/games/idle-angler';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { LocaleProvider } from '../../apps/web/src/lib/i18n';
@@ -501,7 +507,10 @@ const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/
   '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component,
   '/app/paper-lives': PlLife.options.component, '/app/paper-lives/people': PlPeople.options.component, '/app/paper-lives/work': PlWork.options.component, '/app/paper-lives/settings': PlSettings.options.component, '/app/paper-lives/album': PlAlbum.options.component, '/app/paper-lives/rankings': PlRankings.options.component, '/app/paper-lives/achievements': PlAchievements.options.component };
 const lifePage = /^\\/profile\\/[^/]+\\/lives\\/\\d+/.test(location.pathname);
-const publicPage = location.pathname.startsWith('/desk-crawler/heroes/') || lifePage;
+// D210: the signed-in front page, game pages and library, outside the companion shell.
+const sitePages = { '/': Home, '/app': Library, '/games/desk-crawler': DcGame, '/games/idle-angler': IaGame };
+const sitePage = sitePages[location.pathname.replace(/(.)\\/$/, '$1')];
+const publicPage = location.pathname.startsWith('/desk-crawler/heroes/') || lifePage || Boolean(sitePage);
 if (!publicPage && !pages[location.pathname.replace(/\\/$/, '')]) history.replaceState(null, '', '/app/desk-crawler' + location.search);
 function App() {
   const pathname = useLocation({ select: (l) => l.pathname.replace(/\\/$/, '') });
@@ -509,7 +518,7 @@ function App() {
   return <OutletContext.Provider value={pages[pathname] ?? pages['/app/desk-crawler']}><AuthShell><AppShell /></AuthShell></OutletContext.Provider>;
 }
 document.body.className = 'bg-ground text-ink';
-const ProfilePage = (lifePage ? PlPublic : Profile).options.component;
+const ProfilePage = (sitePage ?? (lifePage ? PlPublic : Profile)).options.component;
 const lang = ['fr', 'de', 'es', 'it', 'pt', 'pl', 'nl'].includes(new URLSearchParams(location.search).get('lang')) ? new URLSearchParams(location.search).get('lang') : 'en';
 document.documentElement.lang = lang;
 createRoot(document.getElementById('root')).render(<LocaleProvider locale={lang}><NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider></LocaleProvider>);

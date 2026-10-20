@@ -1,65 +1,124 @@
+import { Show } from '@clerk/tanstack-react-start'
+import { convexQuery } from '@convex-dev/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { api } from '@trmnl-games/backend/api'
 import { games } from '@trmnl-games/platform'
-import { DeviceSample, Faq, FeatureGrid, FloorGrid, HowItPlays, InstallCta, OfficeCensus } from '../lib/deskCrawlerPitch'
-import { faqJsonLd } from '../lib/deskCrawlerFaq'
-import { Glyph } from '../lib/glyphs'
+import { useConvexAuth } from 'convex/react'
+import type { ReactNode } from 'react'
+import { InstallCta, ScreenBezel } from '../lib/deskCrawlerPitch'
+import { FLOORS } from '../lib/facts.gen'
+import { Glyph, type GlyphName } from '../lib/glyphs'
 import { changeDay, latestChanges } from '../lib/changelog'
+import { IA_PITCH, IDLE_ANGLER_MARKETPLACE_URL, IdleAnglerCta, useMyAngler } from '../lib/idleAnglerPitch'
+import { NotifyMe } from '../lib/launchList'
 import { SITE_FRAME } from '../lib/platformHeader'
 import { SiteShell } from '../lib/prose'
-import { BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
-import { DESK_CRAWLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
-import { AfterListing, useGames } from '../lib/gameAccess'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
+import { DESK_CRAWLER_JSON_LD, IDLE_ANGLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
 import { messagesFor, useLocale, useT } from '../lib/i18n'
+import { homeMessages } from '../i18n/home'
+import { iaGamePage } from '../i18n/iaGamePage'
 import { pitchMessages } from '../i18n/pitch'
-import { NotifyMe } from '../lib/launchList'
+import { shellMessages } from '../i18n/shell'
 
 export const Route = createFileRoute('/')({
   head: ({ match: { context: { locale } } }) => seo({
     path: '/',
     locale,
-    description: messagesFor(pitchMessages, locale).homeDescription,
-    jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, faqJsonLd(locale)].map(({ '@context': _, ...node }) => node) },
+    description: messagesFor(homeMessages, locale).description,
+    jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, IDLE_ANGLER_JSON_LD].map(({ '@context': _, ...node }) => node) },
   }),
-  // No loader: the page is static, and the games listing (only for the Idle Angler teaser) loads in the browser after it.
+  // No loader: the page is static, and the signed-in player's games load in the browser after it.
   component: Home,
 })
 
-/** Idle Angler (D115) once it is listed: a "Coming soon" section in preview, the full section when live. Hidden, nothing. */
-function IdleAnglerSection() {
-  const data = useGames()
-  const t = useT(pitchMessages)
-  const game = data?.games.find((g) => g.slug === 'idle-angler')
-  if (!game || (game.status === 'hidden' && !data?.admin)) return null
-  const live = game.status === 'live'
+/**
+ * The signed-in player's games above the pitch (D210): each game's character and status with the way in, or, for a game
+ * they have not started, its page (Desk Crawler) or the in-review state with Notify me (Idle Angler before its listing).
+ */
+function YourGames() {
+  const t = useT(homeMessages)
+  const shell = useT(shellMessages)
+  const { isAuthenticated } = useConvexAuth()
+  const { data: me } = useQuery({ ...convexQuery(api.users.me, {}), enabled: isAuthenticated })
+  const angler = useMyAngler()
+  if (!me) return null
+  const rows: Array<{ slug: 'desk-crawler' | 'idle-angler'; line: string; action: ReactNode }> = [
+    {
+      slug: 'desk-crawler',
+      line: me.hero ? shell.heroLine(me.hero) : t.notStarted,
+      action: me.hero ? <Link to="/app/desk-crawler" className={`${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{t.open}</Link> : <Link to="/games/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.seeGame('Desk Crawler')}</Link>,
+    },
+    {
+      slug: 'idle-angler',
+      line: angler ? shell.anglerLine(angler) : angler === null && !IDLE_ANGLER_MARKETPLACE_URL ? t.inReview : t.notStarted,
+      action: angler ? <Link to="/app/idle-angler" className={`${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{t.open}</Link> : IDLE_ANGLER_MARKETPLACE_URL ? <Link to="/games/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.seeGame('Idle Angler')}</Link> : angler === null ? <NotifyMe gameSlug="idle-angler" /> : null,
+    },
+  ]
   return (
-    <section aria-labelledby="idle-angler-heading" className="grid gap-6 md:grid-cols-2 md:items-center">
-      <img src="/games/idle-angler/sample.png" alt={t.idleAnglerAlt} width={780} height={460} loading="lazy" className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
-      <div className="flex flex-col gap-3">
-        {live ? null : <p className="text-sm font-semibold text-muted">{t.comingNext}</p>}
-        <h2 id="idle-angler-heading" className="font-display text-3xl font-bold text-gold-ink">{games['idle-angler'].name}</h2>
-        <p className="max-w-prose leading-relaxed">{t.idleAnglerBody}</p>
-        {/* D201: while it waits for review, anyone can ask for the one launch email. */}
-        {live ? null : <NotifyMe gameSlug="idle-angler" />}
-        {game.canOpen ? (
-          <div className="flex flex-wrap gap-3">
-            <Link to="/games/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>{t.howItPlaysLink}</Link>
-            <Link to="/app/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.openCompanion}</Link>
-          </div>
-        ) : null}
-      </div>
+    <section aria-labelledby="your-games-heading" className="window flex flex-col gap-1 p-4 sm:p-5">
+      <h2 id="your-games-heading" className="font-display text-xl font-bold">{t.yourGames}</h2>
+      <ul className="flex flex-col">
+        {rows.map((row) => (
+          <li key={row.slug} className="flex flex-col gap-3 border-t-2 border-rule py-3 first:border-t-0 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <img src={`/games/${row.slug}/favicon.svg`} alt="" width={32} height={32} className="size-8 shrink-0 [image-rendering:pixelated]" />
+              <div className="flex min-w-0 flex-col">
+                <span className="font-semibold">{games[row.slug].name}</span>
+                <span className="truncate text-sm text-muted">{row.line}</span>
+              </div>
+            </div>
+            <div className="shrink-0 max-sm:pl-11">{row.action}</div>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
 
-/** The newest few What's new entries (D153), so the front page shows the game is still moving; the page has them all. */
+/**
+ * One cabinet on the game-select screen (D210): the game's real screen in its bezel, its name with the gold cursor that
+ * lands on whichever game the visitor points at, a figure from its catalog, its pitch and its one call to action. From
+ * 1024px the two cards share rows (subgrid), so their screens, pitches and calls to action line up side by side.
+ */
+function GameCard({ slug, alt, caption, facts, factGlyph, pitch, children }: { slug: 'desk-crawler' | 'idle-angler'; alt: string; caption: string; facts: string; factGlyph: GlyphName; pitch: string; children: ReactNode }) {
+  const t = useT(homeMessages)
+  const name = games[slug].name
+  return (
+    <li className="group window flex flex-col gap-5 p-4 outline-4 outline-offset-0 outline-transparent transition-[outline-color] duration-150 focus-within:outline-gold hover:outline-gold sm:p-6 lg:row-span-3 lg:grid lg:grid-rows-subgrid">
+      <figure className="flex flex-col gap-2">
+        <Link to={games[slug].publicPath} tabIndex={-1} aria-hidden="true" className="block"><ScreenBezel slug={slug} alt={alt} sizes="(min-width: 1024px) 560px, 100vw" /></Link>
+        <figcaption className="text-sm text-faint">{caption}</figcaption>
+      </figure>
+      <div className="flex flex-col gap-2">
+        <h3 className="flex items-center gap-3 font-display text-3xl font-bold">
+          {/* The select screen's cursor: hidden until this cabinet is pointed at or focused. */}
+          <span aria-hidden="true" className="h-[15px] w-[9px] shrink-0 bg-[url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='5' shape-rendering='crispEdges'%3E%3Cpath fill='%23ffd166' d='M0 0h1v5H0zM1 1h1v3H1zM2 2h1v1H2z'/%3E%3C/svg%3E&quot;)] bg-contain bg-no-repeat opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100" />
+          <img src={`/games/${slug}/icon-192.png`} alt="" width={40} height={40} className="size-10 [image-rendering:pixelated]" />
+          <Link to={games[slug].publicPath} className="no-underline hover:text-gold-ink">{name}</Link>
+        </h3>
+        <p className="flex items-center gap-2 text-sm font-semibold text-muted"><Glyph name={factGlyph} size={16} className="text-gold-ink" />{facts}</p>
+        <p className="leading-relaxed text-muted">{pitch}</p>
+      </div>
+      <div className="flex flex-col gap-4 border-t-2 border-rule pt-4 lg:self-start">
+        {children}
+        <Link to={games[slug].publicPath} className="inline-flex min-h-11 items-center self-start underline underline-offset-4">{t.about(name)}</Link>
+      </div>
+    </li>
+  )
+}
+
+/** The newest few What's new entries (D153), so the front page shows the games are still moving; the page has them all. */
 function RecentChanges() {
   const t = useT(pitchMessages)
+  const home = useT(homeMessages)
   const locale = useLocale()
   return (
     <section aria-labelledby="recent-heading" className="flex flex-col gap-6">
       <div className="flex max-w-prose flex-col gap-2">
         <h2 id="recent-heading" className="font-display text-3xl font-bold text-gold-ink">{t.recentlyChanged}</h2>
-        <p className="leading-relaxed text-muted">{t.recentIntro}</p>
+        <p className="leading-relaxed text-muted">{home.recentIntro}</p>
       </div>
       <ul className="grid gap-4 lg:grid-cols-3">
         {latestChanges(3, locale).map((change) => (
@@ -75,47 +134,67 @@ function RecentChanges() {
   )
 }
 
-/** The platform front page: Desk Crawler's screen and install link first, then what the game holds. */
+/** The platform front page (D210): the promise, the player's own games, the two games side by side, then how it all works. */
 function Home() {
-  const t = useT(pitchMessages)
+  const t = useT(homeMessages)
+  const pitch = useT(pitchMessages)
+  const ia = useT(iaGamePage)
+  const monsters = FLOORS.reduce((sum, floor) => sum + floor.monsters.length, 0)
   return (
     <SiteShell>
       <main id="main" className="flex flex-col">
-        <section aria-labelledby="home-title" className={`grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14 ${SITE_FRAME}`}>
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <p className="flex items-center gap-2 text-sm font-semibold text-gold-ink"><img src="/games/desk-crawler/favicon.svg" alt="" width={16} height={16} className="[image-rendering:pixelated]" />{t.eyebrow}</p>
-              <h1 id="home-title" className="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">{t.homeTitle}</h1>
-              <p className="max-w-prose text-lg leading-relaxed text-muted">{t.homeLead}</p>
-            </div>
-            <InstallCta place="home" />
-          </div>
-          <DeviceSample caption={t.homeCaption} priority />
-          <AfterListing><OfficeCensus className="lg:col-span-2" /></AfterListing>
-        </section>
+        <div className={`flex flex-col gap-8 pt-8 pb-10 sm:pt-10 sm:pb-14 ${SITE_FRAME}`}>
+          <header className="flex max-w-3xl flex-col gap-4">
+            <h1 className="font-display text-4xl font-bold leading-[1.15] text-balance sm:text-5xl">{t.title}</h1>
+            <p className="max-w-prose text-lg leading-relaxed text-muted">{t.lead}</p>
+          </header>
+          <Show when="signed-in"><YourGames /></Show>
+          <section aria-labelledby="pick-heading" className="flex flex-col gap-4">
+            <h2 id="pick-heading" className="sr-only">{t.pickHeading}</h2>
+            <ul className="grid gap-6 lg:grid-cols-2 lg:gap-x-8">
+              <GameCard slug="desk-crawler" alt={pitch.sampleAlt} caption={pitch.homeCaption} facts={t.deskCrawlerFacts(FLOORS.length, monsters)} factGlyph="sword" pitch={t.deskCrawlerPitch}>
+                <InstallCta place="home card" compact />
+              </GameCard>
+              <GameCard slug="idle-angler" alt={ia.sampleAlt} caption={ia.caption} facts={t.idleAnglerFacts(IA_PITCH.waters.length, IA_PITCH.species)} factGlyph="pin" pitch={t.idleAnglerPitch}>
+                <IdleAnglerCta place="home card" compact />
+              </GameCard>
+            </ul>
+            <p className="text-sm text-muted">{pitch.needsBefore}<a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">{pitch.needsLink}</a>{pitch.needsAfter}</p>
+          </section>
+        </div>
 
         <div className="border-y border-rule bg-night/40 py-14 sm:py-20">
-          <div className={SITE_FRAME}><HowItPlays headingId="how-heading" /></div>
+          <section aria-labelledby="how-heading" className={`flex flex-col gap-8 ${SITE_FRAME}`}>
+            <h2 id="how-heading" className="font-display text-3xl font-bold text-gold-ink">{t.howItWorks}</h2>
+            <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
+              {t.steps.map((step) => (
+                <li key={step.when} className="flex flex-col gap-2 border-t-2 border-rule pt-5">
+                  <p className="text-sm font-semibold text-gold-ink">{step.when}</p>
+                  <h3 className="font-display text-2xl font-bold">{step.title}</h3>
+                  <p className="leading-relaxed text-muted">{step.body}</p>
+                </li>
+              ))}
+            </ol>
+            <div className="flex max-w-prose flex-col gap-2 border-t-2 border-rule pt-5">
+              <h3 className="flex items-center gap-3 font-display text-2xl font-bold"><Glyph name="hero" size={24} className="text-sky-ink" />{t.oneAccountTitle}</h3>
+              <p className="leading-relaxed text-muted">{t.oneAccountBody}</p>
+            </div>
+          </section>
         </div>
 
         <div className={`flex flex-col gap-20 py-14 sm:gap-24 sm:py-20 ${SITE_FRAME}`}>
-          <FloorGrid headingId="floors-heading" />
-          <div className="flex flex-col gap-8">
-            <FeatureGrid headingId="features-heading" />
-            <div className="flex flex-col items-start gap-4 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-prose text-muted">{t.guideBody}</p>
-              <Link to="/help/desk-crawler" className={`shrink-0 gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="quest" />{t.readGuide}</Link>
-            </div>
-          </div>
           <RecentChanges />
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
-            <Faq headingId="faq-heading" />
-            <section aria-labelledby="launch-heading" className="window flex flex-col gap-4 self-start p-5 sm:p-6">
-              <h2 id="launch-heading" className="font-display text-2xl font-bold text-gold-ink">{t.getDeskCrawler}</h2>
-              <InstallCta place="home end" />
-            </section>
-          </div>
-          <AfterListing><IdleAnglerSection /></AfterListing>
+          <section aria-labelledby="faq-heading" className="flex max-w-3xl flex-col gap-6">
+            <h2 id="faq-heading" className="font-display text-3xl font-bold text-gold-ink">{t.questions}</h2>
+            <div className="flex flex-col border-t border-rule">
+              {t.faq.map((item) => (
+                <details key={item.q} className="border-b border-rule">
+                  <summary className="min-h-14 cursor-pointer py-3 font-semibold hover:text-gold-ink">{item.q}</summary>
+                  <p className="max-w-prose pb-5 pl-[1.125rem] leading-relaxed text-muted">{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
     </SiteShell>

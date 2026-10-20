@@ -3,6 +3,7 @@ import { Show, SignInButton } from '@clerk/tanstack-react-start'
 import { convexQuery } from '@convex-dev/react-query'
 import { api } from '@trmnl-games/backend/api'
 import { useQuery } from '@tanstack/react-query'
+import { useConvexAuth } from 'convex/react'
 import { Link } from '@tanstack/react-router'
 import { FAQ } from './deskCrawlerFaq'
 import { FLOORS, UNLOCKS } from './facts.gen'
@@ -25,23 +26,32 @@ export function DeviceSample({ caption, priority = false }: { caption: string; p
   const t = useT(pitchMessages)
   return (
     <figure className="flex flex-col gap-3">
-      <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)] shadow-[0_0_0_3px_var(--color-night),0_24px_48px_-24px_rgb(0_0_0/0.8)]">
-        {/* Rendered from the marketing preview (tools/trmnl/preview.ts --marketing --recap) on the X full layout. 16-colour
-            PNGs, the X's own 4-bit greys, beat WebP at both sizes: 800px for phones at 2x, 1200px for 3x phones and desktop. */}
-        <img
-          src="/games/desk-crawler/screen-sample.png"
-          srcSet="/games/desk-crawler/screen-sample-800.png 800w, /games/desk-crawler/screen-sample.png 1200w"
-          sizes="(min-width: 1024px) 600px, 100vw"
-          alt={t.sampleAlt}
-          width={1200}
-          height={900}
-          fetchPriority={priority ? 'high' : undefined}
-          loading={priority ? undefined : 'lazy'}
-          className="block h-auto w-full rounded-md bg-white"
-        />
-      </div>
+      <ScreenBezel slug="desk-crawler" alt={t.sampleAlt} priority={priority} />
       <figcaption className="text-sm text-muted">{caption}</figcaption>
     </figure>
+  )
+}
+
+/**
+ * A game's sample screen on a TRMNL X in the plum bezel. Rendered from the marketing preview on the X full layout
+ * (Desk Crawler: tools/trmnl/preview.ts --marketing --recap; Idle Angler: its `listing` state, D210). 16-colour PNGs, the
+ * X's own 4-bit greys, beat WebP at both sizes: 800px for phones at 2x, 1200px for 3x phones and desktop.
+ */
+export function ScreenBezel({ slug, alt, priority = false, sizes = '(min-width: 1024px) 600px, 100vw' }: { slug: 'desk-crawler' | 'idle-angler'; alt: string; priority?: boolean; sizes?: string }) {
+  return (
+    <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)] shadow-[0_0_0_3px_var(--color-night),0_24px_48px_-24px_rgb(0_0_0/0.8)]">
+      <img
+        src={`/games/${slug}/screen-sample.png`}
+        srcSet={`/games/${slug}/screen-sample-800.png 800w, /games/${slug}/screen-sample.png 1200w`}
+        sizes={sizes}
+        alt={alt}
+        width={1200}
+        height={900}
+        fetchPriority={priority ? 'high' : undefined}
+        loading={priority ? undefined : 'lazy'}
+        className="block h-auto w-full rounded-md bg-white"
+      />
+    </div>
   )
 }
 
@@ -228,9 +238,10 @@ export function InstallLink({ place, className = '' }: { place: string; classNam
 
 /**
  * Release status, the install link and the TRMNL requirement: the block every pitch ends its first screen with. A
- * signed-in visitor gets the companion first: it shows their hero, or how to start one.
+ * signed-in visitor gets the companion first: it shows their hero, or how to start one. `compact` leaves out the TRMNL
+ * requirement, for the home page's game cards, which state it once below both.
  */
-export function InstallCta({ place }: { place: string }) {
+export function InstallCta({ place, compact = false }: { place: string; compact?: boolean }) {
   const t = useT(pitchMessages)
   const shell = useT(shellMessages)
   return (
@@ -242,11 +253,20 @@ export function InstallCta({ place }: { place: string }) {
       </Show>
       <Show when="signed-in">
         <Link to="/app/desk-crawler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{t.openDeskCrawler}</Link>
-        <p className="text-sm text-muted">{t.signedInBefore}<a href={DESK_CRAWLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place })} className="underline underline-offset-4 hover:text-ink">{t.signedInLink}</a>{t.signedInAfter}</p>
+        <NoHeroYet place={place} />
       </Show>
-      <p className="text-sm text-muted">{t.needsBefore}<a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">{t.needsLink}</a>{t.needsAfter}</p>
+      {compact ? null : <p className="text-sm text-muted">{t.needsBefore}<a href="https://trmnl.com" className="underline underline-offset-4 hover:text-ink">{t.needsLink}</a>{t.needsAfter}</p>}
     </div>
   )
+}
+
+/** The signed-in visitor's install hint, left out once the companion says they have a hero (D210: the home page's card). */
+function NoHeroYet({ place }: { place: string }) {
+  const t = useT(pitchMessages)
+  const { isAuthenticated } = useConvexAuth()
+  const { data: me } = useQuery({ ...convexQuery(api.users.me, {}), enabled: isAuthenticated })
+  if (me?.hero) return null
+  return <p className="text-sm text-muted">{t.signedInBefore}<a href={DESK_CRAWLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place })} className="underline underline-offset-4 hover:text-ink">{t.signedInLink}</a>{t.signedInAfter}</p>
 }
 
 /**
@@ -269,7 +289,7 @@ export function DeskCrawlerSignedOut() {
         <p>{t.wantBefore}<a href="https://trmnl.com" className="underline underline-offset-4">TRMNL</a>{t.wantAfter}</p>
         <InstallLink place="qr pitch" />
         <div className="flex flex-wrap items-center gap-4">
-          <Link to="/" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.aboutDeskCrawler}</Link>
+          <Link to="/games/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.aboutDeskCrawler}</Link>
           <Link to="/help/desk-crawler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.setupHelp}</Link>
         </div>
       </section>

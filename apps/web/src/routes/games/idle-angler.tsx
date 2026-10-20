@@ -1,44 +1,69 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { contentV5 as content } from '@trmnl-games/idle-angler/content'
-import { anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { games } from '@trmnl-games/platform'
+import { ScreenBezel } from '../../lib/deskCrawlerPitch'
 import { requireOpenGame } from '../../lib/gameAccess'
-import { messagesFor, useLocale, useT } from '../../lib/i18n'
+import { Glyph } from '../../lib/glyphs'
+import { messagesFor, useT } from '../../lib/i18n'
+import { IaFaq, IaFeatureGrid, IaHowItPlays, IdleAnglerCta, WaterGrid } from '../../lib/idleAnglerPitch'
+import { SITE_FRAME } from '../../lib/platformHeader'
 import { SiteShell } from '../../lib/prose'
-import { seo } from '../../lib/seo'
+import { IDLE_ANGLER_JSON_LD, seo } from '../../lib/seo'
 import { BUTTON_SECONDARY, LINK_BUTTON } from '../../lib/ui'
 import { iaGamePage } from '../../i18n/iaGamePage'
 
-/** Idle Angler's public game page (idle-angler.md "Companion"), in every language (D200). Hidden with the game until it is live (D115). */
+/**
+ * Idle Angler's public page (D210), built like Desk Crawler's: the real screen and the call to action, how it plays,
+ * the waters, what is in the game, the guide and questions. Eight languages (D200). Hidden with the game until live (D115).
+ */
 export const Route = createFileRoute('/games/idle-angler')({
   loader: ({ context }) => requireOpenGame(context, 'idle-angler'),
   head: ({ match: { context: { locale } } }) => {
     const t = messagesFor(iaGamePage, locale)
-    return seo({ title: 'Idle Angler', path: '/games/idle-angler', description: t.description, image: { path: '/games/idle-angler/sample.png', alt: t.imageAlt }, locale })
+    return seo({ title: 'Idle Angler', path: '/games/idle-angler', description: t.description, image: { path: '/games/idle-angler/sample.png', alt: t.imageAlt }, jsonLd: IDLE_ANGLER_JSON_LD, locale })
   },
   component: GamePage,
 })
 
 function GamePage() {
   const t = useT(iaGamePage)
-  const words = anglerWords(useLocale())
   return (
     <SiteShell>
-      <main id="main" className="mx-auto w-full flex max-w-2xl flex-col gap-8 px-4 py-10">
-        <header className="flex flex-col gap-3">
-          <h1 className="flex items-center gap-4 font-display text-4xl font-bold leading-tight sm:text-5xl"><img src="/games/idle-angler/icon-192.png" alt="" width={64} height={64} className="size-14 [image-rendering:pixelated] sm:size-16" />{games['idle-angler'].name}</h1>
-          <p className="text-lg text-muted">{t.intro}</p>
-        </header>
-        <figure className="flex flex-col gap-2">
-          <img src="/games/idle-angler/sample.png" alt={t.imageAlt} width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" />
-          <figcaption className="text-sm text-muted">{t.caption}</figcaption>
-        </figure>
-        <ul className="flex flex-col gap-2 [&_li]:ml-5 [&_li]:list-disc">
-          {t.features(content.species.length, words.title('newcomer'), words.title('master_angler')).map((line) => <li key={line}>{line}</li>)}
-        </ul>
-        <div className="flex flex-wrap items-center gap-4">
-          <Link to="/help/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>{t.howItPlays}</Link>
-          <Link to="/app/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.openCompanion}</Link>
+      <main id="main" className="flex flex-col">
+        <section aria-labelledby="ia-title" className={`grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-14 ${SITE_FRAME}`}>
+          <div className="flex flex-col gap-6">
+            <header className="flex flex-col gap-4">
+              <h1 id="ia-title" className="flex items-center gap-4 font-display text-4xl font-bold leading-tight sm:text-5xl"><img src="/games/idle-angler/icon-192.png" alt="" width={64} height={64} className="size-14 [image-rendering:pixelated] sm:size-16" />{games['idle-angler'].name}</h1>
+              <p className="font-display text-2xl font-bold leading-snug text-gold-ink">{t.tagline}</p>
+              <p className="max-w-prose text-lg leading-relaxed text-muted">{t.intro}</p>
+            </header>
+            <IdleAnglerCta place="idle angler page" />
+          </div>
+          <figure className="flex flex-col gap-3">
+            <ScreenBezel slug="idle-angler" alt={t.sampleAlt} priority />
+            <figcaption className="text-sm text-muted">{t.caption}</figcaption>
+          </figure>
+        </section>
+
+        <div className="border-y border-rule bg-night/40 py-14 sm:py-20">
+          <div className={SITE_FRAME}><IaHowItPlays headingId="ia-how-heading" /></div>
+        </div>
+
+        <div className={`flex flex-col gap-20 py-14 sm:gap-24 sm:py-20 ${SITE_FRAME}`}>
+          <WaterGrid headingId="ia-waters-heading" />
+          <div className="flex flex-col gap-8">
+            <IaFeatureGrid headingId="ia-features-heading" />
+            <div className="flex flex-col items-start gap-4 border-t border-rule pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-prose text-muted">{t.guideBody}</p>
+              <Link to="/help/idle-angler" className={`shrink-0 gap-2.5 ${LINK_BUTTON} ${BUTTON_SECONDARY}`}><Glyph name="quest" />{t.readGuide}</Link>
+            </div>
+          </div>
+          <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
+            <IaFaq headingId="ia-faq-heading" />
+            <section aria-labelledby="ia-get-heading" className="window flex flex-col gap-4 self-start p-5 sm:p-6">
+              <h2 id="ia-get-heading" className="font-display text-2xl font-bold text-gold-ink">{t.getIdleAngler}</h2>
+              <IdleAnglerCta place="idle angler page end" />
+            </section>
+          </div>
         </div>
       </main>
     </SiteShell>

@@ -5,6 +5,8 @@ import { analyticsConfigured, captureAnalytics, openAnalyticsPreferences } from 
 import { PlatformHeader, SITE_FRAME } from './platformHeader'
 import { useT } from './i18n'
 import { LanguagePicker } from './languagePicker'
+import { games } from '@trmnl-games/platform'
+import { homeMessages } from '../i18n/home'
 import { shellMessages } from '../i18n/shell'
 
 /** Prose styling for a reading page's body: section headings, lists and underlined links. */
@@ -133,6 +135,7 @@ function FooterGroup({ title, children }: { title: string; children: ReactNode }
  */
 export function SiteFooter() {
   const t = useT(shellMessages)
+  const home = useT(homeMessages)
   return (
     <footer className="mt-auto border-t border-rule bg-night/40 text-sm">
       <div className={`flex flex-col gap-8 py-10 ${SITE_FRAME}`}>
@@ -144,12 +147,13 @@ export function SiteFooter() {
           </div>
           <nav aria-label={t.siteNav} className="col-span-2 grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 md:col-span-4">
             <FooterGroup title={t.footerGames}>
-              <li><Link to="/" className={FOOTER_LINK}>Desk Crawler</Link></li>
-              <li><a href={DESK_CRAWLER_INSTALL_URL} className={FOOTER_LINK} onClick={() => captureAnalytics('install link opened', { place: 'footer' })}>{t.installOnTrmnl}</a></li>
+              <li><Link to="/games/desk-crawler" className={FOOTER_LINK}>Desk Crawler</Link></li>
+              <li><Link to="/games/idle-angler" className={FOOTER_LINK}>Idle Angler</Link></li>
               <Show when="signed-in"><li><Link to="/app" className={FOOTER_LINK}>{t.myGames}</Link></li></Show>
             </FooterGroup>
             <FooterGroup title={t.footerHelp}>
-              <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>{t.setupAndHelp}</Link></li>
+              <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>{home.guideFor('Desk Crawler')}</Link></li>
+              <li><Link to="/help/idle-angler" className={FOOTER_LINK}>{home.guideFor('Idle Angler')}</Link></li>
               <li><Link to="/whats-new" className={FOOTER_LINK}>{t.whatsNew}</Link></li>
               <li><Link to="/support" className={FOOTER_LINK}>{t.support}</Link></li>
               <li><Link to="/feedback" className={FOOTER_LINK}>{t.feedback}</Link></li>
@@ -215,7 +219,7 @@ export { SUPPORT_EMAIL } from './support'
 /** Optional support for the games (D134): a plain link out, with nothing in play attached to it. */
 export const SPONSOR_URL = 'https://github.com/sponsors/barrymichaeldoyle'
 /** Desk Crawler's public marketplace listing (plugin 564): its Install button starts the TRMNL connect flow. */
-export const DESK_CRAWLER_INSTALL_URL = 'https://trmnl.com/integrations/desk-crawler'
+export const DESK_CRAWLER_INSTALL_URL = games['desk-crawler'].marketplaceUrl
 /** Shown on the privacy and terms pages; bump whenever either changes. */
 export const POLICY_UPDATED = '2026-10-08'
 /** The privacy policy alone changed on 9 October 2026 (D110: public names in other players' raid stories). */

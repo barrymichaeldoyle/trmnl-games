@@ -7,11 +7,16 @@ import { requireOpenGame, useGames } from '../../lib/gameAccess'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { preload } from '../../lib/preload'
 import { seo } from '../../lib/seo'
-import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
+import { BUTTON_PRIMARY, Card, CountBadge, LINK_BUTTON, LoadingState, NotifyDot } from '../../lib/ui'
+import { captureAnalytics } from '../../lib/analytics'
+import { IDLE_ANGLER_MARKETPLACE_URL } from '../../lib/idleAnglerPitch'
+import { NotifyMe } from '../../lib/launchList'
 import type { Dock } from '../../lib/idleAngler'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import { useT } from '../../lib/i18n'
 import { iaCommon } from '../../i18n/ia'
+import { homeMessages } from '../../i18n/home'
+import { pitchMessages } from '../../i18n/pitch'
 
 /**
  * Idle Angler companion shell (idle-angler.md "Companion", D115): the lifecycle gate (not-found for anyone who cannot
@@ -39,6 +44,8 @@ function Shell() {
   const { data, isPending } = useQuery(convexQuery(api.idleAngler.anglers.dock, {}))
   const dock = data as Dock | undefined
   const t = useT(iaCommon)
+  const home = useT(homeMessages)
+  const pitch = useT(pitchMessages)
   const listing = useGames()
   const status = listing?.games.find((game) => game.slug === 'idle-angler')?.status
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
@@ -51,8 +58,20 @@ function Shell() {
     return (
       <>{banner}<main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
         <Card title={t.startTitle}>
-          <p>{t.startBody}</p>
-          <Link to="/help/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.howItWorks}</Link>
+          {/* D210: until TRMNL lists the plugin there is nothing to install, so the card says so and offers Notify me. */}
+          {IDLE_ANGLER_MARKETPLACE_URL ? (
+            <>
+              <p>{t.startBody}</p>
+              <a href={IDLE_ANGLER_MARKETPLACE_URL} onClick={() => captureAnalytics('install link opened', { place: 'idle angler start card', game: 'idle-angler' })} className={`mt-3 self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{pitch.installOnTrmnl}</a>
+            </>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-semibold text-ink">{home.inReview}</p>
+              <p>{home.startInReview}</p>
+              <NotifyMe gameSlug="idle-angler" />
+            </div>
+          )}
+          <Link to="/games/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.howItWorks}</Link>
         </Card>
       </main></>
     )

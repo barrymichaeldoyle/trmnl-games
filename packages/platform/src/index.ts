@@ -28,6 +28,11 @@ export interface GameEntry {
   readonly installPath: string
   readonly managePath: string
   readonly clientIdEnv: string
+  /**
+   * The game's public TRMNL marketplace page, whose Install button starts the connect flow; null until TRMNL lists
+   * it. While it is null the site shows the game as in review with Notify me instead of an install link (D210).
+   */
+  readonly marketplaceUrl: string | null
 }
 
 export const games = {
@@ -36,13 +41,13 @@ export const games = {
     name: 'Desk Crawler',
     description: 'An office RPG that plays itself on your TRMNL.',
     defaultStatus: 'live',
-    // Home is Desk Crawler's page until Idle Angler launches; /games/desk-crawler redirects there meanwhile (D137).
-    publicPath: '/',
+    publicPath: '/games/desk-crawler',
     companionPath: '/app/desk-crawler',
     helpPath: '/help/desk-crawler',
     installPath: '/connect/trmnl/desk-crawler/install',
     managePath: '/connect/trmnl/desk-crawler/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID',
+    marketplaceUrl: 'https://trmnl.com/integrations/desk-crawler',
   },
   [IDLE_ANGLER_GAME]: {
     slug: IDLE_ANGLER_GAME,
@@ -55,6 +60,8 @@ export const games = {
     installPath: '/connect/trmnl/idle-angler/install',
     managePath: '/connect/trmnl/idle-angler/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID_IDLE_ANGLER',
+    // TRMNL is reviewing plugin 568 (D209). On approval the launch-day branch sets its listing's URL here.
+    marketplaceUrl: null,
   },
   [PAPER_LIVES_GAME]: {
     slug: PAPER_LIVES_GAME,
@@ -68,6 +75,7 @@ export const games = {
     installPath: '/connect/trmnl/paper-lives/install',
     managePath: '/connect/trmnl/paper-lives/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID_PAPER_LIVES',
+    marketplaceUrl: null,
   },
   [LITTLE_PLOT_GAME]: {
     slug: LITTLE_PLOT_GAME,
@@ -81,6 +89,7 @@ export const games = {
     installPath: '/connect/trmnl/little-plot/install',
     managePath: '/connect/trmnl/little-plot/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID_LITTLE_PLOT',
+    marketplaceUrl: null,
   },
 } as const satisfies Record<GameSlug, GameEntry>
 

@@ -16,16 +16,16 @@ type ListedGame = 'idle-angler'
  * D201: Notify me for a game that is coming soon. A signed-in player taps once and nothing is typed, since their
  * address comes from their account at launch; a visitor leaves an email. Either way, one email at launch.
  */
-export function NotifyMe({ gameSlug }: { gameSlug: ListedGame }) {
+export function NotifyMe({ gameSlug, variant = 'primary' }: { gameSlug: ListedGame; variant?: 'primary' | 'secondary' }) {
   return (
     <>
-      <Show when="signed-in"><AccountNotify gameSlug={gameSlug} /></Show>
+      <Show when="signed-in"><AccountNotify gameSlug={gameSlug} variant={variant} /></Show>
       <Show when="signed-out"><EmailNotify gameSlug={gameSlug} /></Show>
     </>
   )
 }
 
-function AccountNotify({ gameSlug }: { gameSlug: ListedGame }) {
+function AccountNotify({ gameSlug, variant }: { gameSlug: ListedGame; variant: 'primary' | 'secondary' }) {
   const t = useT(launchListMessages)
   const locale = useLocale()
   const { data: onList } = useQuery(convexQuery(api.launchList.mine, { gameSlug }))
@@ -54,7 +54,10 @@ function AccountNotify({ gameSlug }: { gameSlug: ListedGame }) {
           <Button variant="quiet" className="self-start" disabled={pending} onClick={() => void run(() => leave({ gameSlug }), 'launch list left')}>{t.leave}</Button>
         </>
       ) : (
-        <Button className="self-start" pending={pending} busyLabel={t.adding} onClick={() => void run(() => notify({ gameSlug, locale }), 'launch list joined')}>{t.notifyMe}</Button>
+        <Button variant={variant} className="self-start" pending={pending} busyLabel={t.adding} onClick={() => void run(() => notify({ gameSlug, locale }), 'launch list joined')}>
+          {/* D210: the short label on phones, where the long one wraps in the arcade face. */}
+          <span className="sm:hidden">{t.join}</span><span className="max-sm:hidden">{t.notifyMe}</span>
+        </Button>
       )}
       <ErrorNote message={error} />
     </div>

@@ -5,7 +5,10 @@ import { api } from '@trmnl-games/backend/api'
 import type { FunctionReturnType } from 'convex/server'
 import { seo } from '../../lib/seo'
 import { preload } from '../../lib/preload'
-import { BUTTON_PRIMARY, LINK_BUTTON } from '../../lib/ui'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, LINK_BUTTON } from '../../lib/ui'
+import { IDLE_ANGLER_MARKETPLACE_URL } from '../../lib/idleAnglerPitch'
+import { NotifyMe } from '../../lib/launchList'
+import { homeMessages } from '../../i18n/home'
 import { games } from '@trmnl-games/platform'
 import { gamesQuery, useGames } from '../../lib/gameAccess'
 import { messagesFor, useT } from '../../lib/i18n'
@@ -41,7 +44,7 @@ function Library() {
               )}
             </div>
           </div>
-          <Link to={me?.hero || me?.gameState === 'deleting' ? '/app/desk-crawler' : '/'} className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{me?.hero ? t.open('Desk Crawler') : t.about('Desk Crawler')}</Link>
+          <Link to={me?.hero || me?.gameState === 'deleting' ? '/app/desk-crawler' : '/games/desk-crawler'} className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{me?.hero ? t.open('Desk Crawler') : t.about('Desk Crawler')}</Link>
         </section>
       )}
       <UpcomingGames />
@@ -55,6 +58,7 @@ function UpcomingGames() {
   const data = useGames()
   const t = useT(libraryMessages)
   const shell = useT(shellMessages)
+  const home = useT(homeMessages)
   const game = data?.games.find((g) => g.slug === 'idle-angler')
   const { data: dock, isPending } = useQuery({ ...dockQuery, enabled: game?.canOpen === true })
   if (!game) return null
@@ -69,7 +73,14 @@ function UpcomingGames() {
       {!angler && !loading ? <img src="/games/idle-angler/sample.png" alt={t.sampleAlt} width={780} height={460} className="w-full border-2 border-edge bg-white [image-rendering:pixelated]" /> : null}
       {loading ? null : <p className="text-muted">{angler ? shell.anglerLine(angler) : shell.games['idle-angler']}</p>}
       {game.status !== 'live' ? <p className="label-px self-start">{game.status === 'hidden' ? t.hiddenAdmins : shell.comingSoon}</p> : null}
-      {game.canOpen && !loading ? <Link to="/app/idle-angler" className={`self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{angler ? t.open('Idle Angler') : t.about('Idle Angler')}</Link> : null}
+      {/* D210: with no angler and no TRMNL listing yet, the tile says it is in review and offers Notify me. */}
+      {!angler && !loading && !IDLE_ANGLER_MARKETPLACE_URL && game.status === 'live' ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-semibold text-ink">{home.inReview}</p>
+          <NotifyMe gameSlug="idle-angler" />
+        </div>
+      ) : null}
+      {game.canOpen && !loading ? <Link to={angler ? '/app/idle-angler' : '/games/idle-angler'} className={`self-start ${LINK_BUTTON} ${angler ? BUTTON_PRIMARY : BUTTON_SECONDARY}`}>{angler ? t.open('Idle Angler') : t.about('Idle Angler')}</Link> : null}
     </section>
   )
 }

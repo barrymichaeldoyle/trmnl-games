@@ -8,7 +8,7 @@ export const SITE_NAME = PLATFORM_NAME
 export const OG_VERSION = 3
 /** Desk Crawler's own social card, for its public pages. */
 export const DESK_CRAWLER_OG = { path: `/games/desk-crawler/og.png?v=${OG_VERSION}`, alt: 'Desk Crawler on a TRMNL X: Pip, level 7, fighting a Cable Serpent in the Server Room, with the latest adventures, to-do list and weekly rankings' }
-const SITE_DESCRIPTION = 'Games for your TRMNL e-ink display. Start with Desk Crawler, an office RPG that plays itself on your desk.'
+const SITE_DESCRIPTION = 'Games that play themselves on your TRMNL e-ink display: Desk Crawler, an office RPG, and Idle Angler, a fishing game.'
 
 /** schema.org description of the site, for the home page's structured data. */
 export const SITE_JSON_LD = { '@context': 'https://schema.org', '@type': 'WebSite', name: SITE_NAME, url: `${SITE_ORIGIN}/`, description: SITE_DESCRIPTION }
@@ -18,10 +18,26 @@ export const DESK_CRAWLER_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'VideoGame',
   name: 'Desk Crawler',
-  url: `${SITE_ORIGIN}/`,
+  url: `${SITE_ORIGIN}/games/desk-crawler`,
   description: 'An office RPG that plays itself on your TRMNL e-ink display. Every fifteen minutes your hero fights, finds loot or gets knocked out, and the screen on your desk shows what happened.',
   image: `${SITE_ORIGIN}${DESK_CRAWLER_OG.path}`,
   genre: ['Role-playing', 'Idle'],
+  gamePlatform: 'TRMNL e-ink display',
+  applicationCategory: 'Game',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
+  author: { '@type': 'Person', name: 'Barry Michael Doyle', url: 'https://barrymichaeldoyle.com' },
+}
+
+/** schema.org description of Idle Angler, for its game page's structured data (D210). */
+export const IDLE_ANGLER_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'VideoGame',
+  name: 'Idle Angler',
+  url: `${SITE_ORIGIN}/games/idle-angler`,
+  description: 'A fishing game that plays itself on your TRMNL e-ink display. Every fifteen minutes your angler casts, and the screen on your desk shows the catch, the weather and the week’s heaviest fish.',
+  image: `${SITE_ORIGIN}/games/idle-angler/sample.png`,
+  genre: ['Simulation', 'Idle'],
   gamePlatform: 'TRMNL e-ink display',
   applicationCategory: 'Game',
   isAccessibleForFree: true,
