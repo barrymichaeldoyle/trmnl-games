@@ -1,6 +1,6 @@
-import { deriveNamedSeeds, deriveSharedSeed } from '@trmnl-games/engine/seed'
-import { FORECAST_BLOCK_MS, forecastBlock, weatherFromSeed } from './conditions'
-import { seasonAt } from './seasons'
+import { deriveNamedSeeds } from '@trmnl-games/engine/seed'
+import { drawForecast, forecastBlockStart } from '@trmnl-games/engine/forecast'
+import { seasonAt, weatherTable } from './seasons'
 import type { IdleAnglerCatalog, StreamName, StreamSeeds, WaterDef, WaterId, Weather } from './types'
 
 export const STREAMS: readonly StreamName[] = ['bite', 'species', 'size', 'narrative', 'orders']
@@ -15,9 +15,8 @@ export function deriveAnglerSeeds(worldSeed: string, anglerId: string, tick: num
  * world's season picks the water's table (D162); the hash is unchanged, so v1 forecasts replay.
  */
 export function forecast(worldSeed: string, water: WaterDef, at: number, content?: Pick<IdleAnglerCatalog, 'seasons'>): Weather {
-  const block = forecastBlock(at)
-  const season = content ? seasonAt(content, block * FORECAST_BLOCK_MS) : undefined
-  return weatherFromSeed(deriveSharedSeed(worldSeed, water.id, block), water, season)
+  const season = content ? seasonAt(content, forecastBlockStart(at)) : undefined
+  return drawForecast(worldSeed, water.id, at, weatherTable(water, season))
 }
 
 export function forecastFor(worldSeed: string, content: IdleAnglerCatalog, waterId: WaterId, at: number): Weather {

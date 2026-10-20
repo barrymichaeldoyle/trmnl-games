@@ -115,7 +115,7 @@ export async function runIntent(
 
     const result = await handler(user)
     if (prior) await ctx.db.delete(prior._id)
-    await ctx.db.insert('operationReceipts', { scope: operation === 'deletion.requestDeletion' || operation.startsWith('users.') ? 'platform' : operation.startsWith('idleAngler.') ? 'idle-angler' : operation.startsWith('paperLives.') ? 'paper-lives' : 'desk-crawler', userId: user._id, operationId, operation, argumentHash, result, createdAt: now, expiresAt: now + RECEIPT_TTL_MS })
+    await ctx.db.insert('operationReceipts', { scope: operation === 'deletion.requestDeletion' || operation.startsWith('users.') ? 'platform' : operation.startsWith('idleAngler.') ? 'idle-angler' : operation.startsWith('paperLives.') ? 'paper-lives' : operation.startsWith('littlePlot.') ? 'little-plot' : 'desk-crawler', userId: user._id, operationId, operation, argumentHash, result, createdAt: now, expiresAt: now + RECEIPT_TTL_MS })
     return { ...result, operationId }
   } catch (error) {
     const refusal = refusalOf(error)

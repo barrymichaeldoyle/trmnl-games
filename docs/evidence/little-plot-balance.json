@@ -1,0 +1,154 @@
+{
+  "plots": 300,
+  "days": 60,
+  "byPolicy": {
+    "never": {
+      "firstRipeHoursMedian": 2.75,
+      "firstRipeHoursP95": 2.75,
+      "firstCrossDayMedian": null,
+      "crossBy3Days": 0,
+      "crossBy7Days": 0,
+      "kindsDay10": 6,
+      "kindsDay30": 8,
+      "kindsDay60": 11,
+      "shedDoneDayMedian": null,
+      "greenhouseDayMedian": null,
+      "pestEventsPerDay": 0.79,
+      "deterredPerDay": 0,
+      "visitsPerNight": 0.35,
+      "defendedVisitsPerNight": 0,
+      "ripeToSeedShare": 98,
+      "setbackShare": 3,
+      "goldDay60": 0,
+      "levelDay60": 6,
+      "epic_moonflower": 0,
+      "epic_dragon_gourd": 0,
+      "epic_golden_sunflower": 0,
+      "epic_frost_rose": 0
+    },
+    "threeDay": {
+      "firstRipeHoursMedian": 2.75,
+      "firstRipeHoursP95": 2.75,
+      "firstCrossDayMedian": 6.947916666666667,
+      "crossBy3Days": 0,
+      "crossBy7Days": 97,
+      "kindsDay10": 17,
+      "kindsDay30": 26,
+      "kindsDay60": 31,
+      "shedDoneDayMedian": null,
+      "greenhouseDayMedian": null,
+      "pestEventsPerDay": 0.53,
+      "deterredPerDay": 0.17,
+      "visitsPerNight": 0.29,
+      "defendedVisitsPerNight": 0,
+      "ripeToSeedShare": 72,
+      "setbackShare": 1,
+      "goldDay60": 363,
+      "levelDay60": 10,
+      "epic_moonflower": 11,
+      "epic_dragon_gourd": 13,
+      "epic_golden_sunflower": 0,
+      "epic_frost_rose": 61
+    },
+    "daily": {
+      "firstRipeHoursMedian": 2.75,
+      "firstRipeHoursP95": 2.75,
+      "firstCrossDayMedian": 2.9479166666666665,
+      "crossBy3Days": 97,
+      "crossBy7Days": 100,
+      "kindsDay10": 27,
+      "kindsDay30": 36,
+      "kindsDay60": 36,
+      "shedDoneDayMedian": 22,
+      "greenhouseDayMedian": 30,
+      "pestEventsPerDay": 0.36,
+      "deterredPerDay": 0.3,
+      "visitsPerNight": 0.15,
+      "defendedVisitsPerNight": 0.09,
+      "ripeToSeedShare": 0,
+      "setbackShare": 1,
+      "goldDay60": 28473,
+      "levelDay60": 17,
+      "epic_moonflower": 100,
+      "epic_dragon_gourd": 100,
+      "epic_golden_sunflower": 100,
+      "epic_frost_rose": 95
+    },
+    "twiceDaily": {
+      "firstRipeHoursMedian": 2.75,
+      "firstRipeHoursP95": 2.75,
+      "firstCrossDayMedian": 1.4895833333333333,
+      "crossBy3Days": 100,
+      "crossBy7Days": 100,
+      "kindsDay10": 29,
+      "kindsDay30": 35,
+      "kindsDay60": 36,
+      "shedDoneDayMedian": 18,
+      "greenhouseDayMedian": 22,
+      "pestEventsPerDay": 0.35,
+      "deterredPerDay": 0.33,
+      "visitsPerNight": 0.13,
+      "defendedVisitsPerNight": 0.09,
+      "ripeToSeedShare": 0,
+      "setbackShare": 1,
+      "goldDay60": 35462,
+      "levelDay60": 17,
+      "epic_moonflower": 100,
+      "epic_dragon_gourd": 100,
+      "epic_golden_sunflower": 100,
+      "epic_frost_rose": 10
+    }
+  },
+  "gates": [
+    {
+      "gate": "First ripe plant: median under 7 hours for every policy, under 8 hours for 95%",
+      "result": "medians 2.75/2.75/2.75/2.75 h, p95 2.75/2.75/2.75/2.75 h",
+      "pass": true
+    },
+    {
+      "gate": "First cross by day 3 for daily and twice daily (95%), by day 7 for three-day (80%)",
+      "result": "daily 97%, twice 100%, three-day by 7: 97%",
+      "pass": true
+    },
+    {
+      "gate": "Catalogue, daily: 14 by day 10, 24 by day 30, 30 by day 60",
+      "result": "27 / 36 / 36",
+      "pass": true
+    },
+    {
+      "gate": "Catalogue, never visits: 8 to 12 kinds by day 60",
+      "result": "11",
+      "pass": true
+    },
+    {
+      "gate": "Epics: each found by a third of daily plots in 60 days (Frost Rose a quarter)",
+      "result": "moonflower 100%, dragon_gourd 100%, golden_sunflower 100%, frost_rose 95%",
+      "pass": true
+    },
+    {
+      "gate": "Coins, daily: the useful shed between day 20 and 30, the greenhouse by day 40",
+      "result": "shed day 22, greenhouse day 30",
+      "pass": true
+    },
+    {
+      "gate": "Pests: about one event a day undefended (never visits), one in three to four days defended (daily)",
+      "result": "never 0.79/day, daily 0.36/day",
+      "pass": true
+    },
+    {
+      "gate": "Setbacks cost a daily player at most 5% of growth",
+      "result": "1%",
+      "pass": true
+    },
+    {
+      "gate": "Visits: one every three nights undefended, one in twelve with lantern and cat",
+      "result": "never 0.35/night, daily with lantern and cat 0.09/night",
+      "pass": true
+    },
+    {
+      "gate": "Ripe waiting: the three-day player sees at least half its ripenings go to seed; twice daily under 10%",
+      "result": "three-day 72%, twice daily 0%",
+      "pass": true
+    }
+  ]
+}

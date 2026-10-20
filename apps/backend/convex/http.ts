@@ -97,6 +97,8 @@ http.route({ path: '/trmnl/idle-angler/install/success', method: 'POST', handler
 http.route({ path: '/trmnl/idle-angler/uninstall', method: 'POST', handler: uninstall('idle-angler') })
 http.route({ path: '/trmnl/paper-lives/install/success', method: 'POST', handler: installSuccess('paper-lives') })
 http.route({ path: '/trmnl/paper-lives/uninstall', method: 'POST', handler: uninstall('paper-lives') })
+http.route({ path: '/trmnl/little-plot/install/success', method: 'POST', handler: installSuccess('little-plot') })
+http.route({ path: '/trmnl/little-plot/uninstall', method: 'POST', handler: uninstall('little-plot') })
 
 /** Shared screen request parsing: bearer, form type and size, one `user_uuid`. */
 async function parseScreenRequest(request: Request): Promise<{ tokenHash: string; form: URLSearchParams; uuid: string } | Response> {

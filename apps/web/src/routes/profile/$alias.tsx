@@ -12,7 +12,7 @@ import { FishName } from '../app/idle-angler/-fish'
 import { formatDate, messagesFor, useLocale, useT } from '../../lib/i18n'
 import { publicPagesMessages } from '../../i18n/publicPages'
 
-type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
+type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives' | 'little-plot'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
 type Profile = { alias: string; games: Game[]; platform: Array<{ id: string; name: string; blurb: string; share: number | null }> } | null
 
 const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { alias })

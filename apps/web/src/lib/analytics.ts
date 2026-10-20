@@ -147,7 +147,7 @@ export function captureAnalytics(event: AnalyticsEvent, properties: Record<strin
 /** The game a page belongs to, for every event's `game` property (D115, D159); platform pages count as Desk Crawler's, as before. */
 const currentGame = () => {
   const path = typeof window === 'undefined' ? '' : window.location.pathname
-  return /(^|\/)idle-angler(\/|$)/.test(path) ? 'idle-angler' : /(^|\/)paper-lives(\/|$)/.test(path) ? 'paper-lives' : 'desk-crawler'
+  return /(^|\/)idle-angler(\/|$)/.test(path) ? 'idle-angler' : /(^|\/)paper-lives(\/|$)/.test(path) ? 'paper-lives' : /(^|\/)little-plot(\/|$)/.test(path) ? 'little-plot' : 'desk-crawler'
 }
 
 /** v1.1 choices worth measuring: intent → event and the one catalog id argument it may carry. */

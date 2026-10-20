@@ -31,6 +31,7 @@ describe('game lifecycle status (D115)', () => {
         { slug: 'desk-crawler', status: 'live', canOpen: true },
         { slug: 'idle-angler', status: 'hidden', canOpen: true },
         { slug: 'paper-lives', status: 'hidden', canOpen: true },
+        { slug: 'little-plot', status: 'hidden', canOpen: true },
       ],
     })
   })

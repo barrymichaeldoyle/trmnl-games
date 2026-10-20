@@ -20,6 +20,9 @@ importers:
       '@trmnl-games/idle-angler':
         specifier: workspace:*
         version: link:packages/idle-angler
+      '@trmnl-games/little-plot':
+        specifier: workspace:*
+        version: link:packages/little-plot
       '@trmnl-games/paper-lives':
         specifier: workspace:*
         version: link:packages/paper-lives
@@ -259,6 +262,16 @@ importers:
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:../platform
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/little-plot:
+    dependencies:
+      '@trmnl-games/engine':
+        specifier: workspace:*
+        version: link:../engine
     devDependencies:
       typescript:
         specifier: ~6.0.3

@@ -1,9 +1,10 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
-import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
+import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, LITTLE_PLOT_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, order, season, timeBand, waterId, weather } from './idleAngler/validators'
 import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, lineChanges as plLineChanges, plLogKind, portraitKey as plPortraitKey } from './paperLives/validators'
+import { lpLogDetail, lpLogKind, plotState as lpPlotState } from './littlePlot/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
@@ -13,6 +14,8 @@ const idleAnglerEngine = engineTables(IDLE_ANGLER_TABLES, ['landed', 'released',
 
 /** Paper Lives' engine tables, prefixed `pl` (paper-lives.md "Data"); no XP boards, its boards are life records. */
 const paperLivesEngine = engineTables(PAPER_LIVES_TABLES, ['events', 'years', 'deaths'])
+/** Little Plot's engine tables, prefixed `lp` (little-plot.md "Data"); it ranks by XP like Desk Crawler, so it has the ranking tables too. */
+const littlePlotEngine = { ...engineTables(LITTLE_PLOT_TABLES, ['ripenings', 'pests', 'visits']), ...rankingTables(LITTLE_PLOT_TABLES) }
 
 /**
  * Current-release schema only (data-model.md). Tables arrive with the work
@@ -142,7 +145,7 @@ export const merchantOffer = v.object({
 export const merchantVisit = v.object({ offers: v.array(merchantOffer), expiresAtTick: v.number(), biomeId: v.string() })
 
 /** P33: the two alert kinds; a new kind needs its own decision row (alerts.md). */
-export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.literal('cooler_full'), v.literal('bait_out'), v.literal('major_decision'), v.literal('life_ended'), v.literal('new_arrival'))
+export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.literal('cooler_full'), v.literal('bait_out'), v.literal('major_decision'), v.literal('life_ended'), v.literal('new_arrival'), v.literal('beds_ripe'), v.literal('new_seed'))
 export const alertPreferences = v.object({
   asleep: v.boolean(),
   merchant: v.boolean(),
@@ -153,6 +156,9 @@ export const alertPreferences = v.object({
   majorDecision: v.optional(v.boolean()),
   lifeEnded: v.optional(v.boolean()),
   newArrival: v.optional(v.boolean()),
+  /** D206: Little Plot's kinds; absent means off. */
+  bedsRipe: v.optional(v.boolean()),
+  newSeed: v.optional(v.boolean()),
   quietStart: v.number(),
   quietEnd: v.number(),
   /** Set when the last device's subscription went stale and both kinds turned off; Settings says why. */
@@ -181,7 +187,7 @@ export const logKind = v.union(
 )
 
 /** Every registered game (packages/platform). Storage accepts any of them; each write path still names its own game. */
-export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'))
+export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'), v.literal('little-plot'))
 export const gameStatus = v.union(v.literal('hidden'), v.literal('preview'), v.literal('live'))
 
 /** D149: a hero's look; chosen free at creation, changed later with a makeover. */
@@ -365,6 +371,126 @@ export default defineSchema({
   plSimulationFailures: paperLivesEngine.failures,
   plLeaderboardPublications: defineTable(paperLivesEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
   plAchievementStats: paperLivesEngine.achievementStats,
+
+  lpWorldState: littlePlotEngine.world,
+  lpSimulationRuns: defineTable(littlePlotEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
+  lpSimulationFailures: littlePlotEngine.failures,
+  lpScoreWindows: littlePlotEngine.scoreWindows,
+  lpRankInputs: littlePlotEngine.rankInputs,
+  lpLeaderboardPublications: defineTable(littlePlotEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
+  lpLeaderboardGenerations: littlePlotEngine.generations,
+  lpRanks: littlePlotEngine.ranks,
+  lpAchievementStats: littlePlotEngine.achievementStats,
+
+  /** One per user once they start Little Plot (D206), like `idleAnglerProfiles`. The pressed flowers (the D46 shape) live here. */
+  littlePlotProfiles: defineTable({
+    userId: v.id('users'),
+    state: v.union(v.literal('active'), v.literal('deleting')),
+    plotId: v.optional(v.id('plots')),
+    flowers: v.optional(v.object({ totalCollected: v.number(), lastClaimWeek: v.number(), lastClaimedAt: v.number() })),
+    createdAt: v.number(),
+  }).index('by_userId', ['userId']),
+
+  /**
+   * The Little Plot player character: the pure core's state stored whole in `plot` (littlePlot/validators.ts), with the
+   * level, XP and gold mirrored on top for ranking and lists. Engine tables call it `heroId` (lib/engine/tables.ts).
+   */
+  plots: defineTable({
+    userId: v.id('users'),
+    createdAt: v.number(),
+    isActive: v.boolean(),
+    activationState: v.union(v.literal('pending_trmnl'), v.literal('active')),
+    activatedAt: v.optional(v.number()),
+    plot: lpPlotState,
+    level: v.number(),
+    xp: v.number(),
+    gold: v.number(),
+    lastLevelUpTick: v.number(),
+    /** D31: XP granted in the current UTC hour, folded into the score window at publication. */
+    scoreHourXp: v.number(),
+    scoreHour: v.optional(v.number()),
+    publicProfile: v.optional(v.boolean()),
+    /** The UTC day the last cutting was sent, one a day. */
+    lastCuttingDay: v.optional(v.number()),
+    eligibleFromTick: v.number(),
+    lastTick: v.number(),
+    lastProgressTick: v.number(),
+    lastAdvancedAt: v.optional(v.number()),
+    logSequence: v.number(),
+    simulationState: v.union(v.literal('healthy'), v.literal('quarantined')),
+    quarantineReasonCode: v.optional(v.string()),
+    achievementsVersion: v.optional(v.number()),
+  })
+    .index('by_userId_and_isActive', ['userId', 'isActive'])
+    .index('by_createdAt', ['createdAt'])
+    .index('by_simulationState', ['simulationState']),
+
+  /** One row per earned Little Plot achievement, keyed by owner (D65 shape); bounded by the catalog. */
+  lpAchievements: defineTable({
+    userId: v.id('users'),
+    plotId: v.id('plots'),
+    achievementId: v.string(),
+    unlockedAt: v.number(),
+    tick: v.number(),
+    catalogVersion: v.number(),
+  })
+    .index('by_userId_and_achievementId', ['userId', 'achievementId'])
+    .index('by_userId_and_unlockedAt', ['userId', 'unlockedAt']),
+
+  /**
+   * The gnome pool (little-plot.md "Gnomes from other gardens"), the raid pool's shape: one row per plot at a random
+   * shard, in its level group, drawable while its page is public and it is growing. A drawn row moves to a new shard
+   * and records when, so nobody is everyone's target.
+   */
+  lpGnomePool: defineTable({
+    plotId: v.id('plots'),
+    userId: v.id('users'),
+    cohortKey: v.string(),
+    eligible: v.boolean(),
+    shard: v.number(),
+    lastActiveTick: v.number(),
+    visitedAtTick: v.optional(v.number()),
+  })
+    .index('by_plotId', ['plotId'])
+    .index('by_cohortKey_and_eligible_and_shard', ['cohortKey', 'eligible', 'shard']),
+
+  /**
+   * The seed ledger between gardens: a gnome's haul or a friend's cutting, written by the sending plot's tick or intent
+   * and applied by the receiving plot at its next evaluation, so each plot only writes its own document. The applied
+   * rows are the week's visit history (at most 30 per plot).
+   */
+  lpVisits: defineTable({
+    plotId: v.id('plots'),
+    fromPlotId: v.id('plots'),
+    fromUserId: v.id('users'),
+    fromName: v.string(),
+    fromNameVersion: v.number(),
+    kindId: v.optional(v.string()),
+    effect: v.union(v.literal('gain'), v.literal('lose'), v.literal('none')),
+    cutting: v.optional(v.literal(true)),
+    caught: v.optional(v.literal(true)),
+    tick: v.number(),
+    state: v.union(v.literal('pending'), v.literal('applied'), v.literal('void')),
+    appliedTick: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index('by_plotId_and_state_and_tick', ['plotId', 'state', 'tick'])
+    .index('by_plotId_and_tick', ['plotId', 'tick']),
+
+  /** A plot's story lines: stages, ripenings, pests, visits, goals and the player's own actions. */
+  lpTickLogs: defineTable({
+    plotId: v.id('plots'),
+    source: v.union(v.literal('tick'), v.literal('command'), v.literal('lifecycle')),
+    tick: v.optional(v.number()),
+    runId: v.optional(v.id('lpSimulationRuns')),
+    sequence: v.number(),
+    at: v.number(),
+    kind: lpLogKind,
+    summary: v.string(),
+    detail: lpLogDetail,
+  })
+    .index('by_plotId_and_at_and_sequence', ['plotId', 'at', 'sequence'])
+    .index('by_at', ['at']),
 
   /** One per user once they start Paper Lives (D159), like `idleAnglerProfiles`. */
   paperLivesProfiles: defineTable({
@@ -837,7 +963,7 @@ export default defineSchema({
 
 
   operationReceipts: defineTable({
-    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'))),
+    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'), v.literal('little-plot'))),
     userId: v.id('users'),
     operationId: v.string(),
     operation: v.string(),
@@ -879,6 +1005,8 @@ export default defineSchema({
     /** Paper Lives rows carry the life, the age it was raised at and the decision or the newborn's id (D159). */
     lifeId: v.optional(v.id('lives')),
     lifeAge: v.optional(v.number()),
+    /** Little Plot rows carry the plot (D206). */
+    plotId: v.optional(v.id('plots')),
     detail: v.optional(v.string()),
     kind: alertKind,
     /** `${heroId}:${kind}:${eventTick}`: one nap or one merchant visit is one alert. */

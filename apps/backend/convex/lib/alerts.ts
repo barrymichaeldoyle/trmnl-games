@@ -30,7 +30,7 @@ export type AlertKind = Doc<'alertOutbox'>['kind']
 export type AlertPreferences = NonNullable<Doc<'users'>['alerts']>
 
 /** Every kind's on/off switch on the owner's preferences, across the games. */
-export const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival'] as const
+export const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival', 'bedsRipe', 'newSeed'] as const
 export type AlertSwitch = (typeof SWITCHES)[number]
 /** The preference switch for each kind. */
 export const PREF_FOR: Readonly<Record<AlertKind, AlertSwitch>> = {
@@ -41,12 +41,16 @@ export const PREF_FOR: Readonly<Record<AlertKind, AlertSwitch>> = {
   major_decision: 'majorDecision',
   life_ended: 'lifeEnded',
   new_arrival: 'newArrival',
+  beds_ripe: 'bedsRipe',
+  new_seed: 'newSeed',
 }
 export const kindOn = (prefs: AlertPreferences | undefined, kind: AlertKind) => prefs?.[PREF_FOR[kind]] === true
 /** Desk Crawler's kinds, Idle Angler's (D115) and Paper Lives' (D159). */
 export const DESK_CRAWLER_KINDS: readonly AlertKind[] = ['asleep', 'merchant']
 export const IDLE_ANGLER_KINDS: readonly AlertKind[] = ['cooler_full', 'bait_out']
 export const PAPER_LIVES_KINDS: readonly AlertKind[] = ['major_decision', 'life_ended', 'new_arrival']
+/** Little Plot's kinds (D206): half the beds ripe, and a seed of a kind never grown in the tin. */
+export const LITTLE_PLOT_KINDS: readonly AlertKind[] = ['beds_ripe', 'new_seed']
 
 const STEP_MS = 15 * 60_000
 
@@ -203,6 +207,8 @@ export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: s
 
 /** One sentence in the game's voice, with nothing private on a lock screen, and the page it opens. */
 export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>, heroName: string, locale: Locale = 'en'): { title: string; body: string; url: string } {
+  if (row.kind === 'beds_ripe') return { ...PLOT_ALERTS[locale].bedsRipe, url: '/app/little-plot?alert=beds_ripe' }
+  if (row.kind === 'new_seed') return { ...PLOT_ALERTS[locale].newSeed(row.offerName ?? null), url: '/app/little-plot/tin?alert=new_seed' }
   if (row.kind === 'cooler_full') return { ...ANGLER_ALERTS[locale].coolerFull, url: '/app/idle-angler/cooler?alert=cooler_full' }
   if (row.kind === 'bait_out') return { ...ANGLER_ALERTS[locale].baitOut, url: '/app/idle-angler/shop?alert=bait_out' }
   if (row.kind === 'asleep') return { ...DESK_ALERTS[locale].asleep(heroName), url: '/app/desk-crawler/inventory?alert=asleep' }
@@ -263,4 +269,34 @@ const DESK_ALERTS: Readonly<Record<Locale, { asleep: (hero: string) => { title: 
     asleep: (hero) => ({ title: `De tas van ${hero} is vol`, body: `${hero} bewaart een nieuwe vondst voor je. Maak ruimte in de tas, zodat de volgende niet blijven liggen.` }),
     merchant: (hero, offer) => ({ title: 'Er is een koopman op bezoek', body: `Een koopman biedt ${hero} ${offer === null ? 'een grotere tas' : nl.nameWith(offer, 'een')} met korting aan, en het goud is er. Het aanbod geldt ongeveer een uur.` }),
   },
+}
+
+/** D206: Little Plot's two alerts in the owner's language. The seed's kind rides in `offerName`, as the merchant's offer does. */
+const PLOT_ALERTS: Readonly<Record<Locale, { bedsRipe: { title: string; body: string }; newSeed: (kind: string | null) => { title: string; body: string } }>> = {
+  en: { bedsRipe: { title: 'Half your beds are ripe', body: 'Pick them in the companion. Left a day, they go to seed on their own.' }, newSeed: (kind) => ({ title: 'A seed you have never grown', body: kind ? `A ${kind} seed is in the tin. Sow it and see.` : 'A new kind of seed is in the tin. Sow it and see.' }) },
+  fr: { bedsRipe: { title: 'La moitié de vos carrés sont mûrs', body: 'Récoltez-les dans le compagnon. Laissés un jour, ils montent en graine tout seuls.' }, newSeed: (kind) => ({ title: 'Une graine jamais cultivée', body: kind ? `Une graine de ${kind} est dans la boîte. Semez-la pour voir.` : 'Une graine d’une nouvelle sorte est dans la boîte. Semez-la pour voir.' }) },
+  de: { bedsRipe: { title: 'Die Hälfte deiner Beete ist reif', body: 'Ernte sie in der Begleit-App. Nach einem Tag gehen sie von selbst in Samen.' }, newSeed: (kind) => ({ title: 'Ein Samen, den du nie gezogen hast', body: kind ? `Ein ${kind}-Samen liegt in der Dose. Säe ihn und schau.` : 'Eine neue Samensorte liegt in der Dose. Säe sie und schau.' }) },
+  es: { bedsRipe: { title: 'La mitad de tus bancales están maduros', body: 'Recógelos en la app. Si pasan un día, granan solos.' }, newSeed: (kind) => ({ title: 'Una semilla que nunca has cultivado', body: kind ? `Hay una semilla de ${kind} en la lata. Siémbrala y verás.` : 'Hay una semilla de una clase nueva en la lata. Siémbrala y verás.' }) },
+  it: { bedsRipe: { title: 'Metà delle tue aiuole è matura', body: 'Raccoglile nell’app. Lasciate un giorno, vanno a seme da sole.' }, newSeed: (kind) => ({ title: 'Un seme che non hai mai coltivato', body: kind ? `Un seme di ${kind} è nella scatola. Seminalo e vedi.` : 'Un seme di un tipo nuovo è nella scatola. Seminalo e vedi.' }) },
+  pt: { bedsRipe: { title: 'Metade dos seus canteiros está madura', body: 'Colha no app. Se ficarem um dia, vão a semente sozinhos.' }, newSeed: (kind) => ({ title: 'Uma semente que você nunca cultivou', body: kind ? `Uma semente de ${kind} está na lata. Plante e veja.` : 'Uma semente de um tipo novo está na lata. Plante e veja.' }) },
+  pl: { bedsRipe: { title: 'Połowa grządek dojrzała', body: 'Zbierz je w aplikacji. Zostawione na dzień same pójdą w nasiona.' }, newSeed: (kind) => ({ title: 'Nasiono, którego nigdy nie uprawiałeś', body: kind ? `W puszce jest nasiono: ${kind}. Posiej i zobacz.` : 'W puszce jest nasiono nowego rodzaju. Posiej i zobacz.' }) },
+  nl: { bedsRipe: { title: 'De helft van je bedden is rijp', body: 'Pluk ze in de app. Na een dag gaan ze vanzelf in het zaad.' }, newSeed: (kind) => ({ title: 'Een zaadje dat je nooit hebt gekweekt', body: kind ? `Er ligt een ${kind}-zaadje in het blik. Zaai het en kijk.` : 'Er ligt een nieuw soort zaadje in het blik. Zaai het en kijk.' }) },
+}
+
+/**
+ * Little Plot tick hook (D206): half the beds ripe on this tick (held 30 minutes, like a nap) and a kind never grown
+ * landing in the tin. Reads nothing unless the owner turned the kind on.
+ */
+export async function queueLittlePlotAlerts(ctx: MutationCtx, args: { owner: Doc<'users'>; plotId: Id<'plots'>; halfRipe: boolean; newSeeds: readonly string[]; content: { kinds: ReadonlyArray<{ id: string; name: string }> }; tick: number; now: number }): Promise<void> {
+  const { owner, plotId, tick, now } = args
+  const prefs = owner.alerts
+  if (prefs === undefined) return
+  const rows: Array<{ kind: AlertKind; key: string; notBefore: number; offerName?: string }> = []
+  if (args.halfRipe && prefs.bedsRipe) rows.push({ kind: 'beds_ripe', key: `${plotId}:beds_ripe:${tick}`, notBefore: now + ALERTS.asleepDelayMs })
+  if (prefs.newSeed) for (const kindId of args.newSeeds) rows.push({ kind: 'new_seed', key: `${plotId}:new_seed:${kindId}`, notBefore: now, offerName: args.content.kinds.find((k) => k.id === kindId)?.name ?? kindId })
+  for (const row of rows) {
+    if (await ctx.db.query('alertOutbox').withIndex('by_key', (q) => q.eq('key', row.key)).first()) continue
+    await ctx.db.insert('alertOutbox', { userId: owner._id, plotId, eventTick: tick, state: 'pending', attempts: 0, createdAt: now, updatedAt: now, ...row })
+    await ensureSender(ctx, row.notBefore)
+  }
 }

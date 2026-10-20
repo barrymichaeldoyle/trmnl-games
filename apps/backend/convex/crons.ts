@@ -16,6 +16,10 @@ crons.cron('idle angler opens', '10 0 * * 1', internal.idleAngler.full.closeOpen
 crons.cron('paper lives tick', '10,25,40,55 * * * *', internal.paperLives.tick.startTick, {})
 crons.interval('paper lives watchdog', { minutes: 5 }, internal.paperLives.tick.watchdog, {})
 
+// D206: Little Plot ticks at twelve past each quarter, the free slot after the other three worlds (little-plot.md "Architecture").
+crons.cron('little plot tick', '12,27,42,57 * * * *', internal.littlePlot.tick.startTick, {})
+crons.interval('little plot watchdog', { minutes: 5 }, internal.littlePlot.tick.watchdog, {})
+
 /** Stalled-run detection and guarded recovery (simulation.md "Watchdog"). */
 crons.interval('tick watchdog', { minutes: 5 }, internal.sim.runs.tick.watchdog, {})
 

@@ -8,7 +8,7 @@ type Life = { first: string; last: string; age: number; activationState: string;
 /** D169: the frame every page shares: header, footers, the game switcher, the sign-in gate and reading pages. */
 export const shellMessages = defineMessages({
   en: {
-    games: { 'desk-crawler': 'An office RPG that plays itself on your TRMNL.', 'idle-angler': 'A fishing game that plays itself on your TRMNL.', 'paper-lives': 'A life story that writes itself on your TRMNL.' } as Record<GameSlug, string>,
+    games: { 'desk-crawler': 'An office RPG that plays itself on your TRMNL.', 'idle-angler': 'A fishing game that plays itself on your TRMNL.', 'paper-lives': 'A life story that writes itself on your TRMNL.', 'little-plot': 'A cosy garden that grows on your TRMNL.' } as Record<GameSlug, string>,
     heroStatus: { paused: 'Paused', dead: 'Knocked out', sleeping: 'Bag full', resuming: 'Resuming' } as Record<string, string>,
     adventuring: 'Adventuring',
     waitingForSave: 'Waiting for TRMNL Save',
@@ -59,7 +59,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'About Desk Crawler',
   },
   fr: {
-    games: { 'desk-crawler': 'Un RPG de bureau qui se joue tout seul sur votre TRMNL.', 'idle-angler': 'Un jeu de pêche qui se joue tout seul sur votre TRMNL.', 'paper-lives': 'Une histoire de vie qui s’écrit toute seule sur votre TRMNL.' },
+    games: { 'desk-crawler': 'Un RPG de bureau qui se joue tout seul sur votre TRMNL.', 'idle-angler': 'Un jeu de pêche qui se joue tout seul sur votre TRMNL.', 'paper-lives': 'Une histoire de vie qui s’écrit toute seule sur votre TRMNL.', 'little-plot': 'Un jardin douillet qui pousse sur votre TRMNL.' },
     heroStatus: { paused: 'En pause', dead: 'K.-O.', sleeping: 'Sac plein', resuming: 'Reprise' },
     adventuring: 'En aventure',
     waitingForSave: 'En attente de l’enregistrement TRMNL',
@@ -110,7 +110,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'À propos de Desk Crawler',
   },
   de: {
-    games: { 'desk-crawler': 'Ein Büro-RPG, das sich auf deinem TRMNL von selbst spielt.', 'idle-angler': 'Ein Angelspiel, das sich auf deinem TRMNL von selbst spielt.', 'paper-lives': 'Eine Lebensgeschichte, die sich auf deinem TRMNL von selbst schreibt.' },
+    games: { 'desk-crawler': 'Ein Büro-RPG, das sich auf deinem TRMNL von selbst spielt.', 'idle-angler': 'Ein Angelspiel, das sich auf deinem TRMNL von selbst spielt.', 'paper-lives': 'Eine Lebensgeschichte, die sich auf deinem TRMNL von selbst schreibt.', 'little-plot': 'Ein gemütlicher Garten, der auf deinem TRMNL wächst.' },
     heroStatus: { paused: 'Pausiert', dead: 'K. o.', sleeping: 'Tasche voll', resuming: 'Geht weiter' },
     adventuring: 'Auf Abenteuer',
     waitingForSave: 'Wartet auf Speichern in TRMNL',
@@ -161,7 +161,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'Über Desk Crawler',
   },
   es: {
-    games: { 'desk-crawler': 'Un RPG de oficina que se juega solo en tu TRMNL.', 'idle-angler': 'Un juego de pesca que se juega solo en tu TRMNL.', 'paper-lives': 'Una historia de vida que se escribe sola en tu TRMNL.' },
+    games: { 'desk-crawler': 'Un RPG de oficina que se juega solo en tu TRMNL.', 'idle-angler': 'Un juego de pesca que se juega solo en tu TRMNL.', 'paper-lives': 'Una historia de vida que se escribe sola en tu TRMNL.', 'little-plot': 'Un jardín acogedor que crece en tu TRMNL.' },
     heroStatus: { paused: 'En pausa', dead: 'K.O.', sleeping: 'Bolsa llena', resuming: 'Reanudando' },
     adventuring: 'De aventura',
     waitingForSave: 'Esperando a que guardes en TRMNL',
@@ -212,7 +212,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'Acerca de Desk Crawler',
   },
   it: {
-    games: { 'desk-crawler': 'Un GDR d’ufficio che si gioca da solo sul tuo TRMNL.', 'idle-angler': 'Un gioco di pesca che si gioca da solo sul tuo TRMNL.', 'paper-lives': 'Una storia di vita che si scrive da sola sul tuo TRMNL.' },
+    games: { 'desk-crawler': 'Un GDR d’ufficio che si gioca da solo sul tuo TRMNL.', 'idle-angler': 'Un gioco di pesca che si gioca da solo sul tuo TRMNL.', 'paper-lives': 'Una storia di vita che si scrive da sola sul tuo TRMNL.', 'little-plot': 'Un giardino accogliente che cresce sul tuo TRMNL.' },
     heroStatus: { paused: 'In pausa', dead: 'KO', sleeping: 'Borsa piena', resuming: 'Riparte' },
     adventuring: 'In avventura',
     waitingForSave: 'In attesa del salvataggio in TRMNL',
@@ -263,7 +263,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'Informazioni su Desk Crawler',
   },
   pt: {
-    games: { 'desk-crawler': 'Um RPG de escritório que se joga sozinho no seu TRMNL.', 'idle-angler': 'Um jogo de pesca que se joga sozinho no seu TRMNL.', 'paper-lives': 'Uma história de vida que se escreve sozinha no seu TRMNL.' },
+    games: { 'desk-crawler': 'Um RPG de escritório que se joga sozinho no seu TRMNL.', 'idle-angler': 'Um jogo de pesca que se joga sozinho no seu TRMNL.', 'paper-lives': 'Uma história de vida que se escreve sozinha no seu TRMNL.', 'little-plot': 'Um jardim aconchegante que cresce no seu TRMNL.' },
     heroStatus: { paused: 'Pausado', dead: 'Nocauteado', sleeping: 'Bolsa cheia', resuming: 'Retomando' },
     adventuring: 'Em aventura',
     waitingForSave: 'Esperando você salvar no TRMNL',
@@ -314,7 +314,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'Sobre o Desk Crawler',
   },
   pl: {
-    games: { 'desk-crawler': 'Biurowe RPG, które samo gra się na twoim TRMNL.', 'idle-angler': 'Gra wędkarska, która sama gra się na twoim TRMNL.', 'paper-lives': 'Historia życia, która sama pisze się na twoim TRMNL.' },
+    games: { 'desk-crawler': 'Biurowe RPG, które samo gra się na twoim TRMNL.', 'idle-angler': 'Gra wędkarska, która sama gra się na twoim TRMNL.', 'paper-lives': 'Historia życia, która sama pisze się na twoim TRMNL.', 'little-plot': 'Przytulny ogródek, który rośnie na twoim TRMNL.' },
     heroStatus: { paused: 'Pauza', dead: 'Nokaut', sleeping: 'Pełna torba', resuming: 'Wznawia' },
     adventuring: 'Na przygodzie',
     waitingForSave: 'Czeka na zapis w TRMNL',
@@ -365,7 +365,7 @@ export const shellMessages = defineMessages({
     aboutDeskCrawler: 'O Desk Crawler',
   },
   nl: {
-    games: { 'desk-crawler': 'Een kantoor-RPG die zichzelf speelt op je TRMNL.', 'idle-angler': 'Een visspel dat zichzelf speelt op je TRMNL.', 'paper-lives': 'Een levensverhaal dat zichzelf schrijft op je TRMNL.' },
+    games: { 'desk-crawler': 'Een kantoor-RPG die zichzelf speelt op je TRMNL.', 'idle-angler': 'Een visspel dat zichzelf speelt op je TRMNL.', 'paper-lives': 'Een levensverhaal dat zichzelf schrijft op je TRMNL.', 'little-plot': 'Een knusse tuin die groeit op je TRMNL.' },
     heroStatus: { paused: 'Gepauzeerd', dead: 'Knock-out', sleeping: 'Tas vol', resuming: 'Gaat verder' },
     adventuring: 'Op avontuur',
     waitingForSave: 'Wacht op opslaan in TRMNL',

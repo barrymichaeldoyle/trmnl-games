@@ -5,6 +5,8 @@ import { activateAngler, prepareAngler } from '../idleAngler/lifecycle'
 import { currentAngler, idleAnglerProfile } from '../idleAngler/profile'
 import { activateLife, prepareLife } from '../paperLives/lifecycle'
 import { currentLife, paperLivesProfile } from '../paperLives/profile'
+import { activatePlot, preparePlot } from '../littlePlot/lifecycle'
+import { currentPlot, littlePlotProfile } from '../littlePlot/profile'
 import { currentHero, gameProfile } from './gameProfile'
 
 /**
@@ -47,9 +49,19 @@ export const PAPER_LIVES_HOOKS: GameHooks & { prepare: (ctx: MutationCtx, user: 
   prepare: prepareLife,
 }
 
-/** The hooks of a game other than Desk Crawler, whose lifecycle predates the hooks (D115, D159). */
+export const LITTLE_PLOT_HOOKS: GameHooks & { prepare: (ctx: MutationCtx, user: Doc<'users'>, now: number) => Promise<unknown> } = {
+  slug: 'little-plot',
+  label: 'Little Plot',
+  deleting: async (ctx, userId) => (await littlePlotProfile(ctx, userId))?.state === 'deleting',
+  current: currentPlot,
+  needsName: false,
+  activate: activatePlot,
+  prepare: preparePlot,
+}
+
+/** The hooks of a game other than Desk Crawler, whose lifecycle predates the hooks (D115, D159, D206). */
 export function otherGameHooks(slug: Exclude<GameSlug, 'desk-crawler'>): typeof IDLE_ANGLER_HOOKS {
-  return slug === 'idle-angler' ? IDLE_ANGLER_HOOKS : PAPER_LIVES_HOOKS
+  return slug === 'idle-angler' ? IDLE_ANGLER_HOOKS : slug === 'paper-lives' ? PAPER_LIVES_HOOKS : LITTLE_PLOT_HOOKS
 }
 
 /** A game's current player character for this user: the hero, the angler or the life. */

@@ -4,8 +4,9 @@ export const PLATFORM_ORIGIN = 'https://trmnlgames.com'
 export const DESK_CRAWLER_GAME = 'desk-crawler' as const
 export const IDLE_ANGLER_GAME = 'idle-angler' as const
 export const PAPER_LIVES_GAME = 'paper-lives' as const
-export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME | typeof PAPER_LIVES_GAME
-export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME, PAPER_LIVES_GAME]
+export const LITTLE_PLOT_GAME = 'little-plot' as const
+export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME | typeof PAPER_LIVES_GAME | typeof LITTLE_PLOT_GAME
+export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME, PAPER_LIVES_GAME, LITTLE_PLOT_GAME]
 
 /**
  * Lifecycle status (idle-angler.md "Architecture"). `hidden`: nothing lists the game and its routes
@@ -68,10 +69,23 @@ export const games = {
     managePath: '/connect/trmnl/paper-lives/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID_PAPER_LIVES',
   },
+  [LITTLE_PLOT_GAME]: {
+    slug: LITTLE_PLOT_GAME,
+    name: 'Little Plot',
+    description: 'A cosy garden that grows on your TRMNL.',
+    // P46 / D206: hidden (admin-only) while it is built, and until Idle Angler has had its launch.
+    defaultStatus: 'hidden',
+    publicPath: '/games/little-plot',
+    companionPath: '/app/little-plot',
+    helpPath: '/help/little-plot',
+    installPath: '/connect/trmnl/little-plot/install',
+    managePath: '/connect/trmnl/little-plot/manage',
+    clientIdEnv: 'TRMNL_CLIENT_ID_LITTLE_PLOT',
+  },
 } as const satisfies Record<GameSlug, GameEntry>
 
 export function isGameSlug(value: unknown): value is GameSlug {
-  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME || value === PAPER_LIVES_GAME
+  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME || value === PAPER_LIVES_GAME || value === LITTLE_PLOT_GAME
 }
 
 export function isGameStatus(value: unknown): value is GameStatus {

@@ -1,0 +1,207 @@
+import type { ItemDef, KindDef, LittlePlotCatalog, PestDef } from '../sim/types'
+
+/**
+ * Little Plot content v1 (little-plot.md "Plants", "Pests and the gnomes", "Picking and the shed", "Progression and
+ * goals"). Starting numbers from the spec, tuned by the G1 harness (tools/balance/little-plot.ts); the build log in
+ * the spec records each change. Plant names are plain words here; the i18n layer marks them for translation.
+ */
+
+const common = (id: string, name: string, group: KindDef['group'], growTicks: number, coins: number, extra: Partial<KindDef> = {}): KindDef => ({ id, name, group, rarity: 'common', growTicks, xp: 10, coins, seeds: 2, source: 'shed', ...extra })
+const uncommon = (id: string, name: string, group: KindDef['group'], growTicks: number, coins: number, extra: Partial<KindDef> = {}): KindDef => ({ id, name, group, rarity: 'uncommon', growTicks, xp: 25, coins, seeds: 1, source: 'shed', ...extra })
+const rare = (id: string, name: string, group: KindDef['group'], growTicks: number, coins: number, parents: readonly [string, string], hint: string, note: string, extra: Partial<KindDef> = {}): KindDef => ({ id, name, group, rarity: 'rare', growTicks, xp: 60, coins, seeds: 1, source: 'cross', parents, hint, note, ...extra })
+const epic = (id: string, name: string, group: KindDef['group'], growTicks: number, coins: number, parents: readonly [string, string], hint: string, note: string, extra: Partial<KindDef> = {}): KindDef => ({ id, name, group, rarity: 'epic', growTicks, xp: 150, coins, seeds: 1, source: 'cross', parents, hint, note, ...extra })
+
+const kinds: readonly KindDef[] = [
+  // Commons (14): sown any season unless said, 24 to 40 ticks.
+  common('marigold', 'Marigold', 'flower', 24, 12),
+  common('nasturtium', 'Nasturtium', 'flower', 28, 13),
+  common('radish', 'Radish', 'vegetable', 20, 10),
+  common('lettuce', 'Lettuce', 'vegetable', 24, 12),
+  common('sunflower', 'Sunflower', 'flower', 40, 24, { sowSeasons: ['spring', 'summer'] }),
+  common('cornflower', 'Cornflower', 'flower', 32, 16),
+  common('chives', 'Chives', 'herb', 28, 14, { hardy: true }),
+  common('mint', 'Mint', 'herb', 28, 13, { hardy: true }),
+  common('pea', 'Pea', 'vegetable', 32, 17, { sowSeasons: ['spring', 'summer'] }),
+  common('poppy', 'Poppy', 'flower', 32, 16),
+  common('pansy', 'Pansy', 'flower', 28, 13, { hardy: true }),
+  common('spinach', 'Spinach', 'vegetable', 24, 12, { hardy: true }),
+  common('daisy', 'Daisy', 'flower', 28, 12),
+  common('carrot', 'Carrot', 'vegetable', 36, 20),
+  // Uncommons (10): 48 to 72 ticks, from level 3.
+  uncommon('tomato', 'Tomato', 'vegetable', 60, 44, { sowSeasons: ['spring', 'summer'] }),
+  uncommon('lavender', 'Lavender', 'flower', 56, 40),
+  uncommon('strawberry', 'Strawberry', 'vegetable', 52, 38, { sowSeasons: ['spring', 'summer'] }),
+  uncommon('foxglove', 'Foxglove', 'flower', 64, 48),
+  uncommon('rosemary', 'Rosemary', 'herb', 60, 42, { hardy: true }),
+  uncommon('pumpkin', 'Pumpkin', 'vegetable', 72, 56, { sowSeasons: ['spring', 'summer'], ripenIn: ['autumn'] }),
+  uncommon('sweet_pea', 'Sweet Pea', 'flower', 48, 34, { sowSeasons: ['spring', 'summer'] }),
+  uncommon('dahlia', 'Dahlia', 'flower', 64, 50, { sowSeasons: ['spring', 'summer', 'autumn'] }),
+  uncommon('courgette', 'Courgette', 'vegetable', 56, 40, { sowSeasons: ['spring', 'summer'] }),
+  uncommon('thyme', 'Thyme', 'herb', 48, 32, { hardy: true }),
+  // Rares (8): crosses, 96 to 144 ticks, never sold. Gnome's Cap comes from a caught gnome.
+  rare('moon_marigold', 'Moon Marigold', 'flower', 96, 90, ['marigold', 'poppy'], 'Opens when the house lights go off.', 'It opens after dark and closes before you are up. The bees never see it.', { night: true }),
+  rare('candy_carrot', 'Candy Carrot', 'vegetable', 112, 100, ['carrot', 'strawberry'], 'Pink all the way through, and sweet as it looks.', 'Pink all the way through. Children will not believe it came out of the ground.'),
+  rare('blue_poppy', 'Blue Poppy', 'flower', 100, 95, ['poppy', 'cornflower'], 'Likes company at the end of the row.', 'A blue you will not see in any seed catalogue.'),
+  rare('midnight_tomato', 'Midnight Tomato', 'vegetable', 120, 110, ['tomato', 'foxglove'], 'Grew up next to something it should not have.', 'Nearly black, and better than it has any right to be. Do not eat the leaves.'),
+  rare('giant_pumpkin', 'Giant Pumpkin', 'vegetable', 144, 130, ['pumpkin', 'sunflower'], 'Reaches for the sun and never stops.', 'It takes two hands and a bit of a lean. Autumn only.', { ripenIn: ['autumn'] }),
+  rare('silver_lavender', 'Silver Lavender', 'flower', 104, 100, ['lavender', 'daisy'], 'Pale as the frost it does not mind.', 'Grey-green and silver, and it does not mind a cold night.', { hardy: true }),
+  rare('honey_pea', 'Honey Pea', 'vegetable', 96, 90, ['pea', 'sweet_pea'], 'A pod that smells of flowers.', 'The pods are sweet enough to eat off the plant, and the bees agree.'),
+  { id: 'gnomes_cap', name: "Gnome's Cap", group: 'herb', rarity: 'rare', growTicks: 108, xp: 60, coins: 100, seeds: 1, source: 'trap', hardy: true, hint: 'Comes out of a red hat.', note: 'A red cap with white spots, and not a toadstool at all. Whatever the gnome was carrying it for, it grows.' },
+  // Epics (4): crosses of crosses, 192 to 288 ticks.
+  epic('moonflower', 'Moonflower', 'flower', 192, 240, ['moon_marigold', 'ghost_pansy'], 'Two night plants, one night.', 'A white trumpet as wide as your hand, open only in the dark. It smells of the sea.', { night: true }),
+  epic('dragon_gourd', 'Dragon Gourd', 'vegetable', 240, 260, ['giant_pumpkin', 'midnight_tomato'], 'Something big grew next to something dark.', 'Ridged, dark and warm to the touch in the mornings. Autumn only, and worth the wait.', { ripenIn: ['autumn'] }),
+  epic('golden_sunflower', 'Golden Sunflower', 'flower', 200, 250, ['sunflower', 'honey_pea'], 'The bees know the way.', 'Every petal the colour of honey. The hive is loud all day.', { needs: 'beehive' }),
+  { id: 'frost_rose', name: 'Frost Rose', 'group': 'flower', rarity: 'epic', growTicks: 288, xp: 150, coins: 280, seeds: 1, source: 'frost', parents: ['silver_lavender', 'silver_lavender'], hardy: true, hint: 'Left behind by a cold night.', note: 'White, with an edge like frost on a window. It only ever grew because something stood out in the cold.' },
+  // The ninth candidate for the rare slot: Ghost Pansy, the Moonflower's other parent.
+  rare('ghost_pansy', 'Ghost Pansy', 'flower', 100, 95, ['pansy', 'mint'], 'Best seen in fog.', 'Pale faces that seem to float an inch above the leaves at dusk.', { night: true, hardy: true }),
+]
+
+const pests: readonly PestDef[] = [
+  { id: 'slugs', name: 'Slugs' },
+  { id: 'aphids', name: 'Aphids' },
+  { id: 'birds', name: 'Birds' },
+  { id: 'fox', name: 'The fox' },
+  { id: 'gnome', name: 'A gnome' },
+  { id: 'heron', name: 'The heron' },
+]
+
+const items: readonly ItemDef[] = [
+  // Tools
+  { id: 'tin_can', name: 'Tin Can', group: 'tool', price: 0, effects: { waterTicks: 16 }, blurb: 'Waters the plot for four hours.' },
+  { id: 'brass_can', name: 'Brass Can', group: 'tool', price: 80, effects: { waterTicks: 32 }, blurb: 'Waters the plot for eight hours.' },
+  { id: 'hose', name: 'Hose', group: 'tool', price: 500, effects: { waterTicks: 64 }, requires: 'brass_can', blurb: 'Waters the plot for sixteen hours.' },
+  { id: 'hose_timer', name: 'Hose Timer', group: 'tool', price: 1800, effects: { waterTicks: 96 }, requires: 'hose', blurb: 'Waters the plot for a whole day.' },
+  { id: 'trowel', name: 'Trowel', group: 'tool', price: 150, effects: { rowSowing: true }, blurb: 'Sows a whole row from one tap.' },
+  // Beds
+  { id: 'beds_6', name: 'Six Beds', group: 'bed', price: 100, effects: { beds: { rows: 2, cols: 3 } }, blurb: 'A third column: a 2 × 3 plot.' },
+  { id: 'beds_9', name: 'Nine Beds', group: 'bed', price: 350, effects: { beds: { rows: 3, cols: 3 } }, requires: 'beds_6', blurb: 'A third row: a 3 × 3 plot.' },
+  { id: 'beds_12', name: 'Twelve Beds', group: 'bed', price: 2000, effects: { beds: { rows: 3, cols: 4 } }, requires: 'beds_9', blurb: 'A fourth column: a 3 × 4 plot, the biggest.' },
+  // Defences
+  { id: 'copper_tape', name: 'Copper Tape', group: 'defence', price: 40, effects: { pests: { slugs: 20 } }, blurb: 'Slugs hate crossing it. Slug damage down by four fifths.' },
+  { id: 'netting', name: 'Netting', group: 'defence', price: 60, effects: { pests: { birds: 20 } }, blurb: 'Keeps the birds off the seed. Bird raids down by four fifths.' },
+  { id: 'ladybirds', name: 'Tub of Ladybirds', group: 'defence', price: 50, effects: { pests: { aphids: 30 }, lasts: 'season' }, blurb: 'Eat the aphids for a season, then fly off.' },
+  { id: 'fence', name: 'Fence', group: 'defence', price: 150, effects: { pests: { fox: 30, gnome: 80 } }, blurb: 'The fox mostly goes round. Gnomes climb it, slowly.' },
+  { id: 'scarecrow', name: 'Scarecrow', group: 'defence', price: 300, effects: { pests: { birds: 60, gnome: 60 } }, blurb: 'Birds and gnomes both give it a wide berth.' },
+  { id: 'lantern', name: 'Lantern', group: 'defence', price: 350, effects: { pests: { gnome: 50 }, visitor: 50, nightOnly: true }, blurb: 'Lights the plot at night. Half the gnomes think better of it.' },
+  { id: 'garden_cat', name: 'Garden Cat', group: 'defence', price: 1200, effects: { pests: { fox: 50, gnome: 50 }, visitor: 50 }, blurb: 'Sits where it likes. The fox and the gnomes know it is there.' },
+  { id: 'gnome_trap', name: 'Gnome Trap', group: 'defence', price: 400, effects: { trapPercent: 40 }, blurb: 'Catches a gnome two times in five. A caught gnome gives back what it took.' },
+  { id: 'wind_chimes', name: 'Wind Chimes', group: 'defence', price: 100, effects: { pests: { gnome: 90 } }, blurb: 'Mostly for the sound. Gnomes mind it a little.' },
+  // Structures
+  { id: 'compost_bin', name: 'Compost Bin', group: 'structure', price: 600, effects: { growthPercent: 110 }, blurb: 'Everything grows a tenth faster.' },
+  { id: 'beehive', name: 'Beehive', group: 'structure', price: 1200, effects: { crossPercent: 200 }, blurb: 'Twice the chance two neighbours cross. The Golden Sunflower needs it.' },
+  { id: 'pond', name: 'Pond', group: 'structure', price: 900, effects: { pests: { slugs: 50 } }, blurb: 'The frogs eat the slugs. Once a season the heron eats a frog.' },
+  { id: 'bird_table', name: 'Bird Table', group: 'structure', price: 400, effects: { dailySeed: true, pests: { birds: 150 } }, blurb: 'A common seed dropped on it every morning, and more birds about.' },
+  { id: 'greenhouse', name: 'Greenhouse', group: 'structure', price: 3500, effects: { greenhouseBeds: 1 }, blurb: 'One bed under glass ignores the season and the frost.' },
+  { id: 'greenhouse_2', name: 'Second Greenhouse', group: 'structure', price: 7000, effects: { greenhouseBeds: 1 }, requires: 'beds_12', level: 8, blurb: 'A second bed under glass, once the plot is 3 × 4.' },
+  // Ornaments
+  { id: 'bench', name: 'Bench', group: 'ornament', price: 120, effects: {}, blurb: 'Somewhere to sit and look at it.' },
+  { id: 'path', name: 'Path', group: 'ornament', price: 90, effects: {}, blurb: 'Flagstones between the beds.' },
+  { id: 'decoy_gnome', name: 'A Gnome of Your Own', group: 'ornament', price: 180, effects: { pests: { gnome: 90 }, visitor: 90 }, blurb: 'The real gnomes find it a bit much.' },
+  { id: 'sundial', name: 'Sundial', group: 'ornament', price: 150, effects: {}, blurb: 'Right twice a day, like the rest of us.' },
+]
+
+export const contentV1: LittlePlotCatalog = {
+  contentVersion: 'v1',
+  kinds,
+  items,
+  pests,
+  pestRule: {
+    basePermille: { dawn: 10, day: 5, dusk: 10, night: 20 },
+    table: {
+      night: [['gnome', 45], ['slugs', 30], ['fox', 25]],
+      dawn: [['birds', 50], ['slugs', 30], ['fox', 15], ['heron', 5]],
+      day: [['birds', 55], ['aphids', 40], ['heron', 5]],
+      dusk: [['gnome', 40], ['slugs', 35], ['birds', 25]],
+    },
+    floorPercent: 10,
+    gnomePerBedPermille: 3,
+    overcastSlugsPercent: 150,
+    rainBirdsPercent: 50,
+    fogGnomePercent: 130,
+    summerAphidsPercent: 150,
+    aphidTicks: 8,
+    heronTicks: 96,
+  },
+  visitor: { permille: 10, floorPercent: 20 },
+  goals: [
+    { id: 'first_sprout', title: 'Watch the first sprout', predicate: { kind: 'stage', stage: 'sprout' }, coins: 10 },
+    { id: 'first_pick', title: 'Pick your first plant', predicate: { kind: 'counter', counter: 'harvests', at: 1 }, coins: 25, page: 'plot', guarantee: { kind: 'ripe', afterTicks: 32 } },
+    { id: 'first_water', title: 'Water the plot', predicate: { kind: 'counter', counter: 'waterings', at: 1 }, coins: 20, page: 'plot' },
+    { id: 'first_sow', title: 'Sow a seed', predicate: { kind: 'counter', counter: 'sowings', at: 1 }, coins: 20, page: 'plot' },
+    { id: 'four_starters', title: 'Grow all four starters', predicate: { kind: 'kinds', at: 4 }, coins: 40 },
+    { id: 'buy_seed', title: 'Buy a seed in the shed', predicate: { kind: 'boughtSeed' }, coins: 30, page: 'shed' },
+    { id: 'poppy_marigold', title: 'Sow a Poppy next to a Marigold', predicate: { kind: 'adjacent', pair: ['poppy', 'marigold'] }, coins: 50, page: 'plot' },
+    { id: 'first_cross', title: 'Find a cross', predicate: { kind: 'counter', counter: 'crossesFound', at: 1 }, coins: 100, page: 'catalogue', guarantee: { kind: 'cross' } },
+    { id: 'fence', title: 'Fence the plot', predicate: { kind: 'item', id: 'fence' }, coins: 60, page: 'shed' },
+    { id: 'catch_gnome', title: 'Catch a gnome', predicate: { kind: 'counter', counter: 'gnomesCaught', at: 1 }, coins: 150, page: 'shed', guarantee: { kind: 'trap' } },
+    { id: 'six_beds', title: 'Six beds', predicate: { kind: 'beds', at: 6 }, coins: 100, page: 'shed' },
+    { id: 'ten_kinds', title: 'Ten kinds in the catalogue', predicate: { kind: 'kinds', at: 10 }, coins: 150, page: 'catalogue' },
+    { id: 'every_season', title: 'Grow a plant in every season', predicate: { kind: 'seasons', at: 4 }, coins: 200 },
+    { id: 'beehive', title: 'Keep bees', predicate: { kind: 'item', id: 'beehive' }, coins: 200, page: 'shed' },
+    { id: 'glass_rare', title: 'Grow a rare in the greenhouse', predicate: { kind: 'counter', counter: 'greenhouseRareRipenings', at: 1 }, coins: 300, page: 'shed' },
+    { id: 'first_epic', title: 'Find an epic', predicate: { kind: 'counter', counter: 'epicsFound', at: 1 }, coins: 500, page: 'catalogue' },
+  ],
+  unlocks: { seeds: 2, uncommonSeeds: 3, defences: 3, structures: 4 },
+  seasons: { order: ['spring', 'summer', 'autumn', 'winter'], offsetWeeks: 1 },
+  seasonGrowthPercent: { spring: 110, summer: 125, autumn: 100, winter: 60 },
+  weatherGrowthPercent: { clear: 100, overcast: 100, rain: 120, fog: 100 },
+  wateredPercent: 150,
+  outOfSeasonPercent: 50,
+  autumnCoinsPercent: 120,
+  ripeToSeedTicks: 96,
+  windPercent: 8,
+  tinCap: 20,
+  tagCap: 8,
+  crossPercent: 25,
+  crossCapPercent: 60,
+  freshTicks: 8,
+  firstXpPercent: 200,
+  seedPrice: { common: 8, uncommon: 40 },
+  bands: { dawn: 5, day: 8, dusk: 17, night: 20 },
+  ambientEvery: 4,
+  ambient: [
+    'The robin is back on the fork handle.',
+    'Rain on the shed roof, and the smell of the soil after.',
+    'A bee works the far bed and takes its time.',
+    'The hedge is full of sparrows arguing.',
+    'Somebody two gardens over is mowing.',
+    'A blackbird turns the leaves over looking for worms.',
+    'The watering can has a spider in it again.',
+    'Mist on the Millpond. The plot is quiet.',
+    'A cat that is not yours walks the fence and looks at you.',
+    'The sun comes round to the back bed about now.',
+    'A frog somewhere. Then nothing.',
+    'The tin lid is warm from the sun.',
+    'Wind in the sunflowers, if there are any.',
+    'The soil is dark and damp where the shade falls.',
+    'A wood pigeon says the same thing it always says.',
+    'Dew on everything. Your boots are soaked.',
+    'The shed door creaks, though nobody opened it.',
+    'A butterfly tries every flower in turn.',
+    'The light goes gold and long across the beds.',
+    'Bats over the hedge at dusk.',
+    'The lantern, if you have one, draws the moths.',
+    'Frost on the bench this morning, gone by ten.',
+    'Something small rustles under the netting and leaves.',
+    'The Millpond is loud with ducks about now.',
+  ],
+  stageLines: {
+    sprout: ['The {name} is up.', 'Two green leaves where the {name} seed went in.', 'A {name} sprout, bent under a crumb of soil.'],
+    leaf: ['The {name} has its first proper leaves.', 'The {name} is filling out.', 'The {name} is past the stage where the slugs want it most.'],
+    bud: ['The {name} is in bud.', 'Buds on the {name}, tight as fists.', 'The {name} is nearly there.'],
+    ripe: ['The {name} is ripe. Pick it in the companion.', 'The {name} is ready for picking.', 'The {name} is ripe, and the bed is waiting.'],
+  },
+  pestLines: {
+    slugs: ['Slugs in the night. The {name} is a stage back.', 'A slug trail across the bed. The {name} has lost a bit of ground.'],
+    aphids: ['Aphids on the {name}. It will be slow for a while.', 'The {name} is sticky with aphids and sulking.'],
+    birds_tin: ['A bird had the tin lid off. One {seed} seed gone.', 'The sparrows found the tin. A {seed} seed less.'],
+    fox: ['The fox dug through the {name} bed in the night. Two stages lost.', 'Fox tracks across the {name}. It will take a while to recover.'],
+    gnome_seed: ['A gnome in a red hat was seen leaving with a {seed} seed.', 'The tin was open in the morning and a {seed} seed short. Small footprints.'],
+    gnome_move: ['A gnome moved the {name} to another bed in the night. Mischief, nothing worse.', 'The {name} is not where you left it. Gnomes.'],
+    gnome_turn: ['The {item} has been turned to face the hedge. Gnomes.', 'Someone small turned the {item} round in the night.'],
+    gnome_caught: ['A gnome in the trap this morning, furious. It gave everything back and was let go.', 'The trap went off in the night. One cross gnome, released at the gate.'],
+    heron: ['The heron came down at dawn and took a frog. The slugs have the run of the place for a day.', 'A heron at the pond. One frog fewer.'],
+    frost_rose: ['Frost on the Silver Lavender.'],
+  },
+  deterredLines: ['{pest} came as far as the {item} and thought better of it.', 'The {item} did its job: {pest} turned back at the edge of the plot.'],
+}

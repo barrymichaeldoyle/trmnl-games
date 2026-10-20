@@ -252,3 +252,17 @@ export const PAPER_LIVES_TABLES = {
   publications: 'plLeaderboardPublications',
   achievementStats: 'plAchievementStats',
 } as const
+
+/** Little Plot's engine tables (little-plot.md "Data"), prefixed `lp`. It ranks by XP like Desk Crawler, so it has the four ranking tables. */
+export const LITTLE_PLOT_TABLES = {
+  subject: 'plots',
+  world: 'lpWorldState',
+  runs: 'lpSimulationRuns',
+  failures: 'lpSimulationFailures',
+  scoreWindows: 'lpScoreWindows',
+  rankInputs: 'lpRankInputs',
+  publications: 'lpLeaderboardPublications',
+  generations: 'lpLeaderboardGenerations',
+  ranks: 'lpRanks',
+  achievementStats: 'lpAchievementStats',
+} as const

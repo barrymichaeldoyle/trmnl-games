@@ -8,6 +8,8 @@
     "./score": "./src/score.ts",
     "./seed": "./src/seed.ts",
     "./levels": "./src/levels.ts",
+    "./forecast": "./src/forecast.ts",
+    "./calendar": "./src/calendar.ts",
     "./art/*": "./src/art/*.ts"
   },
   "scripts": {
