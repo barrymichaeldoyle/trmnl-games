@@ -43,6 +43,7 @@ export const privacyPt: LegalPage = {
         <li>Registros operacionais de curta duração, como contadores de limite de uso e recibos de pedidos duplicados.</li>
         <li>Quando você pede a exclusão da conta: seu e-mail principal verificado, um hash do link de confirmação e o status de entrega. O link expira depois de 30 minutos; pedidos expirados são removidos na limpeza diária.</li>
         <li>A lista de lançamento do Desk Crawler guardava endereços de e-mail para um único e-mail quando o Desk Crawler chegasse à loja do TRMNL. Esse e-mail foi enviado em 13 de outubro de 2026, todos os endereços foram excluídos e a lista está fechada.</li>
+        <li>A lista de lançamento do Idle Angler guarda, para um único e-mail quando o Idle Angler chegar ao marketplace do TRMNL: de um jogador conectado que toca em Me avise, um vínculo com a conta e o idioma (o endereço é lido da conta na hora do envio); de qualquer outra pessoa, o endereço de e-mail digitado e o idioma. Cada inscrição é apagada quando o e-mail dela é enviado, e você pode sair da lista quando quiser pela página inicial ou pelo e-mail.</li>
         <li>O lembrete do herói: se o seu herói do Desk Crawler está em jogo há dois dias e você nunca abriu o app do Desk Crawler, enviamos um único e-mail para seu endereço principal verificado dizendo o que espera por você lá, com um link para parar. O endereço é lido do Clerk no envio e não é guardado. Guardamos só quando foi enviado, ou que você pediu para não receber.</li>
         <li>Se você enviar feedback: sua mensagem, a página de onde enviou, seu nome público e um link para sua conta. Ele vai por e-mail para o desenvolvedor, com seu e-mail principal verificado como endereço de resposta.</li>
       </ul>
@@ -87,6 +88,7 @@ export const privacyPt: LegalPage = {
         <li>Diário de aventuras detalhado: três dias. Resumos de execução: 30 dias. XP recente para rankings: sete dias.</li>
         <li>Recibos de pedidos duplicados: 24 horas. Tentativas de conexão com o TRMNL: menos de um dia.</li>
         <li>Lista de lançamento: excluída quando o e-mail de lançamento saiu, em 13 de outubro de 2026. Não guardamos nenhuma cópia.</li>
+        <li>Lista de lançamento do Idle Angler: cada inscrição é apagada quando o e-mail de lançamento dela é enviado, quando você sai da lista ou junto com sua conta.</li>
         <li>Lembrete do herói: quando foi enviado, ou que você pediu para não receber, até você excluir sua conta.</li>
         <li>Feedback: até você excluir sua conta, ou antes, se pedir. Cópias já enviadas por e-mail ao desenvolvedor são excluídas a pedido.</li>
         <li>Configurações de alertas e dispositivos: até você desligar os alertas, remover o dispositivo ou excluir o Desk Crawler ou sua conta. Um dispositivo cujo endereço push para de funcionar é removido automaticamente. Registros de alertas individuais: sete dias.</li>

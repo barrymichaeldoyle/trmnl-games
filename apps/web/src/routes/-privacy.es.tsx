@@ -43,6 +43,7 @@ export const privacyEs: LegalPage = {
         <li>Registros operativos de corta duración, como contadores de límite de uso y recibos de solicitudes duplicadas.</li>
         <li>Cuando pides borrar tu cuenta: tu correo principal verificado, un hash del enlace de confirmación y el estado de entrega. El enlace caduca a los 30 minutos; las solicitudes caducadas se eliminan en la limpieza diaria.</li>
         <li>La lista de lanzamiento de Desk Crawler guardaba direcciones de correo para un único correo cuando Desk Crawler llegara a la tienda de TRMNL. Ese correo se envió el 13 de octubre de 2026, todas las direcciones se borraron y la lista está cerrada.</li>
+        <li>La lista de lanzamiento de Idle Angler guarda, para un solo correo cuando Idle Angler llegue al marketplace de TRMNL: de un jugador con sesión iniciada que pulsa Avísame, un enlace a su cuenta y su idioma (la dirección se lee de la cuenta al enviar el correo); de cualquier otra persona, la dirección que escribe y su idioma. Cada entrada se borra cuando se envía su correo, y puedes salir de la lista cuando quieras desde la página de inicio o el correo.</li>
         <li>El recordatorio del héroe: si tu héroe de Desk Crawler lleva dos días en marcha y nunca has abierto la app de Desk Crawler, enviamos un único correo a tu dirección principal verificada contando lo que te espera allí, con un enlace para pararlo. La dirección se lee de Clerk al enviarlo y no se guarda. Solo guardamos cuándo se envió, o que pediste no recibirlo.</li>
         <li>Si envías comentarios: tu mensaje, la página desde la que lo enviaste, tu nombre público y un enlace a tu cuenta. Se envía por correo al desarrollador con tu correo principal verificado como dirección de respuesta.</li>
       </ul>
@@ -87,6 +88,7 @@ export const privacyEs: LegalPage = {
         <li>Diario de aventuras detallado: tres días. Resúmenes de ejecución: 30 días. XP reciente para las clasificaciones: siete días.</li>
         <li>Recibos de solicitudes duplicadas: 24 horas. Intentos de conexión con TRMNL: menos de un día.</li>
         <li>Lista de lanzamiento: borrada cuando se envió el correo de lanzamiento el 13 de octubre de 2026. No guardamos ninguna copia.</li>
+        <li>Lista de lanzamiento de Idle Angler: cada entrada se borra cuando se envía su correo de lanzamiento, cuando sales de la lista o con tu cuenta.</li>
         <li>Recordatorio del héroe: cuándo se envió, o que pediste no recibirlo, hasta que borres tu cuenta.</li>
         <li>Comentarios: hasta que borres tu cuenta, o antes si lo pides. Las copias ya enviadas por correo al desarrollador se borran si lo pides.</li>
         <li>Ajustes de alertas y dispositivos: hasta que desactives las alertas, quites el dispositivo o borres Desk Crawler o tu cuenta. Un dispositivo cuya dirección push deja de funcionar se quita automáticamente. Registros de alertas individuales: siete días.</li>

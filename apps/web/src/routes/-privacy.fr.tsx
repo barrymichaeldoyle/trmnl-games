@@ -43,6 +43,7 @@ export const privacyFr: LegalPage = {
         <li>Des données techniques de courte durée, comme des compteurs de limitation de débit et des reçus de requêtes en double.</li>
         <li>Quand vous demandez la suppression de votre compte : votre adresse e-mail principale vérifiée, une empreinte du lien de confirmation et l’état de l’envoi. Le lien expire au bout de 30 minutes ; les demandes expirées sont effacées par un nettoyage quotidien.</li>
         <li>La liste de lancement de Desk Crawler contenait des adresses e-mail pour un seul e-mail, envoyé à l’arrivée de Desk Crawler sur la boutique TRMNL. Cet e-mail est parti le 13 octobre 2026, toutes les adresses ont été supprimées et la liste est close.</li>
+        <li>La liste de lancement d’Idle Angler conserve, pour un seul e-mail quand Idle Angler arrive sur la marketplace TRMNL : pour un joueur connecté qui appuie sur Me prévenir, un lien vers son compte et sa langue (l’adresse est lue sur le compte au moment de l’envoi) ; pour toute autre personne, l’adresse e-mail saisie et sa langue. Chaque inscription est supprimée une fois son e-mail envoyé, et vous pouvez quitter la liste à tout moment depuis la page d’accueil ou l’e-mail.</li>
         <li>Le rappel du héros : si votre héros Desk Crawler joue depuis deux jours et que vous n’avez jamais ouvert l’application Desk Crawler, nous envoyons un seul e-mail à votre adresse principale vérifiée pour dire ce qui vous y attend, avec un lien pour l’arrêter. L’adresse est lue chez Clerk au moment de l’envoi et n’est pas conservée. Nous gardons seulement la date d’envoi, ou le fait que vous ne voulez pas le recevoir.</li>
         <li>Si vous envoyez un retour : votre message, la page d’où vous l’avez envoyé, votre nom public et un lien vers votre compte. Il est envoyé par e-mail au développeur avec votre adresse e-mail principale vérifiée comme adresse de réponse.</li>
       </ul>
@@ -79,6 +80,7 @@ export const privacyFr: LegalPage = {
         <li>Journal d’aventure détaillé : trois jours. Résumés des tours : 30 jours. XP récente pour les classements : sept jours.</li>
         <li>Reçus de requêtes en double : 24 heures. Tentatives de connexion TRMNL : moins d’un jour.</li>
         <li>Liste de lancement : supprimée lors de l’envoi de l’e-mail de lancement, le 13 octobre 2026. Nous n’en gardons aucune copie.</li>
+        <li>Liste de lancement d’Idle Angler : chaque inscription est supprimée à l’envoi de son e-mail de lancement, quand vous quittez la liste, ou avec votre compte.</li>
         <li>Rappel du héros : la date d’envoi, ou votre refus, jusqu’à la suppression de votre compte.</li>
         <li>Retours : jusqu’à la suppression de votre compte, ou plus tôt sur demande. Les copies déjà envoyées par e-mail au développeur sont supprimées sur demande.</li>
         <li>Réglages et appareils d’alerte : jusqu’à ce que vous désactiviez les alertes, retiriez l’appareil, ou supprimiez Desk Crawler ou votre compte. Un appareil dont l’adresse de notification ne fonctionne plus est retiré automatiquement. Historique des alertes : sept jours.</li>

@@ -43,6 +43,7 @@ export const privacyIt: LegalPage = {
         <li>Dati operativi di breve durata, come contatori dei limiti di frequenza e ricevute delle richieste duplicate.</li>
         <li>Quando chiedi di eliminare l’account: la tua e-mail principale verificata, un hash del link di conferma e lo stato di consegna. Il link scade dopo 30 minuti; le richieste scadute vengono rimosse dalla pulizia quotidiana.</li>
         <li>La lista di lancio di Desk Crawler conteneva indirizzi e-mail per un’unica e-mail all’arrivo di Desk Crawler nel marketplace TRMNL. Quell’e-mail è partita il 13 ottobre 2026, ogni indirizzo è stato eliminato e la lista è chiusa.</li>
+        <li>La lista di lancio di Idle Angler conserva, per un’unica e-mail quando Idle Angler arriverà sul marketplace di TRMNL: per un giocatore che ha effettuato l’accesso e preme Avvisami, un collegamento al suo account e la sua lingua (l’indirizzo viene letto dall’account al momento dell’invio); per chiunque altro, l’indirizzo e-mail inserito e la sua lingua. Ogni iscrizione viene eliminata appena parte la sua e-mail, e puoi lasciare la lista in qualsiasi momento dalla pagina iniziale o dall’e-mail.</li>
         <li>Il promemoria dell’eroe: se il tuo eroe di Desk Crawler è in gioco da due giorni e non hai mai aperto l’app di Desk Crawler, inviamo un’unica e-mail al tuo indirizzo principale verificato per dirti cosa ti aspetta lì, con un link per fermarla. L’indirizzo viene letto da Clerk al momento dell’invio e non viene conservato. Teniamo solo quando è stata inviata, o che hai chiesto di non riceverla.</li>
         <li>Se mandi un feedback: il tuo messaggio, la pagina da cui l’hai inviato, il tuo nome pubblico e un link al tuo account. Viene inviato per e-mail allo sviluppatore con la tua e-mail principale verificata come indirizzo di risposta.</li>
       </ul>
@@ -87,6 +88,7 @@ export const privacyIt: LegalPage = {
         <li>Diario delle avventure dettagliato: tre giorni. Riepiloghi delle esecuzioni: 30 giorni. XP recente per le classifiche: sette giorni.</li>
         <li>Ricevute delle richieste duplicate: 24 ore. Tentativi di collegamento a TRMNL: meno di un giorno.</li>
         <li>Lista di lancio: eliminata quando è partita l’e-mail di lancio il 13 ottobre 2026. Non ne conserviamo copie.</li>
+        <li>Lista di lancio di Idle Angler: ogni iscrizione viene eliminata quando parte la sua e-mail di lancio, quando lasci la lista o insieme al tuo account.</li>
         <li>Promemoria dell’eroe: quando è stato inviato, o che hai chiesto di non riceverlo, finché non elimini l’account.</li>
         <li>Feedback: finché non elimini l’account, o prima su richiesta. Le copie già inviate per e-mail allo sviluppatore vengono eliminate su richiesta.</li>
         <li>Impostazioni degli avvisi e dispositivi: finché non spegni gli avvisi, rimuovi il dispositivo o elimini Desk Crawler o l’account. Un dispositivo il cui indirizzo push smette di funzionare viene rimosso in automatico. Registri dei singoli avvisi: sette giorni.</li>

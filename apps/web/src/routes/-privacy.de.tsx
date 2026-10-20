@@ -43,6 +43,7 @@ export const privacyDe: LegalPage = {
         <li>Kurzlebige Betriebsdaten wie Zähler zur Ratenbegrenzung und Belege für doppelte Anfragen.</li>
         <li>Wenn du die Kontolöschung anforderst: deine bestätigte Haupt-E-Mail-Adresse, einen Hash des Bestätigungslinks und den Zustellstatus. Der Link läuft nach 30 Minuten ab; abgelaufene Anfragen entfernt eine tägliche Bereinigung.</li>
         <li>Die Desk-Crawler-Startliste enthielt E-Mail-Adressen für eine einzige E-Mail, als Desk Crawler in den TRMNL-Marktplatz kam. Diese E-Mail ging am 13. Oktober 2026 raus, jede Adresse wurde gelöscht, und die Liste ist geschlossen.</li>
+        <li>Die Idle-Angler-Startliste speichert für eine einzige E-Mail, wenn Idle Angler in den TRMNL-Marktplatz kommt: bei angemeldeten Spielern, die auf Bescheid geben tippen, einen Verweis auf ihr Konto und ihre Sprache (die Adresse wird beim Versand aus dem Konto gelesen); bei allen anderen die eingegebene E-Mail-Adresse und ihre Sprache. Jeder Eintrag wird gelöscht, sobald seine E-Mail verschickt ist, und du kannst die Liste jederzeit über die Startseite oder die E-Mail verlassen.</li>
         <li>Die Helden-Erinnerung: Wenn dein Desk-Crawler-Held seit zwei Tagen unterwegs ist und du die Desk-Crawler-App nie geöffnet hast, schicken wir eine einzige E-Mail an deine bestätigte Hauptadresse, die sagt, was dort auf dich wartet, mit einem Link zum Abbestellen. Die Adresse wird beim Versand bei Clerk abgefragt und nicht gespeichert. Wir behalten nur, wann sie verschickt wurde oder dass du keine willst.</li>
         <li>Wenn du Feedback sendest: deine Nachricht, die Seite, von der du sie gesendet hast, deinen öffentlichen Namen und einen Link zu deinem Konto. Sie geht per E-Mail an den Entwickler, mit deiner bestätigten Haupt-E-Mail-Adresse als Antwortadresse.</li>
       </ul>
@@ -79,6 +80,7 @@ export const privacyDe: LegalPage = {
         <li>Ausführliches Abenteuerlog: drei Tage. Lauf-Zusammenfassungen: 30 Tage. Jüngste XP für Ranglisten: sieben Tage.</li>
         <li>Belege für doppelte Anfragen: 24 Stunden. TRMNL-Verbindungsversuche: unter einem Tag.</li>
         <li>Startliste: gelöscht, als die Start-E-Mail am 13. Oktober 2026 rausging. Wir behalten keine Kopie.</li>
+        <li>Idle-Angler-Startliste: Jeder Eintrag wird gelöscht, wenn seine Start-E-Mail verschickt ist, wenn du die Liste verlässt oder mit deinem Konto.</li>
         <li>Helden-Erinnerung: wann sie verschickt wurde oder dass du keine willst, bis du dein Konto löschst.</li>
         <li>Feedback: bis du dein Konto löschst, oder früher auf Anfrage. Bereits an den Entwickler gemailte Kopien werden auf Anfrage gelöscht.</li>
         <li>Benachrichtigungseinstellungen und Geräte: bis du Benachrichtigungen ausschaltest, das Gerät entfernst oder Desk Crawler oder dein Konto löschst. Ein Gerät, dessen Push-Adresse nicht mehr funktioniert, wird automatisch entfernt. Liste der einzelnen Benachrichtigungen: sieben Tage.</li>

@@ -158,6 +158,8 @@ At the 40 KiB envelope ceiling, 1,000 continuously polling instances yield about
 
 ## Idle Angler operations (D115)
 
+**Launch list (D201).** While Idle Angler is in review, switch it to `preview` in the admin page's Games card: the home page then shows its Coming soon section with Notify me. Count the list with `npx convex run --prod launchList:summary '{"gameSlug":"idle-angler"}'`, read one copy with `launchList:sendTest '{"to":"you@example.com","locale":"en","installUrl":"<listing URL>"}'`, and after approval (with Barry's go-ahead) send it with `launchList:sendLaunch '{"gameSlug":"idle-angler","installUrl":"<listing URL>"}'`; it reschedules itself until the list is empty and deletes each row as Resend accepts it.
+
 Idle Angler runs its own world on the shared engine, ticking at minutes 5, 20, 35 and 50 (cron `idle angler tick`, watchdog `idle angler watchdog`). Its controls mirror Desk Crawler's:
 
 | Need | How |

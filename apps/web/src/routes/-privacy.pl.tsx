@@ -43,6 +43,7 @@ export const privacyPl: LegalPage = {
         <li>Krótkotrwałe zapisy techniczne, takie jak liczniki limitów i potwierdzenia zduplikowanych żądań.</li>
         <li>Gdy prosisz o usunięcie konta: twój zweryfikowany główny e-mail, skrót linku potwierdzającego i stan doręczenia. Link wygasa po 30 minutach; wygasłe prośby są usuwane podczas codziennego sprzątania.</li>
         <li>Lista premierowa Desk Crawler zawierała adresy e-mail na potrzeby jednego maila, wysłanego, gdy Desk Crawler trafi do sklepu TRMNL. Ten mail wyszedł 13 października 2026, wszystkie adresy zostały usunięte, a lista jest zamknięta.</li>
+        <li>Lista premierowa Idle Angler przechowuje, na potrzeby jednego maila w dniu, gdy Idle Angler trafi do marketplace’u TRMNL: dla zalogowanego gracza, który kliknie „Powiadom mnie”, powiązanie z jego kontem i język (adres jest odczytywany z konta przy wysyłce); dla pozostałych osób wpisany adres e-mail i język. Każdy wpis jest usuwany po wysłaniu jego maila, a z listy można się wypisać w każdej chwili na stronie głównej lub z maila.</li>
         <li>Przypomnienie o bohaterze: jeśli twój bohater w Desk Crawler działa od dwóch dni, a aplikacja Desk Crawler nie została ani razu otwarta, wysyłamy jeden mail na twój zweryfikowany główny adres z informacją, co tam czeka, i linkiem do rezygnacji. Adres jest pobierany z Clerk w chwili wysyłki i nie jest przechowywany. Zapisujemy tylko datę wysyłki albo to, że nie chcesz takich maili.</li>
         <li>Jeśli wyślesz opinię: twoją wiadomość, stronę, z której ją wysłano, twoją nazwę publiczną i link do konta. Trafia ona e-mailem do twórcy, z twoim zweryfikowanym głównym e-mailem jako adresem odpowiedzi.</li>
       </ul>
@@ -87,6 +88,7 @@ export const privacyPl: LegalPage = {
         <li>Szczegółowy dziennik przygód: trzy dni. Podsumowania przebiegów: 30 dni. Niedawne XP do rankingów: siedem dni.</li>
         <li>Potwierdzenia zduplikowanych żądań: 24 godziny. Próby połączenia z TRMNL: krócej niż dobę.</li>
         <li>Lista premierowa: usunięta po wysłaniu maila premierowego 13 października 2026. Nie przechowujemy żadnej kopii.</li>
+        <li>Lista premierowa Idle Angler: każdy wpis jest usuwany po wysłaniu jego maila premierowego, gdy opuścisz listę, albo razem z kontem.</li>
         <li>Przypomnienie o bohaterze: data wysyłki albo twoja rezygnacja, do usunięcia konta.</li>
         <li>Opinie: dopóki nie usuniesz konta albo krócej na prośbę. Kopie wysłane już e-mailem do twórcy usuwamy na prośbę.</li>
         <li>Ustawienia alertów i urządzenia: dopóki nie wyłączysz alertów, nie usuniesz urządzenia albo nie usuniesz Desk Crawler lub konta. Urządzenie, którego adres push przestaje działać, jest usuwane automatycznie. Zapisy pojedynczych alertów: siedem dni.</li>

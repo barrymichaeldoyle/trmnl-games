@@ -11,6 +11,7 @@ import { DESK_CRAWLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
 import { AfterListing, useGames } from '../lib/gameAccess'
 import { messagesFor, useLocale, useT } from '../lib/i18n'
 import { pitchMessages } from '../i18n/pitch'
+import { NotifyMe } from '../lib/launchList'
 
 export const Route = createFileRoute('/')({
   head: ({ match: { context: { locale } } }) => seo({
@@ -37,6 +38,8 @@ function IdleAnglerSection() {
         {live ? null : <p className="text-sm font-semibold text-muted">{t.comingNext}</p>}
         <h2 id="idle-angler-heading" className="font-display text-3xl font-bold text-gold-ink">{games['idle-angler'].name}</h2>
         <p className="max-w-prose leading-relaxed">{t.idleAnglerBody}</p>
+        {/* D201: while it waits for review, anyone can ask for the one launch email. */}
+        {live ? null : <NotifyMe gameSlug="idle-angler" />}
         {game.canOpen ? (
           <div className="flex flex-wrap gap-3">
             <Link to="/games/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>{t.howItPlaysLink}</Link>

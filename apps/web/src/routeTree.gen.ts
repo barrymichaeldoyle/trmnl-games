@@ -38,6 +38,7 @@ import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
 import { Route as HelpPaperLivesRouteImport } from './routes/help/paper-lives'
 import { Route as KCodeRouteImport } from './routes/k.$code'
+import { Route as LaunchListUnsubscribeRouteImport } from './routes/launch-list/unsubscribe'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
 import { Route as AppDeskCrawlerIndexRouteImport } from './routes/app/desk-crawler/index'
 import { Route as AppDeskCrawlerAchievementsRouteImport } from './routes/app/desk-crawler/achievements'
@@ -217,6 +218,11 @@ const HelpPaperLivesRoute = HelpPaperLivesRouteImport.update({
 const KCodeRoute = KCodeRouteImport.update({
   id: '/k/$code',
   path: '/k/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaunchListUnsubscribeRoute = LaunchListUnsubscribeRouteImport.update({
+  id: '/launch-list/unsubscribe',
+  path: '/launch-list/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileAliasRoute = ProfileAliasRouteImport.update({
@@ -435,6 +441,7 @@ export interface FileRoutesByFullPath {
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
   '/k/$code': typeof KCodeRoute
+  '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -497,6 +504,7 @@ export interface FileRoutesByTo {
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
   '/k/$code': typeof KCodeRoute
+  '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -564,6 +572,7 @@ export interface FileRoutesById {
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
   '/k/$code': typeof KCodeRoute
+  '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
   '/profile/$alias': typeof ProfileAliasRoute
   '/app/': typeof AppIndexRoute
   '/app/desk-crawler/achievements': typeof AppDeskCrawlerAchievementsRoute
@@ -632,6 +641,7 @@ export interface FileRouteTypes {
     | '/help/idle-angler'
     | '/help/paper-lives'
     | '/k/$code'
+    | '/launch-list/unsubscribe'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -694,6 +704,7 @@ export interface FileRouteTypes {
     | '/help/idle-angler'
     | '/help/paper-lives'
     | '/k/$code'
+    | '/launch-list/unsubscribe'
     | '/profile/$alias'
     | '/app'
     | '/app/desk-crawler/achievements'
@@ -760,6 +771,7 @@ export interface FileRouteTypes {
     | '/help/idle-angler'
     | '/help/paper-lives'
     | '/k/$code'
+    | '/launch-list/unsubscribe'
     | '/profile/$alias'
     | '/app/'
     | '/app/desk-crawler/achievements'
@@ -824,6 +836,7 @@ export interface RootRouteChildren {
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
   HelpPaperLivesRoute: typeof HelpPaperLivesRoute
   KCodeRoute: typeof KCodeRoute
+  LaunchListUnsubscribeRoute: typeof LaunchListUnsubscribeRoute
   ProfileAliasRoute: typeof ProfileAliasRoute
   DeskCrawlerHeroesAliasRoute: typeof DeskCrawlerHeroesAliasRoute
   ConnectTrmnlDeskCrawlerInstallRoute: typeof ConnectTrmnlDeskCrawlerInstallRoute
@@ -1038,6 +1051,13 @@ declare module '@tanstack/react-router' {
       path: '/k/$code'
       fullPath: '/k/$code'
       preLoaderRoute: typeof KCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/launch-list/unsubscribe': {
+      id: '/launch-list/unsubscribe'
+      path: '/launch-list/unsubscribe'
+      fullPath: '/launch-list/unsubscribe'
+      preLoaderRoute: typeof LaunchListUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$alias': {
@@ -1412,6 +1432,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
   HelpPaperLivesRoute: HelpPaperLivesRoute,
   KCodeRoute: KCodeRoute,
+  LaunchListUnsubscribeRoute: LaunchListUnsubscribeRoute,
   ProfileAliasRoute: ProfileAliasRoute,
   DeskCrawlerHeroesAliasRoute: DeskCrawlerHeroesAliasRoute,
   ConnectTrmnlDeskCrawlerInstallRoute: ConnectTrmnlDeskCrawlerInstallRoute,

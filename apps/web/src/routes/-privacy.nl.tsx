@@ -43,6 +43,7 @@ export const privacyNl: LegalPage = {
         <li>Kortlevende operationele gegevens, zoals tellers voor gebruikslimieten en bewijzen van dubbele verzoeken.</li>
         <li>Als je om verwijdering van je account vraagt: je geverifieerde primaire e-mailadres, een hash van de bevestigingslink en de afleverstatus. De link verloopt na 30 minuten; verlopen verzoeken worden bij de dagelijkse opschoning verwijderd.</li>
         <li>De lanceringslijst van Desk Crawler bevatte e-mailadressen voor één e-mail toen Desk Crawler in de TRMNL-marketplace kwam. Die e-mail is op 13 oktober 2026 verstuurd, elk adres is verwijderd en de lijst is gesloten.</li>
+        <li>De lanceringslijst van Idle Angler bewaart, voor één e-mail zodra Idle Angler in de TRMNL-marketplace staat: van een ingelogde speler die op Laat het me weten tikt, een koppeling met diens account en taal (het adres wordt bij het versturen uit het account gelezen); van ieder ander het ingevulde e-mailadres en de taal. Elke vermelding wordt verwijderd zodra de e-mail verstuurd is, en je kunt de lijst altijd verlaten via de startpagina of de e-mail.</li>
         <li>De heldherinnering: als je Desk Crawler-held al twee dagen bezig is en je de Desk Crawler-app nooit hebt geopend, sturen we één e-mail naar je geverifieerde primaire adres met wat daar op je wacht, en een link om het te stoppen. Het adres wordt bij het versturen bij Clerk opgehaald en niet bewaard. We bewaren alleen wanneer hij is verstuurd, of dat je hem niet wilt.</li>
         <li>Als je feedback stuurt: je bericht, de pagina waarvandaan je het stuurde, je openbare naam en een link naar je account. Het gaat per e-mail naar de ontwikkelaar, met je geverifieerde primaire e-mailadres als antwoordadres.</li>
       </ul>
@@ -87,6 +88,7 @@ export const privacyNl: LegalPage = {
         <li>Gedetailleerd avonturenlogboek: drie dagen. Samenvattingen van runs: 30 dagen. Recente XP voor ranglijsten: zeven dagen.</li>
         <li>Bewijzen van dubbele verzoeken: 24 uur. Pogingen om TRMNL te koppelen: minder dan een dag.</li>
         <li>Lanceringslijst: verwijderd toen de lanceringsmail op 13 oktober 2026 uitging. We bewaren geen kopie.</li>
+        <li>Lanceringslijst van Idle Angler: elke vermelding wordt verwijderd als de lanceringsmail is verstuurd, als je de lijst verlaat, of samen met je account.</li>
         <li>Heldherinnering: wanneer hij is verstuurd, of dat je hem niet wilt, tot je je account verwijdert.</li>
         <li>Feedback: tot je je account verwijdert, of eerder op verzoek. Kopieën die al naar de ontwikkelaar zijn gemaild, worden op verzoek verwijderd.</li>
         <li>Meldingsinstellingen en apparaten: tot je meldingen uitzet, het apparaat verwijdert, of Desk Crawler of je account verwijdert. Een apparaat waarvan het pushadres niet meer werkt, wordt automatisch verwijderd. Gegevens van afzonderlijke meldingen: zeven dagen.</li>

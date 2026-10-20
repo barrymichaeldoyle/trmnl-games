@@ -219,4 +219,4 @@ export const DESK_CRAWLER_INSTALL_URL = 'https://trmnl.com/integrations/desk-cra
 /** Shown on the privacy and terms pages; bump whenever either changes. */
 export const POLICY_UPDATED = '2026-10-08'
 /** The privacy policy alone changed on 9 October 2026 (D110: public names in other players' raid stories). */
-export const PRIVACY_UPDATED = '2026-10-15'
+export const PRIVACY_UPDATED = '2026-10-20'

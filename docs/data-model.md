@@ -229,6 +229,10 @@ Proposed simple MVP table: `key`, `windowStart`, `count`, `expiresAt`; indexes `
 
 The launch list's table held each address until the launch email was accepted. The email went to all 16 addresses on 2026-10-13, the table emptied itself, and the table, its functions and the account-deletion step for attached entries were removed the same day (D151).
 
+### `launchList` (D201)
+
+Fields: `gameSlug`, `email?` (a visitor's, normalised), `tokenIdentifier?` (a signed-in player's; no address is stored, it comes from Clerk at send time), `locale`, `state: waiting | sending | failed`, `attempts`, `createdAt`. Indexes `by_gameSlug_and_email`, `by_gameSlug_and_tokenIdentifier`, `by_gameSlug_and_state`, `by_tokenIdentifier`. A row is deleted once its launch email is accepted, when its owner leaves (`leaveMine`, or the unsubscribe link with its HMAC token), or with the account.
+
 ### `feedback` (D107)
 
 Fields: `tokenIdentifier`, `clerkUserId`, `publicAlias?` (when the account has a game), `message`, `page?`, `state: pending | sent | failed`, `attempts`, `createdAt`. Indexes `by_tokenIdentifier`, `by_createdAt`. Rows stay after the email is sent and are deleted with the account; `failed` means Resend refused three times, and `feedback:recent` still shows the message.

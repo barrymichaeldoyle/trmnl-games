@@ -908,6 +908,25 @@ export default defineSchema({
     runAt: v.optional(v.number()),
   }).index('by_key', ['key']),
 
+  /**
+   * D201: people waiting for a game's launch email. A signed-in player joins with one tap and only their identity is
+   * kept (the address comes from Clerk at send time); a visitor leaves an email. Each row is deleted once its one
+   * email is accepted, and an account's row goes with the account.
+   */
+  launchList: defineTable({
+    gameSlug,
+    email: v.optional(v.string()),
+    tokenIdentifier: v.optional(v.string()),
+    locale,
+    state: v.union(v.literal('waiting'), v.literal('sending'), v.literal('failed')),
+    attempts: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_gameSlug_and_email', ['gameSlug', 'email'])
+    .index('by_gameSlug_and_tokenIdentifier', ['gameSlug', 'tokenIdentifier'])
+    .index('by_gameSlug_and_state', ['gameSlug', 'state'])
+    .index('by_tokenIdentifier', ['tokenIdentifier']),
+
   rateLimitBuckets: defineTable({
     key: v.string(),
     windowStart: v.number(),

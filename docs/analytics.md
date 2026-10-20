@@ -28,6 +28,8 @@ Replay is enabled at 100% of consenting production sessions, with 30-day retenti
 | `companion ready` | Active hero companion shell | `setup_state = active`, `has_active_installation` |
 | `management opened` | Management landing state | `setup_state` |
 | `management account mismatch` | Management handoff owner differs from current account | No credential/owner IDs |
+| `launch list joined` | Home page Notify me for a coming-soon game (D201) | `game`, `signed_in`; never the address |
+| `launch list left` | A signed-in player leaves that list | `game`, `signed_in` |
 | `account switched` | Account-switch button | No email in event arguments |
 | `intent failed` | Authenticated game intent fails | `intent` function name, `error_code`; no arguments |
 | `stance changed` | Browser, after `heroes.setStance` commits (v1.1, D76) | `stance` |

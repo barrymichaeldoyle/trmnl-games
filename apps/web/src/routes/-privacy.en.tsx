@@ -42,6 +42,7 @@ export const privacyEn: LegalPage = {
         <li>Short-lived operational records such as rate-limit counters and duplicate-request receipts.</li>
         <li>When you request account deletion: your verified primary email, a hash of the confirmation link, and delivery status. The link expires after 30 minutes; expired requests are removed by daily cleanup.</li>
         <li>The Desk Crawler launch list held email addresses for one email when Desk Crawler reached the TRMNL marketplace. That email went out on 13 October 2026, every address was deleted, and the list is closed.</li>
+        <li>The Idle Angler launch list keeps, for one email when Idle Angler reaches the TRMNL marketplace: for a signed-in player who taps Notify me, a link to their account and their language (the address is read from the account when the email is sent); for anyone else, the email address they type and their language. Each entry is deleted once its email is sent, and you can leave the list at any time from the home page or the email.</li>
         <li>The hero reminder: if your Desk Crawler hero has been running for two days and you have never opened the Desk Crawler app, we send one email to your verified primary address saying what is waiting for you there, with a link to stop it. The address is read from Clerk when the email goes out and is not stored. We keep only when it was sent, or that you asked us not to send it.</li>
         <li>If you send feedback: your message, the page you sent it from, your public name and a link to your account. It is emailed to the developer with your verified primary email as the reply address.</li>
       </ul>
@@ -86,6 +87,7 @@ export const privacyEn: LegalPage = {
         <li>Detailed adventure log: three days. Run summaries: 30 days. Recent XP for rankings: seven days.</li>
         <li>Duplicate-request receipts: 24 hours. TRMNL connection attempts: under a day.</li>
         <li>Launch list: deleted when the launch email went out on 13 October 2026. We keep no copy.</li>
+        <li>Idle Angler launch list: each entry is deleted when its launch email is sent, when you leave the list, or with your account.</li>
         <li>Hero reminder: when it was sent, or that you asked for none, until you delete your account.</li>
         <li>Feedback: until you delete your account, or earlier on request. Copies already emailed to the developer are deleted on request.</li>
         <li>Alert settings and devices: until you turn alerts off, remove the device, or delete Desk Crawler or your account. A device whose push address stops working is removed automatically. Records of individual alerts: seven days.</li>
