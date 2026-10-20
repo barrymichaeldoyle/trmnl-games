@@ -30,6 +30,8 @@
  * landscape half-horizontal info column gives way like the X's lists when a longer language overfills it.
  * Template v16 (D204): under content v6 the header's title is the rank at the angler's water and its ticks count that
  * water's species (`title_logged`); the logbook counter still counts them all.
+ * Template v17 (2026-10-20): the OG's story lists are fitted by measurement like the X's, so they keep a story the
+ * framework's overflow engine dropped (it planned with a 10px gap between stories where the list has 3px).
  * Template v15 (2026-10-20): a time on every story, the goal set apart under its own pennant and shown on the OG
  * too, the welcome headed by the scene, the attention line above the stories rather than in their place, wrapped
  * counter rows closer together, the X's header code at 3x, and full board names where the OG has the width.
@@ -41,7 +43,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 16
+export const TEMPLATE_VERSION = 17
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -168,28 +170,29 @@ const goal = () =>
   `{% elsif goal_line %}<div class="no-shrink stretch-x flex flex--col gap--xsmall" data-goal="true"><div class="flex flex--row flex--left flex--center-y gap--small stretch-x"><img class="${ICON}" src="{{ m_goal }}" alt=""><div class="flex flex--row flex--left flex--center-y gap--[4px] grow w--min-0"><span class="${LABEL} text--bold no-shrink">${L('goal')}</span><span class="${LABEL} grow w--min-0" data-clamp="1">{{ goal_line | escape }}</span></div></div><div class="border--h-30 stretch-x"></div></div>{% endif %}`
 
 /**
+ * Template v15: the clock time of each story at its right, in the owner's time (`utc_offset`, as Desk Crawler's log),
+ * so the order of a busy hour reads at a glance. Without an offset the times are left off rather than shown in UTC.
+ */
+const storyTime = (classes: string) => `{% if utc_offset != nil and story.u %}<span class="${classes} no-shrink" data-story-time="true">{{ story.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
+
+/**
  * The newest stories, each behind its glyph. Template v7: `limit` is the most a layout may show; the stories are a
  * `data-overflow` list inside a `.columns > .column` pair, so the framework's overflow engine measures them in place
  * against the space down to the end of the `.columns` box and hides the trailing ones that do not fit, so a tall slot such as the X's full view fills with stories instead of stopping at a fixed count (Barry,
  * 2026-10-14). The list and the full layouts' wrappers are `flex-auto`, so before the engine trims they shrink to
  * exactly the space left (siblings that are `stretch-x` keep their content height), and the column is top-aligned.
  * On the X the engine misjudged heights (the X scales its content), so the X's list is one line a story and, since
- * template v8, `fitStories` hides the trailing stories that end below the list, at whatever scale the device sets; the
- * OG's keeps the engine and two or three lines where the layout asks for them.
+ * template v8, `fitStories` hides the trailing stories that end below the list, at whatever scale the device sets.
+ * Template v15 fits the OG's lists the same way, keeping two or three lines a story where the layout asks for them:
+ * the engine planned with its own 10px gap rather than the list's 3px, so it kept a story fewer than fit.
  */
-/**
- * Template v15: the clock time of each story at its right, in the owner's time (`utc_offset`, as Desk Crawler's log),
- * so the order of a busy hour reads at a glance. Without an offset the times are left off rather than shown in UTC.
- */
-const storyTime = (classes: string) => `{% if utc_offset != nil and story.u %}<span class="${classes} no-shrink" data-story-time="true">{{ story.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
-
-const storyList = (limit: number, clamp: number, classes: string, show: string, engine = true) =>
-  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true"${engine ? '' : ' data-fit-stories="true"'}><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full"${engine ? ' data-overflow="true"' : ''}>{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span>${storyTime(classes)}</div>{% endfor %}</div></div></div>`
-/** The OG's list keeps the layout's clamp; the X's is one line a story, the only clamp its engine pass keeps exactly. */
-const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') => storyList(limit, clamp, classes, 'lg:hidden') + storyList(limit, 1, classes, 'hidden lg:flex', false)
+const storyList = (limit: number, clamp: number, classes: string, show: string) =>
+  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true" data-fit-stories="true"><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full">{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span>${storyTime(classes)}</div>{% endfor %}</div></div></div>`
+/** The OG's list keeps the layout's clamp; the X's is one line a story. */
+const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') => storyList(limit, clamp, classes, 'lg:hidden') + storyList(limit, 1, classes, 'hidden lg:flex')
 
 /**
- * The X's story lists (`data-fit-stories`, template v8): once the framework has laid out the view, hide the trailing
+ * The story lists (`data-fit-stories`, template v8 on the X, v15 on every screen): once the framework has laid out the view, hide the trailing
  * stories that end below their list, so the list keeps whole stories at any device scale (`screen--scale-*`,
  * `screen--text-scale-*`). Only visibility changes, as Desk Crawler's `fitStories`; scoped to this view and to the
  * orientation the framework is showing. Template v9: where not one story fits (a large device scale), the counters marked
