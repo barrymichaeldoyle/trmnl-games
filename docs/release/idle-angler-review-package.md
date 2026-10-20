@@ -1,6 +1,6 @@
 # Idle Angler marketplace review package (draft)
 
-**Status (2026-10-20): ready for Barry's go.** Translated into all eight languages the site speaks (D200). Plugin 568 exists in TRMNL, private, with its icon and URLs; Desk Crawler's listing is approved and live, so the condition in [the S7 checklist](../idle-angler.md#s7-checklist-barry) ("after Desk Crawler is approved") holds. Submitting, the listing edits below, the video and the email are Barry's actions (or need his explicit go for each).
+**Status (2026-10-20): submitted for review; the email is Barry's to send.** Translated into all eight languages the site speaks (D200). Plugin 568 exists in TRMNL, private, with its icon and URLs; Desk Crawler's listing is approved and live, so the condition in [the S7 checklist](../idle-angler.md#s7-checklist-barry) ("after Desk Crawler is approved") holds. Submitting, the listing edits below, the video and the email are Barry's actions (or need his explicit go for each).
 
 ## Listing
 
@@ -27,9 +27,9 @@ Idle Angler is a fishing game for a glance. The angler casts every 15 minutes on
 
 1. **Production on content v6**: done 2026-10-20 (v5 for D199's first-cast fish, then v6 for D204's water ranks).
 2. **Listing**: description saved 2026-10-19 (the plugin form's Save button does not persist, a fetch POST of the form does). Featured image regenerated at template v19 on 2026-10-20.
-3. **Switch Idle Angler to live** in the admin page's Games card (audited). Until then the reviewer's install, help and companion pages are not-found. On the same day, merge the `idle-angler-launch-day` branch (sitemap entries, `PRIVACY_UPDATED`, a What's new entry in all eight languages) after setting its two dates to that day.
-4. **Record the install video** with the [recording checklist](recording-checklist.md)'s shots, for Idle Angler: Install → Connect, sign up and pick a public name, Save, the first screen ("Wren is ready to fish"), then the first cast with its fish after the next quarter hour (an honest cut caption), the Dock with the goal's Claim, the Cooler and a sale, Configure.
-5. **Submit for Review** in My Plugins, then send the [email](../idle-angler-review-email.md).
+3. **Idle Angler live on trmnlgames.com**: done 2026-10-20, before submitting, because a game in `preview` refuses a non-admin's TRMNL connect (`trmnl.ts`, GAME_UNAVAILABLE) and its help and companion answer not-found. The public can't install until TRMNL lists the plugin. The D201 launch list was skipped: it only shows in `preview`. On approval day, set the two dates on `idle-angler-launch-day` and merge it (sitemap, `PRIVACY_UPDATED`, What's new, Install on TRMNL), after checking its `trmnl.com/integrations/idle-angler` link resolves.
+4. **Install video**: skipped. The connect flow is the one TRMNL approved for Desk Crawler; the email offers a video on request ([recording checklist](recording-checklist.md) if they ask).
+5. **Submitted for Review** 2026-10-20 (My Plugins shows `in_review`). Send the [email](../idle-angler-review-email.md) from barry@barrymichaeldoyle.com.
 
 ## Reviewer access
 
