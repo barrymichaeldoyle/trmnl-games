@@ -60,8 +60,8 @@ export const games = {
     installPath: '/connect/trmnl/idle-angler/install',
     managePath: '/connect/trmnl/idle-angler/manage',
     clientIdEnv: 'TRMNL_CLIENT_ID_IDLE_ANGLER',
-    // TRMNL is reviewing plugin 568 (D209). On approval the launch-day branch sets its listing's URL here.
-    marketplaceUrl: null,
+    // Plugin 568's listing, named like Desk Crawler's (D210). Check it resolves before this merges on launch day.
+    marketplaceUrl: 'https://trmnl.com/integrations/idle-angler',
   },
   [PAPER_LIVES_GAME]: {
     slug: PAPER_LIVES_GAME,
