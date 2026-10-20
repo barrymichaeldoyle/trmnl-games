@@ -2,7 +2,7 @@ import { currentHero } from './gameProfile'
 import { pagePublic } from './publicPage'
 import type { Doc } from '../_generated/dataModel'
 import type { QueryCtx } from '../_generated/server'
-import { HOUR_MS, hourStart, WINDOW_7D_HOURS } from '@trmnl-games/desk-crawler/sim/score'
+import { weekStart } from '@trmnl-games/desk-crawler/sim/score'
 import { levelGroup } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { TOP_ROWS, type PayloadRanking } from '@trmnl-games/desk-crawler/payload'
 
@@ -89,7 +89,8 @@ export async function readDeviceRanking(ctx: QueryCtx, world: Doc<'worldState'> 
     scoreAt: publication.scoreAt,
     asOfTick: publication.asOfTick,
     builtAt: publication.builtAt ?? publication.scoreAt,
-    windowStart: hourStart(publication.scoreAt) - (WINDOW_7D_HOURS - 1) * HOUR_MS,
+    // D202: the device's board is this week's, from Monday 00:00 UTC.
+    windowStart: weekStart(publication.scoreAt),
     totalPlayers: generation?.totalPlayers ?? 0,
     globalTotalPlayers: publication.globalTotalPlayers,
     ...(await deviceRows(ctx, generation?.entries ?? [], hero._id)),

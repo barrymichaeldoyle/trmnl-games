@@ -60,7 +60,7 @@ function Landing() {
           </Topic>
           <Topic id="players-heading" glyph="sword" tone="text-hp-ink" title="Other players" help="desk-raids">
             <p>From level {UNLOCKS.raids}, heroes raid each other’s desks while exploring. Stance tilts the odds of winning, and nobody chooses who gets raided. The loser hands over 5% of its gold.</p>
-            <p>Your screen shows the seven-day XP Top 5 for your level group, with your own row marked. You can also give your hero a public page with its level, rank and achievements, and share it with a picture card.</p>
+            <p>Your screen shows this week’s XP Top 5 for your level group, with your own row marked. You can also give your hero a public page with its level, rank and achievements, and share it with a picture card.</p>
           </Topic>
           <Topic id="career-heading" glyph="quest" tone="text-xp-ink" title="A career and a second hero" help="career">
             <p>Your hero always has one goal, from “Win your first fight” to reaching the Parking Garage, and new features arrive as it levels up. Every morning the stand-up hands out small tasks, like defeating four Paper Imps, for a little gold.</p>

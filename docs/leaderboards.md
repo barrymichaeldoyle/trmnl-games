@@ -45,7 +45,7 @@ Retain current and previous publication sets plus active build, including all as
 
 ## Required verification
 
-- Exact 24-hour/seven-day boundaries and one pinned cutoff despite page timing/recovery; at most one XP credit per hero/run.
+- Exact today/this-week boundaries (00:00 UTC, Monday 00:00 UTC, D202) and one pinned cutoff despite page timing/recovery; at most one XP credit per hero/run.
 - Lifetime tuple/ties, recent score/activation/ID ties, sparse groups and zero/new heroes.
 - Promotion carries score, clears delta; all cohorts work without a level cap.
 - Hero outside Top 100 gets exact scoped rank; other-group browsing never presents an unrelated personal rank.

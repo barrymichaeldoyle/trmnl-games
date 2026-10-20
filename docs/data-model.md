@@ -143,7 +143,7 @@ An `achievement` log (D65, source `lifecycle`) carries `detail { v: 1, achieveme
 
 Fields: `heroId`, `buckets` (max 168 `{hourStart,xp}` positive hourly buckets, ascending), `cutoffHour`, `xp24h`, `xp7d`, `lastFoldedRunId?`, `scoreVersion`. Index: `by_hero[heroId]`.
 
-Per tick, credit granted XP to the hero's `scoreHour`/`scoreHourXp` accumulator (folding an older-hour accumulator first). On publication runs only, fold the accumulator into its hour bucket (adding to an existing bucket), expire buckets at/before each window start, and compute both totals in the same hero transaction. Hourly keys bound seven-day history to 168 buckets; empty hours imply zero. Sleep/pause/quarantine still expire history at publication. Pure projection receives pinned time. Read one bounded document per publication; measure row bytes/CPU. Pending heroes have no earned score history.
+Per tick, credit granted XP to the hero's `scoreHour`/`scoreHourXp` accumulator (folding an older-hour accumulator first). On publication runs only, fold the accumulator into its hour bucket (adding to an existing bucket), expire buckets at/before each window start, and compute both totals (today from 00:00 UTC, this week from Monday 00:00 UTC, D202) in the same hero transaction. Hourly keys bound seven-day history to 168 buckets; empty hours imply zero. Sleep/pause/quarantine still expire history at publication. Pure projection receives pinned time. Read one bounded document per publication; measure row bytes/CPU. Pending heroes have no earned score history.
 
 ### `rankInputs`
 

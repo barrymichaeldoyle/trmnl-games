@@ -20,7 +20,8 @@ export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({
 
 type Board = 'recent_7d' | 'recent_24h' | 'overall'
 // Labels short enough to sit on one line in a third of a phone screen. Shortest period first, as a reader expects.
-// D191: the page still opens on the seven-day board, the one the TRMNL shows, so both report the same rank.
+// D202: Today and This week are calendar periods in UTC. D191: the page opens on this week's board, the one the TRMNL
+// shows, so both report the same rank.
 const TABS: Board[] = ['recent_24h', 'recent_7d', 'overall']
 
 /** Player names are often one long token ("Marcus_the_Bold"): offer a line break after each underscore before any mid-word break. */

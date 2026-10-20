@@ -13,7 +13,7 @@ const hours = (ticks: number, t: (typeof dcLogMessages)['en']) => {
   return total < 48 ? t.hours(total) : t.days(Math.round(total / 24))
 }
 
-/** Seven-day rank in the hero's level group, from the same published board as Rankings. */
+/** This week's rank in the hero's level group (D202), from the same published board as Rankings. */
 function Rank({ stopped }: { stopped: boolean }) {
   const { data } = useQuery(convexQuery(api.leaderboard.view, {}))
   const t = useT(dcLogMessages)
@@ -35,7 +35,7 @@ function Rank({ stopped }: { stopped: boolean }) {
   )
 }
 
-/** `withRank` draws the seven-day rank and the link to the Rankings page; the Rankings page itself leaves both out. */
+/** `withRank` draws this week's rank and the link to the Rankings page; the Rankings page itself leaves both out. */
 export function Records({ counters, lifetimeXp, stopped = false, withRank = true }: { counters: Counters; lifetimeXp: number; stopped?: boolean; withRank?: boolean }) {
   // Each record wears its stat's glyph in that stat's ink (the One Meaning Rule); the label still names it.
   const t = useT(dcLogMessages)

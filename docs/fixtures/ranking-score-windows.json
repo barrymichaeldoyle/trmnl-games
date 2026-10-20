@@ -1,5 +1,5 @@
 {
-  "description": "Documentation-only hourly-bucket example (D31); no generated backend result. Publication run at the last slot of the 09:00 UTC hour folds the hero's accumulator, then expires and sums whole-hour buckets.",
+  "description": "Documentation-only hourly-bucket example (D31, calendar periods since D202); no generated backend result. Publication run at the last slot of the 09:00 UTC hour on Saturday 3 October folds the hero's accumulator, expires buckets older than seven days and sums today's and this week's whole-hour buckets.",
   "scoreAt": "2026-10-03T09:58:00Z",
   "scoreHour": "2026-10-03T09:00:00Z",
   "accumulatorBeforeFold": {
@@ -36,8 +36,8 @@
       }
     ],
     "xp24h": 80,
-    "xp7d": 130,
+    "xp7d": 100,
     "retainedBuckets": 3
   },
-  "interval": "bucket hourStart in (scoreHour - duration, scoreHour]: start exclusive, end inclusive"
+  "interval": "buckets older than (scoreHour - 168h] expire; xp24h sums buckets from 00:00 UTC of scoreHour's day and xp7d from Monday 00:00 UTC of its week, both up to scoreHour inclusive (D202)"
 }

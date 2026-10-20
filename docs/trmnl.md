@@ -1,6 +1,6 @@
 # TRMNL Third Party integration and display contract
 
-Device ranks show seven-day earned XP within the hero's captured level group, published hourly (D31); dormant heroes are unranked on recent boards (D32). Held-find inventory sleep is a gameplay state with explicit claim/wake guidance. All live protocol/render gates remain open.
+Device ranks show this week's earned XP (from Monday 00:00 UTC, D202) within the hero's captured level group, published hourly (D31); dormant heroes are unranked on recent boards (D32). Held-find inventory sleep is a gameplay state with explicit claim/wake guidance. All live protocol/render gates remain open.
 
 ## Selected integration
 
@@ -126,10 +126,10 @@ Root values are flat; bounded `log`, `top5`, `top10` and `board` arrays are inte
 | `standoff` | D163: a dug-in elite or null: `{ name, hp_pct, leaves_at }` with the monster's name, its HP left as a percentage (1 to 100, never 0 while it stands) and when it leaves in UTC seconds. Template v55 draws it in the attention slot of every layout as the name, ten half-step ticks and the percentage, and the full layouts add "leaves HH:MM" from `utc_offset`; an attention line takes its place. Additive v1 field |
 | `goal` | D138: the hero's current career goal or null off the ladder: `{ t, v, n, g }` with the title, progress `v` capped at the target `n`, and the rung's gold. Template v53 shows it on the X full landscape only |
 | `celebration` | String/null: "Level up! Now level N", "Elite defeated!", "Jackpot!", "Rare find!" or, from D65, "Achievement: {name}" when the newest log is that big moment and no attention message applies; templates show it as an inverted badge on full and both half views (D44; the quadrant has no room). Additive v1 field. Log kind `achievement` has its own glyph; its story is `Achievement: [[name]]` with an empty `d` |
-| `rank`, `rank_delta` | Nullable seven-day own-group ordinal rank / gain since previous hourly publication of same board/group; group change or return from dormancy null |
+| `rank`, `rank_delta` | Nullable this-week own-group ordinal rank / gain since previous hourly publication of same board/group; group change or return from dormancy null |
 | `rank_status` | `ranked`, `awaiting` (no own row yet: new, unlinked or before first publication) or `dormant` (paused/sleeping without wake with zero window XP, D32); lets templates explain a null rank |
 | `leaderboard_board`, `leaderboard_cohort`, `leaderboard_cohort_label`, `leaderboard_score` | recent_7d; captured group key/label (<=48 chars; null key and empty label when unlinked); own earned-XP score nullable before own snapshot |
-| `leaderboard_window_start`, `leaderboard_window_end` | Nullable ISO UTC boundaries of the 168 whole UTC hours in the window: start is the beginning of the oldest included hour; end is the publication's `scoreAt` (the last credited slot) |
+| `leaderboard_window_start`, `leaderboard_window_end` | Nullable ISO UTC boundaries of this week's board (D202): start is Monday 00:00 UTC of the publication's week; end is the publication's `scoreAt` (the last credited slot) |
 | `leaderboard_tick`, `leaderboard_built_at` | Nullable published board tick/time |
 | `total_players`, `global_total_players` | Selected-group population and the population ranked on `recent_7d` across all groups (dormant heroes excluded) from the same publication; 0 with no applicable publication/unlinked scope |
 | `top5` | Max 5 `{ rank, name, hero_name, level, class, score }` entries; `name` is owner alias |

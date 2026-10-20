@@ -22,7 +22,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Your hero plays on its own, and the companion is where you steer it.',
     features: (roster: number): readonly Feature[] => [
       { title: 'Desk raids', body: 'Heroes raid each other’s desks for gold while they explore. Your stance tilts the coin toss; level and gear never count.' },
-      { title: 'Rankings and rivals', body: 'Your screen shows the seven-day XP Top 5 for your level group. You can follow other heroes from their public pages and mark one as your rival.' },
+      { title: 'Rankings and rivals', body: 'Your screen shows this week’s XP Top 5 for your level group. You can follow other heroes from their public pages and mark one as your rival.' },
       { title: 'Stances', body: 'Choose how careful your hero is. Bolder heroes earn more and get knocked out more often.' },
       { title: 'Decisions and a merchant', body: 'Chip in for the cake or stay late. A wandering merchant sometimes sells items at a discount.' },
       { title: 'Loot and the workbench', body: 'Gear comes in four rarities, with traits like Vampiric and Lucky on the best. Salvage the spares to upgrade what you wear. Gold buys bigger bags.' },
@@ -101,7 +101,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Votre héros joue tout seul, et le compagnon est l’endroit où vous le guidez.',
     features: (roster: number) => [
       { title: 'Raids de bureau', body: 'Les héros pillent le bureau des autres pour de l’or pendant qu’ils explorent. Votre posture fait pencher le pile ou face ; le niveau et l’équipement ne comptent jamais.' },
-      { title: 'Classements et rivaux', body: 'Votre écran affiche le Top 5 XP sur sept jours de votre groupe de niveau. Vous pouvez suivre d’autres héros depuis leur page publique et en désigner un comme rival.' },
+      { title: 'Classements et rivaux', body: 'Votre écran affiche le Top 5 XP de la semaine de votre groupe de niveau. Vous pouvez suivre d’autres héros depuis leur page publique et en désigner un comme rival.' },
       { title: 'Postures', body: 'Choisissez le degré de prudence de votre héros. Les plus audacieux gagnent davantage et se font mettre K.-O. plus souvent.' },
       { title: 'Décisions et marchand', body: 'Participez au gâteau ou restez tard. Un marchand ambulant vend parfois des objets à prix réduit.' },
       { title: 'Butin et établi', body: 'L’équipement existe en quatre raretés, avec des traits comme Vampirique et Chanceux sur les meilleures pièces. Démontez le surplus pour améliorer ce que vous portez. L’or achète de plus grands sacs.' },
@@ -179,7 +179,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Dein Held spielt von selbst, und in der Begleit-App lenkst du ihn.',
     features: (roster: number) => [
       { title: 'Schreibtisch-Überfälle', body: 'Helden überfallen beim Erkunden gegenseitig ihre Schreibtische und holen sich Gold. Deine Haltung beeinflusst den Münzwurf; Stufe und Ausrüstung zählen nie.' },
-      { title: 'Ranglisten und Rivalen', body: 'Dein Bildschirm zeigt die XP-Top-5 der letzten sieben Tage für deine Stufengruppe. Du kannst anderen Helden über ihre öffentlichen Seiten folgen und einen als Rivalen markieren.' },
+      { title: 'Ranglisten und Rivalen', body: 'Dein Bildschirm zeigt die XP-Top-5 dieser Woche für deine Stufengruppe. Du kannst anderen Helden über ihre öffentlichen Seiten folgen und einen als Rivalen markieren.' },
       { title: 'Haltungen', body: 'Wähle, wie vorsichtig dein Held ist. Draufgänger verdienen mehr und werden öfter k. o. geschlagen.' },
       { title: 'Entscheidungen und ein Händler', body: 'Gib was für den Kuchen oder bleib länger. Ein fahrender Händler verkauft manchmal Sachen mit Rabatt.' },
       { title: 'Beute und Werkbank', body: 'Ausrüstung gibt es in vier Seltenheiten, die besten Teile mit Eigenschaften wie Vampirisch und Glückbringend. Zerlege Übriges, um zu verbessern, was du trägst. Mit Gold kaufst du größere Taschen.' },
@@ -257,7 +257,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Tu héroe juega solo, y en la app es donde lo diriges.',
     features: (roster: number) => [
       { title: 'Incursiones de escritorio', body: 'Los héroes asaltan los escritorios de otros por oro mientras exploran. Tu postura inclina la moneda; el nivel y el equipo nunca cuentan.' },
-      { title: 'Clasificaciones y rivales', body: 'Tu pantalla muestra el Top 5 de XP de siete días de tu grupo de nivel. Puedes seguir a otros héroes desde sus páginas públicas y marcar a uno como tu rival.' },
+      { title: 'Clasificaciones y rivales', body: 'Tu pantalla muestra el Top 5 de XP de esta semana de tu grupo de nivel. Puedes seguir a otros héroes desde sus páginas públicas y marcar a uno como tu rival.' },
       { title: 'Posturas', body: 'Elige lo prudente que es tu héroe. Los más audaces ganan más y caen K.O. más a menudo.' },
       { title: 'Decisiones y un mercader', body: 'Poner dinero para la tarta o quedarse hasta tarde. Un mercader ambulante a veces vende objetos con descuento.' },
       { title: 'Botín y banco de trabajo', body: 'El equipo tiene cuatro rarezas, con rasgos como Vampírico o Afortunado en el mejor. Desmonta lo que sobra para mejorar lo que llevas. El oro compra bolsas más grandes.' },
@@ -335,7 +335,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Il tuo eroe gioca da solo, e nell’app decidi la rotta.',
     features: (roster: number) => [
       { title: 'Incursioni sulle scrivanie', body: 'Gli eroi fanno incursioni sulle scrivanie altrui per l’oro mentre esplorano. La tua tattica sposta la moneta; livello ed equipaggiamento non contano mai.' },
-      { title: 'Classifiche e rivali', body: 'Lo schermo mostra la Top 5 di XP dei sette giorni della tua fascia di livello. Puoi seguire altri eroi dalle loro pagine pubbliche e sceglierne uno come rivale.' },
+      { title: 'Classifiche e rivali', body: 'Lo schermo mostra la Top 5 di XP di questa settimana della tua fascia di livello. Puoi seguire altri eroi dalle loro pagine pubbliche e sceglierne uno come rivale.' },
       { title: 'Tattiche', body: 'Scegli quanto è prudente il tuo eroe. Gli eroi più audaci guadagnano di più e vanno KO più spesso.' },
       { title: 'Decisioni e un mercante', body: 'Contribuire alla torta o restare fino a tardi. Un mercante ambulante a volte vende oggetti scontati.' },
       { title: 'Bottino e banco da lavoro', body: 'L’equipaggiamento ha quattro rarità, con tratti come Vampirico e Fortunato sui pezzi migliori. Smonta i doppioni per migliorare ciò che indossi. L’oro compra borse più grandi.' },
@@ -413,7 +413,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Seu herói joga sozinho, e é no app que você dá a direção.',
     features: (roster: number) => [
       { title: 'Incursões de mesa', body: 'Os heróis invadem as mesas uns dos outros atrás de ouro enquanto exploram. Sua postura inclina a moeda; nível e equipamento nunca contam.' },
-      { title: 'Rankings e rivais', body: 'Sua tela mostra o Top 5 de XP dos sete dias do seu grupo de nível. Você pode seguir outros heróis pelas páginas públicas e marcar um como seu rival.' },
+      { title: 'Rankings e rivais', body: 'Sua tela mostra o Top 5 de XP desta semana do seu grupo de nível. Você pode seguir outros heróis pelas páginas públicas e marcar um como seu rival.' },
       { title: 'Posturas', body: 'Escolha o quanto seu herói é cauteloso. Heróis mais ousados ganham mais e são nocauteados com mais frequência.' },
       { title: 'Decisões e um mercador', body: 'Fazer vaquinha para o bolo ou ficar até mais tarde. Um mercador ambulante às vezes vende itens com desconto.' },
       { title: 'Saque e bancada', body: 'O equipamento tem quatro raridades, com traços como Vampírico e Sortudo nos melhores. Desmonte os reservas para melhorar o que você usa. O ouro compra bolsas maiores.' },
@@ -491,7 +491,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Bohater gra sam, a w aplikacji nadajesz mu kierunek.',
     features: (roster: number) => [
       { title: 'Rajdy na biurka', body: 'Bohaterowie robią sobie nawzajem rajdy na biurka po złoto podczas eksploracji. Postawa przechyla rzut monetą; poziom i sprzęt nigdy się nie liczą.' },
-      { title: 'Rankingi i rywale', body: 'Ekran pokazuje siedmiodniowe Top 5 XP twojej grupy poziomów. Możesz obserwować innych bohaterów z ich stron publicznych i oznaczyć jednego jako rywala.' },
+      { title: 'Rankingi i rywale', body: 'Ekran pokazuje Top 5 XP tego tygodnia w twojej grupie poziomów. Możesz obserwować innych bohaterów z ich stron publicznych i oznaczyć jednego jako rywala.' },
       { title: 'Postawy', body: 'Wybierz, jak ostrożny jest bohater. Śmielsi zarabiają więcej i częściej dostają nokaut.' },
       { title: 'Decyzje i kupiec', body: 'Dorzucić się do tortu czy zostać po godzinach. Wędrowny kupiec czasem sprzedaje przedmioty taniej.' },
       { title: 'Łupy i warsztat', body: 'Sprzęt ma cztery rzadkości, a najlepszy ma cechy takie jak Wampiryczny czy Szczęśliwy. Rozbieraj zapasy, by ulepszać to, co nosisz. Złoto kupuje większe torby.' },
@@ -569,7 +569,7 @@ export const pitchMessages = defineMessages({
     whatsInIntro: 'Je held speelt zelf, en in de app stuur je hem bij.',
     features: (roster: number) => [
       { title: 'Bureauraids', body: 'Helden overvallen tijdens het verkennen elkaars bureaus voor goud. Je houding kantelt de muntworp; niveau en uitrusting tellen nooit mee.' },
-      { title: 'Ranglijsten en rivalen', body: 'Je scherm toont de Top 5 XP van zeven dagen in je niveaugroep. Je kunt andere helden volgen via hun openbare pagina en er één als rivaal markeren.' },
+      { title: 'Ranglijsten en rivalen', body: 'Je scherm toont de Top 5 XP van deze week in je niveaugroep. Je kunt andere helden volgen via hun openbare pagina en er één als rivaal markeren.' },
       { title: 'Houdingen', body: 'Kies hoe voorzichtig je held is. Roekelozere helden verdienen meer en gaan vaker knock-out.' },
       { title: 'Beslissingen en een koopman', body: 'Meebetalen aan de taart of overwerken. Een rondtrekkende koopman verkoopt soms voorwerpen met korting.' },
       { title: 'Buit en de werkbank', body: 'Uitrusting heeft vier zeldzaamheden, met eigenschappen als Vampirisch en Gelukbrengend op de beste stukken. Demonteer reserves om te verbeteren wat je draagt. Goud koopt grotere tassen.' },

@@ -91,6 +91,24 @@ describe('hourly score projection (D31)', () => {
     expect(result.accumulator).toEqual({ scoreHourXp: 0 })
   })
 
+  it('starts Today at 00:00 UTC and This week on Monday 00:00 UTC (D202)', () => {
+    const at = (iso: string) => Date.parse(iso)
+    const buckets = [
+      { hourStart: at('2026-10-18T23:00:00Z'), xp: 1 }, // Sunday, last week
+      { hourStart: at('2026-10-19T00:00:00Z'), xp: 10 }, // Monday's first hour
+      { hourStart: at('2026-10-20T23:00:00Z'), xp: 100 }, // Tuesday's last hour
+    ]
+    const tuesday = projectAtPublication(buckets, { scoreHourXp: 0 }, at('2026-10-20T23:45:00Z'))
+    expect([tuesday.xp24h, tuesday.xp7d]).toEqual([100, 110])
+    // Just after midnight, Wednesday's day starts empty; the week runs on.
+    const wednesday = projectAtPublication(buckets, { scoreHour: at('2026-10-21T00:00:00Z'), scoreHourXp: 5 }, at('2026-10-21T00:45:00Z'))
+    expect([wednesday.xp24h, wednesday.xp7d]).toEqual([5, 115])
+    // The next Monday starts both boards again, though the buckets are kept for seven days.
+    const monday = projectAtPublication(buckets, { scoreHour: at('2026-10-26T00:00:00Z'), scoreHourXp: 3 }, at('2026-10-26T00:45:00Z'))
+    expect([monday.xp24h, monday.xp7d]).toEqual([3, 3])
+    expect(monday.buckets.map((b) => b.xp)).toEqual([100, 3])
+  })
+
   it('folds a stale accumulator after a missed publication', () => {
     const h = 3_600_000
     const first = creditTick({ scoreHourXp: 0 }, 10 * h + 13 * 60_000, 20)

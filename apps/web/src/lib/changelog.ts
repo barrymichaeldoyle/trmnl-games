@@ -28,6 +28,22 @@ export const changeIn = (change: Change, locale: Locale): { title: string; body:
 
 export const CHANGELOG: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-20',
+    changes: [
+      {
+        title: 'Rankings run by the day and the week',
+        body: 'The two recent boards are now Today and This week. Today starts again at 00:00 UTC and the week on Monday at 00:00 UTC, when the keepsake code changes. They used to count the last 24 hours and the last seven days, so a big night stayed on the board into the next evening. Your TRMNL shows This week, as before.',
+        fr: { title: 'Les classements suivent le jour et la semaine', body: 'Les deux classements récents sont désormais Aujourd’hui et Semaine. La journée repart à 00:00 UTC et la semaine le lundi à 00:00 UTC, quand le code souvenir change. Ils comptaient avant les dernières 24 heures et les sept derniers jours, si bien qu’une grosse nuit restait au classement jusqu’au soir suivant. Votre TRMNL affiche la semaine, comme avant.' },
+        de: { title: 'Ranglisten laufen nach Tag und Woche', body: 'Die beiden aktuellen Ranglisten heißen jetzt Heute und Woche. Der Tag beginnt um 00:00 UTC neu und die Woche am Montag um 00:00 UTC, wenn der Andenken-Code wechselt. Bisher zählten sie die letzten 24 Stunden und die letzten sieben Tage, sodass eine starke Nacht bis zum nächsten Abend auf der Liste blieb. Dein TRMNL zeigt wie bisher die Woche.' },
+        es: { title: 'Las clasificaciones van por día y por semana', body: 'Las dos tablas recientes son ahora Hoy y Semana. El día vuelve a empezar a las 00:00 UTC y la semana el lunes a las 00:00 UTC, cuando cambia el código del recuerdo. Antes contaban las últimas 24 horas y los últimos siete días, así que una gran noche seguía en la tabla hasta la tarde siguiente. Tu TRMNL muestra la semana, como antes.' },
+        it: { title: 'Le classifiche vanno per giorno e per settimana', body: 'Le due classifiche recenti ora sono Oggi e Settimana. Il giorno riparte alle 00:00 UTC e la settimana il lunedì alle 00:00 UTC, quando cambia il codice del ricordino. Prima contavano le ultime 24 ore e gli ultimi sette giorni, così una grande notte restava in classifica fino alla sera dopo. Il tuo TRMNL mostra la settimana, come prima.' },
+        pt: { title: 'Os rankings agora vão por dia e por semana', body: 'Os dois placares recentes agora são Hoje e Semana. O dia recomeça às 00:00 UTC e a semana na segunda-feira às 00:00 UTC, quando o código da lembrança muda. Antes eles contavam as últimas 24 horas e os últimos sete dias, então uma noite boa ficava no placar até a noite seguinte. Seu TRMNL mostra a semana, como antes.' },
+        pl: { title: 'Rankingi liczą się według dnia i tygodnia', body: 'Dwie bieżące tabele to teraz Dziś i Tydzień. Dzień zaczyna się od nowa o 00:00 UTC, a tydzień w poniedziałek o 00:00 UTC, gdy zmienia się kod pamiątki. Wcześniej liczyły ostatnie 24 godziny i ostatnie siedem dni, więc udana noc zostawała w tabeli do następnego wieczoru. Twój TRMNL pokazuje tydzień, jak dotąd.' },
+        nl: { title: 'Ranglijsten lopen per dag en per week', body: 'De twee recente lijsten heten nu Vandaag en Week. De dag begint opnieuw om 00:00 UTC en de week op maandag om 00:00 UTC, als de aandenken-code wisselt. Eerst telden ze de laatste 24 uur en de laatste zeven dagen, zodat een goede nacht tot de volgende avond op de lijst bleef. Je TRMNL toont de week, net als eerst.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-19',
     changes: [
       {

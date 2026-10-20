@@ -1,10 +1,15 @@
 /**
  * Pure recent-XP score projection with hourly buckets (ranking.md, D31).
  * Times are UTC epoch milliseconds supplied by the caller; nothing reads a clock.
+ *
+ * D202: the two recent boards are calendar periods in UTC, Today (from 00:00) and This week (from Monday 00:00), as
+ * Idle Angler's and Paper Lives' weekly boards and the keepsakes are. The stored names `xp24h`/`xp7d` (and the board
+ * keys `recent_24h`/`recent_7d`) keep their old spelling; they now hold today's and this week's XP.
  */
 export const HOUR_MS = 3_600_000
-export const WINDOW_24H_HOURS = 24
-export const WINDOW_7D_HOURS = 168
+const DAY_MS = 24 * HOUR_MS
+/** Buckets are kept for seven days, long enough to hold every hour of the current week. */
+const KEEP_HOURS = 168
 
 export interface ScoreBucket {
   readonly hourStart: number
@@ -17,6 +22,10 @@ export interface ScoreAccumulator {
 }
 
 export const hourStart = (timestamp: number): number => Math.floor(timestamp / HOUR_MS) * HOUR_MS
+/** 00:00 UTC of the timestamp's day. */
+export const dayStart = (timestamp: number): number => Math.floor(timestamp / DAY_MS) * DAY_MS
+/** Monday 00:00 UTC of the timestamp's week. */
+export const weekStart = (timestamp: number): number => dayStart(timestamp) - ((new Date(timestamp).getUTCDay() + 6) % 7) * DAY_MS
 
 /** Add positive XP to a bucket list, merging into an existing hour. Keeps ascending order. */
 export function addToBuckets(buckets: readonly ScoreBucket[], hour: number, xp: number): ScoreBucket[] {
@@ -53,7 +62,7 @@ export interface PublicationScore {
 
 /**
  * At a publication run: fold the accumulator, expire buckets at/before the
- * seven-day start, and sum windows (scoreHour - duration, scoreHour].
+ * seven-day start, and sum today's and this week's buckets up to scoreHour (D202).
  */
 export function projectAtPublication(
   buckets: readonly ScoreBucket[],
@@ -65,9 +74,8 @@ export function projectAtPublication(
   if (accumulator.scoreHour !== undefined && accumulator.scoreHourXp > 0) {
     merged = addToBuckets(merged, accumulator.scoreHour, accumulator.scoreHourXp)
   }
-  const start7d = scoreHour - WINDOW_7D_HOURS * HOUR_MS
-  const start24h = scoreHour - WINDOW_24H_HOURS * HOUR_MS
-  const retained = merged.filter((bucket) => bucket.hourStart > start7d && bucket.hourStart <= scoreHour)
-  const sum = (from: number) => retained.filter((bucket) => bucket.hourStart > from).reduce((total, bucket) => total + bucket.xp, 0)
-  return { buckets: retained, xp24h: sum(start24h), xp7d: sum(start7d), accumulator: { scoreHourXp: 0 } }
+  const keepAfter = scoreHour - KEEP_HOURS * HOUR_MS
+  const retained = merged.filter((bucket) => bucket.hourStart > keepAfter && bucket.hourStart <= scoreHour)
+  const sum = (from: number) => retained.filter((bucket) => bucket.hourStart >= from).reduce((total, bucket) => total + bucket.xp, 0)
+  return { buckets: retained, xp24h: sum(dayStart(scoreHour)), xp7d: sum(weekStart(scoreHour)), accumulator: { scoreHourXp: 0 } }
 }
