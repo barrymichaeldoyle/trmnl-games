@@ -148,9 +148,13 @@ const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_b
 const qr = (og: number, x: number) =>
   `{% if qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">{% if fly_waiting %}<span class="${LABEL} text--center text--bold" data-fly-caption="true">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}</div>{% endif %}`
 
-/** The angler's name, then the title beside it behind a dot (v13), so "Wren · Old Hand" does not read as one name. */
+/**
+ * The angler's name, then the title beside it behind a dot (v13), so "Wren · Old Hand" does not read as one name.
+ * Template v17: the pair sits 4px apart in its own row, so the space before the dot matches the one after it (the
+ * row around it is a wider gap apart, which the X widened further).
+ */
 const nameLine = (classes = 'title title--small') =>
-  `<span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}`
+  `<div class="flex flex--row flex--left flex--center-y gap--[4px] w--min-0"><span class="${classes} w--min-0" data-clamp="1">{{ alias | escape }}</span>{% if title %}<span class="${LABEL} no-shrink">&middot;&nbsp;{{ title | escape }}</span>{% endif %}</div>`
 
 /** The cooler, bait or service line, inverted behind its mark so it reads first. */
 const attention = (clamp = 2) =>
