@@ -4,9 +4,11 @@ import { anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { games } from '@trmnl-games/platform'
 import { requireOpenGame } from '../../lib/gameAccess'
 import { messagesFor, useLocale, useT } from '../../lib/i18n'
-import { SiteShell } from '../../lib/prose'
+import { IDLE_ANGLER_INSTALL_URL, SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
-import { BUTTON_SECONDARY, LINK_BUTTON } from '../../lib/ui'
+import { BUTTON_PRIMARY, BUTTON_SECONDARY, LINK_BUTTON } from '../../lib/ui'
+import { captureAnalytics } from '../../lib/analytics'
+import { pitchMessages } from '../../i18n/pitch'
 import { iaGamePage } from '../../i18n/iaGamePage'
 
 /** Idle Angler's public game page (idle-angler.md "Companion"), in every language (D200). Hidden with the game until it is live (D115). */
@@ -21,6 +23,7 @@ export const Route = createFileRoute('/games/idle-angler')({
 
 function GamePage() {
   const t = useT(iaGamePage)
+  const pitch = useT(pitchMessages)
   const words = anglerWords(useLocale())
   return (
     <SiteShell>
@@ -37,6 +40,7 @@ function GamePage() {
           {t.features(content.species.length, words.title('newcomer'), words.title('master_angler')).map((line) => <li key={line}>{line}</li>)}
         </ul>
         <div className="flex flex-wrap items-center gap-4">
+          <a href={IDLE_ANGLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place: 'idle angler game page' })} className={`${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{pitch.installOnTrmnl}</a>
           <Link to="/help/idle-angler" className={`${LINK_BUTTON} ${BUTTON_SECONDARY}`}>{t.howItPlays}</Link>
           <Link to="/app/idle-angler" className="inline-flex min-h-11 items-center underline underline-offset-4">{t.openCompanion}</Link>
         </div>

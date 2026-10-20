@@ -7,7 +7,10 @@ import { requireOpenGame, useGames } from '../../lib/gameAccess'
 import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { preload } from '../../lib/preload'
 import { seo } from '../../lib/seo'
-import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
+import { BUTTON_PRIMARY, Card, CountBadge, LINK_BUTTON, LoadingState, NotifyDot } from '../../lib/ui'
+import { captureAnalytics } from '../../lib/analytics'
+import { IDLE_ANGLER_INSTALL_URL } from '../../lib/prose'
+import { pitchMessages } from '../../i18n/pitch'
 import type { Dock } from '../../lib/idleAngler'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import { useT } from '../../lib/i18n'
@@ -39,6 +42,7 @@ function Shell() {
   const { data, isPending } = useQuery(convexQuery(api.idleAngler.anglers.dock, {}))
   const dock = data as Dock | undefined
   const t = useT(iaCommon)
+  const pitch = useT(pitchMessages)
   const listing = useGames()
   const status = listing?.games.find((game) => game.slug === 'idle-angler')?.status
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
@@ -52,6 +56,7 @@ function Shell() {
       <>{banner}<main id="main" className="mx-auto w-full max-w-3xl px-4 py-8">
         <Card title={t.startTitle}>
           <p>{t.startBody}</p>
+          <a href={IDLE_ANGLER_INSTALL_URL} onClick={() => captureAnalytics('install link opened', { place: 'idle angler start card' })} className={`mt-3 self-start ${LINK_BUTTON} ${BUTTON_PRIMARY}`}>{pitch.installOnTrmnl}</a>
           <Link to="/help/idle-angler" className="mt-3 inline-flex min-h-11 items-center font-semibold underline underline-offset-4">{t.howItWorks}</Link>
         </Card>
       </main></>

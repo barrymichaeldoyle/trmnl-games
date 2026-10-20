@@ -216,6 +216,8 @@ export { SUPPORT_EMAIL } from './support'
 export const SPONSOR_URL = 'https://github.com/sponsors/barrymichaeldoyle'
 /** Desk Crawler's public marketplace listing (plugin 564): its Install button starts the TRMNL connect flow. */
 export const DESK_CRAWLER_INSTALL_URL = 'https://trmnl.com/integrations/desk-crawler'
+// Idle Angler's marketplace page, named like Desk Crawler's. It only resolves once TRMNL publishes the plugin, so check it on approval day before this branch merges.
+export const IDLE_ANGLER_INSTALL_URL = 'https://trmnl.com/integrations/idle-angler'
 /** Shown on the privacy and terms pages; bump whenever either changes. */
 export const POLICY_UPDATED = '2026-10-08'
 /** The privacy policy alone changed on 9 October 2026 (D110: public names in other players' raid stories). */
