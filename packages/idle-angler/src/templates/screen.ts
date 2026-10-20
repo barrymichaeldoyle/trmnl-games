@@ -105,27 +105,30 @@ const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
  * Progress to the next title as ten half-step ticks with the species count after them (titles.ts); v16 (D204) counts
  * `title_logged`, the species at the angler's water when the header shows its rank there. Desk Crawler's bar
  * and rounding, so both Liquids agree; at the last title there is nothing left to fill and the bar is left off.
+ * Template v17: the ticks narrow to their column rather than run past it, as a large device scale made them do.
  */
 const xpTicks = (count = true) =>
-  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink ${ADAPTIVE}" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ title_logged | default: species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
+  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] w--min-0">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] w--min-0 ${ADAPTIVE}" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ title_logged | default: species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
 
 /**
  * The title bar with the weekly fly code. A narrow portrait column (side, quarter) cannot fit the name beside the
  * code, so while a code shows it takes the name's place there with the short label, as Desk Crawler's keepsake does.
+ * Template v17: the landscape side and quarter use the short label too (`short`), as their code's caption does, since
+ * "Fly code" ran out of the bar at a large device scale.
  */
-const titleBar = (orientation: 'landscape' | 'portrait', narrow = false) => `
+const titleBar = (orientation: 'landscape' | 'portrait', narrow = false, short = narrow) => `
 <div class="title_bar ${orientation === 'landscape' ? 'portrait:hidden' : 'landscape:hidden'}">
   <img class="image image-stroke ${ADAPTIVE}" src="${TITLE_ICON}" alt="">
   <span class="title${narrow ? '{% if fly_code %} hidden lg:inline-block{% endif %}' : ''}">Idle Angler</span>
-  {% if fly_code %}<span class="instance">${narrow ? L('fly') : L('fly_code')} {{ fly_code | escape }}</span>{% endif %}
+  {% if fly_code %}<span class="instance">${short ? L('fly') : L('fly_code')} {{ fly_code | escape }}</span>{% endif %}
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
-const oriented = (classes: string, landscape: string, portrait: string, narrowPortrait = false) => `${ASSIGNS}${FLY_ASSIGNS}${fitStories}
+const oriented = (classes: string, landscape: string, portrait: string, narrow = false) => `${ASSIGNS}${FLY_ASSIGNS}${fitStories}
 <div class="${classes} portrait:hidden">${landscape}
-</div>${titleBar('landscape')}
+</div>${titleBar('landscape', false, narrow)}
 <div class="${classes} landscape:hidden">${portrait}
-</div>${titleBar('portrait', narrowPortrait)}`
+</div>${titleBar('portrait', narrow)}`
 
 /**
  * The scene for one slot: the OG's stage width and scale, then the X's. Each width is the slot's width over the scale
@@ -134,7 +137,7 @@ const oriented = (classes: string, landscape: string, portrait: string, narrowPo
  * 205; the X's full view is 1836 and its side 873 (`tools/trmnl` measures these in the framework previews).
  */
 const scene = (og: readonly [width: number, scale: number], x: readonly [width: number, scale: number], classes = 'stretch-x') =>
-  `{% if scene_base != "" %}<div class="${classes} no-shrink flex flex--row flex--center-x"><img class="image lg:hidden" src="{{ scene_base }}/${og[0]}/${og[1]}.png" alt=""><img class="image hidden lg:block" src="{{ scene_base }}/${x[0]}/${x[1]}.png" alt=""></div>{% endif %}`
+  `{% if scene_base != "" %}<div class="${classes} no-shrink flex flex--row flex--center-x" data-give-way="7"><img class="image lg:hidden" src="{{ scene_base }}/${og[0]}/${og[1]}.png" alt=""><img class="image hidden lg:block" src="{{ scene_base }}/${x[0]}/${x[1]}.png" alt=""></div>{% endif %}`
 
 /**
  * D180: while this week's fly waits and the code is not sending a full cooler to the companion, the standing code opens
@@ -192,55 +195,59 @@ const storyList = (limit: number, clamp: number, classes: string, show: string) 
 const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') => storyList(limit, clamp, classes, 'lg:hidden') + storyList(limit, 1, classes, 'hidden lg:flex')
 
 /**
- * The story lists (`data-fit-stories`, template v8 on the X, v15 on every screen): once the framework has laid out the view, hide the trailing
- * stories that end below their list, so the list keeps whole stories at any device scale (`screen--scale-*`,
- * `screen--text-scale-*`). Only visibility changes, as Desk Crawler's `fitStories`; scoped to this view and to the
- * orientation the framework is showing. Template v9: where not one story fits (a large device scale), the counters marked
- * `data-give-way` step aside, the lowest number first (weather, time of day, logbook, bait, cooler, gold), until one does.
+ * The story lists (`data-fit-stories`, template v8 on the X, v15 on every screen): once the framework has laid out the
+ * view, hide the trailing stories that end below their list, so the list keeps whole stories at any device scale
+ * (`screen--scale-*`, `screen--text-scale-*`). Only visibility changes, as Desk Crawler's `fitStories`; scoped to this
+ * view and to the orientation the framework is showing.
+ * Template v9 had the counters marked `data-give-way` step aside where not one story fitted (a large device scale), and
+ * v14 a column that spilled. Template v17 makes that one pass per layout: while anything spills below the layout, or
+ * not one story fits under no attention line, the extras step aside, the lowest number first (the newest-catch panel,
+ * which repeats the newest story; the board; the twelve-hour recap; weather, time of day, logbook, bait, cooler, gold;
+ * the scene last). Then each comes back, the last hidden first, unless that spills again or leaves no story, so only
+ * what made the room stays hidden (the X's board, beside the list, never gives it any). Nothing spills or lacks a story
+ * at the normal scale, so this only changes a scaled screen.
  */
 const fitStories = `<script>
 (() => {
   const view = document.currentScript.closest('.view');
   if (!view) return;
-  const fit = () => { fitColumns(); fitLists(); };
-  // Template v14: a column marked data-fit-column that overflows its height (a longer language on the narrowest
-  // layouts) hides its give-way counters, the lowest number first, until it fits.
-  const fitColumns = () => view.querySelectorAll('[data-fit-column]').forEach((column) => {
-    if (!column.getClientRects().length) return;
-    const extras = Array.from(column.querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
+  const shown = (el) => el.getClientRects().length > 0;
+  const fitLayout = (layout) => {
+    if (!shown(layout)) return;
+    const lists = Array.from(layout.querySelectorAll('[data-fit-stories]')).filter(shown);
+    const extras = Array.from(layout.querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
     extras.forEach((extra) => extra.classList.remove('hidden'));
-    const room = column.closest('.layout').getBoundingClientRect().height;
-    const span = () => {
-      const shown = Array.from(column.children).filter((child) => child.getClientRects().length && child.getBoundingClientRect().height > 0);
-      return shown.length ? shown[shown.length - 1].getBoundingClientRect().bottom - shown[0].getBoundingClientRect().top : 0;
-    };
-    for (const extra of extras) {
-      if (span() <= room + 0.5) break;
-      extra.classList.add('hidden');
-    }
-  });
-  const fitLists = () => view.querySelectorAll('[data-fit-stories]').forEach((list) => {
-    if (!list.getClientRects().length) return;
-    const items = Array.from(list.querySelectorAll('.item'));
-    // Template v15: an attention line already says what matters most, so no counter steps aside for a story under it.
-    const layout = list.closest('.layout');
-    const extras = layout.querySelector('[data-attention]') ? [] : Array.from(layout.querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
-    extras.forEach((extra) => extra.classList.remove('hidden'));
-    const place = () => {
+    // Template v15: an attention line already says what matters most, so nothing steps aside for a story under it.
+    const wantStory = !layout.querySelector('[data-attention]') && lists.some((list) => list.querySelector('.item'));
+    const place = () => lists.reduce((total, list) => {
+      const items = Array.from(list.querySelectorAll('.item'));
       items.forEach((item) => item.classList.remove('hidden'));
       const bottom = list.getBoundingClientRect().bottom;
       let count = items.length;
       while (count && items[count - 1].getBoundingClientRect().bottom > bottom + 0.5) items[--count].classList.add('hidden');
-      return count;
+      list.dataset.storyCount = String(count);
+      return total + count;
+    }, 0);
+    const spills = () => {
+      const bottom = layout.getBoundingClientRect().bottom + 0.5;
+      return Array.from(layout.querySelectorAll('*')).some((el) => shown(el) && el.getBoundingClientRect().bottom > bottom);
     };
+    const short = (count) => spills() || (wantStory && !count);
     let count = place();
+    const hidden = [];
     for (const extra of extras) {
-      if (count || !items.length) break;
+      if (!short(count)) break;
       extra.classList.add('hidden');
+      hidden.push(extra);
       count = place();
     }
-    list.dataset.storyCount = String(count);
-  });
+    for (const extra of hidden.reverse()) {
+      extra.classList.remove('hidden');
+      const restored = place();
+      if (short(restored)) { extra.classList.add('hidden'); count = place(); } else count = restored;
+    }
+  };
+  const fit = () => view.querySelectorAll('.layout').forEach(fitLayout);
   window.addEventListener('trmnl:terminalize:stats', fit);
   window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
   if (window.TRMNL_PLUGINS_READY) fit();
@@ -254,7 +261,7 @@ const fitStories = `<script>
  * whole view (`wide`, template v15) and a full name fits.
  */
 const board = (rows: number, wide = false) =>
-  `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true">` +
+  `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true" data-give-way="-1">` +
   `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="1">{{ board.label | escape }}</span></div>` +
   `<span class="${LABEL} w--full" data-clamp="1">{{ board.rank_label | escape }}</span>` +
   `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. ${wide ? '{{ row.name | escape }}' : '<span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span>'}</span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
@@ -265,7 +272,7 @@ const board = (rows: number, wide = false) =>
  * at the foot of the layout.
  */
 const recap = () =>
-  `{% if recap_items %}<div class="no-shrink stretch-x" data-recap="true"><div class="border--h-30 stretch-x"></div>` +
+  `{% if recap_items %}<div class="no-shrink stretch-x" data-recap="true" data-give-way="0"><div class="border--h-30 stretch-x"></div>` +
   `<div class="pt--2 flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x"><span class="${LABEL} text--bold no-shrink">${L('last_12_hours')}</span>` +
   `{% for item in recap_items %}{% case item.k %}{% when "best" %}{% assign m_recap = m_trophy %}{% when "got_away" %}{% assign m_recap = m_got_away %}{% else %}{% assign m_recap = m_catch %}{% endcase %}` +
   `<div class="flex flex--row flex--center-y gap--[3px] no-shrink" data-recap-item="{{ item.k }}"><img class="${ICON}" src="{{ m_recap }}" alt=""><span class="${LABEL}">{{ item.text | escape }}</span></div>{% endfor %}</div></div>{% endif %}`
@@ -275,7 +282,7 @@ const recap = () =>
  * Only the layouts with room for it show it (the X, and the full portrait).
  */
 const catchPanel = (og: number, x: number) =>
-  `{% if newest_catch %}<div class="flex flex--row flex--left flex--center-y gap--medium stretch-x no-shrink" data-catch="true">` +
+  `{% if newest_catch %}<div class="flex flex--row flex--left flex--center-y gap--medium stretch-x no-shrink" data-catch="true" data-give-way="-2">` +
   `{% if newest_catch.fish_base != "" %}<div class="no-shrink"><img class="image lg:hidden" src="{{ newest_catch.fish_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ newest_catch.fish_base }}/${x}.png" alt=""></div>{% endif %}` +
   `<div class="flex flex--col flex--left gap--xsmall grow w--min-0"><span class="${LABEL}">{% if newest_catch.released %}${L('released')}{% else %}${L('newest_catch')}{% endif %}</span>` +
   `<span class="title title--small">{{ newest_catch.name | escape }}</span>{% if newest_catch.weight_label %}<span class="${LABEL}">{{ newest_catch.weight_label }}</span>{% endif %}</div></div>{% endif %}`
@@ -342,7 +349,7 @@ const halfHorizontal = oriented(
   'layout layout--row layout--left layout--stretch-y gap--medium',
   ready(`
     <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [168, 3])}</div>
-    <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full" data-fit-column="true">
+    <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
       ${statusRow()}
       ${counters('short')}
