@@ -34,7 +34,7 @@ export function nextTitle(species: number): Title | null {
 }
 
 /**
- * A rank at each water (P45), by the share of that water's species logged: the global title takes 58 species to finish,
+ * A rank at each water (D204), by the share of that water's species logged: the global title takes 58 species to finish,
  * a water's ranks take its eight to eleven, so the next one is always close. Visitor is where everyone starts; the top
  * rank needs every species there, the season visitor and the epic included. Thresholds round up, so 10 species give
  * 3, 5, 8 and 10.

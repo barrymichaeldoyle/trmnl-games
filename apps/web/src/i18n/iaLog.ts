@@ -5,7 +5,7 @@ export const iaLog = defineMessages({
   en: {
     logbook: 'Logbook',
     speciesOf: (seen: number, total: number) => `${seen} of ${total} species`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `${n} more species for ${rank}`,
     rankTop: 'Every species here logged',
     achievements: 'Achievements',
@@ -79,7 +79,7 @@ export const iaLog = defineMessages({
   fr: {
     logbook: 'Carnet',
     speciesOf: (seen: number, total: number) => `${seen} espèces sur ${total}`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `Encore ${n} espèce${n > 1 ? 's' : ''} pour ${rank}`,
     rankTop: 'Toutes les espèces d’ici au carnet',
     achievements: 'Succès',
@@ -153,7 +153,7 @@ export const iaLog = defineMessages({
   de: {
     logbook: 'Fangbuch',
     speciesOf: (seen: number, total: number) => `${seen} von ${total} Arten`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `Noch ${n} ${n === 1 ? 'Art' : 'Arten'} bis ${rank}`,
     rankTop: 'Jede Art von hier im Fangbuch',
     achievements: 'Erfolge',
@@ -227,7 +227,7 @@ export const iaLog = defineMessages({
   es: {
     logbook: 'Cuaderno',
     speciesOf: (seen: number, total: number) => `${seen} de ${total} especies`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `${n} ${n === 1 ? 'especie' : 'especies'} más para ${rank}`,
     rankTop: 'Todas las especies de aquí en el cuaderno',
     achievements: 'Logros',
@@ -301,7 +301,7 @@ export const iaLog = defineMessages({
   it: {
     logbook: 'Registro',
     speciesOf: (seen: number, total: number) => `${seen} specie su ${total}`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `Ancora ${n} specie per ${rank}`,
     rankTop: 'Tutte le specie di qui nel registro',
     achievements: 'Traguardi',
@@ -375,7 +375,7 @@ export const iaLog = defineMessages({
   pt: {
     logbook: 'Caderno',
     speciesOf: (seen: number, total: number) => `${seen} de ${total} espécies`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `Mais ${n} ${n === 1 ? 'espécie' : 'espécies'} para ${rank}`,
     rankTop: 'Todas as espécies daqui no caderno',
     achievements: 'Conquistas',
@@ -449,7 +449,7 @@ export const iaLog = defineMessages({
   pl: {
     logbook: 'Rejestr',
     speciesOf: (seen: number, total: number) => `Gatunki: ${seen} z ${total}`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `Brakujące gatunki do rangi ${rank}: ${n}`,
     rankTop: 'Wszystkie gatunki stąd w rejestrze',
     achievements: 'Osiągnięcia',
@@ -523,7 +523,7 @@ export const iaLog = defineMessages({
   nl: {
     logbook: 'Logboek',
     speciesOf: (seen: number, total: number) => `${seen} van ${total} soorten`,
-    // P45: the rank at a water and what the next one needs.
+    // D204: the rank at a water and what the next one needs.
     rankNext: (n: number, rank: string) => `Nog ${n} ${n === 1 ? 'soort' : 'soorten'} tot ${rank}`,
     rankTop: 'Elke soort van hier in het logboek',
     achievements: 'Prestaties',

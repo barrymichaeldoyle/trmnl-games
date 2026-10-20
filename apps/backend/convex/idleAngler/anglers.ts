@@ -311,7 +311,7 @@ export const dock = query({
 })
 
 /** The angler's logbook: every species, with counts and records for the ones caught; unseen species carry no details. */
-/** P45 (content v6): the angler's rank at a water and the next one, or null on a catalog without water ranks. */
+/** D204 (content v6): the angler's rank at a water and the next one, or null on a catalog without water ranks. */
 function rankAt(content: IdleAnglerCatalog, logbook: AnglerState['logbook'], waterId: WaterId) {
   if (!content.waterRanks) return null
   const r = waterRankFor(content, logbook, waterId)

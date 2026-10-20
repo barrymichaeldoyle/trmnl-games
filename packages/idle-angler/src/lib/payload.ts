@@ -35,7 +35,7 @@ export interface PayloadAngler {
   readonly baitOnHook?: BaitClass
   readonly bait: Readonly<Partial<Record<string, number>>>
   readonly speciesLogged: number
-  /** P45: species logged at the angler's water, for its rank there (content v6). */
+  /** D204: species logged at the angler's water, for its rank there (content v6). */
   readonly speciesHere?: number
   /** The newest fly from the fly box, drawn on the hat; null for none. */
   readonly fly?: string | null
@@ -198,7 +198,7 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     newest && newestSpecies
       ? { name: words.species(newestSpecies.id), weight_label: newest.grams === undefined ? null : formatWeight(newest.grams), released: newest.kind === 'release', fish_base: input.artBaseUrl ? `${input.artBaseUrl}${fishBase(newestSpecies.id)}` : '' }
       : null
-  // Standing (titles.ts): the title, and the ticks filled toward the next one by species logged. Under content v6 (P45)
+  // Standing (titles.ts): the title, and the ticks filled toward the next one by species logged. Under content v6 (D204)
   // the header shows the rank at the angler's water instead, the status line under it naming the water, and the ticks
   // count that water's species, so the next step is a few fish away rather than ten.
   const standing = (() => {
@@ -239,7 +239,7 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     title: standing.name,
     title_pct: standing.pct,
     title_next_at: standing.nextAt,
-    // P45: what the ticks count, the species at this water under v6 and the whole logbook before.
+    // D204: what the ticks count, the species at this water under v6 and the whole logbook before.
     title_logged: standing.logged,
     gold: angler.gold,
     water_id: water.id,

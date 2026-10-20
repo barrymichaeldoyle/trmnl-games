@@ -9,7 +9,7 @@ import { deriveAnglerSeeds, forecast } from '@trmnl-games/idle-angler/sim/seed'
 const logged = (content: IdleAnglerCatalog, water: WaterId, n: number): AnglerState['logbook'] =>
   Object.fromEntries(content.species.filter((s) => s.water === water).slice(0, n).map((s) => [s.id, { count: 1, bestGrams: s.minGrams, firstTick: 0 }]))
 
-describe('a rank at each water (P45)', () => {
+describe('a rank at each water (D204)', () => {
   it('climbs from Visitor to Master by the share of the water logged, rounding up', () => {
     const at = (n: number, total: number) => waterRankAt(n, total).rank.id
     expect([0, 2, 3, 5, 7, 8, 9, 10].map((n) => at(n, 10))).toEqual(['visitor', 'visitor', 'angler', 'expert', 'expert', 'veteran', 'veteran', 'master'])
@@ -61,7 +61,7 @@ describe('a rank at each water (P45)', () => {
   })
 })
 
-describe('the rank on the device (P45, template v16)', () => {
+describe('the rank on the device (D204, template v16)', () => {
   it('heads the screen with the rank at the angler water and counts that water in the ticks', async () => {
     const { buildPayload } = await import('@trmnl-games/idle-angler/payload')
     const { previewScenarios } = await import('@trmnl-games/idle-angler/templates/previewScenarios')

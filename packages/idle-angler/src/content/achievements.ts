@@ -10,7 +10,7 @@ import { contentV2 } from './v2'
 /**
  * v2 (S6) appends the Flies family; v3 retires the Levels family with XP and levels (titles replace them); v4 (D162)
  * appends the full game's families, higher tiers for waters, rods, the logbook and epics, and the new species' tiers;
- * v5 appends Rosettes, an Open entered at each water; v6 (P45) appends Mastered waters, every species at a water logged.
+ * v5 appends Rosettes, an Open entered at each water; v6 (D204) appends Mastered waters, every species at a water logged.
  */
 export const ACHIEVEMENTS_VERSION = 6
 
@@ -181,7 +181,7 @@ const FULL: AchievementDef[] = [
     [3, 'Rosettes on the Line', 'Opens entered at three waters.'],
     [6, 'A Rosette from Every Water', 'An Open entered at every water, the ice and the open sea included.'],
   ]),
-  // v6 (P45): Master rank at a water, every species there logged.
+  // v6 (D204): Master rank at a water, every species there logged.
   ...family('mastered', 'Mastered waters', 'Logbook', (n) => ({ kind: 'mastered', atLeast: n }), [
     [1, 'Master of One Water', 'Every species at one water in the logbook.'],
     [3, 'Master of Three Waters', 'Every species at three waters in the logbook.'],

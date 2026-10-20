@@ -5,7 +5,7 @@ import { useLocale } from './i18n'
 /** D200: Idle Angler's game words (fish, waters, baits, goals, stories) in the reader's language. */
 export const useAngler = (): AnglerWords => anglerWords(useLocale())
 
-/** P45 (content v6): an angler's rank at one water, and the next rank with the species it needs. */
+/** D204 (content v6): an angler's rank at one water, and the next rank with the species it needs. */
 export type WaterRank = { id: string; logged: number; total: number; next: { id: string; species: number } | null }
 
 /** The client's view of `idleAngler.anglers.dock` (idle-angler.md "Companion"). */

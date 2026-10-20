@@ -28,7 +28,7 @@
  * Template v14 (D200): the screen speaks the owner's language. Its own words come from the payload's `labels`, read
  * with the English as the default, and the time of day and weather from `band_label` and `weather_label`. The
  * landscape half-horizontal info column gives way like the X's lists when a longer language overfills it.
- * Template v16 (P45): under content v6 the header's title is the rank at the angler's water and its ticks count that
+ * Template v16 (D204): under content v6 the header's title is the rank at the angler's water and its ticks count that
  * water's species (`title_logged`); the logbook counter still counts them all.
  * Template v15 (2026-10-20): a time on every story, the goal set apart under its own pennant and shown on the OG
  * too, the welcome headed by the scene, the attention line above the stories rather than in their place, wrapped
@@ -100,7 +100,7 @@ const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
   )}{% endif %}`
 
 /**
- * Progress to the next title as ten half-step ticks with the species count after them (titles.ts); v16 (P45) counts
+ * Progress to the next title as ten half-step ticks with the species count after them (titles.ts); v16 (D204) counts
  * `title_logged`, the species at the angler's water when the header shows its rank there. Desk Crawler's bar
  * and rounding, so both Liquids agree; at the last title there is nothing left to fill and the bar is left off.
  */

@@ -73,7 +73,7 @@ export interface AnglerWords {
   cooler(name: string): string
   pass(idOrName: string): string
   title(idOrName: string): string
-  /** P45: a rank at a water by their ids ("Expert at the Millpond"). */
+  /** D204: a rank at a water by their ids ("Expert at the Millpond"). */
   waterRank(rankId: string, waterId: string): string
   fly(idOrName: string): string
   season(id: Season | string): string
