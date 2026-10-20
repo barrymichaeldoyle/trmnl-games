@@ -42,14 +42,37 @@ export function clerkUiScriptUrl(publishableKey: string | undefined): string | n
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined
 let loading: Promise<UiConstructor> | undefined
 
-/** Downloads Clerk's UI once; a failed download can be retried by the next call. */
-function preloadClerkUI(): Promise<UiConstructor> {
-  if (typeof window === 'undefined') return Promise.reject(new Error('Clerk UI only loads in the browser'))
-  loading ??= new Promise<UiConstructor>((resolve, reject) => {
+/** Waits before another try: the given delay, and while the browser reports itself offline, until it is back online. */
+function pause(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      if (navigator.onLine !== false) return resolve()
+      window.addEventListener('online', () => resolve(), { once: true })
+    }, ms)
+  })
+}
+
+/**
+ * Runs `load`, trying again after each delay when it fails. A visitor whose connection drops as the page loads (every
+ * Clerk request failing at once, as in Sentry TRMNL-GAMES-6) gets the UI when it returns instead of an error.
+ */
+export async function withRetries<T>(load: () => Promise<T>, delays: readonly number[], wait: (ms: number) => Promise<void> = pause): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await load()
+    } catch (error) {
+      const delay = delays[attempt]
+      if (delay === undefined) throw error
+      await wait(delay)
+    }
+  }
+}
+
+/** Adds Clerk's UI script to the page and resolves with its constructor; a failed script is removed so a retry adds a fresh one. */
+function loadUiScript(url: string): Promise<UiConstructor> {
+  return new Promise<UiConstructor>((resolve, reject) => {
     const ready = loadedUi()
     if (ready) return resolve(ready)
-    const url = clerkUiScriptUrl(PUBLISHABLE_KEY)
-    if (!url) return reject(new Error('Clerk UI has no publishable key to load from'))
     const script = document.createElement('script')
     script.src = url
     script.async = true
@@ -61,11 +84,21 @@ function preloadClerkUI(): Promise<UiConstructor> {
       if (ui) resolve(ui)
       else reject(new Error('Clerk UI loaded without its constructor'))
     }
-    script.onerror = () => reject(new Error('Failed to load Clerk UI'))
+    script.onerror = () => {
+      script.remove()
+      reject(new Error('Failed to load Clerk UI'))
+    }
     document.head.appendChild(script)
-  }).catch((error: unknown) => {
+  })
+}
+
+/** Downloads Clerk's UI once, retrying a failed download (2 s, then 10 s, each after the browser is back online); a call after that can try again. */
+function preloadClerkUI(): Promise<UiConstructor> {
+  if (typeof window === 'undefined') return Promise.reject(new Error('Clerk UI only loads in the browser'))
+  const url = clerkUiScriptUrl(PUBLISHABLE_KEY)
+  if (!url) return Promise.reject(new Error('Clerk UI has no publishable key to load from'))
+  loading ??= withRetries(() => loadUiScript(url), [2_000, 10_000]).catch((error: unknown) => {
     loading = undefined
-    document.querySelector('script[data-clerk-ui-script]')?.remove()
     throw error
   })
   return loading

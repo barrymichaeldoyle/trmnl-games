@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module'
 import { pathToFileURL } from 'node:url'
-import { expect, it } from 'vitest'
-import { clerkFrontendHost, clerkUiScriptUrl } from '../../apps/web/src/lib/clerkUi'
+import { expect, it, vi } from 'vitest'
+import { clerkFrontendHost, clerkUiScriptUrl, withRetries } from '../../apps/web/src/lib/clerkUi'
 
 /** @clerk/shared as the installed Clerk SDK resolves it: the web app depends on it only through @clerk/tanstack-react-start. */
 async function clerksOwnLoader(): Promise<{ clerkUIScriptUrl: (opts: { publishableKey: string }) => string }> {
@@ -23,4 +23,15 @@ it('reads the frontend host from a publishable key and refuses anything that is 
   expect(clerkFrontendHost(undefined)).toBeNull()
   expect(clerkFrontendHost('pk_live_%%%')).toBeNull()
   expect(clerkFrontendHost(`pk_live_${btoa('evil.com/x"$')}`)).toBeNull()
+})
+
+it('tries the UI download again after each delay, then gives up with the last error (Sentry TRMNL-GAMES-6)', async () => {
+  const wait = vi.fn(async () => {})
+  let calls = 0
+  const flaky = () => (++calls < 3 ? Promise.reject(new Error('Failed to load Clerk UI')) : Promise.resolve('ui'))
+  await expect(withRetries(flaky, [2_000, 10_000], wait)).resolves.toBe('ui')
+  expect(wait.mock.calls).toEqual([[2_000], [10_000]])
+  calls = -10
+  await expect(withRetries(flaky, [2_000, 10_000], wait)).rejects.toThrow('Failed to load Clerk UI')
+  expect(calls).toBe(-7)
 })
