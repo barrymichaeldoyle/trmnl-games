@@ -181,8 +181,11 @@ describe('Idle Angler payload', () => {
   })
 
   it('asks for setup before the angler is active', () => {
-    expect(buildPayload(scenarios.pending!)).toMatchObject({ status: 'pending', status_label: 'Waiting for TRMNL Save', alias: 'Wren', scene_base: '' })
+    expect(buildPayload(scenarios.pending!)).toMatchObject({ status: 'pending', status_label: 'Waiting for TRMNL Save', alias: 'Wren' })
     expect(buildPayload(scenarios.unlinked!)).toMatchObject({ status: 'unlinked', alias: null })
+    // Template v15: the welcome shows the angler's water, or the first one before there is an angler, with no catch or fly.
+    expect(buildPayload(scenarios.pending!).scene_base).toContain('/river_bend/dusk/overcast/noseason/waiting/none/nofly')
+    expect(buildPayload(scenarios.unlinked!).scene_base).toContain('/millpond/dusk/overcast/noseason/waiting/none/nofly')
   })
 
   it('leaves image fields empty without an art origin', () => {
@@ -251,14 +254,25 @@ describe('Idle Angler markup', () => {
       const one = await liquid.parseAndRender(markup, { ...buildPayload(scenarios.goalWaiting!), fly_code: null })
       expect(one, layout).toContain('data-attention="goal"')
       expect(one, layout).not.toContain('data-goal-claim')
-      expect(one, layout).not.toContain('Goal: Book a deep-sea charter')
+      expect(one, layout).not.toContain('data-goal="true"')
     }
     const full = await liquid.parseAndRender(screenMarkup.markup, { ...buildPayload(scenarios.goalWaitingFull!), fly_code: null })
     expect(full).toContain('data-attention="cooler"')
     expect(full).toMatch(/data-goal-claim="true"[^]*2 goals reached! Claim 1250 coins in the companion\./)
     const claimed = await liquid.parseAndRender(screenMarkup.markup, { ...buildPayload(scenarios.medal!), fly_code: null })
     expect(claimed).not.toContain('data-goal-claim')
-    expect(claimed).toContain('Goal: Book a deep-sea charter')
+    expect(claimed).toMatch(/data-goal="true"[^]*Goal:<\/span><span[^>]*>Book a deep-sea charter<\/span>/)
+  })
+
+  it('times each story in the owner\'s clock, and leaves the times off without an offset (template v15)', async () => {
+    const payload = buildPayload(scenarios.catch!)
+    expect(payload.stories[0]).toMatchObject({ u: Math.floor((PREVIEW_NOW - 5 * 60_000) / 1000) })
+    for (const [layout, markup] of Object.entries(screenMarkup)) {
+      const timed = await liquid.parseAndRender(markup, { ...payload, fly_code: null, utc_offset: 3600 })
+      expect(timed, layout).toMatch(/data-story-time="true">18:45</)
+      const plain = await liquid.parseAndRender(markup, { ...payload, fly_code: null })
+      expect(plain, layout).not.toContain('data-story-time')
+    }
   })
 
   it('turns the dock code into the waiting fly\'s claim link with its code, but never a full cooler\'s (D180)', async () => {

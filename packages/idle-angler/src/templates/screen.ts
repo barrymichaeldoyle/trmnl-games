@@ -28,6 +28,9 @@
  * Template v14 (D200): the screen speaks the owner's language. Its own words come from the payload's `labels`, read
  * with the English as the default, and the time of day and weather from `band_label` and `weather_label`. The
  * landscape half-horizontal info column gives way like the X's lists when a longer language overfills it.
+ * Template v15 (2026-10-20): a time on every story, the goal set apart under its own pennant and shown on the OG
+ * too, the welcome headed by the scene, the attention line above the stories rather than in their place, wrapped
+ * counter rows closer together, the X's header code at 3x, and full board names where the OG has the width.
  * Template v13 (D199): a dot between the angler's name and title, which ran together as one name ("Wren Master Angler"),
  * and the newest catch's name without a clamp: the clamp measured its column before the layout settled and cut
  * "Barbel" to "Bar..." with the column empty beside it. Species names are at most thirteen characters.
@@ -36,7 +39,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 14
+export const TEMPLATE_VERSION = 15
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -50,7 +53,7 @@ const TITLE_ICON = svgDataUri(
 )
 
 /** Every mark a layout uses, assigned once at its top so the markup repeats a variable rather than the SVG. */
-const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'trophy', 'star', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', 'tickEmpty', 'tickHalf', 'tickFull', ...STORY_GLYPHS]
+const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'trophy', 'star', 'goal', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', 'tickEmpty', 'tickHalf', 'tickFull', ...STORY_GLYPHS]
 const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${mark.startsWith('tick') ? markUri(mark, 36, 16) : markUri(mark, 32)}" %}`).join('')
 
 /** 16px on the OG; 20px on the X, where the text beside it is larger. */
@@ -59,11 +62,15 @@ const ADAPTIVE = 'image--adaptive'
 const ICON = `w--[16px] h--[16px] lg:w--[20px] lg:h--[20px] no-shrink ${ADAPTIVE}`
 const LABEL = 'label lg:title--small'
 
-/** One count behind its mark; the mark sits three pixels from its text. Counts are short and their row wraps, so none clamps. */
-const counter = (mark: string, text: string, data = '') => `<div class="flex flex--row flex--center-y gap--[3px] no-shrink"${data}><img class="${ICON}" src="{{ ${mark} }}" alt=""><span class="${LABEL}">${text}</span></div>`
+/**
+ * One count behind its mark; the mark sits three pixels from its text. Counts are short and their row wraps, so none
+ * clamps. Template v15: the 12px right padding plus the row's 4px gap keep counts 16px apart across a line, while a
+ * wrapped line sits only 4px below the one above (the framework's gaps apply both ways).
+ */
+const counter = (mark: string, text: string, data = '') => `<div class="flex flex--row flex--center-y gap--[3px] no-shrink pr--3"${data}><img class="${ICON}" src="{{ ${mark} }}" alt=""><span class="${LABEL}">${text}</span></div>`
 
-/** A wrapping row of counters a medium gap apart, so each number reads as its own mark's. */
-const row = (inner: string, data: string) => `<div class="flex flex--row flex--wrap flex--left flex--center-y gap--medium stretch-x" ${data}>${inner}</div>`
+/** A wrapping row of counters, each 16px from the next so each number reads as its own mark's. */
+const row = (inner: string, data: string) => `<div class="flex flex--row flex--wrap flex--left flex--center-y gap--[4px] stretch-x" ${data}>${inner}</div>`
 
 /** The time of day and the weather, each behind its mark ("Dusk", "Overcast"). */
 const conditionMarks =
@@ -72,7 +79,7 @@ const conditionMarks =
   `${counter('m_band', '{% if band_label %}{{ band_label | escape }}{% else %}{{ band | capitalize }}{% endif %}', ' data-band="{{ band }}" data-give-way="2"')}${counter('m_weather', '{% if weather_label %}{{ weather_label | escape }}{% else %}{{ weather | capitalize }}{% endif %}', ' data-weather="{{ weather }}" data-give-way="1"')}{% endif %}`
 
 /** Where the angler is: the one counter that can be long ("Heading to the Harbour Pier"), so it may wrap to two lines. */
-const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0" data-place="true"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
+const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0 pr--3" data-place="true"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
 
 /** Where the angler is, then the conditions. */
 const statusRow = (withConditions = true) => row(`${place}${withConditions ? conditionMarks : ''}`, 'data-status-row="true"')
@@ -139,20 +146,23 @@ const nameLine = (classes = 'title title--small') =>
 
 /** The cooler, bait or service line, inverted behind its mark so it reads first. */
 const attention = (clamp = 2) =>
-  `{% if attention %}{% case attention_kind %}{% when "cooler" %}{% assign m_attention = m_cooler %}{% when "bait" %}{% assign m_attention = m_bait_out %}{% when "goal" %}{% assign m_attention = m_star %}{% else %}{% assign m_attention = m_system %}{% endcase %}` +
+  `{% if attention %}{% case attention_kind %}{% when "cooler" %}{% assign m_attention = m_cooler %}{% when "bait" %}{% assign m_attention = m_bait_out %}{% when "goal" %}{% assign m_attention = m_goal %}{% else %}{% assign m_attention = m_system %}{% endcase %}` +
   `<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-attention="{{ attention_kind }}"><img class="${ICON}" src="{{ m_attention }}" alt=""><span class="${LABEL} label--inverted" data-clamp="${clamp}">{{ attention | escape }}</span></div>{% endif %}`
 
-/** One story's glyph: its kind's, a star for a milestone or a goal (D162), the trophy for an Open, a fish for a run, a dot for anything else. */
+/** One story's glyph: its kind's, a star for a milestone, the pennant for a goal (D162, template v15), the trophy for an Open, a fish for a run, a dot for anything else. */
 const storyGlyph = `{% case story.kind %}${STORY_GLYPHS.filter((kind) => kind !== 'system')
   .map((kind) => `{% when "${kind}" %}{% assign m_story = m_${kind} %}`)
-  .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% when "goal" %}{% assign m_story = m_star %}{% when "open" %}{% assign m_story = m_achievement %}{% when "run" %}{% assign m_story = m_catch %}{% else %}{% assign m_story = m_system %}{% endcase %}`
+  .join('')}{% when "milestone" %}{% assign m_story = m_star %}{% when "goal" %}{% assign m_story = m_goal %}{% when "open" %}{% assign m_story = m_achievement %}{% when "run" %}{% assign m_story = m_catch %}{% else %}{% assign m_story = m_system %}{% endcase %}`
 
 /**
- * D162: the current goal behind the star; under content v1 there is none and nothing renders. While goal rewards wait
- * (issue #8) the row inverts to them instead, unless the attention line above already says so.
+ * D162: the current goal; under content v1 there is none and nothing renders. While goal rewards wait (issue #8) the
+ * row inverts to them instead, unless the attention line above already says so. Template v15 sets the goal apart from
+ * the log below it: its own pennant (milestones keep the star), "Goal:" in bold, and a rule under it. The OG shows it
+ * too now, where it was the X's alone.
  */
 const goal = () =>
-  `{% if goal_claim %}{% unless attention_kind == "goal" %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal-claim="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small label--inverted w--min-0" data-clamp="1">{% if goal_claim.label %}{{ goal_claim.label | escape }}{% else %}{% if goal_claim.count > 1 %}{{ goal_claim.count }} goals{% else %}Goal{% endif %} reached! Claim {{ goal_claim.coins }} coins in the companion.{% endif %}</span></div>{% endunless %}{% elsif goal_line %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal="true"><img class="${ICON}" src="{{ m_star }}" alt=""><span class="title--small grow w--min-0" data-clamp="1">${L('goal')} {{ goal_line | escape }}</span></div>{% endif %}`
+  `{% if goal_claim %}{% unless attention_kind == "goal" %}<div class="flex flex--row flex--left flex--center-y gap--small no-shrink stretch-x" data-goal-claim="true"><img class="${ICON}" src="{{ m_goal }}" alt=""><span class="${LABEL} label--inverted w--min-0" data-clamp="1">{% if goal_claim.label %}{{ goal_claim.label | escape }}{% else %}{% if goal_claim.count > 1 %}{{ goal_claim.count }} goals{% else %}Goal{% endif %} reached! Claim {{ goal_claim.coins }} coins in the companion.{% endif %}</span></div>{% endunless %}` +
+  `{% elsif goal_line %}<div class="no-shrink stretch-x flex flex--col gap--xsmall" data-goal="true"><div class="flex flex--row flex--left flex--center-y gap--small stretch-x"><img class="${ICON}" src="{{ m_goal }}" alt=""><div class="flex flex--row flex--left flex--center-y gap--[4px] grow w--min-0"><span class="${LABEL} text--bold no-shrink">${L('goal')}</span><span class="${LABEL} grow w--min-0" data-clamp="1">{{ goal_line | escape }}</span></div></div><div class="border--h-30 stretch-x"></div></div>{% endif %}`
 
 /**
  * The newest stories, each behind its glyph. Template v7: `limit` is the most a layout may show; the stories are a
@@ -164,8 +174,14 @@ const goal = () =>
  * template v8, `fitStories` hides the trailing stories that end below the list, at whatever scale the device sets; the
  * OG's keeps the engine and two or three lines where the layout asks for them.
  */
+/**
+ * Template v15: the clock time of each story at its right, in the owner's time (`utc_offset`, as Desk Crawler's log),
+ * so the order of a busy hour reads at a glance. Without an offset the times are left off rather than shown in UTC.
+ */
+const storyTime = (classes: string) => `{% if utc_offset != nil and story.u %}<span class="${classes} no-shrink" data-story-time="true">{{ story.u | plus: utc_offset | date: "%H:%M" }}</span>{% endif %}`
+
 const storyList = (limit: number, clamp: number, classes: string, show: string, engine = true) =>
-  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true"${engine ? '' : ' data-fit-stories="true"'}><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full"${engine ? ' data-overflow="true"' : ''}>{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span></div>{% endfor %}</div></div></div>`
+  `<div class="columns ${show} flex-auto h--min-0 w--full" data-stories="true"${engine ? '' : ' data-fit-stories="true"'}><div class="column flex--col flex--top"><div class="flex flex--col flex--left gap--[3px] w--full"${engine ? ' data-overflow="true"' : ''}>{% for story in stories limit:${limit} %}${storyGlyph}<div class="item flex flex--row flex--top gap--small stretch-x" data-story="{{ story.kind }}"><img class="${ICON}" src="{{ m_story }}" alt=""><span class="${classes} grow w--min-0" data-clamp="${clamp}">{{ story.summary | escape }}</span>${storyTime(classes)}</div>{% endfor %}</div></div></div>`
 /** The OG's list keeps the layout's clamp; the X's is one line a story, the only clamp its engine pass keeps exactly. */
 const stories = (limit: number, clamp = 1, classes = 'description lg:title--small') => storyList(limit, clamp, classes, 'lg:hidden') + storyList(limit, 1, classes, 'hidden lg:flex', false)
 
@@ -200,7 +216,9 @@ const fitStories = `<script>
   const fitLists = () => view.querySelectorAll('[data-fit-stories]').forEach((list) => {
     if (!list.getClientRects().length) return;
     const items = Array.from(list.querySelectorAll('.item'));
-    const extras = Array.from(list.closest('.layout').querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
+    // Template v15: an attention line already says what matters most, so no counter steps aside for a story under it.
+    const layout = list.closest('.layout');
+    const extras = layout.querySelector('[data-attention]') ? [] : Array.from(layout.querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
     extras.forEach((extra) => extra.classList.remove('hidden'));
     const place = () => {
       items.forEach((item) => item.classList.remove('hidden'));
@@ -226,13 +244,14 @@ const fitStories = `<script>
 /**
  * This week's heaviest fish at the angler's water: the trophy and water, the angler's rank and best, then each row's
  * name and weight. Each row is itself the label, so an inverted own row keeps its text white (a `.label` child would
- * set its own colour), as Desk Crawler's board does.
+ * set its own colour), as Desk Crawler's board does. The OG shows the short names, except where the board spans the
+ * whole view (`wide`, template v15) and a full name fits.
  */
-const board = (rows: number) =>
+const board = (rows: number, wide = false) =>
   `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true">` +
   `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="1">{{ board.label | escape }}</span></div>` +
   `<span class="${LABEL} w--full" data-clamp="1">{{ board.rank_label | escape }}</span>` +
-  `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. <span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span></span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
+  `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. ${wide ? '{{ row.name | escape }}' : '<span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span>'}</span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
 
 /**
  * The twelve-hour recap as Desk Crawler's ribbon: a rule, then its name in bold and each fact behind its mark. Each
@@ -255,18 +274,24 @@ const catchPanel = (og: number, x: number) =>
   `<div class="flex flex--col flex--left gap--xsmall grow w--min-0"><span class="${LABEL}">{% if newest_catch.released %}${L('released')}{% else %}${L('newest_catch')}{% endif %}</span>` +
   `<span class="title title--small">{{ newest_catch.name | escape }}</span>{% if newest_catch.weight_label %}<span class="${LABEL}">{{ newest_catch.weight_label }}</span>{% endif %}</div></div>{% endif %}`
 
-/** Before activation: what to do next and the code to the companion. */
-const welcome = (compact: boolean) => `
-  <div class="flex flex--${compact ? 'row' : 'col'} flex--center-x flex--center-y gap--medium stretch-x grow">
-    ${qr(compact ? 2 : 3, compact ? 3 : 5)}
-    <div class="flex flex--col flex--center-x gap--xsmall">
-      <span class="${compact ? 'title title--small' : 'title'} lg:title--large">{% if status == "pending" %}{% assign ready_name = alias | escape %}{{ labels.ready | default: "${en.device.labels.ready}" | replace: "%name%", ready_name }}{% elsif data_state == "service_paused" %}${L('back_soon')}{% else %}${L('finish_setup')}{% endif %}</span>
-      <span class="label lg:title--small text--center" data-clamp="3">{% if status == "pending" %}${L('save_plugin')}{% else %}{{ attention | escape }}{% endif %}</span>
-      <span class="label lg:title--small">trmnlgames.com</span>
+/**
+ * Before activation: what to do next and the code to the companion. Template v15: where there is room the scene of the
+ * first water heads it (the payload sends one before activation), so the first screen a new player or a reviewer sees
+ * already shows the game; the code and the words sit beside each other (`row`) or stacked (`col`) below it.
+ */
+const welcome = ({ art = '', arrange, qrOg, qrX, small = false }: { art?: string; arrange: 'row' | 'col'; qrOg: number; qrX: number; small?: boolean }) => `
+  <div class="flex flex--col flex--center-x flex--center-y gap--medium stretch-x grow" data-welcome="true">${art}
+    <div class="flex flex--${arrange} flex--center-x flex--center-y gap--medium stretch-x">
+      ${qr(qrOg, qrX)}
+      <div class="flex flex--col flex--center-x gap--xsmall w--min-0">
+        <span class="${small ? 'title title--small' : 'title'} lg:title--large text--center">{% if status == "pending" %}{% assign ready_name = alias | escape %}{{ labels.ready | default: "${en.device.labels.ready}" | replace: "%name%", ready_name }}{% elsif data_state == "service_paused" %}${L('back_soon')}{% else %}${L('finish_setup')}{% endif %}</span>
+        <span class="label lg:title--small text--center" data-clamp="3">{% if status == "pending" %}${L('save_plugin')}{% else %}{{ attention | escape }}{% endif %}</span>
+        <span class="label lg:title--small">trmnlgames.com</span>
+      </div>
     </div>
   </div>`
 
-const ready = (body: string, compact = false) => `{% if status == "unlinked" or status == "pending" %}${welcome(compact)}{% else %}${body}{% endif %}`
+const ready = (body: string, before: string) => `{% if status == "unlinked" or status == "pending" %}${before}{% else %}${body}{% endif %}`
 
 /** The full header: name, title and progress; where and when; the counters; the code in the corner. */
 const header = (qrOg: number, qrX: number) => `
@@ -279,56 +304,68 @@ const header = (qrOg: number, qrX: number) => `
       ${qr(qrOg, qrX)}
     </div>`
 
+/**
+ * Template v15: the X's header code is drawn at 3x rather than 4x (still larger on the glass than the OG's 2x), so it
+ * no longer stands far taller than the three lines beside it and leaves a band of white above the scene.
+ */
 const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
-  ready(`${header(2, 4)}
+  ready(`${header(2, 3)}
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
-    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${stories(16)}</div>
+    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${goal()}${stories(16)}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
       <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
-    ${recap()}`),
-  ready(`${header(2, 4)}
+    ${recap()}`, welcome({ art: scene([156, 5], [170, 6]), arrange: 'row', qrOg: 3, qrX: 4 })),
+  ready(`${header(2, 3)}
     ${scene([153, 3], [152, 5])}
     ${attention(3)}
+    ${goal()}
     ${stories(16, 2, 'label')}
     ${catchPanel(3, 8)}
-    ${board(6)}
-    ${recap()}`),
+    ${board(6, true)}
+    ${recap()}`, welcome({ art: scene([153, 3], [152, 5]), arrange: 'col', qrOg: 3, qrX: 5 })),
 )
 
+/**
+ * Template v15: the attention line no longer replaces the stories in the half and quarter layouts; the stories fill
+ * whatever room is left below it. The X's landscape scene here is 3x on a wider stage, which gives the column beside
+ * it a third more width, so its stories read as sentences rather than a few words each.
+ */
 const halfHorizontal = oriented(
   'layout layout--row layout--left layout--stretch-y gap--medium',
   ready(`
-    <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [152, 4])}</div>
+    <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [168, 3])}</div>
     <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full" data-fit-column="true">
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
       ${statusRow()}
       ${counters('short')}
-      {% if attention %}${attention(1)}{% else %}${stories(16, 1)}{% endif %}
+      ${attention(1)}
+      ${stories(16, 1)}
     </div>
-    ${qr(2, 4)}`, true),
+    ${qr(2, 4)}`, welcome({ arrange: 'row', qrOg: 3, qrX: 4, small: true })),
   ready(`
     <div class="flex flex--col flex--left gap--small grow w--min-0 h--full">
       <div class="flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--row flex--left flex--center-y gap--small grow w--min-0">${nameLine()}</div>${qr(2, 4)}</div>
       ${scene([220, 2], [185, 4])}
       ${statusRow()}
       ${counters()}
-      {% if attention %}${attention()}{% else %}${stories(16, 2)}{% endif %}
-    </div>`),
+      ${attention()}
+      ${stories(16, 2)}
+    </div>`, welcome({ art: scene([220, 2], [185, 4]), arrange: 'row', qrOg: 2, qrX: 4, small: true })),
 )
 
 const halfVertical = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small',
   ready(`
-    <div class="no-shrink flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--row flex--left flex--center-y gap--small grow w--min-0">${nameLine()}</div>${qr(2, 4)}</div>
+    <div class="no-shrink flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--col flex--left gap--xsmall grow w--min-0"><div class="flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine()}</div>${xpTicks()}</div>${qr(2, 3)}</div>
     ${scene([182, 2], [161, 3])}
-    ${xpTicks()}
     ${statusRow()}
     ${counters()}
     ${attention()}
+    ${goal()}
     ${stories(16, 2)}
-    ${recap()}`),
+    ${recap()}`, welcome({ art: scene([182, 2], [161, 3]), arrange: 'col', qrOg: 3, qrX: 5 })),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${scene([205, 1], [177, 2])}
@@ -338,7 +375,7 @@ const halfVertical = oriented(
     ${attention(3)}
     ${stories(16, 3, 'description')}
     ${board(5)}
-    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`),
+    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, welcome({ art: scene([205, 1], [177, 2]), arrange: 'col', qrOg: 3, qrX: 5 })),
   true,
 )
 
@@ -351,15 +388,17 @@ const quadrant = oriented(
         ${statusRow(false)}
         ${counters('compact')}
       </div>
-      ${qr(2, 4)}
+      ${qr(2, 3)}
     </div>
-    {% if attention %}${attention(2)}{% else %}${stories(16, 2)}{% endif %}`, true),
+    ${attention(2)}
+    ${stories(16, 2)}`, welcome({ arrange: 'row', qrOg: 2, qrX: 3, small: true })),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${statusRow(false)}
     ${counters('compact')}
-    {% if attention %}${attention(3)}<div class="grow"></div>{% else %}${stories(16, 3, 'description')}{% endif %}
-    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, true),
+    ${attention(3)}
+    ${stories(16, 3, 'description')}
+    <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4)}</div>`, welcome({ arrange: 'col', qrOg: 2, qrX: 3, small: true })),
   true,
 )
 

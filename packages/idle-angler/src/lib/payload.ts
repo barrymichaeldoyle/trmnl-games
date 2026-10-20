@@ -140,8 +140,9 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
       labels,
       qr: 'app' as const,
       qr_base: input.artBaseUrl && !servicePaused ? `${input.artBaseUrl}${qrBase('home')}` : '',
-      scene_base: '',
-      stories: [] as Array<{ kind: string; summary: string }>,
+      // Template v15: the welcome shows the water a new angler starts at, quiet, at the hour's light and weather.
+      scene_base: input.artBaseUrl ? `${input.artBaseUrl}${sceneBase({ water: angler?.waterId ?? content.waters[0]!.id, band: input.band, weather: input.weather, season: seasonAt(content, now) ?? null, pose: 'waiting', fish: null, fly: null })}` : '',
+      stories: [] as Array<{ kind: string; summary: string; u: number }>,
       stale: false,
     }
   }
@@ -238,7 +239,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     bait_count: hookUsedHere ? hookUnits : null,
     species_logged: angler.speciesLogged,
     species_total: content.species.length,
-    stories: stories.map((s) => ({ kind: s.kind, summary: s.summary })),
+    // Template v15: each story's moment in unix seconds; the screen shows it as the owner's clock time (`utc_offset`).
+    stories: stories.map((s) => ({ kind: s.kind, summary: s.summary, u: Math.floor(s.at / 1000) })),
     recap,
     recap_items: recapItems,
     // This week's heaviest fish at this water: the first rows, then the angler's own when it is further down.

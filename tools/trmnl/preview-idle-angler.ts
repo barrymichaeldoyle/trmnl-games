@@ -47,7 +47,8 @@ for (const [name, input] of Object.entries(previewScenarios(LOCAL))) {
     const flyCode = !process.argv.includes('--no-fly') && (payload.status === 'fishing' || payload.status === 'paused' || payload.status === 'travelling') ? '482 917' : null
     // D180: the screen route's fly QR beside the code.
     const flyQr = flyCode ? flyQrBase(flyCode) : null
-    const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, fly_code: flyCode, fly_qr_base: flyQr ? `${LOCAL}${flyQr}` : '' }))
+    // Template v15: the screen route passes the owner's UTC offset (seconds) for the stories' times; the previews use an hour ahead.
+    const inner = withArt(await liquid.parseAndRender(screenMarkup[layout], { ...payload, fly_code: flyCode, fly_qr_base: flyQr ? `${LOCAL}${flyQr}` : '', utc_offset: 3600 }))
     for (const device of Object.keys(PREVIEW_DEVICES) as PreviewDevice[]) {
       for (const portrait of [false, true]) {
         const file = `.previews/${locale ? `${locale}.` : ''}${theme ? `${theme}.` : ''}ia-${name}--${device}${portrait ? '-portrait' : ''}--${layout}.html`

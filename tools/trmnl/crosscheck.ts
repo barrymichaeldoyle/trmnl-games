@@ -38,10 +38,11 @@ try {
     cases.push(...dumped.map(({ name, layout, context }) => ({ id: `${flags.join(' ')} ${name} ${layout}`, layout, context })))
   }
 
-  // Idle Angler: every preview scenario, with and without the weekly fly code (and its D180 claim QR).
+  // Idle Angler: every preview scenario, with and without the weekly fly code (and its D180 claim QR); the fly cases
+  // also carry a UTC offset, so the stories' times (template v15) render in both Liquids.
   const idleAnglerCases = Object.entries(previewScenarios('https://local-art.invalid')).flatMap(([name, input]) =>
     [null, '482 917'].flatMap((flyCode) =>
-      (Object.keys(idleAnglerMarkup) as PreviewLayout[]).map((layout) => ({ id: `idle-angler ${name}${flyCode ? ' fly' : ''} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPayload(input), fly_code: flyCode, fly_qr_base: flyCode ? 'https://local-art.invalid/art/ia/qr/v1/fly/482917' : '' })) as Record<string, unknown> })),
+      (Object.keys(idleAnglerMarkup) as PreviewLayout[]).map((layout) => ({ id: `idle-angler ${name}${flyCode ? ' fly' : ''} ${layout}`, layout, context: JSON.parse(JSON.stringify({ ...buildPayload(input), fly_code: flyCode, fly_qr_base: flyCode ? 'https://local-art.invalid/art/ia/qr/v1/fly/482917' : '', ...(flyCode ? { utc_offset: 3600 } : {}) })) as Record<string, unknown> })),
     ),
   )
 
