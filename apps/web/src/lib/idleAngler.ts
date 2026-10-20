@@ -5,6 +5,9 @@ import { useLocale } from './i18n'
 /** D200: Idle Angler's game words (fish, waters, baits, goals, stories) in the reader's language. */
 export const useAngler = (): AnglerWords => anglerWords(useLocale())
 
+/** P45 (content v6): an angler's rank at one water, and the next rank with the species it needs. */
+export type WaterRank = { id: string; logged: number; total: number; next: { id: string; species: number } | null }
+
 /** The client's view of `idleAngler.anglers.dock` (idle-angler.md "Companion"). */
 export interface Dock {
   readonly gameState: 'active' | 'deleting' | null
@@ -29,7 +32,7 @@ export interface Dock {
     readonly speciesTotal: number
   }
   readonly catches?: ReadonlyArray<{ id: Id<'catches'>; speciesId: string; name: string; grams: number; value: number; caughtTick: number; record?: boolean }>
-  readonly waters?: ReadonlyArray<{ id: string; name: string; opensAfter: { waterId: string; waterName: string; species: number; logged: number } | null; access: string | null; open: boolean; charter?: boolean; closed?: boolean; weather: string; band: string; bitePercent: number; baits: readonly string[]; weatherUntil: number }>
+  readonly waters?: ReadonlyArray<{ id: string; name: string; opensAfter: { waterId: string; waterName: string; species: number; logged: number } | null; access: string | null; open: boolean; charter?: boolean; closed?: boolean; weather: string; band: string; bitePercent: number; baits: readonly string[]; weatherUntil: number; rank?: WaterRank | null }>
   readonly shop?: {
     readonly rod: { name: string; price: number; limitGrams: number; biteBonusPercent: number } | null
     readonly cooler: { name: string; price: number; capacity: number } | null

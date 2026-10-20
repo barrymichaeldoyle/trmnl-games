@@ -4,7 +4,7 @@ import { contentV5 } from '../content/v5'
 import { BAND_PHRASE } from '../sim/conditions'
 import { articleFor } from '../sim/progress'
 import { SEASON_NAME } from '../sim/seasons'
-import { TITLES } from '../sim/titles'
+import { TITLES, WATER_RANKS } from '../sim/titles'
 import type { FishName, IaLanguage } from './types'
 
 /**
@@ -27,6 +27,8 @@ export const en: IaLanguage = {
   coolers: Object.fromEntries(content.coolers.map((c) => [String(c.tier), c.name])),
   access: byId(content.access, (a) => a.name),
   titles: byId(TITLES, (t) => t.name),
+  waterRanks: byId(WATER_RANKS, (r) => r.name),
+  waterRank: (rank, water) => `${rank} ${water.at}`,
   flies: byId(FLIES, (f) => f.name),
   seasons: SEASON_NAME,
   bands: { dawn: { name: BAND_LABEL.dawn, phrase: BAND_PHRASE.dawn }, day: { name: BAND_LABEL.day, phrase: BAND_PHRASE.day }, dusk: { name: BAND_LABEL.dusk, phrase: BAND_PHRASE.dusk }, night: { name: BAND_LABEL.night, phrase: BAND_PHRASE.night } },
@@ -49,6 +51,7 @@ export const en: IaLanguage = {
     newSpecies: (fish) => `First ${fish.name} in the logbook.`,
     baitOut: (bait) => `The ${bait.name.toLowerCase()} ran out. Fishing a bare hook.`,
     newTitle: (title, species) => `Now a ${title}, with ${species} species in the logbook.`,
+    newWaterRank: (label, logged, total) => `Now ${/^[AE]/.test(label) ? 'an' : 'a'} ${label}, with ${logged} of ${total} species logged there.`,
     waterOpen: (logged, from, water, pass) => `${logged} ${from.name} species logged. ${water.name} is open${pass ? ` with the ${pass}` : ''}.`,
     settledAt: (water) => `You set up on the bank at ${water.the}.`,
     goalReached: (goal, next) => `Goal reached: ${goal}. Next: ${next}.`,

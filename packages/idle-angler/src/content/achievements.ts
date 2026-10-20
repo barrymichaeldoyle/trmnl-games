@@ -10,9 +10,9 @@ import { contentV2 } from './v2'
 /**
  * v2 (S6) appends the Flies family; v3 retires the Levels family with XP and levels (titles replace them); v4 (D162)
  * appends the full game's families, higher tiers for waters, rods, the logbook and epics, and the new species' tiers;
- * v5 appends Rosettes, an Open entered at each water.
+ * v5 appends Rosettes, an Open entered at each water; v6 (P45) appends Mastered waters, every species at a water logged.
  */
-export const ACHIEVEMENTS_VERSION = 5
+export const ACHIEVEMENTS_VERSION = 6
 
 export type AchievementCategory = 'Fishing' | 'Logbook' | 'Trade' | 'Progress' | 'Species'
 
@@ -26,6 +26,8 @@ export type Predicate =
   | { readonly kind: 'flies'; readonly atLeast: number }
   /** v4: set bits in a bit-set counter (seasons or runs fished). */
   | { readonly kind: 'bits'; readonly counter: 'seasonsFished' | 'runsFished' | 'openWaters'; readonly atLeast: number }
+  /** v6: waters where every species is logged (Master rank, titles.ts). */
+  | { readonly kind: 'mastered'; readonly atLeast: number }
 
 export interface AchievementDef {
   readonly id: string
@@ -179,6 +181,12 @@ const FULL: AchievementDef[] = [
     [3, 'Rosettes on the Line', 'Opens entered at three waters.'],
     [6, 'A Rosette from Every Water', 'An Open entered at every water, the ice and the open sea included.'],
   ]),
+  // v6 (P45): Master rank at a water, every species there logged.
+  ...family('mastered', 'Mastered waters', 'Logbook', (n) => ({ kind: 'mastered', atLeast: n }), [
+    [1, 'Master of One Water', 'Every species at one water in the logbook.'],
+    [3, 'Master of Three Waters', 'Every species at three waters in the logbook.'],
+    [6, 'Master of Every Water', 'Every species at every water, the ice and the open sea included.'],
+  ]),
 ]
 
 export const ACHIEVEMENTS: readonly AchievementDef[] = [...FAMILIES, ...SPECIES, ...FLIES, ...FULL]
@@ -204,6 +212,13 @@ export function measure(predicate: Predicate, state: AchievementState, content: 
     case 'waters': {
       const waters = new Set(Object.keys(state.logbook).map((id) => content.species.find((s) => s.id === id)?.water).filter(Boolean))
       return { value: waters.size, target: predicate.atLeast }
+    }
+    case 'mastered': {
+      const value = content.waters.filter((w) => {
+        const here = content.species.filter((sp) => sp.water === w.id)
+        return here.length > 0 && here.every((sp) => state.logbook[sp.id] !== undefined)
+      }).length
+      return { value, target: predicate.atLeast }
     }
     case 'first':
       return { value: state.logbook[predicate.speciesId] ? 1 : 0, target: 1 }

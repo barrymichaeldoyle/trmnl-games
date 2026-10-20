@@ -1,7 +1,7 @@
 import { createRng, pickOne, pickWeighted, type Rng } from '@trmnl-games/engine/rng'
 import { BAND_PHRASE, effectiveBands, localHour, timeBand } from './conditions'
 import { articleFor, fishValue, formatWeight } from './progress'
-import { speciesLogged, titleFor } from './titles'
+import { speciesLogged, titleFor, waterRankAt, waterRankName } from './titles'
 import { evaluateGoal, guaranteedBite, unlockEvents } from './goals'
 import { orderDay, refillOrders } from './orders'
 import { SEASON_BIT, runAt, seasonAt, waterOpenIn } from './seasons'
@@ -280,7 +280,7 @@ function cast(input: CastInput): CastResult {
 }
 
 /**
- * A new species can earn a title and open a water (titles.ts), each told as its own milestone story.
+ * A new species can earn a title, a rank at its water (v6) and open a water (titles.ts), each told as its own milestone story.
  */
 function logbookEvents(content: IdleAnglerCatalog, angler: AnglerState, species: SpeciesDef): TickEvent[] {
   const events: TickEvent[] = []
@@ -289,6 +289,14 @@ function logbookEvents(content: IdleAnglerCatalog, angler: AnglerState, species:
   if (titleFor(total - 1).id !== title.id) events.push({ kind: 'milestone', summary: `Now a ${title.name}, with ${total} species in the logbook.`, detail: {}, deltas: { gold: 0 } })
   events.push(...unlockEvents(content, total))
   const here = speciesLogged(content, angler.logbook, species.water)
+  if (content.waterRanks) {
+    const total = content.species.filter((s) => s.water === species.water).length
+    const rank = waterRankAt(here, total).rank
+    if (waterRankAt(here - 1, total).rank.id !== rank.id) {
+      const article = rank.name.startsWith('A') || rank.name.startsWith('E') ? 'an' : 'a'
+      events.push({ kind: 'milestone', summary: `Now ${article} ${waterRankName(rank, waterOf(content, species.water))}, with ${here} of ${total} species logged there.`, detail: { waterId: species.water }, deltas: { gold: 0 } })
+    }
+  }
   for (const water of content.waters) {
     if (water.opensAfter?.water !== species.water || water.opensAfter.species !== here) continue
     const access = water.access ? content.access.find((a) => a.id === water.access) : undefined

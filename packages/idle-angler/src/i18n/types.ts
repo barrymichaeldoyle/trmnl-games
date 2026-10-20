@@ -59,6 +59,9 @@ export interface IaLanguage {
   readonly coolers: Readonly<Record<string, string>>
   readonly access: Readonly<Record<string, string>>
   readonly titles: Readonly<Record<string, string>>
+  /** P45: rank names at a water, by `WATER_RANKS` id, and the label that puts one at a water ("Experte am Mühlteich"). */
+  readonly waterRanks: Readonly<Record<string, string>>
+  readonly waterRank: (rank: string, water: WaterName) => string
   readonly flies: Readonly<Record<string, string>>
   readonly seasons: Readonly<Record<Season, string>>
   /** Time of day as a label ("Dusk") and in a catch line ("au crépuscule"). */
@@ -86,6 +89,8 @@ export interface IaLanguage {
     readonly newSpecies: (fish: FishName) => string
     readonly baitOut: (bait: BaitName) => string
     readonly newTitle: (title: string, species: number) => string
+    /** P45: a new rank at a water, its label from `waterRank`. */
+    readonly newWaterRank: (label: string, logged: number, total: number) => string
     readonly waterOpen: (logged: number, from: WaterName, water: WaterName, pass: string | null) => string
     readonly settledAt: (water: WaterName) => string
     readonly goalReached: (goal: string, next: string) => string

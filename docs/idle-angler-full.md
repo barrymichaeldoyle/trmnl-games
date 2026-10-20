@@ -310,3 +310,4 @@ Smaller points settled on the same day's review, each the simplest rule that kee
 11. **Charter casts left on a ticket stay for the next trip**, one ticket held at a time, so nothing bought is lost.
 12. **Orders never name a fish that feeds only in some seasons**, so no order waits weeks.
 13. **No new alert kinds**, and six consent-gated analytics events.
+- 2026-10-20, D204 (P45): a rank at each water, Visitor to Master by the share of its species logged, as content v6 (the milestone story), achievements v6 (Mastered waters 1, 3, 6) and template v16 (the header shows the rank at the angler's water, its ticks counting that water's species). The Dock's Waters card, the logbook and the help page show it in all eight languages. The 192 water-rank previews (en, de, es, pl) pass the sweep.

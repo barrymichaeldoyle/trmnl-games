@@ -137,6 +137,8 @@ export interface IdleAnglerCatalog {
   readonly stepGoals?: boolean
   /** v5 (D199): a new angler starts on the first goal rather than waiting for its first evaluation to backfill one, so that goal's guarantee and reward apply from the first cast. */
   readonly starterGoal?: boolean
+  /** v6 (P45): a species that lifts the angler's rank at its water (titles.ts `WATER_RANKS`) writes a milestone story. */
+  readonly waterRanks?: boolean
   /** Species logged at which each feature opens. */
   readonly unlocks?: Readonly<Record<FeatureId, number>>
   readonly opens?: OpensRule

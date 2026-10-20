@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react'
 import { contentV5 as content } from '@trmnl-games/idle-angler/content'
 import { FLIES } from '@trmnl-games/idle-angler/content/flies'
-import { TITLES } from '@trmnl-games/idle-angler/sim'
+import { TITLES, WATER_RANKS } from '@trmnl-games/idle-angler/sim'
 
 /** D200: one language's Idle Angler help page: its head, title, section names and body. */
 export interface HelpPage {
@@ -33,6 +33,8 @@ export const IA_FACTS = {
   /** Titles after the first, with the species each needs. */
   titles: TITLES.slice(1).map((t) => ({ id: t.id, species: t.species })),
   firstTitle: TITLES[0]!.id,
+  /** P45: the ranks at each water, Visitor first. */
+  ranks: WATER_RANKS.map((r) => r.id),
   runs: (content.runs ?? []).map((r) => r.species),
   gates: { river_bend: gate('river_bend'), harbour_pier: gate('harbour_pier'), heron_lake: gate('heron_lake'), deep_sea: gate('deep_sea'), frozen_tarn: gate('frozen_tarn') },
 } as const

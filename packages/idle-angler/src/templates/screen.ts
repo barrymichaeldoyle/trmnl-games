@@ -28,6 +28,8 @@
  * Template v14 (D200): the screen speaks the owner's language. Its own words come from the payload's `labels`, read
  * with the English as the default, and the time of day and weather from `band_label` and `weather_label`. The
  * landscape half-horizontal info column gives way like the X's lists when a longer language overfills it.
+ * Template v16 (P45): under content v6 the header's title is the rank at the angler's water and its ticks count that
+ * water's species (`title_logged`); the logbook counter still counts them all.
  * Template v15 (2026-10-20): a time on every story, the goal set apart under its own pennant and shown on the OG
  * too, the welcome headed by the scene, the attention line above the stories rather than in their place, wrapped
  * counter rows closer together, the X's header code at 3x, and full board names where the OG has the width.
@@ -39,7 +41,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 15
+export const TEMPLATE_VERSION = 16
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -98,11 +100,12 @@ const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
   )}{% endif %}`
 
 /**
- * Progress to the next title as ten half-step ticks with the species count after them (titles.ts). Desk Crawler's bar
+ * Progress to the next title as ten half-step ticks with the species count after them (titles.ts); v16 (P45) counts
+ * `title_logged`, the species at the angler's water when the header shows its rank there. Desk Crawler's bar
  * and rounding, so both Liquids agree; at the last title there is nothing left to fill and the bar is left off.
  */
 const xpTicks = (count = true) =>
-  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink ${ADAPTIVE}" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
+  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] no-shrink">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] no-shrink ${ADAPTIVE}" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ title_logged | default: species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
 
 /**
  * The title bar with the weekly fly code. A narrow portrait column (side, quarter) cannot fit the name beside the

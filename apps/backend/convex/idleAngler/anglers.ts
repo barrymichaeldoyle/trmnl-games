@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
 import { sortByRarity } from '@trmnl-games/idle-angler/content/order'
-import { activeBait, baitOf, bitePermille, canFish, coolerOf, forecastBlock, nextTitle, rodOf, speciesLogged, titleFor, unlocked, waterOf, type AnglerState, type IdleAnglerCatalog, type WaterId } from '@trmnl-games/idle-angler/sim'
+import { activeBait, baitOf, bitePermille, canFish, coolerOf, forecastBlock, nextTitle, rodOf, speciesLogged, titleFor, unlocked, waterOf, waterRankFor, type AnglerState, type IdleAnglerCatalog, type WaterId } from '@trmnl-games/idle-angler/sim'
 import { buyAccess, buyBait, buyCooler, buyRod, nextAccess, nextCooler, nextRod, sell, setBait, travel, tubsThatFit, type ShopResult } from '@trmnl-games/idle-angler/sim/shop'
 import { conditionsAt } from '@trmnl-games/idle-angler/sim/simulate'
 import { forecastFor } from '@trmnl-games/idle-angler/sim/seed'
@@ -253,6 +253,7 @@ export const dock = query({
         bitePercent: Math.round(bitePermille(content, w, angler.rodTier, activeBait(state, w), conditions) / 10),
         baits: w.baits,
         weatherUntil: (forecastBlock(slot) + 1) * 6 * 3_600_000,
+        rank: rankAt(content, angler.logbook, w.id),
       }
     })
     const next = { rod: nextRod(content, state) ?? null, cooler: nextCooler(content, state) ?? null }
@@ -310,6 +311,13 @@ export const dock = query({
 })
 
 /** The angler's logbook: every species, with counts and records for the ones caught; unseen species carry no details. */
+/** P45 (content v6): the angler's rank at a water and the next one, or null on a catalog without water ranks. */
+function rankAt(content: IdleAnglerCatalog, logbook: AnglerState['logbook'], waterId: WaterId) {
+  if (!content.waterRanks) return null
+  const r = waterRankFor(content, logbook, waterId)
+  return { id: r.rank.id, logged: r.logged, total: r.total, next: r.next ? { id: r.next.rank.id, species: r.next.species } : null }
+}
+
 export const logbook = query({
   args: {},
   returns: v.any(),
@@ -322,6 +330,7 @@ export const logbook = query({
     const trophyRule = content.trophies && unlocked(content, toAnglerState(angler), 'trophies') ? content.trophies : null
     return content.waters.map((w) => ({
       water: { id: w.id, name: w.name },
+      rank: rankAt(content, angler.logbook, w.id),
       // Issue #10: rarest last, whatever order the catalog appended its season visitors in.
       species: sortByRarity(content.species.filter((s) => s.water === w.id)).map((s) => {
         const entry = angler.logbook[s.id]

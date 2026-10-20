@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { LOCALES, type Locale } from '@trmnl-games/platform'
-import { contentV5 as content } from '@trmnl-games/idle-angler/content'
+import { contentV6 as content } from '@trmnl-games/idle-angler/content'
 import { ACHIEVEMENTS } from '@trmnl-games/idle-angler/content/achievements'
 import { IA_LANGUAGES, anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { FIXED_LINES } from '@trmnl-games/idle-angler/i18n/lines'
@@ -60,7 +60,7 @@ describe('Idle Angler in every language (D200)', () => {
   it.each(others)('gives %s every name, goal, achievement and fixed line', (locale) => {
     const lang = IA_LANGUAGES[locale]
     const en = IA_LANGUAGES.en
-    for (const key of ['species', 'waters', 'baits', 'rods', 'coolers', 'access', 'titles', 'flies', 'goals', 'achievements', 'achievementFamilies'] as const) expect(Object.keys(lang[key]).sort(), key).toEqual(Object.keys(en[key]).sort())
+    for (const key of ['species', 'waters', 'baits', 'rods', 'coolers', 'access', 'titles', 'waterRanks', 'flies', 'goals', 'achievements', 'achievementFamilies'] as const) expect(Object.keys(lang[key]).sort(), key).toEqual(Object.keys(en[key]).sort())
     expect(Object.keys(lang.lines).sort()).toEqual([...new Set(FIXED_LINES)].sort())
     for (const def of ACHIEVEMENTS) expect(anglerWords(locale).achievement(def.id).name).not.toBe(def.name)
   })

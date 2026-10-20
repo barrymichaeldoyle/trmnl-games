@@ -5,7 +5,7 @@ import { api } from '@trmnl-games/backend/api'
 import { fishSprite, FISH_LARGE } from '@trmnl-games/idle-angler/art/fish'
 import { preload } from '../../../lib/preload'
 import { useAnalyticsView } from '../../../lib/analyticsProvider'
-import { useAngler } from '../../../lib/idleAngler'
+import { useAngler, type WaterRank } from '../../../lib/idleAngler'
 import { Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { Gem, SpriteIcon } from '../desk-crawler/-bagSlots'
 import { FishIcon } from './-art'
@@ -40,7 +40,7 @@ function LogbookPage() {
   const { fly: scanned } = Route.useSearch()
   const { data } = useQuery(convexQuery(api.idleAngler.anglers.logbook, {}))
   const { notice, notify, dismiss } = useNotice()
-  const book = data as Array<{ water: { id: string; name: string }; species: Entry[] }> | null | undefined
+  const book = data as Array<{ water: { id: string; name: string }; rank?: WaterRank | null; species: Entry[] }> | null | undefined
   const t = useT(iaLog)
   const words = useAngler()
   const formatWeight = words.weight
@@ -60,8 +60,9 @@ function LogbookPage() {
           {RARITIES.map((rarity) => <li key={rarity} className="flex items-center gap-1.5"><Gem rarity={rarity} scale={2} />{t.rarity[rarity]}</li>)}
         </ul>
       </div>
-      {book.map(({ water, species }) => (
+      {book.map(({ water, rank, species }) => (
         <Card key={water.id} title={words.water(water.id)} icon="pin">
+          {rank ? <p className="mb-3 text-sm"><strong>{words.waterRank(rank.id, water.id)}</strong> · <span className="text-muted">{t.speciesOf(rank.logged, rank.total)} · {rank.next ? t.rankNext(rank.next.species - rank.logged, words.lang.waterRanks[rank.next.id] ?? rank.next.id) : t.rankTop}</span></p> : null}
           <ul className="grid gap-3 sm:grid-cols-2">
             {species.map((s) => (
               <li key={s.id} className="flex items-start gap-3 border border-rule p-3">

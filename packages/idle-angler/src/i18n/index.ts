@@ -4,7 +4,7 @@ import { FLIES } from '../content/flies'
 import { contentV5 } from '../content/v5'
 import { BAND_PHRASE } from '../sim/conditions'
 import { formatWeight } from '../sim/progress'
-import { TITLES } from '../sim/titles'
+import { TITLES, WATER_RANKS } from '../sim/titles'
 import type { BaitClass, Season, TimeBand, WaterId, Weather } from '../sim/types'
 import { de } from './de'
 import { en } from './en'
@@ -38,6 +38,7 @@ const ROD_BY_NAME = invert(en.rods)
 const COOLER_BY_NAME = invert(en.coolers)
 const ACCESS_BY_NAME = invert(en.access)
 const TITLE_BY_NAME = new Map<string, string>(TITLES.map((t) => [t.name, t.id]))
+const RANK_BY_NAME = new Map<string, string>(WATER_RANKS.map((r) => [r.name, r.id]))
 const FLY_BY_NAME = new Map(FLIES.map((f) => [f.name, f.id]))
 const GOAL_BY_TITLE = new Map(content.goals!.map((g) => [g.title, g.id]))
 const ACHIEVEMENT_BY_NAME = new Map(ACHIEVEMENTS.map((a) => [a.name, a.id]))
@@ -72,6 +73,8 @@ export interface AnglerWords {
   cooler(name: string): string
   pass(idOrName: string): string
   title(idOrName: string): string
+  /** P45: a rank at a water by their ids ("Expert at the Millpond"). */
+  waterRank(rankId: string, waterId: string): string
   fly(idOrName: string): string
   season(id: Season | string): string
   band(id: TimeBand | string): string
@@ -137,6 +140,7 @@ export function anglerWords(locale: Locale): AnglerWords {
     [re(`Something heavy took ${BAIT_THE} and kept going\\.`), (m) => lang.tell.gotAway(baitOf(BAIT_BY_THE.get(m[1]!)))],
     [re(`The ${BAIT_LOWER} ran out\\. Fishing a bare hook\\.`), (m) => lang.tell.baitOut(baitOf(BAIT_BY_LOWER.get(m[1]!)))],
     [re(`Now a (${alternation(TITLE_BY_NAME.keys())}), with (\\d+) species in the logbook\\.`), (m) => lang.tell.newTitle(lang.titles[TITLE_BY_NAME.get(m[1]!)!]!, Number(m[2]))],
+    [re(`Now an? (${alternation(RANK_BY_NAME.keys())}) at ${WATER_THE}, with (\\d+) of (\\d+) species logged there\\.`), (m) => lang.tell.newWaterRank(lang.waterRank(lang.waterRanks[RANK_BY_NAME.get(m[1]!)!]!, waterOf(m[2]!)), Number(m[3]), Number(m[4]))],
     [re(`(\\d+) ${WATER_NAME} species logged\\. ${WATER_NAME} is open(?: with the (${alternation(ACCESS_BY_NAME.keys())}))?\\.`), (m) => lang.tell.waterOpen(Number(m[1]), waterOf(m[2]!), waterOf(m[3]!), m[4] ? lang.access[ACCESS_BY_NAME.get(m[4])!]! : null)],
     [re(`You set up on the bank at ${WATER_THE}\\.`), (m) => lang.tell.settledAt(waterOf(m[1]!))],
     [re(`Goal reached: ${GOAL}\\. Next: ${GOAL}\\.`), (m) => lang.tell.goalReached(goalOf(m[1]!), goalOf(m[2]!))],
@@ -195,6 +199,7 @@ export function anglerWords(locale: Locale): AnglerWords {
     cooler: (name) => lang.coolers[COOLER_BY_NAME.get(name) ?? name] ?? name,
     pass: (idOrName) => lang.access[ACCESS_BY_NAME.get(idOrName) ?? idOrName] ?? idOrName,
     title: (idOrName) => lang.titles[TITLE_BY_NAME.get(idOrName) ?? idOrName] ?? idOrName,
+    waterRank: (rankId, waterId) => lang.waterRank(lang.waterRanks[rankId] ?? rankId, waterOf(waterId)),
     fly: (idOrName) => lang.flies[FLY_BY_NAME.get(idOrName) ?? idOrName] ?? idOrName,
     season: (id) => lang.seasons[id as Season] ?? id,
     band: (id) => lang.bands[id as TimeBand]?.name ?? id,

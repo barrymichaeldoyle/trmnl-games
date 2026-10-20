@@ -54,6 +54,9 @@ export const iaDock = defineMessages({
     charterLine: 'Fished on a charter ticket.',
     bookInShop: 'Book one in the shop',
     opensOnce: (n: number, logged: number) => [`Opens once ${n} `, ` species are in your logbook (${logged} so far)`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `${n} more species for ${rank}`,
+    rankTop: 'Every species here logged',
     withPass: (pass: string) => `, with the ${pass} from the shop`,
     opensLater: 'Opens later',
     fishHere: 'Fish here',
@@ -116,6 +119,9 @@ export const iaDock = defineMessages({
     charterLine: 'Se pêche avec un billet de sortie en mer.',
     bookInShop: 'Réservez-en un au magasin',
     opensOnce: (n: number, logged: number) => [`Ouvre quand ${n} espèces `, ` sont au carnet (${logged} pour l’instant)`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `Encore ${n} espèce${n > 1 ? 's' : ''} pour ${rank}`,
+    rankTop: 'Toutes les espèces d’ici au carnet',
     withPass: (pass: string) => `, avec : ${pass}, au magasin`,
     opensLater: 'Ouvre plus tard',
     fishHere: 'Pêcher ici',
@@ -178,6 +184,9 @@ export const iaDock = defineMessages({
     charterLine: 'Wird mit einem Ticket für die Hochseefahrt befischt.',
     bookInShop: 'Im Laden buchen',
     opensOnce: (n: number, logged: number) => [`Öffnet, sobald ${n} Arten `, ` im Fangbuch stehen (bisher ${logged})`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `Noch ${n} ${n === 1 ? 'Art' : 'Arten'} bis ${rank}`,
+    rankTop: 'Jede Art von hier im Fangbuch',
     withPass: (pass: string) => `, mit: ${pass} aus dem Laden`,
     opensLater: 'Öffnet später',
     fishHere: 'Hier angeln',
@@ -240,6 +249,9 @@ export const iaDock = defineMessages({
     charterLine: 'Se pesca con un billete de salida.',
     bookInShop: 'Reserva uno en la tienda',
     opensOnce: (n: number, logged: number) => [`Abre cuando tengas ${n} especies `, ` en el cuaderno (llevas ${logged})`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `${n} ${n === 1 ? 'especie' : 'especies'} más para ${rank}`,
+    rankTop: 'Todas las especies de aquí en el cuaderno',
     withPass: (pass: string) => `, con: ${pass}, de la tienda`,
     opensLater: 'Abre más adelante',
     fishHere: 'Pescar aquí',
@@ -302,6 +314,9 @@ export const iaDock = defineMessages({
     charterLine: 'Si pesca con un biglietto d’uscita.',
     bookInShop: 'Prenotane uno nel negozio',
     opensOnce: (n: number, logged: number) => [`Apre quando hai ${n} specie `, ` nel registro (finora ${logged})`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `Ancora ${n} specie per ${rank}`,
+    rankTop: 'Tutte le specie di qui nel registro',
     withPass: (pass: string) => `, con: ${pass}, dal negozio`,
     opensLater: 'Apre più avanti',
     fishHere: 'Pesca qui',
@@ -364,6 +379,9 @@ export const iaDock = defineMessages({
     charterLine: 'Pescado com um bilhete de saída.',
     bookInShop: 'Reserve um na loja',
     opensOnce: (n: number, logged: number) => [`Abre quando ${n} espécies `, ` estiverem no caderno (${logged} até agora)`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `Mais ${n} ${n === 1 ? 'espécie' : 'espécies'} para ${rank}`,
+    rankTop: 'Todas as espécies daqui no caderno',
     withPass: (pass: string) => `, com: ${pass}, da loja`,
     opensLater: 'Abre mais tarde',
     fishHere: 'Pescar aqui',
@@ -426,6 +444,9 @@ export const iaDock = defineMessages({
     charterLine: 'Łowi się na bilet na rejs.',
     bookInShop: 'Zarezerwuj w sklepie',
     opensOnce: (n: number, logged: number) => [`Otwiera się przy gatunkach w rejestrze z łowiska `, `: ${n} (na razie ${logged})`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `Brakujące gatunki do rangi ${rank}: ${n}`,
+    rankTop: 'Wszystkie gatunki stąd w rejestrze',
     withPass: (pass: string) => `, z przedmiotem ze sklepu: ${pass}`,
     opensLater: 'Otworzy się później',
     fishHere: 'Łów tutaj',
@@ -488,6 +509,9 @@ export const iaDock = defineMessages({
     charterLine: 'Bevist met een tochtkaartje.',
     bookInShop: 'Boek er een in de winkel',
     opensOnce: (n: number, logged: number) => [`Gaat open zodra ${n} soorten `, ` in je logboek staan (nu ${logged})`] as readonly [string, string],
+    // P45: the rank at a water and what the next one needs.
+    rankNext: (n: number, rank: string) => `Nog ${n} ${n === 1 ? 'soort' : 'soorten'} tot ${rank}`,
+    rankTop: 'Elke soort van hier in het logboek',
     withPass: (pass: string) => `, met: ${pass}, uit de winkel`,
     opensLater: 'Gaat later open',
     fishHere: 'Hier vissen',

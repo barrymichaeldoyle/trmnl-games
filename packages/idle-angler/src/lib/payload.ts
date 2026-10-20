@@ -3,7 +3,7 @@ import { fishBase, qrBase, sceneBase } from '../art/route'
 import { anglerWords } from '../i18n'
 import { poseFor } from '../art/scene'
 import { WEATHER_WORD } from '../sim/conditions'
-import { nextTitle, titleFor } from '../sim/titles'
+import { nextTitle, rankThreshold, titleFor, waterRankAt } from '../sim/titles'
 import { seasonAt } from '../sim/seasons'
 import type { AnglerStatus, BaitClass, IdleAnglerCatalog, TimeBand, WaterId, Weather } from '../sim/types'
 
@@ -35,6 +35,8 @@ export interface PayloadAngler {
   readonly baitOnHook?: BaitClass
   readonly bait: Readonly<Partial<Record<string, number>>>
   readonly speciesLogged: number
+  /** P45: species logged at the angler's water, for its rank there (content v6). */
+  readonly speciesHere?: number
   /** The newest fly from the fly box, drawn on the hat; null for none. */
   readonly fly?: string | null
   /** D162: the current goal's line under content v2; absent under v1. */
@@ -196,10 +198,21 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     newest && newestSpecies
       ? { name: words.species(newestSpecies.id), weight_label: newest.grams === undefined ? null : formatWeight(newest.grams), released: newest.kind === 'release', fish_base: input.artBaseUrl ? `${input.artBaseUrl}${fishBase(newestSpecies.id)}` : '' }
       : null
-  // Standing (titles.ts): the title, and the ticks filled toward the next one by species logged.
-  const title = titleFor(angler.speciesLogged)
-  const next = nextTitle(angler.speciesLogged)
-  const titlePct = next ? Math.floor(((angler.speciesLogged - title.species) * 100) / (next.species - title.species)) : 100
+  // Standing (titles.ts): the title, and the ticks filled toward the next one by species logged. Under content v6 (P45)
+  // the header shows the rank at the angler's water instead, the status line under it naming the water, and the ticks
+  // count that water's species, so the next step is a few fish away rather than ten.
+  const standing = (() => {
+    if (content.waterRanks && angler.speciesHere !== undefined) {
+      const here = angler.speciesHere
+      const total = content.species.filter((s) => s.water === water.id).length
+      const { rank, next } = waterRankAt(here, total)
+      const from = rankThreshold(rank, total)
+      return { name: words.lang.waterRanks[rank.id] ?? rank.name, logged: here, nextAt: next?.species ?? null, pct: next ? Math.floor(((here - from) * 100) / (next.species - from)) : 100 }
+    }
+    const title = titleFor(angler.speciesLogged)
+    const next = nextTitle(angler.speciesLogged)
+    return { name: words.title(title.id), logged: angler.speciesLogged, nextAt: next?.species ?? null, pct: next ? Math.floor(((angler.speciesLogged - title.species) * 100) / (next.species - title.species)) : 100 }
+  })()
   const status = angler.status === 'paused' ? ('paused' as const) : travelling ? ('travelling' as const) : ('fishing' as const)
   const pose = poseFor(status, latest?.kind ?? null)
   // D162: under content v2 the world's season dresses the scene; v1 scenes carry none.
@@ -223,9 +236,11 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     weather: input.weather,
     band: input.band,
     alias: angler.alias,
-    title: words.title(title.id),
-    title_pct: titlePct,
-    title_next_at: next?.species ?? null,
+    title: standing.name,
+    title_pct: standing.pct,
+    title_next_at: standing.nextAt,
+    // P45: what the ticks count, the species at this water under v6 and the whole logbook before.
+    title_logged: standing.logged,
     gold: angler.gold,
     water_id: water.id,
     water_name: words.water(water.id),

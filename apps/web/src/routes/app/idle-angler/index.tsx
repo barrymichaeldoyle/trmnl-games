@@ -168,6 +168,7 @@ function DockPage() {
             <li key={water.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
               <div className="min-w-0">
                 <p className="font-semibold"><WaterName id={water.id} />{water.id === angler.waterId ? <span className="text-muted"> · {t.here}</span> : water.id === angler.travelTo ? <span className="text-muted"> · {t.headingThere}</span> : ''}</p>
+                {water.rank ? <p className="text-sm"><strong>{words.waterRank(water.rank.id, water.id)}</strong> · <span className="text-muted">{water.rank.next ? t.rankNext(water.rank.next.species - water.rank.logged, words.lang.waterRanks[water.rank.next.id] ?? water.rank.next.id) : t.rankTop}</span></p> : null}
                 {water.open ? (
                   <>
                     <p className="text-sm text-muted">{t.until(words.band(water.band), words.weather(water.weather).toLowerCase())} {time(water.weatherUntil)}</p>
