@@ -103,6 +103,12 @@ function DockPage() {
           </div>
           <Meter label={words.cooler(angler.cooler.name)} value={angler.cooler.used} max={angler.cooler.capacity} tone="gold" />
         </div>
+        {/* A full cooler releases every new catch, so its warning takes the Sell line's place under the meter. */}
+        {coolerFull ? (
+          <p className="font-semibold text-hp-ink">
+            {t.coolerFull} <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">{t.sellCatch}</Link>.
+          </p>
+        ) : null}
         {!coolerFull && catches.length > 0 ? (
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 underline underline-offset-4">{t.sell(catches.length)} <Coins n={coolerValue} sign /></Link></p>
         ) : null}
@@ -111,11 +117,6 @@ function DockPage() {
         {/* Issue #6: the wall's way in from the Dock once it opens, with what is on it. */}
         {full?.features.trophies ? <p className="text-sm"><Link to="/app/idle-angler/trophies" className="underline underline-offset-4">{t.trophyWall}</Link> <span className="text-muted">· {t.pegs(full.pegs.pegs - full.pegs.free, full.pegs.pegs)}</span></p> : null}
         {full?.runs.length ? <ul className="flex flex-col gap-1 text-sm">{full.runs.map((run) => <li key={run.id} className="font-semibold text-sky-ink">{words.text(run.line)}</li>)}</ul> : null}
-        {coolerFull ? (
-          <p className="font-semibold text-hp-ink">
-            {t.coolerFull} <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">{t.sellCatch}</Link>.
-          </p>
-        ) : null}
       </section>
 
       {recap && recap.landed + recap.gotAway > 0 ? (

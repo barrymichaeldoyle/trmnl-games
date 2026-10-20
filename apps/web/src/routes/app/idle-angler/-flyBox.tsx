@@ -33,6 +33,8 @@ export function FlyBox({ notify, scanned }: { notify: Notify; scanned?: string }
   const words = useAngler()
   const locale = useLocale()
   const weekday = (date: Date) => formatDate(locale, date, { weekday: 'long' })
+  // The claim answers with an outcome, so a wrong code or a fly already in the box says so (as Desk Crawler's keepsakes do).
+  const said = (done: { outcome: 'claimed' | 'already_claimed' | 'invalid_code' }) => (done.outcome === 'invalid_code' ? { error: t.wrongFlyCode } : done.outcome === 'already_claimed' ? t.flyAlready : t.flyAdded)
   useEffect(() => {
     if (!scanned || sent.current || !box) return
     sent.current = true
@@ -40,12 +42,12 @@ export function FlyBox({ notify, scanned }: { notify: Notify; scanned?: string }
     if (!box.connected) return
     card.current?.scrollIntoView({ block: 'center' })
     setCode(scanned)
-    void claim.run({ code: scanned }, t.checkingCode).then((ok) => { if (ok) setCode('') })
+    void claim.run({ code: scanned }, said).then((ok) => { if (ok) setCode('') })
   }, [scanned, box, claim, navigate])
   if (!box) return null
   const submit = async (event: FormEvent) => {
     event.preventDefault()
-    if (await claim.run({ code }, t.checkingCode)) setCode('')
+    if (await claim.run({ code }, said)) setCode('')
   }
   return (
     <div ref={card} className="scroll-mt-20">

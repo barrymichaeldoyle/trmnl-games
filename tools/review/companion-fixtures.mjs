@@ -24,6 +24,7 @@
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   goal=ready (D166, with v2=1: two reached goals waiting on the Dock's Claim button and a dot on the Dock tab)
  *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) goal=count (a counted goal with its progress bar) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
+ *   ranks=1 (D204, content v6: each water's rank on the Dock and in the Logbook, River Bend one species off Veteran, Millpond at Master)
  *   away=upgraded (the recap's lost fish all broke free on the old rod: the rod held now lands them)   away=mixed (one on the old rod, two still too heavy)
  *   passes=all (issue #7: every pass owned)   trophy=none (issue #6: no trophy-sized fish, the mount goal points at the wall)   trophy=poor (too few coins to mount)   wall=empty (nothing mounted)
  * Paper Lives (D159): /app/paper-lives, /people, /work, /settings with pl=adult (default: a decision open) | child | first (age 0, rename) | infant | senior (the will)
@@ -350,6 +351,18 @@ const iaBook = [
   species({ id: 'millpond', name: 'Millpond' }, [['minnow', 'Minnow', 'common', 12, 48, 50, ['worms', 'bread'], null, null], ['roach', 'Roach', 'common', 30, 590, 600, ['worms', 'bread'], null, null], ['perch', 'Perch', 'common', 9, 1210, 1400, ['worms', 'spinner'], null, null], ['bream', 'Bream', 'uncommon', 3, 2200, 3500, ['bread', 'worms'], ['dawn', 'dusk', 'night'], null], ['eel', 'Eel', 'rare', 0, 0, 0, ['worms']], ['golden_carp', 'Golden Carp', 'epic', 0]]),
   species({ id: 'river_bend', name: 'River Bend' }, [['chub', 'Chub', 'common', 22, 2100, 2500, ['worms', 'maggots'], null, null], ['grayling', 'Grayling', 'uncommon', 4, 1100, 1500, ['maggots'], null, ['overcast', 'rain']], ['pike', 'Pike', 'rare', 0, 0, 0, ['spinner']], ['salmon', 'Salmon', 'epic', 0]]),
 ];
+// D204: ranks=1 gives each water its rank, as content v6's dock and logbook carry it.
+if (params.get('ranks')) {
+  const RANKS = [['visitor', 0], ['angler', 0.25], ['expert', 0.5], ['veteran', 0.75], ['master', 1]];
+  const rankOf = (logged, total) => {
+    const at = RANKS.filter(([, share]) => logged >= Math.ceil(share * total));
+    const next = RANKS[at.length];
+    return { id: at[at.length - 1][0], logged, total, next: next ? { id: next[0], species: Math.ceil(next[1] * total) } : null };
+  };
+  const counts = { millpond: [6, 6], river_bend: [5, 7], harbour_pier: [0, 8], heron_lake: [3, 9] };
+  for (const w of iaDock.waters ?? []) w.rank = counts[w.id] && (w.open || w.id === 'river_bend') ? rankOf(...counts[w.id]) : null;
+  for (const entry of iaBook) entry.rank = counts[entry.water.id] ? rankOf(...counts[entry.water.id]) : null;
+}
 const queries = {
   'users:me': () => data.me,
   'platform:list': () => ({ admin: true, games: [{ slug: 'desk-crawler', status: 'live', canOpen: true }, { slug: 'idle-angler', status: params.get('status') === 'live' ? 'live' : 'hidden', canOpen: true }, { slug: 'paper-lives', status: 'hidden', canOpen: true }] }),

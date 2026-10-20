@@ -45,7 +45,9 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
   const onFeedback = useRef(options.onFeedback)
   onFeedback.current = options.onFeedback
   const fail = (text: string) => { setError(text); onFeedback.current?.({ error: text, message: null }) }
-  async function run(args: Omit<Args, 'operationId'>, successMessage = 'Done. Your TRMNL will reflect this on its next refresh.'): Promise<boolean> {
+  // successMessage may read the result, for a mutation whose answer is an outcome rather than a refusal (a fly code that
+  // does not match); returning { error } shows that line as the failure and run resolves false.
+  async function run(args: Omit<Args, 'operationId'>, successMessage: string | ((done: never) => string | { error: string }) = 'Done. Your TRMNL will reflect this on its next refresh.'): Promise<boolean> {
     if (inFlight.current) return false
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
       fail(serverMessage('You are offline. Reconnect, then try again. No action was queued.', documentLocale()))
@@ -63,10 +65,12 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
         return false
       }
       if (done) {
+        const said = typeof successMessage === 'function' ? successMessage(done as never) : successMessage
+        if (typeof said !== 'string') { fail(said.error); return false }
         const success = intentAnalytics(getFunctionName(fn), args as Record<string, unknown>)
         if (success) captureAnalytics(...success)
         // Callers pass their own success line already in the reader's language; the default one is translated here.
-        const shown = serverMessage(successMessage, documentLocale())
+        const shown = serverMessage(said, documentLocale())
         setMessage(shown)
         onFeedback.current?.({ error: null, message: shown })
       }

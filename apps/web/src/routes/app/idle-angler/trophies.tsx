@@ -81,8 +81,9 @@ function TrophiesPage() {
                   <p className="font-semibold">{trophy.speciesId ? <FishName id={trophy.speciesId} /> : null}</p>
                   <p className="text-sm">{trophy.grams ? formatWeight(trophy.grams) : ''} · {words.water(trophy.water)}</p>
                   <p className="text-sm text-muted">{t.mountedOn} <LocalTime at={trophy.at} format={day} /></p>
+                  {/* A quiet button under the details: taking a fish down is rare, and a boxed one beside them squeezed them into a narrow column on phones. */}
+                  <Button variant="quiet" className="-ml-3 text-sm min-[375px]:-ml-4" disabled={takeDown.pending} onClick={() => setAsking(trophy)}>{t.takeDown}</Button>
                 </div>
-                <Button variant="secondary" disabled={takeDown.pending} onClick={() => setAsking(trophy)}>{t.takeDown}</Button>
               </li>
             ))}
           </ul>
@@ -124,7 +125,7 @@ function TrophiesPage() {
               <li key={m.id} className="flex items-center gap-3 border-b border-rule py-2 last:border-b-0">
                 <span className={`w-16 shrink-0 font-semibold ${m.place === 1 ? 'text-gold-ink' : 'text-ink'}`}>{t.place[m.place ?? 0]}</span>
                 <span className="min-w-0 flex-1 text-sm">{m.speciesId ? <FishName id={m.speciesId} /> : null} · {t.openAt(words.water(m.water))}{m.grams ? `, ${formatWeight(m.grams)}` : ''}</span>
-                <span className="shrink-0 text-sm text-muted">{m.period ? m.period.slice(1) : ''}</span>
+                <span className="shrink-0 text-sm text-muted">{/* An Open's period is its Saturday ('o2026-10-17'), shown as a date like the wall's. */}{m.period ? day(new Date(`${m.period.slice(1)}T12:00:00Z`)) : ''}</span>
               </li>
             ))}
           </ul>
