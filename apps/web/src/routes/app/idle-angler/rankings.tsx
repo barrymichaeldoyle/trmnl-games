@@ -106,9 +106,10 @@ function OpensCard({ opens }: { opens: Opens }) {
           return (
             <li key={w.id} className="flex min-w-0 items-center gap-3 py-2">
               <span className="flex w-12 shrink-0 justify-center"><FishIcon id={w.target.id} scale={2} /></span>
+              {/* The target and its water wrap rather than truncate: a long leader's name took most of the row and cut "Estanque del molino" short. */}
               <span className="min-w-0 flex-1 leading-tight">
-                <span className="block truncate"><FishName id={w.target.id} /></span>
-                <span className="block truncate text-sm text-muted">{words.water(w.id)}</span>
+                <span className="block"><FishName id={w.target.id} /></span>
+                <span className="block text-sm text-muted">{words.water(w.id)}</span>
               </span>
               {leader ? (
                 <span className="flex min-w-0 max-w-[50%] shrink-0 flex-col items-end text-right leading-tight">

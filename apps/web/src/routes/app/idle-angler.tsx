@@ -72,22 +72,22 @@ function Shell() {
   const rewardWaiting = (dock.full?.goal.unclaimed?.length ?? 0) > 0
   return (
     <>
-      <nav aria-label="Idle Angler" className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2">
+      <nav aria-label="Idle Angler" className="hud uppercase sticky top-0 z-30 border-b-4 border-raised bg-night px-2 max-[359px]:px-1">
         <ul className="mx-auto flex min-h-13 max-w-3xl items-stretch">
           <li className="hidden items-center pr-4 pl-2 sm:flex">
             <img src="/games/idle-angler/favicon.svg" alt="" width={24} height={24} className="[image-rendering:pixelated]" />
             <span className="ml-3 text-xs whitespace-nowrap text-gold-ink">Idle Angler</span>
           </li>
           {NAV.map((item) => {
-            // The Cooler tab carries how many fish are in it as a badge, like Desk Crawler's Bag tab.
-            const count = item.to === '/app/idle-angler/cooler' ? coolerUsed : undefined
+            // The Cooler tab carries how many fish are in it as a badge, like Desk Crawler's Bag tab; an empty cooler has none.
+            const count = item.to === '/app/idle-angler/cooler' && coolerUsed > 0 ? coolerUsed : undefined
             const dot = item.to === '/app/idle-angler' && rewardWaiting
             return (
               <li key={item.to} className="flex-1">
                 <Link
                   to={item.to}
                   activeOptions={{ exact: true }}
-                  className="menu-cursor flex min-h-13 flex-col items-center justify-center gap-1 text-[0.625rem] text-muted hover:text-ink aria-[current=page]:text-gold-ink aria-[current=page]:shadow-[inset_0_-4px_0_var(--color-gold)] max-sm:before:hidden sm:flex-row sm:gap-2 sm:text-hud-sm"
+                  className="menu-cursor flex min-h-13 flex-col items-center justify-center gap-1 text-[0.625rem] max-[359px]:text-[0.5625rem] text-muted hover:text-ink aria-[current=page]:text-gold-ink aria-[current=page]:shadow-[inset_0_-4px_0_var(--color-gold)] max-sm:before:hidden sm:flex-row sm:gap-2 sm:text-hud-sm"
                 >
                   {/* On phones the badge sits on the glyph's corner; from 640px it follows the label. */}
                   <span className="relative sm:hidden lg:block">

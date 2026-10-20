@@ -16,7 +16,7 @@ import { useT } from '../../../lib/i18n'
 import { iaShop } from '../../../i18n/iaShop'
 import { iaCommon } from '../../../i18n/ia'
 
-/** The tackle shop: the next rod and cooler, the passes on sale and bait tubs, each at a fixed price and confirmed before buying. */
+/** The tackle shop: the next rod and cooler, the passes on sale and bait tubs, each at a fixed price; upgrades, passes and charters are confirmed before buying, a bait tub buys at once. */
 export const Route = createFileRoute('/app/idle-angler/shop')({
   head: () => seo({ title: 'Tackle shop · Idle Angler', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {}), convexQuery(api.idleAngler.anglers.logbook, {})),
@@ -59,11 +59,10 @@ function ShopPage() {
   const gateOf = (water: string) => dock.waters?.find((w) => w.id === water)?.opensAfter ?? null
   const nextRod = dock.shop.rod
   const nextCooler = dock.shop.cooler
-  // Bait for waters the angler can fish comes first; the rest waits under its own heading.
+  // Only bait for waters the angler can fish is on sale; the rest shows up once its water opens.
   const openWaters = new Set(dock.waters?.filter((w) => w.open).map((w) => w.id))
   // Deadbait comes from the cooler, never a tub.
   const usableBait = angler.bait.filter((b) => b.class !== 'deadbait' && dock.waters?.some((w) => openWaters.has(w.id) && w.baits.includes(b.class)))
-  const laterBait = angler.bait.filter((b) => b.class !== 'deadbait' && !usableBait.includes(b))
   const baitRow = (b: (typeof angler.bait)[number]) => {
     const waters = dock.waters?.filter((w) => w.baits.includes(b.class)).map((w) => words.water(w.id)) ?? []
     const catches = baitCatches(b.class, seen)
@@ -79,10 +78,10 @@ function ShopPage() {
           ...(catches.also.ids.length + catches.also.unseen > 0 ? [[t.alsoCatches, <FishList {...catches.also} />] as const] : []),
           [t.tub, <span className="inline-flex flex-wrap items-center gap-x-2">{t.tubFor(b.tubSize)} <Coins n={b.price} /></span>],
         ]} />
-        {/* Each button says what it adds and costs; a size the angler cannot pay for yet is left out. */}
+        {/* Each button says what it adds and costs, so a tub buys at once without a confirm sheet; a size the angler cannot pay for yet is left out. */}
         <div className="flex flex-wrap items-center gap-2">
           {[1, 3].filter((n) => n <= b.tubsThatFit && gold >= b.price * n).map((n) => (
-            <Button key={n} variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={buying} onClick={() => setOffer({ title: t.buyBaitTitle(b.tubSize * n, words.bait(b.class).toLowerCase()), price: b.price * n, rows: [[t.youGet, `+${b.tubSize * n}`], [t.youWillHold, t.willHold(b.units + b.tubSize * n, b.units)]], buy: () => bait.run({ bait: b.class as never, tubs: n }, t.boughtBait(b.tubSize * n, words.bait(b.class).toLowerCase())) })}>
+            <Button key={n} variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={buying} pending={bait.pending} onClick={() => bait.run({ bait: b.class as never, tubs: n }, t.boughtBait(b.tubSize * n, words.bait(b.class).toLowerCase()))}>
               +{b.tubSize * n} <Coins n={b.price * n} />
             </Button>
           ))}
@@ -167,12 +166,6 @@ function ShopPage() {
 
       <Card title={t.bait}>
         <ul className="flex flex-col gap-3">{usableBait.map(baitRow)}</ul>
-        {laterBait.length > 0 ? (
-          <>
-            <h3 className="mt-5 mb-3 font-semibold">{t.laterWaters}</h3>
-            <ul className="flex flex-col gap-3">{laterBait.map(baitRow)}</ul>
-          </>
-        ) : null}
         <p className="mt-3 text-sm text-muted">{t.baitNote}</p>
       </Card>
       <ConfirmSheet
