@@ -16,6 +16,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as DcRouteImport } from './routes/dc'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as IaRouteImport } from './routes/ia'
+import { Route as LpRouteImport } from './routes/lp'
 import { Route as PlRouteImport } from './routes/pl'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SupportRouteImport } from './routes/support'
@@ -38,6 +39,7 @@ import { Route as GamesLittlePlotRouteImport } from './routes/games/little-plot'
 import { Route as GamesPaperLivesRouteImport } from './routes/games/paper-lives'
 import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
+import { Route as HelpLittlePlotRouteImport } from './routes/help/little-plot'
 import { Route as HelpPaperLivesRouteImport } from './routes/help/paper-lives'
 import { Route as KCodeRouteImport } from './routes/k.$code'
 import { Route as LaunchListUnsubscribeRouteImport } from './routes/launch-list/unsubscribe'
@@ -62,6 +64,12 @@ import { Route as AppIdleAnglerSettingsRouteImport } from './routes/app/idle-ang
 import { Route as AppIdleAnglerShopRouteImport } from './routes/app/idle-angler/shop'
 import { Route as AppIdleAnglerTrophiesRouteImport } from './routes/app/idle-angler/trophies'
 import { Route as AppLittlePlotIndexRouteImport } from './routes/app/little-plot/index'
+import { Route as AppLittlePlotAchievementsRouteImport } from './routes/app/little-plot/achievements'
+import { Route as AppLittlePlotCatalogueRouteImport } from './routes/app/little-plot/catalogue'
+import { Route as AppLittlePlotRankingsRouteImport } from './routes/app/little-plot/rankings'
+import { Route as AppLittlePlotSettingsRouteImport } from './routes/app/little-plot/settings'
+import { Route as AppLittlePlotShedRouteImport } from './routes/app/little-plot/shed'
+import { Route as AppLittlePlotTinRouteImport } from './routes/app/little-plot/tin'
 import { Route as AppPaperLivesIndexRouteImport } from './routes/app/paper-lives/index'
 import { Route as AppPaperLivesAchievementsRouteImport } from './routes/app/paper-lives/achievements'
 import { Route as AppPaperLivesAlbumRouteImport } from './routes/app/paper-lives/album'
@@ -111,6 +119,11 @@ const FeedbackRoute = FeedbackRouteImport.update({
 const IaRoute = IaRouteImport.update({
   id: '/ia',
   path: '/ia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LpRoute = LpRouteImport.update({
+  id: '/lp',
+  path: '/lp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlRoute = PlRouteImport.update({
@@ -221,6 +234,11 @@ const HelpDeskCrawlerRoute = HelpDeskCrawlerRouteImport.update({
 const HelpIdleAnglerRoute = HelpIdleAnglerRouteImport.update({
   id: '/help/idle-angler',
   path: '/help/idle-angler',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpLittlePlotRoute = HelpLittlePlotRouteImport.update({
+  id: '/help/little-plot',
+  path: '/help/little-plot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpPaperLivesRoute = HelpPaperLivesRouteImport.update({
@@ -347,6 +365,37 @@ const AppLittlePlotIndexRoute = AppLittlePlotIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppLittlePlotRoute,
 } as any)
+const AppLittlePlotAchievementsRoute =
+  AppLittlePlotAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AppLittlePlotRoute,
+  } as any)
+const AppLittlePlotCatalogueRoute = AppLittlePlotCatalogueRouteImport.update({
+  id: '/catalogue',
+  path: '/catalogue',
+  getParentRoute: () => AppLittlePlotRoute,
+} as any)
+const AppLittlePlotRankingsRoute = AppLittlePlotRankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
+  getParentRoute: () => AppLittlePlotRoute,
+} as any)
+const AppLittlePlotSettingsRoute = AppLittlePlotSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppLittlePlotRoute,
+} as any)
+const AppLittlePlotShedRoute = AppLittlePlotShedRouteImport.update({
+  id: '/shed',
+  path: '/shed',
+  getParentRoute: () => AppLittlePlotRoute,
+} as any)
+const AppLittlePlotTinRoute = AppLittlePlotTinRouteImport.update({
+  id: '/tin',
+  path: '/tin',
+  getParentRoute: () => AppLittlePlotRoute,
+} as any)
 const AppPaperLivesIndexRoute = AppPaperLivesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -438,6 +487,7 @@ export interface FileRoutesByFullPath {
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
   '/ia': typeof IaRoute
+  '/lp': typeof LpRoute
   '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
@@ -459,6 +509,7 @@ export interface FileRoutesByFullPath {
   '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
+  '/help/little-plot': typeof HelpLittlePlotRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
   '/k/$code': typeof KCodeRoute
   '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
@@ -481,6 +532,12 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/little-plot/achievements': typeof AppLittlePlotAchievementsRoute
+  '/app/little-plot/catalogue': typeof AppLittlePlotCatalogueRoute
+  '/app/little-plot/rankings': typeof AppLittlePlotRankingsRoute
+  '/app/little-plot/settings': typeof AppLittlePlotSettingsRoute
+  '/app/little-plot/shed': typeof AppLittlePlotShedRoute
+  '/app/little-plot/tin': typeof AppLittlePlotTinRoute
   '/app/paper-lives/achievements': typeof AppPaperLivesAchievementsRoute
   '/app/paper-lives/album': typeof AppPaperLivesAlbumRoute
   '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
@@ -507,6 +564,7 @@ export interface FileRoutesByTo {
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
   '/ia': typeof IaRoute
+  '/lp': typeof LpRoute
   '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
@@ -524,6 +582,7 @@ export interface FileRoutesByTo {
   '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
+  '/help/little-plot': typeof HelpLittlePlotRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
   '/k/$code': typeof KCodeRoute
   '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
@@ -546,6 +605,12 @@ export interface FileRoutesByTo {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/little-plot/achievements': typeof AppLittlePlotAchievementsRoute
+  '/app/little-plot/catalogue': typeof AppLittlePlotCatalogueRoute
+  '/app/little-plot/rankings': typeof AppLittlePlotRankingsRoute
+  '/app/little-plot/settings': typeof AppLittlePlotSettingsRoute
+  '/app/little-plot/shed': typeof AppLittlePlotShedRoute
+  '/app/little-plot/tin': typeof AppLittlePlotTinRoute
   '/app/paper-lives/achievements': typeof AppPaperLivesAchievementsRoute
   '/app/paper-lives/album': typeof AppPaperLivesAlbumRoute
   '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
@@ -574,6 +639,7 @@ export interface FileRoutesById {
   '/dc': typeof DcRoute
   '/feedback': typeof FeedbackRoute
   '/ia': typeof IaRoute
+  '/lp': typeof LpRoute
   '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
   '/support': typeof SupportRoute
@@ -595,6 +661,7 @@ export interface FileRoutesById {
   '/games/paper-lives': typeof GamesPaperLivesRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
+  '/help/little-plot': typeof HelpLittlePlotRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
   '/k/$code': typeof KCodeRoute
   '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
@@ -617,6 +684,12 @@ export interface FileRoutesById {
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
+  '/app/little-plot/achievements': typeof AppLittlePlotAchievementsRoute
+  '/app/little-plot/catalogue': typeof AppLittlePlotCatalogueRoute
+  '/app/little-plot/rankings': typeof AppLittlePlotRankingsRoute
+  '/app/little-plot/settings': typeof AppLittlePlotSettingsRoute
+  '/app/little-plot/shed': typeof AppLittlePlotShedRoute
+  '/app/little-plot/tin': typeof AppLittlePlotTinRoute
   '/app/paper-lives/achievements': typeof AppPaperLivesAchievementsRoute
   '/app/paper-lives/album': typeof AppPaperLivesAlbumRoute
   '/app/paper-lives/people': typeof AppPaperLivesPeopleRoute
@@ -646,6 +719,7 @@ export interface FileRouteTypes {
     | '/dc'
     | '/feedback'
     | '/ia'
+    | '/lp'
     | '/pl'
     | '/privacy'
     | '/support'
@@ -667,6 +741,7 @@ export interface FileRouteTypes {
     | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
+    | '/help/little-plot'
     | '/help/paper-lives'
     | '/k/$code'
     | '/launch-list/unsubscribe'
@@ -689,6 +764,12 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/little-plot/achievements'
+    | '/app/little-plot/catalogue'
+    | '/app/little-plot/rankings'
+    | '/app/little-plot/settings'
+    | '/app/little-plot/shed'
+    | '/app/little-plot/tin'
     | '/app/paper-lives/achievements'
     | '/app/paper-lives/album'
     | '/app/paper-lives/people'
@@ -715,6 +796,7 @@ export interface FileRouteTypes {
     | '/dc'
     | '/feedback'
     | '/ia'
+    | '/lp'
     | '/pl'
     | '/privacy'
     | '/support'
@@ -732,6 +814,7 @@ export interface FileRouteTypes {
     | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
+    | '/help/little-plot'
     | '/help/paper-lives'
     | '/k/$code'
     | '/launch-list/unsubscribe'
@@ -754,6 +837,12 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/little-plot/achievements'
+    | '/app/little-plot/catalogue'
+    | '/app/little-plot/rankings'
+    | '/app/little-plot/settings'
+    | '/app/little-plot/shed'
+    | '/app/little-plot/tin'
     | '/app/paper-lives/achievements'
     | '/app/paper-lives/album'
     | '/app/paper-lives/people'
@@ -781,6 +870,7 @@ export interface FileRouteTypes {
     | '/dc'
     | '/feedback'
     | '/ia'
+    | '/lp'
     | '/pl'
     | '/privacy'
     | '/support'
@@ -802,6 +892,7 @@ export interface FileRouteTypes {
     | '/games/paper-lives'
     | '/help/desk-crawler'
     | '/help/idle-angler'
+    | '/help/little-plot'
     | '/help/paper-lives'
     | '/k/$code'
     | '/launch-list/unsubscribe'
@@ -824,6 +915,12 @@ export interface FileRouteTypes {
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
     | '/app/idle-angler/trophies'
+    | '/app/little-plot/achievements'
+    | '/app/little-plot/catalogue'
+    | '/app/little-plot/rankings'
+    | '/app/little-plot/settings'
+    | '/app/little-plot/shed'
+    | '/app/little-plot/tin'
     | '/app/paper-lives/achievements'
     | '/app/paper-lives/album'
     | '/app/paper-lives/people'
@@ -852,6 +949,7 @@ export interface RootRouteChildren {
   DcRoute: typeof DcRoute
   FeedbackRoute: typeof FeedbackRoute
   IaRoute: typeof IaRoute
+  LpRoute: typeof LpRoute
   PlRoute: typeof PlRoute
   PrivacyRoute: typeof PrivacyRoute
   SupportRoute: typeof SupportRoute
@@ -869,6 +967,7 @@ export interface RootRouteChildren {
   GamesPaperLivesRoute: typeof GamesPaperLivesRoute
   HelpDeskCrawlerRoute: typeof HelpDeskCrawlerRoute
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
+  HelpLittlePlotRoute: typeof HelpLittlePlotRoute
   HelpPaperLivesRoute: typeof HelpPaperLivesRoute
   KCodeRoute: typeof KCodeRoute
   LaunchListUnsubscribeRoute: typeof LaunchListUnsubscribeRoute
@@ -932,6 +1031,13 @@ declare module '@tanstack/react-router' {
       path: '/ia'
       fullPath: '/ia'
       preLoaderRoute: typeof IaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lp': {
+      id: '/lp'
+      path: '/lp'
+      fullPath: '/lp'
+      preLoaderRoute: typeof LpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pl': {
@@ -1086,6 +1192,13 @@ declare module '@tanstack/react-router' {
       path: '/help/idle-angler'
       fullPath: '/help/idle-angler'
       preLoaderRoute: typeof HelpIdleAnglerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help/little-plot': {
+      id: '/help/little-plot'
+      path: '/help/little-plot'
+      fullPath: '/help/little-plot'
+      preLoaderRoute: typeof HelpLittlePlotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help/paper-lives': {
@@ -1256,6 +1369,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLittlePlotIndexRouteImport
       parentRoute: typeof AppLittlePlotRoute
     }
+    '/app/little-plot/achievements': {
+      id: '/app/little-plot/achievements'
+      path: '/achievements'
+      fullPath: '/app/little-plot/achievements'
+      preLoaderRoute: typeof AppLittlePlotAchievementsRouteImport
+      parentRoute: typeof AppLittlePlotRoute
+    }
+    '/app/little-plot/catalogue': {
+      id: '/app/little-plot/catalogue'
+      path: '/catalogue'
+      fullPath: '/app/little-plot/catalogue'
+      preLoaderRoute: typeof AppLittlePlotCatalogueRouteImport
+      parentRoute: typeof AppLittlePlotRoute
+    }
+    '/app/little-plot/rankings': {
+      id: '/app/little-plot/rankings'
+      path: '/rankings'
+      fullPath: '/app/little-plot/rankings'
+      preLoaderRoute: typeof AppLittlePlotRankingsRouteImport
+      parentRoute: typeof AppLittlePlotRoute
+    }
+    '/app/little-plot/settings': {
+      id: '/app/little-plot/settings'
+      path: '/settings'
+      fullPath: '/app/little-plot/settings'
+      preLoaderRoute: typeof AppLittlePlotSettingsRouteImport
+      parentRoute: typeof AppLittlePlotRoute
+    }
+    '/app/little-plot/shed': {
+      id: '/app/little-plot/shed'
+      path: '/shed'
+      fullPath: '/app/little-plot/shed'
+      preLoaderRoute: typeof AppLittlePlotShedRouteImport
+      parentRoute: typeof AppLittlePlotRoute
+    }
+    '/app/little-plot/tin': {
+      id: '/app/little-plot/tin'
+      path: '/tin'
+      fullPath: '/app/little-plot/tin'
+      preLoaderRoute: typeof AppLittlePlotTinRouteImport
+      parentRoute: typeof AppLittlePlotRoute
+    }
     '/app/paper-lives/': {
       id: '/app/paper-lives/'
       path: '/'
@@ -1423,10 +1578,22 @@ const AppIdleAnglerRouteWithChildren = AppIdleAnglerRoute._addFileChildren(
 )
 
 interface AppLittlePlotRouteChildren {
+  AppLittlePlotAchievementsRoute: typeof AppLittlePlotAchievementsRoute
+  AppLittlePlotCatalogueRoute: typeof AppLittlePlotCatalogueRoute
+  AppLittlePlotRankingsRoute: typeof AppLittlePlotRankingsRoute
+  AppLittlePlotSettingsRoute: typeof AppLittlePlotSettingsRoute
+  AppLittlePlotShedRoute: typeof AppLittlePlotShedRoute
+  AppLittlePlotTinRoute: typeof AppLittlePlotTinRoute
   AppLittlePlotIndexRoute: typeof AppLittlePlotIndexRoute
 }
 
 const AppLittlePlotRouteChildren: AppLittlePlotRouteChildren = {
+  AppLittlePlotAchievementsRoute: AppLittlePlotAchievementsRoute,
+  AppLittlePlotCatalogueRoute: AppLittlePlotCatalogueRoute,
+  AppLittlePlotRankingsRoute: AppLittlePlotRankingsRoute,
+  AppLittlePlotSettingsRoute: AppLittlePlotSettingsRoute,
+  AppLittlePlotShedRoute: AppLittlePlotShedRoute,
+  AppLittlePlotTinRoute: AppLittlePlotTinRoute,
   AppLittlePlotIndexRoute: AppLittlePlotIndexRoute,
 }
 
@@ -1484,6 +1651,7 @@ const rootRouteChildren: RootRouteChildren = {
   DcRoute: DcRoute,
   FeedbackRoute: FeedbackRoute,
   IaRoute: IaRoute,
+  LpRoute: LpRoute,
   PlRoute: PlRoute,
   PrivacyRoute: PrivacyRoute,
   SupportRoute: SupportRoute,
@@ -1501,6 +1669,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesPaperLivesRoute: GamesPaperLivesRoute,
   HelpDeskCrawlerRoute: HelpDeskCrawlerRoute,
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
+  HelpLittlePlotRoute: HelpLittlePlotRoute,
   HelpPaperLivesRoute: HelpPaperLivesRoute,
   KCodeRoute: KCodeRoute,
   LaunchListUnsubscribeRoute: LaunchListUnsubscribeRoute,

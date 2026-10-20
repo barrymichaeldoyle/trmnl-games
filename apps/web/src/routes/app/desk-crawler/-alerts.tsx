@@ -11,7 +11,7 @@ import { useT } from '../../../lib/i18n'
 import { dcMoreMessages } from '../../../i18n/dcMore'
 
 /** The switches a game's card owns (D115: each game shows its own kinds; devices and quiet hours are shared). */
-const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival'] as const
+const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival', 'bedsRipe', 'newSeed'] as const
 type KindId = (typeof SWITCHES)[number]
 type Prefs = Partial<Record<KindId, boolean>> & { quietStart: number; quietEnd: number }
 export type AlertKindCopy = { readonly id: KindId; readonly name: string; readonly blurb: string }
@@ -184,7 +184,7 @@ export function AlertNudge() {
   return <p className="text-sm">{t.nudge}<Link to="/app/desk-crawler/settings" hash="alerts" className="underline underline-offset-4">{t.turnOnAlerts}</Link></p>
 }
 
-const OPENED_KINDS = new Set(['asleep', 'merchant', 'cooler_full', 'bait_out', 'major_decision', 'life_ended', 'new_arrival'])
+const OPENED_KINDS = new Set(['asleep', 'merchant', 'cooler_full', 'bait_out', 'major_decision', 'life_ended', 'new_arrival', 'beds_ripe', 'new_seed'])
 
 /** `alert opened` with the kind from the alert's link parameter, once, then the parameter leaves the address bar. */
 export function useAlertOpened(ready: boolean) {

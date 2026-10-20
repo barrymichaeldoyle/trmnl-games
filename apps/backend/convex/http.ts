@@ -12,6 +12,8 @@ import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templ
 import { screenMarkup as paperLivesMarkup } from '@trmnl-games/paper-lives/templates/screen'
 import { flyQrBase, renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/route'
 import { renderPaperLivesArt } from '@trmnl-games/paper-lives/art/route'
+import { screenMarkup as littlePlotMarkup } from '@trmnl-games/little-plot/templates/screen'
+import { flowerQrBase, renderLittlePlotArt } from '@trmnl-games/little-plot/art/route'
 import type { GameSlug } from '@trmnl-games/platform'
 import { parseTrmnlLocale } from './lib/trmnlUser'
 
@@ -155,6 +157,27 @@ const paperLivesScreen = httpAction(async (ctx, request) => {
 })
 http.route({ path: '/trmnl/paper-lives/v1/screen', method: 'POST', handler: paperLivesScreen })
 
+/** Little Plot's screen (D206): the same authorization and lost-callback recovery as the other games'. */
+const littlePlotScreen = httpAction(async (ctx, request) => {
+  const parsed = await parseScreenRequest(request)
+  if (parsed instanceof Response) return parsed
+  const { tokenHash, form, uuid } = parsed
+  const now = Date.now()
+  const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
+  const locale = parseTrmnlLocale(form.get('trmnl[user][locale]'))
+  const args = { tokenHash, uuid, now, utcOffset, locale }
+  let result = await ctx.runQuery(internal.littlePlot.payload.forInstance, args)
+  if (result?.outcome === 'recoverable') {
+    await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'little-plot', tokenHash, uuid, confirmedBy: 'screen_request' })
+    result = await ctx.runQuery(internal.littlePlot.payload.forInstance, args)
+  }
+  if (result === null || result.outcome !== 'payload') return notFound()
+  if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
+  const flowerQr = result.flowerCode && process.env.CONVEX_SITE_URL ? flowerQrBase(result.flowerCode) : null
+  return json(200, { ...littlePlotMarkup, merge_variables: { ...result.payload, flower_code: result.flowerCode, flower_qr_base: flowerQr ? `` : '', utc_offset: utcOffset } })
+})
+http.route({ path: '/trmnl/little-plot/v1/screen', method: 'POST', handler: littlePlotScreen })
+
 http.route({
   path: '/trmnl/v1/screen',
   method: 'POST',
@@ -204,6 +227,12 @@ http.route({
     // D159: Paper Lives' portraits and code.
     if (path.startsWith('/art/pl/')) {
       const art = renderPaperLivesArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
+      if (art === null) return new Response('Not found', { status: 404 })
+      return new Response(new Blob([art.png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': art.immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' } })
+    }
+    // D206: Little Plot's scenes and codes.
+    if (path.startsWith('/art/lp/')) {
+      const art = renderLittlePlotArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
       if (art === null) return new Response('Not found', { status: 404 })
       return new Response(new Blob([art.png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': art.immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' } })
     }

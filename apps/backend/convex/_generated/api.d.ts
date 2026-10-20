@@ -82,6 +82,7 @@ import type * as littlePlot_flowers from "../littlePlot/flowers.js";
 import type * as littlePlot_leaderboard from "../littlePlot/leaderboard.js";
 import type * as littlePlot_lifecycle from "../littlePlot/lifecycle.js";
 import type * as littlePlot_operations from "../littlePlot/operations.js";
+import type * as littlePlot_payload from "../littlePlot/payload.js";
 import type * as littlePlot_plots from "../littlePlot/plots.js";
 import type * as littlePlot_profile from "../littlePlot/profile.js";
 import type * as littlePlot_purge from "../littlePlot/purge.js";
@@ -201,6 +202,7 @@ declare const fullApi: ApiFromModules<{
   "littlePlot/leaderboard": typeof littlePlot_leaderboard;
   "littlePlot/lifecycle": typeof littlePlot_lifecycle;
   "littlePlot/operations": typeof littlePlot_operations;
+  "littlePlot/payload": typeof littlePlot_payload;
   "littlePlot/plots": typeof littlePlot_plots;
   "littlePlot/profile": typeof littlePlot_profile;
   "littlePlot/purge": typeof littlePlot_purge;
