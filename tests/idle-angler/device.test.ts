@@ -239,8 +239,8 @@ describe('Idle Angler markup', () => {
     expect(html).toContain('data-band="dusk"')
     expect(html).toContain('data-weather="overcast"')
     expect(html).toContain('data-catch="true"')
-    // Old Hand at 14 species, Specimen Hunter at 20: 17 logged fills half the bar.
-    expect(html).toMatch(/data-xp-ticks="10"/)
+    // Template v18: no progress ticks; the title stays beside the name.
+    expect(html).not.toContain('data-xp-ticks')
     expect(html).toContain('Old Hand')
     expect(buildPayload(scenarios.catch!)).toMatchObject({ title: 'Old Hand', title_next_at: 20, board: { label: 'This week', rank_label: '#3, best 1.9 kg', rows: [{ rank: 1, weight_label: '5.2 kg' }, {}, { rank: 3, own: true }, {}, {}] } })
     expect(buildPayload(scenarios.outsideTop!).board?.rows.at(-1)).toMatchObject({ rank: 19, weight_label: '610 g', own: true })

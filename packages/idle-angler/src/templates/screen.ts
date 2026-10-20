@@ -43,7 +43,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 17
+export const TEMPLATE_VERSION = 18
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -57,8 +57,8 @@ const TITLE_ICON = svgDataUri(
 )
 
 /** Every mark a layout uses, assigned once at its top so the markup repeats a variable rather than the SVG. */
-const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'trophy', 'star', 'goal', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', 'tickEmpty', 'tickHalf', 'tickFull', ...STORY_GLYPHS]
-const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${mark.startsWith('tick') ? markUri(mark, 36, 16) : markUri(mark, 32)}" %}`).join('')
+const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'trophy', 'star', 'goal', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', ...STORY_GLYPHS]
+const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${markUri(mark, 32)}" %}`).join('')
 
 /** 16px on the OG; 20px on the X, where the text beside it is larger. */
 /** D181: the framework repaints `image--adaptive` marks in the theme's ink, so they stay visible under TRMNL's Dark theme. */
@@ -102,13 +102,9 @@ const counters = (fit: 'all' | 'short' | 'compact' = 'all') =>
   )}{% endif %}`
 
 /**
- * Progress to the next title as ten half-step ticks with the species count after them (titles.ts); v16 (D204) counts
- * `title_logged`, the species at the angler's water when the header shows its rank there. Desk Crawler's bar
- * and rounding, so both Liquids agree; at the last title there is nothing left to fill and the bar is left off.
- * Template v17: the ticks narrow to their column rather than run past it, as a large device scale made them do.
+ * Template v18 (Barry, 2026-10-20): the progress ticks toward the next title are gone; they read as irrelevant and
+ * their row was part of the white above the scene. The title stays beside the name, and the logbook counter counts species.
  */
-const xpTicks = (count = true) =>
-  `{% if title_next_at %}{% assign xp_halves = title_pct | default: 0 | times: 20 | plus: 50 | divided_by: 100 | floor %}<div class="flex flex--row flex--wrap flex--left flex--center-y gap--small" data-xp-ticks="{{ xp_halves }}"><div class="flex flex--row gap--[2px] w--min-0">{% for i in (1..10) %}{% assign tick_right = i | times: 2 %}{% assign tick_left = tick_right | minus: 1 %}<img class="w--[18px] h--[8px] lg:w--[22px] lg:h--[10px] w--min-0 ${ADAPTIVE}" src="{% if xp_halves >= tick_right %}{{ m_tickFull }}{% elsif xp_halves >= tick_left %}{{ m_tickHalf }}{% else %}{{ m_tickEmpty }}{% endif %}" alt="">{% endfor %}</div>${count ? `<span class="${LABEL} no-shrink">{{ title_logged | default: species_logged }}/{{ title_next_at }}</span>` : ''}</div>{% endif %}`
 
 /**
  * The title bar with the weekly fly code. A narrow portrait column (side, quarter) cannot fit the name beside the
@@ -145,8 +141,12 @@ const scene = (og: readonly [width: number, scale: number], x: readonly [width: 
  */
 const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_base and fly_qr_base != "" and qr_base != "" and qr != "cooler" %}{% assign fly_waiting = true %}{% assign qr_base = fly_qr_base %}{% endif %}`
 
-const qr = (og: number, x: number) =>
-  `{% if qr_base != "" %}<div class="no-shrink flex flex--col flex--center-x gap--xsmall" data-companion-qr="true"><img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">{% if fly_waiting %}<span class="${LABEL} text--center text--bold" data-fly-caption="true">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}</div>{% endif %}`
+/** Template v18: `beside` sets the fly caption to the code's left, at its foot, so a short header is not made taller by it. */
+const qr = (og: number, x: number, beside = false) => {
+  const caption = `{% if fly_waiting %}<span class="${LABEL} ${beside ? 'text--right' : 'text--center'} text--bold" data-fly-caption="true">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}`
+  const code = `<img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">`
+  return `{% if qr_base != "" %}<div class="no-shrink flex ${beside ? 'flex--row flex--bottom gap--small' : 'flex--col flex--center-x gap--xsmall'}" data-companion-qr="true">${beside ? caption + code : code + caption}</div>{% endif %}`
+}
 
 /**
  * The angler's name, then the title beside it behind a dot (v13), so "Wren · Old Hand" does not read as one name.
@@ -310,15 +310,15 @@ const welcome = ({ art = '', arrange, qrOg, qrX, small = false }: { art?: string
 
 const ready = (body: string, before: string) => `{% if status == "unlinked" or status == "pending" %}${before}{% else %}${body}{% endif %}`
 
-/** The full header: name, title and progress; where and when; the counters; the code in the corner. */
-const header = (qrOg: number, qrX: number) => `
+/** The full header: name and title; where and when; the counters; the code in the corner, its caption beside it if `beside`. */
+const header = (qrOg: number, qrX: number, beside = false) => `
     <div class="no-shrink flex flex--row flex--between flex--top gap--small stretch-x">
       <div class="flex flex--col flex--left gap--xsmall grow w--min-0">
-        <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x" data-name-row="true">${nameLine()}${xpTicks()}</div>
+        <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x" data-name-row="true">${nameLine()}</div>
         ${statusRow()}
         ${counters()}
       </div>
-      ${qr(qrOg, qrX)}
+      ${qr(qrOg, qrX, beside)}
     </div>`
 
 /**
@@ -327,7 +327,7 @@ const header = (qrOg: number, qrX: number) => `
  */
 const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
-  ready(`${header(2, 3)}
+  ready(`${header(2, 3, true)}
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([152, 4], [152, 4], '')}<div class="grow w--min-0">${board(5)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
     <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${goal()}${stories(16)}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
@@ -354,7 +354,7 @@ const halfHorizontal = oriented(
   ready(`
     <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [168, 3])}</div>
     <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
-      <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}${xpTicks()}</div>
+      <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}</div>
       ${statusRow()}
       ${counters('short')}
       ${attention(1)}
@@ -375,10 +375,8 @@ const halfHorizontal = oriented(
 const halfVertical = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small',
   ready(`
-    <div class="no-shrink flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--col flex--left gap--xsmall grow w--min-0"><div class="flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine()}</div>${xpTicks()}</div>${qr(2, 3)}</div>
+    ${header(2, 2)}
     ${scene([182, 2], [161, 3])}
-    ${statusRow()}
-    ${counters()}
     ${attention()}
     ${goal()}
     ${stories(16, 2)}
@@ -386,7 +384,6 @@ const halfVertical = oriented(
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${scene([205, 1], [177, 2])}
-    ${xpTicks()}
     ${statusRow()}
     ${counters('short')}
     ${attention(3)}
