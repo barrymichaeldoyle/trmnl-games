@@ -1,4 +1,4 @@
-# TRMNL review email for Idle Angler (final, for Barry to send)
+# TRMNL review email for Idle Angler (sent by Barry on 2026-10-20)
 
 Plugin 568 was submitted for review on 2026-10-20, after Idle Angler was switched to live on trmnlgames.com so the reviewer can connect. Barry sends this from barry@barrymichaeldoyle.com. It skips the install video: the sign-up and connect flow is the one TRMNL already tested for Desk Crawler, and the email offers a video on request.
 
