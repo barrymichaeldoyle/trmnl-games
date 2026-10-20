@@ -62,8 +62,11 @@ function DockPage() {
   const firstCastThere = dock.nextTickAt ? time(dock.nextTickAt + 15 * 60_000) : null
   const recap = dock.recap
   const nextRod = dock.shop?.rod ?? null
+  // The recap spans twelve hours, so some fish may have broken free on a rod since replaced, and the rod held now lands
+  // those. Only the ones still too heavy for it count towards the next rod's nudge.
+  const tooHeavy = (recap?.awayGrams ?? []).filter((g) => g > angler.rod.limitGrams)
   // Fish that broke free and the next rod would have held: the clearest reason to upgrade.
-  const rodWouldLand = nextRod ? (recap?.awayGrams ?? []).filter((g) => g <= nextRod.limitGrams).length : 0
+  const rodWouldLand = nextRod ? tooHeavy.filter((g) => g <= nextRod.limitGrams).length : 0
   const full = dock.full ?? null
   // D167: what the fishmonger pays now, counting each fish once when two orders could take the same one.
   const taken = new Set<string>()
@@ -122,10 +125,10 @@ function DockPage() {
             recap.best ? [t.heaviest, <span className="inline-flex flex-wrap items-center gap-2"><FishIcon id={recap.best.speciesId} scale={2} /><span>{words.weight(recap.best.grams)} <FishName id={recap.best.speciesId} /></span></span>] : null,
             recap.records ? [t.personalBests, `${recap.records}`] : null,
             recap.firsts ? [t.newSpecies, `${recap.firsts}`] : null,
-            recap.gotAway ? [t.gotAway, t.gotAwayValue(recap.gotAway, words.rod(angler.rod.name))] : null,
+            recap.gotAway ? [t.gotAway, t.gotAwayValue(recap.gotAway, tooHeavy.length, words.rod(angler.rod.name))] : null,
           ]} />
           {nextRod && rodWouldLand > 0 ? (
-            <p className="mt-3 text-sm">{t.rodWould(words.rod(nextRod.name), rodWouldLand, recap.gotAway)} <Link to="/app/idle-angler/shop" className="inline-flex items-center gap-1 underline underline-offset-4">{t.inShopFor} <Coins n={nextRod.price} /></Link></p>
+            <p className="mt-3 text-sm">{t.rodWould(words.rod(nextRod.name), rodWouldLand, tooHeavy.length)} <Link to="/app/idle-angler/shop" className="inline-flex items-center gap-1 underline underline-offset-4">{t.inShopFor} <Coins n={nextRod.price} /></Link></p>
           ) : null}
         </Card>
       ) : null}
