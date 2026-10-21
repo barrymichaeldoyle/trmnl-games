@@ -19,7 +19,10 @@ export const Route = createFileRoute('/games/idle-angler')({
   loader: ({ context }) => requireOpenGame(context, 'idle-angler'),
   head: ({ match: { context: { locale } } }) => {
     const t = messagesFor(iaGamePage, locale)
-    return seo({ title: 'Idle Angler', path: '/games/idle-angler', description: t.description, image: { path: '/games/idle-angler/sample.png', alt: t.imageAlt }, jsonLd: IDLE_ANGLER_JSON_LD, locale })
+    // The game and its questions as one graph, as Desk Crawler's page has them (FAQPage in the page's language).
+    const faq = { '@type': 'FAQPage', mainEntity: t.faq.map((item) => ({ '@type': 'Question', name: item.q, acceptedAnswer: { '@type': 'Answer', text: item.a } })) }
+    const { '@context': _context, ...game } = IDLE_ANGLER_JSON_LD
+    return seo({ title: 'Idle Angler', path: '/games/idle-angler', description: t.description, image: { path: '/games/idle-angler/sample.png', alt: t.imageAlt }, jsonLd: { '@context': 'https://schema.org', '@graph': [game, faq] }, locale })
   },
   component: GamePage,
 })

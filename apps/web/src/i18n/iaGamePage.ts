@@ -28,7 +28,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Your angler keeps casting between visits, and the companion is where you choose the water and the bait and decide what to sell or keep.',
     features: (species: number, first: string, top: string) => [
       { title: 'Hours, weather and seasons', body: 'Fish feed more at dawn and dusk, the weather changes every six hours, and one season a week is the same for every angler, with a run of one species each week.' },
-      { title: 'Bait decides the bite', body: 'Each water takes its own baits, and the bait decides which fish can bite. Small fish can go back on the hook as deadbait for the predators.' },
+      { title: 'Match the bait to the fish', body: 'Each water has its own baits, and what is on the hook sets which fish can bite. Small fish can go back on the hook as deadbait for the predators.' },
       { title: 'The fishmonger', body: 'The fishmonger posts orders such as “Two Roach” and pays well above the market price when your cooler has the fish.' },
       { title: 'A cooler to empty', body: 'Fish wait in the cooler until you sell them. When it fills, your angler keeps fishing and releases the catch, and every fish still counts in the logbook.' },
       { title: 'Rods and the one that got away', body: 'Each rod lands fish up to a weight. Something heavier breaks free, and a better rod would have held it.' },
@@ -80,7 +80,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Votre pêcheur continue de lancer entre vos visites, et c’est dans le compagnon que vous choisissez le plan d’eau et l’appât, et ce que vous vendez ou gardez.',
     features: (species: number, first: string, top: string) => [
       { title: 'Heures, météo et saisons', body: 'Les poissons mordent davantage à l’aube et au crépuscule, la météo change toutes les six heures, et chaque semaine a sa saison, la même pour tous les pêcheurs, avec la montaison d’une espèce.' },
-      { title: 'L’appât décide de la touche', body: 'Chaque plan d’eau a ses appâts, et l’appât décide quels poissons peuvent mordre. Les petits poissons peuvent repartir à l’hameçon comme poisson mort pour les carnassiers.' },
+      { title: 'Le bon appât pour le bon poisson', body: 'Chaque plan d’eau a ses appâts, et ce qui est à l’hameçon détermine quels poissons peuvent mordre. Les petits poissons peuvent repartir à l’hameçon comme poisson mort pour les carnassiers.' },
       { title: 'Le poissonnier', body: 'Le poissonnier affiche des commandes comme « Gardon × 2 » et paie bien au-dessus du prix du marché quand votre glacière contient les poissons.' },
       { title: 'Une glacière à vider', body: 'Les poissons attendent dans la glacière jusqu’à ce que vous les vendiez. Quand elle est pleine, votre pêcheur continue et relâche ses prises, et chaque poisson compte quand même au carnet.' },
       { title: 'Les cannes et celui qui s’est échappé', body: 'Chaque canne tient les poissons jusqu’à un certain poids. Un poisson plus lourd casse la ligne, alors qu’une meilleure canne l’aurait tenu.' },
@@ -132,7 +132,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Dein Angler wirft zwischen deinen Besuchen weiter aus, und in der Begleit-App wählst du Gewässer und Köder und entscheidest, was du verkaufst oder behältst.',
     features: (species: number, first: string, top: string) => [
       { title: 'Tageszeit, Wetter und Jahreszeiten', body: 'Im Morgengrauen und in der Dämmerung beißen die Fische besser, das Wetter wechselt alle sechs Stunden, und jede Woche hat eine Jahreszeit, für alle Angler gleich, mit dem Zug einer Art.' },
-      { title: 'Der Köder entscheidet', body: 'Jedes Gewässer hat seine eigenen Köder, und der Köder entscheidet, welche Fische beißen können. Kleine Fische können als Köderfisch für die Räuber wieder an den Haken.' },
+      { title: 'Der richtige Köder für den Fisch', body: 'Jedes Gewässer hat seine eigenen Köder, und was am Haken hängt, bestimmt, welche Fische beißen können. Kleine Fische können als Köderfisch für die Räuber wieder an den Haken.' },
       { title: 'Der Fischhändler', body: 'Der Fischhändler hängt Aufträge wie „Rotauge × 2“ aus und zahlt deutlich mehr als den Marktpreis, wenn deine Kühlbox die Fische hat.' },
       { title: 'Eine Kühlbox zum Leeren', body: 'Die Fische warten in der Kühlbox, bis du sie verkaufst. Ist sie voll, angelt dein Angler weiter und lässt den Fang frei, und jeder Fisch zählt trotzdem im Fangbuch.' },
       { title: 'Ruten und der Fisch, der entkam', body: 'Jede Rute hält Fische bis zu einem bestimmten Gewicht. Ein schwererer reißt sich los, und eine bessere Rute hätte ihn gehalten.' },
@@ -184,7 +184,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Tu pescador sigue lanzando entre visita y visita, y en la app eliges el agua y el cebo y decides qué vender o guardar.',
     features: (species: number, first: string, top: string) => [
       { title: 'Horas, tiempo y estaciones', body: 'Los peces comen más al amanecer y al anochecer, el tiempo cambia cada seis horas, y cada semana tiene una estación, la misma para todos los pescadores, con el remonte de una especie.' },
-      { title: 'El cebo decide qué pica', body: 'Cada agua tiene sus cebos, y el cebo decide qué peces pueden picar. Los peces pequeños pueden volver al anzuelo como pez muerto para los depredadores.' },
+      { title: 'El cebo adecuado para cada pez', body: 'Cada agua tiene sus cebos, y lo que hay en el anzuelo marca qué peces pueden picar. Los peces pequeños pueden volver al anzuelo como pez muerto para los depredadores.' },
       { title: 'El pescadero', body: 'El pescadero publica pedidos como «Rutilo × 2» y paga bastante más que el precio de mercado cuando tu nevera tiene los peces.' },
       { title: 'Una nevera que vaciar', body: 'Los peces esperan en la nevera hasta que los vendes. Cuando se llena, tu pescador sigue pescando y suelta las capturas, y cada pez cuenta igual en el cuaderno.' },
       { title: 'Cañas y el que se escapó', body: 'Cada caña aguanta peces hasta cierto peso. Uno más pesado se suelta, y una caña mejor lo habría aguantado.' },
@@ -236,7 +236,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Il tuo pescatore continua a lanciare tra una visita e l’altra, e nell’app scegli l’acqua e l’esca e decidi cosa vendere o tenere.',
     features: (species: number, first: string, top: string) => [
       { title: 'Orari, meteo e stagioni', body: 'I pesci mangiano di più all’alba e al tramonto, il meteo cambia ogni sei ore, e ogni settimana ha la sua stagione, uguale per tutti i pescatori, con la risalita di una specie.' },
-      { title: 'L’esca decide chi abbocca', body: 'Ogni acqua ha le sue esche, e l’esca decide quali pesci possono abboccare. I pesci piccoli possono tornare sull’amo come pesce morto per i predatori.' },
+      { title: 'L’esca giusta per ogni pesce', body: 'Ogni acqua ha le sue esche, e ciò che è sull’amo stabilisce quali pesci possono abboccare. I pesci piccoli possono tornare sull’amo come pesce morto per i predatori.' },
       { title: 'Il pescivendolo', body: 'Il pescivendolo espone ordini come «Rutilo × 2» e paga ben più del prezzo di mercato quando hai quei pesci nel frigo.' },
       { title: 'Un frigo da svuotare', body: 'I pesci aspettano nel frigo finché non li vendi. Quando è pieno, il tuo pescatore continua a pescare e rilascia le catture, e ogni pesce conta comunque nel registro.' },
       { title: 'Le canne e quello che è scappato', body: 'Ogni canna regge pesci fino a un certo peso. Uno più pesante si libera, e una canna migliore l’avrebbe tenuto.' },
@@ -288,7 +288,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Seu pescador continua lançando entre uma visita e outra, e é no app que você escolhe a água e a isca e decide o que vender ou guardar.',
     features: (species: number, first: string, top: string) => [
       { title: 'Horário, tempo e estações', body: 'Os peixes comem mais ao amanhecer e ao entardecer, o tempo muda a cada seis horas, e cada semana tem uma estação, igual para todos os pescadores, com a piracema de uma espécie.' },
-      { title: 'A isca decide quem morde', body: 'Cada água tem suas iscas, e a isca decide quais peixes podem morder. Peixes pequenos podem voltar ao anzol como peixe morto para os predadores.' },
+      { title: 'A isca certa para cada peixe', body: 'Cada água tem suas iscas, e o que está no anzol define quais peixes podem morder. Peixes pequenos podem voltar ao anzol como peixe morto para os predadores.' },
       { title: 'O peixeiro', body: 'O peixeiro publica pedidos como “Rutilo × 2” e paga bem acima do preço de mercado quando seu cooler tem os peixes.' },
       { title: 'Um cooler para esvaziar', body: 'Os peixes esperam no cooler até você vender. Quando ele enche, seu pescador continua pescando e solta a captura, e cada peixe conta no caderno do mesmo jeito.' },
       { title: 'Varas e o que escapou', body: 'Cada vara segura peixes até certo peso. Um mais pesado se solta, e uma vara melhor teria segurado.' },
@@ -340,7 +340,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Wędkarz zarzuca dalej między twoimi wizytami, a w aplikacji wybierasz łowisko i przynętę oraz decydujesz, co sprzedać, a co zatrzymać.',
     features: (species: number, first: string, top: string) => [
       { title: 'Pora dnia, pogoda i pory roku', body: 'Ryby żerują chętniej o świcie i o zmierzchu, pogoda zmienia się co sześć godzin, a każdy tydzień ma swoją porę roku, wspólną dla wszystkich wędkarzy, z wędrówką jednego gatunku.' },
-      { title: 'Przynęta decyduje o braniu', body: 'Każde łowisko ma swoje przynęty, a przynęta decyduje, które ryby mogą brać. Małe ryby mogą wrócić na haczyk jako martwa rybka dla drapieżników.' },
+      { title: 'Właściwa przynęta na właściwą rybę', body: 'Każde łowisko ma swoje przynęty, a to, co jest na haczyku, decyduje, które ryby mogą brać. Małe ryby mogą wrócić na haczyk jako martwa rybka dla drapieżników.' },
       { title: 'Handlarz ryb', body: 'Handlarz ryb wystawia zamówienia w rodzaju „Płoć × 2” i płaci dużo więcej niż cena rynkowa, gdy masz te ryby w lodówce.' },
       { title: 'Lodówka do opróżniania', body: 'Ryby czekają w lodówce, aż je sprzedasz. Gdy się zapełni, wędkarz łowi dalej i wypuszcza zdobycz, a każda ryba i tak trafia do rejestru.' },
       { title: 'Wędki i ta, która uciekła', body: 'Każda wędka utrzyma rybę do pewnej wagi. Cięższa się zrywa, a lepsza wędka by ją utrzymała.' },
@@ -392,7 +392,7 @@ export const iaGamePage = defineMessages({
     whatsInIntro: 'Je visser blijft uitwerpen tussen je bezoeken door, en in de app kies je het water en het aas en beslis je wat je verkoopt of houdt.',
     features: (species: number, first: string, top: string) => [
       { title: 'Tijd, weer en seizoenen', body: 'Vissen azen meer bij zonsopgang en schemering, het weer verandert elke zes uur, en elke week heeft een seizoen, voor alle vissers gelijk, met de trek van één soort.' },
-      { title: 'Het aas bepaalt de beet', body: 'Elk water heeft zijn eigen aas, en het aas bepaalt welke vissen kunnen bijten. Kleine vissen kunnen als dood aas terug aan de haak voor de roofvissen.' },
+      { title: 'Het juiste aas voor de juiste vis', body: 'Elk water heeft zijn eigen aas, en wat er aan de haak zit, bepaalt welke vissen kunnen bijten. Kleine vissen kunnen als dood aas terug aan de haak voor de roofvissen.' },
       { title: 'De visboer', body: 'De visboer hangt bestellingen op zoals “Blankvoorn × 2” en betaalt ruim boven de marktprijs als je koelbox de vissen heeft.' },
       { title: 'Een koelbox om te legen', body: 'Vissen wachten in de koelbox tot je ze verkoopt. Is hij vol, dan vist je visser door en zet hij de vangst terug, en elke vis telt toch mee in het logboek.' },
       { title: 'Hengels en die ene die ontsnapte', body: 'Elke hengel houdt vissen tot een bepaald gewicht. Een zwaardere breekt los, en een betere hengel had hem gehouden.' },

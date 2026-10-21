@@ -360,10 +360,12 @@ function nearGround(c: Canvas, water: WaterId): number {
   }
   c.region = water === 'frozen_tarn' ? 'snowbank' : 'grass'
   const bank = BANK
-  c.rect(0, bank, 46, STAGE_HEIGHT - bank, 'w')
+  // The bank's top edge, then its right edge sloping one column out per row down to column 46 and straight below.
   c.hline(0, 40, bank, '#')
   for (let x = 40; x <= 46; x += 1) c.paint(x, bank + (x - 40), '#')
-  c.rect(0, bank + 1, 40, STAGE_HEIGHT - bank - 1, '.')
+  for (let y = bank + 7; y < STAGE_HEIGHT; y += 1) c.paint(46, y, '#')
+  // Shade only inside those edges: the water keeps the wedge beyond the slope, where a white fill once cut it off.
+  for (let y = bank + 1; y < STAGE_HEIGHT; y += 1) c.rect(0, y, Math.min(46, 40 + (y - bank)), 1, '.')
   for (const x of [3, 11, 19, 29, 37]) {
     c.paint(x, bank - 1, '#')
     c.paint(x + 1, bank - 2, '#')
