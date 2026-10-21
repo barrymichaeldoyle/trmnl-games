@@ -15,6 +15,7 @@ import { NameField } from '../../../../lib/nameField'
 import { GenderPicker, type HeroGender } from '../../../../lib/genderPicker'
 import { useAnalyticsView } from '../../../../lib/analyticsProvider'
 import { documentLocale, messagesFor, useT } from '../../../../lib/i18n'
+import { headMessages } from '../../../../i18n/heads'
 import { installMessages } from '../../../../i18n/install'
 import { serverMessage } from '../../../../i18n/serverMessages'
 
@@ -35,7 +36,7 @@ export const Route = createFileRoute('/connect/trmnl/desk-crawler/install')({
   },
   loader: async () => await getPendingInstall({ data: { gameSlug: 'desk-crawler' } }),
   head: ({ match: { context: { locale } } }) => {
-    const head = seo({ title: messagesFor(installMessages, locale).title, index: false, locale })
+    const head = seo({ title: messagesFor(headMessages, locale).dcInstall, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: InstallPage,

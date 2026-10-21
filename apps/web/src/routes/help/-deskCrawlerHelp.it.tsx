@@ -2,6 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const t = contentTranslator('it')
 const n = (value: number) => t.number(value)
@@ -45,8 +46,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const it: HelpPage = {
-  seoTitle: 'Aiuto e installazione di Desk Crawler',
-  description: 'Come installare Desk Crawler su TRMNL e come funziona ogni parte del gioco, con le soluzioni quando lo schermo sembra indietro.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.it.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.it.description,
   title: 'Desk Crawler su TRMNL',
   contents: {
     'getting-started': 'Per iniziare', 'if-the-qr-sends-you-back-to-setup': 'Se il QR ti riporta all’installazione', 'how-time-works': 'Come passa il tempo', floors: 'Piani', 'desk-keepsakes': 'Ricordini da scrivania', career: 'Carriera', 'heroes-and-classes': 'Eroi e classi', stances: 'Tattiche', 'desk-raids': 'Incursioni sulle scrivanie', meetings: 'Riunioni', 'lost-property': 'Oggetti smarriti', 'to-do-list': 'Cose da fare', potions: 'Pozioni', 'the-wandering-merchant': 'Il mercante ambulante', decisions: 'Decisioni', effects: 'Effetti', 'office-calendar': 'Calendario dell’ufficio', 'rare-and-epic-gear': 'Equipaggiamento raro ed epico', 'when-your-bag-fills-up': 'Quando la borsa si riempie', 'bigger-bags': 'Borse più grandi', 'salvage-and-the-workbench': 'Smontaggio e banco da lavoro', 'getting-knocked-out': 'Finire KO', recaps: 'Riepiloghi', 'understanding-rankings': 'Come funzionano le classifiche', 'sharing-your-hero': 'Condividere il tuo eroe', 'following': 'Seguiti', names: 'Nomi', gender: 'Genere', alerts: 'Avvisi', troubleshooting: 'Risoluzione dei problemi', 'disconnecting-and-removing': 'Scollegare e rimuovere', help: 'Aiuto',

@@ -1,5 +1,6 @@
 import { contentTranslator, type ContentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { defineMessages, plForm } from '../lib/i18n'
+import { headMessages } from './heads'
 
 const fr = contentTranslator('fr')
 const de = contentTranslator('de')
@@ -25,7 +26,7 @@ export function shelfTitle(category: string, t: { shelves: Record<Shelf, string>
  */
 export const dcAchievementsMessages = defineMessages({
   en: {
-    title: 'Achievements',
+    title: headMessages.en.dcAchievements,
     bands: { common: 'Common', uncommon: 'Uncommon', rare: 'Rare', legendary: 'Legendary' } as Record<Band, string>,
     ofHeroes: (count: number, total: number) => `${count} of ${total} ${total === 1 ? 'hero' : 'heroes'}`,
     percentOfHeroes: (pct: string) => `${pct}% of heroes`,
@@ -63,7 +64,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family} tier ${label}: ${value} of ${target}`,
   },
   fr: {
-    title: 'Succès',
+    title: headMessages.fr.dcAchievements,
     bands: { common: 'Commun', uncommon: 'Peu commun', rare: 'Rare', legendary: 'Légendaire' },
     ofHeroes: (count: number, total: number) => `${count} sur ${total} héros`,
     percentOfHeroes: (pct: string) => `${pct} % des héros`,
@@ -101,7 +102,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family}, palier ${label} : ${value} sur ${target}`,
   },
   de: {
-    title: 'Erfolge',
+    title: headMessages.de.dcAchievements,
     bands: { common: 'Gewöhnlich', uncommon: 'Ungewöhnlich', rare: 'Selten', legendary: 'Legendär' },
     ofHeroes: (count: number, total: number) => `${count} von ${total} ${total === 1 ? 'Held' : 'Helden'}`,
     percentOfHeroes: (pct: string) => `${pct} % der Helden`,
@@ -139,7 +140,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family}, Grad ${label}: ${value} von ${target}`,
   },
   es: {
-    title: 'Logros',
+    title: headMessages.es.dcAchievements,
     bands: { common: 'Común', uncommon: 'Poco común', rare: 'Raro', legendary: 'Legendario' },
     ofHeroes: (count: number, total: number) => `${count} de ${total} ${total === 1 ? 'héroe' : 'héroes'}`,
     percentOfHeroes: (pct: string) => `${pct} % de los héroes`,
@@ -177,7 +178,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family}, nivel ${label}: ${value} de ${target}`,
   },
   it: {
-    title: 'Obiettivi',
+    title: headMessages.it.dcAchievements,
     bands: { common: 'Comune', uncommon: 'Non comune', rare: 'Raro', legendary: 'Leggendario' },
     ofHeroes: (count: number, total: number) => `${count} su ${total} ${total === 1 ? 'eroe' : 'eroi'}`,
     percentOfHeroes: (pct: string) => `${pct}% degli eroi`,
@@ -215,7 +216,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family}, grado ${label}: ${value} su ${target}`,
   },
   pt: {
-    title: 'Conquistas',
+    title: headMessages.pt.dcAchievements,
     bands: { common: 'Comum', uncommon: 'Incomum', rare: 'Rara', legendary: 'Lendária' },
     ofHeroes: (count: number, total: number) => `${count} de ${total} ${total === 1 ? 'herói' : 'heróis'}`,
     percentOfHeroes: (pct: string) => `${pct}% dos heróis`,
@@ -253,7 +254,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family}, nível ${label}: ${value} de ${target}`,
   },
   pl: {
-    title: 'Osiągnięcia',
+    title: headMessages.pl.dcAchievements,
     bands: { common: 'Pospolite', uncommon: 'Niepospolite', rare: 'Rzadkie', legendary: 'Legendarne' },
     ofHeroes: (count: number, total: number) => `${count} z ${total} ${plForm(total, 'bohatera', 'bohaterów', 'bohaterów')}`,
     percentOfHeroes: (pct: string) => `${pct}% bohaterów`,
@@ -291,7 +292,7 @@ export const dcAchievementsMessages = defineMessages({
     familyTier: (family: string, label: string, value: string, target: string) => `${family}, stopień ${label}: ${value} z ${target}`,
   },
   nl: {
-    title: 'Prestaties',
+    title: headMessages.nl.dcAchievements,
     bands: { common: 'Gewoon', uncommon: 'Ongewoon', rare: 'Zeldzaam', legendary: 'Legendarisch' },
     ofHeroes: (count: number, total: number) => `${count} van ${total} ${total === 1 ? 'held' : 'helden'}`,
     percentOfHeroes: (pct: string) => `${pct}% van de helden`,

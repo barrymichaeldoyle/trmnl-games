@@ -12,6 +12,7 @@ import { ActionFeedback, BUTTON_PRIMARY, BUTTON_SECONDARY, Button, Card, LINK_BU
 import { captureManagement, getManagedInstance } from '../../../../server/manageFns'
 import { useAnalyticsView } from '../../../../lib/analyticsProvider'
 import { messagesFor, useT } from '../../../../lib/i18n'
+import { headMessages } from '../../../../i18n/heads'
 import { manageMessages } from '../../../../i18n/manage'
 
 type Search = { uuid?: string; jwt?: string; invalid?: boolean }
@@ -31,7 +32,7 @@ export const Route = createFileRoute('/connect/trmnl/desk-crawler/manage')({
   },
   loader: async () => await getManagedInstance({ data: { gameSlug: 'desk-crawler' } }),
   head: ({ match: { context: { locale } } }) => {
-    const head = seo({ title: messagesFor(manageMessages, locale).title, index: false, locale })
+    const head = seo({ title: messagesFor(headMessages, locale).dcManage, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: ManagePage,

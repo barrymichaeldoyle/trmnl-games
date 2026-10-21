@@ -1,5 +1,6 @@
 import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { defineMessages, plForm } from '../lib/i18n'
+import { headMessages } from './heads'
 
 const fr = contentTranslator('fr')
 const de = contentTranslator('de')
@@ -14,7 +15,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many)
 /** D169: the Desk Crawler Hero page: commands, effects, the decision, stance, world map, standoff and confirmations. Names arrive in English. */
 export const dcHeroMessages = defineMessages({
   en: {
-    title: 'Hero',
+    title: headMessages.en.dcHero,
     loading: 'Loading your hero…',
     yourHero: (name: string) => `${name}, your hero`,
     playlistTitle: 'Not seeing your hero on your TRMNL yet?',
@@ -130,7 +131,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => name,
   },
   fr: {
-    title: 'Héros',
+    title: headMessages.fr.dcHero,
     loading: 'Chargement de votre héros…',
     yourHero: (name: string) => `${name}, votre héros`,
     playlistTitle: 'Votre héros n’apparaît pas encore sur votre TRMNL ?',
@@ -246,7 +247,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => fr.name(name),
   },
   de: {
-    title: 'Held',
+    title: headMessages.de.dcHero,
     loading: 'Dein Held wird geladen …',
     yourHero: (name: string) => `${name}, dein Held`,
     playlistTitle: 'Dein Held ist noch nicht auf deinem TRMNL?',
@@ -362,7 +363,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => de.name(name),
   },
   es: {
-    title: 'Héroe',
+    title: headMessages.es.dcHero,
     loading: 'Cargando tu héroe…',
     yourHero: (name: string) => `${name}, tu héroe`,
     playlistTitle: '¿Aún no ves a tu héroe en tu TRMNL?',
@@ -478,7 +479,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => es.name(name),
   },
   it: {
-    title: 'Eroe',
+    title: headMessages.it.dcHero,
     loading: 'Caricamento del tuo eroe…',
     yourHero: (name: string) => `${name}, il tuo eroe`,
     playlistTitle: 'Non vedi ancora il tuo eroe sul TRMNL?',
@@ -594,7 +595,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => it.name(name),
   },
   pt: {
-    title: 'Herói',
+    title: headMessages.pt.dcHero,
     loading: 'Carregando seu herói…',
     yourHero: (name: string) => `${name}, seu herói`,
     playlistTitle: 'Ainda não vê seu herói no TRMNL?',
@@ -710,7 +711,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => pt.name(name),
   },
   pl: {
-    title: 'Bohater',
+    title: headMessages.pl.dcHero,
     loading: 'Wczytywanie bohatera…',
     yourHero: (name: string) => `${name}, twój bohater`,
     playlistTitle: 'Nie widzisz jeszcze bohatera na TRMNL?',
@@ -826,7 +827,7 @@ export const dcHeroMessages = defineMessages({
     floor: (name: string) => pl.name(name),
   },
   nl: {
-    title: 'Held',
+    title: headMessages.nl.dcHero,
     loading: 'Je held wordt geladen…',
     yourHero: (name: string) => `${name}, je held`,
     playlistTitle: 'Zie je je held nog niet op je TRMNL?',

@@ -1,11 +1,12 @@
 import { Link } from '@tanstack/react-router'
 import { SUPPORT_EMAIL } from '../lib/prose'
 import type { LegalPage } from './-legal'
+import { TERMS_HEAD } from './-legalHeads'
 
 export const termsPl: LegalPage = {
-  title: 'Warunki korzystania',
-  seoTitle: 'Warunki',
-  description: 'Zasady gry w Desk Crawler: darmowa gra udostępniana w obecnej postaci, z zasadami uczciwej gry i nazw publicznych.',
+  title: TERMS_HEAD.pl.title,
+  seoTitle: TERMS_HEAD.pl.seoTitle,
+  description: TERMS_HEAD.pl.description,
   translationNote: () => <p className="text-sm text-muted">Tłumaczenie wersji angielskiej, która jest rozstrzygająca w razie rozbieżności.</p>,
   Body: () => (
     <>

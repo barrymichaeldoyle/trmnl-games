@@ -4,6 +4,7 @@ import { POLICY_UPDATED, ProsePage } from '../lib/prose'
 import { seo } from '../lib/seo'
 import { formatDate, useLocale } from '../lib/i18n'
 import type { LegalPage } from './-legal'
+import { TERMS_HEAD } from './-legalHeads'
 import { termsEn } from './-terms.en'
 import { termsFr } from './-terms.fr'
 import { termsDe } from './-terms.de'
@@ -17,7 +18,7 @@ import { termsNl } from './-terms.nl'
 const PAGES: Readonly<Record<Locale, LegalPage>> = { en: termsEn, fr: termsFr, de: termsDe, es: termsEs, it: termsIt, pt: termsPt, pl: termsPl, nl: termsNl }
 
 export const Route = createFileRoute('/terms')({
-  head: ({ match: { context: { locale } } }) => seo({ title: PAGES[locale].seoTitle ?? PAGES[locale].title, path: '/terms', description: PAGES[locale].description, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: TERMS_HEAD[locale].seoTitle ?? TERMS_HEAD[locale].title, path: '/terms', description: TERMS_HEAD[locale].description, locale }),
   component: Terms,
 })
 

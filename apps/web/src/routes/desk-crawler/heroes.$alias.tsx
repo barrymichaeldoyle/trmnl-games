@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { SiteShell } from '../../lib/prose'
-import { artUrl } from '../../lib/intent'
+import { artUrl } from '../../lib/artUrl'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 import { Button, Card, NoticeBar, useNotice } from '../../lib/ui'
 import { useIntent } from '../../lib/intent'
@@ -12,6 +12,7 @@ import { WithName } from '../app/desk-crawler/-withName'
 import { Glyph, SectionTitle } from '../../lib/glyphs'
 import { RARITY_TONE } from '../../lib/palette'
 import { formatDate, formatNumber, messagesFor, useLocale, useT } from '../../lib/i18n'
+import { headMessages } from '../../i18n/heads'
 import { useContent } from '../../lib/useContent'
 import { publicPagesMessages } from '../../i18n/publicPages'
 import type { Locale } from '@trmnl-games/platform'
@@ -43,13 +44,13 @@ const profileQuery = (alias: string) => convexQuery(api.profiles.view, { alias }
  */
 const heroCard = (profile: Pick<Profile, 'alias' | 'heroName' | 'level' | 'rank'>, locale: Locale) =>
   import.meta.env.VITE_CONVEX_SITE_URL
-    ? { url: artUrl(`/art/card/hero/${encodeURIComponent(profile.alias)}.png?v=${profile.level}-${profile.rank?.rank ?? 0}`), alt: messagesFor(publicPagesMessages, locale).heroCardAlt(profile.heroName, profile.level), width: 1200, height: 630 }
+    ? { url: artUrl(`/art/card/hero/${encodeURIComponent(profile.alias)}.png?v=${profile.level}-${profile.rank?.rank ?? 0}`), alt: messagesFor(headMessages, locale).heroCardAlt(profile.heroName, profile.level), width: 1200, height: 630 }
     : DESK_CRAWLER_OG
 
 export const Route = createFileRoute('/desk-crawler/heroes/$alias')({
   loader: async ({ context, params }) => (await context.queryClient.ensureQueryData(profileQuery(params.alias))) as Profile | null,
   head: ({ loaderData, params, match: { context: { locale } } }) => {
-    const t = messagesFor(publicPagesMessages, locale)
+    const t = messagesFor(headMessages, locale)
     return loaderData
       ? seo({ title: t.heroTitle(loaderData.heroName, loaderData.level), path: `/desk-crawler/heroes/${encodeURIComponent(loaderData.alias)}`, description: t.heroDescription(loaderData.alias, loaderData.heroName, loaderData.level, loaderData.rank ? t.rankOf(loaderData.rank.rank, loaderData.rank.totalPlayers) : null, loaderData.achievementCount), image: heroCard(loaderData, locale), locale })
       : seo({ title: t.heroNotFound, path: `/desk-crawler/heroes/${encodeURIComponent(params.alias)}`, index: false, locale })

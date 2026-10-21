@@ -3,7 +3,7 @@ import { useT } from './i18n'
 import { commonMessages } from '../i18n/common'
 
 export type HeroGender = 'male' | 'female'
-export const GENDERS: readonly HeroGender[] = ['male', 'female']
+const GENDERS: readonly HeroGender[] = ['male', 'female']
 
 /**
  * D149: the hero's gender as one segmented row, like the stance control. Purely cosmetic. With `name`, a hidden input

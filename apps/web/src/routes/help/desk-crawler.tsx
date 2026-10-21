@@ -4,6 +4,7 @@ import { ProsePage } from '../../lib/prose'
 import { DESK_CRAWLER_OG, seo } from '../../lib/seo'
 import { useLocale } from '../../lib/i18n'
 import { contentsOf, type HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 import { en } from './-deskCrawlerHelp.en'
 import { fr } from './-deskCrawlerHelp.fr'
 import { de } from './-deskCrawlerHelp.de'
@@ -17,7 +18,7 @@ import { nl } from './-deskCrawlerHelp.nl'
 const PAGES: Readonly<Record<Locale, HelpPage>> = { en, fr, de, es, it, pt, pl, nl }
 
 export const Route = createFileRoute('/help/desk-crawler')({
-  head: ({ match: { context: { locale } } }) => seo({ title: PAGES[locale].seoTitle, path: '/help/desk-crawler', description: PAGES[locale].description, image: DESK_CRAWLER_OG, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: DESK_CRAWLER_HELP_HEAD[locale].seoTitle, path: '/help/desk-crawler', description: DESK_CRAWLER_HELP_HEAD[locale].description, image: DESK_CRAWLER_OG, locale }),
   component: HelpRoute,
 })
 

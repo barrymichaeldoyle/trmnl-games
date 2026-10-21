@@ -2,6 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const t = contentTranslator('pl')
 const n = (value: number) => t.number(value)
@@ -47,8 +48,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const pl: HelpPage = {
-  seoTitle: 'Desk Crawler: pomoc i instalacja',
-  description: 'Jak zainstalować Desk Crawler na TRMNL i jak działa każda część gry, z rozwiązaniami na wypadek, gdy ekran wydaje się nieaktualny.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.pl.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.pl.description,
   title: 'Desk Crawler na TRMNL',
   contents: {
     'getting-started': 'Pierwsze kroki', 'if-the-qr-sends-you-back-to-setup': 'Gdy kod QR odsyła do instalacji', 'how-time-works': 'Jak płynie czas', floors: 'Piętra', 'desk-keepsakes': 'Pamiątki z biurka', career: 'Kariera', 'heroes-and-classes': 'Bohaterowie i klasy', stances: 'Postawy', 'desk-raids': 'Rajdy na biurka', meetings: 'Spotkania', 'lost-property': 'Rzeczy znalezione', 'to-do-list': 'Lista zadań', potions: 'Mikstury', 'the-wandering-merchant': 'Wędrowny kupiec', decisions: 'Decyzje', effects: 'Efekty', 'office-calendar': 'Kalendarz biura', 'rare-and-epic-gear': 'Rzadki i epicki sprzęt', 'when-your-bag-fills-up': 'Gdy torba się zapełni', 'bigger-bags': 'Większe torby', 'salvage-and-the-workbench': 'Rozbiórka i warsztat', 'getting-knocked-out': 'Nokaut', recaps: 'Podsumowania', 'understanding-rankings': 'Jak działają rankingi', 'sharing-your-hero': 'Udostępnianie bohatera', 'following': 'Obserwowani', names: 'Nazwy', gender: 'Płeć', alerts: 'Alerty', troubleshooting: 'Rozwiązywanie problemów', 'disconnecting-and-removing': 'Odłączanie i usuwanie', help: 'Pomoc',

@@ -4,7 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
 import { messagesFor, useT } from '../../../lib/i18n'
-import { dcMoreMessages } from '../../../i18n/dcMore'
+import { headMessages } from '../../../i18n/heads'
 import { dcPagesMessages } from '../../../i18n/dcPages'
 import { preload } from '../../../lib/preload'
 import { LoadingState } from '../../../lib/ui'
@@ -12,7 +12,7 @@ import { CareerLadder, type CareerView, type UnlockView } from './-career'
 
 /** The career ladder on its own page under More (P35): every rung in order, and which features the hero's level has opened. */
 export const Route = createFileRoute('/app/desk-crawler/career')({
-  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcMoreMessages, locale).links.career.label, index: false, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcCareer, index: false, locale }),
   loader: ({ context }) => preload(context, convexQuery(api.heroes.mine, {})),
   component: CareerPage,
 })

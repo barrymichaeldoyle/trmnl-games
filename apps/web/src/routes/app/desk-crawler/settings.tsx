@@ -8,6 +8,7 @@ import { useIntent } from '../../../lib/intent'
 import { captureAnalytics } from '../../../lib/analytics'
 import { seo } from '../../../lib/seo'
 import { messagesFor, useT } from '../../../lib/i18n'
+import { headMessages } from '../../../i18n/heads'
 import { dcMoreMessages } from '../../../i18n/dcMore'
 import { Button, Card, LoadingState, NoticeBar, useFocusWithin, useNotice } from '../../../lib/ui'
 import { preload } from '../../../lib/preload'
@@ -16,7 +17,7 @@ import { MoreLinks } from './-moreLinks'
 import { Makeover, NameTag } from './-shop'
 
 /** The More tab (D124): the pages that are not play (achievements, keepsakes, the device) above the settings. */
-export const Route = createFileRoute('/app/desk-crawler/settings')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcMoreMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.connections.mine, {}), convexQuery(api.alerts.mine, {})), component: Settings })
+export const Route = createFileRoute('/app/desk-crawler/settings')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcMore, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.connections.mine, {}), convexQuery(api.alerts.mine, {})), component: Settings })
 
 function Settings() {
   const { data: me } = useQuery(convexQuery(api.users.me, {}))

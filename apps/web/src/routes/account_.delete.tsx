@@ -7,6 +7,7 @@ import { SwitchAccount } from '../lib/switchAccount'
 import { Button } from '../lib/ui'
 import { captureDeletionLink, confirmAccountDeletion, pendingDeletionLink } from '../server/deletionFns'
 import { documentLocale, messagesFor, useT } from '../lib/i18n'
+import { headMessages } from '../i18n/heads'
 import { accountMessages } from '../i18n/account'
 import { serverMessage } from '../i18n/serverMessages'
 
@@ -24,7 +25,7 @@ export const Route = createFileRoute('/account_/delete')({
   loader: () => pendingDeletionLink(),
   headers: () => ({ 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'X-Robots-Tag': 'noindex' }),
   head: ({ match: { context: { locale } } }) => {
-    const head = seo({ title: messagesFor(accountMessages, locale).deleteTitle, index: false, locale })
+    const head = seo({ title: messagesFor(headMessages, locale).accountDelete, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: DeletePage,

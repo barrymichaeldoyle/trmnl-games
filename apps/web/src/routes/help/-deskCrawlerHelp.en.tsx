@@ -1,6 +1,7 @@
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const gold = (n: number) => `${n.toLocaleString('en-US')} gold`
 const and = (parts: readonly string[], last = 'and') => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} ${last} ${parts.at(-1)}`)
@@ -37,8 +38,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const en: HelpPage = {
-  seoTitle: 'Desk Crawler help and setup',
-  description: 'How to set up Desk Crawler on TRMNL and how each part of the game works, with fixes for a screen that looks out of date.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.en.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.en.description,
   title: 'Desk Crawler on TRMNL',
   contents: {
     'getting-started': 'Getting started', 'if-the-qr-sends-you-back-to-setup': 'If the QR sends you back to setup', 'how-time-works': 'How time works', floors: 'Floors', 'desk-keepsakes': 'Desk keepsakes', career: 'Career', 'heroes-and-classes': 'Heroes and classes', stances: 'Stances', 'desk-raids': 'Desk raids', meetings: 'Meetings', 'lost-property': 'Lost property', 'to-do-list': 'To-do list', potions: 'Potions', 'the-wandering-merchant': 'The wandering merchant', decisions: 'Decisions', effects: 'Effects', 'office-calendar': 'Office calendar', 'rare-and-epic-gear': 'Rare and epic gear', 'when-your-bag-fills-up': 'When your bag fills up', 'bigger-bags': 'Bigger bags', 'salvage-and-the-workbench': 'Salvage and the workbench', 'getting-knocked-out': 'Getting knocked out', recaps: 'Recaps', 'understanding-rankings': 'Understanding rankings', 'sharing-your-hero': 'Sharing your hero', 'following': 'Following', names: 'Names', gender: 'Gender', alerts: 'Alerts', troubleshooting: 'Troubleshooting', 'disconnecting-and-removing': 'Disconnecting and removing', help: 'Help',

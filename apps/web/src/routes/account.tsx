@@ -12,11 +12,12 @@ import { Button, ErrorNote } from '../lib/ui'
 import { seo } from '../lib/seo'
 import { preload } from '../lib/preload'
 import { formatDate, messagesFor, useLocale, useT, writeLocaleCookie } from '../lib/i18n'
+import { headMessages } from '../i18n/heads'
 import { accountMessages } from '../i18n/account'
 import { LOCALES, LOCALE_NAMES, LANGUAGES_LIVE, isLocale, type Locale } from '@trmnl-games/platform'
 import { useMutation } from 'convex/react'
 
-export const Route = createFileRoute('/account')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(accountMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {})), component: () => <AuthShell><Account /></AuthShell> })
+export const Route = createFileRoute('/account')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).account, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.users.me, {})), component: () => <AuthShell><Account /></AuthShell> })
 
 function Account() {
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))

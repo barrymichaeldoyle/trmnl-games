@@ -1,9 +1,10 @@
 import { defineMessages } from '../lib/i18n'
+import { headMessages } from './heads'
 
 /** D200: Idle Angler's TRMNL install and manage pages. TRMNL's own buttons are named as TRMNL's app names them. */
 export const iaConnect = defineMessages({
   en: {
-    connectTitle: 'Connect TRMNL',
+    connectTitle: headMessages.en.iaConnect,
     invalidInstall: 'That installation link was not valid.',
     startFrom: 'Start from the Idle Angler plugin in your TRMNL account and choose Install. TRMNL will bring you back here.',
     setupHelp: 'Help with setup',
@@ -21,7 +22,7 @@ export const iaConnect = defineMessages({
     connecting: 'Connecting…',
     connect: 'Connect this TRMNL installation',
     nextSave: 'Next, TRMNL asks you to save the plugin. Saving starts your angler fishing at the Millpond.',
-    manageTitle: 'Manage TRMNL',
+    manageTitle: headMessages.en.iaManage,
     onTrmnl: 'Idle Angler on TRMNL',
     invalidLink: 'That link expired or was not valid.',
     openFrom: 'Open Idle Angler from your TRMNL plugin settings and choose Configure to manage this installation.',
@@ -48,7 +49,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Installation disconnected.',
   },
   fr: {
-    connectTitle: 'Connecter TRMNL',
+    connectTitle: headMessages.fr.iaConnect,
     invalidInstall: 'Ce lien d’installation n’était pas valide.',
     startFrom: 'Partez du plugin Idle Angler dans votre compte TRMNL et choisissez Installer. TRMNL vous ramènera ici.',
     setupHelp: 'Aide à la configuration',
@@ -66,7 +67,7 @@ export const iaConnect = defineMessages({
     connecting: 'Connexion…',
     connect: 'Connecter cette installation TRMNL',
     nextSave: 'Ensuite, TRMNL vous demande d’enregistrer le plugin. L’enregistrement lance votre pêcheur à l’Étang du moulin.',
-    manageTitle: 'Gérer TRMNL',
+    manageTitle: headMessages.fr.iaManage,
     onTrmnl: 'Idle Angler sur TRMNL',
     invalidLink: 'Ce lien a expiré ou n’était pas valide.',
     openFrom: 'Ouvrez Idle Angler depuis les réglages des plugins TRMNL et choisissez Configurer pour gérer cette installation.',
@@ -93,7 +94,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Installation déconnectée.',
   },
   de: {
-    connectTitle: 'TRMNL verbinden',
+    connectTitle: headMessages.de.iaConnect,
     invalidInstall: 'Dieser Installationslink war ungültig.',
     startFrom: 'Starte beim Idle-Angler-Plugin in deinem TRMNL-Konto und wähle Installieren. TRMNL bringt dich hierher zurück.',
     setupHelp: 'Hilfe zur Einrichtung',
@@ -111,7 +112,7 @@ export const iaConnect = defineMessages({
     connecting: 'Wird verbunden…',
     connect: 'Diese TRMNL-Installation verbinden',
     nextSave: 'Als Nächstes bittet dich TRMNL, das Plugin zu speichern. Mit dem Speichern beginnt dein Angler am Mühlteich.',
-    manageTitle: 'TRMNL verwalten',
+    manageTitle: headMessages.de.iaManage,
     onTrmnl: 'Idle Angler auf TRMNL',
     invalidLink: 'Dieser Link ist abgelaufen oder war ungültig.',
     openFrom: 'Öffne Idle Angler in deinen TRMNL-Plugin-Einstellungen und wähle Konfigurieren, um diese Installation zu verwalten.',
@@ -138,7 +139,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Installation getrennt.',
   },
   es: {
-    connectTitle: 'Conectar TRMNL',
+    connectTitle: headMessages.es.iaConnect,
     invalidInstall: 'Ese enlace de instalación no era válido.',
     startFrom: 'Empieza desde el plugin Idle Angler en tu cuenta de TRMNL y elige Instalar. TRMNL te traerá de vuelta aquí.',
     setupHelp: 'Ayuda para configurarlo',
@@ -156,7 +157,7 @@ export const iaConnect = defineMessages({
     connecting: 'Conectando…',
     connect: 'Conectar esta instalación de TRMNL',
     nextSave: 'Después, TRMNL te pide guardar el plugin. Al guardar, tu pescador empieza en el Estanque del molino.',
-    manageTitle: 'Gestionar TRMNL',
+    manageTitle: headMessages.es.iaManage,
     onTrmnl: 'Idle Angler en TRMNL',
     invalidLink: 'Ese enlace caducó o no era válido.',
     openFrom: 'Abre Idle Angler desde los ajustes de plugins de TRMNL y elige Configurar para gestionar esta instalación.',
@@ -183,7 +184,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Instalación desconectada.',
   },
   it: {
-    connectTitle: 'Collega TRMNL',
+    connectTitle: headMessages.it.iaConnect,
     invalidInstall: 'Quel link di installazione non era valido.',
     startFrom: 'Parti dal plugin Idle Angler nel tuo account TRMNL e scegli Installa. TRMNL ti riporterà qui.',
     setupHelp: 'Aiuto per la configurazione',
@@ -201,7 +202,7 @@ export const iaConnect = defineMessages({
     connecting: 'Collegamento…',
     connect: 'Collega questa installazione TRMNL',
     nextSave: 'Poi TRMNL ti chiede di salvare il plugin. Salvando, il tuo pescatore inizia allo Stagno del mulino.',
-    manageTitle: 'Gestisci TRMNL',
+    manageTitle: headMessages.it.iaManage,
     onTrmnl: 'Idle Angler su TRMNL',
     invalidLink: 'Quel link è scaduto o non era valido.',
     openFrom: 'Apri Idle Angler dalle impostazioni dei plugin TRMNL e scegli Configura per gestire questa installazione.',
@@ -228,7 +229,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Installazione scollegata.',
   },
   pt: {
-    connectTitle: 'Conectar o TRMNL',
+    connectTitle: headMessages.pt.iaConnect,
     invalidInstall: 'Esse link de instalação não era válido.',
     startFrom: 'Comece pelo plugin Idle Angler na sua conta TRMNL e escolha Instalar. O TRMNL vai trazer você de volta para cá.',
     setupHelp: 'Ajuda com a configuração',
@@ -246,7 +247,7 @@ export const iaConnect = defineMessages({
     connecting: 'Conectando…',
     connect: 'Conectar esta instalação do TRMNL',
     nextSave: 'Em seguida, o TRMNL pede para salvar o plugin. Ao salvar, seu pescador começa no Lago do moinho.',
-    manageTitle: 'Gerenciar o TRMNL',
+    manageTitle: headMessages.pt.iaManage,
     onTrmnl: 'Idle Angler no TRMNL',
     invalidLink: 'Esse link expirou ou não era válido.',
     openFrom: 'Abra o Idle Angler nas configurações de plugins do TRMNL e escolha Configurar para gerenciar esta instalação.',
@@ -273,7 +274,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Instalação desconectada.',
   },
   pl: {
-    connectTitle: 'Połącz TRMNL',
+    connectTitle: headMessages.pl.iaConnect,
     invalidInstall: 'Ten link instalacyjny był nieprawidłowy.',
     startFrom: 'Zacznij od pluginu Idle Angler na swoim koncie TRMNL i wybierz „Instaluj”. TRMNL przyprowadzi cię tu z powrotem.',
     setupHelp: 'Pomoc w konfiguracji',
@@ -291,7 +292,7 @@ export const iaConnect = defineMessages({
     connecting: 'Łączenie…',
     connect: 'Połącz tę instalację TRMNL',
     nextSave: 'Potem TRMNL poprosi o zapisanie pluginu. Po zapisaniu twój wędkarz zacznie łowić nad Stawem młyńskim.',
-    manageTitle: 'Zarządzaj TRMNL',
+    manageTitle: headMessages.pl.iaManage,
     onTrmnl: 'Idle Angler na TRMNL',
     invalidLink: 'Ten link wygasł lub był nieprawidłowy.',
     openFrom: 'Otwórz Idle Angler w ustawieniach pluginów TRMNL i wybierz „Konfiguruj”, aby zarządzać tą instalacją.',
@@ -318,7 +319,7 @@ export const iaConnect = defineMessages({
     disconnected: 'Instalacja rozłączona.',
   },
   nl: {
-    connectTitle: 'TRMNL koppelen',
+    connectTitle: headMessages.nl.iaConnect,
     invalidInstall: 'Die installatielink was niet geldig.',
     startFrom: 'Begin bij de Idle Angler-plugin in je TRMNL-account en kies Installeren. TRMNL brengt je hier terug.',
     setupHelp: 'Hulp bij instellen',
@@ -336,7 +337,7 @@ export const iaConnect = defineMessages({
     connecting: 'Koppelen…',
     connect: 'Deze TRMNL-installatie koppelen',
     nextSave: 'Daarna vraagt TRMNL je de plugin op te slaan. Na het opslaan begint je visser bij de Molenvijver.',
-    manageTitle: 'TRMNL beheren',
+    manageTitle: headMessages.nl.iaManage,
     onTrmnl: 'Idle Angler op TRMNL',
     invalidLink: 'Die link is verlopen of was niet geldig.',
     openFrom: 'Open Idle Angler via je TRMNL-plugininstellingen en kies Configureer om deze installatie te beheren.',

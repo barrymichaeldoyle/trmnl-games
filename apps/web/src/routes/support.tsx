@@ -2,10 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ProsePage, SPONSOR_URL, SUPPORT_EMAIL } from '../lib/prose'
 import { seo } from '../lib/seo'
 import { messagesFor, useT } from '../lib/i18n'
+import { headMessages } from '../i18n/heads'
 import { pagesMessages } from '../i18n/pages'
 
 export const Route = createFileRoute('/support')({
-  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(pagesMessages, locale).supportTitle, path: '/support', description: messagesFor(pagesMessages, locale).supportDescription, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).support, path: '/support', description: messagesFor(headMessages, locale).supportDescription, locale }),
   component: Support,
 })
 

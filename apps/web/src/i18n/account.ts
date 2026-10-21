@@ -1,9 +1,10 @@
 import { defineMessages } from '../lib/i18n'
+import { headMessages } from './heads'
 
 /** D169: the account page and the account deletion flow. */
 export const accountMessages = defineMessages({
   en: {
-    title: 'Account',
+    title: headMessages.en.account,
     loading: 'Loading your account…',
     offline: 'You are offline. Reconnect to request the email.',
     playingAsBefore: 'Playing as ',
@@ -39,7 +40,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Used here and on your TRMNL screens. Automatic follows your browser here and your TRMNL account’s language on the screen.',
     automatic: 'Automatic',
     languageSaved: 'Language saved.',
-    deleteTitle: 'Confirm account deletion',
+    deleteTitle: headMessages.en.accountDelete,
     linkUnavailable: 'That deletion link is expired or unavailable.',
     requestNewLink: 'Request a new link from Account',
     stillActive: 'Your account is still active. Opening this page does not delete anything.',
@@ -56,7 +57,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Keep my account',
   },
   fr: {
-    title: 'Compte',
+    title: headMessages.fr.account,
     loading: 'Chargement de votre compte…',
     offline: 'Vous êtes hors ligne. Reconnectez-vous pour demander l’e-mail.',
     playingAsBefore: 'Vous jouez sous le nom ',
@@ -92,7 +93,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Utilisée ici et sur vos écrans TRMNL. Automatique suit votre navigateur ici et la langue de votre compte TRMNL sur l’écran.',
     automatic: 'Automatique',
     languageSaved: 'Langue enregistrée.',
-    deleteTitle: 'Confirmer la suppression du compte',
+    deleteTitle: headMessages.fr.accountDelete,
     linkUnavailable: 'Ce lien de suppression a expiré ou n’est plus disponible.',
     requestNewLink: 'Demander un nouveau lien depuis Compte',
     stillActive: 'Votre compte est toujours actif. Ouvrir cette page ne supprime rien.',
@@ -109,7 +110,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Garder mon compte',
   },
   de: {
-    title: 'Konto',
+    title: headMessages.de.account,
     loading: 'Dein Konto wird geladen …',
     offline: 'Du bist offline. Verbinde dich neu, um die E-Mail anzufordern.',
     playingAsBefore: 'Du spielst als ',
@@ -145,7 +146,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Gilt hier und auf deinen TRMNL-Bildschirmen. Automatisch folgt hier deinem Browser und auf dem Bildschirm der Sprache deines TRMNL-Kontos.',
     automatic: 'Automatisch',
     languageSaved: 'Sprache gespeichert.',
-    deleteTitle: 'Kontolöschung bestätigen',
+    deleteTitle: headMessages.de.accountDelete,
     linkUnavailable: 'Dieser Löschlink ist abgelaufen oder nicht verfügbar.',
     requestNewLink: 'Unter Konto einen neuen Link anfordern',
     stillActive: 'Dein Konto ist noch aktiv. Das Öffnen dieser Seite löscht nichts.',
@@ -162,7 +163,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Mein Konto behalten',
   },
   es: {
-    title: 'Cuenta',
+    title: headMessages.es.account,
     loading: 'Cargando tu cuenta…',
     offline: 'Estás sin conexión. Vuelve a conectarte para pedir el correo.',
     playingAsBefore: 'Juegas como ',
@@ -198,7 +199,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Se usa aquí y en tus pantallas TRMNL. Automático sigue a tu navegador aquí y al idioma de tu cuenta de TRMNL en la pantalla.',
     automatic: 'Automático',
     languageSaved: 'Idioma guardado.',
-    deleteTitle: 'Confirmar el borrado de la cuenta',
+    deleteTitle: headMessages.es.accountDelete,
     linkUnavailable: 'Ese enlace de borrado ha caducado o no está disponible.',
     requestNewLink: 'Pide un enlace nuevo desde Cuenta',
     stillActive: 'Tu cuenta sigue activa. Abrir esta página no borra nada.',
@@ -215,7 +216,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Conservar mi cuenta',
   },
   it: {
-    title: 'Account',
+    title: headMessages.it.account,
     loading: 'Caricamento del tuo account…',
     offline: 'Sei offline. Riconnettiti per richiedere l’e-mail.',
     playingAsBefore: 'Giochi come ',
@@ -251,7 +252,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Vale qui e sui tuoi schermi TRMNL. Automatica segue il browser qui e la lingua del tuo account TRMNL sullo schermo.',
     automatic: 'Automatica',
     languageSaved: 'Lingua salvata.',
-    deleteTitle: 'Conferma l’eliminazione dell’account',
+    deleteTitle: headMessages.it.accountDelete,
     linkUnavailable: 'Quel link di eliminazione è scaduto o non è disponibile.',
     requestNewLink: 'Chiedi un nuovo link da Account',
     stillActive: 'Il tuo account è ancora attivo. Aprire questa pagina non elimina niente.',
@@ -268,7 +269,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Tieni il mio account',
   },
   pt: {
-    title: 'Conta',
+    title: headMessages.pt.account,
     loading: 'Carregando sua conta…',
     offline: 'Você está offline. Reconecte para pedir o e-mail.',
     playingAsBefore: 'Jogando como ',
@@ -304,7 +305,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Usado aqui e nas suas telas TRMNL. Automático segue o navegador aqui e o idioma da sua conta TRMNL na tela.',
     automatic: 'Automático',
     languageSaved: 'Idioma salvo.',
-    deleteTitle: 'Confirmar a exclusão da conta',
+    deleteTitle: headMessages.pt.accountDelete,
     linkUnavailable: 'Esse link de exclusão expirou ou não está disponível.',
     requestNewLink: 'Peça um link novo em Conta',
     stillActive: 'Sua conta continua ativa. Abrir esta página não exclui nada.',
@@ -321,7 +322,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Manter minha conta',
   },
   pl: {
-    title: 'Konto',
+    title: headMessages.pl.account,
     loading: 'Wczytywanie konta…',
     offline: 'Jesteś offline. Połącz się ponownie, aby poprosić o maila.',
     playingAsBefore: 'Grasz jako ',
@@ -357,7 +358,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Używany tutaj i na twoich ekranach TRMNL. Automatyczny język podąża tu za przeglądarką, a na ekranie za językiem konta TRMNL.',
     automatic: 'Automatyczny',
     languageSaved: 'Zapisano język.',
-    deleteTitle: 'Potwierdź usunięcie konta',
+    deleteTitle: headMessages.pl.accountDelete,
     linkUnavailable: 'Ten link do usunięcia wygasł lub jest niedostępny.',
     requestNewLink: 'Poproś o nowy link w zakładce Konto',
     stillActive: 'Twoje konto jest nadal aktywne. Otwarcie tej strony niczego nie usuwa.',
@@ -374,7 +375,7 @@ export const accountMessages = defineMessages({
     keepAccount: 'Zachowaj moje konto',
   },
   nl: {
-    title: 'Account',
+    title: headMessages.nl.account,
     loading: 'Je account wordt geladen…',
     offline: 'Je bent offline. Maak opnieuw verbinding om de e-mail aan te vragen.',
     playingAsBefore: 'Je speelt als ',
@@ -410,7 +411,7 @@ export const accountMessages = defineMessages({
     languageBody: 'Geldt hier en op je TRMNL-schermen. Automatisch volgt hier je browser en op het scherm de taal van je TRMNL-account.',
     automatic: 'Automatisch',
     languageSaved: 'Taal opgeslagen.',
-    deleteTitle: 'Verwijderen van je account bevestigen',
+    deleteTitle: headMessages.nl.accountDelete,
     linkUnavailable: 'Die verwijderlink is verlopen of niet beschikbaar.',
     requestNewLink: 'Vraag via Account een nieuwe link aan',
     stillActive: 'Je account is nog actief. Deze pagina openen verwijdert niets.',

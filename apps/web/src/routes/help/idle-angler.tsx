@@ -4,7 +4,8 @@ import { requireOpenGame } from '../../lib/gameAccess'
 import { useLocale } from '../../lib/i18n'
 import { ProsePage } from '../../lib/prose'
 import { seo } from '../../lib/seo'
-import { contentsOf, SAMPLE_IMAGE, type HelpPage } from './-idleAnglerHelp'
+import { contentsOf, type HelpPage } from './-idleAnglerHelp'
+import { IDLE_ANGLER_HELP_HEAD, SAMPLE_IMAGE } from './-helpHeads'
 import { en } from './-idleAnglerHelp.en'
 import { fr } from './-idleAnglerHelp.fr'
 import { de } from './-idleAnglerHelp.de'
@@ -20,7 +21,7 @@ const PAGES: Readonly<Record<Locale, HelpPage>> = { en, fr, de, es, it, pt, pl, 
 /** Idle Angler help (idle-angler.md "Companion"). Hidden with the game until it is live (D115). */
 export const Route = createFileRoute('/help/idle-angler')({
   loader: ({ context }) => requireOpenGame(context, 'idle-angler'),
-  head: ({ match: { context: { locale } } }) => seo({ title: PAGES[locale].seoTitle, path: '/help/idle-angler', description: PAGES[locale].description, image: SAMPLE_IMAGE, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: IDLE_ANGLER_HELP_HEAD[locale].seoTitle, path: '/help/idle-angler', description: IDLE_ANGLER_HELP_HEAD[locale].description, image: SAMPLE_IMAGE, locale }),
   component: HelpRoute,
 })
 

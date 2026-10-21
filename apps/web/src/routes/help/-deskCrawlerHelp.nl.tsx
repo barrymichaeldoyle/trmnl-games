@@ -2,6 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const t = contentTranslator('nl')
 const n = (value: number) => t.number(value)
@@ -42,8 +43,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const nl: HelpPage = {
-  seoTitle: 'Desk Crawler: hulp en installatie',
-  description: 'Hoe je Desk Crawler op TRMNL installeert en hoe elk onderdeel van het spel werkt, met oplossingen als het scherm achterloopt.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.nl.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.nl.description,
   title: 'Desk Crawler op TRMNL',
   contents: {
     'getting-started': 'Aan de slag', 'if-the-qr-sends-you-back-to-setup': 'Als de QR je terugstuurt naar de installatie', 'how-time-works': 'Hoe de tijd verloopt', floors: 'Verdiepingen', 'desk-keepsakes': 'Bureau-aandenkens', career: 'Carrière', 'heroes-and-classes': 'Helden en klassen', stances: 'Houdingen', 'desk-raids': 'Bureauraids', meetings: 'Vergaderingen', 'lost-property': 'Gevonden voorwerpen', 'to-do-list': 'Takenlijst', potions: 'Drankjes', 'the-wandering-merchant': 'De rondtrekkende koopman', decisions: 'Beslissingen', effects: 'Effecten', 'office-calendar': 'Kantoorkalender', 'rare-and-epic-gear': 'Zeldzame en epische uitrusting', 'when-your-bag-fills-up': 'Als je tas vol raakt', 'bigger-bags': 'Grotere tassen', 'salvage-and-the-workbench': 'Demonteren en de werkbank', 'getting-knocked-out': 'Knock-out gaan', recaps: 'Samenvattingen', 'understanding-rankings': 'Hoe de ranglijsten werken', 'sharing-your-hero': 'Je held delen', 'following': 'Volgen', names: 'Namen', gender: 'Geslacht', alerts: 'Meldingen', troubleshooting: 'Problemen oplossen', 'disconnecting-and-removing': 'Ontkoppelen en verwijderen', help: 'Hulp',

@@ -5,6 +5,7 @@ import { PRIVACY_UPDATED, ProsePage } from '../lib/prose'
 import { seo } from '../lib/seo'
 import { formatDate, useLocale } from '../lib/i18n'
 import type { LegalPage } from './-legal'
+import { PRIVACY_HEAD } from './-legalHeads'
 import { privacyEn } from './-privacy.en'
 import { privacyFr } from './-privacy.fr'
 import { privacyDe } from './-privacy.de'
@@ -29,7 +30,7 @@ function ListedGame({ slug, Part }: { slug: string; Part?: LegalPage['IdleAngler
 }
 
 export const Route = createFileRoute('/privacy')({
-  head: ({ match: { context: { locale } } }) => seo({ title: PAGES[locale].title, path: '/privacy', description: PAGES[locale].description, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: PRIVACY_HEAD[locale].title, path: '/privacy', description: PRIVACY_HEAD[locale].description, locale }),
   component: Privacy,
 })
 

@@ -1,6 +1,6 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { preload } from '../../../lib/preload'
 import { Card } from '../../../lib/ui'

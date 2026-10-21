@@ -14,11 +14,12 @@ import { Glyph, type GlyphName } from '../../lib/glyphs'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import { gamesQuery } from '../../lib/gameAccess'
 import { messagesFor, useT } from '../../lib/i18n'
+import { headMessages } from '../../i18n/heads'
 import { dcShellMessages } from '../../i18n/dcShell'
 
 /** Companion shell: auth gate, setup states and mobile-first navigation (companion.md). */
 export const Route = createFileRoute('/app/desk-crawler')({
-  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcShellMessages, locale).title, index: false, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcShell, index: false, locale }),
   // The listing feeds the header's game switcher, so it is in the server render too.
   loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), gamesQuery),
   component: AppShell,
@@ -34,7 +35,7 @@ const NAV = [
   { to: '/app/desk-crawler/log', label: 'log', glyph: 'quest' },
   { to: '/app/desk-crawler/leaderboard', label: 'ranks', glyph: 'trophy' },
   { to: '/app/desk-crawler/settings', label: 'more', glyph: 'cog' },
-] as const satisfies ReadonlyArray<{ to: string; label: keyof (typeof dcShellMessages)['en']['nav']; glyph: GlyphName }>
+] as const satisfies ReadonlyArray<{ to: string; label: keyof (typeof import('../../i18n/dcShell'))['dcShellMessages']['en']['nav']; glyph: GlyphName }>
 
 function AppShell() {
   return <SignedInApp />

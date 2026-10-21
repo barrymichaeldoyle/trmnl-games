@@ -1,5 +1,6 @@
 import { contentTranslator, type ContentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { defineMessages, plForm } from '../lib/i18n'
+import { headMessages } from './heads'
 
 const fr = contentTranslator('fr')
 const de = contentTranslator('de')
@@ -21,7 +22,7 @@ const list = (parts: readonly string[], and: string) => (parts.length <= 1 ? par
 /** D169: the Bag page: gear, potions, sale and salvage, workbench, merchant, bigger bags, pouch, name tag and makeover. */
 export const dcBagMessages = defineMessages({
   en: {
-    title: 'Bag',
+    title: headMessages.en.dcBag,
     loading: 'Loading your bag…',
     stat: { weapon: 'attack', armor: 'defense' } as Record<'weapon' | 'armor', string>,
     statTitle: { weapon: 'Attack', armor: 'Defense' } as Record<'weapon' | 'armor', string>,
@@ -249,7 +250,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `Resuming at ${at ?? 'the next adventure'}, or the first adventure after that if updates run late.`,
   },
   fr: {
-    title: 'Sac',
+    title: headMessages.fr.dcBag,
     loading: 'Chargement de votre sac…',
     stat: { weapon: 'attaque', armor: 'défense' },
     statTitle: { weapon: 'Attaque', armor: 'Défense' },
@@ -477,7 +478,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `Reprise à ${at ?? 'la prochaine aventure'}, ou à l’aventure suivante si les mises à jour prennent du retard.`,
   },
   de: {
-    title: 'Tasche',
+    title: headMessages.de.dcBag,
     loading: 'Deine Tasche wird geladen …',
     stat: { weapon: 'Angriff', armor: 'Verteidigung' },
     statTitle: { weapon: 'Angriff', armor: 'Verteidigung' },
@@ -705,7 +706,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `${at === null ? 'Geht beim nächsten Abenteuer weiter' : `Geht um ${at} weiter`}, oder beim Abenteuer danach, falls die Updates sich verspäten.`,
   },
   es: {
-    title: 'Bolsa',
+    title: headMessages.es.dcBag,
     loading: 'Cargando tu bolsa…',
     stat: { weapon: 'ataque', armor: 'defensa' },
     statTitle: { weapon: 'Ataque', armor: 'Defensa' },
@@ -933,7 +934,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `Se reanuda ${at ? `a las ${at}` : 'en la próxima aventura'}, o en la primera después si las actualizaciones se retrasan.`,
   },
   it: {
-    title: 'Borsa',
+    title: headMessages.it.dcBag,
     loading: 'Caricamento della borsa…',
     stat: { weapon: 'attacco', armor: 'difesa' },
     statTitle: { weapon: 'Attacco', armor: 'Difesa' },
@@ -1161,7 +1162,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `Riparte ${at ? `alle ${at}` : 'alla prossima avventura'}, o alla prima successiva se gli aggiornamenti tardano.`,
   },
   pt: {
-    title: 'Bolsa',
+    title: headMessages.pt.dcBag,
     loading: 'Carregando sua bolsa…',
     stat: { weapon: 'ataque', armor: 'defesa' },
     statTitle: { weapon: 'Ataque', armor: 'Defesa' },
@@ -1389,7 +1390,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `Volta ${at ? `às ${at}` : 'na próxima aventura'}, ou na primeira depois disso se as atualizações atrasarem.`,
   },
   pl: {
-    title: 'Torba',
+    title: headMessages.pl.dcBag,
     loading: 'Wczytywanie torby…',
     stat: { weapon: 'atak', armor: 'obrona' },
     statTitle: { weapon: 'Atak', armor: 'Obrona' },
@@ -1617,7 +1618,7 @@ export const dcBagMessages = defineMessages({
     resumingAt: (at: string | null) => `Wznowienie ${at ? `o ${at}` : 'przy następnej przygodzie'} albo przy pierwszej po niej, jeśli aktualizacje się spóźnią.`,
   },
   nl: {
-    title: 'Tas',
+    title: headMessages.nl.dcBag,
     loading: 'Je tas wordt geladen…',
     stat: { weapon: 'aanval', armor: 'verdediging' },
     statTitle: { weapon: 'Aanval', armor: 'Verdediging' },

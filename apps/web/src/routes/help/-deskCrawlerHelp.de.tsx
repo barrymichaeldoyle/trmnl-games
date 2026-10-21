@@ -2,6 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const t = contentTranslator('de')
 const n = (value: number) => t.number(value)
@@ -41,8 +42,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const de: HelpPage = {
-  seoTitle: 'Desk Crawler: Hilfe und Einrichtung',
-  description: 'Wie du Desk Crawler auf TRMNL einrichtest und wie jeder Teil des Spiels funktioniert, mit Lösungen, wenn der Bildschirm veraltet aussieht.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.de.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.de.description,
   title: 'Desk Crawler auf TRMNL',
   contents: {
     'getting-started': 'Erste Schritte', 'if-the-qr-sends-you-back-to-setup': 'Wenn der QR-Code zur Einrichtung führt', 'how-time-works': 'Wie die Zeit vergeht', floors: 'Etagen', 'desk-keepsakes': 'Schreibtisch-Andenken', career: 'Karriere', 'heroes-and-classes': 'Helden und Klassen', stances: 'Haltungen', 'desk-raids': 'Schreibtisch-Überfälle', meetings: 'Begegnungen', 'lost-property': 'Fundsachen', 'to-do-list': 'To-do-Liste', potions: 'Tränke', 'the-wandering-merchant': 'Der fahrende Händler', decisions: 'Entscheidungen', effects: 'Effekte', 'office-calendar': 'Bürokalender', 'rare-and-epic-gear': 'Seltene und epische Ausrüstung', 'when-your-bag-fills-up': 'Wenn die Tasche voll ist', 'bigger-bags': 'Größere Taschen', 'salvage-and-the-workbench': 'Zerlegen und Werkbank', 'getting-knocked-out': 'K. o. gehen', recaps: 'Rückblicke', 'understanding-rankings': 'Ranglisten verstehen', 'sharing-your-hero': 'Deinen Helden teilen', 'following': 'Folgen', names: 'Namen', gender: 'Geschlecht', alerts: 'Benachrichtigungen', troubleshooting: 'Fehlerbehebung', 'disconnecting-and-removing': 'Trennen und entfernen', help: 'Hilfe',

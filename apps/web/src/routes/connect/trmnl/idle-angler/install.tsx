@@ -14,6 +14,7 @@ import { captureAnalytics, readAnalyticsConsent } from '../../../../lib/analytic
 import { reportError } from '../../../../lib/errorReporting'
 import { NameField } from '../../../../lib/nameField'
 import { messagesFor, useT } from '../../../../lib/i18n'
+import { headMessages } from '../../../../i18n/heads'
 import { iaConnect } from '../../../../i18n/iaConnect'
 
 type Search = { code?: string; installation_callback_url?: string; invalid?: boolean }
@@ -39,7 +40,7 @@ export const Route = createFileRoute('/connect/trmnl/idle-angler/install')({
     return await getPendingInstall({ data: { gameSlug: 'idle-angler' } })
   },
   head: ({ match: { context: { locale } } }) => {
-    const head = seo({ title: messagesFor(iaConnect, locale).connectTitle, index: false, locale })
+    const head = seo({ title: messagesFor(headMessages, locale).iaConnect, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: InstallPage,

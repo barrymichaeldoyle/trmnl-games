@@ -39,4 +39,3 @@ export const IA_FACTS = {
   gates: { river_bend: gate('river_bend'), harbour_pier: gate('harbour_pier'), heron_lake: gate('heron_lake'), deep_sea: gate('deep_sea'), frozen_tarn: gate('frozen_tarn') },
 } as const
 
-export const SAMPLE_IMAGE = { path: '/games/idle-angler/sample.png', alt: 'A sample Idle Angler screen' }

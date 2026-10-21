@@ -88,5 +88,3 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
   }
   return { run, pending, error, message, clearError: () => setError(null), clearFeedback: () => { setError(null); setMessage(null) } }
 }
-
-export const artUrl = (path: string) => `${import.meta.env.VITE_CONVEX_SITE_URL ?? ''}${path}`

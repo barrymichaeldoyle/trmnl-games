@@ -22,13 +22,14 @@ import { RosterCard } from './-rosterCard'
 import { WhatsNewCard } from './-whatsNew'
 import { IdleAnglerNote } from './-idleAnglerNote'
 import { messagesFor, useT } from '../../../lib/i18n'
+import { headMessages } from '../../../i18n/heads'
 import { useContent } from '../../../lib/useContent'
 import { dcHeroMessages } from '../../../i18n/dcHero'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
   // D180: a keepsake QR's six digits, collected by the callout and then dropped from the address.
   validateSearch: (search: Record<string, unknown>): { keepsake?: string } => (typeof search.keepsake === 'string' && /^\d{6}$/.test(search.keepsake) ? { keepsake: search.keepsake } : typeof search.keepsake === 'number' && Number.isInteger(search.keepsake) && search.keepsake >= 0 && search.keepsake < 1e6 ? { keepsake: String(search.keepsake).padStart(6, '0') } : {}),
-  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcHeroMessages, locale).title, index: false, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcHero, index: false, locale }),
   loader: ({ context }) =>
     preload(context, convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.returnSummary, {}), convexQuery(api.keepsakes.mine, {}), latestLogQuery()),
   component: HeroHome,

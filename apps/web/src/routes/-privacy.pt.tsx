@@ -1,10 +1,11 @@
 import { Link } from '@tanstack/react-router'
 import { SUPPORT_EMAIL } from '../lib/prose'
 import type { LegalPage } from './-legal'
+import { PRIVACY_HEAD } from './-legalHeads'
 
 export const privacyPt: LegalPage = {
-  title: 'Privacidade',
-  description: 'O que o TRMNL Games guarda, o que é público nos rankings e nas telas TRMNL, e como excluir sua conta.',
+  title: PRIVACY_HEAD.pt.title,
+  description: PRIVACY_HEAD.pt.description,
   translationNote: () => <p className="text-sm text-muted">Tradução da versão em inglês, que prevalece em caso de diferença.</p>,
   Body: () => (
     <>

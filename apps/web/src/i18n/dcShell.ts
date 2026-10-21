@@ -1,9 +1,10 @@
 import { defineMessages } from '../lib/i18n'
+import { headMessages } from './heads'
 
 /** D169: the Desk Crawler companion's frame: tabs and the setup states before a hero exists. */
 export const dcShellMessages = defineMessages({
   en: {
-    title: 'Companion',
+    title: headMessages.en.dcShell,
     nav: { hero: 'Hero', bag: 'Bag', log: 'Log', ranks: 'Ranks', more: 'More' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} slots used`,
@@ -25,7 +26,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Desk Crawler settings',
   },
   fr: {
-    title: 'Compagnon',
+    title: headMessages.fr.dcShell,
     nav: { hero: 'Héros', bag: 'Sac', log: 'Journal', ranks: 'Rangs', more: 'Plus' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} places utilisées`,
@@ -47,7 +48,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Réglages de Desk Crawler',
   },
   de: {
-    title: 'Begleit-App',
+    title: headMessages.de.dcShell,
     nav: { hero: 'Held', bag: 'Tasche', log: 'Log', ranks: 'Ränge', more: 'Mehr' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} Plätze belegt`,
@@ -69,7 +70,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Desk-Crawler-Einstellungen',
   },
   es: {
-    title: 'App complementaria',
+    title: headMessages.es.dcShell,
     nav: { hero: 'Héroe', bag: 'Bolsa', log: 'Diario', ranks: 'Tabla', more: 'Más' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} huecos ocupados`,
@@ -91,7 +92,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Ajustes de Desk Crawler',
   },
   it: {
-    title: 'App di supporto',
+    title: headMessages.it.dcShell,
     nav: { hero: 'Eroe', bag: 'Borsa', log: 'Diario', ranks: 'Podio', more: 'Altro' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} posti occupati`,
@@ -113,7 +114,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Impostazioni di Desk Crawler',
   },
   pt: {
-    title: 'App complementar',
+    title: headMessages.pt.dcShell,
     nav: { hero: 'Herói', bag: 'Bolsa', log: 'Diário', ranks: 'Placar', more: 'Mais' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} espaços ocupados`,
@@ -135,7 +136,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Configurações do Desk Crawler',
   },
   pl: {
-    title: 'Aplikacja towarzysząca',
+    title: headMessages.pl.dcShell,
     nav: { hero: 'Bohater', bag: 'Torba', log: 'Wpisy', ranks: 'Tabela', more: 'Więcej' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, zajęte miejsca: ${n}`,
@@ -157,7 +158,7 @@ export const dcShellMessages = defineMessages({
     settings: 'Ustawienia Desk Crawler',
   },
   nl: {
-    title: 'Begeleidende app',
+    title: headMessages.nl.dcShell,
     nav: { hero: 'Held', bag: 'Tas', log: 'Logboek', ranks: 'Stand', more: 'Meer' },
     navLabel: 'Desk Crawler',
     slotsUsed: (n: number) => `, ${n} plekken bezet`,

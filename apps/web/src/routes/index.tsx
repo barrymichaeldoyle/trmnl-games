@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 import { InstallCta, ScreenBezel } from '../lib/deskCrawlerPitch'
 import { FLOORS } from '../lib/facts.gen'
 import { Glyph, type GlyphName } from '../lib/glyphs'
-import { changeDay, latestChanges } from '../lib/changelog'
+import { changeDay, latestChanges } from '../lib/changelogRecent'
 import { IA_PITCH, IDLE_ANGLER_MARKETPLACE_URL, IdleAnglerCta, useMyAngler } from '../lib/idleAnglerPitch'
 import { NotifyMe } from '../lib/launchList'
 import { SITE_FRAME } from '../lib/platformHeader'
@@ -17,6 +17,7 @@ import { SiteShell } from '../lib/prose'
 import { BUTTON_PRIMARY, BUTTON_SECONDARY, LINK_BUTTON } from '../lib/ui'
 import { DESK_CRAWLER_JSON_LD, IDLE_ANGLER_JSON_LD, SITE_JSON_LD, seo } from '../lib/seo'
 import { messagesFor, useLocale, useT } from '../lib/i18n'
+import { headMessages } from '../i18n/heads'
 import { homeMessages } from '../i18n/home'
 import { iaGamePage } from '../i18n/iaGamePage'
 import { pitchMessages } from '../i18n/pitch'
@@ -26,7 +27,7 @@ export const Route = createFileRoute('/')({
   head: ({ match: { context: { locale } } }) => seo({
     path: '/',
     locale,
-    description: messagesFor(homeMessages, locale).description,
+    description: messagesFor(headMessages, locale).home,
     jsonLd: { '@context': 'https://schema.org', '@graph': [SITE_JSON_LD, DESK_CRAWLER_JSON_LD, IDLE_ANGLER_JSON_LD].map(({ '@context': _, ...node }) => node) },
   }),
   // No loader: the page is static, and the signed-in player's games load in the browser after it.
@@ -82,16 +83,18 @@ function YourGames() {
  * lands on whichever game the visitor points at, a figure from its catalog, its pitch and its one call to action. From
  * 1024px the two cards share rows (subgrid), so their screens, pitches and calls to action line up side by side.
  */
-function GameCard({ slug, alt, caption, facts, factGlyph, pitch, children }: { slug: 'desk-crawler' | 'idle-angler'; alt: string; caption: string; facts: string; factGlyph: GlyphName; pitch: string; children: ReactNode }) {
+function GameCard({ slug, alt, caption, facts, factGlyph, pitch, priority = false, children }: { slug: 'desk-crawler' | 'idle-angler'; alt: string; caption: string; facts: string; factGlyph: GlyphName; pitch: string; priority?: boolean; children: ReactNode }) {
   const t = useT(homeMessages)
   const name = games[slug].name
   return (
-    <li className="group window flex flex-col gap-5 p-4 outline-4 outline-offset-0 outline-transparent transition-[outline-color] duration-150 focus-within:outline-gold hover:outline-gold sm:p-6 lg:row-span-3 lg:grid lg:grid-rows-subgrid">
+    <li className="group window flex flex-col gap-5 p-4 outline-4 outline-offset-0 outline-transparent transition-[outline-color] duration-150 focus-within:outline-gold hover:outline-gold sm:p-6 lg:row-span-4 lg:grid lg:grid-rows-subgrid">
       <figure className="flex flex-col gap-2">
-        <Link to={games[slug].publicPath} tabIndex={-1} aria-hidden="true" className="block"><ScreenBezel slug={slug} alt={alt} sizes="(min-width: 1024px) 560px, 100vw" /></Link>
+        {/* The first cabinet's screen is the largest thing on the page at every width: it loads first, the second waits. */}
+        <Link to={games[slug].publicPath} tabIndex={-1} aria-hidden="true" className="block"><ScreenBezel slug={slug} alt={alt} priority={priority} sizes="(min-width: 1024px) 560px, 100vw" /></Link>
         <figcaption className="text-sm text-faint">{caption}</figcaption>
       </figure>
-      <div className="flex flex-col gap-2">
+      {/* Below 1024px the cards stack, so the name goes above the screen: a visitor reads which game it is before the pixels. */}
+      <div className="flex flex-col gap-2 max-lg:order-first">
         <h3 className="flex items-center gap-3 font-display text-3xl font-bold">
           {/* The select screen's cursor: hidden until this cabinet is pointed at or focused. */}
           <span aria-hidden="true" className="h-[15px] w-[9px] shrink-0 bg-[url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='3' height='5' shape-rendering='crispEdges'%3E%3Cpath fill='%23ffd166' d='M0 0h1v5H0zM1 1h1v3H1zM2 2h1v1H2z'/%3E%3C/svg%3E&quot;)] bg-contain bg-no-repeat opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100" />
@@ -99,8 +102,8 @@ function GameCard({ slug, alt, caption, facts, factGlyph, pitch, children }: { s
           <Link to={games[slug].publicPath} className="no-underline hover:text-gold-ink">{name}</Link>
         </h3>
         <p className="flex items-center gap-2 text-sm font-semibold text-muted"><Glyph name={factGlyph} size={16} className="text-gold-ink" />{facts}</p>
-        <p className="leading-relaxed text-muted">{pitch}</p>
       </div>
+      <p className="leading-relaxed text-muted">{pitch}</p>
       <div className="flex flex-col gap-4 border-t-2 border-rule pt-4 lg:self-start">
         {children}
         <Link to={games[slug].publicPath} className="inline-flex min-h-11 items-center self-start underline underline-offset-4">{t.about(name)}</Link>
@@ -122,9 +125,9 @@ function RecentChanges() {
       </div>
       <ul className="grid gap-4 lg:grid-cols-3">
         {latestChanges(3, locale).map((change) => (
-          <li key={change.title} className="window flex flex-col gap-2 p-5">
+          <li key={change.key} className="window flex flex-col gap-2 p-5">
             <time dateTime={change.date} className="text-sm font-semibold text-muted">{changeDay(change.date, true, locale)}</time>
-            <h3 className="font-display text-xl font-bold">{change.title}</h3>
+            <h3 className="font-display text-xl font-bold"><Link to="/whats-new" hash={change.key} className="no-underline hover:text-gold-ink">{change.title}</Link></h3>
             <p className="line-clamp-4 leading-relaxed text-muted">{change.body}</p>
           </li>
         ))}
@@ -152,7 +155,7 @@ function Home() {
           <section aria-labelledby="pick-heading" className="flex flex-col gap-4">
             <h2 id="pick-heading" className="sr-only">{t.pickHeading}</h2>
             <ul className="grid gap-6 lg:grid-cols-2 lg:gap-x-8">
-              <GameCard slug="desk-crawler" alt={pitch.sampleAlt} caption={pitch.homeCaption} facts={t.deskCrawlerFacts(FLOORS.length, monsters)} factGlyph="sword" pitch={t.deskCrawlerPitch}>
+              <GameCard slug="desk-crawler" alt={pitch.sampleAlt} caption={pitch.homeCaption} facts={t.deskCrawlerFacts(FLOORS.length, monsters)} factGlyph="sword" pitch={t.deskCrawlerPitch} priority>
                 <InstallCta place="home card" compact />
               </GameCard>
               <GameCard slug="idle-angler" alt={ia.sampleAlt} caption={ia.caption} facts={t.idleAnglerFacts(IA_PITCH.waters.length, IA_PITCH.species)} factGlyph="pin" pitch={t.idleAnglerPitch}>

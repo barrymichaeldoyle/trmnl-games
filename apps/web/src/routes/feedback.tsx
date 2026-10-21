@@ -10,6 +10,7 @@ import { seo } from '../lib/seo'
 import { Button, ErrorNote } from '../lib/ui'
 import { PRELOAD_CLERK_UI } from '../lib/clerkUi'
 import { messagesFor, useT } from '../lib/i18n'
+import { headMessages } from '../i18n/heads'
 import { pagesMessages } from '../i18n/pages'
 
 const MAX = 2000
@@ -18,7 +19,7 @@ const MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('TRMNL Game
 /** Player feedback (D107): one text box for signed-in players, email for everyone else. */
 export const Route = createFileRoute('/feedback')({
   validateSearch: (search: Record<string, unknown>): { from?: string } => (typeof search.from === 'string' && search.from.startsWith('/') ? { from: search.from.slice(0, 120) } : {}),
-  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(pagesMessages, locale).feedbackTitle, path: '/feedback', description: messagesFor(pagesMessages, locale).feedbackDescription, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).feedback, path: '/feedback', description: messagesFor(headMessages, locale).feedbackDescription, locale }),
   component: FeedbackPage,
 })
 

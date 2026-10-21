@@ -10,13 +10,14 @@ import { preload } from '../../../lib/preload'
 import { levelGroup } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { LocalTime } from '../../../lib/localTime'
 import { formatNumber, messagesFor, useLocale, useT } from '../../../lib/i18n'
+import { headMessages } from '../../../i18n/heads'
 import { INTL_TAG } from '@trmnl-games/platform'
 import { dcLogMessages } from '../../../i18n/dcLog'
 import { Records } from './-records'
 import { FollowingCard } from './-following'
 import { useShownName } from './-withName'
 
-export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcLogMessages, locale).rankingsTitle, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_7d' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
+export const Route = createFileRoute('/app/desk-crawler/leaderboard')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcRankings, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.leaderboard.view, { board: 'recent_7d' }), convexQuery(api.heroes.mine, {}), convexQuery(api.follows.list, {})), component: Leaderboard })
 
 type Board = 'recent_7d' | 'recent_24h' | 'overall'
 // Labels short enough to sit on one line in a third of a phone screen. Shortest period first, as a reader expects.

@@ -4,7 +4,7 @@ import { paintedSceneUri } from '@trmnl-games/desk-crawler/art/sceneColour'
 import { keepUnitsTogether } from '@trmnl-games/desk-crawler/payload'
 import { markedRuns } from '@trmnl-games/desk-crawler/sim/core/narrative'
 import { logPresentation, noEffectChip, type LogDeltas } from '@trmnl-games/desk-crawler/log'
-import { artUrl } from '../../../lib/intent'
+import { artUrl } from '../../../lib/artUrl'
 import { localSceneUrl, useMinute } from '../../../lib/localClock'
 import { changeTone } from './-logStory'
 

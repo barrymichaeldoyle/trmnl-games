@@ -5,8 +5,9 @@ import { lazy, Suspense } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
 import { messagesFor, useT } from '../../../lib/i18n'
+import { headMessages } from '../../../i18n/heads'
 import { dcPagesMessages } from '../../../i18n/dcPages'
-import { artUrl } from '../../../lib/intent'
+import { artUrl } from '../../../lib/artUrl'
 import { preload } from '../../../lib/preload'
 import { LoadingState } from '../../../lib/ui'
 import { latestLogQuery } from './-queries'
@@ -15,7 +16,7 @@ const DevicePreview = lazy(() => import('./-devicePreview').then((module) => ({ 
 
 /** What the owner's TRMNL is showing (companion.md "Display help"), on its own page under More (D124). */
 export const Route = createFileRoute('/app/desk-crawler/trmnl')({
-  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcPagesMessages, locale).trmnlTitle, index: false, locale }),
+  head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcTrmnl, index: false, locale }),
   loader: ({ context }) => preload(context, convexQuery(api.heroes.mine, {}), latestLogQuery()),
   component: DevicePage,
 })

@@ -2,6 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const t = contentTranslator('pt')
 const n = (value: number) => t.number(value)
@@ -47,8 +48,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const pt: HelpPage = {
-  seoTitle: 'Ajuda e instalação do Desk Crawler',
-  description: 'Como instalar o Desk Crawler no TRMNL e como funciona cada parte do jogo, com soluções para quando a tela parece desatualizada.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.pt.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.pt.description,
   title: 'Desk Crawler no TRMNL',
   contents: {
     'getting-started': 'Primeiros passos', 'if-the-qr-sends-you-back-to-setup': 'Se o QR leva de volta à instalação', 'how-time-works': 'Como o tempo passa', floors: 'Andares', 'desk-keepsakes': 'Lembrancinhas de mesa', career: 'Carreira', 'heroes-and-classes': 'Heróis e classes', stances: 'Posturas', 'desk-raids': 'Incursões de mesa', meetings: 'Reuniões', 'lost-property': 'Achados e perdidos', 'to-do-list': 'Lista de tarefas', potions: 'Poções', 'the-wandering-merchant': 'O mercador ambulante', decisions: 'Decisões', effects: 'Efeitos', 'office-calendar': 'Calendário do escritório', 'rare-and-epic-gear': 'Equipamento raro e épico', 'when-your-bag-fills-up': 'Quando a bolsa enche', 'bigger-bags': 'Bolsas maiores', 'salvage-and-the-workbench': 'Desmontar e a bancada', 'getting-knocked-out': 'Ser nocauteado', recaps: 'Resumos', 'understanding-rankings': 'Como funcionam os rankings', 'sharing-your-hero': 'Compartilhar seu herói', 'following': 'Seguir', names: 'Nomes', gender: 'Gênero', alerts: 'Alertas', troubleshooting: 'Solução de problemas', 'disconnecting-and-removing': 'Desconectar e remover', help: 'Ajuda',

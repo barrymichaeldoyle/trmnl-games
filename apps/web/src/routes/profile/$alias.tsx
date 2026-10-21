@@ -10,6 +10,7 @@ import { anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { FishIcon } from '../app/idle-angler/-art'
 import { FishName } from '../app/idle-angler/-fish'
 import { formatDate, messagesFor, useLocale, useT } from '../../lib/i18n'
+import { headMessages } from '../../i18n/heads'
 import { publicPagesMessages } from '../../i18n/publicPages'
 
 type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives' | 'little-plot'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
@@ -21,7 +22,7 @@ const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { 
 export const Route = createFileRoute('/profile/$alias')({
   loader: async ({ context, params }) => (await context.queryClient.ensureQueryData(profileQuery(params.alias))) as Profile,
   head: ({ loaderData, params, match: { context: { locale } } }) => {
-    const t = messagesFor(publicPagesMessages, locale)
+    const t = messagesFor(headMessages, locale)
     return loaderData
       ? seo({ title: t.profileTitle(loaderData.alias), path: `/profile/${encodeURIComponent(loaderData.alias)}`, description: t.profileDescription(loaderData.alias, loaderData.games.map((g) => games[g.slug].name)), locale })
       : seo({ title: t.playerNotFound, path: `/profile/${encodeURIComponent(params.alias)}`, index: false, locale })

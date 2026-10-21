@@ -4,11 +4,8 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { nextSlotAfter } from '@trmnl-games/desk-crawler/sim/schedule'
 import { api } from '@trmnl-games/backend/api'
-import { HERO_NAME_RULE } from '@trmnl-games/platform'
 import type { Id } from '@trmnl-games/backend/data-model'
 import { useIntent } from '../../../lib/intent'
-import { NameField, nameProblem } from '../../../lib/nameField'
-import { GENDERS, GenderPicker, type HeroGender } from '../../../lib/genderPicker'
 import { seo } from '../../../lib/seo'
 import { Glyph } from '../../../lib/glyphs'
 import { BUTTON_SECONDARY, Button, Card, ErrorNote, LINK_BUTTON, LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
@@ -22,12 +19,15 @@ import { ConfirmButtons, ConfirmSheet, Consequences } from './-confirm'
 import { BuySheet, Price, type PurchaseIntent } from './-shop'
 import { WithName } from './-withName'
 import { formatNumber, formatTime, messagesFor, useLocale, useT } from '../../../lib/i18n'
+import { headMessages } from '../../../i18n/heads'
 import { useContent } from '../../../lib/useContent'
 import { dcBagMessages, materialsList } from '../../../i18n/dcBag'
 
-type T = (typeof dcBagMessages)['en']
+// `typeof import()` rather than `typeof dcBagMessages`: a value reference here would keep the catalog in the route's
+// shared part, which the main bundle carries, so every page would load the Bag's copy.
+type T = (typeof import('../../../i18n/dcBag'))['dcBagMessages']['en']
 
-export const Route = createFileRoute('/app/desk-crawler/inventory')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(dcBagMessages, locale).title, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.mine, {})), component: Inventory })
+export const Route = createFileRoute('/app/desk-crawler/inventory')({ head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcBag, index: false, locale }), loader: ({ context }) => preload(context, convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.mine, {})), component: Inventory })
 
 type Gear = {
   id: Id<'items'>

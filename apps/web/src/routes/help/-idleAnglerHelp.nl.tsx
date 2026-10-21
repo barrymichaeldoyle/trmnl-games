@@ -1,14 +1,15 @@
 import { anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { SUPPORT_EMAIL } from '../../lib/support'
 import { IA_FACTS as F, type HelpPage } from './-idleAnglerHelp'
+import { IDLE_ANGLER_HELP_HEAD } from './-helpHeads'
 
 const w = anglerWords('nl')
 const n = (value: number) => w.number(value)
 const en_ = (parts: readonly string[]) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} en ${parts.at(-1)}`)
 
 export const nl: HelpPage = {
-  seoTitle: 'Hulp bij Idle Angler',
-  description: 'Zo vist Idle Angler op je TRMNL: aas, koelbox, hengels, wateren, seizoenen, logboek, weekend-Opens en vliegendoos.',
+  seoTitle: IDLE_ANGLER_HELP_HEAD.nl.seoTitle,
+  description: IDLE_ANGLER_HELP_HEAD.nl.description,
   title: 'Idle Angler op TRMNL',
   contents: {
     'getting-started': 'Aan de slag',

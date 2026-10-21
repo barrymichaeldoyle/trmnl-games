@@ -1,4 +1,5 @@
 import { defineMessages } from '../lib/i18n'
+import { headMessages } from './heads'
 
 type Step = { when: string; title: string; body: string }
 type Faq = ReadonlyArray<{ q: string; a: string }>
@@ -9,7 +10,7 @@ type Faq = ReadonlyArray<{ q: string; a: string }>
  */
 export const homeMessages = defineMessages({
   en: {
-    description: 'Free games that play themselves on your TRMNL e-ink display: Desk Crawler, an office RPG, and Idle Angler, a fishing game. Each one moves every 15 minutes on our servers, and your screen shows what happened.',
+    description: headMessages.en.home,
     title: 'Games that play themselves on your TRMNL',
     lead: 'Every fifteen minutes, day and night, each game takes a turn on our servers and your e-ink screen shows what happened.',
     pickHeading: 'Pick a game',
@@ -53,10 +54,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'A fishing game that plays itself on your TRMNL, on the same account as your hero.',
     dismiss: 'Dismiss',
     startInReview: 'TRMNL is reviewing Idle Angler for its marketplace, so it can’t be installed yet. We’ll email you once, the day it can.',
-    guideFor: (name: string) => `${name} guide`,
   },
   fr: {
-    description: 'Des jeux gratuits qui se jouent tout seuls sur votre écran e-ink TRMNL : Desk Crawler, un RPG de bureau, et Idle Angler, un jeu de pêche. Chacun avance toutes les 15 minutes sur nos serveurs, et votre écran montre ce qui s’est passé.',
+    description: headMessages.fr.home,
     title: 'Des jeux qui se jouent tout seuls sur votre TRMNL',
     lead: 'Toutes les quinze minutes, jour et nuit, chaque jeu joue un tour sur nos serveurs et votre écran e-ink montre ce qui s’est passé.',
     pickHeading: 'Choisissez un jeu',
@@ -100,10 +100,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Un jeu de pêche qui se joue tout seul sur votre TRMNL, avec le même compte que votre héros.',
     dismiss: 'Fermer',
     startInReview: 'TRMNL examine Idle Angler pour sa boutique, il ne peut donc pas encore être installé. Nous vous écrirons une seule fois, le jour où ce sera possible.',
-    guideFor: (name: string) => `Guide de ${name}`,
   },
   de: {
-    description: 'Kostenlose Spiele, die sich auf deinem TRMNL-E-Ink-Display von selbst spielen: Desk Crawler, ein Büro-RPG, und Idle Angler, ein Angelspiel. Jedes läuft alle 15 Minuten auf unseren Servern weiter, und dein Bildschirm zeigt, was passiert ist.',
+    description: headMessages.de.home,
     title: 'Spiele, die sich auf deinem TRMNL von selbst spielen',
     lead: 'Alle fünfzehn Minuten, Tag und Nacht, macht jedes Spiel auf unseren Servern einen Zug, und dein E-Ink-Bildschirm zeigt, was passiert ist.',
     pickHeading: 'Wähle ein Spiel',
@@ -147,10 +146,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Ein Angelspiel, das sich auf deinem TRMNL von selbst spielt, mit demselben Konto wie dein Held.',
     dismiss: 'Ausblenden',
     startInReview: 'TRMNL prüft Idle Angler gerade für seinen Marktplatz, deshalb lässt es sich noch nicht installieren. Wir schreiben dir einmal, an dem Tag, an dem es geht.',
-    guideFor: (name: string) => `Leitfaden zu ${name}`,
   },
   es: {
-    description: 'Juegos gratis que se juegan solos en tu pantalla de tinta electrónica TRMNL: Desk Crawler, un RPG de oficina, e Idle Angler, un juego de pesca. Cada uno avanza cada 15 minutos en nuestros servidores y tu pantalla muestra lo que pasó.',
+    description: headMessages.es.home,
     title: 'Juegos que se juegan solos en tu TRMNL',
     lead: 'Cada quince minutos, de día y de noche, cada juego hace su turno en nuestros servidores y tu pantalla de tinta electrónica muestra lo que pasó.',
     pickHeading: 'Elige un juego',
@@ -194,10 +192,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Un juego de pesca que se juega solo en tu TRMNL, con la misma cuenta que tu héroe.',
     dismiss: 'Cerrar',
     startInReview: 'TRMNL está revisando Idle Angler para su tienda, así que todavía no se puede instalar. Te escribiremos una sola vez, el día que se pueda.',
-    guideFor: (name: string) => `Guía de ${name}`,
   },
   it: {
-    description: 'Giochi gratuiti che si giocano da soli sul tuo display e-ink TRMNL: Desk Crawler, un GDR d’ufficio, e Idle Angler, un gioco di pesca. Ognuno va avanti ogni 15 minuti sui nostri server e lo schermo mostra cosa è successo.',
+    description: headMessages.it.home,
     title: 'Giochi che si giocano da soli sul tuo TRMNL',
     lead: 'Ogni quindici minuti, giorno e notte, ogni gioco fa il suo turno sui nostri server e lo schermo e-ink mostra cosa è successo.',
     pickHeading: 'Scegli un gioco',
@@ -241,10 +238,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Un gioco di pesca che si gioca da solo sul tuo TRMNL, con lo stesso account del tuo eroe.',
     dismiss: 'Chiudi',
     startInReview: 'TRMNL sta controllando Idle Angler per il suo marketplace, quindi non si può ancora installare. Ti scriveremo una volta sola, il giorno in cui si potrà.',
-    guideFor: (name: string) => `Guida di ${name}`,
   },
   pt: {
-    description: 'Jogos grátis que se jogam sozinhos na sua tela e-ink TRMNL: Desk Crawler, um RPG de escritório, e Idle Angler, um jogo de pesca. Cada um avança a cada 15 minutos nos nossos servidores, e a sua tela mostra o que aconteceu.',
+    description: headMessages.pt.home,
     title: 'Jogos que se jogam sozinhos no seu TRMNL',
     lead: 'A cada quinze minutos, dia e noite, cada jogo faz uma jogada nos nossos servidores e a sua tela e-ink mostra o que aconteceu.',
     pickHeading: 'Escolha um jogo',
@@ -288,10 +284,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Um jogo de pesca que se joga sozinho no seu TRMNL, na mesma conta do seu herói.',
     dismiss: 'Fechar',
     startInReview: 'O TRMNL está analisando o Idle Angler para a loja dele, então ainda não dá para instalar. Vamos escrever uma única vez, no dia em que der.',
-    guideFor: (name: string) => `Guia do ${name}`,
   },
   pl: {
-    description: 'Darmowe gry, które same grają się na twoim wyświetlaczu e-ink TRMNL: Desk Crawler, biurowe RPG, i Idle Angler, gra wędkarska. Każda posuwa się co 15 minut na naszych serwerach, a ekran pokazuje, co się wydarzyło.',
+    description: headMessages.pl.home,
     title: 'Gry, które same grają się na twoim TRMNL',
     lead: 'Co piętnaście minut, dzień i noc, każda gra wykonuje ruch na naszych serwerach, a ekran e-ink pokazuje, co się wydarzyło.',
     pickHeading: 'Wybierz grę',
@@ -335,10 +330,9 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Gra wędkarska, która sama gra się na twoim TRMNL, na tym samym koncie co twój bohater.',
     dismiss: 'Zamknij',
     startInReview: 'TRMNL sprawdza Idle Angler przed dodaniem do swojego sklepu, więc nie da się go jeszcze zainstalować. Napiszemy raz, w dniu, w którym będzie to możliwe.',
-    guideFor: (name: string) => `Przewodnik po ${name}`,
   },
   nl: {
-    description: 'Gratis spellen die zichzelf spelen op je TRMNL-e-ink-scherm: Desk Crawler, een kantoor-RPG, en Idle Angler, een visspel. Elk spel gaat elk kwartier verder op onze servers, en je scherm toont wat er gebeurd is.',
+    description: headMessages.nl.home,
     title: 'Spellen die zichzelf spelen op je TRMNL',
     lead: 'Elk kwartier, dag en nacht, doet elk spel een beurt op onze servers en je e-ink-scherm toont wat er gebeurd is.',
     pickHeading: 'Kies een spel',
@@ -382,6 +376,5 @@ export const homeMessages = defineMessages({
     noteListedBody: 'Een visspel dat zichzelf speelt op je TRMNL, met hetzelfde account als je held.',
     dismiss: 'Sluiten',
     startInReview: 'TRMNL beoordeelt Idle Angler voor de marketplace, dus je kunt het nog niet installeren. We mailen je één keer, op de dag dat het kan.',
-    guideFor: (name: string) => `Gids voor ${name}`,
   },
 })

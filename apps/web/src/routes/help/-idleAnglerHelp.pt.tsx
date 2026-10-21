@@ -1,14 +1,15 @@
 import { anglerWords } from '@trmnl-games/idle-angler/i18n'
 import { SUPPORT_EMAIL } from '../../lib/support'
 import { IA_FACTS as F, type HelpPage } from './-idleAnglerHelp'
+import { IDLE_ANGLER_HELP_HEAD } from './-helpHeads'
 
 const w = anglerWords('pt')
 const n = (value: number) => w.number(value)
 const e = (parts: readonly string[]) => (parts.length <= 1 ? parts.join('') : `${parts.slice(0, -1).join(', ')} e ${parts.at(-1)}`)
 
 export const pt: HelpPage = {
-  seoTitle: 'Ajuda do Idle Angler',
-  description: 'Como o Idle Angler pesca no seu TRMNL: iscas, cooler, varas, águas, estações, caderno, Opens de fim de semana e caixa de moscas.',
+  seoTitle: IDLE_ANGLER_HELP_HEAD.pt.seoTitle,
+  description: IDLE_ANGLER_HELP_HEAD.pt.description,
   title: 'Idle Angler no TRMNL',
   contents: {
     'getting-started': 'Primeiros passos',

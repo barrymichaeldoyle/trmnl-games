@@ -1,4 +1,5 @@
 import { defineMessages } from '../lib/i18n'
+import { headMessages } from './heads'
 
 type LinkKey = 'roster' | 'career' | 'achievements' | 'fieldNotes' | 'keepsakes' | 'trmnl' | 'help' | 'whatsNew'
 type Link = { readonly label: string; readonly blurb: string }
@@ -6,13 +7,13 @@ type Link = { readonly label: string; readonly blurb: string }
 /** D169: the More tab: its links, settings, alerts (shared with the other games' settings) and name repair. */
 export const dcMoreMessages = defineMessages({
   en: {
-    title: 'More',
+    title: headMessages.en.dcMore,
     links: {
       roster: { label: 'Heroes', blurb: 'Your heroes, switching between them, and recruiting a new class.' },
-      career: { label: 'Career', blurb: 'The ladder of goals, and what opens at each level.' },
+      career: { label: headMessages.en.dcCareer, blurb: 'The ladder of goals, and what opens at each level.' },
       achievements: { label: 'Achievements', blurb: 'Every one you have earned, and how rare it is.' },
       fieldNotes: { label: 'Field notes', blurb: 'What your hero knows about every floor and monster.' },
-      keepsakes: { label: 'Desk keepsakes', blurb: 'The weekly code from your TRMNL and your shelf.' },
+      keepsakes: { label: headMessages.en.dcKeepsakes, blurb: 'The weekly code from your TRMNL and your shelf.' },
       trmnl: { label: 'On your TRMNL', blurb: 'What the plugin is showing, in every layout.' },
       help: { label: 'How Desk Crawler works', blurb: 'Adventures, floors, gear, stances and setup help.' },
       whatsNew: { label: 'What’s new', blurb: 'Every change to the game, newest first. Last updated {day}.' },
@@ -132,13 +133,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Save names',
   },
   fr: {
-    title: 'Plus',
+    title: headMessages.fr.dcMore,
     links: {
       roster: { label: 'Héros', blurb: 'Vos héros, passer de l’un à l’autre, et recruter une nouvelle classe.' },
-      career: { label: 'Carrière', blurb: 'L’échelle des objectifs, et ce qui se débloque à chaque niveau.' },
+      career: { label: headMessages.fr.dcCareer, blurb: 'L’échelle des objectifs, et ce qui se débloque à chaque niveau.' },
       achievements: { label: 'Succès', blurb: 'Tous ceux que vous avez obtenus, et leur rareté.' },
       fieldNotes: { label: 'Notes de terrain', blurb: 'Ce que votre héros sait de chaque étage et de chaque monstre.' },
-      keepsakes: { label: 'Souvenirs de bureau', blurb: 'Le code hebdomadaire de votre TRMNL et votre étagère.' },
+      keepsakes: { label: headMessages.fr.dcKeepsakes, blurb: 'Le code hebdomadaire de votre TRMNL et votre étagère.' },
       trmnl: { label: 'Sur votre TRMNL', blurb: 'Ce qu’affiche le plugin, dans chaque mise en page.' },
       help: { label: 'Comment marche Desk Crawler', blurb: 'Aventures, étages, équipement, postures et aide à l’installation.' },
       whatsNew: { label: 'Nouveautés', blurb: 'Tous les changements du jeu, du plus récent au plus ancien. Dernière mise à jour le {day}.' },
@@ -257,13 +258,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Enregistrer les noms',
   },
   de: {
-    title: 'Mehr',
+    title: headMessages.de.dcMore,
     links: {
       roster: { label: 'Helden', blurb: 'Deine Helden, zwischen ihnen wechseln und eine neue Klasse anwerben.' },
-      career: { label: 'Karriere', blurb: 'Die Leiter der Ziele und was auf jeder Stufe freigeschaltet wird.' },
+      career: { label: headMessages.de.dcCareer, blurb: 'Die Leiter der Ziele und was auf jeder Stufe freigeschaltet wird.' },
       achievements: { label: 'Erfolge', blurb: 'Alle, die du verdient hast, und wie selten sie sind.' },
       fieldNotes: { label: 'Feldnotizen', blurb: 'Was dein Held über jedes Stockwerk und jedes Monster weiß.' },
-      keepsakes: { label: 'Schreibtisch-Andenken', blurb: 'Der Wochencode von deinem TRMNL und dein Regal.' },
+      keepsakes: { label: headMessages.de.dcKeepsakes, blurb: 'Der Wochencode von deinem TRMNL und dein Regal.' },
       trmnl: { label: 'Auf deinem TRMNL', blurb: 'Was das Plugin zeigt, in jedem Layout.' },
       help: { label: 'So funktioniert Desk Crawler', blurb: 'Abenteuer, Stockwerke, Ausrüstung, Haltungen und Hilfe beim Einrichten.' },
       whatsNew: { label: 'Neuigkeiten', blurb: 'Jede Änderung am Spiel, die neueste zuerst. Zuletzt aktualisiert am {day}.' },
@@ -382,13 +383,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Namen speichern',
   },
   es: {
-    title: 'Más',
+    title: headMessages.es.dcMore,
     links: {
       roster: { label: 'Héroes', blurb: 'Tus héroes, cambiar entre ellos y reclutar una clase nueva.' },
-      career: { label: 'Carrera', blurb: 'La escalera de objetivos y lo que se abre en cada nivel.' },
+      career: { label: headMessages.es.dcCareer, blurb: 'La escalera de objetivos y lo que se abre en cada nivel.' },
       achievements: { label: 'Logros', blurb: 'Todos los que has conseguido y lo raro que es cada uno.' },
       fieldNotes: { label: 'Notas de campo', blurb: 'Lo que tu héroe sabe de cada planta y cada monstruo.' },
-      keepsakes: { label: 'Recuerdos de oficina', blurb: 'El código semanal de tu TRMNL y tu estante.' },
+      keepsakes: { label: headMessages.es.dcKeepsakes, blurb: 'El código semanal de tu TRMNL y tu estante.' },
       trmnl: { label: 'En tu TRMNL', blurb: 'Lo que muestra el plugin, en cada diseño.' },
       help: { label: 'Cómo funciona Desk Crawler', blurb: 'Aventuras, plantas, equipo, posturas y ayuda con la instalación.' },
       whatsNew: { label: 'Novedades', blurb: 'Cada cambio del juego, lo más reciente primero. Última actualización: {day}.' },
@@ -507,13 +508,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Guardar nombres',
   },
   it: {
-    title: 'Altro',
+    title: headMessages.it.dcMore,
     links: {
       roster: { label: 'Eroi', blurb: 'I tuoi eroi, il cambio tra loro e il reclutamento di una nuova classe.' },
-      career: { label: 'Carriera', blurb: 'La scala degli obiettivi e cosa si apre a ogni livello.' },
+      career: { label: headMessages.it.dcCareer, blurb: 'La scala degli obiettivi e cosa si apre a ogni livello.' },
       achievements: { label: 'Obiettivi', blurb: 'Tutti quelli che hai ottenuto e quanto sono rari.' },
       fieldNotes: { label: 'Appunti di campo', blurb: 'Cosa sa il tuo eroe di ogni piano e di ogni mostro.' },
-      keepsakes: { label: 'Ricordini da scrivania', blurb: 'Il codice settimanale del tuo TRMNL e il tuo scaffale.' },
+      keepsakes: { label: headMessages.it.dcKeepsakes, blurb: 'Il codice settimanale del tuo TRMNL e il tuo scaffale.' },
       trmnl: { label: 'Sul tuo TRMNL', blurb: 'Cosa mostra il plugin, in ogni layout.' },
       help: { label: 'Come funziona Desk Crawler', blurb: 'Avventure, piani, equipaggiamento, tattiche e aiuto con l’installazione.' },
       whatsNew: { label: 'Novità', blurb: 'Ogni modifica al gioco, dalla più recente. Ultimo aggiornamento: {day}.' },
@@ -632,13 +633,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Salva i nomi',
   },
   pt: {
-    title: 'Mais',
+    title: headMessages.pt.dcMore,
     links: {
       roster: { label: 'Heróis', blurb: 'Seus heróis, a troca entre eles e o recrutamento de uma nova classe.' },
-      career: { label: 'Carreira', blurb: 'A escada de objetivos e o que abre em cada nível.' },
+      career: { label: headMessages.pt.dcCareer, blurb: 'A escada de objetivos e o que abre em cada nível.' },
       achievements: { label: 'Conquistas', blurb: 'Todas as que você ganhou e quão raras elas são.' },
       fieldNotes: { label: 'Notas de campo', blurb: 'O que seu herói sabe sobre cada andar e cada monstro.' },
-      keepsakes: { label: 'Lembrancinhas de mesa', blurb: 'O código semanal do seu TRMNL e sua prateleira.' },
+      keepsakes: { label: headMessages.pt.dcKeepsakes, blurb: 'O código semanal do seu TRMNL e sua prateleira.' },
       trmnl: { label: 'No seu TRMNL', blurb: 'O que o plugin está mostrando, em cada layout.' },
       help: { label: 'Como o Desk Crawler funciona', blurb: 'Aventuras, andares, equipamento, posturas e ajuda com a instalação.' },
       whatsNew: { label: 'Novidades', blurb: 'Cada mudança no jogo, das mais recentes às mais antigas. Última atualização: {day}.' },
@@ -757,13 +758,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Salvar nomes',
   },
   pl: {
-    title: 'Więcej',
+    title: headMessages.pl.dcMore,
     links: {
       roster: { label: 'Bohaterowie', blurb: 'Twoi bohaterowie, zmiana między nimi i werbunek nowej klasy.' },
-      career: { label: 'Kariera', blurb: 'Drabina celów i to, co otwiera się na każdym poziomie.' },
+      career: { label: headMessages.pl.dcCareer, blurb: 'Drabina celów i to, co otwiera się na każdym poziomie.' },
       achievements: { label: 'Osiągnięcia', blurb: 'Wszystkie zdobyte i to, jak są rzadkie.' },
       fieldNotes: { label: 'Notatki terenowe', blurb: 'Co twój bohater wie o każdym piętrze i potworze.' },
-      keepsakes: { label: 'Pamiątki z biurka', blurb: 'Cotygodniowy kod z twojego TRMNL i twoja półka.' },
+      keepsakes: { label: headMessages.pl.dcKeepsakes, blurb: 'Cotygodniowy kod z twojego TRMNL i twoja półka.' },
       trmnl: { label: 'Na twoim TRMNL', blurb: 'Co pokazuje plugin, w każdym układzie.' },
       help: { label: 'Jak działa Desk Crawler', blurb: 'Przygody, piętra, sprzęt, postawy i pomoc z instalacją.' },
       whatsNew: { label: 'Nowości', blurb: 'Każda zmiana w grze, od najnowszych. Ostatnia aktualizacja: {day}.' },
@@ -882,13 +883,13 @@ export const dcMoreMessages = defineMessages({
     saveNames: 'Zapisz nazwy',
   },
   nl: {
-    title: 'Meer',
+    title: headMessages.nl.dcMore,
     links: {
       roster: { label: 'Helden', blurb: 'Je helden, tussen ze wisselen en een nieuwe klasse aanwerven.' },
-      career: { label: 'Carrière', blurb: 'De ladder van doelen, en wat er op elk niveau opengaat.' },
+      career: { label: headMessages.nl.dcCareer, blurb: 'De ladder van doelen, en wat er op elk niveau opengaat.' },
       achievements: { label: 'Prestaties', blurb: 'Alles wat je hebt behaald, en hoe zeldzaam het is.' },
       fieldNotes: { label: 'Veldnotities', blurb: 'Wat je held weet over elke verdieping en elk monster.' },
-      keepsakes: { label: 'Bureau-aandenkens', blurb: 'De wekelijkse code van je TRMNL en je plank.' },
+      keepsakes: { label: headMessages.nl.dcKeepsakes, blurb: 'De wekelijkse code van je TRMNL en je plank.' },
       trmnl: { label: 'Op je TRMNL', blurb: 'Wat de plugin toont, in elke indeling.' },
       help: { label: 'Hoe Desk Crawler werkt', blurb: 'Avonturen, verdiepingen, uitrusting, houdingen en hulp bij de installatie.' },
       whatsNew: { label: 'Wat is er nieuw', blurb: 'Elke wijziging aan het spel, nieuwste eerst. Laatst bijgewerkt op {day}.' },

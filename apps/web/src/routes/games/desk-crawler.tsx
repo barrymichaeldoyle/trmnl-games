@@ -4,6 +4,7 @@ import { faqJsonLd } from '../../lib/deskCrawlerFaq'
 import { AfterListing } from '../../lib/gameAccess'
 import { Glyph } from '../../lib/glyphs'
 import { messagesFor, useT } from '../../lib/i18n'
+import { headMessages } from '../../i18n/heads'
 import { SITE_FRAME } from '../../lib/platformHeader'
 import { SiteShell } from '../../lib/prose'
 import { DESK_CRAWLER_JSON_LD, DESK_CRAWLER_OG, seo } from '../../lib/seo'
@@ -20,7 +21,7 @@ export const Route = createFileRoute('/games/desk-crawler')({
       title: 'Desk Crawler',
       path: '/games/desk-crawler',
       locale,
-      description: messagesFor(pitchMessages, locale).gameDescription,
+      description: messagesFor(headMessages, locale).dcGame,
       image: DESK_CRAWLER_OG,
       jsonLd: { '@context': 'https://schema.org', '@graph': [DESK_CRAWLER_JSON_LD, faqJsonLd(locale)].map(({ '@context': _, ...node }) => node) },
     }),

@@ -2,6 +2,7 @@ import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'
+import { DESK_CRAWLER_HELP_HEAD } from './-helpHeads'
 
 const t = contentTranslator('es')
 const n = (value: number) => t.number(value)
@@ -42,8 +43,8 @@ function occasionDate(rule: Occasion): string {
 }
 
 export const es: HelpPage = {
-  seoTitle: 'Ayuda e instalación de Desk Crawler',
-  description: 'Cómo instalar Desk Crawler en TRMNL y cómo funciona cada parte del juego, con soluciones para cuando la pantalla parece desfasada.',
+  seoTitle: DESK_CRAWLER_HELP_HEAD.es.seoTitle,
+  description: DESK_CRAWLER_HELP_HEAD.es.description,
   title: 'Desk Crawler en TRMNL',
   contents: {
     'getting-started': 'Primeros pasos', 'if-the-qr-sends-you-back-to-setup': 'Si el QR te devuelve a la instalación', 'how-time-works': 'Cómo pasa el tiempo', floors: 'Plantas', 'desk-keepsakes': 'Recuerdos de oficina', career: 'Carrera', 'heroes-and-classes': 'Héroes y clases', stances: 'Posturas', 'desk-raids': 'Incursiones de escritorio', meetings: 'Reuniones', 'lost-property': 'Objetos perdidos', 'to-do-list': 'Lista de tareas', potions: 'Pociones', 'the-wandering-merchant': 'El mercader ambulante', decisions: 'Decisiones', effects: 'Efectos', 'office-calendar': 'Calendario de la oficina', 'rare-and-epic-gear': 'Equipo raro y épico', 'when-your-bag-fills-up': 'Cuando la bolsa se llena', 'bigger-bags': 'Bolsas más grandes', 'salvage-and-the-workbench': 'Desmontar y el banco de trabajo', 'getting-knocked-out': 'Caer K.O.', recaps: 'Resúmenes', 'understanding-rankings': 'Cómo funcionan las clasificaciones', 'sharing-your-hero': 'Compartir tu héroe', 'following': 'Seguir', names: 'Nombres', gender: 'Género', alerts: 'Alertas', troubleshooting: 'Solución de problemas', 'disconnecting-and-removing': 'Desconectar y quitar', help: 'Ayuda',

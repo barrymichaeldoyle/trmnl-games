@@ -62,10 +62,11 @@ export function AnalyticsProvider() {
   // Pinned to the foot of the screen, so it is seen on arrival and when reopened from the footer, not after the page. From
   // tablet width it is one low row, so it never sits over a page's first form; the spacer lets the page scroll clear of it.
   return <>
-    <div aria-hidden="true" className="h-56 sm:h-28" />
+    <div aria-hidden="true" className="h-40 sm:h-28" />
     <aside aria-label="Analytics preferences" className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-5xl px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="border-2 border-edge bg-panel p-3 shadow-[0_0_0_4px_var(--color-night)] sm:flex sm:items-center sm:gap-6 sm:px-4">
-        <p className="text-sm sm:flex-1"><strong className="font-semibold">Help us find problems.</strong> Allow usage analytics, error reports and masked session recordings? When signed in, these link to your account and email so we can help with support. Saying no does not affect the game. <Link to="/privacy" className="underline underline-offset-4">Privacy details</Link></p>
+        {/* On a phone the panel covered a quarter of the screen, so there it asks in one line and leaves the detail to the privacy page. */}
+        <p className="text-sm sm:flex-1"><strong className="font-semibold">Help us find problems.</strong> <span className="sm:hidden">Allow usage analytics and error reports? Saying no does not affect the game.</span><span className="max-sm:hidden">Allow usage analytics, error reports and masked session recordings? When signed in, these link to your account and email so we can help with support. Saying no does not affect the game.</span> <Link to="/privacy" className="underline underline-offset-4">Privacy details</Link></p>
         {/* One row of two equal answers: stacked, the panel covered about a third of a phone screen. */}
         <div className="mt-3 grid shrink-0 grid-cols-2 gap-2 sm:mt-0 sm:flex sm:gap-3"><Button variant="secondary" className="px-2 sm:px-4" onClick={() => choose('allowed')}>Allow analytics</Button><Button variant="secondary" className="px-2 sm:px-4" onClick={() => choose('declined')}>No thanks</Button></div>
       </div>

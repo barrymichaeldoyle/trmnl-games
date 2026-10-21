@@ -6,7 +6,6 @@ import { PlatformHeader, SITE_FRAME } from './platformHeader'
 import { useT } from './i18n'
 import { LanguagePicker } from './languagePicker'
 import { games } from '@trmnl-games/platform'
-import { homeMessages } from '../i18n/home'
 import { shellMessages } from '../i18n/shell'
 
 /** Prose styling for a reading page's body: section headings, lists and underlined links. */
@@ -135,7 +134,6 @@ function FooterGroup({ title, children }: { title: string; children: ReactNode }
  */
 export function SiteFooter() {
   const t = useT(shellMessages)
-  const home = useT(homeMessages)
   return (
     <footer className="mt-auto border-t border-rule bg-night/40 text-sm">
       <div className={`flex flex-col gap-8 py-10 ${SITE_FRAME}`}>
@@ -152,8 +150,8 @@ export function SiteFooter() {
               <Show when="signed-in"><li><Link to="/app" className={FOOTER_LINK}>{t.myGames}</Link></li></Show>
             </FooterGroup>
             <FooterGroup title={t.footerHelp}>
-              <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>{home.guideFor('Desk Crawler')}</Link></li>
-              <li><Link to="/help/idle-angler" className={FOOTER_LINK}>{home.guideFor('Idle Angler')}</Link></li>
+              <li><Link to="/help/desk-crawler" className={FOOTER_LINK}>{t.guideFor('Desk Crawler')}</Link></li>
+              <li><Link to="/help/idle-angler" className={FOOTER_LINK}>{t.guideFor('Idle Angler')}</Link></li>
               <li><Link to="/whats-new" className={FOOTER_LINK}>{t.whatsNew}</Link></li>
               <li><Link to="/support" className={FOOTER_LINK}>{t.support}</Link></li>
               <li><Link to="/feedback" className={FOOTER_LINK}>{t.feedback}</Link></li>

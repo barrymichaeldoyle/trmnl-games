@@ -12,6 +12,7 @@ import { captureManagement, getManagedInstance } from '../../../../server/manage
 import { useAnalyticsView } from '../../../../lib/analyticsProvider'
 import { requireOpenGame } from '../../../../lib/gameAccess'
 import { messagesFor, useT } from '../../../../lib/i18n'
+import { headMessages } from '../../../../i18n/heads'
 import { iaConnect } from '../../../../i18n/iaConnect'
 
 type Search = { uuid?: string; jwt?: string; invalid?: boolean }
@@ -34,7 +35,7 @@ export const Route = createFileRoute('/connect/trmnl/idle-angler/manage')({
     return await getManagedInstance({ data: { gameSlug: 'idle-angler' } })
   },
   head: ({ match: { context: { locale } } }) => {
-    const head = seo({ title: messagesFor(iaConnect, locale).manageTitle, index: false, locale })
+    const head = seo({ title: messagesFor(headMessages, locale).iaManage, index: false, locale })
     return { ...head, meta: [...head.meta, { name: 'referrer', content: 'no-referrer' }] }
   },
   component: ManagePage,
