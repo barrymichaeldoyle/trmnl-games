@@ -25,7 +25,8 @@ describe('Idle Angler operator controls (D115)', () => {
 
   it('shows health to admins only and releases a quarantined angler with an audit row', async () => {
     const anglerId = await seedAngler(t, { simulationState: 'quarantined', quarantineReasonCode: 'UNKNOWN_WATER' }, 'Stuck')
-    await expect(t.withIdentity({ issuer: 'issuer', subject: 'Stuck' }).query(api.idleAngler.operations.health, {})).rejects.toThrow()
+    expect(await t.withIdentity({ issuer: 'issuer', subject: 'Stuck' }).query(api.idleAngler.operations.health, {})).toBeNull()
+    expect(await t.query(api.idleAngler.operations.health, {})).toBeNull()
     const health = await admin().query(api.idleAngler.operations.health, {})
     expect(health).toMatchObject({ world: { currentTick: 1, contentVersion: 'v1', ticksPaused: false }, quarantined: [{ name: 'Stuck', reasonCode: 'UNKNOWN_WATER' }] })
     await admin().mutation(api.idleAngler.operations.releaseAngler, { anglerId, reasonCode: 'diagnosed' })

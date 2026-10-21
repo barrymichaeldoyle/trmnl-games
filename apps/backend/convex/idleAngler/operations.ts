@@ -3,7 +3,7 @@ import { titleFor } from '@trmnl-games/idle-angler/sim'
 import type { Doc, Id } from '../_generated/dataModel'
 import { internalMutation, internalQuery, mutation, query } from '../_generated/server'
 import { audit } from '../admin'
-import { requireAdmin } from '../lib/adminAccess'
+import { isAdminReader, requireAdmin } from '../lib/adminAccess'
 import { appError } from '../lib/errors'
 import { getOrCreateEngineWorld, readEngineWorld, setEngineContentVersion } from '../lib/engine/world'
 import { IDLE_ANGLER_RUNTIME } from './runtime'
@@ -18,7 +18,7 @@ export const health = query({
   args: {},
   returns: v.any(),
   handler: async (ctx) => {
-    await requireAdmin(ctx)
+    if (!(await isAdminReader(ctx))) return null
     const world = await readEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
     const runId = world?.activeRunId as unknown as Id<'iaSimulationRuns'> | undefined
     const run = runId ? await ctx.db.get(runId) : null

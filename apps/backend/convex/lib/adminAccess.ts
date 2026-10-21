@@ -17,6 +17,14 @@ export async function adminRef(ctx: QueryCtx): Promise<string | null> {
   return sha256Hex(`admin:${identity.tokenIdentifier}`).slice(0, 16)
 }
 
+/**
+ * For admin-page reads: null for anyone else instead of an error. The page shows them only after `admin:isAdmin`, so a
+ * throw here meant the admin's own session lapsing under an open tab, logged as an error (Sentry TRMNL-GAMES-CONVEX-2).
+ */
+export async function isAdminReader(ctx: QueryCtx): Promise<boolean> {
+  return (await adminRef(ctx)) !== null
+}
+
 export async function requireAdmin(ctx: QueryCtx): Promise<string> {
   const ref = await adminRef(ctx)
   if (ref === null) throw appError('UNAUTHENTICATED', 'Admin access required.')

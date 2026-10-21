@@ -4,7 +4,7 @@ import { internal } from './_generated/api'
 import type { Doc } from './_generated/dataModel'
 import { internalMutation, internalQuery, mutation, query, type MutationCtx, type QueryCtx } from './_generated/server'
 import { appError } from './lib/errors'
-import { requireAdmin } from './lib/adminAccess'
+import { isAdminReader, requireAdmin } from './lib/adminAccess'
 import { sha256Hex } from './lib/hash'
 import { normalizeAlias } from './lib/names'
 import { getOrCreateWorld, readWorld } from './world'
@@ -38,7 +38,7 @@ export const health = query({
   args: {},
   returns: v.any(),
   handler: async (ctx) => {
-    await requireAdmin(ctx)
+    if (!(await isAdminReader(ctx))) return null
     const world = await readWorld(ctx)
     const activeRun = world?.activeRunId ? await ctx.db.get(world.activeRunId) : null
     const quarantined = await ctx.db.query('heroes').withIndex('by_simulationState', (q) => q.eq('simulationState', 'quarantined')).take(50)
@@ -169,7 +169,7 @@ export const findUser = query({
   args: { alias: v.string() },
   returns: v.any(),
   handler: async (ctx, { alias }) => {
-    await requireAdmin(ctx)
+    if (!(await isAdminReader(ctx))) return null
     const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalizeAlias(alias))).first()
     if (user === null) return null
     const hero = await currentHero(ctx, user)
