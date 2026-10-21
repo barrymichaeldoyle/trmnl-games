@@ -5,6 +5,7 @@ import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query
 import { ConvexReactClient } from 'convex/react'
 import { routeTree } from './routeTree.gen'
 import { installDomMismatchGuard } from './lib/domMismatch'
+import { reloadIfBehindDeploy } from './lib/deployWatch'
 import { reportError } from './lib/errorReporting'
 import { RouteError } from './lib/routeError'
 import { isStaleChunkError, recoverFromStaleChunks, reloadingForNewBuild } from './lib/staleChunks'
@@ -42,7 +43,8 @@ export function getRouter() {
     // CatchBoundary keeps the component stack in onCatch and does not pass it to the error screen.
     defaultOnCatch: (error, errorInfo) => {
       if (reloadingForNewBuild() || isStaleChunkError(error)) return
-      reportError(error, 'route', errorInfo.componentStack ?? undefined)
+      // An old bundle can crash on data the new backend changed: reload onto the deployed build rather than report it.
+      void reloadIfBehindDeploy().then((reloading) => { if (!reloading) reportError(error, 'route', errorInfo.componentStack ?? undefined) })
     },
   })
   setupRouterSsrQueryIntegration({ router, queryClient })

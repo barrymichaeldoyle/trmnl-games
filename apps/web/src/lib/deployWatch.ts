@@ -15,6 +15,38 @@ const reloadOnce = (deployed: string) => {
   window.location.reload()
 }
 
+/** The deployed build id when it differs from this bundle's; null when they match, in dev, or when `/build.json` can't be read. */
+async function newerDeployedBuild(): Promise<string | null> {
+  const current = import.meta.env.VITE_BUILD_ID as string | undefined
+  if (import.meta.env.DEV || !current || !navigator.onLine) return null
+  try {
+    const response = await fetch('/build.json', { cache: 'no-store' })
+    const deployed = response.ok ? ((await response.json()) as { id?: unknown }).id : undefined
+    return typeof deployed === 'string' && deployed !== current ? deployed : null
+  } catch {
+    // Offline or mid-deploy: try again at the next check.
+    return null
+  }
+}
+
+/**
+ * A page that crashed may be an old bundle reading data the new backend no longer sends (a Safari tab loaded two
+ * days after D205 dropped `rivalOf`, Sentry TRMNL-GAMES-7). If a newer build is deployed, reload onto it once and
+ * return true. Without session storage there is no loop guard, so it never reloads.
+ */
+export async function reloadIfBehindDeploy(): Promise<boolean> {
+  const deployed = await newerDeployedBuild()
+  if (!deployed) return false
+  try {
+    if (sessionStorage.getItem(RELOADED_KEY) === deployed) return false
+    sessionStorage.setItem(RELOADED_KEY, deployed)
+  } catch {
+    return false
+  }
+  window.location.reload()
+  return true
+}
+
 let holds = 0
 
 /**
@@ -45,23 +77,18 @@ const typing = () => {
 export function useDeployWatch() {
   const router = useRouter()
   useEffect(() => {
-    const current = import.meta.env.VITE_BUILD_ID as string | undefined
-    if (import.meta.env.DEV || !current) return
+    if (import.meta.env.DEV || !import.meta.env.VITE_BUILD_ID) return
     let stale = false
     let deployedId = ''
     let checking = false
     const check = async () => {
       if (stale || checking || !navigator.onLine) return
       checking = true
-      try {
-        const response = await fetch('/build.json', { cache: 'no-store' })
-        const deployed = response.ok ? ((await response.json()) as { id?: unknown }).id : undefined
-        stale = typeof deployed === 'string' && deployed !== current
-        if (stale) deployedId = deployed as string
-      } catch {
-        // Offline or mid-deploy: try again at the next check.
-      } finally {
-        checking = false
+      const deployed = await newerDeployedBuild()
+      checking = false
+      if (deployed) {
+        stale = true
+        deployedId = deployed
       }
     }
     const onVisible = () => {
