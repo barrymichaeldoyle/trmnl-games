@@ -27,10 +27,17 @@ export const REMINDER_AFTER_MS = 2 * DAY_MS
 const SCAN = 5000
 const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3 } as const
 
-/** Never opened the companion: no recap seen, and nothing done that only the companion can do. */
-function untouched(hero: Doc<'heroes'>): boolean {
+/** Opened in the companion: a recap seen, or something done that only the companion can do (the recap can go unrecorded). */
+export function openedCompanion(hero: Doc<'heroes'>): boolean {
   const c = hero.counters
-  return !hero.companionVisitBaseline && !(c.itemsEquipped ?? 0) && !(c.itemsSold ?? 0) && !(c.itemsSalvaged ?? 0) && !(c.purchases ?? 0)
+  return !!hero.companionVisitBaseline || !!(c.itemsEquipped ?? 0) || !!(c.itemsSold ?? 0) || !!(c.itemsSalvaged ?? 0) || !!(c.purchases ?? 0)
+}
+
+const untouched = (hero: Doc<'heroes'>) => !openedCompanion(hero)
+
+/** An owner who opened the companion with any hero, including a parked one, has opened it (D213: a new hero is not a new player). */
+async function ownerOpenedCompanion(ctx: QueryCtx, userId: Id<'users'>): Promise<boolean> {
+  return (await ctx.db.query('heroes').withIndex('by_userId_and_isActive', (q) => q.eq('userId', userId)).take(20)).some(openedCompanion)
 }
 
 export function reminderDue(hero: Doc<'heroes'>, user: Doc<'users'>, now: number): boolean {
@@ -82,6 +89,7 @@ async function dueOwners(ctx: QueryCtx, now: number, limit: number) {
     if (user === null || !reminderDue(hero, user, now)) continue
     const profile = await gameProfile(ctx, user._id)
     if (profile?.state === 'deleting' || (profile?.activeHeroId ?? user.activeHeroId) !== hero._id) continue
+    if (await ownerOpenedCompanion(ctx, user._id)) continue
     due.push({ userId: user._id, heroId: hero._id })
   }
   return due
@@ -110,7 +118,7 @@ export const emailFor = internalQuery({
   handler: async (ctx, { userId, heroId, test }) => {
     const [user, hero] = await Promise.all([ctx.db.get(userId), ctx.db.get(heroId)])
     if (user === null || hero === null || hero.userId !== userId || user.state !== 'active' || user.heroReminderStoppedAt !== undefined) return null
-    if (!test && (!untouched(hero) || !hero.isActive)) return null
+    if (!test && (!hero.isActive || (await ownerOpenedCompanion(ctx, userId)))) return null
     return { tokenIdentifier: user.tokenIdentifier, locale: deviceLocale(user), facts: await factsFor(ctx, hero, user) }
   },
 })

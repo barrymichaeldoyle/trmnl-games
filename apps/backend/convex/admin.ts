@@ -7,6 +7,7 @@ import { appError } from './lib/errors'
 import { isAdminReader, requireAdmin } from './lib/adminAccess'
 import { sha256Hex } from './lib/hash'
 import { normalizeAlias } from './lib/names'
+import { openedCompanion } from './heroReminder'
 import { getOrCreateWorld, readWorld } from './world'
 
 /**
@@ -86,13 +87,23 @@ async function engagementReport(ctx: QueryCtx, now: number) {
   const tally = (values: (string | number)[]) => values.reduce<Record<string, number>>((acc, key) => ({ ...acc, [key]: (acc[key] ?? 0) + 1 }), {})
   const sum = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.reduce((total, h) => total + (pick(h.counters) ?? 0), 0)
   const reached = (pick: (c: Doc<'heroes'>['counters']) => number | undefined) => heroes.filter((h) => (pick(h.counters) ?? 0) > 0).length
-  const visitedWithin = (days: number) => heroes.filter((h) => h.companionVisitBaseline && now - h.companionVisitBaseline.at <= days * DAY_MS).length
+  // D213: a visit belongs to the owner, across every hero they have (parked ones too), and counts companion-only actions
+  // when no recap was recorded; those carry no time, so the 1- and 7-day windows read recorded recaps only.
+  const owners = new Map<string, { opened: boolean; lastVisit: number | undefined }>()
+  for (const h of scanned) {
+    const owner = owners.get(h.userId) ?? { opened: false, lastVisit: undefined }
+    const at = h.companionVisitBaseline?.at
+    owners.set(h.userId, { opened: owner.opened || openedCompanion(h), lastVisit: at === undefined ? owner.lastVisit : Math.max(at, owner.lastVisit ?? 0) })
+  }
+  const visited = (h: Doc<'heroes'>) => owners.get(h.userId)?.opened ?? false
+  const visitedIn = (h: Doc<'heroes'>, days: number) => { const at = owners.get(h.userId)?.lastVisit; return at !== undefined && now - at <= days * DAY_MS }
+  const visitedWithin = (days: number) => heroes.filter((h) => visitedIn(h, days)).length
   const users = await ctx.db.query('users').withIndex('by_state', (q) => q.eq('state', 'active')).take(ENGAGEMENT_SCAN)
   const localeOf = new Map(users.flatMap((u) => (u.trmnlLocale === undefined ? [] : [[u._id, u.trmnlLocale] as const])))
   return {
     truncated: scanned.length === ENGAGEMENT_SCAN,
     activeHeroes: heroes.length,
-    companionVisits: { within1Day: visitedWithin(1), within7Days: visitedWithin(7), never: heroes.filter((h) => !h.companionVisitBaseline).length },
+    companionVisits: { within1Day: visitedWithin(1), within7Days: visitedWithin(7), never: heroes.filter((h) => !visited(h)).length },
     stances: tally(heroes.map((h) => h.stance ?? 'balanced')),
     stanceChanges: { total: sum((c) => c.stanceChanges), heroes: reached((c) => c.stanceChanges) },
     choices: { made: sum((c) => c.choicesMade), defaulted: sum((c) => c.choicesDefaulted), heroesWhoChose: reached((c) => c.choicesMade), pending: heroes.filter((h) => h.choice).length },
@@ -120,7 +131,7 @@ async function engagementReport(ctx: QueryCtx, now: number) {
     // Each activation week's heroes, how many have ever opened the companion and how many did in the last 7 days.
     retention: Object.fromEntries([...new Set(heroes.map(weekOf))].sort().map((week) => {
       const cohort = heroes.filter((h) => weekOf(h) === week)
-      return [week, { heroes: cohort.length, visitedEver: cohort.filter((h) => h.companionVisitBaseline).length, visited7Days: cohort.filter((h) => h.companionVisitBaseline && now - h.companionVisitBaseline.at <= 7 * DAY_MS).length }]
+      return [week, { heroes: cohort.length, visitedEver: cohort.filter(visited).length, visited7Days: cohort.filter((h) => visitedIn(h, 7)).length }]
     })),
   }
 }

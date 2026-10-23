@@ -72,6 +72,24 @@ describe('the hero reminder email (D198)', () => {
     expect(await t.mutation(internal.heroReminder.queueDaily, {})).toBe(0)
   })
 
+  it('skips an owner whose new hero is untouched but who used the companion with a parked one (D213)', { timeout: 30_000 }, async () => {
+    vi.stubEnv('HERO_REMINDERS', 'on')
+    const parked = await seedHero(t, {}, 'Ana')
+    await t.run(async (ctx) => {
+      const old = (await ctx.db.get(parked))!
+      // The recap went unrecorded; only the sales show the companion was used.
+      await ctx.db.patch(parked, { isActive: false, parkedAtTick: 1, counters: { ...old.counters, itemsSold: 3 } })
+      const { _id, _creationTime, ...rest } = old
+      const odin = await ctx.db.insert('heroes', { ...rest, name: 'Odin', class: 'rogue', isActive: true })
+      await ctx.db.patch(old.userId, { activeHeroId: odin })
+    })
+    vi.advanceTimersByTime(2 * DAY)
+    expect(await t.mutation(internal.heroReminder.queueDaily, {})).toBe(0)
+    // Without the sales the owner never used the companion, and Odin is due.
+    await t.run(async (ctx) => await ctx.db.patch(parked, { counters: { ...(await ctx.db.get(parked))!.counters, itemsSold: 0 } }))
+    expect(await t.mutation(internal.heroReminder.queueDaily, {})).toBe(1)
+  })
+
   it('stops reminders only with the link the email carried', { timeout: 30_000 }, async () => {
     vi.stubEnv('HERO_REMINDERS', 'on')
     await seedHero(t, {}, 'Ana')

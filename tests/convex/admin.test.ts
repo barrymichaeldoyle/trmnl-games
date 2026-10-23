@@ -78,6 +78,24 @@ describe('owner-run moderation (D23)', () => {
     expect(Object.values(stats.retention)).toEqual([{ heroes: 2, visitedEver: 1, visited7Days: 1 }])
   })
 
+  it('counts a visit per owner, across parked heroes and companion-only actions (D213)', async () => {
+    const seller = await seedHero(t, {})
+    const switcher = await seedHero(t, {})
+    await t.run(async (ctx) => {
+      const sold = (await ctx.db.get(seller))!
+      await ctx.db.patch(seller, { counters: { ...sold.counters, itemsSold: 2 } })
+      const old = (await ctx.db.get(switcher))!
+      await ctx.db.patch(switcher, { isActive: false, parkedAtTick: 1, companionVisitBaseline: { at: Date.now(), level: 1, lifetimeXp: 0, logSequence: 1, counters: old.counters } })
+      const { _id, _creationTime, ...rest } = old
+      await ctx.db.insert('heroes', { ...rest, name: 'Odin', class: 'rogue', isActive: true })
+    })
+    await seedHero(t, {})
+    const stats = await t.query(internal.admin.engagement, {})
+    // The seller has no recap time, so only the switcher's visit falls in the windows.
+    expect(stats.companionVisits).toEqual({ within1Day: 1, within7Days: 1, never: 1 })
+    expect(Object.values(stats.retention).reduce((sum: number, week) => sum + (week as { visitedEver: number }).visitedEver, 0)).toBe(2)
+  })
+
   it('keeps one engagement report a day and reads the trend back newest first (D197)', async () => {
     await seedHero(t, {})
     await t.mutation(internal.admin.snapshotEngagement, {})
