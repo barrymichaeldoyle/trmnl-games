@@ -28,6 +28,7 @@ import { Route as AppDeskCrawlerRouteImport } from './routes/app/desk-crawler'
 import { Route as AppIdleAnglerRouteImport } from './routes/app/idle-angler'
 import { Route as AppLittlePlotRouteImport } from './routes/app/little-plot'
 import { Route as AppPaperLivesRouteImport } from './routes/app/paper-lives'
+import { Route as AppPixelWarsRouteImport } from './routes/app/pixel-wars'
 import { Route as DeskCrawlerUnsubscribeRouteImport } from './routes/desk-crawler/unsubscribe'
 import { Route as DeskCrawlerWaitingListRouteImport } from './routes/desk-crawler/waiting-list'
 import { Route as DevDeskCrawlerRouteImport } from './routes/dev/desk-crawler'
@@ -37,6 +38,7 @@ import { Route as GamesDeskCrawlerRouteImport } from './routes/games/desk-crawle
 import { Route as GamesIdleAnglerRouteImport } from './routes/games/idle-angler'
 import { Route as GamesLittlePlotRouteImport } from './routes/games/little-plot'
 import { Route as GamesPaperLivesRouteImport } from './routes/games/paper-lives'
+import { Route as GamesPixelWarsRouteImport } from './routes/games/pixel-wars'
 import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
 import { Route as HelpLittlePlotRouteImport } from './routes/help/little-plot'
@@ -77,6 +79,7 @@ import { Route as AppPaperLivesPeopleRouteImport } from './routes/app/paper-live
 import { Route as AppPaperLivesRankingsRouteImport } from './routes/app/paper-lives/rankings'
 import { Route as AppPaperLivesSettingsRouteImport } from './routes/app/paper-lives/settings'
 import { Route as AppPaperLivesWorkRouteImport } from './routes/app/paper-lives/work'
+import { Route as AppPixelWarsIndexRouteImport } from './routes/app/pixel-wars/index'
 import { Route as DeskCrawlerHeroesAliasRouteImport } from './routes/desk-crawler/heroes.$alias'
 import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/connect/trmnl/desk-crawler/install'
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
@@ -181,6 +184,11 @@ const AppPaperLivesRoute = AppPaperLivesRouteImport.update({
   path: '/paper-lives',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPixelWarsRoute = AppPixelWarsRouteImport.update({
+  id: '/pixel-wars',
+  path: '/pixel-wars',
+  getParentRoute: () => AppRoute,
+} as any)
 const DeskCrawlerUnsubscribeRoute = DeskCrawlerUnsubscribeRouteImport.update({
   id: '/desk-crawler/unsubscribe',
   path: '/desk-crawler/unsubscribe',
@@ -224,6 +232,11 @@ const GamesLittlePlotRoute = GamesLittlePlotRouteImport.update({
 const GamesPaperLivesRoute = GamesPaperLivesRouteImport.update({
   id: '/games/paper-lives',
   path: '/games/paper-lives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesPixelWarsRoute = GamesPixelWarsRouteImport.update({
+  id: '/games/pixel-wars',
+  path: '/games/pixel-wars',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpDeskCrawlerRoute = HelpDeskCrawlerRouteImport.update({
@@ -432,6 +445,11 @@ const AppPaperLivesWorkRoute = AppPaperLivesWorkRouteImport.update({
   path: '/work',
   getParentRoute: () => AppPaperLivesRoute,
 } as any)
+const AppPixelWarsIndexRoute = AppPixelWarsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPixelWarsRoute,
+} as any)
 const DeskCrawlerHeroesAliasRoute = DeskCrawlerHeroesAliasRouteImport.update({
   id: '/desk-crawler/heroes/$alias',
   path: '/desk-crawler/heroes/$alias',
@@ -498,6 +516,7 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
   '/app/little-plot': typeof AppLittlePlotRouteWithChildren
   '/app/paper-lives': typeof AppPaperLivesRouteWithChildren
+  '/app/pixel-wars': typeof AppPixelWarsRouteWithChildren
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
@@ -507,6 +526,7 @@ export interface FileRoutesByFullPath {
   '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/games/little-plot': typeof GamesLittlePlotRoute
   '/games/paper-lives': typeof GamesPaperLivesRoute
+  '/games/pixel-wars': typeof GamesPixelWarsRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/little-plot': typeof HelpLittlePlotRoute
@@ -549,6 +569,7 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
   '/app/little-plot/': typeof AppLittlePlotIndexRoute
   '/app/paper-lives/': typeof AppPaperLivesIndexRoute
+  '/app/pixel-wars/': typeof AppPixelWarsIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
@@ -580,6 +601,7 @@ export interface FileRoutesByTo {
   '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/games/little-plot': typeof GamesLittlePlotRoute
   '/games/paper-lives': typeof GamesPaperLivesRoute
+  '/games/pixel-wars': typeof GamesPixelWarsRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/little-plot': typeof HelpLittlePlotRoute
@@ -622,6 +644,7 @@ export interface FileRoutesByTo {
   '/app/idle-angler': typeof AppIdleAnglerIndexRoute
   '/app/little-plot': typeof AppLittlePlotIndexRoute
   '/app/paper-lives': typeof AppPaperLivesIndexRoute
+  '/app/pixel-wars': typeof AppPixelWarsIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
@@ -650,6 +673,7 @@ export interface FileRoutesById {
   '/app/idle-angler': typeof AppIdleAnglerRouteWithChildren
   '/app/little-plot': typeof AppLittlePlotRouteWithChildren
   '/app/paper-lives': typeof AppPaperLivesRouteWithChildren
+  '/app/pixel-wars': typeof AppPixelWarsRouteWithChildren
   '/desk-crawler/unsubscribe': typeof DeskCrawlerUnsubscribeRoute
   '/desk-crawler/waiting-list': typeof DeskCrawlerWaitingListRoute
   '/dev/desk-crawler': typeof DevDeskCrawlerRoute
@@ -659,6 +683,7 @@ export interface FileRoutesById {
   '/games/idle-angler': typeof GamesIdleAnglerRoute
   '/games/little-plot': typeof GamesLittlePlotRoute
   '/games/paper-lives': typeof GamesPaperLivesRoute
+  '/games/pixel-wars': typeof GamesPixelWarsRoute
   '/help/desk-crawler': typeof HelpDeskCrawlerRoute
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/little-plot': typeof HelpLittlePlotRoute
@@ -701,6 +726,7 @@ export interface FileRoutesById {
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
   '/app/little-plot/': typeof AppLittlePlotIndexRoute
   '/app/paper-lives/': typeof AppPaperLivesIndexRoute
+  '/app/pixel-wars/': typeof AppPixelWarsIndexRoute
   '/connect/trmnl/desk-crawler/install': typeof ConnectTrmnlDeskCrawlerInstallRoute
   '/connect/trmnl/desk-crawler/manage': typeof ConnectTrmnlDeskCrawlerManageRoute
   '/connect/trmnl/idle-angler/install': typeof ConnectTrmnlIdleAnglerInstallRoute
@@ -730,6 +756,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler'
     | '/app/little-plot'
     | '/app/paper-lives'
+    | '/app/pixel-wars'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
@@ -739,6 +766,7 @@ export interface FileRouteTypes {
     | '/games/idle-angler'
     | '/games/little-plot'
     | '/games/paper-lives'
+    | '/games/pixel-wars'
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/help/little-plot'
@@ -781,6 +809,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/'
     | '/app/little-plot/'
     | '/app/paper-lives/'
+    | '/app/pixel-wars/'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
@@ -812,6 +841,7 @@ export interface FileRouteTypes {
     | '/games/idle-angler'
     | '/games/little-plot'
     | '/games/paper-lives'
+    | '/games/pixel-wars'
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/help/little-plot'
@@ -854,6 +884,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler'
     | '/app/little-plot'
     | '/app/paper-lives'
+    | '/app/pixel-wars'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
@@ -881,6 +912,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler'
     | '/app/little-plot'
     | '/app/paper-lives'
+    | '/app/pixel-wars'
     | '/desk-crawler/unsubscribe'
     | '/desk-crawler/waiting-list'
     | '/dev/desk-crawler'
@@ -890,6 +922,7 @@ export interface FileRouteTypes {
     | '/games/idle-angler'
     | '/games/little-plot'
     | '/games/paper-lives'
+    | '/games/pixel-wars'
     | '/help/desk-crawler'
     | '/help/idle-angler'
     | '/help/little-plot'
@@ -932,6 +965,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/'
     | '/app/little-plot/'
     | '/app/paper-lives/'
+    | '/app/pixel-wars/'
     | '/connect/trmnl/desk-crawler/install'
     | '/connect/trmnl/desk-crawler/manage'
     | '/connect/trmnl/idle-angler/install'
@@ -965,6 +999,7 @@ export interface RootRouteChildren {
   GamesIdleAnglerRoute: typeof GamesIdleAnglerRoute
   GamesLittlePlotRoute: typeof GamesLittlePlotRoute
   GamesPaperLivesRoute: typeof GamesPaperLivesRoute
+  GamesPixelWarsRoute: typeof GamesPixelWarsRoute
   HelpDeskCrawlerRoute: typeof HelpDeskCrawlerRoute
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
   HelpLittlePlotRoute: typeof HelpLittlePlotRoute
@@ -1117,6 +1152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPaperLivesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/pixel-wars': {
+      id: '/app/pixel-wars'
+      path: '/pixel-wars'
+      fullPath: '/app/pixel-wars'
+      preLoaderRoute: typeof AppPixelWarsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/desk-crawler/unsubscribe': {
       id: '/desk-crawler/unsubscribe'
       path: '/desk-crawler/unsubscribe'
@@ -1178,6 +1220,13 @@ declare module '@tanstack/react-router' {
       path: '/games/paper-lives'
       fullPath: '/games/paper-lives'
       preLoaderRoute: typeof GamesPaperLivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/pixel-wars': {
+      id: '/games/pixel-wars'
+      path: '/games/pixel-wars'
+      fullPath: '/games/pixel-wars'
+      preLoaderRoute: typeof GamesPixelWarsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help/desk-crawler': {
@@ -1460,6 +1509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPaperLivesWorkRouteImport
       parentRoute: typeof AppPaperLivesRoute
     }
+    '/app/pixel-wars/': {
+      id: '/app/pixel-wars/'
+      path: '/'
+      fullPath: '/app/pixel-wars/'
+      preLoaderRoute: typeof AppPixelWarsIndexRouteImport
+      parentRoute: typeof AppPixelWarsRoute
+    }
     '/desk-crawler/heroes/$alias': {
       id: '/desk-crawler/heroes/$alias'
       path: '/desk-crawler/heroes/$alias'
@@ -1625,11 +1681,24 @@ const AppPaperLivesRouteWithChildren = AppPaperLivesRoute._addFileChildren(
   AppPaperLivesRouteChildren,
 )
 
+interface AppPixelWarsRouteChildren {
+  AppPixelWarsIndexRoute: typeof AppPixelWarsIndexRoute
+}
+
+const AppPixelWarsRouteChildren: AppPixelWarsRouteChildren = {
+  AppPixelWarsIndexRoute: AppPixelWarsIndexRoute,
+}
+
+const AppPixelWarsRouteWithChildren = AppPixelWarsRoute._addFileChildren(
+  AppPixelWarsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppDeskCrawlerRoute: typeof AppDeskCrawlerRouteWithChildren
   AppIdleAnglerRoute: typeof AppIdleAnglerRouteWithChildren
   AppLittlePlotRoute: typeof AppLittlePlotRouteWithChildren
   AppPaperLivesRoute: typeof AppPaperLivesRouteWithChildren
+  AppPixelWarsRoute: typeof AppPixelWarsRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -1638,6 +1707,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIdleAnglerRoute: AppIdleAnglerRouteWithChildren,
   AppLittlePlotRoute: AppLittlePlotRouteWithChildren,
   AppPaperLivesRoute: AppPaperLivesRouteWithChildren,
+  AppPixelWarsRoute: AppPixelWarsRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -1667,6 +1737,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesIdleAnglerRoute: GamesIdleAnglerRoute,
   GamesLittlePlotRoute: GamesLittlePlotRoute,
   GamesPaperLivesRoute: GamesPaperLivesRoute,
+  GamesPixelWarsRoute: GamesPixelWarsRoute,
   HelpDeskCrawlerRoute: HelpDeskCrawlerRoute,
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
   HelpLittlePlotRoute: HelpLittlePlotRoute,

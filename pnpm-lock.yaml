@@ -26,6 +26,9 @@ importers:
       '@trmnl-games/paper-lives':
         specifier: workspace:*
         version: link:packages/paper-lives
+      '@trmnl-games/pixel-wars':
+        specifier: workspace:*
+        version: link:packages/pixel-wars
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:packages/platform
@@ -282,6 +285,12 @@ importers:
       '@trmnl-games/engine':
         specifier: workspace:*
         version: link:../engine
+    devDependencies:
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+
+  packages/pixel-wars:
     devDependencies:
       typescript:
         specifier: ~6.0.3

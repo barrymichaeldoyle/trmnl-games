@@ -5,8 +5,9 @@ export const DESK_CRAWLER_GAME = 'desk-crawler' as const
 export const IDLE_ANGLER_GAME = 'idle-angler' as const
 export const PAPER_LIVES_GAME = 'paper-lives' as const
 export const LITTLE_PLOT_GAME = 'little-plot' as const
-export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME | typeof PAPER_LIVES_GAME | typeof LITTLE_PLOT_GAME
-export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME, PAPER_LIVES_GAME, LITTLE_PLOT_GAME]
+export const PIXEL_WARS_GAME = 'pixel-wars' as const
+export type GameSlug = typeof DESK_CRAWLER_GAME | typeof IDLE_ANGLER_GAME | typeof PAPER_LIVES_GAME | typeof LITTLE_PLOT_GAME | typeof PIXEL_WARS_GAME
+export const GAME_SLUGS: readonly GameSlug[] = [DESK_CRAWLER_GAME, IDLE_ANGLER_GAME, PAPER_LIVES_GAME, LITTLE_PLOT_GAME, PIXEL_WARS_GAME]
 
 /**
  * Lifecycle status (idle-angler.md "Architecture"). `hidden`: nothing lists the game and its routes
@@ -91,10 +92,24 @@ export const games = {
     clientIdEnv: 'TRMNL_CLIENT_ID_LITTLE_PLOT',
     marketplaceUrl: null,
   },
+  [PIXEL_WARS_GAME]: {
+    slug: PIXEL_WARS_GAME,
+    name: 'Pixel Wars',
+    description: 'Every TRMNL is a tile. Hold yours, take your neighbours\'.',
+    // P47 / D214: hidden (admin-only) while it is built, until its own listing.
+    defaultStatus: 'hidden',
+    publicPath: '/games/pixel-wars',
+    companionPath: '/app/pixel-wars',
+    helpPath: '/help/pixel-wars',
+    installPath: '/connect/trmnl/pixel-wars/install',
+    managePath: '/connect/trmnl/pixel-wars/manage',
+    clientIdEnv: 'TRMNL_CLIENT_ID_PIXEL_WARS',
+    marketplaceUrl: null,
+  },
 } as const satisfies Record<GameSlug, GameEntry>
 
 export function isGameSlug(value: unknown): value is GameSlug {
-  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME || value === PAPER_LIVES_GAME || value === LITTLE_PLOT_GAME
+  return value === DESK_CRAWLER_GAME || value === IDLE_ANGLER_GAME || value === PAPER_LIVES_GAME || value === LITTLE_PLOT_GAME || value === PIXEL_WARS_GAME
 }
 
 export function isGameStatus(value: unknown): value is GameStatus {

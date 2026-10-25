@@ -187,7 +187,7 @@ export const logKind = v.union(
 )
 
 /** Every registered game (packages/platform). Storage accepts any of them; each write path still names its own game. */
-export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'), v.literal('little-plot'))
+export const gameSlug = v.union(v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'), v.literal('little-plot'), v.literal('pixel-wars'))
 export const gameStatus = v.union(v.literal('hidden'), v.literal('preview'), v.literal('live'))
 
 /** D149: a hero's look; chosen free at creation, changed later with a makeover. */

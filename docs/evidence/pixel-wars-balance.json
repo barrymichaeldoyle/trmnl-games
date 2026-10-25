@@ -1,0 +1,478 @@
+{
+  "generatedAt": "2026-10-25T19:57:55.789Z",
+  "days": 28,
+  "content": "v1",
+  "gates": [
+    {
+      "gate": "60: leader share averaged over any week never over 45%",
+      "pass": true,
+      "detail": "34/35/36/34"
+    },
+    {
+      "gate": "60: smallest share averaged over any week never under 12%",
+      "pass": true,
+      "detail": "17/17/17/17"
+    },
+    {
+      "gate": "60: a daily desk falls at most once in three days",
+      "pass": true,
+      "detail": "0/day"
+    },
+    {
+      "gate": "60: a daily desk is liberated within a median 8 hours",
+      "pass": true,
+      "detail": "never fell h"
+    },
+    {
+      "gate": "60: a never-visits desk is liberated by faction-mates within two days",
+      "pass": true,
+      "detail": "15 h"
+    },
+    {
+      "gate": "60: daily and twice-daily XP within 10% (spend pattern)",
+      "pass": true,
+      "detail": "6155 vs 5886"
+    },
+    {
+      "gate": "60: no desk taken inside its owner's shield",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "gate": "60: young map not decided by the bell (trailing faction at least 15% at the bell in half the weeks)",
+      "pass": true,
+      "detail": "20/21/20/22"
+    },
+    {
+      "gate": "60: replay from the order log is identical",
+      "pass": true,
+      "detail": "45431 orders, 0 refused"
+    },
+    {
+      "gate": "200: leader share averaged over any week never over 45%",
+      "pass": true,
+      "detail": "35/35/36/35"
+    },
+    {
+      "gate": "200: smallest share averaged over any week never under 12%",
+      "pass": true,
+      "detail": "13/13/13/13"
+    },
+    {
+      "gate": "200: at least two lead changes a week",
+      "pass": true,
+      "detail": "4/6/8/6"
+    },
+    {
+      "gate": "200: a daily desk falls at most once in three days",
+      "pass": true,
+      "detail": "0/day"
+    },
+    {
+      "gate": "200: a daily desk is liberated within a median 8 hours",
+      "pass": true,
+      "detail": "never fell h"
+    },
+    {
+      "gate": "200: a never-visits desk is liberated by faction-mates within two days",
+      "pass": true,
+      "detail": "15 h"
+    },
+    {
+      "gate": "200: daily and twice-daily XP within 10% (spend pattern)",
+      "pass": true,
+      "detail": "6054 vs 5777"
+    },
+    {
+      "gate": "200: no desk taken inside its owner's shield",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "gate": "200: replay from the order log is identical",
+      "pass": true,
+      "detail": "171782 orders, 0 refused"
+    },
+    {
+      "gate": "440: leader share averaged over any week never over 45%",
+      "pass": true,
+      "detail": "36/36/36/36"
+    },
+    {
+      "gate": "440: smallest share averaged over any week never under 12%",
+      "pass": true,
+      "detail": "13/13/13/13"
+    },
+    {
+      "gate": "440: a daily desk falls at most once in three days",
+      "pass": true,
+      "detail": "0/day"
+    },
+    {
+      "gate": "440: a daily desk is liberated within a median 8 hours",
+      "pass": true,
+      "detail": "never fell h"
+    },
+    {
+      "gate": "440: a never-visits desk is liberated by faction-mates within two days",
+      "pass": true,
+      "detail": "11 h"
+    },
+    {
+      "gate": "440: daily and twice-daily XP within 10% (spend pattern)",
+      "pass": true,
+      "detail": "6473 vs 6738"
+    },
+    {
+      "gate": "440: no desk taken inside its owner's shield",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "gate": "440: replay from the order log is identical",
+      "pass": true,
+      "detail": "389451 orders, 0 refused"
+    }
+  ],
+  "reports": [
+    {
+      "desks": 60,
+      "weeks": [
+        {
+          "winner": 1,
+          "leaderAvgPercent": 34,
+          "smallestAvgPercent": 17,
+          "leadChanges": 10,
+          "finalPercents": [
+            32,
+            24,
+            24,
+            20
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 35,
+          "smallestAvgPercent": 17,
+          "leadChanges": 16,
+          "finalPercents": [
+            29,
+            24,
+            27,
+            21
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 36,
+          "smallestAvgPercent": 17,
+          "leadChanges": 7,
+          "finalPercents": [
+            32,
+            22,
+            25,
+            20
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 34,
+          "smallestAvgPercent": 17,
+          "leadChanges": 14,
+          "finalPercents": [
+            30,
+            25,
+            23,
+            22
+          ]
+        }
+      ],
+      "deskFallsPerDailyDeskPerDay": 0,
+      "deskFallsPerNeverDeskPerDay": 0.088,
+      "medianLiberationHoursDaily": null,
+      "medianLiberationHoursNever": 15,
+      "xpByPolicy": {
+        "never": 326,
+        "threeDay": 3264,
+        "daily": 6155,
+        "twiceDaily": 5886
+      },
+      "partsByPolicy": {
+        "never": {
+          "flips": 0,
+          "desks": 0,
+          "held": 205,
+          "full": 21,
+          "lib": 0,
+          "paint": 0,
+          "stamp": 0,
+          "strike": 0,
+          "liberate": 0
+        },
+        "threeDay": {
+          "flips": 7,
+          "desks": 1,
+          "held": 2948,
+          "full": 62,
+          "lib": 4,
+          "paint": 282,
+          "stamp": 20,
+          "strike": 14,
+          "liberate": 3
+        },
+        "daily": {
+          "flips": 21,
+          "desks": 2,
+          "held": 5519,
+          "full": 183,
+          "lib": 4,
+          "paint": 835,
+          "stamp": 73,
+          "strike": 53,
+          "liberate": 0
+        },
+        "twiceDaily": {
+          "flips": 30,
+          "desks": 2,
+          "held": 4912,
+          "full": 300,
+          "lib": 10,
+          "paint": 1667,
+          "stamp": 179,
+          "strike": 93,
+          "liberate": 0
+        }
+      },
+      "shieldBreaches": 0,
+      "replayIdentical": true,
+      "refusedOrders": 0,
+      "ordersPlaced": 45431
+    },
+    {
+      "desks": 200,
+      "weeks": [
+        {
+          "winner": 1,
+          "leaderAvgPercent": 35,
+          "smallestAvgPercent": 13,
+          "leadChanges": 4,
+          "finalPercents": [
+            37,
+            27,
+            22,
+            14
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 35,
+          "smallestAvgPercent": 13,
+          "leadChanges": 6,
+          "finalPercents": [
+            34,
+            27,
+            23,
+            15
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 36,
+          "smallestAvgPercent": 13,
+          "leadChanges": 8,
+          "finalPercents": [
+            35,
+            30,
+            21,
+            15
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 35,
+          "smallestAvgPercent": 13,
+          "leadChanges": 6,
+          "finalPercents": [
+            36,
+            28,
+            22,
+            14
+          ]
+        }
+      ],
+      "deskFallsPerDailyDeskPerDay": 0,
+      "deskFallsPerNeverDeskPerDay": 0.083,
+      "medianLiberationHoursDaily": null,
+      "medianLiberationHoursNever": 15,
+      "xpByPolicy": {
+        "never": 355,
+        "threeDay": 3624,
+        "daily": 6054,
+        "twiceDaily": 5777
+      },
+      "partsByPolicy": {
+        "never": {
+          "flips": 0,
+          "desks": 0,
+          "held": 223,
+          "full": 26,
+          "lib": 0,
+          "paint": 0,
+          "stamp": 0,
+          "strike": 0,
+          "liberate": 0
+        },
+        "threeDay": {
+          "flips": 5,
+          "desks": 1,
+          "held": 3317,
+          "full": 65,
+          "lib": 4,
+          "paint": 345,
+          "stamp": 19,
+          "strike": 10,
+          "liberate": 2
+        },
+        "daily": {
+          "flips": 11,
+          "desks": 2,
+          "held": 5382,
+          "full": 209,
+          "lib": 7,
+          "paint": 977,
+          "stamp": 59,
+          "strike": 28,
+          "liberate": 0
+        },
+        "twiceDaily": {
+          "flips": 21,
+          "desks": 2,
+          "held": 4833,
+          "full": 303,
+          "lib": 11,
+          "paint": 1929,
+          "stamp": 144,
+          "strike": 59,
+          "liberate": 0
+        }
+      },
+      "shieldBreaches": 0,
+      "replayIdentical": true,
+      "refusedOrders": 0,
+      "ordersPlaced": 171782
+    },
+    {
+      "desks": 440,
+      "weeks": [
+        {
+          "winner": 1,
+          "leaderAvgPercent": 36,
+          "smallestAvgPercent": 13,
+          "leadChanges": 90,
+          "finalPercents": [
+            36,
+            34,
+            16,
+            13
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 36,
+          "smallestAvgPercent": 13,
+          "leadChanges": 92,
+          "finalPercents": [
+            34,
+            34,
+            18,
+            14
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 36,
+          "smallestAvgPercent": 13,
+          "leadChanges": 96,
+          "finalPercents": [
+            36,
+            34,
+            17,
+            13
+          ]
+        },
+        {
+          "winner": 1,
+          "leaderAvgPercent": 36,
+          "smallestAvgPercent": 13,
+          "leadChanges": 88,
+          "finalPercents": [
+            37,
+            34,
+            16,
+            13
+          ]
+        }
+      ],
+      "deskFallsPerDailyDeskPerDay": 0,
+      "deskFallsPerNeverDeskPerDay": 0.049,
+      "medianLiberationHoursDaily": null,
+      "medianLiberationHoursNever": 11,
+      "xpByPolicy": {
+        "never": 353,
+        "threeDay": 3471,
+        "daily": 6473,
+        "twiceDaily": 6738
+      },
+      "partsByPolicy": {
+        "never": {
+          "flips": 0,
+          "desks": 0,
+          "held": 221,
+          "full": 26,
+          "lib": 0,
+          "paint": 0,
+          "stamp": 0,
+          "strike": 0,
+          "liberate": 0
+        },
+        "threeDay": {
+          "flips": 6,
+          "desks": 0,
+          "held": 3155,
+          "full": 77,
+          "lib": 4,
+          "paint": 355,
+          "stamp": 19,
+          "strike": 12,
+          "liberate": 2
+        },
+        "daily": {
+          "flips": 13,
+          "desks": 1,
+          "held": 5865,
+          "full": 193,
+          "lib": 6,
+          "paint": 1025,
+          "stamp": 64,
+          "strike": 34,
+          "liberate": 0
+        },
+        "twiceDaily": {
+          "flips": 20,
+          "desks": 2,
+          "held": 5732,
+          "full": 340,
+          "lib": 11,
+          "paint": 1916,
+          "stamp": 237,
+          "strike": 62,
+          "liberate": 0
+        }
+      },
+      "shieldBreaches": 0,
+      "replayIdentical": true,
+      "refusedOrders": 0,
+      "ordersPlaced": 389451
+    }
+  ]
+}

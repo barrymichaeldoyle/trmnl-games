@@ -1,0 +1,17 @@
+{
+  "name": "@trmnl-games/pixel-wars",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./content": "./src/content/index.ts",
+    "./content/*": "./src/content/*.ts",
+    "./sim": "./src/sim/index.ts",
+    "./sim/*": "./src/sim/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}
