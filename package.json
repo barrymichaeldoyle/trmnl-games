@@ -36,6 +36,7 @@
     "preview:idle-angler": "tsx tools/trmnl/preview-idle-angler.ts --inline-art",
     "preview:paper-lives": "tsx tools/trmnl/preview-paper-lives.ts --inline-art",
     "preview:little-plot": "tsx tools/trmnl/preview-little-plot.ts --inline-art",
+    "preview:pixel-wars": "tsx tools/trmnl/preview-pixel-wars.ts --inline-art",
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {

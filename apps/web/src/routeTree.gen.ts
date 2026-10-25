@@ -19,6 +19,7 @@ import { Route as IaRouteImport } from './routes/ia'
 import { Route as LpRouteImport } from './routes/lp'
 import { Route as PlRouteImport } from './routes/pl'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PwRouteImport } from './routes/pw'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as WhatsNewRouteImport } from './routes/whats-new'
@@ -137,6 +138,11 @@ const PlRoute = PlRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PwRoute = PwRouteImport.update({
+  id: '/pw',
+  path: '/pw',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -508,6 +514,7 @@ export interface FileRoutesByFullPath {
   '/lp': typeof LpRoute
   '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
+  '/pw': typeof PwRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
@@ -588,6 +595,7 @@ export interface FileRoutesByTo {
   '/lp': typeof LpRoute
   '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
+  '/pw': typeof PwRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
@@ -665,6 +673,7 @@ export interface FileRoutesById {
   '/lp': typeof LpRoute
   '/pl': typeof PlRoute
   '/privacy': typeof PrivacyRoute
+  '/pw': typeof PwRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/whats-new': typeof WhatsNewRoute
@@ -748,6 +757,7 @@ export interface FileRouteTypes {
     | '/lp'
     | '/pl'
     | '/privacy'
+    | '/pw'
     | '/support'
     | '/terms'
     | '/whats-new'
@@ -828,6 +838,7 @@ export interface FileRouteTypes {
     | '/lp'
     | '/pl'
     | '/privacy'
+    | '/pw'
     | '/support'
     | '/terms'
     | '/whats-new'
@@ -904,6 +915,7 @@ export interface FileRouteTypes {
     | '/lp'
     | '/pl'
     | '/privacy'
+    | '/pw'
     | '/support'
     | '/terms'
     | '/whats-new'
@@ -986,6 +998,7 @@ export interface RootRouteChildren {
   LpRoute: typeof LpRoute
   PlRoute: typeof PlRoute
   PrivacyRoute: typeof PrivacyRoute
+  PwRoute: typeof PwRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   WhatsNewRoute: typeof WhatsNewRoute
@@ -1087,6 +1100,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pw': {
+      id: '/pw'
+      path: '/pw'
+      fullPath: '/pw'
+      preLoaderRoute: typeof PwRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -1724,6 +1744,7 @@ const rootRouteChildren: RootRouteChildren = {
   LpRoute: LpRoute,
   PlRoute: PlRoute,
   PrivacyRoute: PrivacyRoute,
+  PwRoute: PwRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   WhatsNewRoute: WhatsNewRoute,

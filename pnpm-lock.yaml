@@ -291,6 +291,10 @@ importers:
         version: 6.0.3
 
   packages/pixel-wars:
+    dependencies:
+      '@trmnl-games/engine':
+        specifier: workspace:*
+        version: link:../engine
     devDependencies:
       typescript:
         specifier: ~6.0.3

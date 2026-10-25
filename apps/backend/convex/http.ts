@@ -14,6 +14,9 @@ import { flyQrBase, renderIdleAnglerArt } from '@trmnl-games/idle-angler/art/rou
 import { renderPaperLivesArt } from '@trmnl-games/paper-lives/art/route'
 import { screenMarkup as littlePlotMarkup } from '@trmnl-games/little-plot/templates/screen'
 import { flowerQrBase, renderLittlePlotArt } from '@trmnl-games/little-plot/art/route'
+import { screenMarkup as pixelWarsMarkup } from '@trmnl-games/pixel-wars/templates/screen'
+import { parseArtPath as parsePixelWarsArt, renderMapPng as renderPixelWarsMap, renderQrPng as renderPixelWarsQr } from '@trmnl-games/pixel-wars/art/route'
+import { contentV1 as pixelWarsContent } from '@trmnl-games/pixel-wars/content'
 import type { GameSlug } from '@trmnl-games/platform'
 import { parseTrmnlLocale } from './lib/trmnlUser'
 
@@ -180,6 +183,27 @@ const littlePlotScreen = httpAction(async (ctx, request) => {
 })
 http.route({ path: '/trmnl/little-plot/v1/screen', method: 'POST', handler: littlePlotScreen })
 
+/** Pixel Wars' screen (D214): the same authorization and lost-callback recovery; every valid screen records when it was served, for the cleared-desk rule. */
+const pixelWarsScreen = httpAction(async (ctx, request) => {
+  const parsed = await parseScreenRequest(request)
+  if (parsed instanceof Response) return parsed
+  const { tokenHash, form, uuid } = parsed
+  const now = Date.now()
+  const utcOffset = parseUtcOffset(form.get('trmnl[user][utc_offset]'))
+  const locale = parseTrmnlLocale(form.get('trmnl[user][locale]'))
+  const args = { tokenHash, uuid, now, utcOffset, locale }
+  let result = await ctx.runQuery(internal.pixelWars.payload.forInstance, args)
+  if (result?.outcome === 'recoverable') {
+    await ctx.runMutation(internal.trmnl.confirmInstance, { gameSlug: 'pixel-wars', tokenHash, uuid, confirmedBy: 'screen_request' })
+    result = await ctx.runQuery(internal.pixelWars.payload.forInstance, args)
+  }
+  if (result === null || result.outcome !== 'payload') return notFound()
+  if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
+  if (result.screenServedFor !== undefined) { try { await ctx.runMutation(internal.trmnl.recordScreenServed, { instanceId: result.screenServedFor, at: now }) } catch { /* next request retries */ } }
+  return json(200, { ...pixelWarsMarkup, merge_variables: { ...result.payload, utc_offset: utcOffset } })
+})
+http.route({ path: '/trmnl/pixel-wars/v1/screen', method: 'POST', handler: pixelWarsScreen })
+
 http.route({
   path: '/trmnl/v1/screen',
   method: 'POST',
@@ -231,6 +255,21 @@ http.route({
       const art = renderPaperLivesArt(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN)
       if (art === null) return new Response('Not found', { status: 404 })
       return new Response(new Blob([art.png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': art.immutable ? 'public, max-age=31536000, immutable' : 'public, max-age=86400' } })
+    }
+    // D214: Pixel Wars' map windows and prints are drawn from stored snapshots; its code is pure.
+    if (path.startsWith('/art/pw/')) {
+      const art = parsePixelWarsArt(path)
+      if (art === null) return new Response('Not found', { status: 404 })
+      const png = (bytes: Uint8Array, cache: string) => new Response(new Blob([bytes.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': cache } })
+      if (art.kind === 'qr') return png(renderPixelWarsQr(art.target, art.scale, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN), 'public, max-age=86400')
+      if (art.kind === 'map') {
+        const row = await ctx.runQuery(internal.pixelWars.art.snapshot, { mapId: art.mapId, tick: art.tick, seat: art.seat })
+        if (row === null) return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'public, max-age=60' } })
+        return png(renderPixelWarsMap({ ...row, cells: new Uint8Array(row.cells) }, art.window, pixelWarsContent, row.own ?? undefined), 'public, max-age=31536000, immutable')
+      }
+      const row = await ctx.runQuery(internal.pixelWars.art.print, { seasonId: art.seasonId })
+      if (row === null) return new Response('Not found', { status: 404, headers: { 'Cache-Control': 'public, max-age=60' } })
+      return png(renderPixelWarsMap({ ...row, cells: new Uint8Array(row.cells) }, { x0: row.x0, y0: row.y0, cols: row.cols, rows: row.rows, px: art.px }, pixelWarsContent), 'public, max-age=31536000, immutable')
     }
     // D206: Little Plot's scenes and codes.
     if (path.startsWith('/art/lp/')) {
