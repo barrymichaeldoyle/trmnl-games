@@ -175,6 +175,9 @@ importers:
       '@trmnl-games/paper-lives':
         specifier: workspace:*
         version: link:../../packages/paper-lives
+      '@trmnl-games/pixel-wars':
+        specifier: workspace:*
+        version: link:../../packages/pixel-wars
       '@trmnl-games/platform':
         specifier: workspace:*
         version: link:../../packages/platform

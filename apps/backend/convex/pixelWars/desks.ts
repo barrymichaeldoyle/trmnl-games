@@ -266,7 +266,7 @@ export const view = query({
       factions,
       open,
       map: state && map
-        ? { id: map._id, x0: state.x0, y0: state.y0, cols: state.cols, rows: state.rows, cells: cellsToHex(state.cells), seats: state.seats.map((s) => ({ x: s.x, y: s.y, f: s.faction })), shares: map.shares, tick: map.currentTick, lines: latest?.lines ?? [] }
+        ? { id: map._id, x0: state.x0, y0: state.y0, cols: state.cols, rows: state.rows, cells: cellsToHex(state.cells), seats: state.seats.map((s) => ({ x: s.x, y: s.y, f: s.faction })), shares: map.shares, seasonScore: map.seasonScore, tick: map.currentTick, lines: latest?.lines ?? [] }
         : null,
       queue: queue.map((o) => ({ id: o._id, x: o.x, y: o.y, kind: o.kind, drops: o.drops, tick: o.tick })),
       targetTick: target,

@@ -44,6 +44,7 @@ import { Route as HelpDeskCrawlerRouteImport } from './routes/help/desk-crawler'
 import { Route as HelpIdleAnglerRouteImport } from './routes/help/idle-angler'
 import { Route as HelpLittlePlotRouteImport } from './routes/help/little-plot'
 import { Route as HelpPaperLivesRouteImport } from './routes/help/paper-lives'
+import { Route as HelpPixelWarsRouteImport } from './routes/help/pixel-wars'
 import { Route as KCodeRouteImport } from './routes/k.$code'
 import { Route as LaunchListUnsubscribeRouteImport } from './routes/launch-list/unsubscribe'
 import { Route as ProfileAliasRouteImport } from './routes/profile/$alias'
@@ -81,6 +82,10 @@ import { Route as AppPaperLivesRankingsRouteImport } from './routes/app/paper-li
 import { Route as AppPaperLivesSettingsRouteImport } from './routes/app/paper-lives/settings'
 import { Route as AppPaperLivesWorkRouteImport } from './routes/app/paper-lives/work'
 import { Route as AppPixelWarsIndexRouteImport } from './routes/app/pixel-wars/index'
+import { Route as AppPixelWarsAchievementsRouteImport } from './routes/app/pixel-wars/achievements'
+import { Route as AppPixelWarsRankingsRouteImport } from './routes/app/pixel-wars/rankings'
+import { Route as AppPixelWarsSeasonRouteImport } from './routes/app/pixel-wars/season'
+import { Route as AppPixelWarsSettingsRouteImport } from './routes/app/pixel-wars/settings'
 import { Route as DeskCrawlerHeroesAliasRouteImport } from './routes/desk-crawler/heroes.$alias'
 import { Route as ConnectTrmnlDeskCrawlerInstallRouteImport } from './routes/connect/trmnl/desk-crawler/install'
 import { Route as ConnectTrmnlDeskCrawlerManageRouteImport } from './routes/connect/trmnl/desk-crawler/manage'
@@ -263,6 +268,11 @@ const HelpLittlePlotRoute = HelpLittlePlotRouteImport.update({
 const HelpPaperLivesRoute = HelpPaperLivesRouteImport.update({
   id: '/help/paper-lives',
   path: '/help/paper-lives',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpPixelWarsRoute = HelpPixelWarsRouteImport.update({
+  id: '/help/pixel-wars',
+  path: '/help/pixel-wars',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KCodeRoute = KCodeRouteImport.update({
@@ -456,6 +466,27 @@ const AppPixelWarsIndexRoute = AppPixelWarsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppPixelWarsRoute,
 } as any)
+const AppPixelWarsAchievementsRoute =
+  AppPixelWarsAchievementsRouteImport.update({
+    id: '/achievements',
+    path: '/achievements',
+    getParentRoute: () => AppPixelWarsRoute,
+  } as any)
+const AppPixelWarsRankingsRoute = AppPixelWarsRankingsRouteImport.update({
+  id: '/rankings',
+  path: '/rankings',
+  getParentRoute: () => AppPixelWarsRoute,
+} as any)
+const AppPixelWarsSeasonRoute = AppPixelWarsSeasonRouteImport.update({
+  id: '/season',
+  path: '/season',
+  getParentRoute: () => AppPixelWarsRoute,
+} as any)
+const AppPixelWarsSettingsRoute = AppPixelWarsSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppPixelWarsRoute,
+} as any)
 const DeskCrawlerHeroesAliasRoute = DeskCrawlerHeroesAliasRouteImport.update({
   id: '/desk-crawler/heroes/$alias',
   path: '/desk-crawler/heroes/$alias',
@@ -538,6 +569,7 @@ export interface FileRoutesByFullPath {
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/little-plot': typeof HelpLittlePlotRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
+  '/help/pixel-wars': typeof HelpPixelWarsRoute
   '/k/$code': typeof KCodeRoute
   '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
   '/profile/$alias': typeof ProfileAliasRoute
@@ -571,6 +603,10 @@ export interface FileRoutesByFullPath {
   '/app/paper-lives/rankings': typeof AppPaperLivesRankingsRoute
   '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
   '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
+  '/app/pixel-wars/achievements': typeof AppPixelWarsAchievementsRoute
+  '/app/pixel-wars/rankings': typeof AppPixelWarsRankingsRoute
+  '/app/pixel-wars/season': typeof AppPixelWarsSeasonRoute
+  '/app/pixel-wars/settings': typeof AppPixelWarsSettingsRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
@@ -614,6 +650,7 @@ export interface FileRoutesByTo {
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/little-plot': typeof HelpLittlePlotRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
+  '/help/pixel-wars': typeof HelpPixelWarsRoute
   '/k/$code': typeof KCodeRoute
   '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
   '/profile/$alias': typeof ProfileAliasRoute
@@ -647,6 +684,10 @@ export interface FileRoutesByTo {
   '/app/paper-lives/rankings': typeof AppPaperLivesRankingsRoute
   '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
   '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
+  '/app/pixel-wars/achievements': typeof AppPixelWarsAchievementsRoute
+  '/app/pixel-wars/rankings': typeof AppPixelWarsRankingsRoute
+  '/app/pixel-wars/season': typeof AppPixelWarsSeasonRoute
+  '/app/pixel-wars/settings': typeof AppPixelWarsSettingsRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler': typeof AppIdleAnglerIndexRoute
@@ -697,6 +738,7 @@ export interface FileRoutesById {
   '/help/idle-angler': typeof HelpIdleAnglerRoute
   '/help/little-plot': typeof HelpLittlePlotRoute
   '/help/paper-lives': typeof HelpPaperLivesRoute
+  '/help/pixel-wars': typeof HelpPixelWarsRoute
   '/k/$code': typeof KCodeRoute
   '/launch-list/unsubscribe': typeof LaunchListUnsubscribeRoute
   '/profile/$alias': typeof ProfileAliasRoute
@@ -730,6 +772,10 @@ export interface FileRoutesById {
   '/app/paper-lives/rankings': typeof AppPaperLivesRankingsRoute
   '/app/paper-lives/settings': typeof AppPaperLivesSettingsRoute
   '/app/paper-lives/work': typeof AppPaperLivesWorkRoute
+  '/app/pixel-wars/achievements': typeof AppPixelWarsAchievementsRoute
+  '/app/pixel-wars/rankings': typeof AppPixelWarsRankingsRoute
+  '/app/pixel-wars/season': typeof AppPixelWarsSeasonRoute
+  '/app/pixel-wars/settings': typeof AppPixelWarsSettingsRoute
   '/desk-crawler/heroes/$alias': typeof DeskCrawlerHeroesAliasRoute
   '/app/desk-crawler/': typeof AppDeskCrawlerIndexRoute
   '/app/idle-angler/': typeof AppIdleAnglerIndexRoute
@@ -781,6 +827,7 @@ export interface FileRouteTypes {
     | '/help/idle-angler'
     | '/help/little-plot'
     | '/help/paper-lives'
+    | '/help/pixel-wars'
     | '/k/$code'
     | '/launch-list/unsubscribe'
     | '/profile/$alias'
@@ -814,6 +861,10 @@ export interface FileRouteTypes {
     | '/app/paper-lives/rankings'
     | '/app/paper-lives/settings'
     | '/app/paper-lives/work'
+    | '/app/pixel-wars/achievements'
+    | '/app/pixel-wars/rankings'
+    | '/app/pixel-wars/season'
+    | '/app/pixel-wars/settings'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
     | '/app/idle-angler/'
@@ -857,6 +908,7 @@ export interface FileRouteTypes {
     | '/help/idle-angler'
     | '/help/little-plot'
     | '/help/paper-lives'
+    | '/help/pixel-wars'
     | '/k/$code'
     | '/launch-list/unsubscribe'
     | '/profile/$alias'
@@ -890,6 +942,10 @@ export interface FileRouteTypes {
     | '/app/paper-lives/rankings'
     | '/app/paper-lives/settings'
     | '/app/paper-lives/work'
+    | '/app/pixel-wars/achievements'
+    | '/app/pixel-wars/rankings'
+    | '/app/pixel-wars/season'
+    | '/app/pixel-wars/settings'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler'
     | '/app/idle-angler'
@@ -939,6 +995,7 @@ export interface FileRouteTypes {
     | '/help/idle-angler'
     | '/help/little-plot'
     | '/help/paper-lives'
+    | '/help/pixel-wars'
     | '/k/$code'
     | '/launch-list/unsubscribe'
     | '/profile/$alias'
@@ -972,6 +1029,10 @@ export interface FileRouteTypes {
     | '/app/paper-lives/rankings'
     | '/app/paper-lives/settings'
     | '/app/paper-lives/work'
+    | '/app/pixel-wars/achievements'
+    | '/app/pixel-wars/rankings'
+    | '/app/pixel-wars/season'
+    | '/app/pixel-wars/settings'
     | '/desk-crawler/heroes/$alias'
     | '/app/desk-crawler/'
     | '/app/idle-angler/'
@@ -1017,6 +1078,7 @@ export interface RootRouteChildren {
   HelpIdleAnglerRoute: typeof HelpIdleAnglerRoute
   HelpLittlePlotRoute: typeof HelpLittlePlotRoute
   HelpPaperLivesRoute: typeof HelpPaperLivesRoute
+  HelpPixelWarsRoute: typeof HelpPixelWarsRoute
   KCodeRoute: typeof KCodeRoute
   LaunchListUnsubscribeRoute: typeof LaunchListUnsubscribeRoute
   ProfileAliasRoute: typeof ProfileAliasRoute
@@ -1275,6 +1337,13 @@ declare module '@tanstack/react-router' {
       path: '/help/paper-lives'
       fullPath: '/help/paper-lives'
       preLoaderRoute: typeof HelpPaperLivesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help/pixel-wars': {
+      id: '/help/pixel-wars'
+      path: '/help/pixel-wars'
+      fullPath: '/help/pixel-wars'
+      preLoaderRoute: typeof HelpPixelWarsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/k/$code': {
@@ -1536,6 +1605,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPixelWarsIndexRouteImport
       parentRoute: typeof AppPixelWarsRoute
     }
+    '/app/pixel-wars/achievements': {
+      id: '/app/pixel-wars/achievements'
+      path: '/achievements'
+      fullPath: '/app/pixel-wars/achievements'
+      preLoaderRoute: typeof AppPixelWarsAchievementsRouteImport
+      parentRoute: typeof AppPixelWarsRoute
+    }
+    '/app/pixel-wars/rankings': {
+      id: '/app/pixel-wars/rankings'
+      path: '/rankings'
+      fullPath: '/app/pixel-wars/rankings'
+      preLoaderRoute: typeof AppPixelWarsRankingsRouteImport
+      parentRoute: typeof AppPixelWarsRoute
+    }
+    '/app/pixel-wars/season': {
+      id: '/app/pixel-wars/season'
+      path: '/season'
+      fullPath: '/app/pixel-wars/season'
+      preLoaderRoute: typeof AppPixelWarsSeasonRouteImport
+      parentRoute: typeof AppPixelWarsRoute
+    }
+    '/app/pixel-wars/settings': {
+      id: '/app/pixel-wars/settings'
+      path: '/settings'
+      fullPath: '/app/pixel-wars/settings'
+      preLoaderRoute: typeof AppPixelWarsSettingsRouteImport
+      parentRoute: typeof AppPixelWarsRoute
+    }
     '/desk-crawler/heroes/$alias': {
       id: '/desk-crawler/heroes/$alias'
       path: '/desk-crawler/heroes/$alias'
@@ -1702,10 +1799,18 @@ const AppPaperLivesRouteWithChildren = AppPaperLivesRoute._addFileChildren(
 )
 
 interface AppPixelWarsRouteChildren {
+  AppPixelWarsAchievementsRoute: typeof AppPixelWarsAchievementsRoute
+  AppPixelWarsRankingsRoute: typeof AppPixelWarsRankingsRoute
+  AppPixelWarsSeasonRoute: typeof AppPixelWarsSeasonRoute
+  AppPixelWarsSettingsRoute: typeof AppPixelWarsSettingsRoute
   AppPixelWarsIndexRoute: typeof AppPixelWarsIndexRoute
 }
 
 const AppPixelWarsRouteChildren: AppPixelWarsRouteChildren = {
+  AppPixelWarsAchievementsRoute: AppPixelWarsAchievementsRoute,
+  AppPixelWarsRankingsRoute: AppPixelWarsRankingsRoute,
+  AppPixelWarsSeasonRoute: AppPixelWarsSeasonRoute,
+  AppPixelWarsSettingsRoute: AppPixelWarsSettingsRoute,
   AppPixelWarsIndexRoute: AppPixelWarsIndexRoute,
 }
 
@@ -1763,6 +1868,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpIdleAnglerRoute: HelpIdleAnglerRoute,
   HelpLittlePlotRoute: HelpLittlePlotRoute,
   HelpPaperLivesRoute: HelpPaperLivesRoute,
+  HelpPixelWarsRoute: HelpPixelWarsRoute,
   KCodeRoute: KCodeRoute,
   LaunchListUnsubscribeRoute: LaunchListUnsubscribeRoute,
   ProfileAliasRoute: ProfileAliasRoute,

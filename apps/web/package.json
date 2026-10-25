@@ -24,6 +24,7 @@
     "@trmnl-games/engine": "workspace:*",
     "@trmnl-games/idle-angler": "workspace:*",
     "@trmnl-games/paper-lives": "workspace:*",
+    "@trmnl-games/pixel-wars": "workspace:*",
     "@trmnl-games/platform": "workspace:*",
     "convex": "^1.46.0",
     "jose": "^6.2.12",
