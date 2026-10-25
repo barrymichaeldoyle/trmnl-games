@@ -1,10 +1,11 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 import { logDetail, todoKind } from './lib/logDetail'
-import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, LITTLE_PLOT_TABLES, PAPER_LIVES_TABLES, engineTables, rankingTables } from './lib/engine/tables'
+import { DESK_CRAWLER_TABLES, IDLE_ANGLER_TABLES, LITTLE_PLOT_TABLES, PAPER_LIVES_TABLES, PIXEL_WARS_TABLES, engineTables, rankingTables } from './lib/engine/tables'
 import { accessId, anglerCounters, baitClass, logbookEntry, iaLogDetail, iaLogKind, order, season, timeBand, waterId, weather } from './idleAngler/validators'
 import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, lifeState, lineChanges as plLineChanges, plLogKind, portraitKey as plPortraitKey } from './paperLives/validators'
 import { lpLogDetail, lpLogKind, plotState as lpPlotState } from './littlePlot/validators'
+import { deskCounters as pwDeskCounters, faction as pwFaction, factionId as pwFactionId, mapEvent as pwMapEvent, orderKind as pwOrderKind, pwLogDetail, pwLogKind, seat as pwSeat, seatEvents as pwSeatEvents, share as pwShare, weekTally as pwWeekTally } from './pixelWars/validators'
 
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
@@ -16,6 +17,8 @@ const idleAnglerEngine = engineTables(IDLE_ANGLER_TABLES, ['landed', 'released',
 const paperLivesEngine = engineTables(PAPER_LIVES_TABLES, ['events', 'years', 'deaths'])
 /** Little Plot's engine tables, prefixed `lp` (little-plot.md "Data"); it ranks by XP like Desk Crawler, so it has the ranking tables too. */
 const littlePlotEngine = { ...engineTables(LITTLE_PLOT_TABLES, ['ripenings', 'pests', 'visits']), ...rankingTables(LITTLE_PLOT_TABLES) }
+/** Pixel Wars' engine tables, prefixed `pw` (pixel-wars.md "Data"); XP boards like Desk Crawler's. */
+const pixelWarsEngine = { ...engineTables(PIXEL_WARS_TABLES, ['orders', 'flips', 'desksTaken']), ...rankingTables(PIXEL_WARS_TABLES) }
 
 /**
  * Current-release schema only (data-model.md). Tables arrive with the work
@@ -381,6 +384,183 @@ export default defineSchema({
   lpLeaderboardGenerations: littlePlotEngine.generations,
   lpRanks: littlePlotEngine.ranks,
   lpAchievementStats: littlePlotEngine.achievementStats,
+
+  pwWorldState: pixelWarsEngine.world,
+  pwSimulationRuns: defineTable(pixelWarsEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
+  pwSimulationFailures: pixelWarsEngine.failures,
+  pwScoreWindows: pixelWarsEngine.scoreWindows,
+  pwRankInputs: pixelWarsEngine.rankInputs,
+  pwLeaderboardPublications: defineTable(pixelWarsEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
+  pwLeaderboardGenerations: pixelWarsEngine.generations,
+  pwRanks: pixelWarsEngine.ranks,
+  pwAchievementStats: pixelWarsEngine.achievementStats,
+
+  /** One per user once they start Pixel Wars (D214), like `littlePlotProfiles`. */
+  pixelWarsProfiles: defineTable({
+    userId: v.id('users'),
+    state: v.union(v.literal('active'), v.literal('deleting')),
+    deskId: v.optional(v.id('desks')),
+    createdAt: v.number(),
+  }).index('by_userId', ['userId']),
+
+  /**
+   * The Pixel Wars player character (pixel-wars.md "Desks, maps and placement"): one per account, placed on a map
+   * once a faction is chosen. Engine tables call it `heroId` (lib/engine/tables.ts). The well accrues lazily from
+   * `well.tick`; `faction` 0 means not chosen yet.
+   */
+  desks: defineTable({
+    userId: v.id('users'),
+    createdAt: v.number(),
+    isActive: v.boolean(),
+    activationState: v.union(v.literal('pending_trmnl'), v.literal('active')),
+    activatedAt: v.optional(v.number()),
+    mapId: v.optional(v.id('pwMaps')),
+    seat: v.optional(v.number()),
+    faction: pwFaction,
+    level: v.number(),
+    xp: v.number(),
+    lifetimeXp: v.number(),
+    lastLevelUpTick: v.number(),
+    scoreHourXp: v.number(),
+    scoreHour: v.optional(v.number()),
+    publicProfile: v.optional(v.boolean()),
+    counters: pwDeskCounters,
+    week: pwWeekTally,
+    goal: v.object({ rung: v.number() }),
+    well: v.object({ drops: v.number(), tick: v.number() }),
+    /** The keepsake week the desk last saw a bell for, so the first tick of a new week refills and tallies once. */
+    seasonWeek: v.number(),
+    /** The week a faction switch was last made, one a season. */
+    switchedWeek: v.optional(v.number()),
+    /** The desk whose link placed this one, and this desk's own link code. */
+    invitedBy: v.optional(v.id('desks')),
+    inviteCode: v.string(),
+    /** Cleared to ground after the owner's screens went silent (pixel-wars.md "Desks, maps and placement"). */
+    cleared: v.optional(v.boolean()),
+    eligibleFromTick: v.number(),
+    lastTick: v.number(),
+    lastProgressTick: v.number(),
+    lastAdvancedAt: v.optional(v.number()),
+    logSequence: v.number(),
+    simulationState: v.union(v.literal('healthy'), v.literal('quarantined')),
+    quarantineReasonCode: v.optional(v.string()),
+    achievementsVersion: v.optional(v.number()),
+  })
+    .index('by_userId_and_isActive', ['userId', 'isActive'])
+    .index('by_createdAt', ['createdAt'])
+    .index('by_mapId_and_seat', ['mapId', 'seat'])
+    .index('by_inviteCode', ['inviteCode'])
+    .index('by_simulationState', ['simulationState']),
+
+  /**
+   * A map (pixel-wars.md "Data"): the live cells and painters as bytes, the seats, the cached shares and the season
+   * running score. One row, the global map, in the MVP; `kind` and the per-row shape are what offices (v1.1) reuse.
+   */
+  pwMaps: defineTable({
+    kind: v.union(v.literal('global'), v.literal('office')),
+    x0: v.number(),
+    y0: v.number(),
+    cols: v.number(),
+    rows: v.number(),
+    cells: v.bytes(),
+    painters: v.bytes(),
+    seats: v.array(pwSeat),
+    currentTick: v.number(),
+    seasonWeek: v.number(),
+    /** Index 1 to 4: the week's cumulative score per faction. */
+    seasonScore: v.array(v.number()),
+    shares: v.array(pwShare),
+    lastLeader: v.optional(pwFactionId),
+    leadChanges: v.number(),
+    lastWinner: v.optional(pwFactionId),
+    createdAt: v.number(),
+  }).index('by_kind', ['kind']),
+
+  /** One snapshot per map per tick, the last eight kept: what the device renders and what the per-desk step reads. */
+  pwMapTicks: defineTable({
+    mapId: v.id('pwMaps'),
+    tick: v.number(),
+    at: v.number(),
+    x0: v.number(),
+    y0: v.number(),
+    cols: v.number(),
+    rows: v.number(),
+    cells: v.bytes(),
+    painters: v.bytes(),
+    shares: v.array(pwShare),
+    events: v.array(pwMapEvent),
+    /** Keyed by seat number. */
+    seatEvents: v.record(v.string(), pwSeatEvents),
+    /** Up to three lines for the device, aliases already resolved. */
+    lines: v.array(v.string()),
+    bell: v.optional(v.boolean()),
+  })
+    .index('by_mapId_and_tick', ['mapId', 'tick'])
+    .index('by_at', ['at']),
+
+  /** The orders queued for one map and tick, sharded by seat so a busy quarter-hour never fills one document. */
+  pwOrderBoards: defineTable({
+    mapId: v.id('pwMaps'),
+    tick: v.number(),
+    shard: v.number(),
+    orders: v.array(v.object({ s: v.number(), x: v.number(), y: v.number(), k: pwOrderKind, d: v.number() })),
+  }).index('by_mapId_and_tick_and_shard', ['mapId', 'tick', 'shard']),
+
+  /** A player's own queued orders, for the companion's queue and Cancel; the desk's step deletes its resolved rows. */
+  pwOrders: defineTable({
+    deskId: v.id('desks'),
+    mapId: v.id('pwMaps'),
+    tick: v.number(),
+    x: v.number(),
+    y: v.number(),
+    kind: pwOrderKind,
+    drops: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_deskId_and_tick', ['deskId', 'tick'])
+    .index('by_createdAt', ['createdAt']),
+
+  /** A finished week: the final map for the print and the standings. */
+  pwSeasons: defineTable({
+    mapId: v.id('pwMaps'),
+    week: v.number(),
+    endedAt: v.number(),
+    x0: v.number(),
+    y0: v.number(),
+    cols: v.number(),
+    rows: v.number(),
+    cells: v.bytes(),
+    standings: v.array(v.object({ faction: pwFactionId, score: v.number(), percent: v.number() })),
+    winner: pwFactionId,
+    desks: v.number(),
+  }).index('by_mapId_and_week', ['mapId', 'week']),
+
+  /** One row per earned Pixel Wars achievement, keyed by owner (D65 shape); bounded by the catalog. */
+  pwAchievements: defineTable({
+    userId: v.id('users'),
+    deskId: v.id('desks'),
+    achievementId: v.string(),
+    unlockedAt: v.number(),
+    tick: v.number(),
+    catalogVersion: v.number(),
+  })
+    .index('by_userId_and_achievementId', ['userId', 'achievementId'])
+    .index('by_userId_and_unlockedAt', ['userId', 'unlockedAt']),
+
+  /** A desk's story lines: what fell and came back, what it took, the bell, goals and achievements. */
+  pwTickLogs: defineTable({
+    deskId: v.id('desks'),
+    source: v.union(v.literal('tick'), v.literal('command'), v.literal('lifecycle')),
+    tick: v.optional(v.number()),
+    runId: v.optional(v.id('pwSimulationRuns')),
+    sequence: v.number(),
+    at: v.number(),
+    kind: pwLogKind,
+    summary: v.string(),
+    detail: pwLogDetail,
+  })
+    .index('by_deskId_and_at_and_sequence', ['deskId', 'at', 'sequence'])
+    .index('by_at', ['at']),
 
   /** One per user once they start Little Plot (D206), like `idleAnglerProfiles`. The pressed flowers (the D46 shape) live here. */
   littlePlotProfiles: defineTable({
@@ -963,7 +1143,7 @@ export default defineSchema({
 
 
   operationReceipts: defineTable({
-    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'), v.literal('little-plot'))),
+    scope: v.optional(v.union(v.literal('platform'), v.literal('desk-crawler'), v.literal('idle-angler'), v.literal('paper-lives'), v.literal('little-plot'), v.literal('pixel-wars'))),
     userId: v.id('users'),
     operationId: v.string(),
     operation: v.string(),
@@ -1007,6 +1187,8 @@ export default defineSchema({
     lifeAge: v.optional(v.number()),
     /** Little Plot rows carry the plot (D206). */
     plotId: v.optional(v.id('plots')),
+    /** Pixel Wars rows carry the desk (D214). */
+    deskId: v.optional(v.id('desks')),
     detail: v.optional(v.string()),
     kind: alertKind,
     /** `${heroId}:${kind}:${eventTick}`: one nap or one merchant visit is one alert. */

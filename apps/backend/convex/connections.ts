@@ -5,6 +5,7 @@ import { gameSlug } from './schema'
 import { currentAngler } from './idleAngler/profile'
 import { currentLife } from './paperLives/profile'
 import { currentPlot } from './littlePlot/profile'
+import { currentDesk } from './pixelWars/profile'
 import type { GameSlug } from '@trmnl-games/platform'
 import { gameDeletingFor } from './lib/gameHooks'
 import type { Doc, Id } from './_generated/dataModel'
@@ -22,6 +23,7 @@ async function gameDeleting(ctx: QueryCtx, userId: Id<'users'>, slug: GameSlug):
 async function characterName(ctx: QueryCtx, user: Doc<'users'>, slug: GameSlug): Promise<string | null> {
   if (slug === 'idle-angler') return (await currentAngler(ctx, user)) ? user.publicAlias : null
   if (slug === 'little-plot') return (await currentPlot(ctx, user)) ? user.publicAlias : null
+  if (slug === 'pixel-wars') return (await currentDesk(ctx, user)) ? user.publicAlias : null
   if (slug === 'paper-lives') {
     const life = await currentLife(ctx, user)
     return life ? `${life.life.first} ${life.life.last}` : null

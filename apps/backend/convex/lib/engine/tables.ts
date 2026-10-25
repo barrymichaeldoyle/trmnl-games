@@ -266,3 +266,17 @@ export const LITTLE_PLOT_TABLES = {
   ranks: 'lpRanks',
   achievementStats: 'lpAchievementStats',
 } as const
+
+/** Pixel Wars' engine tables (pixel-wars.md "Data"), prefixed `pw`. It ranks by XP like Desk Crawler, so it has the four ranking tables. */
+export const PIXEL_WARS_TABLES = {
+  subject: 'desks',
+  world: 'pwWorldState',
+  runs: 'pwSimulationRuns',
+  failures: 'pwSimulationFailures',
+  scoreWindows: 'pwScoreWindows',
+  rankInputs: 'pwRankInputs',
+  publications: 'pwLeaderboardPublications',
+  generations: 'pwLeaderboardGenerations',
+  ranks: 'pwRanks',
+  achievementStats: 'pwAchievementStats',
+} as const

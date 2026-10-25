@@ -21,8 +21,8 @@ export const RETENTION = {
   alertOutboxMs: 7 * DAY,
 } as const
 
-type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'iaTickLogs' | 'iaFailures' | 'iaRuns' | 'plTickLogs' | 'plFailures' | 'plRuns'
-const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'iaTickLogs', 'iaFailures', 'iaRuns', 'plTickLogs', 'plFailures', 'plRuns']
+type Job = 'tickLogs' | 'receipts' | 'rateLimits' | 'deletionConfirmations' | 'reconnectAttempts' | 'installAttempts' | 'failures' | 'runs' | 'raids' | 'meetings' | 'alerts' | 'iaTickLogs' | 'iaFailures' | 'iaRuns' | 'plTickLogs' | 'plFailures' | 'plRuns' | 'pwOrders' | 'pwMapTicks'
+const ORDER: readonly Job[] = ['tickLogs', 'receipts', 'rateLimits', 'deletionConfirmations', 'reconnectAttempts', 'installAttempts', 'failures', 'runs', 'raids', 'meetings', 'alerts', 'iaTickLogs', 'iaFailures', 'iaRuns', 'plTickLogs', 'plFailures', 'plRuns', 'pwOrders', 'pwMapTicks']
 
 export const cleanup = internalMutation({
   args: { job: v.optional(v.union(...ORDER.map((j) => v.literal(j)))) },
@@ -88,6 +88,19 @@ export const cleanup = internalMutation({
         const world = await ctx.db.query('worldState').withIndex('by_key', (q) => q.eq('key', 'world')).unique()
         const before = (world?.currentTick ?? 0) - RETENTION.appliedRaidTicks
         const rows = await ctx.db.query('meetings').withIndex('by_state_and_tick', (q) => q.eq('state', 'applied').lt('tick', before)).take(BATCH)
+        for (const row of rows) await ctx.db.delete(row._id)
+        deleted = rows.length
+        break
+      }
+      // D214: resolved Pixel Wars orders and old snapshots that a desk's step or the map's tick did not reach.
+      case 'pwOrders': {
+        const rows = await ctx.db.query('pwOrders').withIndex('by_createdAt', (q) => q.lt('createdAt', now - 2 * 86_400_000)).take(BATCH)
+        for (const row of rows) await ctx.db.delete(row._id)
+        deleted = rows.length
+        break
+      }
+      case 'pwMapTicks': {
+        const rows = await ctx.db.query('pwMapTicks').withIndex('by_at', (q) => q.lt('at', now - 86_400_000)).take(BATCH)
         for (const row of rows) await ctx.db.delete(row._id)
         deleted = rows.length
         break

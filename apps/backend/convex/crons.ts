@@ -20,6 +20,10 @@ crons.interval('paper lives watchdog', { minutes: 5 }, internal.paperLives.tick.
 crons.cron('little plot tick', '12,27,42,57 * * * *', internal.littlePlot.tick.startTick, {})
 crons.interval('little plot watchdog', { minutes: 5 }, internal.littlePlot.tick.watchdog, {})
 
+// D214: Pixel Wars ticks at three past each quarter, the free slot after the other four worlds (pixel-wars.md "Architecture").
+crons.cron('pixel wars tick', '3,18,33,48 * * * *', internal.pixelWars.tick.startTick, {})
+crons.interval('pixel wars watchdog', { minutes: 5 }, internal.pixelWars.tick.watchdog, {})
+
 /** Stalled-run detection and guarded recovery (simulation.md "Watchdog"). */
 crons.interval('tick watchdog', { minutes: 5 }, internal.sim.runs.tick.watchdog, {})
 

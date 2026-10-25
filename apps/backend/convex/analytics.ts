@@ -5,7 +5,7 @@ import { currentCharacterOf } from './lib/gameHooks'
 import { gameSlug } from './schema'
 
 /** Server-side events: activations, and one per finished Paper Lives life (D159, L6). */
-const serverEvent = v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started'), v.literal('little plot started'), v.literal('life ended'))
+const serverEvent = v.union(v.literal('installation connected'), v.literal('hero activated'), v.literal('idle angler started'), v.literal('paper lives started'), v.literal('little plot started'), v.literal('pixel wars started'), v.literal('life ended'))
 
 /** Re-check consent and account state at send time; no telemetry in simulation or polling beyond a life's end. */
 export const activationSubject = internalQuery({

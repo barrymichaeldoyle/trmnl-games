@@ -7,6 +7,8 @@ import { activateLife, prepareLife } from '../paperLives/lifecycle'
 import { currentLife, paperLivesProfile } from '../paperLives/profile'
 import { activatePlot, preparePlot } from '../littlePlot/lifecycle'
 import { currentPlot, littlePlotProfile } from '../littlePlot/profile'
+import { activateDesk, prepareDesk } from '../pixelWars/lifecycle'
+import { currentDesk, pixelWarsProfile } from '../pixelWars/profile'
 import { currentHero, gameProfile } from './gameProfile'
 
 /**
@@ -59,9 +61,19 @@ export const LITTLE_PLOT_HOOKS: GameHooks & { prepare: (ctx: MutationCtx, user: 
   prepare: preparePlot,
 }
 
-/** The hooks of a game other than Desk Crawler, whose lifecycle predates the hooks (D115, D159, D206). */
+export const PIXEL_WARS_HOOKS: GameHooks & { prepare: (ctx: MutationCtx, user: Doc<'users'>, now: number) => Promise<unknown> } = {
+  slug: 'pixel-wars',
+  label: 'Pixel Wars',
+  deleting: async (ctx, userId) => (await pixelWarsProfile(ctx, userId))?.state === 'deleting',
+  current: currentDesk,
+  needsName: false,
+  activate: activateDesk,
+  prepare: prepareDesk,
+}
+
+/** The hooks of a game other than Desk Crawler, whose lifecycle predates the hooks (D115, D159, D206, D214). */
 export function otherGameHooks(slug: Exclude<GameSlug, 'desk-crawler'>): typeof IDLE_ANGLER_HOOKS {
-  return slug === 'idle-angler' ? IDLE_ANGLER_HOOKS : slug === 'paper-lives' ? PAPER_LIVES_HOOKS : LITTLE_PLOT_HOOKS
+  return slug === 'idle-angler' ? IDLE_ANGLER_HOOKS : slug === 'paper-lives' ? PAPER_LIVES_HOOKS : slug === 'little-plot' ? LITTLE_PLOT_HOOKS : PIXEL_WARS_HOOKS
 }
 
 /** A game's current player character for this user: the hero, the angler or the life. */

@@ -23,6 +23,10 @@ import { MAX_LP_UNLOCKS } from './littlePlot/achievements'
 import { LITTLE_PLOT_RUNTIME } from './littlePlot/runtime'
 import { kindsGrown } from '@trmnl-games/little-plot/sim'
 import { contentV1 as littlePlotContent } from '@trmnl-games/little-plot/content'
+import { currentDesk } from './pixelWars/profile'
+import { MAX_PW_UNLOCKS } from './pixelWars/achievements'
+import { PIXEL_WARS_RUNTIME } from './pixelWars/runtime'
+import { contentV1 as pixelWarsContent } from '@trmnl-games/pixel-wars/content'
 import { contentV1 as paperLivesContent } from '@trmnl-games/paper-lives/content'
 import type { EngineRuntime } from './lib/engine/runtime'
 
@@ -45,8 +49,11 @@ async function crossGame(ctx: QueryCtx, user: Doc<'users'>) {
   // D206: Little Plot counts like any game.
   const plot = await currentPlot(ctx, user)
   const lpUnlocks = (await ctx.db.query('lpAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_LP_UNLOCKS)).length
-  const games = (hero?.activationState === 'active' ? 1 : 0) + (angler?.activationState === 'active' ? 1 : 0) + (life?.activationState === 'active' ? 1 : 0) + (plot?.activationState === 'active' ? 1 : 0)
-  return { hero, angler, life, plot, dcUnlocks, iaUnlocks, plUnlocks, lpUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks + lpUnlocks }
+  // D214: Pixel Wars counts like any game.
+  const desk = await currentDesk(ctx, user)
+  const pwUnlocks = (await ctx.db.query('pwAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_PW_UNLOCKS)).length
+  const games = (hero?.activationState === 'active' ? 1 : 0) + (angler?.activationState === 'active' ? 1 : 0) + (life?.activationState === 'active' ? 1 : 0) + (plot?.activationState === 'active' ? 1 : 0) + (desk?.activationState === 'active' ? 1 : 0)
+  return { hero, angler, life, plot, desk, dcUnlocks, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks + lpUnlocks + pwUnlocks }
 }
 
 /** All-time rank in a game's published set, or null. */
@@ -68,13 +75,14 @@ export const view = query({
     if (normalized.length < ALIAS_RULE.min || normalized.length > ALIAS_RULE.max) return null
     const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalized)).first()
     if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
-    const { hero, angler, life, plot, dcUnlocks, iaUnlocks, plUnlocks, lpUnlocks, games, collected } = await crossGame(ctx, user)
+    const { hero, angler, life, plot, desk, dcUnlocks, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected } = await crossGame(ctx, user)
     const admin = (await adminRef(ctx)) !== null
     const showIdleAngler = angler !== null && angler.activationState === 'active' && pagePublic(angler) && ((await gameStatusOf(ctx, 'idle-angler')) === 'live' || admin)
     const showDesk = hero !== null && hero.activationState === 'active' && pagePublic(hero)
     const showPaperLives = life !== null && life.activationState === 'active' && pagePublic(life) && ((await gameStatusOf(ctx, 'paper-lives')) === 'live' || admin)
     const showLittlePlot = plot !== null && plot.activationState === 'active' && pagePublic(plot) && ((await gameStatusOf(ctx, 'little-plot')) === 'live' || admin)
-    if (!showDesk && !showIdleAngler && !showPaperLives && !showLittlePlot) return null
+    const showPixelWars = desk !== null && desk.activationState === 'active' && desk.faction !== 0 && pagePublic(desk) && ((await gameStatusOf(ctx, 'pixel-wars')) === 'live' || admin)
+    if (!showDesk && !showIdleAngler && !showPaperLives && !showLittlePlot && !showPixelWars) return null
     const current = await ctx.db.query('platformStats').withIndex('by_key', (q) => q.eq('key', 'current')).unique()
     return {
       alias: user.publicAlias,
@@ -94,6 +102,13 @@ export const view = query({
               slug: 'little-plot' as const, name: user.publicAlias, level: plot.level, since: plot.activatedAt ?? plot.createdAt, rank: await overallRank(ctx, LITTLE_PLOT_RUNTIME, plot._id), achievements: lpUnlocks, page: null,
               // The plot as it stands and the catalogue count, with the rarest kind grown.
               plot: { rows: plot.plot.rows, cols: plot.plot.cols, beds: plot.plot.beds.map((b) => ({ kind: b.kindId ? (littlePlotContent.kinds.find((k) => k.id === b.kindId)?.name ?? b.kindId) : null, greenhouse: b.greenhouse === true })), kinds: kindsGrown(plot.plot), kindsTotal: littlePlotContent.kinds.length, rarest: [...littlePlotContent.kinds].reverse().find((k) => plot.plot.catalogue[k.id] !== undefined)?.name ?? null },
+            }]
+          : []),
+        ...(showPixelWars
+          ? [{
+              slug: 'pixel-wars' as const, name: user.publicAlias, level: desk.level, since: desk.activatedAt ?? desk.createdAt, rank: await overallRank(ctx, PIXEL_WARS_RUNTIME, desk._id), achievements: pwUnlocks, page: null,
+              // The side, the week so far and the lifetime desks taken.
+              war: { faction: pixelWarsContent.factions[(desk.faction as 1 | 2 | 3 | 4) - 1]!.name, pattern: pixelWarsContent.factions[(desk.faction as 1 | 2 | 3 | 4) - 1]!.pattern, week: desk.week, desksTaken: desk.counters.desksTaken, seasonsWon: desk.counters.seasonsWon, cleared: desk.cleared === true },
             }]
           : []),
       ],

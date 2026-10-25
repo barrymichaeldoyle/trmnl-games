@@ -168,8 +168,11 @@ export function resolve(input: ResolveInput): ResolveResult {
       painters[index] = painter.seat
       touched.add(index)
       const e = seatEvents(events, painter.seat)
-      if (holder === 0) e.painted += 1
-      else {
+      if (holder === 0) {
+        e.painted += 1
+        const key = `0>${faction}`
+        transfers.set(key, (transfers.get(key) ?? 0) + 1)
+      } else {
         e.flipped += 1
         if (faction === smallest && holder === largest && smallest !== largest) e.underdogFlips += 1
         const key = `${holder}>${faction}`

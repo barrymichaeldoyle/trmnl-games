@@ -10,6 +10,7 @@ import { ALERTS, alertMessage, DESK_CRAWLER_KINDS, ensureSender, inQuietHours, k
 import { currentAngler } from './idleAngler/profile'
 import { currentLife } from './paperLives/profile'
 import { currentPlot } from './littlePlot/profile'
+import { currentDesk } from './pixelWars/profile'
 import { kindOf as plotKindOf, stageOf as plotStageOf } from '@trmnl-games/little-plot/sim'
 import { contentV1 as plotContent } from '@trmnl-games/little-plot/content'
 import type { GameSlug } from '@trmnl-games/platform'
@@ -362,9 +363,9 @@ export async function purgeGameAlertRows(ctx: MutationCtx, userId: Id<'users'>, 
   const otherGame =
     owner === null
       ? false
-      : (game !== 'desk-crawler' && (await currentHero(ctx, owner)) !== null) || (game !== 'idle-angler' && (await currentAngler(ctx, owner)) !== null) || (game !== 'paper-lives' && (await currentLife(ctx, owner)) !== null) || (game !== 'little-plot' && (await currentPlot(ctx, owner)) !== null)
+      : (game !== 'desk-crawler' && (await currentHero(ctx, owner)) !== null) || (game !== 'idle-angler' && (await currentAngler(ctx, owner)) !== null) || (game !== 'paper-lives' && (await currentLife(ctx, owner)) !== null) || (game !== 'little-plot' && (await currentPlot(ctx, owner)) !== null) || (game !== 'pixel-wars' && (await currentDesk(ctx, owner)) !== null)
   if (!otherGame) return await purgeAlertRows(ctx, userId, batch)
-  const kinds: readonly AlertKind[] = game === 'idle-angler' ? IDLE_ANGLER_KINDS : game === 'paper-lives' ? PAPER_LIVES_KINDS : game === 'little-plot' ? LITTLE_PLOT_KINDS : DESK_CRAWLER_KINDS
+  const kinds: readonly AlertKind[] = game === 'idle-angler' ? IDLE_ANGLER_KINDS : game === 'paper-lives' ? PAPER_LIVES_KINDS : game === 'little-plot' ? LITTLE_PLOT_KINDS : game === 'pixel-wars' ? [] : DESK_CRAWLER_KINDS
   const rows = (await ctx.db.query('alertOutbox').withIndex('by_userId_and_localDay', (q) => q.eq('userId', userId)).take(batch * 4)).filter((row) => kinds.includes(row.kind)).slice(0, batch)
   for (const row of rows) await ctx.db.delete(row._id)
   if (rows.length === 0) {
