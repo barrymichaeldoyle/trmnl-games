@@ -1,6 +1,6 @@
 # Pixel Wars: every TRMNL is a tile (P47)
 
-Proposed 2026-10-24 for Barry's review. This is the full specification for the fifth TRMNL Games title, a community territory war in which every player's desk is one cell on a shared map that is drawn on every player's screen. The idea came from Barry's brief on 2026-10-24 for "some sort of TRMNL wars game that acts as a community king of the hill, where there's always a catch-up mechanic to pile on the leader", chosen for the virality and stickiness of social games and asked to be "quite distinct from my existing TRMNL games". Three brainstorm rounds settled the direction: a shared one-bit map rather than a single throne; the player's own device as their tile; ink that fades so the largest faction can never hold what it does not keep painting; orders that resolve on the quarter-hour tick; and a weekly season that ends as a print. **Pixel Wars** is the working name; [Decisions taken in this revision](#decisions-taken-in-this-revision) lists the open points settled while drafting, and the name is Barry's to choose.
+Proposed 2026-10-24 for Barry's review. This is the full specification for the fifth TRMNL Games title, a community territory war in which every player's desk is one cell on a shared map that is drawn on every player's screen. The idea came from Barry's brief on 2026-10-24 for "some sort of TRMNL wars game that acts as a community king of the hill, where there's always a catch-up mechanic to pile on the leader", chosen for the virality and stickiness of social games and asked to be "quite distinct from my existing TRMNL games". Three brainstorm rounds settled the direction: a shared one-bit map rather than a single throne; the player's own device as their tile; ink that fades so the largest faction can never hold what it does not keep painting; orders that resolve on the quarter-hour tick; and a weekly season that ends as a print. Barry confirmed the name **Pixel Wars** on 2026-10-25 and moved private office maps out of the MVP (they are v1.1 in [Versions after the MVP](#versions-after-the-mvp)); [Decisions taken in this revision](#decisions-taken-in-this-revision) lists the other points settled while drafting.
 
 The game reuses what [Idle Angler](idle-angler.md), [Paper Lives](paper-lives.md) and [Little Plot](little-plot.md) lifted out of Desk Crawler: the quarter-hour tick, the pure seeded simulator, bounded reads, receipted intents, achievements over counters, the hourly publication, the TRMNL lifecycle with the `hidden`, `preview` and `live` status, the launch list (D201), push alerts, the weekly device code and keepsakes (D46), follows (D143), the eight languages (D193, D200) and the two-level deletion boundary. Where this spec says "as Desk Crawler" or "as Idle Angler", the named document is the authority and Pixel Wars inherits the rule unchanged.
 
@@ -15,7 +15,7 @@ Every player has one desk: a single cell on a shared map, placed when their plug
 | Progress | A hero that levels for ever | A logbook that fills for months | Finite lives, then the next generation | A catalogue filled by discovery | A week, then a print; nothing carries but the record |
 | The player's role | Gear, floors, stances, raids | Setup: water, bait, selling | Decisions | Placement | Orders: where to spend this hour's ink |
 | Device | Pixel scene with a board | Pixel scene with the catch | A portrait and a diary column | A pixel plot from above | The shared map, the same picture on every player's screen |
-| Social | Boards, raids, meetings, friends | Per-water records, Opens | Album, family tree | Gnomes, cuttings | Everything: four factions, one map, your desk is the stake, private maps for an office |
+| Social | Boards, raids, meetings, friends | Per-water records, Opens | Album, family tree | Gnomes, cuttings | Everything: four factions, one map, your desk is the stake, invite links that place a friend beside you |
 | Economy | Gold, shop, workbench | Coins, tackle | Money as one stat | Coins, seeds, the shed | Ink only, by the hour, the same for everyone |
 | Antagonist | Monsters and elites | The one that got away | Time | Slugs, the fox, the gnomes | The other three factions, and the fade |
 | Tone | Office fantasy | Cosy | Warm and dry | Cosy | Cheeky, partisan, fast |
@@ -25,8 +25,8 @@ The existing four are solo and cosy and reward checking in. Pixel Wars is zero-s
 ## What a player sees
 
 - **Device:** the map, drawn as one-bit patterns at a whole number of pixels per cell, with the player's own desk marked by a ring. Under it a strip: the four faction swatches with their share of the map and an arrow for the hour's movement, the player's faction and desk state ("Your desk: Ink, 3 of 5" or, large, "YOUR DESK IS HATCH'S"), the since-your-last-look ticker ("+14 −9 cells for Ink since 09:15; Wren took the north corner"), the newest story line, the season's day and the time to Monday's bell, service warnings and the companion QR. A desk that is captured swaps the strip for a panel in the captor's pattern with the one line "Hatch holds your desk. 4 Ink players are within reach." and the QR to the Map page. On a small layout the map becomes a window centred on the player's desk.
-- **Companion:** a Map page (the whole map, zoomable, tap a cell to queue an order, the well with the ink held and the ink arriving by the bell, the orders queued for the next tick with Cancel, the countdown to the tick, the faction strip), a Season page (standings over the week, lead changes, the player's own week, past prints), the Office page (create or join a private map by link, pick the map an installation shows), Rankings, Achievements and More (public profile, help, delete Pixel Wars progress). Settings and Account are shared. The companion paints factions in colour and keeps the pattern inside the colour, so the two surfaces agree.
-- **Help page:** `/help/pixel-wars` explains that the map is the community, that orders resolve on the quarter-hour, how ink fades and why the leader fades fastest, what happens when a desk falls and why it is cheap to take back, the night shield, the Monday bell and the print, and what a private map is.
+- **Companion:** a Map page (the whole map, zoomable, tap a cell to queue an order, the well with the ink held and the ink arriving by the bell, the orders queued for the next tick with Cancel, the countdown to the tick, the faction strip), a Season page (standings over the week, lead changes, the player's own week, past prints), Rankings, Achievements and More (public profile, help, delete Pixel Wars progress). Settings and Account are shared. The companion paints factions in colour and keeps the pattern inside the colour, so the two surfaces agree.
+- **Help page:** `/help/pixel-wars` explains that the map is the community, that orders resolve on the quarter-hour, how ink fades and why the leader fades fastest, what happens when a desk falls and why it is cheap to take back, the night shield, the Monday bell and the print, and what an invite link does.
 - **Public profile:** the shared profile at `/profile/<public name>` lists Pixel Wars when opted in (public by default, D144): faction, desk state, this week's cells painted and desks taken, seasons played, the prints. Missing, private and suspended names return the same not-found (D109).
 
 No streaks, no daily login reward, no shop, no gold. The one pressure is ink that fades and a desk that can fall, and a desk that falls is the cheapest thing on the map to take back.
@@ -38,11 +38,11 @@ No streaks, no daily login reward, no shop, no gold. The one pressure is ink tha
 | Field | Meaning |
 | --- | --- |
 | Desk | One cell per account on a map. A player with three devices has one desk; every device shows the map |
-| Map | The global map, or a private map (an "office") a player created. A desk exists per map the player has joined |
+| Map | One global map in the MVP. Every row carries a `mapId` so private maps (v1.1) arrive without a migration |
 | Lattice | Desks sit on every third cell in both directions, so two cells of ground separate neighbours and there is always ground to fight over |
 | Placement | A player joining from an invite link takes the nearest free lattice point to the inviter's desk. Anyone else takes the next free lattice point on a spiral from the centre, so the map is dense and grows a ring at a time |
 | Map size | Grows with the players: when the spiral reaches the edge, a ring of ground is added. Hard cap 64 × 64 cells (about 440 desks) per map; the global map shards into a second "floor" at the cap (see [Versions after the MVP](#versions-after-the-mvp)) |
-| Factions | Ink (solid), Hatch (diagonal), Dots, Weave (crosshatch). A new player joins the smallest faction on that map; an invite link joins the inviter's faction |
+| Factions | Ink (solid), Hatch (diagonal), Dots, Weave (crosshatch). A new player joins the smallest faction; an invite link joins the inviter's faction and places the desk beside theirs |
 | Switching | Allowed in the hour after the Monday bell, once a season. A switch keeps the desk, resets the week's counters, and the companion says so |
 
 Activation is TRMNL-exclusive as in Desk Crawler (D09): the desk is pending until a verified saved installation of the Pixel Wars plugin. One desk per account per map, kept across uninstalls. A desk whose owner's installations have served no screen for 14 days is cleared to ground ("the desk stands empty") with a line on the map; it comes back at the nearest free lattice point to where it was when a screen is served again. That is the only way a desk moves, and it keeps lapsed players from being dead cells.
@@ -121,15 +121,10 @@ Levels follow the engine's shared curve. One current goal as Idle Angler's (D196
 | 7 | Liberate a desk | `desksLiberated` ≥ 1 | 50 |
 | 8 | Finish a season | a print is yours | 100 |
 | 9 | Win a season | | 200 |
-| 10 | Start an office | a private map with 4 desks | 100 |
 
 ### Stories
 
 One line a tick at most, in the cheeky partisan register, from the `narrative` stream over the tick's real events: "Hatch took the north corner while Ink slept." "Wren's desk fell at 14:30. Three of you are within reach." "Dots is the smallest faction, and its ink counts double against yours this hour." "Weave has held 41% for six hours. The fade is doing its work." Faction names and public aliases are marked for translation so each language keeps its article (D193). Names on the map are public aliases only, masked as rank rows are masked, and the game has no free text anywhere else: no taunts, no chat, no map messages.
-
-### Private maps
-
-An **office** is a private map created from the Office page, with an invite link and a cap of 64 desks. It runs the same rules, the same tick and the same season, with two differences: it has two factions when it has eight or fewer desks (Ink and Hatch) and four from the ninth, existing desks assigned round-robin at the moment it widens; and its print is offered only to its own desks. A player may join up to four maps and has a desk on each; each installation picks the map it shows (default: the global map; a player with two devices can show the office on one). Ink is per player per map, so an office never drains the global well. The creator can close the office at the bell; its prints stay. Offices are the viral unit, the way fantasy leagues and Wordle groups are, and "the office map on the office TRMNL" is the first install story the listing tells.
 
 ### Determinism and versions
 
@@ -154,7 +149,6 @@ A Pixel Wars catalog, versioned and appended as [achievements](achievements.md) 
 | Wins | `seasonsWon` | 1 / 3 / 10 |
 | Underdog | `underdogFlips` (flips while in the smallest faction) | 10 / 100 / 1,000 |
 | Recruiter | `invitesPlaced` | 1 / 5 / 25 |
-| Office | `officesJoined` | 1 / 4 |
 | Night owl | `ordersAtNight` (orders resolved 00:00 to 05:00 local) | 10 / 100 |
 | Levels | `level` | 4 / 8 / 12 / 16 / 20 |
 
@@ -182,7 +176,7 @@ Every state renders in the sweep: four factions holding, desk captured, desk shi
 
 ## Companion
 
-Pages under `/pixel-wars/`: Map, Season, Office, Rankings, Achievements, More. The Map page is the game. It draws the map on a canvas at phone width with pinch zoom, the player's desk centred on first open, and taps that queue orders with their cost shown before the tap confirms; a long press on a cell names the faction, its ink and who painted it last. The well, the countdown to the next tick and the queued orders sit above the map; the faction strip below. Only actionable things are shown (D167): a cell that cannot be targeted is not tappable and says why on long press, a shielded desk shows the hour its shield lifts, and a full well shows nothing about arrival. The companion checks at 390 and 320 wide in eight languages on the fixtures harness.
+Pages under `/pixel-wars/`: Map, Season, Rankings, Achievements, More. The Season page carries the player's invite link with the goal 5 line beside it. The Map page is the game. It draws the map on a canvas at phone width with pinch zoom, the player's desk centred on first open, and taps that queue orders with their cost shown before the tap confirms; a long press on a cell names the faction, its ink and who painted it last. The well, the countdown to the next tick and the queued orders sit above the map; the faction strip below. Only actionable things are shown (D167): a cell that cannot be targeted is not tappable and says why on long press, a shielded desk shows the hour its shield lifts, and a full well shows nothing about arrival. The companion checks at 390 and 320 wide in eight languages on the fixtures harness.
 
 ## Alerts
 
@@ -190,13 +184,13 @@ Three kinds on the shared push machinery, each opt-in as the others: **Desk take
 
 ## Analytics
 
-Events, with the usual properties and no cell coordinates: `pixel wars order queued` (kind, drops), `pixel wars desk taken` (attacker or defender), `pixel wars desk liberated`, `pixel wars invite placed`, `pixel wars office created`, `pixel wars office joined`, `pixel wars print saved`, `pixel wars faction switched`. The engagement report counts a Pixel Wars player as having opened the companion when an order was queued (D213's owner rule).
+Events, with the usual properties and no cell coordinates: `pixel wars order queued` (kind, drops), `pixel wars desk taken` (attacker or defender), `pixel wars desk liberated`, `pixel wars invite placed`, `pixel wars print saved`, `pixel wars faction switched`. The engagement report counts a Pixel Wars player as having opened the companion when an order was queued (D213's owner rule).
 
 ## Data
 
 | Table | Rows | Notes |
 | --- | --- | --- |
-| `pwMaps` | one per map | kind (global, office), size, spiral cursor, faction count, creator, invite code, status |
+| `pwMaps` | one row (the global map) | kind, size, spiral cursor, faction count, status; the shape private maps reuse in v1.1 |
 | `pwMapTicks` | one per map per tick, last eight kept | the packed cell bytes, the four shares, the tick's events summary; the renderer and the device read this and nothing else |
 | `pwDesks` | one per account per map | position, faction, counters, `lastScreenAt`, cleared flag, switch request |
 | `pwOrders` | one per queued order | map, tick it targets, desk, cell, kind, drops; deleted when resolved or cancelled; indexed by map and tick |
@@ -224,7 +218,7 @@ Small, by design: four faction patterns at three densities and a desk variant of
 
 ## Balance and the harness
 
-A 28-day harness over four maps (24, 60, 200 and 440 desks) with the four visit policies (never visits; every three days; daily; twice daily) and a faction split of 40/30/20/10 at the start, each policy spending its well by a simple rule (liberate own desk first, then strike the faded enemy border nearest the desk, then stamp own border, then paint ground). Gates for W1:
+A 28-day harness over three maps (60, 200 and 440 desks) with the four visit policies (never visits; every three days; daily; twice daily) and a faction split of 40/30/20/10 at the start, each policy spending its well by a simple rule (liberate own desk first, then strike the faded enemy border nearest the desk, then stamp own border, then paint ground). Gates for W1:
 
 | Gate | Target |
 | --- | --- |
@@ -233,7 +227,7 @@ A 28-day harness over four maps (24, 60, 200 and 440 desks) with the four visit 
 | Desks | A daily player's desk is taken no more than once in three days and liberated within a median 8 hours; a never-visits desk falls within three days and is liberated by faction-mates within two |
 | Spend pattern | A daily player spending 48 at once and a twice-daily player spending 24 twice land within 10% of each other's XP |
 | Night shield | No desk is ever taken inside its owner's shield; shielded hours cost the attacking faction under 5% of its week's flips |
-| Small maps | A 24-desk map with two factions is not decided by day three: the trailing faction holds at least 35% at the bell in half the runs |
+| Young map | The 60-desk map is not decided by day three: the trailing faction holds at least 15% at the bell in half the runs, and every faction has at least one lead change in the first fortnight |
 | Replay | Every run's print is reproduced from its order log byte for byte |
 
 The harness sets the fade intervals, the underdog multiplier, the desk ink cap and the XP table; the numbers above are starting marks.
@@ -244,39 +238,38 @@ The harness sets the fade intervals, the underdog multiplier, the desk ink cap a
 | --- | --- | --- |
 | W0 Engine | Registry entry, `gameSlug` unions, crons at 3/18/33/48, keepsake image storage id | The four games' test sets pass unchanged; a production tick of each completes clean after deploy |
 | W1 Core | Content v1 (patterns, lines in eight languages), `resolve`, `fade`, placement spiral, the harness | Every gate in [Balance](#balance-and-the-harness) |
-| W2 Backend | `pw` tables, activation and placement, tick, wells, intents (queue, cancel, switch, create office, join, pick map, pause), publication and shares, season bell and print, screen and art routes, payload v1, deletion paths | convex-test matrix: a tick with contested cells, every order kind, a refused order and its refund, the fade at each rank, the shield by offset, a desk cleared and returned, the bell and the clean map, an office widening to four factions, activation, both deletion levels |
+| W2 Backend | `pw` tables, activation and placement, tick, wells, intents (queue, cancel, switch, pause), publication and shares, season bell and print, screen and art routes, payload v1, deletion paths | convex-test matrix: a tick with contested cells, every order kind, a refused order and its refund, the fade at each rank, the shield by offset, a desk cleared and returned, the bell and the clean map, an invite placing a desk beside its inviter, activation, both deletion levels |
 | W3 Device | Patterns and renderer, templates for four layouts on OG and X, captured panel, rosette | Preview sweep clean in every state, every map size, with and without the title bar, in eight languages, Dark theme too |
 | W4 Companion | Map canvas and orders, Season, Rankings, Achievements, help, game page, switcher, launch list tile, 390 and 320 wide | Fixtures harness walkthrough with no horizontal overflow in eight languages |
-| W5 Offices and alerts | Office page, invite links, per-installation map choice, three alert kinds, analytics, privacy policy in eight languages | Alert tests by backend path; a real push on the dev keys; two desks on two maps from one account |
+| W5 Alerts and analytics | Invite links on the Season page, three alert kinds, analytics, privacy policy in eight languages | Alert tests by backend path; a real push on the dev keys; an invite link that places a desk beside its inviter in the inviter's faction |
 | W6 Listing (Barry) | OAuth client, listing image, Barry's own install while hidden, preview, submission | Live install, render and uninstall on Barry's device |
-
-W5 is the slice to cut if the game must ship sooner: the global map alone is the whole game; offices are the growth engine.
 
 ## Versions after the MVP
 
 | Version | Name | Content |
 | --- | --- | --- |
-| v1.1 | Follow the sun | Ground cells painted by a player whose local time is daytime hold at full strength; cells of a sleeping faction fade at the next rank's rate. The terminator is drawn across the map. Mixed-timezone factions become the winning strategy and recruiting abroad the thing to do |
-| v1.2 | Landmarks | Half a dozen named ground cells per map (the Fountain, the Lift, the Server Room) worth 5 a tick to whoever holds them, so the fight has places as well as borders |
-| v1.3 | The hall | A hall of weeks on the game page: every global print, the winner, the week's best painter; faction all-time records |
-| v1.4 | Floors | The global map shards into floors at 440 desks; a stairwell cell on each floor lets a faction's surplus cross |
+| v1.1 | Offices | Private maps created from an Office page with an invite link and a cap of 64 desks: the same rules, tick and season; two factions (Ink and Hatch) up to eight desks and four from the ninth, existing desks assigned round-robin as it widens; the print offered to its own desks only; up to four maps a player, a desk on each, ink per player per map, each installation picking the map it shows; the creator can close it at the bell. Offices are the growth engine (fantasy leagues, Wordle groups) and the first thing to build once the global map has a week of real play. Moved out of the MVP by Barry on 2026-10-25 |
+| v1.2 | Follow the sun | Ground cells painted by a player whose local time is daytime hold at full strength; cells of a sleeping faction fade at the next rank's rate. The terminator is drawn across the map. Mixed-timezone factions become the winning strategy and recruiting abroad the thing to do |
+| v1.3 | Landmarks | Half a dozen named ground cells per map (the Fountain, the Lift, the Server Room) worth 5 a tick to whoever holds them, so the fight has places as well as borders |
+| v1.4 | The hall | A hall of weeks on the game page: every global print, the winner, the week's best painter; faction all-time records |
+| v1.5 | Floors | The global map shards into floors at 440 desks; a stairwell cell on each floor lets a faction's surplus cross |
 | v2.0 | Invasions | Two offices agree a weekend match on a shared map; office standings; cosmetic nods between games (a hero's banner on a desk, the angler's fly as a pattern accent) |
 
 ## Not in the MVP
 
-Fog of war (opaque on a 15-minute screen and it moves the game onto Discord), structures and upgrades (progression is what the other games are for), pixel-art objectives judged by vote, taunts or any free text on the map, alliances between factions, ink purchases of any kind, a hill or throne mode (the shared map replaced it in the brainstorm), and hemisphere or real-calendar seasons.
+Private office maps (v1.1, at Barry's review on 2026-10-25), fog of war (opaque on a 15-minute screen and it moves the game onto Discord), structures and upgrades (progression is what the other games are for), pixel-art objectives judged by vote, taunts or any free text on the map, alliances between factions, ink purchases of any kind, a hill or throne mode (the shared map replaced it in the brainstorm), and hemisphere or real-calendar seasons.
 
 ## Decisions taken in this revision
 
 Settled while drafting, each with the recommendation taken and the alternative passed over; Barry can reopen any of them.
 
 1. **Desk per account, not per installation.** A player with three devices has one desk and three screens showing the map. The alternative (a desk per device) rewards buying hardware and breaks the "one account" promise.
-2. **Four factions on the global map from day one, two on small offices.** Three would read more easily on e-ink but leaves no fourth to pile on; two on an office of eight is the only way a small map has a fight at all.
+2. **Four factions from day one.** Three would read more easily on e-ink but leaves no fourth to pile on. The harness's young-map gate checks that a 60-desk map with four factions still has a fight.
 3. **Orders resolve at the tick, never live.** The suspense between ticks is the hook, and it matches how the device works. Live painting would make the phone the game and the device a lagging mirror.
 4. **The fade, not a tax, is the catch-up.** It is visible, it needs no explaining beyond "ink fades, the leader's fades fastest", and it makes a map that nobody tends go quiet rather than freeze.
 5. **Cumulative score decides the week; the final map is the print.** Scoring at the bell would make the week's play matter less than its last hour.
 6. **Night shield on desks only.** Shielding ground would freeze the map for eight hours in each timezone's turn; shielding desks is what keeps the stake fair.
 7. **No random draws in the core.** A contest you can reason about is the whole appeal of a slow strategy game, and a replayable week is a cheap print.
-8. **Offices in the MVP, as the last slice.** The global map is the product; offices are how it spreads. W5 is the one that can be cut.
+8. **Offices out of the MVP (Barry, 2026-10-25).** The global map is the product; offices are v1.1 and the data model carries `mapId` from the start so they cost no migration. Invite links stay in the MVP as the viral hook: a friend's desk lands beside yours, in your faction.
 9. **No free text anywhere.** Names come from the moderated public alias and nothing else, so the game adds nothing to moderate.
-10. **Working name Pixel Wars.** Alternatives for Barry's list: Ink Front, Hatch, Ground Ink, The Quarter Hour, Desk Wars, Inkfall.
+10. **The name is Pixel Wars**, confirmed by Barry on 2026-10-25 over Ink Front, Hatch, Ground Ink, The Quarter Hour, Desk Wars and Inkfall.
