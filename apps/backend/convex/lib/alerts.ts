@@ -30,7 +30,7 @@ export type AlertKind = Doc<'alertOutbox'>['kind']
 export type AlertPreferences = NonNullable<Doc<'users'>['alerts']>
 
 /** Every kind's on/off switch on the owner's preferences, across the games. */
-export const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival', 'bedsRipe', 'newSeed'] as const
+export const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival', 'bedsRipe', 'newSeed', 'deskTaken', 'leadLost', 'bell'] as const
 export type AlertSwitch = (typeof SWITCHES)[number]
 /** The preference switch for each kind. */
 export const PREF_FOR: Readonly<Record<AlertKind, AlertSwitch>> = {
@@ -43,6 +43,9 @@ export const PREF_FOR: Readonly<Record<AlertKind, AlertSwitch>> = {
   new_arrival: 'newArrival',
   beds_ripe: 'bedsRipe',
   new_seed: 'newSeed',
+  desk_taken: 'deskTaken',
+  lead_lost: 'leadLost',
+  bell: 'bell',
 }
 export const kindOn = (prefs: AlertPreferences | undefined, kind: AlertKind) => prefs?.[PREF_FOR[kind]] === true
 /** Desk Crawler's kinds, Idle Angler's (D115) and Paper Lives' (D159). */
@@ -51,6 +54,8 @@ export const IDLE_ANGLER_KINDS: readonly AlertKind[] = ['cooler_full', 'bait_out
 export const PAPER_LIVES_KINDS: readonly AlertKind[] = ['major_decision', 'life_ended', 'new_arrival']
 /** Little Plot's kinds (D206): half the beds ripe, and a seed of a kind never grown in the tin. */
 export const LITTLE_PLOT_KINDS: readonly AlertKind[] = ['beds_ripe', 'new_seed']
+/** Pixel Wars' kinds (D214): the desk taken, the lead lost, the bell. */
+export const PIXEL_WARS_KINDS: readonly AlertKind[] = ['desk_taken', 'lead_lost', 'bell']
 
 const STEP_MS = 15 * 60_000
 
@@ -209,6 +214,9 @@ export function lifeAlertMessage(row: Pick<Doc<'alertOutbox'>, 'kind'>, first: s
 export function alertMessage(row: Pick<Doc<'alertOutbox'>, 'kind' | 'offerName'>, heroName: string, locale: Locale = 'en'): { title: string; body: string; url: string } {
   if (row.kind === 'beds_ripe') return { ...PLOT_ALERTS[locale].bedsRipe, url: '/app/little-plot?alert=beds_ripe' }
   if (row.kind === 'new_seed') return { ...PLOT_ALERTS[locale].newSeed(row.offerName ?? null), url: '/app/little-plot/tin?alert=new_seed' }
+  if (row.kind === 'desk_taken') return { ...WAR_ALERTS[locale].deskTaken(row.offerName ?? null), url: '/app/pixel-wars?alert=desk_taken' }
+  if (row.kind === 'lead_lost') return { ...WAR_ALERTS[locale].leadLost(row.offerName ?? null), url: '/app/pixel-wars?alert=lead_lost' }
+  if (row.kind === 'bell') return { ...WAR_ALERTS[locale].bell(row.offerName ?? null), url: '/app/pixel-wars/season?alert=bell' }
   if (row.kind === 'cooler_full') return { ...ANGLER_ALERTS[locale].coolerFull, url: '/app/idle-angler/cooler?alert=cooler_full' }
   if (row.kind === 'bait_out') return { ...ANGLER_ALERTS[locale].baitOut, url: '/app/idle-angler/shop?alert=bait_out' }
   if (row.kind === 'asleep') return { ...DESK_ALERTS[locale].asleep(heroName), url: '/app/desk-crawler/inventory?alert=asleep' }
@@ -297,6 +305,37 @@ export async function queueLittlePlotAlerts(ctx: MutationCtx, args: { owner: Doc
   for (const row of rows) {
     if (await ctx.db.query('alertOutbox').withIndex('by_key', (q) => q.eq('key', row.key)).first()) continue
     await ctx.db.insert('alertOutbox', { userId: owner._id, plotId, eventTick: tick, state: 'pending', attempts: 0, createdAt: now, updatedAt: now, ...row })
+    await ensureSender(ctx, row.notBefore)
+  }
+}
+
+const WAR_ALERTS: Readonly<Record<Locale, { deskTaken: (faction: string | null) => { title: string; body: string }; leadLost: (faction: string | null) => { title: string; body: string }; bell: (winner: string | null) => { title: string; body: string } }>> = {
+  en: { deskTaken: (f) => ({ title: 'Your desk fell', body: f ? `${f} holds your desk. One drop of yours counts three on your own desk.` : 'Another side holds your desk. One drop of yours counts three on your own desk.' }), leadLost: (f) => ({ title: 'Your side lost the lead', body: f ? `${f} holds the most ground now.` : 'Another side holds the most ground now.' }), bell: (w) => ({ title: 'The bell', body: w ? `${w} won the week. The map is clean and your well is full.` : 'The week is over. The map is clean and your well is full.' }) },
+  fr: { deskTaken: (f) => ({ title: 'Votre bureau est tombé', body: f ? `${f} tient votre bureau. Chacune de vos gouttes compte triple sur votre propre bureau.` : 'Un autre camp tient votre bureau. Chacune de vos gouttes compte triple sur votre propre bureau.' }), leadLost: (f) => ({ title: 'Votre camp a perdu la tête', body: f ? `${f} tient le plus de terrain maintenant.` : 'Un autre camp tient le plus de terrain maintenant.' }), bell: (w) => ({ title: 'La cloche', body: w ? `${w} a gagné la semaine. La carte est nettoyée et votre puits est plein.` : 'La semaine est finie. La carte est nettoyée et votre puits est plein.' }) },
+  de: { deskTaken: (f) => ({ title: 'Dein Schreibtisch ist gefallen', body: f ? `${f} hält deinen Schreibtisch. Jeder deiner Tropfen zählt dreifach auf deinem eigenen Schreibtisch.` : 'Eine andere Seite hält deinen Schreibtisch. Jeder deiner Tropfen zählt dreifach auf deinem eigenen Schreibtisch.' }), leadLost: (f) => ({ title: 'Deine Seite hat die Führung verloren', body: f ? `${f} hält jetzt das meiste Gelände.` : 'Eine andere Seite hält jetzt das meiste Gelände.' }), bell: (w) => ({ title: 'Die Glocke', body: w ? `${w} hat die Woche gewonnen. Die Karte ist sauber und dein Brunnen voll.` : 'Die Woche ist vorbei. Die Karte ist sauber und dein Brunnen voll.' }) },
+  es: { deskTaken: (f) => ({ title: 'Tu escritorio cayó', body: f ? `${f} tiene tu escritorio. Cada gota tuya cuenta triple en tu propio escritorio.` : 'Otro bando tiene tu escritorio. Cada gota tuya cuenta triple en tu propio escritorio.' }), leadLost: (f) => ({ title: 'Tu bando perdió el liderato', body: f ? `${f} tiene ahora más terreno.` : 'Otro bando tiene ahora más terreno.' }), bell: (w) => ({ title: 'La campana', body: w ? `${w} ganó la semana. El mapa está limpio y tu pozo lleno.` : 'La semana terminó. El mapa está limpio y tu pozo lleno.' }) },
+  it: { deskTaken: (f) => ({ title: 'La tua scrivania è caduta', body: f ? `${f} tiene la tua scrivania. Ogni tua goccia conta il triplo sulla tua scrivania.` : 'Un altro schieramento tiene la tua scrivania. Ogni tua goccia conta il triplo sulla tua scrivania.' }), leadLost: (f) => ({ title: 'Il tuo schieramento ha perso la testa', body: f ? `${f} tiene ora più terreno.` : 'Un altro schieramento tiene ora più terreno.' }), bell: (w) => ({ title: 'La campana', body: w ? `${w} ha vinto la settimana. La mappa è pulita e il tuo pozzo è pieno.` : 'La settimana è finita. La mappa è pulita e il tuo pozzo è pieno.' }) },
+  pt: { deskTaken: (f) => ({ title: 'Sua mesa caiu', body: f ? `${f} tem a sua mesa. Cada gota sua conta o triplo na sua própria mesa.` : 'Outro lado tem a sua mesa. Cada gota sua conta o triplo na sua própria mesa.' }), leadLost: (f) => ({ title: 'Seu lado perdeu a liderança', body: f ? `${f} tem mais terreno agora.` : 'Outro lado tem mais terreno agora.' }), bell: (w) => ({ title: 'O sino', body: w ? `${w} venceu a semana. O mapa está limpo e seu poço cheio.` : 'A semana acabou. O mapa está limpo e seu poço cheio.' }) },
+  pl: { deskTaken: (f) => ({ title: 'Twoje biurko padło', body: f ? `${f} trzyma twoje biurko. Każda twoja kropla liczy się potrójnie na własnym biurku.` : 'Inna strona trzyma twoje biurko. Każda twoja kropla liczy się potrójnie na własnym biurku.' }), leadLost: (f) => ({ title: 'Twoja strona straciła prowadzenie', body: f ? `${f} ma teraz najwięcej terenu.` : 'Inna strona ma teraz najwięcej terenu.' }), bell: (w) => ({ title: 'Dzwon', body: w ? `${w} wygrało tydzień. Mapa jest czysta, a twoja studnia pełna.` : 'Tydzień minął. Mapa jest czysta, a twoja studnia pełna.' }) },
+  nl: { deskTaken: (f) => ({ title: 'Je bureau is gevallen', body: f ? `${f} houdt je bureau. Elke druppel van jou telt driedubbel op je eigen bureau.` : 'Een andere kant houdt je bureau. Elke druppel van jou telt driedubbel op je eigen bureau.' }), leadLost: (f) => ({ title: 'Je kant is de leiding kwijt', body: f ? `${f} houdt nu het meeste terrein.` : 'Een andere kant houdt nu het meeste terrein.' }), bell: (w) => ({ title: 'De bel', body: w ? `${w} won de week. De kaart is schoon en je put is vol.` : 'De week is voorbij. De kaart is schoon en je put is vol.' }) },
+}
+
+/**
+ * Pixel Wars tick hook (D214): the desk taken this tick (held half an hour, so a liberation in the next tick cancels
+ * it), the side's lead lost this tick (once a day), and the bell (once a week). Reads nothing unless the owner turned
+ * the kind on.
+ */
+export async function queuePixelWarsAlerts(ctx: MutationCtx, args: { owner: Doc<'users'>; deskId: Id<'desks'>; fellTo: string | null; leadLostTo: string | null; bell: { winner: string | null; week: number } | null; tick: number; now: number }): Promise<void> {
+  const { owner, deskId, tick, now } = args
+  const prefs = owner.alerts
+  if (prefs === undefined) return
+  const rows: Array<{ kind: AlertKind; key: string; notBefore: number; offerName?: string }> = []
+  if (args.fellTo !== null && prefs.deskTaken) rows.push({ kind: 'desk_taken', key: `${deskId}:desk_taken:${Math.floor(tick / 16)}`, notBefore: now + ALERTS.asleepDelayMs, offerName: args.fellTo })
+  if (args.leadLostTo !== null && prefs.leadLost) rows.push({ kind: 'lead_lost', key: `${deskId}:lead_lost:${Math.floor(tick / 96)}`, notBefore: now, offerName: args.leadLostTo })
+  if (args.bell !== null && prefs.bell) rows.push({ kind: 'bell', key: `${deskId}:bell:${args.bell.week}`, notBefore: now, ...(args.bell.winner === null ? {} : { offerName: args.bell.winner }) })
+  for (const row of rows) {
+    if (await ctx.db.query('alertOutbox').withIndex('by_key', (q) => q.eq('key', row.key)).first()) continue
+    await ctx.db.insert('alertOutbox', { userId: owner._id, deskId, eventTick: tick, state: 'pending', attempts: 0, createdAt: now, updatedAt: now, ...row })
     await ensureSender(ctx, row.notBefore)
   }
 }

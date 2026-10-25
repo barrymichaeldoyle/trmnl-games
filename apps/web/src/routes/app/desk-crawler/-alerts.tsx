@@ -11,7 +11,7 @@ import { useT } from '../../../lib/i18n'
 import { dcMoreMessages } from '../../../i18n/dcMore'
 
 /** The switches a game's card owns (D115: each game shows its own kinds; devices and quiet hours are shared). */
-const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival', 'bedsRipe', 'newSeed'] as const
+const SWITCHES = ['asleep', 'merchant', 'coolerFull', 'baitOut', 'majorDecision', 'lifeEnded', 'newArrival', 'bedsRipe', 'newSeed', 'deskTaken', 'leadLost', 'bell'] as const
 type KindId = (typeof SWITCHES)[number]
 type Prefs = Partial<Record<KindId, boolean>> & { quietStart: number; quietEnd: number }
 export type AlertKindCopy = { readonly id: KindId; readonly name: string; readonly blurb: string }

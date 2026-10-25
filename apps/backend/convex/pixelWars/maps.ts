@@ -228,7 +228,8 @@ export async function ensureMapTick(ctx: MutationCtx, mapId: Id<'pwMaps'>, run: 
   const result = resolve({ map, orders, tick: run.tick, content, shielded: shieldedSeats(content, doc.seats, run.wallSlot) })
   for (const s of result.shares) seasonScore[s.faction] = (seasonScore[s.faction] ?? 0) + s.score
   const leader = [...result.shares].sort((a, b) => a.rank - b.rank)[0]!.faction
-  if (lastLeader !== undefined && leader !== lastLeader) leadChanges += 1
+  const leaderChanged = lastLeader !== undefined && leader !== lastLeader
+  if (leaderChanged) leadChanges += 1
   const seatEvents: Record<string, SeatEvents> = {}
   for (const [seat, e] of result.seats) seatEvents[String(seat)] = { ...e }
   const events = result.events.slice(0, MAX_EVENTS)
@@ -248,6 +249,7 @@ export async function ensureMapTick(ctx: MutationCtx, mapId: Id<'pwMaps'>, run: 
     seatEvents,
     lines: await linesFor(ctx, mapId, content, events, bell, lastWinner),
     ...(bell ? { bell: true } : {}),
+    ...(leaderChanged && lastLeader !== undefined ? { leaderFrom: lastLeader, leaderTo: leader } : {}),
   })
   await ctx.db.patch(mapId, { ...stored, currentTick: run.tick, seasonScore, seasonWeek, shares: [...result.shares], leadChanges, lastLeader: leader, ...(lastWinner === undefined ? {} : { lastWinner }) })
   for (const b of boards) await ctx.db.delete(b._id)

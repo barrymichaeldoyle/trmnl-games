@@ -8,7 +8,7 @@ export const IDENTITY_EVENT = 'tg:analytics-identity'
 /** The site footer's link asks the provider to reopen the consent panel. */
 export const PREFERENCES_EVENT = 'tg:analytics-preferences'
 export const openAnalyticsPreferences = () => window.dispatchEvent(new Event(PREFERENCES_EVENT))
-export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'install link opened' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'makeover bought' | 'public name changed' | 'hero followed' | 'hero unfollowed' | 'decision chosen' | 'aged up' | 'next life started' | 'album viewed' | 'life page viewed' | 'rankings viewed' | 'photo taken' | 'launch list joined' | 'launch list left'
+export type AnalyticsEvent = 'installation started' | 'installation submitted' | 'installation connected' | 'installation failed' | 'setup screen shown' | 'setup help opened' | 'companion ready' | 'management opened' | 'management account mismatch' | 'account switched' | 'intent failed' | 'stance changed' | 'decision made' | 'merchant purchase' | 'pouch bought' | 'bag bought' | 'install link opened' | 'feedback sent' | 'profile shared' | 'task swapped' | 'goal claimed' | 'alerts changed' | 'alert opened' | 'fish sold' | 'tackle bought' | 'water changed' | 'bait changed' | 'logbook viewed' | 'game switched' | 'gear salvaged' | 'gear upgraded' | 'affix chosen' | 'potion combined' | 'sponsor link opened' | 'name tag bought' | 'makeover bought' | 'public name changed' | 'hero followed' | 'hero unfollowed' | 'decision chosen' | 'aged up' | 'next life started' | 'album viewed' | 'life page viewed' | 'rankings viewed' | 'photo taken' | 'launch list joined' | 'launch list left' | 'order queued' | 'side chosen' | 'side switched'
 let volatileConsent: AnalyticsConsent = null
 
 export function readAnalyticsConsent(): AnalyticsConsent {
@@ -163,6 +163,10 @@ const INTENT_EVENTS: Record<string, [AnalyticsEvent, string, string]> = {
   'idleAngler/anglers:chooseBait': ['bait changed', 'bait', 'bait'],
   'idleAngler/anglers:buyAccessItem': ['tackle bought', 'access', 'item'],
   'idleAngler/anglers:buyBaitTubs': ['tackle bought', 'bait', 'item'],
+  // D214: Pixel Wars' choices.
+  'pixelWars/desks:queueOrder': ['order queued', 'kind', 'kind'],
+  'pixelWars/desks:chooseFaction': ['side chosen', 'faction', 'faction'],
+  'pixelWars/desks:switchFaction': ['side switched', 'faction', 'faction'],
 }
 
 /** Intents whose event carries a count or a fixed kind rather than one catalog id. */

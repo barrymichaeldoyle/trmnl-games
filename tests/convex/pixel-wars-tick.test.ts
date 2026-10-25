@@ -70,6 +70,10 @@ describe('Pixel Wars tick on the shared engine (D214, W2)', () => {
   it('takes a desk, tells the owner, and the owner liberates it at triple strength', async () => {
     const ana = await seedDesk(t, 1, 'Ana')
     await seedDesk(t, 2, 'Bea', {}, ana)
+    await t.run(async (ctx) => {
+      const desk = (await ctx.db.get(ana))!
+      await ctx.db.patch(desk.userId, { alerts: { asleep: false, merchant: false, deskTaken: true, leadLost: true, bell: true, quietStart: 21, quietEnd: 8 } })
+    })
     const map = await globalMap(t)
     const [a, b] = map.seats
     const step = { x: Math.sign(a!.x - b!.x), y: Math.sign(a!.y - b!.y) }
@@ -83,6 +87,10 @@ describe('Pixel Wars tick on the shared engine (D214, W2)', () => {
     await nextPixelWarsTick(t)
     const taken = toMapState(await globalMap(t))
     expect(cellAt(taken, a!.x, a!.y)).toMatchObject({ faction: 2, desk: true })
+    // Ana turned the desk-taken alert on before the strike landed: one outbox row, held half an hour, naming Hatch.
+    const outbox = await t.run(async (ctx) => await ctx.db.query('alertOutbox').collect())
+    // (The test owner has no push device, so the sender skips the row once it is due; it was queued with the taker's name.)
+    expect(outbox.filter((row) => row.kind === 'desk_taken' && row.deskId === ana)).toMatchObject([{ offerName: 'Hatch', reason: 'no_devices' }])
     const anaDesk = await deskOf(t, ana)
     expect(anaDesk.counters.deskFalls).toBe(1)
     const logs = await t.run(async (ctx) => await ctx.db.query('pwTickLogs').withIndex('by_deskId_and_at_and_sequence', (q) => q.eq('deskId', ana)).collect())
@@ -144,6 +152,10 @@ describe('Pixel Wars tick on the shared engine (D214, W2)', () => {
 
   it('rings the bell on the first tick of a new week: the standings are kept, the map painted clean, the wells filled', async () => {
     const ana = await seedDesk(t, 1, 'Ana')
+    await t.run(async (ctx) => {
+      const desk = (await ctx.db.get(ana))!
+      await ctx.db.patch(desk.userId, { alerts: { asleep: false, merchant: false, bell: true, quietStart: 21, quietEnd: 8 } })
+    })
     const map = await globalMap(t)
     const a = map.seats[0]!
     const me = as(t, 'Ana')
@@ -165,6 +177,9 @@ describe('Pixel Wars tick on the shared engine (D214, W2)', () => {
     const desk = await deskOf(t, ana)
     expect(desk.well.drops).toBe(contentV1.wellCap)
     expect(desk.counters.seasonsPlayed).toBe(1)
+    // The bell alert names the winner, once for the week.
+    const bells = await t.run(async (ctx) => (await ctx.db.query('alertOutbox').collect()).filter((row) => row.kind === 'bell'))
+    expect(bells).toMatchObject([{ offerName: 'Ink', deskId: ana }])
     expect(desk.counters.seasonsWon).toBe(1)
     expect(desk.week.painted).toBe(0)
   })

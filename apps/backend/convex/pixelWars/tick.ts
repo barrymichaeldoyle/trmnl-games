@@ -6,6 +6,7 @@ import type { Doc, Id } from '../_generated/dataModel'
 import { internalMutation, type MutationCtx } from '../_generated/server'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engine/runner'
 import { accumulatorOf, addBucket, creditTick, foldScore } from '../lib/engine/scores'
+import { queuePixelWarsAlerts } from '../lib/alerts'
 import { awardDesk, stateOf, tallyDeskUnlocks } from './achievements'
 import { writeRankInput } from './leaderboard'
 import { ensureMapTick, setSeatFaction, syncSeatOffset, toMapState } from './maps'
@@ -192,6 +193,13 @@ async function simulateDeskStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
     }
   }
   void faction
+
+  // Alerts (D214): the desk taken this tick, the side's lead lost this tick, the bell.
+  if (owner.alerts !== undefined) {
+    const leadLost = snapshot.leaderFrom !== undefined && snapshot.leaderFrom === faction && snapshot.leaderTo !== undefined && snapshot.leaderTo !== faction ? factionName(snapshot.leaderTo) : null
+    const bellNow = snapshot.bell === true ? { winner: map.lastWinner === undefined ? null : factionName(map.lastWinner), week: map.seasonWeek } : null
+    if (e.fell !== undefined || leadLost !== null || bellNow !== null) await queuePixelWarsAlerts(ctx, { owner, deskId: desk._id, fellTo: e.fell === undefined ? null : factionName(e.fell), leadLostTo: leadLost, bell: bellNow, tick: run.tick, now })
+  }
 
   if (sequence !== desk.logSequence) patch.logSequence = sequence
   const credited = creditTick(accumulatorOf(desk), run.scoreAt, xpEarned)

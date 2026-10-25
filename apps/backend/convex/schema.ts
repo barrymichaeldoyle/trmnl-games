@@ -148,7 +148,7 @@ export const merchantOffer = v.object({
 export const merchantVisit = v.object({ offers: v.array(merchantOffer), expiresAtTick: v.number(), biomeId: v.string() })
 
 /** P33: the two alert kinds; a new kind needs its own decision row (alerts.md). */
-export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.literal('cooler_full'), v.literal('bait_out'), v.literal('major_decision'), v.literal('life_ended'), v.literal('new_arrival'), v.literal('beds_ripe'), v.literal('new_seed'))
+export const alertKind = v.union(v.literal('asleep'), v.literal('merchant'), v.literal('cooler_full'), v.literal('bait_out'), v.literal('major_decision'), v.literal('life_ended'), v.literal('new_arrival'), v.literal('beds_ripe'), v.literal('new_seed'), v.literal('desk_taken'), v.literal('lead_lost'), v.literal('bell'))
 export const alertPreferences = v.object({
   asleep: v.boolean(),
   merchant: v.boolean(),
@@ -162,6 +162,10 @@ export const alertPreferences = v.object({
   /** D206: Little Plot's kinds; absent means off. */
   bedsRipe: v.optional(v.boolean()),
   newSeed: v.optional(v.boolean()),
+  /** D214: Pixel Wars' kinds; absent means off. */
+  deskTaken: v.optional(v.boolean()),
+  leadLost: v.optional(v.boolean()),
+  bell: v.optional(v.boolean()),
   quietStart: v.number(),
   quietEnd: v.number(),
   /** Set when the last device's subscription went stale and both kinds turned off; Settings says why. */
@@ -494,6 +498,9 @@ export default defineSchema({
     /** Up to three lines for the device, aliases already resolved. */
     lines: v.array(v.string()),
     bell: v.optional(v.boolean()),
+    /** The faction that led before this tick and the one leading after, when they differ (for the lead-lost alert). */
+    leaderFrom: v.optional(pwFactionId),
+    leaderTo: v.optional(pwFactionId),
   })
     .index('by_mapId_and_tick', ['mapId', 'tick'])
     .index('by_at', ['at']),

@@ -8,13 +8,20 @@ import { preload } from '../../../lib/preload'
 import { seo } from '../../../lib/seo'
 import { ActionFeedback, Button, Card, LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
 import type { WarView } from '../../../lib/pixelWars'
+import { AlertsCard, type AlertKindCopy } from '../desk-crawler/-alerts'
 
-/** The More tab: rankings, achievements and help, then settings (public page, installations, deleting Pixel Wars progress alone). Alerts come with W5. */
+/** The More tab: rankings, achievements and help, then settings (public page, alerts, installations, deleting Pixel Wars progress alone). */
 export const Route = createFileRoute('/app/pixel-wars/settings')({
   head: () => seo({ title: 'More · Pixel Wars', index: false }),
   loader: ({ context }) => preload(context, convexQuery(api.pixelWars.desks.view, {}), convexQuery(api.connections.mine, { gameSlug: 'pixel-wars' })),
   component: SettingsPage,
 })
+
+const ALERT_KINDS: readonly AlertKindCopy[] = [
+  { id: 'deskTaken', name: 'Desk taken', blurb: 'When another side takes your desk. Held for half an hour, so a quick liberation cancels it.' },
+  { id: 'leadLost', name: 'Lead lost', blurb: 'When your side loses the most ground. At most once a day.' },
+  { id: 'bell', name: 'The bell', blurb: 'Monday 00:00 UTC: who won the week, and that the map is clean.' },
+]
 
 const MORE_LINKS = [
   { to: '/app/pixel-wars/rankings', label: 'Rankings', blurb: 'Today, this week and lifetime, by level group.' },
@@ -59,6 +66,7 @@ function SettingsPage() {
           <ActionFeedback error={profile.error} message={profile.message} />
         </Card>
       ) : null}
+      {active ? <AlertsCard notify={notify} kinds={ALERT_KINDS} intro="A push when your desk falls, when your side loses the lead, and at the bell." quietNote="Nothing is sent in quiet hours; a fallen desk waits until morning, a lost lead is dropped." /> : null}
       <Installations notify={notify} />
       <details className="border-t-2 border-hp pt-4">
         <summary className="min-h-11 cursor-pointer font-semibold text-hp-ink">Delete Pixel Wars progress</summary>
