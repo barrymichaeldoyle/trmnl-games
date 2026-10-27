@@ -54,8 +54,11 @@ export const simulateBatch = internalMutation({
   handler: async (ctx, { runId, expectedSequence }) => await runBatch(ctx, DESK_CRAWLER_RUNTIME, runId, expectedSequence, simulateHeroStep),
 })
 
-/** One hero's share of a page: eligibility, dormant skip, quarantine, the pure core, then its writes and rank input. */
-async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, world, content, now, tally }: SubjectStep<ContentCatalog>): Promise<void> {
+/**
+ * One hero's share of a page: eligibility, dormant skip, quarantine, the pure core, then its writes and rank input.
+ * Exported for `admin:catchUpHero`, which replays it for one released hero over the real runs it missed.
+ */
+export async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, world, content, now, tally }: SubjectStep<ContentCatalog>): Promise<void> {
   // D174: the landing tally. Pending installs have not started. Parked heroes still count, and so do their wins.
   // This runs before the dormant skip, on the hero document the page already loaded.
   if (hero.activationState === 'active') {

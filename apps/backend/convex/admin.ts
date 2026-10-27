@@ -12,6 +12,9 @@ import { getOrCreateWorld, readWorld, worldContent } from './world'
 import { heroMaxHp } from '@trmnl-games/desk-crawler/sim/core/stats'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { commandLog } from './lib/intent'
+import { simulateHeroStep } from './sim/runs/tick'
+import type { PageTally } from './lib/engine/runner'
+import { catalogs, type CatalogId } from '@trmnl-games/desk-crawler/content'
 
 /**
  * Owner-run support and moderation (D23). Admin authority comes only from the
@@ -274,6 +277,75 @@ export const compensateHero = internalMutation({
     await commandLog(ctx, (await ctx.db.get(heroId))!, 'compensate', `Thanks for the heads-up about the pause. The office chipped in [[${gold} gold]].`, { xpEarned: 0, gold, hp: 0 })
     await audit(ctx, 'cli', 'compensate_hero', heroId, reasonCode, `gold +${gold}`)
     return { gold: hero.gold + gold }
+  },
+})
+
+const CATCH_UP_STEPS = 6
+
+/**
+ * Catch-up after a quarantine (Barry's decision, 2026-10-27, for the hero paused a day by the HP ceiling): replay the
+ * released hero through the real runs it missed, oldest first, one hero only. Each missed tick uses that tick's own run
+ * row (its wall slot, content version and seed inputs), so the hero gets the adventures, finds, fights, decisions and
+ * level-ups it would have had, told in its log at the ticks they belong to. Rank inputs are not rewritten for closed
+ * publications (`publishes` is forced off); XP still credits the hero's score buckets. The replay waits while a live
+ * run is active so the two never step the same hero, stops if the core quarantines the hero again, and audits start
+ * and end. `npx convex run --prod admin:catchUpHero '{"heroId":"...","fromTick":2106,"reasonCode":"..."}'`; `toTick`
+ * defaults to the last completed tick.
+ */
+export const catchUpHero = internalMutation({
+  args: { heroId: v.id('heroes'), fromTick: v.number(), toTick: v.optional(v.number()), reasonCode: reason, started: v.optional(v.boolean()) },
+  returns: v.object({ state: v.union(v.literal('scheduled'), v.literal('waiting'), v.literal('done'), v.literal('stopped')), lastTick: v.number(), toTick: v.number() }),
+  handler: async (ctx, { heroId, fromTick, toTick: givenTo, reasonCode, started }) => {
+    const world = await getOrCreateWorld(ctx)
+    const toTick = givenTo ?? world.lastCompletedTick ?? 0
+    const hero = await ctx.db.get(heroId)
+    if (hero === null) throw appError('INVALID_STATE', 'Hero not found.')
+    const again = async (delayMs: number) => {
+      await ctx.scheduler.runAfter(delayMs, internal.admin.catchUpHero, { heroId, fromTick, toTick, reasonCode, started: true })
+    }
+    if (!started) {
+      if (hero.simulationState !== 'quarantined' && hero.simulationState !== 'healthy') throw appError('INVALID_STATE', 'Hero is not healthy.')
+      if (hero.simulationState === 'quarantined') throw appError('INVALID_STATE', 'Release the hero first.')
+      if (!Number.isSafeInteger(fromTick) || fromTick < 1 || fromTick > toTick) throw appError('INVALID_INPUT', `fromTick must be 1..${toTick}.`)
+      if (world.lastCompletedTick === undefined || toTick > world.lastCompletedTick) throw appError('INVALID_INPUT', 'toTick must be a completed tick.')
+      await ctx.db.patch(heroId, { lastTick: fromTick - 1 })
+      await audit(ctx, 'cli', 'catch_up_hero', heroId, reasonCode, `start ${fromTick}..${toTick}`)
+      await again(0)
+      return { state: 'scheduled' as const, lastTick: fromTick - 1, toTick }
+    }
+    // A live run would step this hero too; wait it out.
+    if (world.activeRunId !== undefined) {
+      await again(30_000)
+      return { state: 'waiting' as const, lastTick: hero.lastTick, toTick }
+    }
+    let current = hero
+    const tally: PageTally = { counts: { processed: 0, eligible: 0, skippedDormant: 0, quarantined: 0, deaths: 0, levelUps: 0, heldFinds: 0 }, unlocks: {}, population: 0 }
+    for (let step = 0; step < CATCH_UP_STEPS && current.lastTick < toTick; step += 1) {
+      const tick = current.lastTick + 1
+      const run = await ctx.db.query('simulationRuns').withIndex('by_tick', (q) => q.eq('tick', tick)).first()
+      if (run === null) {
+        // A tick with no run row (never started) has nothing to replay.
+        await ctx.db.patch(heroId, { lastTick: tick })
+      } else {
+        const content = catalogs[run.contentVersion as CatalogId]
+        if (content === undefined) throw appError('INVALID_STATE', `No catalog ${run.contentVersion} for tick ${tick}.`)
+        await simulateHeroStep(ctx, current, { run: { ...run, publishes: false }, world, content, now: Date.now(), tally })
+        const after = (await ctx.db.get(heroId))!
+        // A dormant skip leaves lastTick alone; move it so the replay keeps walking.
+        if (after.lastTick < tick) await ctx.db.patch(heroId, { lastTick: tick })
+      }
+      current = (await ctx.db.get(heroId))!
+      if (current.simulationState === 'quarantined') {
+        await audit(ctx, 'cli', 'catch_up_hero', heroId, reasonCode, `stopped: quarantined at ${tick} (${current.quarantineReasonCode ?? '?'})`)
+        return { state: 'stopped' as const, lastTick: current.lastTick, toTick }
+      }
+    }
+    if (current.lastTick < toTick) {
+      await again(0)
+      return { state: 'scheduled' as const, lastTick: current.lastTick, toTick }
+    }
+    await audit(ctx, 'cli', 'catch_up_hero', heroId, reasonCode, `done ${fromTick}..${toTick}: level ${current.level}, ${current.gold} gold, ${tally.counts.deaths} deaths, ${tally.counts.levelUps} level-ups`)
+    return { state: 'done' as const, lastTick: current.lastTick, toTick }
   },
 })
 

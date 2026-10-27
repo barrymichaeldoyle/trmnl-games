@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, internal } from '@trmnl-games/backend/api'
 import { ACTIVE_CONTENT } from '@trmnl-games/desk-crawler/content'
 import schema from '../../apps/backend/convex/schema'
-import { seedHero, seedWorld, type T } from './helpers'
+import { runTick, seedHero, seedWorld, type T } from './helpers'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
 
@@ -137,5 +137,33 @@ describe('owner-run moderation (D23)', () => {
     expect((await t.run(async (ctx) => await ctx.db.query('adminAuditEvents').collect())).at(-1)).toMatchObject({ action: 'compensate_hero', outcome: 'gold +300', reasonCode: 'hp_quarantine_2026_10_26' })
     await expect(t.mutation(internal.admin.compensateHero, { heroId, gold: 0, reasonCode: 'x' })).rejects.toThrow()
     await expect(t.mutation(internal.admin.compensateHero, { heroId, gold: 5001, reasonCode: 'x' })).rejects.toThrow()
+  })
+
+  it('catches a released hero up through the real runs it missed, tick by tick, and audits both ends', async () => {
+    const NOW = Date.UTC(2026, 9, 3, 10, 0, 2)
+    vi.setSystemTime(NOW)
+    await t.run(async (ctx) => { const world = (await ctx.db.query('worldState').first())!; await ctx.db.patch(world._id, { activeContentVersion: ACTIVE_CONTENT, lastPublishedAt: NOW - 5 * 60_000 }) })
+    // Over the ceiling from the start: quarantined on tick 1, then carried as quarantined through ticks 2 to 4.
+    const heroId = await seedHero(t, { hp: 999 }, 'Tdb')
+    const witness = await seedHero(t, {}, 'Other')
+    for (let tick = 1; tick <= 4; tick += 1) {
+      vi.setSystemTime(NOW + (tick - 1) * 15 * 60_000)
+      await runTick(t)
+    }
+    expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ simulationState: 'quarantined', lastTick: 4 })
+    expect(await t.run(async (ctx) => await ctx.db.get(witness))).toMatchObject({ lastTick: 4 })
+    await expect(t.mutation(internal.admin.catchUpHero, { heroId, fromTick: 1, reasonCode: 'x' })).rejects.toThrow()
+    expect(await t.mutation(internal.admin.releaseHeroFromCli, { heroId, reasonCode: 'fixed' })).toEqual({ outcome: 'healthy, hp 999 to 100' })
+
+    expect(await t.mutation(internal.admin.catchUpHero, { heroId, fromTick: 1, reasonCode: 'hp_quarantine' })).toEqual({ state: 'scheduled', lastTick: 0, toTick: 4 })
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    const hero = await t.run(async (ctx) => await ctx.db.get(heroId))
+    expect(hero).toMatchObject({ simulationState: 'healthy', lastTick: 4 })
+    expect(hero!.lifetimeXp).toBeGreaterThan(0)
+    const ticks = await t.run(async (ctx) => (await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).collect()).filter((e) => e.source === 'tick').map((e) => e.tick))
+    expect(new Set(ticks)).toEqual(new Set([1, 2, 3, 4]))
+    const audits = (await t.run(async (ctx) => await ctx.db.query('adminAuditEvents').collect())).filter((a) => a.action === 'catch_up_hero').map((a) => a.outcome)
+    expect(audits[0]).toBe('start 1..4')
+    expect(audits.at(-1)).toMatch(/^done 1\.\.4: level \d+, \d+ gold/)
   })
 })
