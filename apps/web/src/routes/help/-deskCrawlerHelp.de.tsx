@@ -1,4 +1,4 @@
-import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
+import { contentTranslator } from '@trmnl-games/desk-crawler/i18n/lazy'
 import { DESK_CRAWLER_INSTALL_URL, SUPPORT_EMAIL } from '../../lib/prose'
 import { HELP_FACTS as F, nextTableDate, signed, type Cost, type Modifiers, type Occasion } from './-deskCrawlerFacts'
 import type { HelpPage } from './-deskCrawlerHelp'

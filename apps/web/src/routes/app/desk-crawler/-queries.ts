@@ -7,3 +7,7 @@ import { api } from '@trmnl-games/backend/api'
  * -gameScreen put the screen, the scene painter and its timers on every page.
  */
 export const latestLogQuery = () => convexQuery(api.heroes.latestLog, {})
+
+/** The log's first page, as the Log tab's loader fetches it: the live pagination takes over from it after hydration. */
+export const LOG_PAGE = 40
+export const firstLogPage = (heroId: string) => convexQuery(api.heroes.recentLog, { heroId: heroId as never, paginationOpts: { numItems: LOG_PAGE, cursor: null } })

@@ -432,6 +432,7 @@ const path = (parts) => new Proxy(function () {}, { get: (_, key) => (key === Sy
 export const api = path([]);
 export const convexQuery = (fn, args = {}) => ({ queryKey: ['convexQuery', String(fn), args] });
 export const keepPreviousData = (previous) => previous;
+export const useQueryClient = () => ({ getQueryData: (key) => { const [, fn, args] = key; return queries[fn] ? queries[fn](args) : undefined } });
 export const useQuery = (options) => { const [, fn, args] = options.queryKey; const data = queries[fn] ? queries[fn](args) : undefined; return { data, isPending: false, isPlaceholderData: false, isError: false, refetch: async () => ({ data }) } };
 const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('ok') ? resolveIt({ changed: true, outcome: params.get('outcome') ?? 'collected', totalCollected: 1 }) : reject(new Error('Synthetic QA: all server mutations are disabled'))), flag('ok') ? 800 : 1200));
 // Optimistic updates are not simulated: the stubbed mutation ignores them, so only local drafts show early.

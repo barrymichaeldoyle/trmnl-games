@@ -16,3 +16,12 @@ export const contentNeededAt = (pathname: string): boolean => CONTENT_PATHS.some
 
 /** Loaders: the locale's dictionary alongside the page's queries; a failed fetch leaves English rather than a broken page. */
 export const preloadContent = (locale: Locale): Promise<void> => loadContent(locale).catch(() => {})
+
+/**
+ * Everything the client entry waits for before hydrating `pathname`: the dictionary for a content page, and for the
+ * Desk Crawler help page its guide too (written out at module scope, so it needs the dictionary first).
+ */
+export function prepareHydration(pathname: string, locale: Locale): Promise<void> {
+  if (pathname.replace(/\/$/, '') === '/help/desk-crawler') return import('../routes/help/-deskCrawlerHelp').then((m) => m.loadDeskCrawlerHelp(locale)).catch(() => {})
+  return contentNeededAt(pathname) ? preloadContent(locale) : Promise.resolve()
+}

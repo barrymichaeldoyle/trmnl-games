@@ -64,6 +64,12 @@ describe('content pages', () => {
   it('leaves pages without game content to hydrate at once', () => {
     expect(contentNeededAt('/')).toBe(false)
     expect(contentNeededAt('/app/idle-angler')).toBe(false)
-    expect(contentNeededAt('/help/desk-crawler')).toBe(false)
+  })
+
+  it('keeps the help guides, which write game names at module scope, behind the loader', () => {
+    const route = readFileSync(join(SRC, 'routes/help/desk-crawler.tsx'), 'utf8')
+    expect(route).toMatch(/loader: .*import\('\.\/-deskCrawlerHelp'\).*loadDeskCrawlerHelp/)
+    expect(route).not.toMatch(/from '\.\/-deskCrawlerHelp\.\w\w'/)
+    expect(readFileSync(join(SRC, 'lib/content.ts'), 'utf8')).toContain('/help/desk-crawler')
   })
 })

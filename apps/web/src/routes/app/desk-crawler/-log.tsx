@@ -1,6 +1,6 @@
 import { usePaginatedQuery } from 'convex/react'
 import { convexQuery } from '@convex-dev/react-query'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { LogStory } from './-logStory'
@@ -13,6 +13,7 @@ import { formatDate, useLocale, useT } from '../../../lib/i18n'
 import type { Locale } from '@trmnl-games/platform'
 import { useStoryOptions } from '../../../lib/useStory'
 import { dcLogMessages } from '../../../i18n/dcLog'
+import { firstLogPage, LOG_PAGE } from './-queries'
 
 type Entry = { id: string; at: number; tick: number | null; kind: string; summary: string; source: string; deltas: LogDeltas }
 
@@ -90,7 +91,14 @@ function group(entries: Entry[], t: T, locale: Locale) {
 export function AdventureLog() {
   // Keyed on the hero, so a recruit or switch starts a fresh page instead of reusing the last hero's cursor.
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
-  const { results, status, loadMore } = usePaginatedQuery(api.heroes.recentLog, hero ? { heroId: hero.id } : 'skip', { initialNumItems: 40 })
+  const paged = usePaginatedQuery(api.heroes.recentLog, hero ? { heroId: hero.id } : 'skip', { initialNumItems: LOG_PAGE })
+  // The loader's copy of the first page stands in while the live pagination fetches its own, so the tab never opens
+  // on a skeleton; it is read once from the cache, not watched, so the rows are not subscribed twice.
+  const queryClient = useQueryClient()
+  const preloaded = hero && paged.status === 'LoadingFirstPage' ? (queryClient.getQueryData(firstLogPage(hero.id).queryKey) as { page: Entry[] } | undefined) : undefined
+  const results = preloaded ? preloaded.page : paged.results
+  const status = preloaded ? 'Preloaded' : paged.status
+  const loadMore = paged.loadMore
   const [filter, setFilter] = useState<FilterKey>('all')
   const [limit, setLimit] = useState(FIRST_VIEW)
   const t = useT(dcLogMessages)
