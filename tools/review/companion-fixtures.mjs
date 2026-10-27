@@ -402,6 +402,8 @@ const queries = {
   'heroes:mine': () => hero,
   'roster:mine': () => data.roster,
   'inventory:mine': () => inventory,
+  // The shell's tab marks: a held find or a nearly full bag counts on the Bag tab, an unclaimed reward dots Hero.
+  'inventory:badges': () => ({ used: inventory.used, capacity: inventory.capacity, held: inventory.heldItemId !== null && inventory.heldItemId !== undefined, rewardWaiting: (hero.career?.unclaimed?.length ?? 0) > 0 }),
   'heroes:returnSummary': () => data.recap,
   'achievements:mine': () => data.achievements,
   'keepsakes:mine': () => data.keepsakes,

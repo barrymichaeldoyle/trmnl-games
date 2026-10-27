@@ -23,6 +23,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Loading settings…',
     settings: 'Settings',
+    shop: 'Shop',
     playingAs: 'Playing as ',
     aliasExplainer: ', the name other players see on leaderboards and TRMNL screens. ',
     changeFromAccount: 'Change it from Account',
@@ -149,6 +150,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Chargement des réglages…',
     settings: 'Réglages',
+    shop: 'Boutique',
     playingAs: 'Vous jouez sous le nom ',
     aliasExplainer: ', celui que les autres joueurs voient dans les classements et sur les écrans TRMNL. ',
     changeFromAccount: 'Changez-le depuis Compte',
@@ -274,6 +276,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Einstellungen werden geladen …',
     settings: 'Einstellungen',
+    shop: 'Shop',
     playingAs: 'Du spielst als ',
     aliasExplainer: ', der Name, den andere Spieler in Ranglisten und auf TRMNL-Bildschirmen sehen. ',
     changeFromAccount: 'Ändere ihn unter Konto',
@@ -399,6 +402,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Cargando ajustes…',
     settings: 'Ajustes',
+    shop: 'Tienda',
     playingAs: 'Juegas como ',
     aliasExplainer: ', el nombre que ven los demás jugadores en las clasificaciones y en las pantallas TRMNL. ',
     changeFromAccount: 'Cámbialo desde Cuenta',
@@ -524,6 +528,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Caricamento delle impostazioni…',
     settings: 'Impostazioni',
+    shop: 'Negozio',
     playingAs: 'Giochi come ',
     aliasExplainer: ', il nome che gli altri giocatori vedono nelle classifiche e sugli schermi TRMNL. ',
     changeFromAccount: 'Cambialo da Account',
@@ -649,6 +654,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Carregando configurações…',
     settings: 'Configurações',
+    shop: 'Loja',
     playingAs: 'Jogando como ',
     aliasExplainer: ', o nome que os outros jogadores veem nos rankings e nas telas TRMNL. ',
     changeFromAccount: 'Mude em Conta',
@@ -774,6 +780,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Wczytywanie ustawień…',
     settings: 'Ustawienia',
+    shop: 'Sklep',
     playingAs: 'Grasz jako ',
     aliasExplainer: ', nazwa, którą inni gracze widzą w rankingach i na ekranach TRMNL. ',
     changeFromAccount: 'Zmień ją w zakładce Konto',
@@ -899,6 +906,7 @@ export const dcMoreMessages = defineMessages({
 
     loadingSettings: 'Instellingen worden geladen…',
     settings: 'Instellingen',
+    shop: 'Winkel',
     playingAs: 'Je speelt als ',
     aliasExplainer: ', de naam die andere spelers zien in de ranglijsten en op TRMNL-schermen. ',
     changeFromAccount: 'Wijzig hem via Account',

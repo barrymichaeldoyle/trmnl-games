@@ -73,6 +73,8 @@ export const mine = query({
       .order('desc')
       .take(6)).find((log) => log.kind !== 'achievement' && log.kind !== 'todo' && log.kind !== 'career' && log.kind !== 'occasion')
     const scene = sceneFor(hero.status, hero.wakeAtTick !== undefined, await sceneEvent(ctx, newest), hero.class, hero.gender)
+    // The stats before affixes and effects, for the public page and the roster; derived once for both figures.
+    const base = deriveStats(hero, items.map((item) => ({ ...item, id: item._id })), content)
     return {
       id: hero._id,
       // D139: dressed for the occasion on the owner's last TRMNL date; the companion sets the sky from the browser's clock.
@@ -93,8 +95,8 @@ export const mine = query({
       maxHp: stats.maxHp,
       attack: stats.attack,
       defense: stats.defense,
-      baseAttack: deriveStats(hero, items.map((item) => ({ ...item, id: item._id })), content).attack,
-      baseDefense: deriveStats(hero, items.map((item) => ({ ...item, id: item._id })), content).defense,
+      baseAttack: base.attack,
+      baseDefense: base.defense,
       effects: liveEffects(hero.effects, world?.currentTick ?? 0).map((active) => ({ id: active.id, name: effectById(content, active.id)?.name ?? active.id, blurb: effectById(content, active.id)?.blurb ?? '', kind: effectById(content, active.id)?.kind ?? 'boon', ticksLeft: active.untilTick - (world?.currentTick ?? 0) })),
       gold: hero.gold,
       status: hero.status,

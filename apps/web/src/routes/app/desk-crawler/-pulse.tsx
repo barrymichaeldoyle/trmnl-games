@@ -55,35 +55,48 @@ function sentence(hero: PulseHero, t: (typeof dcScreenMessages)['en']): string {
   }
 }
 
+/** Whether adventures are scheduled: the HUD reserves the next-adventure box whenever they are, so it never appears or vanishes on hydration. */
+const scheduledFor = (hero: PulseHero) => hero.simulationState !== 'quarantined' && !hero.world?.paused && hero.world !== null && hero.status !== 'paused' && hero.status !== 'sleeping'
+
+/** Whether a run is going on at `now`, and started in the last five minutes. */
+const runningAt = (world: NonNullable<PulseHero['world']>, now: number) => {
+  const slot = wallSlotFor(now)
+  return (world.lastCompletedTick !== world.currentTick || (world.lastStartedWallSlot ?? 0) < slot) && now - slot < 5 * 60_000
+}
+
 /**
  * What the hero is doing and when the next adventure lands. Calm by design: no
  * urgency, and delays are explained without blaming the player (PRODUCT.md).
+ * The status line changes by the minute at most, so its clock ticks every half minute; the countdown has its own
+ * second clock in `useCountdown`, so only its box re-renders each second, not the hearts, bars and painted scene.
  */
-export function usePulse(hero: PulseHero): { glyph: string; sentence: string; detail: string | null; countdown: string | null } {
-  const now = useNow()
+export function usePulse(hero: PulseHero): { glyph: string; sentence: string; detail: string | null } {
+  const now = useNow(30_000)
   const t = useT(dcScreenMessages)
   const locale = useLocale()
   const clock = (at: number) => formatTime(locale, at)
   const world = hero.world
   let detail: string | null = null
-  // The HUD's next-adventure box is reserved whenever adventures are scheduled, so it never
-  // appears or vanishes on hydration: the server render shows a blank clock in its place.
-  const scheduled = hero.simulationState !== 'quarantined' && !world?.paused && world !== null && hero.status !== 'paused' && hero.status !== 'sleeping'
-  let next: string | null = scheduled ? '--:--' : null
   if (hero.simulationState === 'quarantined') detail = t.serviceCheck
   else if (world?.paused) detail = t.maintenance
   else if (now !== null && world) {
-    const slot = wallSlotFor(now)
-    const running = world.lastCompletedTick !== world.currentTick || (world.lastStartedWallSlot ?? 0) < slot
     const late = world.lastCompletedAt !== null && now - world.lastCompletedAt > 2 * SLOT_MS
     const ticksTo = (tick: number | null) => (tick === null ? null : Math.max(1, tick - world.currentTick))
     if (late) detail = t.late
     else if (hero.status === 'paused') detail = t.noAdventures
     else if (hero.status === 'sleeping') detail = hero.wakeAtTick !== null ? t.resumeScheduled : hero.bagReady ? t.chooseResume : t.manageBag
-    else if (running && now - slot < 5 * 60_000) detail = t.adventuringNow
+    else if (runningAt(world, now)) detail = t.adventuringNow
     else if (hero.status === 'travelling' && ticksTo(hero.arriveAtTick)) detail = t.arrivesAbout(clock(slotEta(now, ticksTo(hero.arriveAtTick)!)))
     else if (hero.status === 'dead' && ticksTo(hero.reviveAtTick)) detail = t.backAbout(clock(slotEta(now, ticksTo(hero.reviveAtTick)!)))
-    if (scheduled) next = running && now - slot < 5 * 60_000 ? t.now : countdown(nextSlotAfter(now) - now)
   }
-  return { glyph: STATUS_GLYPH[hero.status] ?? 'system', sentence: sentence(hero, t), detail, countdown: next }
+  return { glyph: STATUS_GLYPH[hero.status] ?? 'system', sentence: sentence(hero, t), detail }
+}
+
+/** The next-adventure clock: null when none is scheduled, a blank clock until mounted, "Now" during a run. */
+export function useCountdown(hero: PulseHero): string | null {
+  const now = useNow()
+  const t = useT(dcScreenMessages)
+  if (!scheduledFor(hero)) return null
+  if (now === null || !hero.world) return '--:--'
+  return runningAt(hero.world, now) ? t.now : countdown(nextSlotAfter(now) - now)
 }

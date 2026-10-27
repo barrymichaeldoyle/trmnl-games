@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@trmnl-games/backend/api'
-import { agreesWithHero } from '@trmnl-games/desk-crawler/i18n'
+import { agreesWithHero } from '@trmnl-games/desk-crawler/i18n/lazy'
 import type { PresentationOptions } from '@trmnl-games/desk-crawler/log'
 import { useLocale } from './i18n'
 

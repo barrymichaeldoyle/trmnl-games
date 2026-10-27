@@ -6,6 +6,7 @@ import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
 import { seo } from '../../lib/seo'
 import { NameRepair } from './desk-crawler/-nameRepair'
 import { preload } from '../../lib/preload'
+import { preloadContent } from '../../lib/content'
 import { captureAnalytics } from '../../lib/analytics'
 import { useAnalyticsView } from '../../lib/analyticsProvider'
 import { SwitchAccount } from '../../lib/switchAccount'
@@ -20,8 +21,9 @@ import { dcShellMessages } from '../../i18n/dcShell'
 /** Companion shell: auth gate, setup states and mobile-first navigation (companion.md). */
 export const Route = createFileRoute('/app/desk-crawler')({
   head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcShell, index: false, locale }),
-  // The listing feeds the header's game switcher, so it is in the server render too.
-  loader: ({ context }) => preload(context, convexQuery(api.users.me, {}), gamesQuery),
+  // The listing feeds the header's game switcher, so it is in the server render too. The reader's content dictionary
+  // (lib/content) loads with it, so every page under the shell translates game names from its first render.
+  loader: ({ context }) => Promise.all([preloadContent(context.locale), preload(context, convexQuery(api.users.me, {}), gamesQuery, convexQuery(api.inventory.badges, {}))]).then(() => undefined),
   component: AppShell,
 })
 
@@ -41,20 +43,24 @@ function AppShell() {
   return <SignedInApp />
 }
 
+/** The Bag tab counts its slots from this share of the capacity: 8 of 10, 16 of 20. */
+const NEARLY_FULL = 0.8
+
 function SignedInApp() {
+  const t = useT(dcShellMessages)
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))
-  // The Bag tab shows how full the bag is, so a new find is visible from any tab.
-  const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
-  const bagUsed = (bag as { used: number } | null | undefined)?.used
+  // One small query feeds both tab marks from any tab, in place of the whole hero and bag views the shell once watched.
+  const { data: badges } = useQuery(convexQuery(api.inventory.badges, {}))
+  // The Bag tab's count is a call to act, not a running total: a find waiting for a slot, or a bag nearly full (D167).
+  // A half-empty bag shows nothing, where the slot count used to read as a notification that never cleared.
+  const bagMark = badges ? (badges.held ? { count: 1, text: t.findWaiting } : badges.used >= Math.ceil(badges.capacity * NEARLY_FULL) ? { count: badges.used, text: t.slotsUsed(badges.used) } : null) : null
   // The Hero tab shows a dot while a goal reward waits for its Claim button, so it is seen from any tab.
-  const { data: heroView } = useQuery(convexQuery(api.heroes.mine, {}))
-  const rewardWaiting = ((heroView as { career?: { unclaimed?: unknown[] } | null } | null | undefined)?.career?.unclaimed?.length ?? 0) > 0
+  const rewardWaiting = badges?.rewardWaiting === true
   const setupState = !me?.hero ? (me?.hasActiveInstallation ? 'installation_without_hero' : 'not_enrolled') : me.hero.activationState === 'pending_trmnl' ? 'waiting_for_save' : 'active'
   useAnalyticsView(setupState === 'active' ? 'companion ready' : 'setup screen shown', { setup_state: setupState, has_active_installation: me?.hasActiveInstallation ?? false }, !isPending && me?.user?.state !== 'deleting' && me?.gameState !== 'deleting')
   // P33: an alert's tap lands here with ?alert=<kind>; counted once identity is known.
   useAlertOpened(!isPending)
   const settings = useLocation({ select: (location) => location.pathname.replace(/\/$/, '').endsWith('/settings') })
-  const t = useT(dcShellMessages)
   if (isPending) return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><LoadingState label={t.loading} /></main>
   if (me?.gameState === 'deleting') return <main id="main" className="mx-auto w-full max-w-3xl px-4 py-8"><Card title={t.removingTitle}><p>{t.removingBody}</p></Card></main>
   if (!me?.hero) {
@@ -97,8 +103,8 @@ function SignedInApp() {
             <span className="ml-3 text-xs text-gold-ink">Desk Crawler</span>
           </li>
           {NAV.map((item) => {
-            // The Bag tab carries how many spares wait to be sold or salvaged, like a notification count; none, no badge.
-            const count = item.to === '/app/desk-crawler/inventory' && bagUsed !== undefined && bagUsed > 0 ? bagUsed : undefined
+            const mark = item.to === '/app/desk-crawler/inventory' ? bagMark : null
+            const count = mark?.count
             const dot = item.to === '/app/desk-crawler' && rewardWaiting
             return (
               <li key={item.to} className="flex-1">
@@ -116,7 +122,7 @@ function SignedInApp() {
                   </span>
                   <span className="flex items-center">
                     {t.nav[item.label]}
-                    {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">{t.slotsUsed(count)}</span></> : null}
+                    {mark ? <><CountBadge count={mark.count} className="ml-2 hidden sm:flex" /><span className="sr-only">{mark.text}</span></> : null}
                     {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{t.rewardReady}</span></> : null}
                   </span>
                 </Link>

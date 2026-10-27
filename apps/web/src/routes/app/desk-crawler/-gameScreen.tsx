@@ -11,7 +11,7 @@ import { changeTone } from './-logStory'
 import { BIOME_BANDS } from '../../../lib/palette'
 import { useGains } from '../../../lib/ui'
 import { PixelIcon } from './-pixelIcon'
-import { usePulse, type PulseHero } from './-pulse'
+import { useCountdown, usePulse, type PulseHero } from './-pulse'
 import { latestLogQuery } from './-queries'
 import { formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { dcScreenMessages } from '../../../i18n/dcScreen'
@@ -97,12 +97,7 @@ export function GameScreen({ hero }: { hero: ScreenHero }) {
             <svg key={coinGains} viewBox="0 0 8 8" width={16} height={16} aria-hidden="true" shapeRendering="crispEdges" className={coinGains > 0 ? 'coin-hop' : ''}><path className="fill-gold" d="M2 0h4v1H2zM1 1h6v6H1zM0 2h8v4H0zM2 7h4v1H2z" /><path className="fill-gold-lo" d="M3 2h2v4H3z" /></svg>
             {formatNumber(locale, hero.gold)}<span className="sr-only">{t.gold}</span>
           </p>
-          {pulse.countdown ? (
-            <p className="label-px sm:border-[3px] sm:border-night sm:bg-night/85 sm:px-3 sm:py-2" aria-live="off">
-              {t.nextAdventure}
-              <span className="hud block min-w-[5ch] text-sm text-xp-ink">{pulse.countdown}</span>
-            </p>
-          ) : null}
+          <NextAdventure hero={hero} />
         </div>
       </div>
 
@@ -131,6 +126,19 @@ export function GameScreen({ hero }: { hero: ScreenHero }) {
         </svg>
       </div>
     </section>
+  )
+}
+
+/** The HUD's next-adventure box, on its own second clock so the rest of the screen holds still between ticks. */
+function NextAdventure({ hero }: { hero: PulseHero }) {
+  const countdown = useCountdown(hero)
+  const t = useT(dcScreenMessages)
+  if (countdown === null) return null
+  return (
+    <p className="label-px sm:border-[3px] sm:border-night sm:bg-night/85 sm:px-3 sm:py-2" aria-live="off">
+      {t.nextAdventure}
+      <span className="hud block min-w-[5ch] text-sm text-xp-ink">{countdown}</span>
+    </p>
   )
 }
 

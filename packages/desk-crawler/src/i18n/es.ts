@@ -1,4 +1,4 @@
-import type { EsDictionary } from './index'
+import type { EsDictionary } from './core'
 
 /** D193: Desk Crawler's content in Spanish, keyed by the English text (see ./index). */
 export const es: EsDictionary = {

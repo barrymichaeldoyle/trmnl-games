@@ -36,12 +36,13 @@ export function Meetings({ enabled }: { enabled: boolean }) {
     <section aria-labelledby="meetings-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <SectionTitle id="meetings-title" glyph="meeting" tone="text-sky-ink">{t.coworkers}</SectionTitle>
       <p className="text-sm text-muted">{t.coworkersExplainer}</p>
-      <dl className="grid grid-cols-2 gap-x-4 min-[480px]:gap-x-6">
+      {/* Before the first meeting the card is its explainer and one line; a count of zero told the player nothing (D167). */}
+      {total > 0 ? <dl className="grid grid-cols-2 gap-x-4 min-[480px]:gap-x-6">
         <div className="flex min-w-0 items-baseline justify-between gap-2 border-t-2 border-dashed border-rule py-2">
           <dt className="label-px min-w-0 text-muted">{t.meetings}</dt>
           <dd className="font-bold whitespace-nowrap tabular-nums">{formatNumber(locale, total)}</dd>
         </div>
-      </dl>
+      </dl> : null}
       {meetings.length === 0 ? (
         <p className="text-sm">{t.nobodyYet}</p>
       ) : (

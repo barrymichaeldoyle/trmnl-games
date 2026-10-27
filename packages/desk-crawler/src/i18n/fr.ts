@@ -1,4 +1,4 @@
-import type { FrDictionary } from './index'
+import type { FrDictionary } from './core'
 
 /** D169: Desk Crawler's content in French, keyed by the English text (see ./index). */
 export const fr: FrDictionary = {

@@ -1,4 +1,4 @@
-import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
+import { contentTranslator } from '@trmnl-games/desk-crawler/i18n/lazy'
 import { defineMessages } from '../lib/i18n'
 
 const fr = contentTranslator('fr')

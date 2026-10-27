@@ -63,6 +63,8 @@ type PotionRow = { templateId: string; name: string; healPct: number; heals: num
 type Combine = { from: { templateId: string; name: string; count: number; have: number }; materials: MaterialCount; to: { templateId: string; name: string }; shortfall: { potions: number; materials: MaterialCount }; batches: number }
 
 const SALE_LIMIT = BATCH_ITEMS
+/** Empty slots drawn after the gear: one phone row, as a hint of room rather than a page of it. */
+const EMPTY_SLOTS_SHOWN = 4
 const statOf = (item: Gear) => item.kind === 'weapon' ? item.attack : item.defense
 /** The materials several pieces yield together. */
 const yieldOf = (items: readonly Gear[]): MaterialCount => items.reduce<Record<string, number>>((total, item) => { for (const [id, n] of Object.entries(item.salvage)) total[id] = (total[id] ?? 0) + n; return total }, {})
@@ -187,7 +189,8 @@ function Inventory() {
     }
   }
 
-  const slots = Math.max(bag.capacity, inBag.length)
+  // One row of empty slots at most: the header counts the capacity, and ten dashed squares were a screen of nothing.
+  const emptyShown = Math.min(EMPTY_SLOTS_SHOWN, Math.max(0, bag.capacity - inBag.length))
   const claimMessage = (item: Gear) => t.claimMessage(item.label)
   return (
     <div className="flex min-w-0 flex-col gap-8">
@@ -282,10 +285,11 @@ function Inventory() {
           <h2 id="bag-gear-title" className="flex min-w-0 items-center gap-3 font-display text-xl font-bold sm:text-2xl"><Glyph name="bag" size={24} className="text-gold-ink" /><span className="truncate">{t.gear}</span></h2>
           {mode !== 'browse'
             ? <Button allowOffline variant="secondary" className="w-28 shrink-0 whitespace-nowrap" disabled={busy} onClick={leaveSale}>{t.done}</Button>
-            : <div className="flex shrink-0 gap-2">
-              <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="tag" disabled={sellable.length === 0} onClick={() => setMode('sell')}>{t.sell}</Button>
+            // D167: nothing to sell, no keys; the line under the title says finds land here.
+            : sellable.length === 0 ? null : <div className="flex shrink-0 gap-2">
+              <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="tag" onClick={() => setMode('sell')}>{t.sell}</Button>
               {/* D129: the second way out of the bag, beside Sell. */}
-              {workbench ? <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="scrap" disabled={sellable.length === 0} onClick={() => setMode('salvage')}>{t.salvage}</Button> : null}
+              {workbench ? <Button allowOffline variant="secondary" className="whitespace-nowrap" icon="scrap" onClick={() => setMode('salvage')}>{t.salvage}</Button> : null}
             </div>}
         </div>
         <p className="mt-1 min-h-5 text-sm text-muted">
@@ -296,7 +300,7 @@ function Inventory() {
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
           {held ? <li><Slot item={held} held label={slotLabel(held)} busy={busyId === held.id} onClick={() => setOpenId(held.id)} /></li> : null}
           {inBag.map((item) => <li key={item.id}><Slot item={item} label={slotLabel(item)} selectable={mode !== 'browse'} selected={selected.has(item.id)} upgrade={deltaOf(item) > 0 && item.requiredLevel <= hero.level} downgrade={deltaOf(item) < 0 && item.requiredLevel <= hero.level} lockedLevel={item.requiredLevel > hero.level ? item.requiredLevel : null} busy={busyId === item.id} onClick={() => tap(item)} /></li>)}
-          {Array.from({ length: Math.max(0, slots - inBag.length) }, (_, index) => <li key={`empty-${index}`}><EmptySlot /></li>)}
+          {Array.from({ length: emptyShown }, (_, index) => <li key={`empty-${index}`}><EmptySlot /></li>)}
         </ul>
       </section>
 
@@ -574,7 +578,11 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
           <h3 className="caps text-sm text-muted">{t.kindTitle[kind]}</h3>
           {item === null ? <p className="mt-1 text-sm text-muted">{t.equipToWork(t.kind[kind])}</p> : <>
             <p className={`mt-1 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}>{c.name(item.label)}</p>
-            {next ? <>
+            {next && next.requiredLevel > hero.level ? <>
+              {/* D167: a step the level has not reached is one line, not a price list for a job that cannot be done yet. */}
+              <p className="mt-1 text-sm text-muted">{t.stepNeedsLevel(next.label, next.requiredLevel)}</p>
+              {item.affixable ? <Button className="mt-2" variant="secondary" disabled={disabled} onClick={() => { setAffixId(null); setFitting(item) }}>{t.chooseAffix}</Button> : null}
+            </> : next ? <>
               <p className="mt-1 text-sm tabular-nums">{t.stepLine(t.stepLabel(next.label), t.priceText(mats(next.materials), next.gold), statTitle(item), next.stat.from)}<strong>{next.stat.to}</strong>.</p>
               {next.affordable || item.affixable ? <div className="mt-2 flex flex-wrap items-center gap-2">
                 {next.affordable ? <Button disabled={disabled} pending={intents.upgrade.pending && asking?.id === item.id} busyLabel={t.working} onClick={() => setAsking(item)}>{next.kind === 'tier' ? t.upgrade : t.reinforce}</Button> : null}
@@ -625,9 +633,8 @@ function Workbench({ rules, materials, equipped, hero, disabled, intents }: { ru
 }
 
 
-/** Why the step is out of reach, one reason at a time: the level, then the materials, then the gold. */
+/** Why a step within the hero's level is out of reach: the materials, then the gold. */
 function shortText(step: Step, hero: { level: number; gold: number }, materials: readonly Material[], t: T): string {
-  if (step.requiredLevel > hero.level) return t.stepNeedsLevel(step.label, step.requiredLevel)
   if (Object.keys(step.shortfall).length > 0) return t.needsMore(materialsText(step.shortfall, materials, t))
   return t.goldToGo(step.gold - hero.gold)
 }

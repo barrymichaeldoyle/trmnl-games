@@ -2,13 +2,14 @@ import { ConvexError } from 'convex/values'
 import { useMutation } from 'convex/react'
 import type { OptimisticUpdate } from 'convex/browser'
 import type { FunctionReference } from 'convex/server'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ExpiredSubmission, Submission } from './submission'
 import { getFunctionName } from 'convex/server'
 import { captureAnalytics, intentAnalytics } from './analytics'
 import { reportError } from './errorReporting'
 import { documentLocale } from './i18n'
 import { serverMessage } from '../i18n/serverMessages'
+import { loadContent } from './content'
 
 /** User-safe message from a structured Convex error (api.md error contract). */
 export function errorMessage(error: unknown): string {
@@ -38,6 +39,8 @@ export function useIntent<Args extends { operationId: string }>(fn: FunctionRefe
   const base = useMutation(fn)
   const mutate = options.optimisticUpdate ? base.withOptimisticUpdate(options.optimisticUpdate) : base
   const [pending, setPending] = useState(false)
+  // A server message can name game things ("3 Scrap"); the reader's dictionary loads in the background so they translate.
+  useEffect(() => { void loadContent(documentLocale()).catch(() => {}) }, [])
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [submission] = useState(() => new Submission())

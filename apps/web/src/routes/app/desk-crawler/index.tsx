@@ -163,7 +163,8 @@ function HeroSheet({ hero }: { hero: HeroView }) {
   const canAct = healthy && (hero.status === 'exploring' || hero.status === 'resting')
   // D118: a travelling hero can drink too, so it arrives ready.
   const canDrink = canAct || (healthy && hero.status === 'travelling')
-  // Anything that could set the hero back or slow it down asks first (the to-do swap, travel, stance, a costly decision). Pause lives on the More tab (D191).
+  // Anything that could set the hero back or slow it down asks first (the to-do swap, travel, a costly decision). Pause lives on the More tab (D191).
+  // The stance does not: it applies from the next adventure and switches back any time, and its rule reads under the picker.
   const [ask, setAsk] = useState<Ask | null>(null)
   const close = () => setAsk(null)
   // D131: the strengths in the pouch. One strength drinks at once; more than one opens a picker. The button's figure
@@ -194,7 +195,9 @@ function HeroSheet({ hero }: { hero: HeroView }) {
     <div className="flex min-w-0 flex-col gap-8">
       {hero.career ? <GoalCard career={hero.career} level={hero.level} gold={hero.gold} holding={holding} notify={notify} /> : null}
       {hero.roster ? <RosterCard roster={hero.roster} name={hero.name} className={hero.className ?? 'Warrior'} /> : null}
-      <section ref={commands} aria-label={t.commands} className="flex flex-col gap-2">
+      <section ref={commands} aria-labelledby="commands-title" className="flex flex-col gap-2">
+        {/* The keys sit under their own small heading, so one lone key never floats between the goal and the effects. */}
+        <h2 id="commands-title" className="caps text-sm text-muted">{t.commands}</h2>
         {canDrink || hero.status === 'paused' || (hero.status === 'sleeping' && !waking && !bagReady) ? (
           // Full-width keys stacked on phones so their edges line up; a row from 640px.
           <div className="grid gap-2 sm:flex sm:flex-wrap">
@@ -216,14 +219,15 @@ function HeroSheet({ hero }: { hero: HeroView }) {
             ) : null}
           </div>
         ) : null}
-        {hero.effects.length > 0 || hero.calendar?.today ? (
+        {hero.effects.length > 0 || hero.calendar?.today || hero.calendar?.next ? (
           <ul aria-label={t.effects} className="flex flex-wrap gap-2 text-sm">
             {/* D139: today's occasion leads the effects, with its one plain bonus. */}
             {hero.calendar?.today ? <li className="border-[3px] border-gold px-2 py-1"><strong>{c.text(hero.calendar.today.name)}</strong>{hero.calendar.today.effect ? ` · ${c.text(hero.calendar.today.effect)}` : ''} · <span className="whitespace-nowrap">{hero.calendar.today.daysLeft === 1 ? t.today : t.daysLeft(hero.calendar.today.daysLeft)}</span></li> : null}
             {hero.effects.map((effect) => <li key={effect.id} className={`border-[3px] px-2 py-1 ${effect.kind === 'bane' ? 'border-hp-ink' : 'border-night'}`}><strong>{c.text(effect.name)}</strong> · {c.text(effect.blurb)} · <span className="whitespace-nowrap">{t.adventuresLeft(effect.ticksLeft)}</span></li>)}
+            {/* The next occasion closes the row as a dashed chip, where a sentence of its own read as a stray line; it opens the calendar. */}
+            {hero.calendar?.next ? <li><Link to="/help/desk-crawler" hash="office-calendar" className="block border-[3px] border-dashed border-rule px-2 py-1 text-muted"><strong>{c.text(hero.calendar.next.name)}</strong>{hero.calendar.next.effect ? ` · ${c.text(hero.calendar.next.effect)}` : ''} · <span className="whitespace-nowrap">{t.inDays(hero.calendar.next.inDays)}</span></Link></li> : null}
           </ul>
         ) : null}
-        {hero.calendar?.next ? <p className="text-sm text-muted">{t.nextOnCalendarBefore}<strong>{c.text(hero.calendar.next.name)}</strong> {t.inDays(hero.calendar.next.inDays)}{hero.calendar.next.effect ? ` (${c.text(hero.calendar.next.effect)})` : ''}. <Link to="/help/desk-crawler" hash="office-calendar" className="underline underline-offset-4">{t.seeCalendar}</Link></p> : null}
         {hero.status === 'sleeping' && hero.wakeAtTick === null && !bagReady ? <AlertNudge /> : null}
         {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>{t.merchantVisiting}</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.seeOffers}</Link>{t.withinAdventures(hero.merchantTicksLeft)}</p> : null}
         {!healthy ? <p className="text-sm">{t.serviceCheck}<Link to="/support" className="underline underline-offset-4">{t.contactSupport}</Link>{t.ifItLasts}</p> : null}
@@ -265,8 +269,8 @@ function HeroSheet({ hero }: { hero: HeroView }) {
           <div role="group" aria-label={t.stance} className="flex border-2 border-edge">
             {hero.stances.map((option) => {
               const chosen = stanceChosen && option.id === hero.stance
-              // Picking the stance the hero already plays by changes nothing in play, so it needs no confirming.
-              const pick = () => (!stanceChosen && option.id === hero.stance ? void stance.run({ stance: option.id }, t.stanceFromNext(option.name)) : setAsk({ kind: 'stance', id: option.id }))
+              // No sheet: the switch costs nothing and reverses any time, and the rule for the chosen stance reads below.
+              const pick = () => void stance.run({ stance: option.id }, t.stanceFromNext(option.name))
               return (
                 <button key={option.id} type="button" aria-pressed={chosen} aria-disabled={stance.pending || undefined} disabled={!healthy} onClick={() => { if (chosen || stance.pending) return; pick() }} className={`menu-cursor flex min-h-11 flex-1 items-center justify-center px-2 py-2 label-px uppercase tracking-wide not-last:border-r-2 not-last:border-edge not-aria-pressed:before:hidden ${chosen ? 'bg-navy text-gold' : 'text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink disabled:text-muted'}`}>
                   {c.text(option.name)}
@@ -319,14 +323,14 @@ function HeroSheet({ hero }: { hero: HeroView }) {
         {!canAct && hero.status !== 'travelling' && stopNote ? <p className="mt-3 text-sm text-muted">{stopNote}</p> : null}
       </section>
 
-      <AskSheets ask={ask} hero={hero} close={close} intents={{ travel, stance, choose, potion, walkAway }} strengths={strengths} />
+      <AskSheets ask={ask} hero={hero} close={close} intents={{ travel, choose, potion, walkAway }} strengths={strengths} />
 
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </div>
   )
 }
 
-type Ask = { kind: 'travel'; biomeId: string } | { kind: 'stance'; id: StanceId } | { kind: 'choice'; optionId: string } | { kind: 'potion' } | { kind: 'walkAway' }
+type Ask = { kind: 'travel'; biomeId: string } | { kind: 'choice'; optionId: string } | { kind: 'potion' } | { kind: 'walkAway' }
 type Run<A> = { pending: boolean; run: (args: A, message?: string) => Promise<boolean> }
 /** D131: one potion strength in the pouch, with the HP one drink restores for this hero. */
 type PotionRow = { templateId: string; name: string; healPct: number; heals: number; count: number }
@@ -336,7 +340,7 @@ type PotionRow = { templateId: string; name: string; healPct: number; heals: num
  * The confirmations for the Hero page's commands that could cost progress or pace. Each says what the action costs and
  * whether it can be undone; only its confirm button commits.
  */
-function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { travel: Run<{ biomeId: string; leaveStandoff?: boolean }>; stance: Run<{ stance: StanceId }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }>; walkAway: Run<Record<string, never>> }; strengths: readonly PotionRow[] }) {
+function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; hero: HeroView; close: () => void; intents: { travel: Run<{ biomeId: string; leaveStandoff?: boolean }>; choose: Run<{ optionId: string }>; potion: Run<{ templateId?: string }>; walkAway: Run<Record<string, never>> }; strengths: readonly PotionRow[] }) {
   const healthy = hero.simulationState !== 'quarantined'
   const t = useT(dcHeroMessages)
   const c = useContent()
@@ -358,22 +362,6 @@ function AskSheets({ ask, hero, close, intents, strengths }: { ask: Ask | null; 
           {/* Office Cubicles (the first floor) is safe; anywhere else a knockout can happen. */}
           {index > here ? <li>{t.tougherThere}</li> : index > 0 ? <li>{t.outsideOffice}</li> : null}
           {waiting.length > 0 ? <li>{t.tasksWait(waiting.length, current?.name ?? '')}</li> : null}
-        </Consequences>
-      </ConfirmSheet>
-    )
-  }
-  if (ask?.kind === 'stance') {
-    const next = hero.stances.find((s) => s.id === ask.id)
-    const now = hero.stances.find((s) => s.id === hero.stance)
-    if (!next || !now) return null
-    return (
-      <ConfirmSheet open title={t.switchTo(next.name)} confirmLabel={t.goStance(next.name)} busyLabel={t.switching} cancelLabel={t.stayStance(now.name)} pending={intents.stance.pending} {...common} onConfirm={() => { close(); void intents.stance.run({ stance: next.id }, t.stanceFromNext(next.name)) }}>
-        <p>{c.text(next.blurb)}</p>
-        <Consequences>
-          {next.victoryXpPct < now.victoryXpPct ? <li>{t.lessXpBefore}<strong>{t.lessXpMiddle(next.victoryXpPct)}</strong>{t.lessXpAfter(now.victoryXpPct)}</li> : next.victoryXpPct > now.victoryXpPct ? <li>{t.moreXp(next.victoryXpPct, now.victoryXpPct)}</li> : null}
-          {next.restBelowPct < now.restBelowPct ? <li>{t.fightsDownBefore}<strong>{t.fightsDownMiddle(next.restBelowPct)}</strong>{t.fightsDownAfter(now.restBelowPct)}</li> : null}
-          {next.potionBelowPct > now.potionBelowPct ? <li>{t.drinksSooner(next.potionBelowPct, now.potionBelowPct)}</li> : null}
-          <li>{t.switchBack}</li>
         </Consequences>
       </ConfirmSheet>
     )

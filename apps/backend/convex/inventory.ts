@@ -219,6 +219,23 @@ function stepView(content: ContentCatalog, hero: Doc<'heroes'>, item: Doc<'items
   }
 }
 
+/**
+ * The companion shell's tab marks, from any tab: how full the bag is and whether a find waits for a slot (the Bag
+ * tab), and whether a goal reward waits for its Claim button (the Hero tab). The shell used to subscribe to the whole
+ * hero and bag views for these, on every tab.
+ */
+export const badges = query({
+  args: {},
+  returns: v.union(v.null(), v.object({ used: v.number(), capacity: v.number(), held: v.boolean(), rewardWaiting: v.boolean() })),
+  handler: async (ctx) => {
+    const user = await currentUser(ctx)
+    const hero = await currentHero(ctx, user)
+    if (hero === null || user === null) return null
+    const items = await heroItems(ctx, hero._id)
+    return { used: bagUsed(asBagHero(hero), asSnapshots(items)), capacity: hero.bagCapacity, held: hero.heldItemId !== undefined, rewardWaiting: (hero.career?.unclaimed?.length ?? 0) > 0 }
+  },
+})
+
 /** Bag, held find, potions and capacity for the owner's hero. */
 export const mine = query({
   args: {},

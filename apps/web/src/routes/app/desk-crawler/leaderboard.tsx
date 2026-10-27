@@ -74,6 +74,11 @@ function Leaderboard() {
   const ownIndex = data?.published && data.own ? entries.findIndex((row) => row.rank === data.own!.rank) : -1
   const aroundStart = Math.max(0, Math.min(ownIndex - 2, entries.length - 5))
   const around = ownIndex >= AROUND_FROM ? entries.slice(aroundStart, aroundStart + 5) : []
+  // With the neighbours shown, the list below is the top five until asked for the rest: the whole list repeated the
+  // neighbours' rows (and the hero's own, highlighted twice) a few lines further down.
+  const [showAll, setShowAll] = useState(false)
+  const trimmed = around.length > 0 && !showAll && entries.length > AROUND_FROM
+  const listed = trimmed ? entries.slice(0, AROUND_FROM) : entries
   return (
     <>
       <h1 className="font-display text-3xl font-bold">{t.rankingsTitle}</h1>
@@ -132,14 +137,15 @@ function Leaderboard() {
               </ol>
             </section>
           ) : null}
-          {around.length > 0 ? <h3 className="mb-1 text-sm font-semibold text-muted">{t.top(data.entries.length)}</h3> : null}
+          {around.length > 0 ? <h3 className="mb-1 text-sm font-semibold text-muted">{t.top(listed.length)}</h3> : null}
           {data.entries.length === 0 ? (
             <p>{t.noRanked}</p>
           ) : (
             <ol className="flex flex-col divide-y divide-rule">
-              {data.entries.map((row: Row) => <RankRow key={row.rank} row={row} own={data.own?.rank === row.rank} board={board} />)}
+              {listed.map((row: Row) => <RankRow key={row.rank} row={row} own={data.own?.rank === row.rank} board={board} />)}
             </ol>
           )}
+          {trimmed ? <Button variant="quiet" className="mt-2 -ml-3 min-[375px]:-ml-4" onClick={() => setShowAll(true)}>{t.showAll(data.entries.length)}</Button> : null}
           {data.totalPlayers > data.entries.length ? <p className="mt-3 text-sm text-muted">{t.topOf(data.entries.length, n(data.totalPlayers))}</p> : null}
         </Card>
       )}

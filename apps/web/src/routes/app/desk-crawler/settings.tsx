@@ -55,14 +55,18 @@ function Settings() {
     <>
       <h1 className="font-display text-3xl font-bold">{t.title}</h1>
       <MoreLinks />
+      {/* The two purchases under their own heading: among the settings they read as settings. */}
+      {bag?.nameTag || bag?.makeover ? <section aria-labelledby="shop-title" className="flex flex-col gap-4">
+        <h2 id="shop-title" className="font-display text-2xl font-bold">{t.shop}</h2>
+        <div className="grid gap-8 sm:grid-cols-2">
+          {bag.nameTag ? <NameTag tag={bag.nameTag} heroName={hero.name} gold={hero.gold} disabled={buyNameTag.pending || buyMakeover.pending} intent={buyNameTag} /> : null}
+          {bag.makeover ? <Makeover makeover={bag.makeover} heroName={hero.name} gold={hero.gold} disabled={buyNameTag.pending || buyMakeover.pending} intent={buyMakeover} /> : null}
+        </div>
+      </section> : null}
       <header>
         <h2 className="font-display text-2xl font-bold">{t.settings}</h2>
         <p className="mt-2">{t.playingAs}<strong>{me.user.publicAlias}</strong>{t.aliasExplainer}<Link to="/account" className="underline underline-offset-4">{t.changeFromAccount}</Link>{t.renameWithTag}</p>
       </header>
-      {bag?.nameTag || bag?.makeover ? <div className="grid gap-8 sm:grid-cols-2">
-        {bag.nameTag ? <NameTag tag={bag.nameTag} heroName={hero.name} gold={hero.gold} disabled={buyNameTag.pending || buyMakeover.pending} intent={buyNameTag} /> : null}
-        {bag.makeover ? <Makeover makeover={bag.makeover} heroName={hero.name} gold={hero.gold} disabled={buyNameTag.pending || buyMakeover.pending} intent={buyMakeover} /> : null}
-      </div> : null}
       <Card title={t.adventures} icon="travel"><div ref={adventures}>
         {hero.activationState !== 'active' ? (
           <p>{t.heroReady}</p>
@@ -91,6 +95,8 @@ function Settings() {
         {hero.status === 'dead' || hero.status === 'travelling' ? <p className="mt-2 text-sm text-muted">{t.pauseAfter(hero.status === 'dead')}</p> : null}
         {!healthy ? <p className="mt-2 text-sm">{t.serviceCheck}</p> : null}
       </div></Card>
+      {/* Alerts next: they bring a player back, so they sit ahead of sharing. */}
+      {hero.activationState === 'active' ? <AlertsCard notify={notify} /> : null}
       <Card title={t.publicProfile} icon="eye"><div ref={sharing}>
         {hero.activationState !== 'active' ? (
           <p>{t.pageOnceStarted}</p>
@@ -111,9 +117,10 @@ function Settings() {
           </>
         )}
       </div></Card>
-      {hero.activationState === 'active' ? <AlertsCard notify={notify} /> : null}
-      <Card title={t.installations} icon="plug">
-        <p className="mb-3 text-sm text-muted">{t.installationsBlurb}</p>
+      {/* Installations fold away: they matter once in a while, and the page was nearly four screens tall with them open. */}
+      <details className="border-t-2 border-rule pt-4">
+        <summary className="min-h-11 cursor-pointer font-semibold">{t.installations}{connections ? ` (${connections.length})` : ''}</summary>
+        <p className="mt-2 mb-3 text-sm text-muted">{t.installationsBlurb}</p>
         {connections === undefined ? <LoadingState label={t.loadingInstallations} /> : connections.length > 0 ? (
           <ul className="flex flex-col divide-y divide-rule">
             {connections.map((c) => (
@@ -142,7 +149,7 @@ function Settings() {
             <Button allowOffline variant="quiet" disabled={disconnect.pending} onClick={() => setDisconnectId(null)}>{t.cancel}</Button>
           </div>
         </div> : null}
-      </Card>
+      </details>
       <details className="border-t-2 border-hp pt-4">
         <summary className="min-h-11 cursor-pointer font-semibold text-hp-ink">{t.deleteSummary}</summary>
         <p>{t.deleteBody}</p>

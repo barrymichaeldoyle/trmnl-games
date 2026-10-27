@@ -46,14 +46,15 @@ export function Raids({ enabled }: { enabled: boolean }) {
     <section aria-labelledby="raids-title" className="window flex min-w-0 flex-col gap-3 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
       <SectionTitle id="raids-title" glyph="raid" tone="text-rare-ink">{t.raids}</SectionTitle>
       <p className="text-sm text-muted">{t.raidsExplainer}</p>
-      <dl className="grid grid-cols-2 gap-x-4 min-[480px]:gap-x-6">
+      {/* Before the first raid the card is its explainer and one line: four zeros told the player nothing (D167). */}
+      {record.launched + record.repelled + record.lost + record.mishaps > 0 ? <dl className="grid grid-cols-2 gap-x-4 min-[480px]:gap-x-6">
         {tally.map(([label, value]) => (
           <div key={label} className="flex min-w-0 items-baseline justify-between gap-2 border-t-2 border-dashed border-rule py-2">
             <dt className="label-px min-w-0 text-muted">{label}</dt>
             <dd className="font-bold whitespace-nowrap tabular-nums">{formatNumber(locale, value)}</dd>
           </div>
         ))}
-      </dl>
+      </dl> : null}
       {raids.length === 0 ? (
         <p className="text-sm">{t.noRaids}</p>
       ) : (

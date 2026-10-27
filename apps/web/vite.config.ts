@@ -25,8 +25,24 @@ const sentrySourceMaps = (): Plugin[] => process.env.SENTRY_AUTH_TOKEN
   ? sentryTanstackStart({ org: 'barry-michael-doyle', project: 'trmnl-games', release: { name: BUILD_ID }, autoInstrumentMiddleware: false, telemetry: false })
   : []
 
+/**
+ * D169: Desk Crawler's content dictionaries load one locale at a time in the browser (lib/content, i18n/lazy), where
+ * the package's own modules (the log presenter, the device payload) import the static index that holds all seven.
+ * This swaps that index for the lazy registry wherever the web build resolves it, so no page carries the other six
+ * languages. The help pages keep the static index: they write their guide out at module scope, before any loader runs.
+ */
+const lazyContentDictionaries = (): Plugin => ({
+  name: 'lazy-content-dictionaries',
+  enforce: 'pre',
+  async resolveId(source, importer, options) {
+    if (importer === undefined || /[\\/]routes[\\/]help[\\/]/.test(importer)) return null
+    const resolved = await this.resolve(source, importer, { ...options, skipSelf: true })
+    return resolved && /[\\/]packages[\\/]desk-crawler[\\/]src[\\/]i18n[\\/]index\.ts$/.test(resolved.id) ? resolved.id.replace(/index\.ts$/, 'lazy.ts') : null
+  },
+})
+
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   define: { 'import.meta.env.VITE_BUILD_ID': JSON.stringify(BUILD_ID) },
-  plugins: [cloudflare({ viteEnvironment: { name: 'ssr' } }), tailwindcss(), tanstackStart(), viteReact(), buildManifest(), ...sentrySourceMaps()],
+  plugins: [lazyContentDictionaries(), cloudflare({ viteEnvironment: { name: 'ssr' } }), tailwindcss(), tanstackStart(), viteReact(), buildManifest(), ...sentrySourceMaps()],
 })

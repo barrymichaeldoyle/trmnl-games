@@ -1,4 +1,4 @@
-import { contentTranslator } from '@trmnl-games/desk-crawler/i18n'
+import { contentTranslator } from '@trmnl-games/desk-crawler/i18n/lazy'
 import { defineMessages, plForm } from '../lib/i18n'
 import { headMessages } from './heads'
 
@@ -64,6 +64,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'Your hero’s rank appears at the next hourly update.',
     aroundYou: 'Around you',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Show all ${n}`,
     noRanked: 'No ranked heroes in this group for this period.',
     topOf: (n: number, total: string) => `Top ${n} of ${total} heroes.`,
     level: (n: number) => `Level ${n}`,
@@ -162,6 +163,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'Le rang de votre héros apparaîtra à la prochaine mise à jour horaire.',
     aroundYou: 'Autour de vous',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Afficher les ${n}`,
     noRanked: 'Aucun héros classé dans ce groupe sur cette période.',
     topOf: (n: number, total: string) => `Top ${n} sur ${total} héros.`,
     level: (n: number) => `Niveau ${n}`,
@@ -260,6 +262,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'Der Rang deines Helden erscheint beim nächsten stündlichen Update.',
     aroundYou: 'Um dich herum',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Alle ${n} anzeigen`,
     noRanked: 'In dieser Gruppe hat in diesem Zeitraum kein Held einen Rang.',
     topOf: (n: number, total: string) => `Top ${n} von ${total} Helden.`,
     level: (n: number) => `Stufe ${n}`,
@@ -358,6 +361,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'El puesto de tu héroe aparece en la próxima actualización horaria.',
     aroundYou: 'A tu alrededor',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Mostrar los ${n}`,
     noRanked: 'No hay héroes clasificados en este grupo para este periodo.',
     topOf: (n: number, total: string) => `Top ${n} de ${total} héroes.`,
     level: (n: number) => `Nivel ${n}`,
@@ -456,6 +460,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'La posizione del tuo eroe compare al prossimo aggiornamento orario.',
     aroundYou: 'Intorno a te',
     top: (n: number) => `Primi ${n}`,
+    showAll: (n: number) => `Mostra tutti i ${n}`,
     noRanked: 'Nessun eroe in classifica in questa fascia per questo periodo.',
     topOf: (n: number, total: string) => `Primi ${n} su ${total} eroi.`,
     level: (n: number) => `Livello ${n}`,
@@ -554,6 +559,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'A posição do seu herói aparece na próxima atualização de hora em hora.',
     aroundYou: 'Perto de você',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Mostrar todos os ${n}`,
     noRanked: 'Nenhum herói no ranking deste grupo neste período.',
     topOf: (n: number, total: string) => `Top ${n} de ${total} heróis.`,
     level: (n: number) => `Nível ${n}`,
@@ -652,6 +658,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'Miejsce bohatera pojawi się przy następnej cogodzinnej aktualizacji.',
     aroundYou: 'Wokół ciebie',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Pokaż wszystkich (${n})`,
     noRanked: 'W tej grupie nie ma bohaterów w rankingu za ten okres.',
     topOf: (n: number, total: string) => `Top ${n} z ${total} bohaterów.`,
     level: (n: number) => `Poziom ${n}`,
@@ -750,6 +757,7 @@ export const dcLogMessages = defineMessages({
     rankAppears: 'De plek van je held verschijnt bij de volgende update van het hele uur.',
     aroundYou: 'Om je heen',
     top: (n: number) => `Top ${n}`,
+    showAll: (n: number) => `Alle ${n} tonen`,
     noRanked: 'Geen gerangschikte helden in deze groep voor deze periode.',
     topOf: (n: number, total: string) => `Top ${n} van ${total} helden.`,
     level: (n: number) => `Niveau ${n}`,

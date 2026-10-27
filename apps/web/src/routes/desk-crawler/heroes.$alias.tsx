@@ -15,6 +15,7 @@ import { formatDate, formatNumber, messagesFor, useLocale, useT } from '../../li
 import { headMessages } from '../../i18n/heads'
 import { useContent } from '../../lib/useContent'
 import { publicPagesMessages } from '../../i18n/publicPages'
+import { preloadContent } from '../../lib/content'
 import type { Locale } from '@trmnl-games/platform'
 
 type Profile = {
@@ -48,7 +49,7 @@ const heroCard = (profile: Pick<Profile, 'alias' | 'heroName' | 'level' | 'rank'
     : DESK_CRAWLER_OG
 
 export const Route = createFileRoute('/desk-crawler/heroes/$alias')({
-  loader: async ({ context, params }) => (await context.queryClient.ensureQueryData(profileQuery(params.alias))) as Profile | null,
+  loader: async ({ context, params }) => (await Promise.all([context.queryClient.ensureQueryData(profileQuery(params.alias)), preloadContent(context.locale)]))[0] as Profile | null,
   head: ({ loaderData, params, match: { context: { locale } } }) => {
     const t = messagesFor(headMessages, locale)
     return loaderData

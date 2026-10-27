@@ -1,4 +1,4 @@
-import type { NlDictionary } from './index'
+import type { NlDictionary } from './core'
 
 /** D193: Desk Crawler's content in Dutch, keyed by the English text (see ./index). */
 export const nl: NlDictionary = {

@@ -1,4 +1,4 @@
-import type { DeDictionary } from './index'
+import type { DeDictionary } from './core'
 
 /** D169: Desk Crawler's content in German, keyed by the English text (see ./index). */
 export const de: DeDictionary = {
