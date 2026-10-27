@@ -1,14 +1,15 @@
 import { currentHero, gameProfile } from './lib/gameProfile'
 import { v } from 'convex/values'
 import { internal } from './_generated/api'
-import type { Doc } from './_generated/dataModel'
+import type { Doc, Id } from './_generated/dataModel'
 import { internalMutation, internalQuery, mutation, query, type MutationCtx, type QueryCtx } from './_generated/server'
 import { appError } from './lib/errors'
 import { isAdminReader, requireAdmin } from './lib/adminAccess'
 import { sha256Hex } from './lib/hash'
 import { normalizeAlias } from './lib/names'
 import { openedCompanion } from './heroReminder'
-import { getOrCreateWorld, readWorld } from './world'
+import { getOrCreateWorld, readWorld, worldContent } from './world'
+import { heroMaxHp } from '@trmnl-games/desk-crawler/sim/core/stats'
 
 /**
  * Owner-run support and moderation (D23). Admin authority comes only from the
@@ -219,18 +220,39 @@ export const setSuspended = mutation({
   },
 })
 
-/** Release a quarantined hero after diagnosis; no retroactive catch-up (simulation.md). */
+/**
+ * Release a quarantined hero after diagnosis; no retroactive catch-up (simulation.md). The one repair it makes is to
+ * bring HP back under the hero's maximum for its level and class, the state behind the only quarantine so far
+ * (2026-10-26, a Rogue healed to the Warrior ceiling by a decision); a hero released above its ceiling would be
+ * quarantined again on the next tick. The audit outcome names the repair.
+ */
+async function releaseQuarantinedHero(ctx: MutationCtx, actor: string, heroId: Id<'heroes'>, reasonCode: string): Promise<string> {
+  const hero = await ctx.db.get(heroId)
+  if (hero === null || hero.simulationState !== 'quarantined') throw appError('INVALID_STATE', 'Hero is not quarantined.')
+  const world = await getOrCreateWorld(ctx)
+  const max = heroMaxHp(worldContent(world), hero)
+  const repaired = hero.hp > max
+  await ctx.db.patch(heroId, { simulationState: 'healthy', quarantineReasonCode: undefined, ...(repaired ? { hp: max } : {}) })
+  const outcome = repaired ? `healthy, hp ${hero.hp} to ${max}` : 'healthy'
+  await audit(ctx, actor, 'release_hero', heroId, reasonCode, outcome)
+  return outcome
+}
+
 export const releaseHero = mutation({
   args: { heroId: v.id('heroes'), reasonCode: reason },
   returns: v.null(),
   handler: async (ctx, { heroId, reasonCode }) => {
     const actor = await requireAdmin(ctx)
-    const hero = await ctx.db.get(heroId)
-    if (hero === null || hero.simulationState !== 'quarantined') throw appError('INVALID_STATE', 'Hero is not quarantined.')
-    await ctx.db.patch(heroId, { simulationState: 'healthy', quarantineReasonCode: undefined })
-    await audit(ctx, actor, 'release_hero', heroId, reasonCode, 'healthy')
+    await releaseQuarantinedHero(ctx, actor, heroId, reasonCode)
     return null
   },
+})
+
+/** The same release from the terminal: `npx convex run --prod admin:releaseHeroFromCli '{"heroId":"...","reasonCode":"..."}'`. */
+export const releaseHeroFromCli = internalMutation({
+  args: { heroId: v.id('heroes'), reasonCode: reason },
+  returns: v.object({ outcome: v.string() }),
+  handler: async (ctx, { heroId, reasonCode }) => ({ outcome: await releaseQuarantinedHero(ctx, 'cli', heroId, reasonCode) }),
 })
 
 /**

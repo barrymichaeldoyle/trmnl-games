@@ -6,6 +6,7 @@ import { forecastFor } from '@trmnl-games/idle-angler/sim/seed'
 import type { Doc, Id } from '../_generated/dataModel'
 import { internalMutation, type MutationCtx, type QueryCtx } from '../_generated/server'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engine/runner'
+import { noteQuarantine } from '../incidents'
 import { accumulatorOf, addBucket, creditTick, foldScore } from '../lib/engine/scores'
 import { readEngineWorld } from '../lib/engine/world'
 import { IDLE_ANGLER_RUNTIME } from '../idleAngler/runtime'
@@ -111,6 +112,7 @@ async function simulatePlotStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
       message: error.message.slice(0, 500),
       createdAt: now,
     })
+    await noteQuarantine(ctx, run._id, now)
     if (run.publishes) await publishInputs(ctx, plot, owner, step)
     return
   }

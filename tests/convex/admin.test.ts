@@ -2,6 +2,7 @@
 import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { api, internal } from '@trmnl-games/backend/api'
+import { ACTIVE_CONTENT } from '@trmnl-games/desk-crawler/content'
 import schema from '../../apps/backend/convex/schema'
 import { seedHero, seedWorld, type T } from './helpers'
 
@@ -107,5 +108,21 @@ describe('owner-run moderation (D23)', () => {
     expect(history.days.map((d: { heroes: number }) => d.heroes)).toEqual([2, 1])
     expect(history.days[0]).toMatchObject({ visited1Day: 0, neverVisited: 2 })
     expect(Object.values(history.retention).reduce((sum: number, week) => sum + (week as { heroes: number }).heroes, 0)).toBe(2)
+  })
+
+  it('releases a quarantined hero and brings HP back under its class ceiling, from the page and from the terminal', async () => {
+    await t.run(async (ctx) => { const world = (await ctx.db.query('worldState').first())!; await ctx.db.patch(world._id, { activeContentVersion: ACTIVE_CONTENT }) })
+    const heroId = await seedHero(t, { class: 'rogue', level: 6, hp: 160, simulationState: 'quarantined', quarantineReasonCode: 'HP' }, 'Tdb')
+    const admin = t.withIdentity({ issuer: 'issuer', subject: 'Admin' })
+    await expect(t.withIdentity({ issuer: 'issuer', subject: 'Tdb' }).mutation(api.admin.releaseHero, { heroId, reasonCode: 'x' })).rejects.toThrow()
+    await admin.mutation(api.admin.releaseHero, { heroId, reasonCode: 'hp_ceiling_fixed' })
+    expect(await t.run(async (ctx) => await ctx.db.get(heroId))).toMatchObject({ simulationState: 'healthy', hp: 148 })
+    const events = await t.run(async (ctx) => await ctx.db.query('adminAuditEvents').collect())
+    expect(events.at(-1)).toMatchObject({ action: 'release_hero', reasonCode: 'hp_ceiling_fixed', outcome: 'healthy, hp 160 to 148' })
+    await expect(admin.mutation(api.admin.releaseHero, { heroId, reasonCode: 'again' })).rejects.toThrow()
+
+    const other = await seedHero(t, { level: 3, hp: 50, simulationState: 'quarantined', quarantineReasonCode: 'XP' }, 'Cli')
+    expect(await t.mutation(internal.admin.releaseHeroFromCli, { heroId: other, reasonCode: 'diagnosed' })).toEqual({ outcome: 'healthy' })
+    expect(await t.run(async (ctx) => await ctx.db.get(other))).toMatchObject({ simulationState: 'healthy', hp: 50 })
   })
 })

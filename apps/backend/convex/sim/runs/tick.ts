@@ -22,6 +22,7 @@ import { SLOT_MS, SLOT_OFFSET_MS, wallSlotFor } from '@trmnl-games/desk-crawler/
 import { queueAlerts } from '../../lib/alerts'
 import { DESK_CRAWLER_RUNTIME } from '../../lib/engine/deskCrawler'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../../lib/engine/runner'
+import { noteQuarantine } from '../../incidents'
 import { accumulatorOf, addBucket, creditTick, foldScore } from '../../lib/engine/scores'
 import { shouldPublish as engineShouldPublish } from '@trmnl-games/engine/schedule'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
@@ -182,6 +183,7 @@ async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { run, wo
       message: error.message.slice(0, 500),
       createdAt: now,
     })
+    await noteQuarantine(ctx, run._id, now)
     return
   }
 

@@ -1315,8 +1315,8 @@ export default defineSchema({
 
   operationalIncidents: defineTable({
     incidentKey: v.string(),
-    /** A Desk Crawler or Idle Angler run (D115). */
-    runId: v.union(v.id('simulationRuns'), v.id('iaSimulationRuns')),
+    /** Any game's run (D115; the quarantine notice covers all five). */
+    runId: v.union(v.id('simulationRuns'), v.id('iaSimulationRuns'), v.id('plSimulationRuns'), v.id('lpSimulationRuns'), v.id('pwSimulationRuns')),
     state: v.union(v.literal('open'), v.literal('recovered')),
     openedAt: v.number(),
     recoveredAt: v.optional(v.number()),

@@ -8,8 +8,20 @@ import { internalAction, internalMutation, internalQuery, type MutationCtx } fro
  * "Operational alerts"). One incident per stalled run; one alert and one
  * recovery notice, deduplicated, with bounded retries. Delivery failure never
  * blocks simulation recovery. Disabled until RESEND_API_KEY is configured.
+ *
+ * A quarantine notice (2026-10-27): the first hero a run quarantines sends one alert naming the game, the tick, the count
+ * and the reason codes. The run itself is healthy, so the notice is stored already closed and sends no recovery mail;
+ * the quarantined heroes stay listed on the admin page until they are released.
  */
 const MAX_ATTEMPTS = 3
+/** Game name, failures table and runs table for each run table the incident may point at. */
+const GAMES = [
+  ['Desk Crawler', 'simulationFailures', 'simulationRuns'],
+  ['Idle Angler', 'iaSimulationFailures', 'iaSimulationRuns'],
+  ['Paper Lives', 'plSimulationFailures', 'plSimulationRuns'],
+  ['Little Plot', 'lpSimulationFailures', 'lpSimulationRuns'],
+  ['Pixel Wars', 'pwSimulationFailures', 'pwSimulationRuns'],
+] as const
 type Notice = 'alert' | 'recovery'
 
 export async function openIncident(ctx: MutationCtx, runId: Id<'simulationRuns'>, kind: string, now: number): Promise<void> {
@@ -17,6 +29,15 @@ export async function openIncident(ctx: MutationCtx, runId: Id<'simulationRuns'>
   const existing = await ctx.db.query('operationalIncidents').withIndex('by_incidentKey', (q) => q.eq('incidentKey', incidentKey)).unique()
   if (existing) return
   const incidentId = await ctx.db.insert('operationalIncidents', { incidentKey, runId, state: 'open', openedAt: now, alert: { state: 'pending', attempts: 0 } })
+  await ctx.scheduler.runAfter(0, internal.incidents.sendNotice, { incidentId, notice: 'alert' })
+}
+
+/** One quarantine notice per run, closed on insert: the run completes as normal, the heroes wait for a release. */
+export async function noteQuarantine(ctx: MutationCtx, runId: Id<'simulationRuns'> | Id<'iaSimulationRuns'> | Id<'plSimulationRuns'> | Id<'lpSimulationRuns'>, now: number): Promise<void> {
+  const incidentKey = `${runId}:quarantine`
+  const existing = await ctx.db.query('operationalIncidents').withIndex('by_incidentKey', (q) => q.eq('incidentKey', incidentKey)).unique()
+  if (existing) return
+  const incidentId = await ctx.db.insert('operationalIncidents', { incidentKey, runId, state: 'recovered', openedAt: now, recoveredAt: now, alert: { state: 'pending', attempts: 0 } })
   await ctx.scheduler.runAfter(0, internal.incidents.sendNotice, { incidentId, notice: 'alert' })
 }
 
@@ -35,9 +56,11 @@ export const getIncident = internalQuery({
     const incident = await ctx.db.get(incidentId)
     if (incident === null) return null
     const run = await ctx.db.get(incident.runId)
-    // D115: an Idle Angler run lives in its own table.
-    const game = ctx.db.normalizeId('iaSimulationRuns', incident.runId) === null ? 'Desk Crawler' : 'Idle Angler'
-    return { incident, game, run: run ? { tick: run.tick, state: run.state, phase: run.state, contentVersion: run.contentVersion, simulationVersion: run.simulationVersion } : null }
+    // D115: each game's runs and failures live in their own tables.
+    const [game, failures] = GAMES.find(([, , table]) => ctx.db.normalizeId(table, incident.runId) !== null) ?? GAMES[0]!
+    const kind = incident.incidentKey.endsWith(':quarantine') ? 'quarantine' : 'stall'
+    const reasons = kind === 'quarantine' ? (await ctx.db.query(failures as 'simulationFailures').withIndex('by_runId', (q) => q.eq('runId', incident.runId as Id<'simulationRuns'>)).take(20)).map((row) => row.message) : []
+    return { incident, game, kind, reasons, run: run ? { tick: run.tick, state: run.state, phase: run.state, contentVersion: run.contentVersion, simulationVersion: run.simulationVersion, quarantined: 'quarantined' in run ? run.quarantined : 0 } : null }
   },
 })
 
@@ -59,9 +82,16 @@ export const sendNotice = internalAction({
     }
     const tick = data.run?.tick ?? 'unknown'
     const game = data.game ?? 'Desk Crawler'
-    const subject = notice === 'alert' ? `${game}: world tick ${tick} has stalled` : `${game}: world tick ${tick} recovered`
-    const text =
-      notice === 'alert'
+    const quarantined = data.kind === 'quarantine'
+    const count: number = Math.max(1, data.run?.quarantined ?? data.reasons.length)
+    const subject = quarantined
+      ? `${game}: ${count} ${count === 1 ? 'hero' : 'heroes'} quarantined at tick ${tick}`
+      : notice === 'alert'
+        ? `${game}: world tick ${tick} has stalled`
+        : `${game}: world tick ${tick} recovered`
+    const text = quarantined
+      ? `World tick ${tick} quarantined ${count} ${count === 1 ? 'hero' : 'heroes'} at ${new Date(data.incident.openedAt).toISOString()}. Their devices say "Paused for a service check" until each one is released.\n\n${(data.reasons as string[]).map((line: string) => `- ${line}`).join('\n')}\n\nFix the cause, then release each hero from the admin page (audited; no retroactive catch-up).`
+      : notice === 'alert'
         ? `World tick ${tick} has made no progress for over five minutes. Opened ${new Date(data.incident.openedAt).toISOString()}. Run state: ${data.run?.state ?? 'unknown'}. Check the Convex dashboard. Player progress is safe; the watchdog keeps trying.`
         : `World tick ${tick} completed. Recovered ${new Date(data.incident.recoveredAt ?? Date.now()).toISOString()}.`
     let outcome: 'sent' | 'failed' = 'failed'

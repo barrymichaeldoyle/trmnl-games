@@ -79,4 +79,14 @@ describe('narrative choice intent (D79)', () => {
     expect(await errorCode(user.mutation(api.heroes.choose, { operationId: opId(), optionId: 'keep' }))).toBe('NO_CHOICE')
     expect((await user.query(api.heroes.mine, {})).choice).toBeNull()
   })
+
+  it('heals a Rogue no higher than its own maximum, not the Warrior ceiling (the 2026-10-26 HP quarantine)', async () => {
+    // Level 6: a Warrior's maximum is 160, a Rogue's 148. The cake heals 15%, so a Rogue at 147 stops at 148.
+    const heroId = await seedHero(t, { class: 'rogue', level: 6, gold: 100, hp: 147, choice: { eventId: 'break_room_cake', offeredAtTick: 8, expiresAtTick: 104, biomeTier: 1 } }, 'Ana')
+    const user = as(t, 'Ana')
+    const view = (await user.query(api.heroes.mine, {})).choice
+    expect(view.options.find((o: { id: string }) => o.id === 'chip_in')?.change).toMatchObject({ gold: -15, hp: 1, potions: 0 })
+    expect(await user.mutation(api.heroes.choose, { operationId: opId(), optionId: 'chip_in' })).toMatchObject({ changed: true, hp: 148 })
+    expect(await heroDoc(t, heroId)).toMatchObject({ hp: 148, simulationState: 'healthy' })
+  })
 })

@@ -5,6 +5,7 @@ import { deriveAnglerSeeds, forecastFor } from '@trmnl-games/idle-angler/sim/see
 import type { Doc, Id } from '../_generated/dataModel'
 import { internalMutation, type MutationCtx } from '../_generated/server'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engine/runner'
+import { noteQuarantine } from '../incidents'
 import { fromAnglerState, progressed, storedDetail, toAnglerState } from './adapter'
 import { currentAngler } from './profile'
 import { awardAngler, stateOf, tallyAnglerUnlocks } from './achievements'
@@ -97,6 +98,7 @@ async function simulateAnglerStep(ctx: MutationCtx, subject: Doc<'heroes'>, step
       message: error.message.slice(0, 500),
       createdAt: now,
     })
+    await noteQuarantine(ctx, run._id, now)
     if (run.publishes) await publishInputs(ctx, owner, step)
     return
   }

@@ -32,6 +32,22 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-27',
+    changes: [
+      {
+        title: 'A Rogue heals to its own limit',
+        body: 'A decision that healed a Rogue could push it past its maximum HP, and the game then paused that hero for a service check until someone looked. Healing now stops at the right limit, the paused hero is back at work, and a pause like this now tells us the same hour it happens.',
+        fr: { title: 'Un Voleur se soigne jusqu’à sa propre limite', body: 'Une décision qui soignait un Voleur pouvait le pousser au-delà de ses PV maximum, et le jeu mettait alors ce héros en pause pour une vérification technique jusqu’à ce que quelqu’un s’en occupe. Le soin s’arrête désormais à la bonne limite, le héros en pause a repris le travail, et une pause de ce genre nous est maintenant signalée dans l’heure.' },
+        de: { title: 'Ein Schurke heilt bis zu seiner eigenen Grenze', body: 'Eine Entscheidung, die einen Schurken heilte, konnte ihn über seine maximalen LP hinaus bringen, und das Spiel pausierte diesen Helden dann für eine Wartungsprüfung, bis jemand nachsah. Heilung endet jetzt an der richtigen Grenze, der pausierte Held ist wieder im Dienst, und eine solche Pause meldet sich nun in derselben Stunde bei uns.' },
+        es: { title: 'Un Pícaro se cura hasta su propio límite', body: 'Una decisión que curaba a un Pícaro podía llevarlo por encima de sus PV máximos, y el juego pausaba entonces a ese héroe por una revisión técnica hasta que alguien lo mirara. La curación ahora se detiene en el límite correcto, el héroe pausado ha vuelto al trabajo, y una pausa así ahora nos avisa en la misma hora en que ocurre.' },
+        it: { title: 'Un Ladro si cura fino al proprio limite', body: 'Una decisione che curava un Ladro poteva portarlo oltre i suoi PV massimi, e il gioco metteva quell’eroe in pausa per un controllo tecnico finché qualcuno non controllava. La cura ora si ferma al limite giusto, l’eroe in pausa è tornato al lavoro, e una pausa del genere ora ci avvisa nella stessa ora in cui accade.' },
+        pt: { title: 'Um Ladino cura-se até ao seu próprio limite', body: 'Uma decisão que curava um Ladino podia levá-lo acima dos seus PV máximos, e o jogo pausava então esse herói para uma verificação técnica até alguém verificar. A cura agora para no limite certo, o herói pausado voltou ao trabalho, e uma pausa destas passa a avisar-nos na mesma hora em que acontece.' },
+        pl: { title: 'Łotrzyk leczy się do własnego limitu', body: 'Decyzja, która leczyła Łotrzyka, mogła wypchnąć go ponad maksymalne PŻ, a gra wstrzymywała wtedy tego bohatera na kontrolę techniczną, aż ktoś to sprawdził. Leczenie zatrzymuje się teraz na właściwym limicie, wstrzymany bohater wrócił do pracy, a taka pauza daje nam teraz znać w tej samej godzinie.' },
+        nl: { title: 'Een Schurk geneest tot zijn eigen grens', body: 'Een beslissing die een Schurk genas, kon hem boven zijn maximale HP brengen, waarna het spel die held pauzeerde voor een technische controle tot iemand keek. Genezing stopt nu op de juiste grens, de gepauzeerde held is weer aan het werk, en zo’n pauze meldt zich nu in hetzelfde uur bij ons.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-21',
     changes: [
       {

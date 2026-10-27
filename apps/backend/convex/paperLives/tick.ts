@@ -5,6 +5,7 @@ import type { Doc, Id } from '../_generated/dataModel'
 import { internal } from '../_generated/api'
 import { internalMutation, type MutationCtx } from '../_generated/server'
 import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engine/runner'
+import { noteQuarantine } from '../incidents'
 import { fromLifeState, toLifeState } from './adapter'
 import { currentLife } from './profile'
 import { endedLife } from './records'
@@ -134,6 +135,7 @@ async function simulateLifeStep(ctx: MutationCtx, subject: Doc<'heroes'>, step: 
       message: error.message.slice(0, 500),
       createdAt: now,
     })
+    await noteQuarantine(ctx, run._id, now)
     if (run.publishes) await publishInputs(ctx, owner, step)
     return
   }

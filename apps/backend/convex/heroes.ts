@@ -245,7 +245,8 @@ function choiceView(content: ContentCatalog, hero: Doc<'heroes'>, potionsHeld: n
   if (!pending || tick >= pending.expiresAtTick) return null
   const event = eventById(content, pending.eventId)
   if (!event) return null
-  const state = { level: hero.level, hp: hero.hp, gold: hero.gold, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
+  // The class sets the HP ceiling (P37): without it a Rogue was healed to the Warrior maximum and the core quarantined it.
+  const state = { level: hero.level, class: hero.class, hp: hero.hp, gold: hero.gold, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
   return {
     eventId: event.id,
     title: event.title,
@@ -279,7 +280,7 @@ export const choose = mutation({
       // D131: the pouch counts every strength; a decision's potions are the catalog (healing) potion.
       const potionRows = await ctx.db.query('items').withIndex('by_heroId_and_kind', (q) => q.eq('heroId', hero._id).eq('kind', 'potion')).take(8)
       const potion = potionRows.find((row) => row.templateId === content.potion.templateId) ?? null
-      const state = { level: hero.level, hp: hero.hp, gold: hero.gold, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
+      const state = { level: hero.level, class: hero.class, hp: hero.hp, gold: hero.gold, ...(hero.potionCap === undefined ? {} : { potionCap: hero.potionCap }) }
       const change = resolveEffect(content, state, potionsHeld(potionRows), option.effect, pending.biomeTier)
       const counters = withCounterDefaults(hero.counters)
       const granted = change.effectId === undefined ? undefined : effectById(content, change.effectId)
