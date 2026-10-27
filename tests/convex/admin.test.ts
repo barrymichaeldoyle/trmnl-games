@@ -125,4 +125,17 @@ describe('owner-run moderation (D23)', () => {
     expect(await t.mutation(internal.admin.releaseHeroFromCli, { heroId: other, reasonCode: 'diagnosed' })).toEqual({ outcome: 'healthy' })
     expect(await t.run(async (ctx) => await ctx.db.get(other))).toMatchObject({ simulationState: 'healthy', hp: 50 })
   })
+
+  it('compensates a hero with audited gold and a log line the player can read, within bounds', async () => {
+    const heroId = await seedHero(t, { gold: 40 }, 'Tdb')
+    expect(await t.mutation(internal.admin.compensateHero, { heroId, gold: 300, reasonCode: 'hp_quarantine_2026_10_26' })).toEqual({ gold: 340 })
+    const hero = await t.run(async (ctx) => await ctx.db.get(heroId))
+    expect(hero).toMatchObject({ gold: 340, level: 1 })
+    expect(hero?.counters.goldEarned).toBe(300)
+    const log = await t.run(async (ctx) => await ctx.db.query('tickLogs').withIndex('by_heroId_and_at_and_sequence', (q) => q.eq('heroId', heroId)).order('desc').first())
+    expect(log).toMatchObject({ source: 'command', kind: 'system', summary: 'Thanks for the heads-up about the pause. The office chipped in [[300 gold]].', detail: { operation: 'compensate' }, deltas: { gold: 300, xpEarned: 0, hp: 0 } })
+    expect((await t.run(async (ctx) => await ctx.db.query('adminAuditEvents').collect())).at(-1)).toMatchObject({ action: 'compensate_hero', outcome: 'gold +300', reasonCode: 'hp_quarantine_2026_10_26' })
+    await expect(t.mutation(internal.admin.compensateHero, { heroId, gold: 0, reasonCode: 'x' })).rejects.toThrow()
+    await expect(t.mutation(internal.admin.compensateHero, { heroId, gold: 5001, reasonCode: 'x' })).rejects.toThrow()
+  })
 })

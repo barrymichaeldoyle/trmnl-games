@@ -10,6 +10,8 @@ import { normalizeAlias } from './lib/names'
 import { openedCompanion } from './heroReminder'
 import { getOrCreateWorld, readWorld, worldContent } from './world'
 import { heroMaxHp } from '@trmnl-games/desk-crawler/sim/core/stats'
+import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
+import { commandLog } from './lib/intent'
 
 /**
  * Owner-run support and moderation (D23). Admin authority comes only from the
@@ -253,6 +255,26 @@ export const releaseHeroFromCli = internalMutation({
   args: { heroId: v.id('heroes'), reasonCode: reason },
   returns: v.object({ outcome: v.string() }),
   handler: async (ctx, { heroId, reasonCode }) => ({ outcome: await releaseQuarantinedHero(ctx, 'cli', heroId, reasonCode) }),
+})
+
+/**
+ * Compensation after an operational pause (simulation.md: a separately audited decision, never a replay). Grants gold
+ * only, so no level, rung or achievement is faked; the hero's log tells the player in a system line. Bounded at 5,000.
+ * `npx convex run --prod admin:compensateHero '{"heroId":"...","gold":300,"reasonCode":"hp_quarantine_2026_10_26"}'`.
+ */
+export const compensateHero = internalMutation({
+  args: { heroId: v.id('heroes'), gold: v.number(), reasonCode: reason },
+  returns: v.object({ gold: v.number() }),
+  handler: async (ctx, { heroId, gold, reasonCode }) => {
+    if (!Number.isSafeInteger(gold) || gold < 1 || gold > 5000) throw appError('INVALID_INPUT', 'Gold must be a whole number from 1 to 5,000.')
+    const hero = await ctx.db.get(heroId)
+    if (hero === null) throw appError('INVALID_STATE', 'Hero not found.')
+    const counters = withCounterDefaults(hero.counters)
+    await ctx.db.patch(heroId, { gold: hero.gold + gold, counters: { ...counters, goldEarned: counters.goldEarned + gold } })
+    await commandLog(ctx, (await ctx.db.get(heroId))!, 'compensate', `Thanks for the heads-up about the pause. The office chipped in [[${gold} gold]].`, { xpEarned: 0, gold, hp: 0 })
+    await audit(ctx, 'cli', 'compensate_hero', heroId, reasonCode, `gold +${gold}`)
+    return { gold: hero.gold + gold }
+  },
 })
 
 /**
