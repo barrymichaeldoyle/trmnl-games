@@ -13,6 +13,15 @@ export async function preload(context: { queryClient: QueryClient; token?: strin
   // Signed out on the server: nothing to fetch, and the shell shows the sign-in prompt.
   if (import.meta.env.SSR && !context.token) return
   // convexQuery() options are typed per result; ensureQueryData's generic defaults reject them by variance only.
-  // A failure here is not fatal: the page's own useQuery retries it and reports through the route error boundary.
-  await Promise.allSettled(queries.map((query) => context.queryClient.ensureQueryData(query as EnsureOptions)))
+  const results = await Promise.allSettled(queries.map((query) => context.queryClient.ensureQueryData(query as EnsureOptions)))
+  // A failure here must not be fatal, and it was: the error stayed in the cache, so a root-level hook reading the
+  // same query (the header's game listing, analytics) threw on render with nothing above it to catch, and a 40-second
+  // Convex "Service temporarily unavailable" on 2026-10-26 became a failed page for whoever opened the companion
+  // (TRMNL-GAMES-8, -9). Dropping the failed query leaves it pending: the page renders its loading state, and the
+  // browser's live subscription fetches it as soon as Convex answers again.
+  results.forEach((result, index) => {
+    if (result.status !== 'rejected') return
+    context.queryClient.removeQueries({ queryKey: queries[index]!.queryKey, exact: true })
+    console.error(`preload: ${JSON.stringify(queries[index]!.queryKey[1] ?? queries[index]!.queryKey)} failed: ${result.reason instanceof Error ? result.reason.message : String(result.reason)}`)
+  })
 }
