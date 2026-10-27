@@ -70,6 +70,6 @@ describe('content pages', () => {
     const route = readFileSync(join(SRC, 'routes/help/desk-crawler.tsx'), 'utf8')
     expect(route).toMatch(/loader: .*import\('\.\/-deskCrawlerHelp'\).*loadDeskCrawlerHelp/)
     expect(route).not.toMatch(/from '\.\/-deskCrawlerHelp\.\w\w'/)
-    expect(readFileSync(join(SRC, 'lib/content.ts'), 'utf8')).toContain('/help/desk-crawler')
+    expect(readFileSync(join(SRC, 'client.tsx'), 'utf8')).toContain('/help/desk-crawler')
   })
 })
