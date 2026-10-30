@@ -35,6 +35,17 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-30',
     changes: [
       {
+        title: 'Fly codes land with a splash',
+        body: 'Scanning the fly code on your Idle Angler screen now opens your fly box at the top of the logbook, with confetti and the new fly marked as it lands.',
+        fr: { title: 'Les codes mouche arrivent en fanfare', body: 'Scanner le code mouche de votre écran Idle Angler ouvre maintenant votre boîte à mouches en haut du carnet, avec des confettis et la nouvelle mouche signalée à son arrivée.' },
+        de: { title: 'Fliegencodes kommen mit Konfetti an', body: 'Wenn du den Fliegencode auf deinem Idle-Angler-Bildschirm scannst, öffnet sich deine Fliegendose jetzt oben im Fangbuch, mit Konfetti und der neuen Fliege markiert.' },
+        es: { title: 'Los códigos de mosca llegan con confeti', body: 'Al escanear el código de mosca de tu pantalla de Idle Angler, tu caja de moscas se abre ahora arriba del Cuaderno, con confeti y la nueva mosca marcada al llegar.' },
+        it: { title: 'I codici delle mosche arrivano con i coriandoli', body: 'Scansionando il codice mosca sullo schermo di Idle Angler, la scatola delle mosche si apre ora in cima al registro, con i coriandoli e la nuova mosca segnata appena arriva.' },
+        pt: { title: 'Os códigos de mosca chegam com confete', body: 'Ao escanear o código de mosca na tela do Idle Angler, sua caixa de moscas agora abre no topo do Caderno, com confete e a nova mosca marcada assim que chega.' },
+        pl: { title: 'Kody much przychodzą z konfetti', body: 'Zeskanowanie kodu muchy z ekranu Idle Angler otwiera teraz pudełko na muchy na górze Rejestru, z konfetti i oznaczoną nową muchą.' },
+        nl: { title: 'Vliegcodes komen binnen met confetti', body: 'Als je de vliegcode op je Idle Angler-scherm scant, opent je vliegendoos nu bovenaan het Logboek, met confetti en de nieuwe vlieg gemarkeerd zodra hij binnenkomt.' },
+      },
+      {
         title: 'See who shares your floor',
         body: 'Your TRMNL now names up to three other heroes on your hero’s floor under the status line, with how many more are there. In the companion, the world map shows how many heroes are on each floor, and See everyone lists everyone on yours, linked to their public pages.',
         fr: { title: 'Voyez qui partage votre étage', body: 'Votre TRMNL nomme désormais jusqu’à trois autres héros présents à l’étage de votre héros, sous la ligne d’état, avec le nombre de ceux qui restent. Dans le compagnon, la carte du monde indique combien de héros se trouvent à chaque étage, et Voir tout le monde liste tous ceux du vôtre, avec un lien vers leur page publique.' },

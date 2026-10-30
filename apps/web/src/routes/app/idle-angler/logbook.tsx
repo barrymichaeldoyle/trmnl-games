@@ -1,6 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { fishSprite, FISH_LARGE } from '@trmnl-games/idle-angler/art/fish'
 import { preload } from '../../../lib/preload'
@@ -38,6 +39,9 @@ const RARITIES = ['common', 'uncommon', 'rare', 'epic'] as const
 
 function LogbookPage() {
   const { fly: scanned } = Route.useSearch()
+  // D217: a scanned fly code opens the page on the fly box, so the fly is seen landing; the box stays first after the
+  // address drops the code.
+  const [fromScan] = useState(Boolean(scanned))
   const { data } = useQuery(convexQuery(api.idleAngler.anglers.logbook, {}))
   const { notice, notify, dismiss } = useNotice()
   const book = data as Array<{ water: { id: string; name: string }; rank?: WaterRank | null; species: Entry[] }> | null | undefined
@@ -60,6 +64,7 @@ function LogbookPage() {
           {RARITIES.map((rarity) => <li key={rarity} className="flex items-center gap-1.5"><Gem rarity={rarity} scale={2} />{t.rarity[rarity]}</li>)}
         </ul>
       </div>
+      {fromScan ? <FlyBox notify={notify} scanned={scanned} /> : null}
       {book.map(({ water, rank, species }) => (
         <Card key={water.id} title={words.water(water.id)} icon="pin">
           {rank ? <p className="mb-3 text-sm"><strong>{words.waterRank(rank.id, water.id)}</strong> · <span className="text-muted">{t.speciesOf(rank.logged, rank.total)} · {rank.next ? t.rankNext(rank.next.species - rank.logged, words.lang.waterRanks[rank.next.id] ?? rank.next.id) : t.rankTop}</span></p> : null}
@@ -88,7 +93,7 @@ function LogbookPage() {
           </ul>
         </Card>
       ))}
-      <FlyBox notify={notify} scanned={scanned} />
+      {fromScan ? null : <FlyBox notify={notify} scanned={scanned} />}
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>
   )
