@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { DESK_KEEPSAKES, EASTER_EGG_KEEPSAKE, KEEPSAKES_OPEN_AT, keepsakesOpen, keepsakeShelf, keepsakeWeek, LETTER_CODES_UNTIL } from '@trmnl-games/desk-crawler/content/keepsakes'
 import { errorMessage, isRefusal } from '../../../lib/intent'
+import { Confetti, useBurst } from '../../../lib/confetti'
 import { useOnline } from '../../../lib/network'
 import { Submission } from '../../../lib/submission'
 import { ActionFeedback, BUTTON_SECONDARY, Button, LINK_BUTTON } from '../../../lib/ui'
@@ -19,6 +20,9 @@ import { dcCareerMessages } from '../../../i18n/dcCareer'
 
 const arrivesAt = (tag: string) => (date: Date) => date.toLocaleString(tag, { weekday: 'long', hour: 'numeric', minute: '2-digit' })
 const opensOn = (tag: string) => (date: Date) => date.toLocaleString(tag, { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' })
+
+/** D180: a keepsake QR's six digits in the address, for the keepsakes page (and the hero page, which passes them on). */
+export const keepsakeSearch = (search: Record<string, unknown>): { keepsake?: string } => (typeof search.keepsake === 'string' && /^\d{6}$/.test(search.keepsake) ? { keepsake: search.keepsake } : typeof search.keepsake === 'number' && Number.isInteger(search.keepsake) && search.keepsake >= 0 && search.keepsake < 1e6 ? { keepsake: String(search.keepsake).padStart(6, '0') } : {})
 
 function KeepsakeIcon({ pixels }: { pixels: readonly string[] }) {
   const path = pixels.flatMap((row, y) => [...row.matchAll(/#+/g)].map((run) => `M${run.index} ${y}h${run[0].length}v1h-${run[0].length}z`)).join('')
@@ -41,6 +45,8 @@ function useKeepsakeClaim() {
   const [message, setMessage] = useState<string | null>(null)
   const [earned, setEarned] = useState<(typeof DESK_KEEPSAKES)[number] | typeof EASTER_EGG_KEEPSAKE | null>(null)
   const [now, setNow] = useState(() => Date.now())
+  // D218: a keepsake that lands bursts confetti, as a fly does (D217).
+  const [burst, fire] = useBurst()
   const t = useT(dcCareerMessages)
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60_000)
@@ -74,6 +80,7 @@ function useKeepsakeClaim() {
         // D140: the sample screen's code finds the hidden Easter Egg once; the server decides, so a real matching code still collects.
         if (result.outcome === 'easter_egg' && result.changed) {
           setEarned(EASTER_EGG_KEEPSAKE)
+          fire()
           setMessage(t.eggCollected)
           setCode('')
         } else if (result.outcome === 'easter_egg') setMessage(t.eggAlready)
@@ -82,6 +89,7 @@ function useKeepsakeClaim() {
         else {
           const item = DESK_KEEPSAKES[(result.totalCollected - 1) % DESK_KEEPSAKES.length]!
           setEarned(item)
+          fire()
           setMessage(t.collected(item.name))
           setCode('')
         }
@@ -90,7 +98,7 @@ function useKeepsakeClaim() {
     finally { inFlight.current = false; setPending(false) }
   }
 
-  return { collection, collectedThisWeek, open, next, code, edit, claim, submit, pending, error, message, earned }
+  return { collection, collectedThisWeek, open, next, code, edit, claim, submit, pending, error, message, earned, burst }
 }
 
 type KeepsakeClaim = ReturnType<typeof useKeepsakeClaim>
@@ -113,34 +121,20 @@ function KeepsakeCodeForm({ form, inputId }: { form: KeepsakeClaim; inputId: str
  * form itself, so the trip to the device pays off without a detour to
  * Settings. Hidden when there is nothing to collect or no connection to show
  * a code; stays to confirm a claim made from it until the next visit.
- * D180: `scanned` is a code from the screen's keepsake QR. Once the collection loads it is entered and sent once, the
- * address drops it (so a reload or the history never sends it again), and the callout stays to show how it went.
+ * D218: a scanned keepsake QR lands on the keepsakes page instead, where the new design is seen on the shelf.
  */
-export function KeepsakeCallout({ scanned }: { scanned?: string }) {
+export function KeepsakeCallout() {
   const form = useKeepsakeClaim()
   const { collection, next, earned } = form
   // Closed by default on every screen: the game screen stays in the first viewport and the code is two taps away.
   const [open, setOpen] = useState(false)
-  const [fromScan, setFromScan] = useState(false)
-  const sent = useRef(false)
-  const navigate = useNavigate()
   const t = useT(dcCareerMessages)
   const c = useContent()
-  const ready = collection !== undefined && collection !== null
-  useEffect(() => {
-    if (!scanned || sent.current || !ready) return
-    sent.current = true
-    void navigate({ to: '/app/desk-crawler', search: {}, replace: true })
-    if (!collection.connected || !form.open) return
-    setFromScan(true)
-    setOpen(true)
-    form.edit(scanned)
-    void form.submit(scanned)
-  }, [scanned, ready, collection, form, navigate])
   if (!collection?.connected || !form.open) return null
-  if (form.collectedThisWeek && !earned && !(fromScan && (form.message || form.error || form.pending))) return null
+  if (form.collectedThisWeek && !earned) return null
   const shown = earned ?? next
-  return <section aria-labelledby="keepsake-callout-title" className="flex min-w-0 flex-col border-[3px] border-night bg-panel outline-4 outline-gold">
+  return <section aria-labelledby="keepsake-callout-title" className="relative flex min-w-0 flex-col border-[3px] border-night bg-panel outline-4 outline-gold">
+    {form.burst > 0 ? <Confetti key={form.burst} /> : null}
     {/* The title keeps at least a word's width: where the button no longer fits beside it, the button takes its own full row. */}
     <div className="flex flex-wrap items-center gap-3 p-3 sm:gap-4 sm:px-4">
       <div className="grid size-12 shrink-0 place-items-center border-[3px] border-night bg-night text-gold-ink [&>svg]:size-8">
@@ -165,16 +159,37 @@ export function KeepsakeCallout({ scanned }: { scanned?: string }) {
   </section>
 }
 
-/** The keepsakes page's content (D46): the next design, the code form and the shelf. Its heading is the page's h1. */
-export function DeskKeepsakes() {
+/**
+ * The keepsakes page's content (D46): the next design, the code form and the shelf. Its heading is the page's h1.
+ * D218: `scanned` is a code from the screen's keepsake QR (D180). Once the collection loads it is entered and sent once and
+ * the address drops it (so a reload or the history never sends it again); a keepsake that lands bursts confetti and its
+ * shelf tile is marked New until the page is left, as Idle Angler's flies are (D217).
+ */
+export function DeskKeepsakes({ scanned }: { scanned?: string }) {
   const form = useKeepsakeClaim()
-  const { collection, collectedThisWeek, open, next, error, message } = form
+  const { collection, collectedThisWeek, open, next, error, message, earned } = form
   const t = useT(dcCareerMessages)
   const c = useContent()
   const locale = useLocale()
+  const sent = useRef(false)
+  const top = useRef<HTMLElement>(null)
+  const navigate = useNavigate()
+  const ready = collection !== undefined && collection !== null
+  useEffect(() => {
+    if (!scanned || sent.current || !ready) return
+    sent.current = true
+    void navigate({ to: '/app/desk-crawler/keepsakes', search: {}, replace: true })
+    if (!collection.connected || !form.open) return
+    top.current?.scrollIntoView({ block: 'start' })
+    form.edit(scanned)
+    void form.submit(scanned)
+  }, [scanned, ready, collection, form, navigate])
+  const fresh = (id: string) => earned?.id === id
+  const newMark = <span className="label-px absolute -top-2.5 left-0 bg-gold px-1 text-night">{t.newKeepsake}</span>
 
-  return <section id="desk-keepsakes" aria-labelledby="keepsakes-title" className="window min-w-0 scroll-mt-20 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
-    <div className="flex flex-wrap items-baseline justify-between gap-2">
+  return <section ref={top} id="desk-keepsakes" aria-labelledby="keepsakes-title" className="window min-w-0 scroll-mt-20 px-3 pt-3 pb-4 min-[375px]:px-4 sm:px-5">
+    <div className="relative flex flex-wrap items-baseline justify-between gap-2">
+      {form.burst > 0 ? <Confetti key={form.burst} /> : null}
       <h1 id="keepsakes-title" className="flex items-center gap-3 font-display text-3xl font-bold"><Glyph name="keepsake" size={24} className="text-gold-ink" />{t.keepsakesTitle}</h1>
       {collection ? <p className="text-sm tabular-nums">{t.countCollected(formatNumber(locale, collection.totalCollected))}</p> : null}
     </div>
@@ -189,12 +204,14 @@ export function DeskKeepsakes() {
       <ActionFeedback error={error} message={message} />
       <ul aria-label={t.shelfLabel} className="mt-5 grid grid-cols-1 gap-x-6 gap-y-4 min-[480px]:grid-cols-2 sm:grid-cols-3 sm:gap-y-5">
         {/* Collected designs sit in a solid night tile in gold; the rest are dark silhouettes in a dashed edge, still to earn. */}
-        {keepsakeShelf(collection.totalCollected).map((item) => <li key={item.id} className={`flex items-center gap-3 ${item.count ? '' : 'text-muted'}`}>
+        {keepsakeShelf(collection.totalCollected).map((item) => <li key={item.id} className={`relative flex items-center gap-3 ${item.count ? '' : 'text-muted'} ${fresh(item.id) ? 'outline-4 outline-offset-4 outline-gold' : ''}`}>
+          {fresh(item.id) ? newMark : null}
           <span aria-hidden="true" className={`grid size-12 shrink-0 place-items-center border-[3px] bg-night ${item.count ? 'border-night text-gold-ink' : 'border-dashed border-faint text-raised'}`}><KeepsakeIcon pixels={item.pixels} /></span>
           <div className="min-w-0"><p className="text-sm font-semibold">{c.text(item.name)}</p><p className="mt-0.5 text-sm tabular-nums">{item.count ? t.countCollected(formatNumber(locale, item.count)) : t.notCollected}</p></div>
         </li>)}
         {/* D140: the hidden keepsake joins the shelf only once found, outside the weekly set and its count. */}
-        {collection.easterEgg ? <li className="flex items-center gap-3">
+        {collection.easterEgg ? <li className={`relative flex items-center gap-3 ${fresh(EASTER_EGG_KEEPSAKE.id) ? 'outline-4 outline-offset-4 outline-gold' : ''}`}>
+          {fresh(EASTER_EGG_KEEPSAKE.id) ? newMark : null}
           <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center border-[3px] border-night bg-night text-gold-ink"><KeepsakeIcon pixels={EASTER_EGG_KEEPSAKE.pixels} /></span>
           <div className="min-w-0"><p className="text-sm font-semibold">{c.text(EASTER_EGG_KEEPSAKE.name)}</p><p className="mt-0.5 text-sm">{c.text(EASTER_EGG_KEEPSAKE.description)}</p></div>
         </li> : null}

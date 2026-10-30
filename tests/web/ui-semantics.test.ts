@@ -15,6 +15,8 @@ it('server-renders a pending button with a busy label, unavailable but still foc
   expect(markup).not.toContain('disabled=""')
   expect(markup).toContain('aria-label="Confirm sale"')
   expect(markup).toContain('Selling…')
+  // D219: the idle label stays in the layout, hidden, so the button keeps its width while it works.
+  expect(markup).toMatch(/<span class="invisible">Sell<\/span>/)
 })
 
 it('preserves the explicit submit type without inventing a pending or disabled state', () => {

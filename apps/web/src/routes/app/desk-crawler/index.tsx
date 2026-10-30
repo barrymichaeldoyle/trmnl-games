@@ -1,6 +1,6 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, redirect } from '@tanstack/react-router'
 import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { seo } from '../../../lib/seo'
@@ -12,7 +12,7 @@ import { Glyph, SectionTitle } from '../../../lib/glyphs'
 import { ReturnNudge } from './-recap'
 import { GameScreen } from './-gameScreen'
 import { latestLogQuery } from './-queries'
-import { KeepsakeCallout } from './-keepsakes'
+import { KeepsakeCallout, keepsakeSearch } from './-keepsakes'
 import { TodoCard, type TodoView } from './-todo'
 import { ComingUp, GoalCard, type CareerView, type UnlockView } from './-career'
 import { ConfirmSheet, Consequences } from './-confirm'
@@ -28,8 +28,11 @@ import { useContent } from '../../../lib/useContent'
 import { dcHeroMessages } from '../../../i18n/dcHero'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
-  // D180: a keepsake QR's six digits, collected by the callout and then dropped from the address.
-  validateSearch: (search: Record<string, unknown>): { keepsake?: string } => (typeof search.keepsake === 'string' && /^\d{6}$/.test(search.keepsake) ? { keepsake: search.keepsake } : typeof search.keepsake === 'number' && Number.isInteger(search.keepsake) && search.keepsake >= 0 && search.keepsake < 1e6 ? { keepsake: String(search.keepsake).padStart(6, '0') } : {}),
+  // D180, D218: a keepsake QR's six digits from an older link (or a sign-in that returns here) go on to the keepsakes page.
+  validateSearch: keepsakeSearch,
+  beforeLoad: ({ search }) => {
+    if (search.keepsake) throw redirect({ to: '/app/desk-crawler/keepsakes', search: { keepsake: search.keepsake }, replace: true })
+  },
   head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcHero, index: false, locale }),
   loader: ({ context }) =>
     preload(context, convexQuery(api.heroes.mine, {}), convexQuery(api.inventory.mine, {}), convexQuery(api.heroes.returnSummary, {}), convexQuery(api.keepsakes.mine, {}), latestLogQuery()),
@@ -46,7 +49,6 @@ type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number;
  * was seven screens tall when it held all of it.
  */
 function HeroHome() {
-  const { keepsake: scanned } = Route.useSearch()
   const { data: hero } = useQuery(convexQuery(api.heroes.mine, {}))
   const { data: bag } = useQuery(convexQuery(api.inventory.mine, {}))
   const t = useT(dcHeroMessages)
@@ -59,7 +61,7 @@ function HeroHome() {
     <div className="flex min-w-0 flex-col gap-8">
       {/* The page's title for assistive tech, ahead of the keepsake callout; the game screen's HUD names the hero visibly. */}
       <h1 className="sr-only">{t.yourHero(hero.name)}</h1>
-      <KeepsakeCallout scanned={scanned} />
+      <KeepsakeCallout />
       <PlaylistNudge activatedAt={hero.activatedAt} screenServed={hero.screenServed} />
       <GameScreen hero={{ ...hero, biomeName, targetName, bagReady }} />
       <ReturnNudge />
