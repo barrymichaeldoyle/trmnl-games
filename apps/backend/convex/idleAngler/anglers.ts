@@ -12,6 +12,7 @@ import { pagePublic } from '../lib/publicPage'
 import { currentUser, intentReturns, isIntentRefusal, runIntent, type IntentRefusal, type IntentResult } from '../lib/intent'
 import { readEngineWorld } from '../lib/engine/world'
 import { fromAnglerState, toAnglerState } from './adapter'
+import { waterCounts } from './presence'
 import { currentAngler, idleAnglerProfile } from './profile'
 import { IDLE_ANGLER_RUNTIME, IDLE_ANGLER_SCHEDULE } from './runtime'
 import { awardAfterAnglerIntent } from './achievements'
@@ -234,6 +235,7 @@ export const dock = query({
     const cooler = coolerOf(content, angler.coolerTier)
     const rod = rodOf(content, angler.rodTier)
     const slot = IDLE_ANGLER_SCHEDULE.wallSlotFor(now)
+    const presence = await waterCounts(ctx, angler)
     const waters = content.waters.map((w) => {
       const weatherNow = world ? forecastFor(world.worldSeed, content, w.id, slot) : 'clear'
       const conditions = conditionsAt({ tickAt: slot, ...(user.trmnlUtcOffset === undefined ? {} : { utcOffsetSeconds: user.trmnlUtcOffset }), weather: weatherNow, content })
@@ -254,6 +256,8 @@ export const dock = query({
         baits: w.baits,
         weatherUntil: (forecastBlock(slot) + 1) * 6 * 3_600_000,
         rank: rankAt(content, angler.logbook, w.id),
+        // D220: how many other anglers the last tick found fishing here.
+        others: presence[w.id] ?? 0,
       }
     })
     const next = { rod: nextRod(content, state) ?? null, cooler: nextCooler(content, state) ?? null }

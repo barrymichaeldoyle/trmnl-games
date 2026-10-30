@@ -41,12 +41,14 @@
  * Template v13 (D199): a dot between the angler's name and title, which ran together as one name ("Wren Master Angler"),
  * and the newest catch's name without a clamp: the clamp measured its column before the layout settled and cut
  * "Barbel" to "Bar..." with the column empty beside it. Species names are at most thirteen characters.
+ * Template v21 (D220): who else fishes the water ("Quill, Bram, Tess and 8 others") under the place, behind a people
+ * mark, in every layout but the quadrant; it is the first line to give way where the stories need the room.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 20
+export const TEMPLATE_VERSION = 21
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -60,7 +62,7 @@ const TITLE_ICON = svgDataUri(
 )
 
 /** Every mark a layout uses, assigned once at its top so the markup repeats a variable rather than the SVG. */
-const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'trophy', 'star', 'goal', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', ...STORY_GLYPHS]
+const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'people', 'trophy', 'star', 'goal', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', ...STORY_GLYPHS]
 const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${markUri(mark, 32)}" %}`).join('')
 
 /** 16px on the OG; 20px on the X, where the text beside it is larger. */
@@ -87,6 +89,9 @@ const conditionMarks =
 
 /** Where the angler is: the one counter that can be long ("Heading to the Harbour Pier"), so it may wrap to two lines. */
 const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0 pr--3" data-place="true" data-give-way="6.5"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
+
+/** D220: who else fishes this water, behind the people mark; two lines at most, and the first line to give way. */
+const company = `{% if company %}<div class="flex flex--row flex--left flex--top gap--[3px] stretch-x w--min-0" data-company="true" data-give-way="0.5"><img class="${ICON}" src="{{ m_people }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ company | escape }}</span></div>{% endif %}`
 
 /** Where the angler is, then the conditions. */
 const statusRow = (withConditions = true) => row(`${place}${withConditions ? conditionMarks : ''}`, 'data-status-row="true"')
@@ -326,6 +331,7 @@ const header = (qrOg: number, qrX: number, beside = false) => `
       <div class="flex flex--col flex--left gap--xsmall grow w--min-0">
         <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x" data-name-row="true">${nameLine()}</div>
         ${statusRow()}
+        ${company}
         ${counters()}
       </div>
       ${qr(qrOg, qrX, beside)}
@@ -366,6 +372,7 @@ const halfHorizontal = oriented(
     <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}</div>
       ${statusRow()}
+      ${company}
       ${counters('short')}
       ${attention(1)}
       ${stories(16, 1)}
@@ -376,6 +383,7 @@ const halfHorizontal = oriented(
       <div class="flex flex--row flex--center-y gap--small stretch-x"><div class="flex flex--row flex--left flex--center-y gap--small grow w--min-0">${nameLine()}</div>${qr(2, 4)}</div>
       ${scene([220, 2], [185, 4])}
       ${statusRow()}
+      ${company}
       ${counters()}
       ${attention()}
       ${stories(16, 2)}
@@ -395,6 +403,7 @@ const halfVertical = oriented(
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${scene([205, 1], [177, 2])}
     ${statusRow()}
+    ${company}
     ${counters('short')}
     ${attention(3)}
     ${stories(16, 3, 'description')}

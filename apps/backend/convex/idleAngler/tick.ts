@@ -4,13 +4,13 @@ import { simulateAngler, IdleAnglerInvariantError } from '@trmnl-games/idle-angl
 import { deriveAnglerSeeds, forecastFor } from '@trmnl-games/idle-angler/sim/seed'
 import type { Doc, Id } from '../_generated/dataModel'
 import { internalMutation, type MutationCtx } from '../_generated/server'
-import { runBatch, startRun, watchdogStep, type SubjectStep } from '../lib/engine/runner'
+import { runBatch, startRun, watchdogStep, type PresenceTally, type SubjectStep } from '../lib/engine/runner'
 import { noteQuarantine } from '../incidents'
 import { fromAnglerState, progressed, storedDetail, toAnglerState } from './adapter'
 import { currentAngler } from './profile'
 import { awardAngler, stateOf, tallyAnglerUnlocks } from './achievements'
 import { needsFullPass } from '@trmnl-games/idle-angler/content/achievements'
-import { coolerOf, entersOpen, formatWeight, unlocked, waterOf } from '@trmnl-games/idle-angler/sim'
+import { coolerOf, entersOpen, formatWeight, speciesLogged, unlocked, waterOf } from '@trmnl-games/idle-angler/sim'
 import { queueIdleAnglerAlerts } from '../lib/alerts'
 import { IDLE_ANGLER_RUNTIME } from './runtime'
 import { recordCatch } from './records'
@@ -150,6 +150,14 @@ async function simulateAnglerStep(ctx: MutationCtx, subject: Doc<'heroes'>, step
   }
   if (sequence !== angler.logSequence) patch.logSequence = sequence
   await ctx.db.patch(angler._id, patch)
+  // D220: who fishes each water, for the "who's here" lines; paused anglers stopped above, and one heading elsewhere is
+  // between waters. An admin catch-up passes no presence: it replays one angler, so it says nothing about who is where.
+  const waters: Record<string, PresenceTally> | undefined = tally.presence
+  if (waters !== undefined && result.angler.status === 'fishing' && result.angler.travelTo === undefined) {
+    const here = (waters[result.angler.waterId] ??= { count: 0, members: [] })
+    here.count += 1
+    here.members.push({ userId: owner._id, heroId: angler._id as unknown as Id<'heroes'>, level: speciesLogged(content, result.angler.logbook, result.angler.waterId) })
+  }
   // Achievements: diff lifetime state; an angler behind the catalog version gets one full pass.
   if (result.event !== undefined || result.extraEvents !== undefined || needsFullPass(angler.achievementsVersion)) {
     const updated = (await ctx.db.get(angler._id))!

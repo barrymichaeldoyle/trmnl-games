@@ -24,6 +24,7 @@
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   goal=ready (D166, with v2=1: two reached goals waiting on the Dock's Claim button and a dot on the Dock tab)
  *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) goal=count (a counted goal with its progress bar) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
+ *   company=none|crowd (D220: nobody else at the angler's water, or 23 there; three others by default)
  *   ranks=1 (D204, content v6: each water's rank on the Dock and in the Logbook, River Bend one species off Veteran, Millpond at Master)
  *   away=upgraded (the recap's lost fish all broke free on the old rod: the rod held now lands them)   away=mixed (one on the old rod, two still too heavy)
  *   passes=all (issue #7: every pass owned)   trophy=none (issue #6: no trophy-sized fish, the mount goal points at the wall)   trophy=poor (too few coins to mount)   wall=empty (nothing mounted)
@@ -367,6 +368,9 @@ if (params.get('ranks')) {
   for (const w of iaDock.waters ?? []) w.rank = counts[w.id] && (w.open || w.id === 'river_bend') ? rankOf(...counts[w.id]) : null;
   for (const entry of iaBook) entry.rank = counts[entry.water.id] ? rankOf(...counts[entry.water.id]) : null;
 }
+// D220: others at each water, as on Desk Crawler's floors; company=none leaves the angler alone, company=crowd fills its water.
+const waterOthers = { millpond: 3, river_bend: 9, harbour_pier: 1 };
+if (iaDock.waters) for (const w of iaDock.waters) w.others = params.get('company') === 'none' ? 0 : params.get('company') === 'crowd' && w.id === iaDock.angler?.waterId ? 23 : waterOthers[w.id] ?? 0;
 const queries = {
   'users:me': () => data.me,
   // D210: onlist=1 puts the signed-in player on Idle Angler's launch list.
@@ -386,6 +390,12 @@ const queries = {
   'paperLives/album:board': (args = {}) => ({ ...(args.board === 'fortune' ? paperLives.boardFortuneAll : paperLives.boardLongestWeek), board: args.board ?? 'longest', period: args.period ?? 'week', entries: [['Quillfeather_Longname', 'Ottilie Achterberg-Cartwright', 101], ['Barry', 'Maud Okafor', 100], ['Mo', 'Sid Rook', 94], ['Hidden player', '', 91], ['Bea', 'Ada Moss', 88]].map(([name, life, age], i) => ({ rank: i + 1, name, life, value: args.board === 'fortune' ? 400000 - i * 50000 : age, age, own: name === 'Barry', profile: name === 'Mo' })), own: { rank: 2, value: 100, age: 100 } }),
   'paperLives/public:lifePage': () => (params.get('private') === '1' ? null : { alias: 'Barry', ordinal: 1, name: 'Maud Okafor', age: 101, generation: 'Third of the Okafors', traits: ['Curious', 'Loyal'], epitaph: paperLives.memorial.memorial.epitaph, highlights: paperLives.memorial.logs.filter((l) => l.kind !== 'recap').slice(0, 8).map((l) => l.age + ': ' + l.summary), endedAt: Date.now() - 864e5, portrait: paperLives.memorial.life.portrait, photos: plPhotos(), parent: { ordinal: 0, name: 'Hamish Okafor' }, child: null }),
   'idleAngler/anglers:dock': () => iaDock,
+  'idleAngler/presence:here': () => {
+    const water = iaDock.waters?.find((w) => w.id === iaDock.angler?.waterId);
+    if (!water || iaDock.angler.status !== 'fishing' || iaDock.angler.travelTo) return null;
+    const names = [['Quill', 'old_hand', true], ['mossy_bram', 'local', true], ['Tess', 'local', false], ['Maximilian_Wolfgangs', 'regular', true], ['Dee', 'regular', true], ['Ana', 'newcomer', true]];
+    return { waterId: water.id, others: water.others, named: names.slice(0, Math.max(0, water.others - 1)).map(([name, id, profile]) => ({ name, standing: { kind: 'title', id }, profile })) };
+  },
   'idleAngler/anglers:logbook': () => iaBook,
   'idleAngler/payload:preview': () => ({ scene_base: '' }),
   'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: params.get('wall') === 'empty' ? [] : [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),

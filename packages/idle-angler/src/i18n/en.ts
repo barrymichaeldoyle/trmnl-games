@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS } from '../content/achievements'
+import { company } from './company'
 import { FLIES } from '../content/flies'
 import { contentV5 } from '../content/v5'
 import { BAND_PHRASE } from '../sim/conditions'
@@ -98,6 +99,7 @@ export const en: IaLanguage = {
     outOf: (bait) => `Out of ${bait.toLowerCase()}, fishing a bare hook.`,
     bareHook: 'Fishing a bare hook.',
     goalWaiting: (count, coins) => `${count > 1 ? `${count} goals` : 'Goal'} reached! Claim ${coins} coins in the companion.`,
+    company: company('and', (k) => `and ${k} ${k === 1 ? 'other' : 'others'}`, (k) => `${k} other ${k === 1 ? 'angler' : 'anglers'} here`),
     fish: (n) => `${n} fish`,
     best: (weight, fish) => `Best ${weight} ${fish}`,
     gotAway: (n) => `${n} got away`,

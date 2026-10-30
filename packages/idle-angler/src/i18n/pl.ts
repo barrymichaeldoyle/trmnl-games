@@ -1,4 +1,5 @@
 import { en } from './en'
+import { company } from './company'
 import type { FishName, IaLanguage } from './types'
 
 /**
@@ -201,6 +202,7 @@ export const pl: IaLanguage = {
     outOf: (bait) => `Koniec: ${bait.toLowerCase()}, goły haczyk.`,
     bareHook: 'Łowi na goły haczyk.',
     goalWaiting: (c, value) => `${c > 1 ? `Osiągnięte cele: ${c}` : 'Cel osiągnięty'}! Odbierz ${coins(value)} w aplikacji.`,
+    company: company('i', (k) => `i jeszcze ${n(k)}`, (k) => `Inni wędkarze tutaj: ${n(k)}`),
     fish: (c) => ryby(c),
     best: (weight, x) => `Najlepsza: ${x.toLowerCase()} ${weight}`,
     gotAway: (c) => `Uciekło: ${c}`,

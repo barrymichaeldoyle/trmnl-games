@@ -16,6 +16,7 @@ import { readDeviceBoard } from './leaderboard'
 import { deviceFlyCode, flyTotal } from './flies'
 import { flyForClaim } from '@trmnl-games/idle-angler/content/flies'
 import { deviceLocale, trmnlUserChanged } from '../lib/trmnlUser'
+import { waterCompany } from './presence'
 
 /**
  * Idle Angler's device payload for one authorized installation (trmnl.md "Query read budget"): fixed reads,
@@ -86,9 +87,18 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
     artBaseUrl: process.env.CONVEX_SITE_URL ?? null,
     locale: deviceLocale(user),
     board: angler && angler.activationState === 'active' ? await readDeviceBoard(ctx, angler, now) : null,
+    // D220: the water's other anglers, three named at most.
+    company: angler && angler.activationState === 'active' && angler.status === 'fishing' && angler.travelTo === undefined ? await deviceCompany(ctx, angler) : null,
     stories: logs.map((log) => ({ kind: log.kind, summary: log.summary, at: log.at, ...(log.detail.speciesId === undefined ? {} : { speciesId: log.detail.speciesId }), ...(log.detail.grams === undefined ? {} : { grams: log.detail.grams }), ...(log.kind === 'achievement' && log.detail.name !== undefined ? { title: log.detail.name } : {}) })),
   })
 }
+
+/** D220: the three others at the angler's water with the most species logged there, by public name, and the head count. */
+async function deviceCompany(ctx: QueryCtx, angler: Doc<'anglers'>) {
+  const { others, named } = await waterCompany(ctx, angler, angler.waterId, DEVICE_NAMES)
+  return { names: named.map((member) => member.name), others }
+}
+const DEVICE_NAMES = 3
 
 /** The owner's own device preview in the companion (no installation needed). */
 export const preview = query({

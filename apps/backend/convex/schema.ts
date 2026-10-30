@@ -10,6 +10,9 @@ import { deskCounters as pwDeskCounters, faction as pwFaction, factionId as pwFa
 /** D216: one hero on a floor, as the tick saw it; names are read from the owner when shown, so a rename shows at once. */
 export const presenceMember = v.object({ userId: v.id('users'), heroId: v.id('heroes'), level: v.number() })
 
+/** D220: one angler at a water, as the tick saw it; `heroId` is the engine's name for the angler, `level` its species logged there. */
+const iaPresenceMember = v.object({ userId: v.id('users'), heroId: v.id('anglers'), level: v.number() })
+
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
 
@@ -281,12 +284,27 @@ export default defineSchema({
   achievementStats: deskCrawlerEngine.achievementStats,
 
   iaWorldState: idleAnglerEngine.world,
-  iaSimulationRuns: defineTable(idleAnglerEngine.runFields).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
+  iaSimulationRuns: defineTable({
+    ...idleAnglerEngine.runFields,
+    /** D220: who the walk found at each water so far, keyed by water id; copied to `waterPresence` when it finishes. */
+    censusPresence: v.optional(v.record(v.string(), v.object({ count: v.number(), members: v.array(iaPresenceMember) }))),
+  }).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
   iaSimulationFailures: idleAnglerEngine.failures,
   iaLeaderboardPublications: defineTable(idleAnglerEngine.publicationFields).index('by_runId', ['runId']).index('by_state', ['state']),
   iaAchievementStats: idleAnglerEngine.achievementStats,
 
   /** One per user once they start Idle Angler (D115), like `deskCrawlerProfiles`. */
+  /**
+   * Who fishes each Idle Angler water (D220), as `floorPresence` (D216): one row per water with anyone at it, replaced
+   * at the end of each tick's angler walk. `members` holds the first `PRESENCE_MEMBERS_MAX` by species logged there.
+   */
+  waterPresence: defineTable({
+    waterId: v.string(),
+    count: v.number(),
+    members: v.array(iaPresenceMember),
+    asOfTick: v.number(),
+  }).index('by_waterId', ['waterId']),
+
   idleAnglerProfiles: defineTable({
     userId: v.id('users'),
     state: v.union(v.literal('active'), v.literal('deleting')),

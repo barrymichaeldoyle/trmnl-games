@@ -1,4 +1,5 @@
 import { en } from './en'
+import { company } from './company'
 import type { FishName, IaLanguage } from './types'
 
 /** D200: Idle Angler in Spanish (tú, as the rest of the site; "app" for the companion). */
@@ -199,6 +200,7 @@ export const es: IaLanguage = {
     outOf: (bait) => `Sin ${bait.toLowerCase()}, anzuelo vacío.`,
     bareHook: 'Pescando con el anzuelo vacío.',
     goalWaiting: (c, coins) => `¡${c > 1 ? `${c} objetivos cumplidos` : 'Objetivo cumplido'}! Cobra ${n(coins)} monedas en la app.`,
+    company: company('y', (k) => `y ${n(k)} más`, (k) => `${n(k)} ${k === 1 ? 'pescador más' : 'pescadores más'} aquí`),
     fish: (c) => `${c} ${pez(c)}`,
     best: (weight, x) => `Mejor: ${x.toLowerCase()} ${weight}`,
     gotAway: (c) => (c === 1 ? '1 se escapó' : `${c} se escaparon`),

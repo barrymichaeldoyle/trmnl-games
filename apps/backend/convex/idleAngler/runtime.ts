@@ -6,6 +6,7 @@ import { makeSchedule } from '@trmnl-games/engine/schedule'
 import { internal } from '../_generated/api'
 import type { EngineRuntime } from '../lib/engine/runtime'
 import { IDLE_ANGLER_TABLES } from '../lib/engine/tables'
+import { publishWaterPresence } from './presence'
 
 /** Idle Angler ticks five minutes into each quarter-hour, so it never shares a slot with Desk Crawler (idle-angler.md "Architecture"). */
 export const IDLE_ANGLER_SCHEDULE = makeSchedule(5 * 60_000)
@@ -27,4 +28,5 @@ export const IDLE_ANGLER_RUNTIME: EngineRuntime<IdleAnglerCatalog> = {
     buildBatch: internal.idleAngler.leaderboard.buildBatch as unknown as Refs['buildBatch'],
     cleanupPublication: internal.idleAngler.leaderboard.cleanupPublication as unknown as Refs['cleanupPublication'],
   },
+  onCohortWalked: publishWaterPresence,
 }

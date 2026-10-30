@@ -139,6 +139,11 @@ export interface IaLanguage {
     readonly outOf: (bait: string) => string
     readonly bareHook: string
     readonly goalWaiting: (count: number, coins: number) => string
+    /**
+     * D220: who else fishes the angler's water, after the people mark: up to three public names by species logged
+     * there, then how many more; with no name to show, the count alone. Names arrive plain and the template escapes them.
+     */
+    readonly company: (names: readonly string[], others: number) => string
     readonly fish: (n: number) => string
     readonly best: (weight: string, fish: string) => string
     readonly gotAway: (n: number) => string

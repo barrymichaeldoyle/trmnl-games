@@ -102,6 +102,8 @@ export interface IdleAnglerPayloadInput {
   readonly board?: PayloadBoard | null
   /** D200: the owner's language for everything the screen says; English when absent. */
   readonly locale?: Locale
+  /** D220: the other anglers at this water: up to three public names by species logged there, and how many in all. */
+  readonly company?: { readonly names: readonly string[]; readonly others: number } | null
 }
 
 export interface PayloadBoard {
@@ -231,6 +233,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     labels,
     season,
     goal_line: angler.goal ? words.goal(angler.goal) : null,
+    // D220: who else fishes this water, behind the people mark; only while casting here, not heading elsewhere or paused.
+    company: status === 'fishing' && input.company && input.company.others > 0 ? say.company(input.company.names, input.company.others) : null,
     // Issue #8: the X's goal row shows the waiting coins instead of the next goal until they are claimed.
     goal_claim: waiting ? { ...waiting, label: say.goalWaiting(waiting.count, waiting.coins) } : null,
     weather: input.weather,

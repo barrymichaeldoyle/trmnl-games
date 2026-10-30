@@ -224,4 +224,4 @@ Functions live under `idleAngler.*` ([spec](idle-angler.md)). Intents use the co
 | `idleAngler.anglers.pause`, `resume`, `setPublicProfile` | As Desk Crawler's |
 | `deletion.requestGameDeletion({ gameSlug: 'idle-angler' })` | Deletes Idle Angler progress only |
 
-Queries: `idleAngler.anglers.dock` (angler, cooler, bait, shop, forecast, stories), `idleAngler.anglers.logbook`, `idleAngler.payload.preview`, and `platform.list` (games this viewer can see). Admin: `platform.setGameStatus`.
+Queries: `idleAngler.anglers.dock` (angler, cooler, bait, shop, forecast, stories), `idleAngler.anglers.logbook`, `idleAngler.payload.preview`, `idleAngler.presence.here` (D220: everyone else the last tick found fishing the angler's water, `others` and up to 50 `named` by species logged there with their standing; null while paused or heading elsewhere; the dock's waters carry the per-water `others` count), and `platform.list` (games this viewer can see). Admin: `platform.setGameStatus`.

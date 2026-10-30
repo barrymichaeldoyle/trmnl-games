@@ -18,6 +18,8 @@ export const IA_MARKS = {
   trophy: ['########', '#.####.#', '#.####.#', '.######.', '..####..', '...##...', '..####..', '.######.'],
   /** A pennant on its pole: the current goal and goals reached (template v15), apart from the milestones' star. */
   goal: ['##......', '####....', '######..', '########', '######..', '####....', '#.......', '#.......'],
+  /** D220: other anglers at the water, Desk Crawler's people mark. */
+  people: ['.##..##.', '.##..##.', '........', '###..###', '###..###', '###..###', '###..###', '........'],
   /** Experience and level-ups: a five-point star. */
   star: ['...##...', '...##...', '########', '.######.', '..####..', '.######.', '.##..##.', '##....##'],
 

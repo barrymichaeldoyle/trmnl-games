@@ -32,7 +32,7 @@ export interface Dock {
     readonly speciesTotal: number
   }
   readonly catches?: ReadonlyArray<{ id: Id<'catches'>; speciesId: string; name: string; grams: number; value: number; caughtTick: number; record?: boolean }>
-  readonly waters?: ReadonlyArray<{ id: string; name: string; opensAfter: { waterId: string; waterName: string; species: number; logged: number } | null; access: string | null; open: boolean; charter?: boolean; closed?: boolean; weather: string; band: string; bitePercent: number; baits: readonly string[]; weatherUntil: number; rank?: WaterRank | null }>
+  readonly waters?: ReadonlyArray<{ id: string; name: string; opensAfter: { waterId: string; waterName: string; species: number; logged: number } | null; access: string | null; open: boolean; charter?: boolean; closed?: boolean; weather: string; band: string; bitePercent: number; baits: readonly string[]; weatherUntil: number; rank?: WaterRank | null; others?: number }>
   readonly shop?: {
     readonly rod: { name: string; price: number; limitGrams: number; biteBonusPercent: number } | null
     readonly cooler: { name: string; price: number; capacity: number } | null

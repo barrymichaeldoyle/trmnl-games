@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import schema from '../../apps/backend/convex/schema'
 import { runTick, seedHero, seedWorld, type T } from './helpers'
 import { nextIdleAnglerTick, runIdleAnglerTick, seedAngler } from './idleAnglerHelpers'
+import { api } from '@trmnl-games/backend/api'
 
 const modules = import.meta.glob('../../apps/backend/convex/**/*.ts')
 
@@ -23,6 +24,40 @@ describe('Idle Angler tick on the shared engine (D115, S2)', () => {
     expect(run).toMatchObject({ tick: 1, state: 'completed', wallSlot: Date.UTC(2026, 10, 2, 6, 5), processed: 0, landed: 0 })
     // The same slot never starts a second tick.
     expect(await runIdleAnglerTick(t)).toBeNull()
+  })
+
+  it('publishes who fishes each water and names the others on the device and in the companion (D220)', async () => {
+    const logbook = (...ids: string[]) => Object.fromEntries(ids.map((id) => [id, { count: 1, bestGrams: 100, firstTick: 0 }]))
+    await seedAngler(t, {}, 'Ana')
+    await seedAngler(t, { logbook: logbook('minnow', 'roach', 'rudd') }, 'Bo')
+    await seedAngler(t, { logbook: logbook('minnow') }, 'Cy')
+    await seedAngler(t, { logbook: logbook('minnow', 'roach', 'rudd', 'perch', 'bream'), publicProfile: false }, 'Dee')
+    // Paused: never on a water's line; one heading elsewhere arrives in the tick; a name under repair is counted but not named.
+    await seedAngler(t, { status: 'paused' }, 'Napper')
+    await seedAngler(t, { travelTo: 'river_bend' }, 'Walker')
+    const gone = await seedAngler(t, { logbook: logbook('minnow', 'roach', 'rudd', 'perch', 'bream') }, 'Gone')
+    await t.run(async (ctx) => ctx.db.patch((await ctx.db.get(gone))!.userId, { nameRepairRequired: true }))
+    await nextIdleAnglerTick(t)
+
+    const rows = await t.run(async (ctx) => await ctx.db.query('waterPresence').take(10))
+    expect(rows.map((row) => [row.waterId, row.count]).sort()).toEqual([['millpond', 5], ['river_bend', 1]])
+    const ana = t.withIdentity({ issuer: 'issuer', subject: 'Ana' })
+    const here = await ana.query(api.idleAngler.presence.here, {})
+    expect(here?.others).toBe(4)
+    // By species logged here; a hidden page names the player without a link.
+    expect(here?.named.map((m) => [m.name, m.profile])).toEqual([['Dee', false], ['Bo', true], ['Cy', true]])
+    expect(here?.named[0]?.standing).toEqual({ kind: 'title', id: expect.any(String) })
+    const dock = await ana.query(api.idleAngler.anglers.dock, {})
+    expect(dock.waters.find((w: { id: string }) => w.id === 'millpond').others).toBe(4)
+    expect((await ana.query(api.idleAngler.payload.preview, {})).company).toBe('Dee, Bo, Cy and 1 other')
+    expect(await t.withIdentity({ issuer: 'issuer', subject: 'Napper' }).query(api.idleAngler.presence.here, {})).toBeNull()
+
+    // A water nobody fishes any more loses its row.
+    await t.run(async (ctx) => {
+      for (const angler of await ctx.db.query('anglers').take(20)) await ctx.db.patch(angler._id, { status: 'paused' })
+    })
+    await nextIdleAnglerTick(t)
+    expect(await t.run(async (ctx) => await ctx.db.query('waterPresence').take(10))).toEqual([])
   })
 
   it('casts every tick: logs, catches up to the cooler and progress markers', async () => {

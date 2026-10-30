@@ -13,6 +13,7 @@ import { FishName, FishText, FromWater, WaterName } from './-fish'
 import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
+import { WaterCompany, WaterCount } from './-company'
 import { LocalTime } from '../../../lib/localTime'
 import { formatDate, formatTime, useLocale, useT } from '../../../lib/i18n'
 import { iaDock } from '../../../i18n/iaDock'
@@ -94,6 +95,7 @@ function DockPage() {
           </p>
           {here ? <p className="text-muted">{full?.season ? <>{words.season(full.season.id)} · </> : null}{words.band(here.band)}, {words.weather(here.weather).toLowerCase()} · {t.biteChance(here.bitePercent)}</p> : null}
           {dock.nextTickAt && !destination && angler.status !== 'paused' ? <p className="text-sm text-muted">{t.nextCast} {time(dock.nextTickAt)}.</p> : null}
+          <WaterCompany />
         </div>
         {/* The logbook meter counts species towards the next title; the sentence under it says what the title is, in words a first visit can follow. */}
         <div className="grid gap-4 sm:grid-cols-2">
@@ -168,7 +170,7 @@ function DockPage() {
           {shownWaters.map((water) => (
             <li key={water.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
               <div className="min-w-0">
-                <p className="font-semibold"><WaterName id={water.id} />{water.id === angler.waterId ? <span className="text-muted"> · {t.here}</span> : water.id === angler.travelTo ? <span className="text-muted"> · {t.headingThere}</span> : ''}</p>
+                <p className="flex flex-wrap items-center gap-x-3 font-semibold"><span><WaterName id={water.id} />{water.id === angler.waterId ? <span className="text-muted"> · {t.here}</span> : water.id === angler.travelTo ? <span className="text-muted"> · {t.headingThere}</span> : ''}</span><WaterCount others={water.others ?? 0} /></p>
                 {water.rank ? <p className="text-sm"><strong>{words.waterRank(water.rank.id, water.id)}</strong> · <span className="text-muted">{water.rank.next ? t.rankNext(water.rank.next.species - water.rank.logged, words.lang.waterRanks[water.rank.next.id] ?? water.rank.next.id) : t.rankTop}</span></p> : null}
                 {water.open ? (
                   <>

@@ -1,4 +1,5 @@
 import { en } from './en'
+import { company } from './company'
 import type { FishName, IaLanguage } from './types'
 
 /** D200: Idle Angler in Dutch (je, as the rest of the site; "app" for the companion). */
@@ -198,6 +199,7 @@ export const nl: IaLanguage = {
     outOf: (bait) => `${bait} op, kale haak.`,
     bareHook: 'Vist met een kale haak.',
     goalWaiting: (c, coins) => `${c > 1 ? `${c} doelen` : 'Doel'} gehaald! Haal ${n(coins)} munten op in de app.`,
+    company: company('en', (k) => `en ${n(k)} ${k === 1 ? 'ander' : 'anderen'}`, (k) => `${n(k)} ${k === 1 ? 'andere visser' : 'andere vissers'} hier`),
     fish: (c) => `${c} ${vis(c)}`,
     best: (weight, x) => `Beste: ${x.toLowerCase()} ${weight}`,
     gotAway: (c) => `${c} ontsnapt`,

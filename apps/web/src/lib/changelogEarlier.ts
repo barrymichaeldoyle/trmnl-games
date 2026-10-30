@@ -3,6 +3,22 @@ import type { ChangelogEntry } from './changelogRecent'
 /** The public dev log before the newest entries (changelogRecent.ts), newest first; the What's new page shows both. */
 export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-21',
+    changes: [
+      {
+        title: 'A lighter front page',
+        body: 'Every page now loads about a sixth of the script it used to, so the site opens faster on a phone. On a phone the front page names each game above its screen, the recent changes link to their full entries, and the analytics question takes one line.',
+        fr: { title: 'Une page d’accueil plus légère', body: 'Chaque page charge désormais environ six fois moins de script, et le site s’ouvre plus vite sur un téléphone. Sur un téléphone, la page d’accueil nomme chaque jeu au-dessus de son écran, les changements récents renvoient à leur entrée complète, et la question sur les statistiques tient en une ligne.' },
+        de: { title: 'Eine leichtere Startseite', body: 'Jede Seite lädt jetzt etwa ein Sechstel des bisherigen Skripts, sodass die Seite auf dem Handy schneller öffnet. Auf dem Handy nennt die Startseite jedes Spiel über seinem Bildschirm, die neuesten Änderungen verlinken auf ihren vollständigen Eintrag, und die Frage zu den Statistiken passt in eine Zeile.' },
+        es: { title: 'Una portada más ligera', body: 'Cada página carga ahora cerca de una sexta parte del script de antes, así que el sitio abre más rápido en el móvil. En el móvil, la portada nombra cada juego encima de su pantalla, los cambios recientes enlazan a su entrada completa y la pregunta sobre las estadísticas ocupa una línea.' },
+        it: { title: 'Una pagina iniziale più leggera', body: 'Ogni pagina ora carica circa un sesto dello script di prima, così il sito si apre più in fretta sul telefono. Sul telefono la pagina iniziale nomina ogni gioco sopra il suo schermo, le modifiche recenti rimandano alla loro voce completa e la domanda sulle statistiche sta in una riga.' },
+        pt: { title: 'Uma página inicial mais leve', body: 'Cada página agora carrega cerca de um sexto do script de antes, então o site abre mais rápido no celular. No celular, a página inicial nomeia cada jogo acima da sua tela, as mudanças recentes levam à sua entrada completa e a pergunta sobre estatísticas cabe em uma linha.' },
+        pl: { title: 'Lżejsza strona główna', body: 'Każda strona ładuje teraz około jednej szóstej dawnego skryptu, więc witryna otwiera się szybciej na telefonie. Na telefonie strona główna podaje nazwę każdej gry nad jej ekranem, ostatnie zmiany prowadzą do pełnego wpisu, a pytanie o statystyki mieści się w jednej linii.' },
+        nl: { title: 'Een lichtere voorpagina', body: 'Elke pagina laadt nu ongeveer een zesde van het script van vroeger, zodat de site sneller opent op een telefoon. Op een telefoon noemt de voorpagina elk spel boven zijn scherm, de recente wijzigingen linken naar hun volledige vermelding, en de vraag over statistieken past op één regel.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-20',
     changes: [
       {

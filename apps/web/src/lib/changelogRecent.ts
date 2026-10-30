@@ -35,6 +35,17 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-30',
     changes: [
       {
+        title: 'See who fishes your water',
+        body: 'Idle Angler now shows who else is fishing your water: on your TRMNL, three names and how many more; on the Dock, a count for every water and the whole list behind See everyone.',
+        fr: { title: 'Voyez qui pêche avec vous', body: 'Idle Angler montre maintenant qui d’autre pêche au même endroit que vous : sur votre TRMNL, trois noms et combien d’autres ; sur le Ponton, le nombre pour chaque plan d’eau et la liste complète derrière Voir tout le monde.' },
+        de: { title: 'Sieh, wer an deinem Gewässer angelt', body: 'Idle Angler zeigt jetzt, wer sonst noch an deinem Gewässer angelt: auf deinem TRMNL drei Namen und wie viele weitere, am Steg die Zahl für jedes Gewässer und die ganze Liste hinter Alle ansehen.' },
+        es: { title: 'Mira quién pesca en tu agua', body: 'Idle Angler muestra ahora quién más pesca en tu agua: en tu TRMNL, tres nombres y cuántos más; en el Muelle, la cifra de cada agua y la lista completa tras Ver a todos.' },
+        it: { title: 'Guarda chi pesca nelle tue acque', body: 'Idle Angler ora mostra chi altro pesca nelle tue acque: sul TRMNL tre nomi e quanti altri, al Pontile il numero per ogni specchio d’acqua e l’elenco completo dietro Vedi tutti.' },
+        pt: { title: 'Veja quem pesca na sua água', body: 'O Idle Angler agora mostra quem mais está pescando na sua água: no TRMNL, três nomes e quantos mais; no Píer, a contagem de cada água e a lista completa em Ver todos.' },
+        pl: { title: 'Zobacz, kto łowi z tobą', body: 'Idle Angler pokazuje teraz, kto jeszcze łowi na twoim łowisku: na TRMNL trzy imiona i ilu jeszcze, na Pomoście liczbę przy każdym łowisku i pełną listę pod Zobacz wszystkich.' },
+        nl: { title: 'Zie wie er bij jou vist', body: 'Idle Angler laat nu zien wie er nog meer op jouw water vist: op je TRMNL drie namen en hoeveel anderen, op de Stek het aantal bij elk water en de hele lijst achter Bekijk iedereen.' },
+      },
+      {
         title: 'Keepsakes land on your shelf',
         body: 'Scanning the keepsake code on your Desk Crawler screen now opens your keepsakes page, with confetti and the new design marked on the shelf.',
         fr: { title: 'Les souvenirs arrivent sur votre étagère', body: 'Scanner le code souvenir de votre écran Desk Crawler ouvre maintenant la page des souvenirs, avec des confettis et le nouveau modèle signalé sur l’étagère.' },
@@ -115,22 +126,6 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
         pt: { title: 'Um Ladino cura-se até ao seu próprio limite', body: 'Uma decisão que curava um Ladino podia levá-lo acima dos seus PV máximos, e o jogo pausava então esse herói para uma verificação técnica até alguém verificar. A cura agora para no limite certo, o herói pausado voltou ao trabalho, e uma pausa destas passa a avisar-nos na mesma hora em que acontece.' },
         pl: { title: 'Łotrzyk leczy się do własnego limitu', body: 'Decyzja, która leczyła Łotrzyka, mogła wypchnąć go ponad maksymalne PŻ, a gra wstrzymywała wtedy tego bohatera na kontrolę techniczną, aż ktoś to sprawdził. Leczenie zatrzymuje się teraz na właściwym limicie, wstrzymany bohater wrócił do pracy, a taka pauza daje nam teraz znać w tej samej godzinie.' },
         nl: { title: 'Een Schurk geneest tot zijn eigen grens', body: 'Een beslissing die een Schurk genas, kon hem boven zijn maximale HP brengen, waarna het spel die held pauzeerde voor een technische controle tot iemand keek. Genezing stopt nu op de juiste grens, de gepauzeerde held is weer aan het werk, en zo’n pauze meldt zich nu in hetzelfde uur bij ons.' },
-      },
-    ],
-  },
-  {
-    date: '2026-10-21',
-    changes: [
-      {
-        title: 'A lighter front page',
-        body: 'Every page now loads about a sixth of the script it used to, so the site opens faster on a phone. On a phone the front page names each game above its screen, the recent changes link to their full entries, and the analytics question takes one line.',
-        fr: { title: 'Une page d’accueil plus légère', body: 'Chaque page charge désormais environ six fois moins de script, et le site s’ouvre plus vite sur un téléphone. Sur un téléphone, la page d’accueil nomme chaque jeu au-dessus de son écran, les changements récents renvoient à leur entrée complète, et la question sur les statistiques tient en une ligne.' },
-        de: { title: 'Eine leichtere Startseite', body: 'Jede Seite lädt jetzt etwa ein Sechstel des bisherigen Skripts, sodass die Seite auf dem Handy schneller öffnet. Auf dem Handy nennt die Startseite jedes Spiel über seinem Bildschirm, die neuesten Änderungen verlinken auf ihren vollständigen Eintrag, und die Frage zu den Statistiken passt in eine Zeile.' },
-        es: { title: 'Una portada más ligera', body: 'Cada página carga ahora cerca de una sexta parte del script de antes, así que el sitio abre más rápido en el móvil. En el móvil, la portada nombra cada juego encima de su pantalla, los cambios recientes enlazan a su entrada completa y la pregunta sobre las estadísticas ocupa una línea.' },
-        it: { title: 'Una pagina iniziale più leggera', body: 'Ogni pagina ora carica circa un sesto dello script di prima, così il sito si apre più in fretta sul telefono. Sul telefono la pagina iniziale nomina ogni gioco sopra il suo schermo, le modifiche recenti rimandano alla loro voce completa e la domanda sulle statistiche sta in una riga.' },
-        pt: { title: 'Uma página inicial mais leve', body: 'Cada página agora carrega cerca de um sexto do script de antes, então o site abre mais rápido no celular. No celular, a página inicial nomeia cada jogo acima da sua tela, as mudanças recentes levam à sua entrada completa e a pergunta sobre estatísticas cabe em uma linha.' },
-        pl: { title: 'Lżejsza strona główna', body: 'Każda strona ładuje teraz około jednej szóstej dawnego skryptu, więc witryna otwiera się szybciej na telefonie. Na telefonie strona główna podaje nazwę każdej gry nad jej ekranem, ostatnie zmiany prowadzą do pełnego wpisu, a pytanie o statystyki mieści się w jednej linii.' },
-        nl: { title: 'Een lichtere voorpagina', body: 'Elke pagina laadt nu ongeveer een zesde van het script van vroeger, zodat de site sneller opent op een telefoon. Op een telefoon noemt de voorpagina elk spel boven zijn scherm, de recente wijzigingen linken naar hun volledige vermelding, en de vraag over statistieken past op één regel.' },
       },
     ],
   },

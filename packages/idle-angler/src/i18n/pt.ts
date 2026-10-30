@@ -1,4 +1,5 @@
 import { en } from './en'
+import { company } from './company'
 import type { FishName, IaLanguage } from './types'
 
 /** D200: Idle Angler in Brazilian Portuguese (você, as the rest of the site; "app" for the companion). */
@@ -199,6 +200,7 @@ export const pt: IaLanguage = {
     outOf: (bait) => `Sem ${bait.toLowerCase()}, anzol vazio.`,
     bareHook: 'Pescando com o anzol vazio.',
     goalWaiting: (c, coins) => `${c > 1 ? `${c} metas cumpridas` : 'Meta cumprida'}! Resgate ${n(coins)} moedas no app.`,
+    company: company('e', (k) => `e mais ${n(k)}`, (k) => `${n(k)} ${k === 1 ? 'outro pescador' : 'outros pescadores'} aqui`),
     fish: (c) => `${c} ${peixe(c)}`,
     best: (weight, x) => `Melhor: ${x.toLowerCase()} ${weight}`,
     gotAway: (c) => (c === 1 ? '1 escapou' : `${c} escaparam`),

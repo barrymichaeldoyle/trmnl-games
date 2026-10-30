@@ -59,6 +59,8 @@ const base: IdleAnglerPayloadInput = {
   band: 'dusk',
   stories,
   artBaseUrl: 'https://local-art.invalid',
+  // D220: three named others at the water and eight more.
+  company: { names: ['Quill', 'Mo', 'Bea'], others: 11 },
   board: {
     rank: 3,
     ownGrams: 1900,
@@ -106,7 +108,7 @@ export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerP
     },
     outsideTop: { ...b, board: { ...b.board!, rank: 19, ownGrams: 610, top: b.board!.top.map((row) => ({ ...row, own: false })) } },
     unranked: { ...b, board: { ...b.board!, rank: null, ownGrams: null, top: b.board!.top.map((row) => ({ ...row, own: false })) } },
-    longText: { ...b, angler: { ...angler, alias: 'WWWWWWWWWWWWWWWWWWWW', gold: 999999, coolerTier: 4, speciesLogged: 20 }, coolerUsed: 23, stories: stories.map((s) => ({ ...s, summary: 'An 18.0 kg Conger Eel took the mackerel strip in the dark. A new personal best.' })) },
+    longText: { ...b, angler: { ...angler, alias: 'WWWWWWWWWWWWWWWWWWWW', gold: 999999, coolerTier: 4, speciesLogged: 20 }, coolerUsed: 23, company: { names: ['WWWWWWWWWWWWWWWWWWWW', 'MMMMMMMMMMMMMMMMMMMM', 'QQQQQQQQQQQQQQQQQQQQ'], others: 128 }, stories: stories.map((s) => ({ ...s, summary: 'An 18.0 kg Conger Eel took the mackerel strip in the dark. A new personal best.' })) },
     stale: { ...b, world: { ...b.world!, lastCompletedAt: PREVIEW_NOW - 90 * 60_000 } },
     servicePaused: { ...b, world: { ...b.world!, paused: true } },
     pending: { ...b, angler: { ...angler, activationState: 'pending_trmnl' }, stories: [] },
