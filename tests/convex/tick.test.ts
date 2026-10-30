@@ -192,6 +192,55 @@ describe('tick scheduler', () => {
     })
   })
 
+  it('publishes who is on each floor and names the others on the device and in the companion (D216)', async () => {
+    const named = async (alias: string, overrides: Record<string, unknown> = {}) => {
+      const heroId = await seedHero(t, overrides)
+      await t.run(async (ctx) => {
+        const hero = (await ctx.db.get(heroId))!
+        await ctx.db.patch(hero.userId, { publicAlias: alias, tokenIdentifier: `issuer|${alias}` })
+        await ctx.db.patch(heroId, { name: `${alias} hero` })
+      })
+      return heroId
+    }
+    const base = starterHero('x', contentV1, 0)
+    await named('Ana', { level: 2 })
+    await named('Bo', { level: 5 })
+    await named('Cy', { level: 3 })
+    await named('Dee', { level: 4 })
+    await named('Eve', { level: 6, publicProfile: false })
+    // Elsewhere, paused, travelling or under name repair: never on this floor's line, and repair hides the name only.
+    await named('Far', { biomeId: 'server_room' })
+    await named('Napper', { status: 'paused' })
+    await named('Walker', { status: 'travelling', targetBiomeId: 'server_room', arriveAtTick: 9 })
+    const hidden = await named('Gone', { level: 9 })
+    await t.run(async (ctx) => ctx.db.patch((await ctx.db.get(hidden))!.userId, { nameRepairRequired: true }))
+    await runTick(t)
+
+    const rows = await t.run(async (ctx) => await ctx.db.query('floorPresence').take(10))
+    expect(rows.map((row) => [row.biomeId, row.count]).sort()).toEqual([[base.biomeId, 6], ['server_room', 1]].sort())
+
+    const ana = t.withIdentity({ issuer: 'issuer', subject: 'Ana' })
+    const here = await ana.query(api.presence.here, {})
+    expect(here?.others).toBe(5)
+    // By level, the hidden owner counted but not named; a hidden page names the player without a link.
+    expect(here?.named.map((m) => [m.name, m.profile])).toEqual([['Eve', false], ['Bo', true], ['Dee', true], ['Cy', true]])
+    const mine = await ana.query(api.heroes.mine, {})
+    expect(mine.biomes.find((b: { id: string }) => b.id === base.biomeId).others).toBe(5)
+    expect(mine.biomes.find((b: { id: string }) => b.id === 'server_room')?.others ?? 1).toBe(1)
+    const preview = await ana.query(api.trmnlPayload.mine, { now: Date.now() })
+    expect(preview.company).toBe('Eve, Bo, Dee and 2 others')
+    expect(preview.company_short).toBe('5 other heroes here')
+
+    // A floor nobody stands on any more loses its row.
+    await t.run(async (ctx) => {
+      const far = await ctx.db.query('users').withIndex('by_tokenIdentifier', (q) => q.eq('tokenIdentifier', 'issuer|Far')).unique()
+      await ctx.db.patch(far!.activeHeroId!, { status: 'paused' })
+    })
+    vi.setSystemTime(SLOT + 15 * 60_000 + 1_000)
+    await runTick(t)
+    expect((await t.run(async (ctx) => await ctx.db.query('floorPresence').take(10))).map((row) => row.biomeId)).toEqual([base.biomeId])
+  })
+
   it('never simulates pending heroes or heroes not yet eligible', async () => {
     const pending = await seedHero(t, { activationState: 'pending_trmnl' })
     const later = await seedHero(t, { eligibleFromTick: 5 })

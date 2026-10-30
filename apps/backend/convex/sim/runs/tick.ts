@@ -21,7 +21,7 @@ import { needsFullPass } from '@trmnl-games/desk-crawler/sim/core/achievements'
 import { SLOT_MS, SLOT_OFFSET_MS, wallSlotFor } from '@trmnl-games/desk-crawler/sim/schedule'
 import { queueAlerts } from '../../lib/alerts'
 import { DESK_CRAWLER_RUNTIME } from '../../lib/engine/deskCrawler'
-import { runBatch, startRun, watchdogStep, type SubjectStep } from '../../lib/engine/runner'
+import { runBatch, startRun, watchdogStep, type PresenceTally, type SubjectStep } from '../../lib/engine/runner'
 import { noteQuarantine } from '../../incidents'
 import { accumulatorOf, addBucket, creditTick, foldScore } from '../../lib/engine/scores'
 import { shouldPublish as engineShouldPublish } from '@trmnl-games/engine/schedule'
@@ -88,6 +88,14 @@ export async function simulateHeroStep(ctx: MutationCtx, hero: Doc<'heroes'>, { 
       held.map((item) => ({ id: item._id, kind: item.kind })),
     )
     if (ready) dormant = false
+  }
+  // D216: who is on each floor, for the "who's here" lines. Travelling, knocked-out, dormant and quarantined heroes are elsewhere.
+  // An admin catch-up passes no presence: it replays one hero, so it says nothing about who is where.
+  const floors: Record<string, PresenceTally> | undefined = tally.presence
+  if (floors !== undefined && !dormant && hero.simulationState !== 'quarantined' && hero.status !== 'travelling' && hero.status !== 'dead') {
+    const floor = (floors[hero.biomeId] ??= { count: 0, members: [] })
+    floor.count += 1
+    floor.members.push({ userId: owner._id, heroId: hero._id, level: hero.level })
   }
   if (dormant && !run.publishes) {
     counts.skippedDormant += 1

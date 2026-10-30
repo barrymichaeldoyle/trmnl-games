@@ -32,6 +32,22 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-30',
+    changes: [
+      {
+        title: 'See who shares your floor',
+        body: 'Your TRMNL now names up to three other heroes on your hero’s floor under the status line, with how many more are there. In the companion, the world map shows how many heroes are on each floor, and See everyone lists everyone on yours, linked to their public pages.',
+        fr: { title: 'Voyez qui partage votre étage', body: 'Votre TRMNL nomme désormais jusqu’à trois autres héros présents à l’étage de votre héros, sous la ligne d’état, avec le nombre de ceux qui restent. Dans le compagnon, la carte du monde indique combien de héros se trouvent à chaque étage, et Voir tout le monde liste tous ceux du vôtre, avec un lien vers leur page publique.' },
+        de: { title: 'Sieh, wer auf deiner Etage ist', body: 'Dein TRMNL nennt jetzt unter der Statuszeile bis zu drei andere Helden auf der Etage deines Helden und wie viele noch dort sind. In der Begleit-App zeigt die Weltkarte, wie viele Helden auf jeder Etage sind, und Alle ansehen listet alle auf deiner Etage auf, mit Links zu ihren öffentlichen Seiten.' },
+        es: { title: 'Mira quién comparte tu planta', body: 'Tu TRMNL ahora nombra, bajo la línea de estado, hasta tres héroes más que están en la planta de tu héroe, y cuántos más hay. En la app, el mapa del mundo muestra cuántos héroes hay en cada planta, y Ver a todos enumera a todos los de la tuya, con enlaces a sus páginas públicas.' },
+        it: { title: 'Scopri chi c’è al tuo piano', body: 'Il tuo TRMNL ora nomina, sotto la riga di stato, fino a tre altri eroi al piano del tuo eroe, e quanti altri ce ne sono. Nell’app, la mappa del mondo mostra quanti eroi ci sono a ogni piano, e Vedi tutti elenca tutti quelli del tuo, con i link alle loro pagine pubbliche.' },
+        pt: { title: 'Veja quem divide o seu andar', body: 'O seu TRMNL agora mostra, abaixo da linha de status, até três outros heróis no andar do seu herói e quantos mais estão lá. No app, o mapa do mundo mostra quantos heróis há em cada andar, e Ver todos lista todo mundo no seu, com links para as páginas públicas deles.' },
+        pl: { title: 'Zobacz, kto jest na twoim piętrze', body: 'Twój TRMNL pokazuje teraz pod linią stanu do trzech innych bohaterów na piętrze twojego bohatera i ilu jest tam jeszcze. W aplikacji mapa świata pokazuje, ilu bohaterów jest na każdym piętrze, a Zobacz wszystkich wymienia wszystkich z twojego, z linkami do ich publicznych stron.' },
+        nl: { title: 'Zie wie er op je verdieping is', body: 'Je TRMNL noemt nu onder de statusregel tot drie andere helden op de verdieping van je held, en hoeveel er nog meer zijn. In de app toont de wereldkaart hoeveel helden er op elke verdieping zijn, en Bekijk iedereen toont iedereen op die van jou, met links naar hun openbare pagina’s.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-27',
     changes: [
       {

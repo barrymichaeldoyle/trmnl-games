@@ -78,6 +78,8 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
     hero: { name: 'Baz', level: 5, xp: 210, hp: 118, gold: 640, status: 'exploring', biomeId: 'server_room', lastTick: 120, lastAdvancedAt: NOW - 7 * 60_000, quarantined: false },
     weaponName: 'Uncommon Cable Cutter',
     armorName: 'Insulated Cardigan',
+    // D216: three others named on the floor and five more.
+    company: { names: ['Quill', 'mossy_bram', 'Tess'], others: 8 },
     weaponAttack: 5,
     armorDefense: 2,
     potions: 4,
@@ -172,6 +174,8 @@ export function previewScenarios(artBaseUrl: string | null): PreviewScenarios {
       hero: hero({ name: 'Sir Staplington', biomeId: 'cafeteria_depths', stance: 'cautious' }),
       latestEvent: { kind: 'combat', outcome: { variant: 'combat', monsterId: 'microwave_wraith', elite: true, outcome: 'victory' } },
       ownerAlias: 'A_Very_Long_Alias__',
+      // D216: the widest company line, three 20-character names and a three-digit count.
+      company: { names: ['Maximilian_Wolfgangs', 'Bartholomew_Staples', 'Persephone_Ledgers'], others: 128 },
       // Widest case for the unclamped rank rows: a 20-character public name with a five-digit score.
       ranking: ranked({ rank: 1, score: 12840, top: [{ rank: 1, name: 'Maximilian_Wolfgangs', hero_name: 'Sir Staplington', level: 12, score: 12840 }, ...base.ranking!.top.slice(1)] }),
       logs: [{ at: NOW - 7 * 60_000, kind: 'combat', summary: 'Sent an elite [[Microwave Wraith]] back to the kitchen. +188 XP, +57 gold. Reached level 12! Found a [[Rare Ladle of Ruin]].', deltas: { xpEarned: 188, gold: 57, hp: -48 } }, ...base.logs],

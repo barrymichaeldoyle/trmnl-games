@@ -1,3 +1,4 @@
+import { floorCounts } from './lib/presence'
 import { currentHero, gameProfile } from './lib/gameProfile'
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
@@ -61,6 +62,7 @@ export const mine = query({
       .withIndex('by_heroId', (q) => q.eq('heroId', hero._id))
       .take(INVENTORY_READ)
     const world = await readWorld(ctx)
+    const presence = await floorCounts(ctx, hero)
     // D80/D81: the stats the hero fights with, affixes and live effects included.
     // D139: the occasion on the owner's last TRMNL date counts too, as it does in the tick.
     const now = Date.now()
@@ -139,7 +141,8 @@ export const mine = query({
       // D139: today's occasion and its effect, and the next one on the calendar; null before v19.
       calendar: calendarView(worldContent(world), now, user.trmnlUtcOffset),
       // D133: the floors the world actually runs, so a new floor shows and takes travel only once the world has switched to its catalog.
-      biomes: worldContent(world).biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe })),
+      // D216: `others` is how many other heroes the last tick found on each floor.
+      biomes: worldContent(world).biomes.map((biome) => ({ id: biome.id, name: biome.name, unlockLevel: biome.unlockLevel, unlocked: biome.unlockLevel <= hero.level, safe: biome.safe, others: presence[biome.id] ?? 0 })),
       // D133: every floor's field note and its monsters' notes, open or not, for the Field notes page; null before v16.
       lore: loreView(worldContent(world), { biomeId: hero.biomeId, counters: { monsterWins: hero.counters.monsterWins ?? {}, ...(hero.counters.biomesVisited === undefined ? {} : { biomesVisited: hero.counters.biomesVisited }) } }),
       world: world

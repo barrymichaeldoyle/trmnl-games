@@ -107,6 +107,8 @@ export interface PayloadInput {
   readonly goal?: { readonly title: string; readonly value: number; readonly target: number; readonly gold: number; readonly claimable?: boolean } | null
   /** D169: the owner's language for everything the screen says; English when absent. */
   readonly locale?: Locale
+  /** D216: the other heroes on the hero's floor: up to three public names by level, and how many there are in all. */
+  readonly company?: { readonly names: readonly string[]; readonly others: number }
 }
 
 export interface PayloadRanking {
@@ -353,6 +355,8 @@ export function buildPayload(input: PayloadInput) {
       bag_capacity: null,
       stance: '' as const,
       stance_name: '',
+      company: '',
+      company_short: '',
       held_item: '',
       wake_at_tick: null,
       log: [],
@@ -440,6 +444,7 @@ export function buildPayload(input: PayloadInput) {
   // D42: when the next scheduled tick starts (UTC seconds), only while this hero will take part in it.
   // The template formats it in the owner's TRMNL timezone; nothing is promised when delayed or stopped.
   const adventuring = hero.status === 'exploring' || hero.status === 'resting' || hero.status === 'travelling'
+  const onFloor = hero.status === 'exploring' || hero.status === 'resting'
   const nextTickAt = adventuring && attention === null ? Math.floor(nextSlotAfter(now) / 1000) : null
   return {
     ...common,
@@ -488,6 +493,10 @@ export function buildPayload(input: PayloadInput) {
     // D103: the stance outlasts its log line, so the HUD shows it under its gauge mark; empty under a catalog without stances.
     stance: stance ? stance.id : ('' as const),
     stance_name: stance ? t.text(stance.name) : '',
+    // D216: who else is on this floor, under the status line, while the hero is out on it; empty when alone.
+    // `company_short` is the count alone, for a column too narrow for the names.
+    company: onFloor && input.company ? words.company(input.company.names, input.company.others) : '',
+    company_short: onFloor && input.company ? words.company([], input.company.others) : '',
     held_item: input.heldItemName === null ? '' : t.name(input.heldItemName),
     wake_at_tick: hero.wakeAtTick ?? null,
     log: travelLine === null ? logs : [travelLine, ...logs].slice(0, MAX_LOGS),

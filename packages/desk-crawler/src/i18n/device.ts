@@ -34,6 +34,11 @@ export interface DeviceWords {
   readonly merchantVisiting: string
   /** D189: an awake hero holding a find on a full bag (v26), a notice rather than an attention line. */
   readonly bagFullKeepGoing: string
+  /**
+   * D216: who else is on the hero's floor, after the people mark: up to three public names by level, then how many
+   * more; with no name to show, the count alone. Names arrive plain and the template escapes them.
+   */
+  readonly company: (names: readonly string[], others: number) => string
   readonly achievement: (title: string) => string
   readonly levelUp: (level: number) => string
   readonly eliteDefeated: string
@@ -115,6 +120,13 @@ export interface DeviceWords {
 }
 
 const n = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`
+/** D216: "A, B and C" in a language's own "and", or "A, B, C and 8 others" when `more` follows the names. */
+const company = (and: string, more: (count: number) => string, alone: (count: number) => string) => (names: readonly string[], others: number) => {
+  const rest = others - names.length
+  if (names.length === 0) return others > 0 ? alone(others) : ''
+  if (rest > 0) return `${names.join(', ')} ${more(rest)}`
+  return names.length === 1 ? names[0]! : `${names.slice(0, -1).join(', ')} ${and} ${names[names.length - 1]}`
+}
 
 const en: DeviceWords = {
   exploring: (area) => `Exploring the ${area}`,
@@ -143,6 +155,7 @@ const en: DeviceWords = {
   decisionWaiting: 'A decision is waiting in the companion.',
   merchantVisiting: 'Merchant visiting. Shop in the companion soon.',
   bagFullKeepGoing: 'Bag full. New finds stay behind until you make room.',
+  company: company('and', (k) => `and ${n(k, 'other', 'others')}`, (k) => `${n(k, 'other hero', 'other heroes')} here`),
   achievement: (title) => `Achievement: ${title}`,
   levelUp: (level) => `Level up! Now level ${level}`,
   eliteDefeated: 'Elite defeated!',
@@ -216,6 +229,7 @@ const fr: DeviceWords = {
   decisionWaiting: 'Une décision vous attend dans le compagnon.',
   merchantVisiting: 'Un marchand est de passage. Faites vos achats dans le compagnon.',
   bagFullKeepGoing: 'Sac plein. Les nouvelles trouvailles restent sur place jusqu’à ce que vous fassiez de la place.',
+  company: company('et', (k) => `et ${n(k, 'autre', 'autres')}`, (k) => `${n(k, 'autre héros', 'autres héros')} ici`),
   achievement: (title) => `Succès : ${title}`,
   levelUp: (level) => `Niveau supérieur ! Niveau ${level}`,
   eliteDefeated: 'Élite vaincue !',
@@ -289,6 +303,7 @@ const de: DeviceWords = {
   decisionWaiting: 'In der Begleit-App wartet eine Entscheidung.',
   merchantVisiting: 'Ein Händler ist da. Kauf bald in der Begleit-App ein.',
   bagFullKeepGoing: 'Tasche voll. Neue Funde bleiben liegen, bis du Platz schaffst.',
+  company: company('und', (k) => `und ${n(k, 'weiterer', 'weitere')}`, (k) => `${n(k, 'weiterer Held', 'weitere Helden')} hier`),
   achievement: (title) => `Erfolg: ${title}`,
   levelUp: (level) => `Stufenaufstieg! Jetzt Stufe ${level}`,
   eliteDefeated: 'Elite besiegt!',
@@ -370,6 +385,7 @@ const es: DeviceWords = {
   decisionWaiting: 'Te espera una decisión en la app.',
   merchantVisiting: 'Hay un mercader de paso. Compra pronto en la app.',
   bagFullKeepGoing: 'Bolsa llena. Los nuevos hallazgos se quedan atrás hasta que hagas sitio.',
+  company: company('y', (k) => `y ${k} más`, (k) => `${n(k, 'héroe más', 'héroes más')} aquí`),
   achievement: (title) => `Logro: ${title}`,
   levelUp: (level) => `¡Subida de nivel! Ahora nivel ${level}`,
   eliteDefeated: '¡Élite derrotado!',
@@ -443,6 +459,7 @@ const it: DeviceWords = {
   decisionWaiting: 'Una decisione ti aspetta nell’app.',
   merchantVisiting: 'C’è un mercante di passaggio. Fai acquisti nell’app.',
   bagFullKeepGoing: 'Borsa piena. I nuovi ritrovamenti restano lì finché non fai spazio.',
+  company: company('e', (k) => `e ${n(k, 'altro', 'altri')}`, (k) => `${n(k, 'altro eroe', 'altri eroi')} qui`),
   achievement: (title) => `Traguardo: ${title}`,
   levelUp: (level) => `Livello su! Ora livello ${level}`,
   eliteDefeated: 'Élite sconfitta!',
@@ -516,6 +533,7 @@ const pt: DeviceWords = {
   decisionWaiting: 'Uma decisão espera por você no app.',
   merchantVisiting: 'Mercador de passagem. Compre logo no app.',
   bagFullKeepGoing: 'Bolsa cheia. Os novos achados ficam para trás até você abrir espaço.',
+  company: company('e', (k) => `e mais ${k}`, (k) => `${n(k, 'outro herói', 'outros heróis')} aqui`),
   achievement: (title) => `Conquista: ${title}`,
   levelUp: (level) => `Subiu de nível! Agora nível ${level}`,
   eliteDefeated: 'Elite derrotado!',
@@ -589,6 +607,7 @@ const pl: DeviceWords = {
   decisionWaiting: 'W aplikacji czeka decyzja.',
   merchantVisiting: 'Kupiec przejazdem. Zrób zakupy w aplikacji.',
   bagFullKeepGoing: 'Torba pełna. Nowe znaleziska zostają, aż zrobisz miejsce.',
+  company: company('i', (k) => `i jeszcze ${k}`, (k) => `Inni bohaterowie tutaj: ${k}`),
   achievement: (title) => `Osiągnięcie: ${title}`,
   levelUp: (level) => `Awans! Teraz poziom ${level}`,
   eliteDefeated: 'Elita pokonana!',
@@ -662,6 +681,7 @@ const nl: DeviceWords = {
   decisionWaiting: 'Er wacht een beslissing in de app.',
   merchantVisiting: 'Er is een koopman op bezoek. Winkel snel in de app.',
   bagFullKeepGoing: 'Tas vol. Nieuwe vondsten blijven liggen tot je ruimte maakt.',
+  company: company('en', (k) => `en ${n(k, 'ander', 'anderen')}`, (k) => `${n(k, 'andere held', 'andere helden')} hier`),
   achievement: (title) => `Prestatie: ${title}`,
   levelUp: (level) => `Niveau omhoog! Nu niveau ${level}`,
   eliteDefeated: 'Elite verslagen!',

@@ -5,6 +5,7 @@ import { v } from 'convex/values'
 import { internalQuery, query, type QueryCtx } from './_generated/server'
 import type { Doc } from './_generated/dataModel'
 import { currentUser } from './lib/intent'
+import { floorCompany } from './lib/presence'
 
 import { bagUsed as countBag } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
@@ -220,9 +221,18 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     // D138: the X full landscape shows today's tasks and the current goal beside the stories.
     ...(hero?.todo && content.todo ? { todoTasks: hero.todo.tasks.map((task) => ({ label: taskLabel(task, content), progress: task.progress, target: task.target, done: task.doneTick !== undefined })) } : {}),
     goal: hero ? deviceGoal(content, hero) : null,
+    // D216: the floor's other heroes, three named at most.
+    ...(hero ? { company: await deviceCompany(ctx, hero) } : {}),
   })
   return payload
 }
+
+/** D216: the three highest-level others on the hero's floor by public name, and the head count. */
+async function deviceCompany(ctx: QueryCtx, hero: Doc<'heroes'>) {
+  const { others, named } = await floorCompany(ctx, hero, hero.biomeId, DEVICE_NAMES)
+  return { names: named.map((member) => member.name), others }
+}
+const DEVICE_NAMES = 3
 
 /**
  * Owner preview: exactly what the user's TRMNL renders now. `now` comes from

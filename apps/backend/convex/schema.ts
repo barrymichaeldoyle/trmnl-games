@@ -7,6 +7,9 @@ import { career as plCareer, glyph as plGlyph, lifeBoard, lifeRecordFields, life
 import { lpLogDetail, lpLogKind, plotState as lpPlotState } from './littlePlot/validators'
 import { deskCounters as pwDeskCounters, faction as pwFaction, factionId as pwFactionId, mapEvent as pwMapEvent, orderKind as pwOrderKind, pwLogDetail, pwLogKind, seat as pwSeat, seatEvents as pwSeatEvents, share as pwShare, weekTally as pwWeekTally } from './pixelWars/validators'
 
+/** D216: one hero on a floor, as the tick saw it; names are read from the owner when shown, so a rename shows at once. */
+export const presenceMember = v.object({ userId: v.id('users'), heroId: v.id('heroes'), level: v.number() })
+
 /** Desk Crawler's engine tables (world, runs, score windows, leaderboard sets), from the shared factory (S0). */
 const deskCrawlerEngine = { ...engineTables(DESK_CRAWLER_TABLES, ['deaths', 'levelUps', 'heldFinds']), ...rankingTables(DESK_CRAWLER_TABLES) }
 
@@ -232,6 +235,17 @@ export default defineSchema({
     tasks: v.optional(v.number()),
   }).index('by_key', ['key']),
 
+  /**
+   * Who is on each Desk Crawler floor (D216): one row per floor with anyone on it, replaced at the end of each tick's
+   * hero walk. `members` holds the first `PRESENCE_MEMBERS_MAX` by level; `count` is everyone.
+   */
+  floorPresence: defineTable({
+    biomeId: v.string(),
+    count: v.number(),
+    members: v.array(presenceMember),
+    asOfTick: v.number(),
+  }).index('by_biomeId', ['biomeId']),
+
   /** Server-controlled game lifecycle (idle-angler.md "Architecture"): one row per game once an admin sets its status. */
   platformGames: defineTable({
     slug: gameSlug,
@@ -255,6 +269,8 @@ export default defineSchema({
     censusUpgraded: v.optional(v.number()),
     censusRaids: v.optional(v.number()),
     censusTasks: v.optional(v.number()),
+    /** D216: who the walk found on each floor so far, keyed by biome id; copied to `floorPresence` when it finishes. */
+    censusPresence: v.optional(v.record(v.string(), v.object({ count: v.number(), members: v.array(presenceMember) }))),
   }).index('by_tick', ['tick']).index('by_state_and_startedAt', ['state', 'startedAt']),
   simulationFailures: deskCrawlerEngine.failures,
   heroScoreWindows: deskCrawlerEngine.scoreWindows,

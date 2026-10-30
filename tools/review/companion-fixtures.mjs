@@ -270,7 +270,9 @@ if (params.get('notes') === '1') {
   hero.counters = { ...hero.counters, monsterWins: { paper_imp: 212, rogue_roomba: 180, stapler_mimic: 150, dust_daemon: 171, cable_serpent: 96, overheated_rack: 80, firewall_gremlin: 77, legacy_mainframe: 71, coffee_slime: 140, crumb_golem: 121, microwave_wraith: 118, leftovers_hydra: 99, box_file_beetle: 31, shelf_lurker: 25, microfilm_phantom: 1, trolley_swarm: 2 }, biomesVisited: { server_room: 4, cafeteria_depths: 3, archive: 2, parking_garage: 1 } };
 }
 if (params.get('notes') === 'new') { hero.level = 1; hero.biomeId = 'office_cubicles'; hero.counters = { ...hero.counters, monsterWins: {}, biomesVisited: undefined } }
-hero.biomes = contentV16.biomes.map((b) => ({ id: b.id, name: b.name, unlockLevel: b.unlockLevel, unlocked: b.unlockLevel <= hero.level, safe: b.safe }));
+// D216: others on each floor; company=none leaves the hero alone, company=crowd fills its floor past the line's three names.
+const floorOthers = { office_cubicles: 2, server_room: 11, cafeteria_depths: 4, archive: 1 };
+hero.biomes = contentV16.biomes.map((b) => ({ id: b.id, name: b.name, unlockLevel: b.unlockLevel, unlocked: b.unlockLevel <= hero.level, safe: b.safe, others: params.get('company') === 'none' ? 0 : floorOthers[b.id] ?? 0 }));
 hero.lore = loreView(contentV16, { biomeId: hero.biomeId, counters: { monsterWins: hero.counters.monsterWins ?? {}, biomesVisited: hero.counters.biomesVisited } });
 // D112: todo=1 gives the hero a to-do list with each state the card draws; todo=used spends the swap.
 if (params.has('todo')) {
@@ -400,6 +402,11 @@ const queries = {
     { family: 'species_salmon', name: 'Salmon', category: 'Species', tiers: 2, earned: null, next: { id: 'first_salmon', name: 'First Salmon', tier: 1 }, value: 0, target: 1 },
   ] }),
   'heroes:mine': () => hero,
+  'presence:here': () => {
+    const others = params.get('company') === 'none' ? 0 : params.get('company') === 'crowd' ? 23 : hero.biomes.find((b) => b.id === hero.biomeId)?.others ?? 0;
+    const names = [['Quill', 'Sir Quill', 14, true], ['mossy_bram', 'Bram', 12, true], ['Tess', 'Tess the Bold', 11, false], ['Maximilian_Wolfgangs', 'Sir Staplington', 9, true], ['Dee', 'Dee', 8, true], ['Ana', 'Ana', 6, true]];
+    return { biomeId: hero.biomeId, others, named: names.slice(0, Math.max(0, others - 1)).map(([name, heroName, level, profile]) => ({ name, heroName, level, profile })) };
+  },
   'roster:mine': () => data.roster,
   'inventory:mine': () => inventory,
   // The shell's tab marks: a held find or a nearly full bag counts on the Bag tab, an unclaimed reward dots Hero.

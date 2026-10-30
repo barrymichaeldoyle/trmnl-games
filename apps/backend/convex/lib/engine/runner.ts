@@ -25,6 +25,27 @@ export interface PageTally {
   readonly counts: Record<string, number>
   readonly unlocks: Record<string, number>
   population: number
+  /** D216: who a game's step found where (Desk Crawler: heroes by floor), merged into the run's `censusPresence`. */
+  readonly presence?: Record<string, PresenceTally>
+}
+
+export interface PresenceTally {
+  count: number
+  members: Array<{ userId: Id<'users'>; heroId: Id<'heroes'>; level: number }>
+}
+
+/** D216: members kept per floor; the count goes on past it. */
+export const PRESENCE_MEMBERS_MAX = 50
+
+/** Fold a page's presence into the run's, keeping the highest levels when a floor passes the cap. */
+export function mergePresence(into: Record<string, PresenceTally> | undefined, page: Record<string, PresenceTally>): Record<string, PresenceTally> {
+  const merged: Record<string, PresenceTally> = { ...into }
+  for (const [floor, add] of Object.entries(page)) {
+    const prior = merged[floor]
+    const members = [...(prior?.members ?? []), ...add.members].sort((a, b) => b.level - a.level).slice(0, PRESENCE_MEMBERS_MAX)
+    merged[floor] = { count: (prior?.count ?? 0) + add.count, members }
+  }
+  return merged
 }
 
 export interface SubjectStep<Content> {
@@ -110,7 +131,7 @@ export async function runBatch<Content>(
     .withIndex('by_createdAt', (q) => q.lt('createdAt', run.cohortCutoff))
     .paginate({ numItems: PAGE_SIZE, cursor: run.cursor ?? null })
 
-  const tally: PageTally = { counts: zeroCounts(runtime), unlocks: {}, population: 0 }
+  const tally: PageTally = { counts: zeroCounts(runtime), unlocks: {}, population: 0, presence: {} }
   for (const subject of page.page) {
     tally.counts.processed! += 1
     await step(ctx, subject, { run, world, content, now, tally })
@@ -122,6 +143,7 @@ export async function runBatch<Content>(
     batchSequence: run.batchSequence + 1,
     lastProgressAt: now,
     ...Object.fromEntries(Object.entries(tally.counts).map(([name, value]) => [name, (runCounts[name] ?? 0) + value])),
+    ...(Object.keys(tally.presence ?? {}).length > 0 ? { censusPresence: mergePresence(run.censusPresence, tally.presence!) } : {}),
     ...(run.publishes ? { achievementCounts: mergeCounts(run.achievementCounts, tally.unlocks), achievementPopulation: (run.achievementPopulation ?? 0) + tally.population } : {}),
   } as Partial<Doc<'simulationRuns'>>
   if (!page.isDone) {

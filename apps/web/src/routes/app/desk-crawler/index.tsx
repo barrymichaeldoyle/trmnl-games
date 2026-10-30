@@ -21,6 +21,7 @@ import { AlertNudge } from './-alerts'
 import { RosterCard } from './-rosterCard'
 import { WhatsNewCard } from './-whatsNew'
 import { IdleAnglerNote } from './-idleAnglerNote'
+import { FloorCompany, FloorCount } from './-company'
 import { messagesFor, useT } from '../../../lib/i18n'
 import { headMessages } from '../../../i18n/heads'
 import { useContent } from '../../../lib/useContent'
@@ -35,7 +36,7 @@ export const Route = createFileRoute('/app/desk-crawler/')({
   component: HeroHome,
 })
 
-type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number; safe: boolean }
+type Biome = { id: string; name: string; unlocked: boolean; unlockLevel: number; safe: boolean; others?: number }
 
 /**
  * The game screen leads, after an unclaimed weekly keepsake's callout (a
@@ -309,7 +310,11 @@ function HeroSheet({ hero }: { hero: HeroView }) {
                     <span aria-hidden="true" className={`hud hidden size-7 shrink-0 place-items-center border-[3px] border-night text-hud-sm sm:grid ${chip}`}>{index + 1}</span>
                     <span className="leading-tight [overflow-wrap:normal]">{c.name(biome.name)}</span>
                   </span>
-                  <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? t.youreHere : onTheWay ? t.arrivingNext : t.unlocked) : t.opensAt(biome.unlockLevel)}</span>
+                  {/* D216: how many other heroes the last tick found there. */}
+                  <span className="flex flex-wrap items-center gap-x-3">
+                    <span className={`text-sm font-semibold ${here ? 'text-gold-ink' : ''}`}>{biome.unlocked ? (here ? t.youreHere : onTheWay ? t.arrivingNext : t.unlocked) : t.opensAt(biome.unlockLevel)}</span>
+                    {biome.unlocked ? <FloorCount others={biome.others ?? 0} /> : null}
+                  </span>
                 </span>
                 {biome.unlocked && !here && !onTheWay ? (
                   <Button icon="travel" className="shrink-0 sm:mt-2 sm:self-start" pending={travel.pending} busyLabel={t.travelling} aria-label={travel.pending ? undefined : t.travelTo(biome.name)} disabled={!canAct} onClick={() => setAsk({ kind: 'travel', biomeId: biome.id })}>
@@ -320,6 +325,7 @@ function HeroSheet({ hero }: { hero: HeroView }) {
             )
           })}
         </ol>
+        <FloorCompany />
         {!canAct && hero.status !== 'travelling' && stopNote ? <p className="mt-3 text-sm text-muted">{stopNote}</p> : null}
       </section>
 

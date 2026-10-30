@@ -1,4 +1,5 @@
 /**
+ * Template v67 names who else is on the hero's floor under the status line, behind a people mark (D216).
  * Template v65 inverts the goal row and points to the companion while a reached goal's reward waits (D184).
  * Template v64 gives the full landscape ledger the portrait's adaptive rows: changes packed at their natural width and
  * the newest story on one line with its changes and time whenever they fit (D183).
@@ -52,7 +53,7 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 66
+export const TEMPLATE_VERSION = 67
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -178,7 +179,7 @@ const HUD_ASSIGNS =
   `{% assign hud_tick_full = "${hudMarkUri('tickFull', 36, 16)}" %}{% assign hud_tick_half = "${hudMarkUri('tickHalf', 36, 16)}" %}{% assign hud_tick_empty = "${hudMarkUri('tickEmpty', 36, 16)}" %}` +
   `{% assign hud_sword = "${hudMarkUri('sword', 24, 24)}" %}{% assign hud_shield = "${hudMarkUri('shield', 24, 24)}" %}` +
   `{% assign hud_coin = "${hudMarkUri('coin', 24, 24)}" %}{% assign hud_potion = "${hudMarkUri('potion', 24, 24)}" %}{% assign hud_xp = "${hudMarkUri('xp', 48, 32)}" %}{% assign hud_bag = "${hudMarkUri('bag', 24, 24)}" %}` +
-  `{% assign hud_stance_cautious = "${hudMarkUri('stanceCautious', 24, 24)}" %}{% assign hud_stance_balanced = "${hudMarkUri('stanceBalanced', 24, 24)}" %}{% assign hud_stance_bold = "${hudMarkUri('stanceBold', 24, 24)}" %}`
+  `{% assign hud_stance_cautious = "${hudMarkUri('stanceCautious', 24, 24)}" %}{% assign hud_stance_balanced = "${hudMarkUri('stanceBalanced', 24, 24)}" %}{% assign hud_stance_bold = "${hudMarkUri('stanceBold', 24, 24)}" %}{% assign hud_people = "${hudMarkUri('people', 24, 24)}" %}`
 
 /**
  * A HUD row: marks and counts that wrap where a column is too narrow for all of them. It never shrinks, so beside a
@@ -400,9 +401,21 @@ const logLine = (entry: string, classes: string, clamp: number, size: number, fi
   return `{% assign line_timed = false %}{% if utc_offset != nil and ${entry}.live != true %}{% assign line_timed = true %}{% endif %}{% assign line_changes = ${entry}.d | default: "" | split: " · " %}{% assign line_story = ${entry}.n | default: ${entry}.s %}{% assign line_plain = ${plainOf('line_story')} %}${compactSwap}<div class="${wrapper} stretch-x"><div class="grid grid--cols-1 gap--none"${adaptive ? ' data-adaptive-story="true"' : ''}>${entry === 'log[0]' ? '' : '{% unless forloop.first %}<div class="border--h-30 stretch-x"></div>{% endunless %}'}${sortFirst}<div class="flex flex--row flex--left flex--top${centred} gap--xsmall"${othersBelow ? ' data-ledger-row="true"' : ''}${adaptive ? ' data-adaptive-main="true"' : ''}><div class="${ogMeta ? 'hidden lg:block ' : ''}no-shrink pt--0.5">${logIcon(`${entry}.k`, size)}</div>${story}${inlineChips}${timeBelow ? '' : time}</div>${inline === 'all' ? '' : stacked}${leadRow}</div></div>`
 }
 
-/** The status line, its clamp fitted like log lines. */
-const statusLine = (clamp: number, fit: number) =>
-  `{% if status_eta_at and utc_offset != nil %}{% assign status_plain = ${plainOf('status_eta_label')} | append: " 00:00" %}{% else %}{% assign status_plain = ${plainOf('status_label')} %}{% endif %}<span class="label lg:title--small" ${fitClamp('status_plain', clamp, fit)}>${statusText}</span>`
+/**
+ * Who else is on the floor (D216), under the status line behind the people mark: up to three names and how many more.
+ * Hero columns size to their content, so names longer than the status line's `fit` would widen the column; there the
+ * line is the count alone. Older payloads without the field show nothing.
+ */
+const companyLine = (fit: number) =>
+  `{% if company and company != "" %}{% if company.size > ${fit} %}{% assign company_text = company_short %}{% else %}{% assign company_text = company %}{% endif %}` +
+  `<div class="flex flex--row flex--left flex--center-y gap--[3px] stretch-x" data-company="true"><img class="${COUNTER_ICON}" src="{{ hud_people }}" alt=""><span class="label lg:title--small">{{ company_text | escape }}</span></div>{% endif %}`
+
+/**
+ * The status line, its clamp fitted like log lines, then the floor's company. The OG half horizontal has no row to
+ * spare under its hearts and counters, so it leaves the company out (`company` false).
+ */
+const statusLine = (clamp: number, fit: number, company = true) =>
+  `{% if status_eta_at and utc_offset != nil %}{% assign status_plain = ${plainOf('status_eta_label')} | append: " 00:00" %}{% else %}{% assign status_plain = ${plainOf('status_label')} %}{% endif %}<span class="label lg:title--small" ${fitClamp('status_plain', clamp, fit)}>${statusText}</span>${company ? companyLine(fit) : ''}`
 
 /**
  * A big moment (level-up, elite win, jackpot, rare find) gets an inverted badge above the newest story. Its own row keeps
@@ -1333,7 +1346,7 @@ export const markupHalfHorizontal = `${glyphAssigns([16, 24])}${HUD_ASSIGNS}${KE
   <div class="lg:hidden grid grow h--full h--min-0 stretch-x gap--medium">
     <div class="col--span-4 flex flex--col flex--left flex--top flex--stretch-x gap--xsmall">
       <span class="title title--small" data-clamp="1">{{ hero_name | escape }}, ${L('level')} {{ level }}</span>
-      ${statusLine(2, 36)}${hearts(false)}
+      ${statusLine(2, 36, false)}${hearts(false)}
       ${counters()}
     </div>
     <div class="col--span-6 h--full flex flex--col flex--left flex--top flex--stretch-x gap--xsmall lg:gap--small">
