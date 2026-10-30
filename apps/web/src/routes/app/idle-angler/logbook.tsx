@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { api } from '@trmnl-games/backend/api'
 import { fishSprite, FISH_LARGE } from '@trmnl-games/idle-angler/art/fish'
 import { preload } from '../../../lib/preload'
+import { codeSearch } from '../../../lib/scanCodes'
 import { useAnalyticsView } from '../../../lib/analyticsProvider'
 import { useAngler, type WaterRank } from '../../../lib/idleAngler'
 import { Card, NoticeBar, useNotice } from '../../../lib/ui'
@@ -20,7 +21,7 @@ import { iaLog } from '../../../i18n/iaLog'
 export const Route = createFileRoute('/app/idle-angler/logbook')({
   head: () => seo({ title: 'Logbook · Idle Angler', index: false }),
   // D180: a fly QR's six digits, added by the fly box and then dropped from the address.
-  validateSearch: (search: Record<string, unknown>): { fly?: string } => (typeof search.fly === 'string' && /^\d{6}$/.test(search.fly) ? { fly: search.fly } : typeof search.fly === 'number' && Number.isInteger(search.fly) && search.fly >= 0 && search.fly < 1e6 ? { fly: String(search.fly).padStart(6, '0') } : {}),
+  validateSearch: (search: Record<string, unknown>): { fly?: string } => codeSearch('fly')(search),
   loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.logbook, {}), convexQuery(api.idleAngler.flies.mine, {})),
   component: LogbookPage,
 })

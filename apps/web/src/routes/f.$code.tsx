@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { requireOpenGame } from '../lib/gameAccess'
+import { flyLink } from '../lib/scanCodes'
 
 /**
  * D180: the short link Idle Angler's fly QR encodes, like Desk Crawler's `/k/<code>`. It carries the six digits to the
@@ -8,7 +9,6 @@ import { requireOpenGame } from '../lib/gameAccess'
 export const Route = createFileRoute('/f/$code')({
   beforeLoad: async ({ context, params }) => {
     await requireOpenGame(context, 'idle-angler')
-    const digits = params.code.replace(/\D/g, '')
-    throw redirect({ to: '/app/idle-angler/logbook', search: /^\d{6}$/.test(digits) ? { fly: digits } : {}, replace: true })
+    throw redirect({ ...flyLink(params.code), replace: true })
   },
 })

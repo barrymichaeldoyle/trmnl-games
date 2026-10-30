@@ -455,7 +455,8 @@ export const useQueryClient = () => ({ getQueryData: (key) => { const [, fn, arg
 export const useQuery = (options) => { const [, fn, args] = options.queryKey; const data = queries[fn] ? queries[fn](args) : undefined; return { data, isPending: false, isPlaceholderData: false, isError: false, refetch: async () => ({ data }) } };
 const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('ok') ? resolveIt({ changed: true, outcome: params.get('outcome') ?? 'collected', totalCollected: 1 }) : reject(new Error('Synthetic QA: all server mutations are disabled'))), flag('ok') ? 800 : 1200));
 // Optimistic updates are not simulated: the stubbed mutation ignores them, so only local drafts show early.
-export const useMutation = () => useCallback(Object.assign(async () => settle(), { withOptimisticUpdate() { return this } }), []);
+// Every mutation call is recorded on window.__mutations ({ fn, args }) for tools/review/scan-landing.mjs.
+export const useMutation = (fn) => useCallback(Object.assign(async (args) => { (window.__mutations ??= []).push({ fn: String(fn), args }); return settle() }, { withOptimisticUpdate() { return this } }), []);
 export const useAction = () => useCallback(async () => settle(), []);
 export const useConvexAuth = () => ({ isLoading: false, isAuthenticated: true });
 // Paper Lives' story (D182) pages the fixture life's lines; story=long repeats them back to birth so "Show earlier years" shows.

@@ -12,7 +12,8 @@ import { Glyph, SectionTitle } from '../../../lib/glyphs'
 import { ReturnNudge } from './-recap'
 import { GameScreen } from './-gameScreen'
 import { latestLogQuery } from './-queries'
-import { KeepsakeCallout, keepsakeSearch } from './-keepsakes'
+import { KeepsakeCallout } from './-keepsakes'
+import { codeSearch, heroKeepsake } from '../../../lib/scanCodes'
 import { TodoCard, type TodoView } from './-todo'
 import { ComingUp, GoalCard, type CareerView, type UnlockView } from './-career'
 import { ConfirmSheet, Consequences } from './-confirm'
@@ -29,9 +30,10 @@ import { dcHeroMessages } from '../../../i18n/dcHero'
 
 export const Route = createFileRoute('/app/desk-crawler/')({
   // D180, D218: a keepsake QR's six digits from an older link (or a sign-in that returns here) go on to the keepsakes page.
-  validateSearch: keepsakeSearch,
+  validateSearch: (search: Record<string, unknown>): { keepsake?: string } => codeSearch('keepsake')(search),
   beforeLoad: ({ search }) => {
-    if (search.keepsake) throw redirect({ to: '/app/desk-crawler/keepsakes', search: { keepsake: search.keepsake }, replace: true })
+    const landing = heroKeepsake(search)
+    if (landing) throw redirect({ ...landing, replace: true })
   },
   head: ({ match: { context: { locale } } }) => seo({ title: messagesFor(headMessages, locale).dcHero, index: false, locale }),
   loader: ({ context }) =>

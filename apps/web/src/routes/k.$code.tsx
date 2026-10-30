@@ -1,4 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { keepsakeLink } from '../lib/scanCodes'
 
 /**
  * D180: the short link a waiting keepsake's QR encodes. It carries the six digits to the keepsakes page, which collects
@@ -6,7 +7,6 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
  */
 export const Route = createFileRoute('/k/$code')({
   beforeLoad: ({ params }) => {
-    const digits = params.code.replace(/\D/g, '')
-    throw redirect(/^\d{6}$/.test(digits) ? { to: '/app/desk-crawler/keepsakes', search: { keepsake: digits }, replace: true } : { to: '/app/desk-crawler', replace: true })
+    throw redirect({ ...keepsakeLink(params.code), replace: true })
   },
 })
