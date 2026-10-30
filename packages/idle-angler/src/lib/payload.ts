@@ -235,6 +235,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     goal_line: angler.goal ? words.goal(angler.goal) : null,
     // D220: who else fishes this water, behind the people mark; only while casting here, not heading elsewhere or paused.
     company: status === 'fishing' && input.company && input.company.others > 0 ? say.company(input.company.names, input.company.others) : null,
+    // Template v22: the count alone, for where the names do not fit.
+    company_short: status === 'fishing' && input.company && input.company.others > 0 ? say.company([], input.company.others) : null,
     // Issue #8: the X's goal row shows the waiting coins instead of the next goal until they are claimed.
     goal_claim: waiting ? { ...waiting, label: say.goalWaiting(waiting.count, waiting.coins) } : null,
     weather: input.weather,

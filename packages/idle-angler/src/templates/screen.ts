@@ -43,12 +43,13 @@
  * "Barbel" to "Bar..." with the column empty beside it. Species names are at most thirteen characters.
  * Template v21 (D220): who else fishes the water ("Quill, Bram, Tess and 8 others") under the place, behind a people
  * mark, in every layout but the quadrant; it is the first line to give way where the stories need the room.
+ * Template v22: the count alone ("128 other anglers here") where the names would not fit their two lines.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 21
+export const TEMPLATE_VERSION = 22
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -90,8 +91,12 @@ const conditionMarks =
 /** Where the angler is: the one counter that can be long ("Heading to the Harbour Pier"), so it may wrap to two lines. */
 const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0 pr--3" data-place="true" data-give-way="6.5"><img class="${ICON}" src="{{ m_pin }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ status_label | escape }}</span></div>`
 
-/** D220: who else fishes this water, behind the people mark; two lines at most, and the first line to give way. */
-const company = `{% if company %}<div class="flex flex--row flex--left flex--top gap--[3px] stretch-x w--min-0" data-company="true" data-give-way="0.5"><img class="${ICON}" src="{{ m_people }}" alt=""><span class="${LABEL} w--min-0" data-clamp="2">{{ company | escape }}</span></div>{% endif %}`
+/**
+ * D220: who else fishes this water, behind the people mark; two lines at most, and the first line to give way. Template
+ * v22: where the names would not fit those two lines, the fitter swaps in the count alone (`company_short`), so "and 125
+ * others" is never the part cut off.
+ */
+const company = `{% if company %}<div class="flex flex--row flex--left flex--top gap--[3px] stretch-x w--min-0" data-company="true" data-give-way="0.5"><img class="${ICON}" src="{{ m_people }}" alt=""><span class="${LABEL} w--min-0" data-company-text="true" data-short="{{ company_short | escape }}">{{ company | escape }}</span></div>{% endif %}`
 
 /** Where the angler is, then the conditions. */
 const statusRow = (withConditions = true) => row(`${place}${withConditions ? conditionMarks : ''}`, 'data-status-row="true"')
@@ -224,7 +229,7 @@ const stories = (limit: number, clamp = 1, classes = 'description lg:title--smal
  * what made the room stays hidden (the X's board, beside the list, never gives it any). Nothing spills or lacks a story
  * at the normal scale, so this only changes a scaled screen.
  */
-const aliasStyle = `<style>[data-alias]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>`
+const aliasStyle = `<style>[data-alias]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}[data-company-text]{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}</style>`
 
 const fitStories = `<script>
 (() => {
@@ -233,6 +238,10 @@ const fitStories = `<script>
   const shown = (el) => el.getClientRects().length > 0;
   const fitLayout = (layout) => {
     if (!shown(layout)) return;
+    // Template v22: names that run past their two lines give way to the count alone.
+    layout.querySelectorAll('[data-company-text]').forEach((text) => {
+      if (shown(text) && text.dataset.short && text.scrollHeight > text.clientHeight + 1) text.textContent = text.dataset.short;
+    });
     const lists = Array.from(layout.querySelectorAll('[data-fit-stories]')).filter(shown);
     const extras = Array.from(layout.querySelectorAll('[data-give-way]')).sort((a, b) => a.dataset.giveWay - b.dataset.giveWay);
     extras.forEach((extra) => extra.classList.remove('hidden'));

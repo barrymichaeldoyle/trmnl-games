@@ -43,17 +43,14 @@ function AppShell() {
   return <SignedInApp />
 }
 
-/** The Bag tab counts its slots from this share of the capacity: 8 of 10, 16 of 20. */
-const NEARLY_FULL = 0.8
-
 function SignedInApp() {
   const t = useT(dcShellMessages)
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))
   // One small query feeds both tab marks from any tab, in place of the whole hero and bag views the shell once watched.
   const { data: badges } = useQuery(convexQuery(api.inventory.badges, {}))
-  // The Bag tab's count is a call to act, not a running total: a find waiting for a slot, or a bag nearly full (D167).
-  // A half-empty bag shows nothing, where the slot count used to read as a notification that never cleared.
-  const bagMark = badges ? (badges.held ? { count: 1, text: t.findWaiting } : badges.used >= Math.ceil(badges.capacity * NEARLY_FULL) ? { count: badges.used, text: t.slotsUsed(badges.used) } : null) : null
+  // The Bag tab counts the slots in use whenever the bag holds anything (D221, Barry: the count went missing on a bag
+  // that was not empty); a find waiting for a slot shows as one until it is placed.
+  const bagMark = badges ? (badges.held ? { count: 1, text: t.findWaiting } : badges.used > 0 ? { count: badges.used, text: t.slotsUsed(badges.used) } : null) : null
   // The Hero tab shows a dot while a goal reward waits for its Claim button, so it is seen from any tab.
   const rewardWaiting = badges?.rewardWaiting === true
   const setupState = !me?.hero ? (me?.hasActiveInstallation ? 'installation_without_hero' : 'not_enrolled') : me.hero.activationState === 'pending_trmnl' ? 'waiting_for_save' : 'active'
