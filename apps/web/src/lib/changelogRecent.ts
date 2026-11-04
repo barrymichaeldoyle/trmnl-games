@@ -35,6 +35,17 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-11-04',
     changes: [
       {
+        title: 'The merchant stays the day',
+        body: 'In Desk Crawler, the wandering merchant now stays about eight hours instead of one, and the Hero page shows what it sells with a button straight to its offers. A merchant deal alert that turns up overnight waits for the morning.',
+        fr: { title: 'Le marchand reste la journée', body: 'Dans Desk Crawler, le marchand ambulant reste maintenant environ huit heures au lieu d’une, et la page Héros montre ce qu’il vend avec un bouton qui mène droit à ses offres. Une alerte de bonne affaire qui arrive la nuit attend le matin.' },
+        de: { title: 'Der Händler bleibt den ganzen Tag', body: 'In Desk Crawler bleibt der wandernde Händler jetzt etwa acht Stunden statt einer, und die Helden-Seite zeigt, was er verkauft, mit einem Knopf direkt zu seinen Angeboten. Eine Händlerangebot-Benachrichtigung in der Nacht wartet bis zum Morgen.' },
+        es: { title: 'El mercader se queda el día', body: 'En Desk Crawler, el mercader ambulante se queda ahora unas ocho horas en lugar de una, y la página Héroe muestra lo que vende con un botón directo a sus ofertas. Una alerta de oferta del mercader que llega de noche espera a la mañana.' },
+        it: { title: 'Il mercante resta tutto il giorno', body: 'In Desk Crawler il mercante ambulante ora resta circa otto ore invece di una, e la pagina Eroe mostra cosa vende con un pulsante che porta dritto alle sue offerte. Un avviso di affare del mercante che arriva di notte aspetta il mattino.' },
+        pt: { title: 'O mercador fica o dia todo', body: 'No Desk Crawler, o mercador ambulante agora fica cerca de oito horas em vez de uma, e a página Herói mostra o que ele vende com um botão direto para as ofertas. Um alerta de oferta do mercador que chega de madrugada espera a manhã.' },
+        pl: { title: 'Kupiec zostaje na cały dzień', body: 'W Desk Crawler wędrowny kupiec zostaje teraz około ośmiu godzin zamiast jednej, a strona Bohater pokazuje, co sprzedaje, z przyciskiem prosto do jego ofert. Alert o okazji u kupca, który przyjdzie w nocy, czeka do rana.' },
+        nl: { title: 'De koopman blijft de hele dag', body: 'In Desk Crawler blijft de rondtrekkende koopman nu zo’n acht uur in plaats van één, en de pagina Held laat zien wat hij verkoopt, met een knop die meteen naar zijn aanbiedingen gaat. Een melding over een koopje die ’s nachts binnenkomt, wacht tot de ochtend.' },
+      },
+      {
         title: 'More potions on the deep floors',
         body: 'In Desk Crawler, potions turn up more often in the Cafeteria Depths, the Archive and the Parking Garage, in place of some gold, so a hero down there no longer runs its pouch dry. The Archive gets the most.',
         fr: { title: 'Plus de potions dans les étages profonds', body: 'Dans Desk Crawler, les potions se trouvent plus souvent dans les Profondeurs de la cafétéria, les Archives et le Parking souterrain, à la place d’un peu d’or : un héros qui y descend ne vide plus sa bourse à potions. Les Archives en reçoivent le plus.' },

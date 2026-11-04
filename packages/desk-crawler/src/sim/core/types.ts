@@ -247,6 +247,8 @@ export interface MerchantRule {
   readonly staysForTicks: number
   /** D122: the merchant's bag and pouch offers are this much cheaper than the companion's ladder price; absent means full price. */
   readonly ladderDiscountPct?: number
+  /** D223: while a visit is open, another merchant draw pays gold instead of replacing it; absent means a new visit replaces the open one. */
+  readonly oneVisitAtATime?: true
 }
 
 export interface MerchantOffer {

@@ -111,6 +111,8 @@ export const mine = query({
       counters: withCounterDefaults(hero.counters),
       // D76: the chosen stance and every stance's thresholds, so the companion can show what each one does.
       merchantTicksLeft: hero.merchant && world && hero.merchant.expiresAtTick > world.currentTick ? hero.merchant.expiresAtTick - world.currentTick : null,
+      // D223: what the merchant has, so the Hero page can show the visit as a card rather than a line.
+      merchantOffers: hero.merchant && world && hero.merchant.expiresAtTick > world.currentTick ? hero.merchant.offers.map((offer) => ({ id: offer.id, name: offer.name, quantity: offer.quantity, price: offer.price })) : [],
       // D163: a dug-in elite: its name, HP and the adventures before it leaves.
       standoff: hero.standoff
         ? { monsterId: hero.standoff.monsterId, name: content.monsters.find((m) => m.id === hero.standoff!.monsterId)?.name ?? 'elite', hp: hero.standoff.hp, maxHp: hero.standoff.maxHp, hpPct: Math.max(1, Math.ceil((hero.standoff.hp * 100) / hero.standoff.maxHp)), ticksLeft: Math.max(1, hero.standoff.untilTick - (world?.currentTick ?? hero.lastTick)) }

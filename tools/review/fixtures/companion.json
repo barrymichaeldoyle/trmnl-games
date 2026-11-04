@@ -615,6 +615,7 @@
     "maxHp": 104,
     "meetingsEnabled": true,
     "merchantTicksLeft": null,
+    "merchantOffers": [],
     "name": "Pip",
     "publicProfile": true,
     "raidsEnabled": true,

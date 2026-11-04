@@ -9,7 +9,7 @@ Source: the original brief listed "web push choice/merchant/death", to come late
 | Event | Stopped or losing something? | Player can act? | Verdict |
 | --- | --- | --- | --- |
 | Hero asleep with a full bag | Yes: no XP, no adventures until the player acts | Yes: sell, claim, resume | **Alert** |
-| Merchant offering the next bag or pouch the hero can afford | Yes: the offer vanishes after four adventures (an hour), and under content v10 (D122) it is 25% off the Bag page price, a real saving on a real step up the ladder | Yes: buy | **Alert** |
+| Merchant offering the next bag or pouch the hero can afford | Yes: the offer vanishes when the visit ends (four adventures, an hour, until content v28 made it 32, a working day: D223), and under content v10 (D122) it is 25% off the Bag page price, a real saving on a real step up the ladder | Yes: buy | **Alert** |
 | Merchant offering only potions | No: potions are a small convenience and the next visit sells them too | Yes | No alert: it would buzz a phone several times a day for nothing |
 | Decision pending | No: the default resolves it after a day and play continues, and D79 promises a choice never needs intervention | Yes, but the default is fine | No alert: the game's own rule says nothing is waiting |
 | Weekly keepsake waiting | No: it waits all week on the device | Yes | No alert: the keepsake exists to make people look at the TRMNL (D46), not a phone |
@@ -27,7 +27,7 @@ Email is out (Barry, 2026-10-09). A push lands on the phone the player already u
 
 - **Settings → Alerts:** one card, off by default. "Get a nudge on this phone when your hero needs you" with an "Allow on this device" button that runs the browser permission prompt only after the player taps it, a list of enabled devices with Remove buttons, and two switches, each saying what it is and how often it can arrive:
   - "Hero asleep: the bag is full and adventures have stopped. Once per nap." (until D123 removed the drawer, "the bag and drawer are full")
-  - "Merchant deal: a bag or pouch you can afford is on sale for about an hour. At most once a day."
+  - "Merchant deal: a bag or pouch you can afford is on sale for a few hours. At most once a day." (D223; "about an hour" before)
   - Quiet hours, on by default from 21:00 to 08:00 in the browser's timezone, editable in whole hours.
 - **The alert itself:** short, in the game's voice, and it carries no data that would be a privacy problem on a lock screen: "Baz's bag is full, so they've stopped for a nap. Make room to send them back out." or "A merchant is offering Baz a Messenger Bag at a discount, and they have the gold. The offer lasts about an hour." Tapping opens the right companion page (Bag or Merchant).
 - **Nothing on the device changes.**
@@ -54,9 +54,9 @@ The key is the row's identity, so a retried tick batch can't insert it twice.
 A scheduled sender action drains the outbox in small batches (at most 50 rows a run, oldest first) and for each row:
 
 1. **Rechecks that the alert still makes sense.** If the hero is no longer asleep, or the merchant has gone or the offer was bought, the row is marked `skipped`. An alert never tells the player something that's already over.
-2. **Applies quiet hours.** During quiet hours, `asleep` waits until the window ends and then rechecks. `merchant` is dropped, because the visit is over by morning.
+2. **Applies quiet hours.** During quiet hours, `asleep` waits until the window ends and then rechecks. `merchant` waits too (D223: a visit now stays a working day; before, it was dropped because the hour was over by morning), and the recheck drops it if the merchant has gone or the offer sold.
 3. **Applies caps.** Each account gets at most 2 pushes per local day across both kinds, and at most 1 `merchant` push a day. Over a cap the row is `skipped`, with nothing queued for later.
-4. **Waits before `asleep`.** The first attempt is 30 minutes after the nap starts, so a player who is already in the companion fixing the bag gets no alert. `merchant` sends at once, because the hour is the whole point.
+4. **Waits before `asleep`.** The first attempt is 30 minutes after the nap starts, so a player who is already in the companion fixing the bag gets no alert. `merchant` sends at once, because the visit has a clock.
 5. **Sends** as Web Push (VAPID, aes128gcm) from a `"use node"` action using the `web-push` library, to each of the account's subscriptions. A 404 or 410 from the push service deletes that subscription. When an account's last subscription is gone, both switches turn off and Settings says why.
 6. **Marks the row** `sent`, `skipped` or `failed`, with a reason code. Failures retry twice with backoff, then stop.
 
@@ -114,7 +114,7 @@ All four slices are in the code. Where the build differs from the plan above, th
 - **Sender scheduling.** The sender runs when the earliest pending row is due, rather than every 5 minutes. A merchant row sends within seconds of its tick, and an `asleep` row 30 minutes after the nap starts. A row held by quiet hours wakes the sender when the window ends. An idle outbox still has no scheduled run. Two sender runs can't double-send, because a row is marked `sending` in the same transaction that claims it.
 - **Retries.** A failed push is retried 5 and then 10 minutes later. After three attempts the row is `failed`. A 404 or 410 deletes that device. If the push failed only because every device was gone, the row is `skipped` with `no_devices`, and both switches turn off with `offReason`.
 - **Merchant TTL.** The push's time-to-live is the visit's remaining ticks, so a push service never delivers a deal after the merchant has left. An `asleep` push lives for 12 hours.
-- **Browser.** `public/push-sw.js` is scoped to `/app/`. It has no fetch handler or cache and is served `no-cache`. A tap opens the Bag page with `?alert=<kind>`, which the companion counts as `alert opened` and then removes from the address bar. Settings marks the current device by a 16-character fingerprint of its endpoint, so the endpoint itself never goes back to the browser.
+- **Browser.** `public/push-sw.js` is scoped to `/app/`. It has no fetch handler or cache and is served `no-cache`. A tap opens the Bag page with `?alert=<kind>` (a merchant push adds `#merchant`, landing on the merchant's card, D223), which the companion counts as `alert opened` and then removes from the address bar. Settings marks the current device by a 16-character fingerprint of its endpoint, so the endpoint itself never goes back to the browser.
 - **Settings and Hero.** The Alerts card shows three things: what each kind does, the reach note, and the iOS Home Screen guidance or the blocked-permission note in place of the button. Once a device exists it also shows the two switches, quiet hours as two hour selects in the browser's timezone, and the device list with Remove. The Hero page's bag-full state links to it while the nap alert is off.
 - **Configuration.** `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and optionally `VAPID_SUBJECT` are Convex environment variables. Until they are set, Settings says alerts are not available yet and nothing can be turned on.
 - **Tests.** `tests/convex/alerts.test.ts` covers each check in the slice table except real-device delivery. Two things are still open: the A2 check on an Android phone and on an iOS Home Screen install, and Barry receiving a real alert. Once his device is allowed, `npx convex run alertsPush:sendTest '{"tokenIdentifier": "<issuer>|<subject>"}'` pushes a labelled test alert to every device of one account, outside the outbox, caps and quiet hours.

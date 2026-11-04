@@ -43,3 +43,20 @@ Findings:
 - **Levels hold.** Final level medians move by 0 to 3, up.
 
 Checks: `tests/sim/deep-floor-potions.test.ts` (v28 is valid with the three floor shares; the validator refuses shares that do not sum to 100 or a merchant share without merchant rules; a floor without its own shares plays exactly as v27 seed by seed; Archive loot finds potions above 38% of the time against under 26% in v27). The full suite passes.
+
+## The merchant stays a working day (D223)
+
+Production on 2026-11-04: 862 merchant visits met across all heroes, 65 purchases, and 52 of the 69 heroes who had met the merchant had never bought. v28 also makes a visit stay 32 adventures instead of 4, with a second merchant draw paying gold while one is open. The raw v28 results above include it. The harness's cohorts buy what a visit offers when one is open at their visit time, so a longer stay means they catch more visits. Potion shares only → with the long stay:
+
+| Cohort | Final level | Gold at day 60 | Full-price bag buys per hero | Empty pouch, Cafeteria / Archive / Garage |
+| --- | --- | --- | --- | --- |
+| Daily | 38 → 38 | 9,420 → 9,530 | 4.37 → 2.95 | 31 / 36 / 10% → 29 / 33 / 9% |
+| Three-day | 37 → 37 | 8,933 → 9,109 | 3.70 → 2.40 | 28 / 31 / 10% → 27 / 31 / 10% |
+| Seven-day | 36 → 36 | 8,851 → 8,538 | 3.13 → 2.52 | 22 / 15 / 7% → 22 / 15 / 7% |
+| Undergeared three-day | 33 → 33 | 5,193 → 6,106 | 2.43 → 2.13 | 19 / 53 / 31% → 18 / 51 / 29% |
+| Bold daily | 39 → 40 | 7,326 → 5,848 | 3.93 → 2.85 | 11 / 21 / 6% → 9 / 18 / 5% |
+| Bold three-day | 37 → 37 | 7,309 → 6,222 | 2.97 → 2.33 | 6 / 11 / 4% → 6 / 11 / 4% |
+
+Fewer bags are bought at the Bag page's price because more are bought from the merchant at its discount. Bold cohorts end with less gold because the harness buys the potion bundle at every visit it catches, at 12 gold × floor tier each. Late-game gold is not the binding constraint (the reporting player held 4,961). Levels hold or rise.
+
+Checks: `tests/sim/deep-floor-potions.test.ts` also covers the 32-adventure stay, the validator's one-visit rule and a second merchant draw paying gold where v27 replaced the visit. `tests/convex/alerts.test.ts` covers a deal held through quiet hours and sent in the morning, one dropped when the merchant left overnight, and the merchant and daily caps. `tests/convex/merchant-pouch.test.ts` checks that `heroes.mine` lists the offers. The phone harness (`merchant=1`) shows both cards at 390 and 320 wide with no overflow, and the Hero page's key landing on the Bag page's merchant card below the sticky header.

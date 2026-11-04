@@ -91,7 +91,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alerts',
     loadingAlerts: 'Loading alerts…',
-    kinds: { asleep: { name: 'Bag full', blurb: 'The bag is full and your hero is holding a find for you. Once each time it fills.' }, merchant: { name: 'Merchant deal', blurb: 'A bag or pouch you can afford is on sale for about an hour. At most once a day.' } },
+    kinds: { asleep: { name: 'Bag full', blurb: 'The bag is full and your hero is holding a find for you. Once each time it fills.' }, merchant: { name: 'Merchant deal', blurb: 'A bag or pouch you can afford is on sale for a few hours. At most once a day.' } },
     intro: 'Get a nudge on this phone when your hero needs you.',
     quietNote: 'During quiet hours, nap alerts wait until morning and merchant deals are skipped.',
     offByDefault: ' Off by default. At most two alerts a day across all your games.',
@@ -218,7 +218,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alertes',
     loadingAlerts: 'Chargement des alertes…',
-    kinds: { asleep: { name: 'Sac plein', blurb: 'Le sac est plein et votre héros vous garde une trouvaille. Une fois chaque fois qu’il se remplit.' }, merchant: { name: 'Bonne affaire du marchand', blurb: 'Un sac ou une pochette à votre portée est en promo pendant environ une heure. Au plus une fois par jour.' } },
+    kinds: { asleep: { name: 'Sac plein', blurb: 'Le sac est plein et votre héros vous garde une trouvaille. Une fois chaque fois qu’il se remplit.' }, merchant: { name: 'Bonne affaire du marchand', blurb: 'Un sac ou une pochette à votre portée est en promo pendant quelques heures. Au plus une fois par jour.' } },
     intro: 'Recevez un petit rappel sur ce téléphone quand votre héros a besoin de vous.',
     quietNote: 'Pendant les heures calmes, les alertes de sieste attendent le matin et les bonnes affaires sont ignorées.',
     offByDefault: ' Désactivées par défaut. Au plus deux alertes par jour pour tous vos jeux.',
@@ -344,7 +344,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Benachrichtigungen',
     loadingAlerts: 'Benachrichtigungen werden geladen …',
-    kinds: { asleep: { name: 'Tasche voll', blurb: 'Die Tasche ist voll und dein Held hebt einen Fund für dich auf. Einmal, jedes Mal wenn sie voll wird.' }, merchant: { name: 'Händlerangebot', blurb: 'Eine Tasche oder ein Beutel, den du dir leisten kannst, ist etwa eine Stunde lang im Angebot. Höchstens einmal am Tag.' } },
+    kinds: { asleep: { name: 'Tasche voll', blurb: 'Die Tasche ist voll und dein Held hebt einen Fund für dich auf. Einmal, jedes Mal wenn sie voll wird.' }, merchant: { name: 'Händlerangebot', blurb: 'Eine Tasche oder ein Beutel, den du dir leisten kannst, ist ein paar Stunden lang im Angebot. Höchstens einmal am Tag.' } },
     intro: 'Lass dich auf diesem Handy anstupsen, wenn dein Held dich braucht.',
     quietNote: 'Während der Ruhezeiten warten Nickerchen-Benachrichtigungen bis zum Morgen, und Händlerangebote fallen weg.',
     offByDefault: ' Standardmäßig aus. Höchstens zwei Benachrichtigungen am Tag über alle deine Spiele.',
@@ -470,7 +470,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alertas',
     loadingAlerts: 'Cargando alertas…',
-    kinds: { asleep: { name: 'Bolsa llena', blurb: 'La bolsa está llena y tu héroe te guarda un hallazgo. Una vez cada vez que se llena.' }, merchant: { name: 'Oferta del mercader', blurb: 'Una bolsa o bolsita que puedes pagar está en venta durante una hora más o menos. Como mucho una vez al día.' } },
+    kinds: { asleep: { name: 'Bolsa llena', blurb: 'La bolsa está llena y tu héroe te guarda un hallazgo. Una vez cada vez que se llena.' }, merchant: { name: 'Oferta del mercader', blurb: 'Una bolsa o bolsita que puedes pagar está en venta durante unas horas. Como mucho una vez al día.' } },
     intro: 'Recibe un aviso en este móvil cuando tu héroe te necesite.',
     quietNote: 'En las horas de silencio, las alertas de siesta esperan a la mañana y las ofertas del mercader se omiten.',
     offByDefault: ' Desactivadas por defecto. Como mucho dos alertas al día entre todos tus juegos.',
@@ -596,7 +596,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Avvisi',
     loadingAlerts: 'Caricamento degli avvisi…',
-    kinds: { asleep: { name: 'Borsa piena', blurb: 'La borsa è piena e il tuo eroe ti tiene da parte un ritrovamento. Una volta ogni volta che si riempie.' }, merchant: { name: 'Affare del mercante', blurb: 'Una borsa o un borsello che puoi permetterti è in vendita per circa un’ora. Al massimo una volta al giorno.' } },
+    kinds: { asleep: { name: 'Borsa piena', blurb: 'La borsa è piena e il tuo eroe ti tiene da parte un ritrovamento. Una volta ogni volta che si riempie.' }, merchant: { name: 'Affare del mercante', blurb: 'Una borsa o un borsello che puoi permetterti è in vendita per qualche ora. Al massimo una volta al giorno.' } },
     intro: 'Ricevi un avviso su questo telefono quando il tuo eroe ha bisogno di te.',
     quietNote: 'Durante le ore di silenzio, gli avvisi del pisolino aspettano il mattino e gli affari del mercante vengono saltati.',
     offByDefault: ' Disattivati di default. Al massimo due avvisi al giorno tra tutti i tuoi giochi.',
@@ -722,7 +722,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alertas',
     loadingAlerts: 'Carregando alertas…',
-    kinds: { asleep: { name: 'Bolsa cheia', blurb: 'A bolsa está cheia e seu herói está guardando um achado para você. Uma vez cada vez que ela enche.' }, merchant: { name: 'Oferta do mercador', blurb: 'Uma bolsa ou bolsinha que você pode pagar está à venda por cerca de uma hora. No máximo uma vez por dia.' } },
+    kinds: { asleep: { name: 'Bolsa cheia', blurb: 'A bolsa está cheia e seu herói está guardando um achado para você. Uma vez cada vez que ela enche.' }, merchant: { name: 'Oferta do mercador', blurb: 'Uma bolsa ou bolsinha que você pode pagar está à venda por algumas horas. No máximo uma vez por dia.' } },
     intro: 'Receba um aviso neste celular quando seu herói precisar de você.',
     quietNote: 'No horário de silêncio, os alertas de soneca esperam até de manhã e as ofertas do mercador são puladas.',
     offByDefault: ' Desligados por padrão. No máximo dois alertas por dia entre todos os seus jogos.',
@@ -848,7 +848,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Alerty',
     loadingAlerts: 'Wczytywanie alertów…',
-    kinds: { asleep: { name: 'Pełna torba', blurb: 'Torba jest pełna, a bohater trzyma dla ciebie znalezisko. Raz za każdym zapełnieniem.' }, merchant: { name: 'Okazja u kupca', blurb: 'Torba albo sakiewka, na którą cię stać, jest w sprzedaży przez mniej więcej godzinę. Najwyżej raz dziennie.' } },
+    kinds: { asleep: { name: 'Pełna torba', blurb: 'Torba jest pełna, a bohater trzyma dla ciebie znalezisko. Raz za każdym zapełnieniem.' }, merchant: { name: 'Okazja u kupca', blurb: 'Torba albo sakiewka, na którą cię stać, jest w sprzedaży przez kilka godzin. Najwyżej raz dziennie.' } },
     intro: 'Dostań powiadomienie na ten telefon, gdy bohater cię potrzebuje.',
     quietNote: 'W godzinach ciszy alerty o drzemce czekają do rana, a okazje u kupca są pomijane.',
     offByDefault: ' Domyślnie wyłączone. Najwyżej dwa alerty dziennie ze wszystkich twoich gier.',
@@ -974,7 +974,7 @@ export const dcMoreMessages = defineMessages({
 
     alerts: 'Meldingen',
     loadingAlerts: 'Meldingen worden geladen…',
-    kinds: { asleep: { name: 'Tas vol', blurb: 'De tas is vol en je held houdt een vondst voor je vast. Eén keer per keer dat hij volloopt.' }, merchant: { name: 'Koopje van de koopman', blurb: 'Een tas of buidel die je kunt betalen is ongeveer een uur te koop. Hooguit één keer per dag.' } },
+    kinds: { asleep: { name: 'Tas vol', blurb: 'De tas is vol en je held houdt een vondst voor je vast. Eén keer per keer dat hij volloopt.' }, merchant: { name: 'Koopje van de koopman', blurb: 'Een tas of buidel die je kunt betalen is een paar uur te koop. Hooguit één keer per dag.' } },
     intro: 'Krijg een seintje op deze telefoon als je held je nodig heeft.',
     quietNote: 'Tijdens stille uren wachten dutjesmeldingen tot de ochtend en worden koopjes van de koopman overgeslagen.',
     offByDefault: ' Standaard uit. Hooguit twee meldingen per dag over al je spellen.',

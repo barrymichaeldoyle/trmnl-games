@@ -304,8 +304,9 @@ function Inventory() {
         </ul>
       </section>
 
-      {workbench ? <Workbench rules={workbench} materials={materials} equipped={[equippedOf('weapon'), equippedOf('armor')]} hero={hero} disabled={!manageable || busy} intents={{ upgrade, chooseAffix }} /> : null}
+      {/* D223: a visit is the one thing here with a clock, so it comes straight after the bag; the Hero page's key lands on it. */}
       {bag.merchant ? <Merchant visit={bag.merchant} gold={hero.gold} potions={bag.potions} cap={bag.pouch.cap} discountPct={bag.ladder.merchantDiscountPct} disabled={!manageable || busy} intent={buyOffer} /> : null}
+      {workbench ? <Workbench rules={workbench} materials={materials} equipped={[equippedOf('weapon'), equippedOf('armor')]} hero={hero} disabled={!manageable || busy} intents={{ upgrade, chooseAffix }} /> : null}
       <div className="grid gap-8 sm:grid-cols-2">
         <div id="bags"><BagLadder ladder={bag.ladder} capacity={bag.capacity} gold={hero.gold} disabled={!manageable || busy} intent={buyBag} /></div>
         {/* A pouch with nothing bigger to buy has nothing to act on, so its card hides (D167). */}
@@ -504,8 +505,14 @@ function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: 
   const t = useT(dcBagMessages)
   const c = useContent()
   const have = t.haveGold(gold)
-  return <Card title={t.merchant} icon="merchant">
-    <p className="text-sm">{t.leavesIn(visit.ticksLeft)}</p>
+  // D223: the Hero page's key and the merchant push land here (#merchant). The router's own hash scroll ignores the
+  // sticky header, so the card scrolls itself into view once it renders, clear of the header by its scroll margin.
+  const spot = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (window.location.hash === '#merchant') spot.current?.scrollIntoView({ block: 'start' })
+  }, [])
+  return <div ref={spot} id="merchant" className="scroll-mt-40"><Card title={t.merchant} icon="merchant">
+    <p className="text-sm">{t.leavesIn(visit.ticksLeft, t.aboutTime(visit.ticksLeft))}</p>
     <ul className="mt-3 flex flex-col gap-3">
       {visit.offers.map((offer) => {
         const affordable = gold >= offer.price
@@ -522,7 +529,7 @@ function Merchant({ visit, gold, potions, cap, discountPct, disabled, intent }: 
     <BuySheet open={asking !== null} title={asking ? t.buyOffer(asking.name) : ''} price={asking?.price ?? 0} gold={gold} pending={intent.pending} onClose={() => setAsking(null)} onConfirm={() => (asking ? intent.run({ offerId: asking.id }, t.offerBought(asking.name)) : Promise.resolve(false))}>
       <li>{t.sellsOnce}</li>
     </BuySheet>
-  </Card>
+  </Card></div>
 }
 
 /** D61/D122: the current bag, the next one and how to get it. */

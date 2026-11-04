@@ -49,10 +49,14 @@ describe('deep-floor potion shares (D222)', () => {
     expect(withArchive(noMerchant as ContentCatalog, archive.lootWeights!)).toContain('biome archive merchant loot weight needs merchant rules')
   })
 
-  it('leaves floors without their own shares exactly as v27 plays them', () => {
+  it('leaves floors without their own shares exactly as v27 plays them, but for the merchant\'s longer stay', () => {
+    // A merchant line names its stay ("Open for 4 adventures" against 32); every other line matches seed by seed.
+    const stay = (line: string) => line.replace(/\b(4|32) adventures/, 'N adventures')
     const a = lootFinds(v27, 'server_room', 8, 400)
     const b = lootFinds(v28, 'server_room', 8, 400)
-    expect(b.summaries).toEqual(a.summaries)
+    expect(b.found).toEqual(a.found)
+    expect(b.summaries.map(stay)).toEqual(a.summaries.map(stay))
+    expect(a.summaries.some((line) => line.includes('Merchant'))).toBe(true)
   })
 
   it('finds potions more often in the Archive, in place of gold', () => {
@@ -61,5 +65,36 @@ describe('deep-floor potion shares (D222)', () => {
     expect(share(before, 'potion')).toBeLessThan(0.26)
     expect(share(after, 'potion')).toBeGreaterThan(0.38)
     expect(share(after, 'gold')).toBeLessThan(share(before, 'gold'))
+  })
+})
+
+describe('a merchant that stays the day (D223)', () => {
+  const kit = starterKit(v28)
+  const inventory: ItemSnapshot[] = [withId(kit.weapon, 'i000'), withId(kit.armor, 'i001'), withId(kit.potions, 'i002')]
+  const base = { ...starterHero('hero1', v28, 0), level: 12, biomeId: 'archive', weaponId: 'i000', armorId: 'i001' }
+  const tickAt = EPOCH + 1000 * QUARTER
+  const tick = (content: ContentCatalog, hero: typeof base, seed: number) =>
+    simulateHero({ hero, inventory, tick: 1000, content, simulationVersion: SIMULATION_VERSION, streams: { ...seeds(seed), quest: seed + 11, raid: seed + 7 }, tickAt })
+  const merchantSeed = (content: ContentCatalog) => {
+    for (let seed = 0; seed < 5000; seed += 1) if (tick(content, base, seed).event?.detail.outcome.variant === 'merchant') return seed
+    throw new Error('no merchant draw')
+  }
+
+  it('stays 32 adventures, and the validator holds a long stay to one visit at a time', () => {
+    expect(v28.merchant).toMatchObject({ staysForTicks: 32, oneVisitAtATime: true })
+    const visit = tick(v28, base, merchantSeed(v28)).nextHero.merchant
+    expect(visit?.expiresAtTick).toBe(1032)
+    expect(validateCatalog({ ...v28, merchant: { ...v28.merchant!, oneVisitAtATime: undefined } } as unknown as ContentCatalog)).toContain('a merchant staying past 8 ticks must keep one visit at a time')
+    expect(validateCatalog({ ...v28, merchant: { ...v28.merchant!, staysForTicks: 97 } })).toContain('merchant must stay between 1 and 96 ticks')
+  })
+
+  it('pays gold for a second merchant draw while a visit is open, where v27 replaced the visit', () => {
+    const open = { offers: [{ id: 'potions' as const, name: 'Healing Potion', price: 48, quantity: 1 }], expiresAtTick: 1010, biomeId: 'archive' }
+    const later = tick(v28, { ...base, merchant: open }, merchantSeed(v28))
+    expect(later.event?.detail.outcome).toMatchObject({ variant: 'loot', found: 'gold' })
+    expect(later.nextHero.merchant).toEqual(open)
+    const replaced = tick(v27, { ...base, merchant: open }, merchantSeed(v27))
+    expect(replaced.event?.detail.outcome.variant).toBe('merchant')
+    expect(replaced.nextHero.merchant).not.toEqual(open)
   })
 })

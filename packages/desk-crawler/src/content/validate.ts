@@ -298,7 +298,9 @@ export function validateCatalog(content: ContentCatalog): string[] {
   }
   if (content.merchant) {
     if (!(content.merchant.potionPrice >= 1 && content.merchant.maxPotionsOffered >= 1 && content.merchant.maxPotionsOffered <= 10)) problems.push('merchant potion offer out of bounds')
-    if (!(content.merchant.staysForTicks >= 1 && content.merchant.staysForTicks <= 8)) problems.push('merchant must stay between 1 and 8 ticks')
+    // D223: up to a day; a stay past eight ticks needs one visit at a time, so a long visit is never swapped mid-shop.
+    if (!(Number.isSafeInteger(content.merchant.staysForTicks) && content.merchant.staysForTicks >= 1 && content.merchant.staysForTicks <= 96)) problems.push('merchant must stay between 1 and 96 ticks')
+    if (content.merchant.staysForTicks > 8 && content.merchant.oneVisitAtATime !== true) problems.push('a merchant staying past 8 ticks must keep one visit at a time')
     const discount = content.merchant.ladderDiscountPct
     if (discount !== undefined && !(Number.isSafeInteger(discount) && discount >= 1 && discount <= 50)) problems.push('merchant ladder discount must be a whole percentage from 1 to 50')
   }

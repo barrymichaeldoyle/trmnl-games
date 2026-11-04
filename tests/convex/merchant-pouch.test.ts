@@ -54,6 +54,8 @@ describe('potion pouch and merchant intents (D77/D78)', () => {
     const user = as(t, 'Ana')
     expect((await user.query(api.inventory.mine, {})).merchant).toMatchObject({ ticksLeft: 4, expiresAtTick: 5 })
     expect((await user.query(api.heroes.mine, {})).merchantTicksLeft).toBe(4)
+    // D223: the Hero page's card lists what the merchant sells.
+    expect((await user.query(api.heroes.mine, {})).merchantOffers).toEqual(VISIT.offers.map(({ id, name, quantity, price }) => ({ id, name, quantity, price })))
     // Potions: the starter kit holds 3, the bundle adds 2.
     expect(await user.mutation(api.inventory.buyOffer, { operationId: opId(), offerId: 'potions' })).toMatchObject({ changed: true, gold: -48, count: 2 })
     expect(await potions(t, heroId)).toBe(5)

@@ -168,7 +168,7 @@ export const pl: HelpPage = {
         </>}
       <p>Mikstury trzyma się w sakiewce. Nowy bohater ma {name(F.firstPouch.name)} na {F.firstPouch.size} mikstur. Większe sakiewki kupuje się za złoto na stronie Torba, po jednej: {rungs(F.shopPouches)}. Gdy sakiewka jest pełna, znaleziona mikstura zamienia się w złoto.</p>
       <h2 id="the-wandering-merchant">Wędrowny kupiec</h2>
-      <p>Od czasu do czasu bohater spotyka podczas eksploracji wędrownego kupca. Ekran pokazuje „Kupiec przejazdem. Zrób zakupy w aplikacji.”, a strona Torba pokazuje do trzech ofert: kilka mikstur oraz następną sakiewkę lub torbę{F.merchantOff > 0 ? ` o ${F.merchantOff}% taniej niż na stronie Torba` : ''}. Każda oferta sprzedaje się raz. Kupiec rusza dalej po czterech przygodach albo po twoim ostatnim zakupie.</p>
+      <p>Od czasu do czasu bohater spotyka podczas eksploracji wędrownego kupca. Ekran pokazuje „Kupiec przejazdem. Zrób zakupy w aplikacji.”, a strona Torba pokazuje do trzech ofert: kilka mikstur oraz następną sakiewkę lub torbę{F.merchantOff > 0 ? ` o ${F.merchantOff}% taniej niż na stronie Torba` : ''}. Każda oferta sprzedaje się raz. Kupiec rusza dalej po {F.merchantStay} przygodach (około {F.merchantHours} godzin) albo po twoim ostatnim zakupie.</p>
       <h2 id="decisions">Decyzje</h2>
       <p>Czasem biuro pyta bohatera o drobiazg, na przykład o zrzutkę na tort albo zostanie po godzinach. Ekran pokazuje „W aplikacji czeka decyzja.”, a strona Bohater pokazuje obie opcje i dokładnie to, co każda zmienia. Jeśli nie odpowiesz w ciągu mniej więcej doby, zostanie wybrana opcja oznaczona jako domyślna.</p>
       <h2 id="effects">Efekty</h2>
@@ -241,7 +241,7 @@ export const pl: HelpPage = {
         <li><strong>Pełna torba:</strong> torba jest pełna, a bohater trzyma dla ciebie znalezisko. Przychodzi pół godziny po zapełnieniu torby, więc nie dostaniesz go, jeśli już ją porządkujesz, i tylko raz za każdym zapełnieniem.</li>
         <li><strong>Okazja u kupca:</strong> kupiec sprzedaje następną torbę lub sakiewkę{F.merchantOff > 0 ? ` o ${F.merchantOff}% taniej` : ''}, a bohater ma na nią złoto. Najwyżej raz dziennie. Kupiec z samymi miksturami nigdy go nie wysyła.</li>
       </ul>
-      <p>Dostajesz najwyżej dwa alerty dziennie. Godziny ciszy trwają od 21:00 do 08:00, chyba że je zmienisz: alert o pełnej torbie czeka, aż się skończą, a okazja u kupca, która trafi się w tym czasie, zostaje pominięta. Przed wysłaniem gra sprawdza, czy alert jest wciąż aktualny, więc nigdy nie usłyszysz o torbie, którą już uporządkowałeś, ani o ofercie, której już nie ma. Decyzje, rajdy, nokauty, awanse i pamiątki nigdy nie wysyłają alertów.</p>
+      <p>Dostajesz najwyżej dwa alerty dziennie. Godziny ciszy trwają od 21:00 do 08:00, chyba że je zmienisz: alert o pełnej torbie albo okazja u kupca czeka, aż się skończą. Przed wysłaniem gra sprawdza, czy alert jest wciąż aktualny, więc nigdy nie usłyszysz o torbie, którą już uporządkowałeś, ani o ofercie, której już nie ma. Decyzje, rajdy, nokauty, awanse i pamiątki nigdy nie wysyłają alertów.</p>
       <p>Wybierz w Ustawieniach „Zezwól na tym urządzeniu”, a potem zaakceptuj pytanie przeglądarki. Na iPhonie i iPadzie najpierw dodaj TRMNL Games do ekranu początkowego (Udostępnij, a potem Do ekranu początk.) i otwieraj stamtąd. Każde urządzenie, na które zezwolisz, jest w Ustawieniach z przyciskiem „Usuń”; usunięcie ostatniego wyłącza alerty.</p>
       <h2 id="troubleshooting">Rozwiązywanie problemów</h2>
       <h3 id="not-on-your-screen">Bohatera nie ma na ekranie</h3>

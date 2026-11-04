@@ -123,6 +123,7 @@ type HeroView = {
   career?: CareerView | null
   unlocks?: UnlockView | null
   merchantTicksLeft: number | null
+  merchantOffers: ReadonlyArray<{ id: 'potions' | 'pouch' | 'bag'; name: string; quantity: number; price: number }>
   /** D163: a dug-in elite, while one lasts. */
   standoff?: Standoff | null
   wakeAtTick: number | null
@@ -234,9 +235,10 @@ function HeroSheet({ hero }: { hero: HeroView }) {
           </ul>
         ) : null}
         {hero.status === 'sleeping' && hero.wakeAtTick === null && !bagReady ? <AlertNudge /> : null}
-        {hero.merchantTicksLeft !== null ? <p className="text-sm"><strong>{t.merchantVisiting}</strong> <Link to="/app/desk-crawler/inventory" className="underline underline-offset-4">{t.seeOffers}</Link>{t.withinAdventures(hero.merchantTicksLeft)}</p> : null}
         {!healthy ? <p className="text-sm">{t.serviceCheck}<Link to="/support" className="underline underline-offset-4">{t.contactSupport}</Link>{t.ifItLasts}</p> : null}
       </section>
+
+      {hero.merchantTicksLeft !== null && hero.merchantOffers.length > 0 ? <MerchantCard ticksLeft={hero.merchantTicksLeft} offers={hero.merchantOffers} gold={hero.gold} /> : null}
 
       {hero.standoff ? <StandoffCard standoff={hero.standoff} status={hero.status} healthy={healthy} pending={walkAway.pending} onWalkAway={() => setAsk({ kind: 'walkAway' })} /> : null}
 
@@ -446,3 +448,30 @@ function StandoffCard({ standoff, status, healthy, pending, onWalkAway }: { stan
     </section>
   )
 }
+
+/**
+ * D223: a visiting merchant gets a card on the Hero page, with what it sells and when it leaves, and one key to the
+ * Bag page where each offer is bought. It used to be one line under the commands, easy to read past.
+ */
+function MerchantCard({ ticksLeft, offers, gold }: { ticksLeft: number; offers: HeroView['merchantOffers']; gold: number }) {
+  const t = useT(dcHeroMessages)
+  const c = useContent()
+  return (
+    <section aria-labelledby="merchant-title" className="flex flex-col gap-3 border-[3px] border-night bg-panel p-4">
+      <SectionTitle id="merchant-title" glyph="merchant" tone="text-gold-ink" size="text-2xl">{t.merchantVisiting}</SectionTitle>
+      <ul className="flex flex-col gap-1">
+        {offers.map((offer) => (
+          <li key={offer.id} className="flex flex-wrap items-baseline justify-between gap-2">
+            <span>{c.name(offer.name)}</span>
+            <span className={`inline-flex items-center gap-1.5 tabular-nums font-semibold ${gold >= offer.price ? 'text-gold-ink' : 'text-muted'}`}><Glyph name="coin" />{offer.price}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Link to="/app/desk-crawler/inventory" hash="merchant" className={`inline-flex min-h-11 items-center justify-center gap-2.5 px-4 ${BUTTON_PRIMARY}`}><Glyph name="merchant" />{t.shop}</Link>
+        <span className="text-sm text-muted">{t.leavesIn(ticksLeft, t.aboutTime(ticksLeft))}</span>
+      </div>
+    </section>
+  )
+}
+

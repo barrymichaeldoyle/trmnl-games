@@ -111,7 +111,7 @@ if (flag('occasion')) {
   hero.calendar = { today: { id: 'halloween', name: 'Halloween', effect: '+15% gold', daysLeft: 1 }, next: { id: 'diwali', name: 'Diwali', effect: '+15% XP', inDays: 8 } };
   hero.scenePath = hero.scenePath.replace('/v4/', '/v5/').replace('/day/', '/day/halloween/').replace('/night/', '/night/halloween/');
 } else hero.calendar = { today: null, next: { id: 'halloween', name: 'Halloween', effect: '+15% gold', inDays: 18 } };
-if (flag('merchant')) { hero.merchantTicksLeft = 3; inventory.merchant = { offers: [{ id: 'potions', name: '3 healing potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 3, ticksLeft: 3, biomeId: hero.biomeId } }
+if (flag('merchant')) { hero.merchantTicksLeft = 30; hero.merchantOffers = [{ id: 'potions', name: '3 healing potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225 }]; inventory.merchant = { offers: [{ id: 'potions', name: '3 healing potions', quantity: 3, price: 30 }, { id: 'bag', name: 'Messenger Bag', quantity: 1, price: 225, tierId: 'messenger_bag' }], expiresAtTick: hero.world.currentTick + 30, ticksLeft: 30, biomeId: hero.biomeId } }
 if (flag('recap')) data.recap = { ...data.recap, baseline: { at: Date.now() - 36e5 * 26 }, xpGained: 212, levelsGained: 1, newEvents: 19, counters: { combatWins: 7, goldEarned: 43, itemsFound: 2, deaths: 1 } };
 // P37: the roster. The Heroes page reads roster:mine; the Hero page reads hero.roster.
 const rosterMode = params.get('roster');

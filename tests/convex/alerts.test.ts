@@ -209,31 +209,56 @@ describe('alerts backend (P33)', () => {
     expect(sent).toHaveLength(0)
   })
 
-  it('holds a nap alert until quiet hours end, drops a merchant alert, and caps two a day with one merchant', async () => {
+  it('holds a nap and a merchant deal until quiet hours end, and caps two a day with one merchant', async () => {
     const offers = [{ id: 'bag' as const, name: 'Messenger Bag', quantity: 1, price: 150, tierId: 'messenger' }]
     const heroId = await seedHero(t, { status: 'sleeping', gold: 500, merchant: { offers, expiresAtTick: 14, biomeId: 'office' } }, 'Hal')
     await subscribe(t, 'Hal', 1)
-    // 22:00 UTC: inside the default quiet hours.
+    // 22:00 UTC: inside the default quiet hours. D223: the merchant stays the day, so its deal waits for morning too.
     vi.setSystemTime(Date.UTC(2026, 9, 7, 22, 0))
     await enable(t, 'Hal')
     const nap = await queued(heroId, 'asleep', 9)
     const deal = await queued(heroId, 'merchant', 10, { offerId: 'bag', offerName: 'Messenger Bag' })
     await deliver()
     expect(await row(nap)).toMatchObject({ state: 'pending', notBefore: Date.UTC(2026, 9, 8, 8, 0) })
-    expect(await row(deal)).toMatchObject({ state: 'skipped', reason: 'quiet_hours' })
+    expect(await row(deal)).toMatchObject({ state: 'pending', notBefore: Date.UTC(2026, 9, 8, 8, 0) })
 
     vi.setSystemTime(Date.UTC(2026, 9, 8, 8, 0))
     await deliver()
     expect(await row(nap)).toMatchObject({ state: 'sent', localDay: '2026-10-08' })
+    expect(await row(deal)).toMatchObject({ state: 'sent', localDay: '2026-10-08' })
+    expect(sent.map((push) => JSON.parse(push.payload).body)).toContain('A merchant is offering Baz a Messenger Bag at a discount, and they have the gold. The merchant stays a few hours.')
+
+    // The next day: one merchant push, then the merchant cap; the second push of the day, then the daily cap.
+    vi.setSystemTime(Date.UTC(2026, 9, 9, 9, 0))
     const first = await queued(heroId, 'merchant', 11, { offerId: 'bag', offerName: 'Messenger Bag' })
     await deliver()
     expect(await row(first)).toMatchObject({ state: 'sent' })
-    expect(JSON.parse(sent.at(-1)!.payload).body).toBe('A merchant is offering Baz a Messenger Bag at a discount, and they have the gold. The offer lasts about an hour.')
-    // Two pushes today already: the third is skipped, not queued.
-    const third = await queued(heroId, 'asleep', 12)
+    const second = await queued(heroId, 'merchant', 12, { offerId: 'bag', offerName: 'Messenger Bag' })
+    await deliver()
+    expect(await row(second)).toMatchObject({ state: 'skipped', reason: 'merchant_cap' })
+    const napAgain = await queued(heroId, 'asleep', 12)
+    await deliver()
+    expect(await row(napAgain)).toMatchObject({ state: 'sent' })
+    const third = await queued(heroId, 'asleep', 13)
     await deliver()
     expect(await row(third)).toMatchObject({ state: 'skipped', reason: 'daily_cap' })
-    expect(sent).toHaveLength(2)
+    expect(sent).toHaveLength(4)
+  })
+
+  it('drops a deal held overnight when the merchant has gone by morning', async () => {
+    const offers = [{ id: 'bag' as const, name: 'Messenger Bag', quantity: 1, price: 150, tierId: 'messenger' }]
+    const heroId = await seedHero(t, { gold: 500, merchant: { offers, expiresAtTick: 14, biomeId: 'office' } }, 'Kit')
+    await subscribe(t, 'Kit', 1)
+    vi.setSystemTime(Date.UTC(2026, 9, 7, 22, 0))
+    await enable(t, 'Kit')
+    const deal = await queued(heroId, 'merchant', 10, { offerId: 'bag', offerName: 'Messenger Bag' })
+    await deliver()
+    expect(await row(deal)).toMatchObject({ state: 'pending' })
+    await t.run(async (ctx) => ctx.db.patch(heroId, { merchant: undefined }))
+    vi.setSystemTime(Date.UTC(2026, 9, 8, 8, 0))
+    await deliver()
+    expect(await row(deal)).toMatchObject({ state: 'skipped', reason: 'merchant_gone' })
+    expect(sent).toHaveLength(0)
   })
 
   it('a revoked permission removes the device, and the last one turns alerts off with a reason', async () => {

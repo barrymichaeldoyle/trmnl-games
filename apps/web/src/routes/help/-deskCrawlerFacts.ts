@@ -36,6 +36,9 @@ export const HELP_FACTS = {
   firstPouch: { name: catalog.potionPouch?.tiers[0]?.name ?? 'Thermos', size: catalog.potionPouch?.tiers[0]?.cap ?? 20 },
   shopPouches: (catalog.potionPouch?.tiers ?? []).filter((tier) => tier.milestone === undefined && tier.price !== undefined).map((tier) => ({ name: tier.name, size: tier.cap, price: tier.price! })),
   merchantOff: catalog.merchant?.ladderDiscountPct ?? 0,
+  // D223: how long a visit stays, in adventures and in rounded hours.
+  merchantStay: catalog.merchant?.staysForTicks ?? 4,
+  merchantHours: Math.max(1, Math.round((catalog.merchant?.staysForTicks ?? 4) / 4)),
   workbench: workbench === undefined ? undefined : {
     level: catalog.unlocks?.workbench,
     materials: workbench.materials.map((m) => ({ name: m.name, rarities: m.rarities })),

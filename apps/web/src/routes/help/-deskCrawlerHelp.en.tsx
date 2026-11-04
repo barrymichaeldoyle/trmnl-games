@@ -158,7 +158,7 @@ export const en: HelpPage = {
         </>}
       <p>Potions are kept in a pouch. A new hero carries a {F.firstPouch.name} that holds {F.firstPouch.size}. Bigger pouches are bought with gold on the Bag page, one at a time: {rungs(F.shopPouches)}. When the pouch is full, a potion find becomes gold instead.</p>
       <h2 id="the-wandering-merchant">The wandering merchant</h2>
-      <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and the next pouch or bag{F.merchantOff > 0 ? ` at ${F.merchantOff}% off the Bag page price` : ''}. Each offer sells once. The merchant moves on after four adventures or after your last purchase.</p>
+      <p>Now and then your hero meets a wandering merchant while exploring. Your screen says “Merchant visiting. Shop in the companion soon.” and the Bag page shows up to three offers: a few potions, and the next pouch or bag{F.merchantOff > 0 ? ` at ${F.merchantOff}% off the Bag page price` : ''}. Each offer sells once. The merchant moves on after {F.merchantStay} adventures (about {F.merchantHours} hours) or after your last purchase.</p>
       <h2 id="decisions">Decisions</h2>
       <p>Sometimes the office asks your hero something small, like chipping in for a cake or staying late. Your screen says “A decision is waiting in the companion.” and the Hero page shows both options with exactly what each one changes. If you don't answer within about a day, the option marked as the default is chosen for you.</p>
       <h2 id="effects">Effects</h2>
@@ -231,7 +231,7 @@ export const en: HelpPage = {
         <li><strong>Bag full:</strong> the bag is full and your hero is holding a find for you. It comes half an hour after the bag fills, so nothing arrives if you are already sorting it out, and once each time it fills.</li>
         <li><strong>Merchant deal:</strong> a merchant is selling the next bag or pouch{F.merchantOff > 0 ? ` at ${F.merchantOff}% off` : ''} and your hero has the gold. At most once a day. A merchant with only potions never sends one.</li>
       </ul>
-      <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a bag-full alert waits until they end, and a merchant deal that turns up then is skipped. Before sending, the game checks that the alert still holds, so you never hear about a bag you have already sorted or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>
+      <p>You get at most two alerts a day. Quiet hours run from 21:00 to 08:00 unless you change them: a bag-full alert or a merchant deal waits until they end. Before sending, the game checks that the alert still holds, so you never hear about a bag you have already sorted or an offer that has gone. Decisions, raids, knockouts, level-ups and keepsakes never send alerts.</p>
       <p>Choose Allow on this device in Settings, then accept your browser’s prompt. On iPhone and iPad, first add TRMNL Games to your Home Screen (Share, then Add to Home Screen) and open it from there. Each device you allow is listed in Settings with a Remove button; removing the last one turns alerts off.</p>
       <h2 id="troubleshooting">Troubleshooting</h2>
       <h3 id="not-on-your-screen">Your hero isn't on your screen</h3>

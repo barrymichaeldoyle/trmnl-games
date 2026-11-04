@@ -212,7 +212,7 @@ const sendValidator = v.object({
 
 /**
  * Sender, first transaction: take up to 50 due rows, oldest first, and decide each one. A row whose moment has
- * passed is skipped, quiet hours hold `asleep` until morning and drop `merchant`, the caps skip without queueing,
+ * passed is skipped, quiet hours hold `asleep` and `merchant` until morning (D223), the caps skip without queueing,
  * and what is left is marked sending and handed to the push action.
  */
 export const claimDue = internalMutation({
@@ -305,9 +305,10 @@ export const claimDue = internalMutation({
       const devices = await devicesOf(ctx, owner._id)
       if (devices.length === 0) { await skip(row, 'no_devices'); continue }
       if (inQuietHours(now, owner.timezone, prefs)) {
-        // The nap, a full cooler, a waiting decision and a death are still news in the morning; the merchant, a bait
-        // alert and a birth are not worth waking for (a decision whose year closes overnight drops at the recheck).
-        if (row.kind === 'merchant' || row.kind === 'bait_out' || row.kind === 'new_arrival' || row.kind === 'new_seed') await skip(row, 'quiet_hours')
+        // The nap, a full cooler, a waiting decision and a death are still news in the morning; a bait alert and a birth
+        // are not worth waking for (a decision whose year closes overnight drops at the recheck). D223: a merchant stays a
+        // working day now, so its deal waits for morning too, and the recheck drops it if the merchant has gone by then.
+        if (row.kind === 'bait_out' || row.kind === 'new_arrival' || row.kind === 'new_seed') await skip(row, 'quiet_hours')
         else await ctx.db.patch(row._id, { notBefore: quietEndsAt(now, owner.timezone, prefs), updatedAt: now })
         continue
       }

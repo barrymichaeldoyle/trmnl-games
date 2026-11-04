@@ -7,7 +7,7 @@
     "heroes": 60,
     "days": 60,
     "ticks": 5760,
-    "seconds": 163.823,
+    "seconds": 143.107,
     "cumulativeXpToLevel8": 3608,
     "deathDenominator": "hero-days with at least one exploring/resting tick in the biome; multiple deaths count once for probability",
     "uncertainty": "Wilson 95% descriptive interval; repeated days per seeded hero are correlated, not a player forecast"
@@ -153,17 +153,17 @@
         "reached": 0
       },
       "goldDayEnd": {
-        "median": 2297,
-        "p90": 2792
+        "median": 2312,
+        "p90": 2828
       },
-      "goldDay30": 2137,
+      "goldDay30": 2166,
       "todo": {
         "tasksPerHeroDay": 2.5,
         "tasksPerAwakeHeroDay": 2.5,
         "awakeDaySharePct": 100,
         "daysWithTwoPlusPct": 89.5,
         "awakeDaysWithTwoPlusPct": 89.5,
-        "taskGoldSharePct": 11,
+        "taskGoldSharePct": 10.8,
         "taskGoldPerHeroDay": 12.5,
         "hoursToFinish": {
           "avoid_traps": {
@@ -188,7 +188,7 @@
             "finished": 1735,
             "p10": 3.5,
             "median": 6.25,
-            "p90": 9.75
+            "p90": 9.5
           },
           "explore_biome": {
             "finished": 1163,
@@ -559,12 +559,12 @@
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 2137,
-            "p90": 2505
+            "median": 2166,
+            "p90": 2528
           },
           "day60": {
-            "median": 2297,
-            "p90": 2792
+            "median": 2312,
+            "p90": 2828
           }
         },
         "materialsHeldMedian": {
@@ -576,7 +576,7 @@
         "workbenchGoldMedian": 0,
         "steps": {}
       },
-      "jackpotGoldShare": 3.4,
+      "jackpotGoldShare": 3.5,
       "elitesPerHeroDay": 0.85,
       "bag": {
         "reach": [
@@ -1637,7 +1637,7 @@
             "elites_3": 63.3,
             "elites_4": 0,
             "jackpots_1": 100,
-            "jackpots_2": 81.7,
+            "jackpots_2": 85,
             "jackpots_3": 0,
             "rare_finds_1": 100,
             "rare_finds_2": 86.7,
@@ -1825,7 +1825,7 @@
         },
         {
           "level": 8,
-          "p10": 7.2,
+          "p10": 7.1,
           "median": 7.7,
           "p90": 8.3,
           "reached": 60
@@ -1833,64 +1833,64 @@
         {
           "level": 12,
           "p10": 11.7,
-          "median": 13,
-          "p90": 14.7,
+          "median": 12.9,
+          "p90": 14.1,
           "reached": 60
         },
         {
           "level": 16,
           "p10": 15.7,
-          "median": 17.3,
-          "p90": 19.7,
+          "median": 17.2,
+          "p90": 18.8,
           "reached": 60
         }
       ],
-      "finalLevelMedian": 39,
+      "finalLevelMedian": 40,
       "deathByBiome": {
         "server_room": {
           "eligibleHeroDays": 368,
-          "heroDaysWithDeath": 2,
-          "deathProbabilityPct": 0.5,
+          "heroDaysWithDeath": 1,
+          "deathProbabilityPct": 0.3,
           "wilson95Pct": [
-            0.1,
-            2
+            0,
+            1.5
           ],
-          "deathsPerEligibleHeroDay": 0.005
+          "deathsPerEligibleHeroDay": 0.003
         },
         "cafeteria_depths": {
-          "eligibleHeroDays": 374,
-          "heroDaysWithDeath": 132,
-          "deathProbabilityPct": 35.3,
+          "eligibleHeroDays": 368,
+          "heroDaysWithDeath": 119,
+          "deathProbabilityPct": 32.3,
           "wilson95Pct": [
-            30.6,
-            40.3
+            27.8,
+            37.3
           ],
-          "deathsPerEligibleHeroDay": 0.364
+          "deathsPerEligibleHeroDay": 0.337
         },
         "archive": {
-          "eligibleHeroDays": 326,
-          "heroDaysWithDeath": 62,
-          "deathProbabilityPct": 19,
+          "eligibleHeroDays": 317,
+          "heroDaysWithDeath": 58,
+          "deathProbabilityPct": 18.3,
           "wilson95Pct": [
-            15.1,
-            23.6
+            14.4,
+            22.9
           ],
-          "deathsPerEligibleHeroDay": 0.193
+          "deathsPerEligibleHeroDay": 0.189
         },
         "parking_garage": {
-          "eligibleHeroDays": 2547,
-          "heroDaysWithDeath": 195,
-          "deathProbabilityPct": 7.7,
+          "eligibleHeroDays": 2564,
+          "heroDaysWithDeath": 180,
+          "deathProbabilityPct": 7,
           "wilson95Pct": [
-            6.7,
-            8.8
+            6.1,
+            8.1
           ],
-          "deathsPerEligibleHeroDay": 0.078
+          "deathsPerEligibleHeroDay": 0.073
         }
       },
       "stateSharePct": {
-        "exploring": 97.8,
-        "resting": 0.9,
+        "exploring": 98.1,
+        "resting": 0.7,
         "travelling": 0.4,
         "dead": 0.9,
         "sleeping": 0
@@ -1903,11 +1903,11 @@
       },
       "gearPerDay": 4.9,
       "usefulGearPerDay": 0.3,
-      "equippedUpgradesPerHero": 10.6,
+      "equippedUpgradesPerHero": 10.8,
       "potions": {
-        "acquiredPerHeroDay": 5.6,
+        "acquiredPerHeroDay": 5.4,
         "usedPerHeroDay": 4.7,
-        "fullStackFallbacksPerHeroDay": 1.9,
+        "fullStackFallbacksPerHeroDay": 2.3,
         "finalCount": {
           "p10": 59,
           "median": 60,
@@ -1917,123 +1917,123 @@
       "potionStrengths": {
         "byStrength": {
           "minor": {
-            "foundPerHeroDay": 0.6,
-            "usedPerHeroDay": 0.5,
+            "foundPerHeroDay": 0.5,
+            "usedPerHeroDay": 0.4,
             "finalMedian": 0
           },
           "healing": {
-            "foundPerHeroDay": 2.2,
-            "usedPerHeroDay": 2.4,
+            "foundPerHeroDay": 2.1,
+            "usedPerHeroDay": 2.5,
             "finalMedian": 0
           },
           "major": {
-            "foundPerHeroDay": 2.8,
-            "usedPerHeroDay": 1.9,
+            "foundPerHeroDay": 2.7,
+            "usedPerHeroDay": 1.8,
             "finalMedian": 59
           }
         },
-        "combinedPerHero": 1.9,
+        "combinedPerHero": 1.8,
         "combinedMedian": 2,
         "materialsSpentPerHero": {
-          "scrap": 1.9
+          "scrap": 1.8
         },
-        "restTicksPerHeroDay": 0.9
+        "restTicksPerHeroDay": 0.7
       },
       "potionsByBiome": {
         "office_cubicles": {
-          "heroDays": 402.7,
+          "heroDays": 385.6,
           "foundPerDay": 5.5,
           "drunkPerDay": 0.1,
-          "emptyPouchPct": 6.4
+          "emptyPouchPct": 5.5
         },
         "server_room": {
-          "heroDays": 307,
+          "heroDays": 307.7,
           "foundPerDay": 4.7,
           "drunkPerDay": 5,
-          "emptyPouchPct": 2.4
+          "emptyPouchPct": 2.1
         },
         "cafeteria_depths": {
-          "heroDays": 218.7,
+          "heroDays": 218.2,
           "foundPerDay": 8,
-          "drunkPerDay": 12.8,
-          "emptyPouchPct": 10.7
+          "drunkPerDay": 13.1,
+          "emptyPouchPct": 8.5
         },
         "archive": {
-          "heroDays": 225.5,
-          "foundPerDay": 10.3,
-          "drunkPerDay": 11.4,
-          "emptyPouchPct": 21.4
+          "heroDays": 220.6,
+          "foundPerDay": 10.4,
+          "drunkPerDay": 12.2,
+          "emptyPouchPct": 17.5
         },
         "parking_garage": {
-          "heroDays": 2399.5,
-          "foundPerDay": 5.2,
-          "drunkPerDay": 4.2,
-          "emptyPouchPct": 6.4
+          "heroDays": 2424.4,
+          "foundPerDay": 4.8,
+          "drunkPerDay": 4.1,
+          "emptyPouchPct": 5.1
         }
       },
       "retreatsPerHeroDay": 0,
       "rescuesPerHeroDay": 0,
       "bestInSlot": {
-        "p10": 28.4,
-        "median": 41.7,
+        "p10": 29.6,
+        "median": 45.1,
         "p90": ">60",
         "reached": 45
       },
       "goldDayEnd": {
-        "median": 7326,
-        "p90": 10317
+        "median": 5848,
+        "p90": 11438
       },
-      "goldDay30": 4737,
+      "goldDay30": 3072,
       "todo": {
         "tasksPerHeroDay": 2.4,
         "tasksPerAwakeHeroDay": 2.4,
         "awakeDaySharePct": 100,
-        "daysWithTwoPlusPct": 84.9,
-        "awakeDaysWithTwoPlusPct": 84.9,
-        "taskGoldSharePct": 11.4,
-        "taskGoldPerHeroDay": 95.4,
+        "daysWithTwoPlusPct": 85.2,
+        "awakeDaysWithTwoPlusPct": 85.2,
+        "taskGoldSharePct": 11.3,
+        "taskGoldPerHeroDay": 95.7,
         "hoursToFinish": {
           "avoid_traps": {
-            "finished": 1385,
+            "finished": 1396,
             "p10": 1.5,
             "median": 8,
-            "p90": 23
+            "p90": 22.25
           },
           "defeat_any": {
-            "finished": 1459,
+            "finished": 1445,
             "p10": 4.25,
             "median": 7.5,
             "p90": 11
           },
           "defeat_monster": {
-            "finished": 930,
-            "p10": 2.5,
+            "finished": 934,
+            "p10": 2.25,
             "median": 7,
-            "p90": 17.5
+            "p90": 16.75
           },
           "earn_gold": {
-            "finished": 1402,
+            "finished": 1410,
             "p10": 4.5,
             "median": 8,
             "p90": 12.25
           },
           "elite": {
-            "finished": 1081,
+            "finished": 1079,
             "p10": 1.75,
-            "median": 11,
-            "p90": 31.75
+            "median": 11.25,
+            "p90": 33
           },
           "explore_biome": {
-            "finished": 968,
+            "finished": 963,
             "p10": 4.5,
             "median": 7.5,
             "p90": 10
           },
           "find_gear": {
-            "finished": 1471,
+            "finished": 1474,
             "p10": 1,
             "median": 5.5,
-            "p90": 15.25
+            "p90": 15
           }
         },
         "staleSwapsPerTaskWrittenPct": 8.4,
@@ -2294,16 +2294,16 @@
             "companion": false,
             "p10": 8.9,
             "median": 9.7,
-            "p90": 11,
+            "p90": 11.5,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "rolling_suitcase",
             "companion": true,
-            "p10": 9,
-            "median": 9.9,
-            "p90": 11.1,
+            "p10": 9.3,
+            "median": 10.4,
+            "p90": 11.9,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
@@ -2311,81 +2311,81 @@
             "id": "level_12",
             "companion": false,
             "p10": 11.7,
-            "median": 13,
-            "p90": 14.7,
+            "median": 12.9,
+            "p90": 14.1,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "first_upgrade",
             "companion": true,
-            "p10": 12.1,
-            "median": 13.4,
-            "p90": 15.6,
+            "p10": 12.2,
+            "median": 13.3,
+            "p90": 15.4,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "reinforce_3",
             "companion": true,
-            "p10": 32.1,
-            "median": 37.7,
-            "p90": 44.9,
-            "reached": 60,
+            "p10": 33.5,
+            "median": 42,
+            "p90": 55.2,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "archive_win",
             "companion": true,
-            "p10": 32.1,
-            "median": 37.7,
-            "p90": 44.9,
-            "reached": 60,
+            "p10": 33.5,
+            "median": 42.1,
+            "p90": 55.2,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "level_16",
             "companion": false,
-            "p10": 32.1,
-            "median": 37.8,
-            "p90": 44.9,
-            "reached": 60,
+            "p10": 33.5,
+            "median": 42.1,
+            "p90": 55.2,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "garage_win",
             "companion": true,
-            "p10": 32.1,
-            "median": 37.8,
-            "p90": 45,
-            "reached": 60,
+            "p10": 33.5,
+            "median": 42.1,
+            "p90": 55.2,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "gym_duffel",
             "companion": true,
-            "p10": 36.6,
-            "median": 43.6,
-            "p90": 54.9,
+            "p10": 35.6,
+            "median": 42.6,
+            "p90": 55.2,
             "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "first_standoff",
             "companion": false,
-            "p10": 36.8,
-            "median": 45.1,
-            "p90": 56.4,
+            "p10": 35.6,
+            "median": 44.3,
+            "p90": 55.2,
             "reached": 59,
             "guaranteeFiresPerHero": null
           }
         ],
-        "careerGoldSharePct": 3.5,
-        "careerGoldPerHero": 1934.2,
+        "careerGoldSharePct": 3.4,
+        "careerGoldPerHero": 1924.7,
         "rungsReachedMedian": 31,
         "finalRung": {
           "done": 59,
-          "gym_duffel": 1
+          "reinforce_3": 1
         },
         "waitingOnCompanionPct": 1.7,
         "days": 60
@@ -2393,39 +2393,39 @@
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 4737,
-            "p90": 7169
+            "median": 3072,
+            "p90": 6243
           },
           "day60": {
-            "median": 7326,
-            "p90": 10317
+            "median": 5848,
+            "p90": 11438
           }
         },
         "materialsHeldMedian": {
-          "scrap": 366,
-          "parts": 142,
-          "components": 53
+          "scrap": 377,
+          "parts": 145,
+          "components": 51
         },
-        "salvagedPerHero": 234.6,
-        "workbenchGoldMedian": 28000,
+        "salvagedPerHero": 237,
+        "workbenchGoldMedian": 25000,
         "steps": {
           "armor:+1": {
-            "p10": 13.5,
-            "median": 15.6,
-            "p90": 18.1,
+            "p10": 13.6,
+            "median": 15.1,
+            "p90": 17.7,
             "reached": 60
           },
           "armor:+2": {
-            "p10": 22.3,
-            "median": 25.3,
-            "p90": 34.2,
+            "p10": 23,
+            "median": 27.4,
+            "p90": 34.4,
             "reached": 60
           },
           "armor:+3": {
-            "p10": 40.2,
-            "median": 47.4,
-            "p90": 55.8,
-            "reached": 58
+            "p10": 44,
+            "median": 55,
+            "p90": ">60",
+            "reached": 44
           },
           "armor:Mk 2": {
             "p10": ">60",
@@ -2434,28 +2434,28 @@
             "reached": 2
           },
           "armor:Mk 3": {
-            "p10": 15.5,
+            "p10": 14.3,
             "median": ">60",
             "p90": ">60",
             "reached": 9
           },
           "weapon:+1": {
-            "p10": 12,
-            "median": 13.8,
-            "p90": 15.6,
+            "p10": 11.9,
+            "median": 13.3,
+            "p90": 15.4,
             "reached": 60
           },
           "weapon:+2": {
-            "p10": 18.1,
-            "median": 21.7,
-            "p90": 30.3,
+            "p10": 17.8,
+            "median": 23.2,
+            "p90": 30.8,
             "reached": 60
           },
           "weapon:+3": {
-            "p10": 32.1,
-            "median": 37.7,
-            "p90": 44.9,
-            "reached": 60
+            "p10": 33.5,
+            "median": 42,
+            "p90": 55.2,
+            "reached": 59
           },
           "weapon:Mk 3": {
             "p10": ">60",
@@ -2465,8 +2465,8 @@
           }
         }
       },
-      "jackpotGoldShare": 1.6,
-      "elitesPerHeroDay": 1.23,
+      "jackpotGoldShare": 1.7,
+      "elitesPerHeroDay": 1.24,
       "bag": {
         "reach": [
           {
@@ -2492,36 +2492,36 @@
           },
           {
             "capacity": 20,
-            "p10": 6.7,
-            "median": 7.4,
-            "p90": 8.5,
-            "reached": 60
+            "p10": 6.8,
+            "median": 8,
+            "p90": ">60",
+            "reached": 49
           },
           {
             "capacity": 24,
-            "p10": 45.1,
-            "median": 54.9,
+            "p10": ">60",
+            "median": ">60",
             "p90": ">60",
-            "reached": 44
+            "reached": 4
           },
           {
             "capacity": 28,
-            "p10": 52.3,
+            "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 29
+            "reached": 4
           },
           {
             "capacity": 32,
             "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 1
+            "reached": 0
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 3.93,
-        "goldSpentMedian": 5900
+        "purchasesPerHero": 2.85,
+        "goldSpentMedian": 1900
       },
       "xpLastDay": {
         "p10": 5271,
@@ -2530,7 +2530,7 @@
         "ratio": 1.46
       },
       "xpLast7Days": {
-        "p10": 40630,
+        "p10": 40865,
         "median": 43676,
         "p90": 46515,
         "ratio": 1.14
@@ -2923,9 +2923,9 @@
         },
         "day7": {
           "bands": {
-            "common": 52,
+            "common": 53,
             "uncommon": 7,
-            "rare": 4,
+            "rare": 3,
             "legendary": 170
           },
           "monsterTiers": {
@@ -3193,7 +3193,7 @@
             "bags_1": 100,
             "bags_2": 100,
             "bags_3": 100,
-            "bags_4": 21.7,
+            "bags_4": 13.3,
             "sales_1": 100,
             "sales_2": 93.3,
             "sales_3": 0,
@@ -3202,7 +3202,7 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 6.7,
+            "purchases_1": 61.7,
             "purchases_2": 0,
             "purchases_3": 0,
             "merchants_1": 100,
@@ -3308,9 +3308,9 @@
         },
         "day30": {
           "bands": {
-            "common": 125,
-            "uncommon": 5,
-            "rare": 4,
+            "common": 127,
+            "uncommon": 4,
+            "rare": 3,
             "legendary": 99
           },
           "monsterTiers": {
@@ -3331,14 +3331,14 @@
             "slay_stapler_mimic": [
               100,
               100,
-              96.7,
+              98.3,
               0,
               0
             ],
             "slay_dust_daemon": [
               100,
               100,
-              95,
+              98.3,
               0,
               0
             ],
@@ -3430,28 +3430,28 @@
               100,
               100,
               100,
-              71.7,
+              81.7,
               0
             ],
             "slay_oil_slick": [
               100,
               100,
               100,
-              73.3,
+              85,
               0
             ],
             "slay_barrier_golem": [
               100,
               100,
               100,
-              75,
+              81.7,
               0
             ],
             "slay_ghost_car": [
               100,
               100,
               100,
-              71.7,
+              76.7,
               0
             ]
           },
@@ -3468,12 +3468,12 @@
             "slay_rogue_roomba_5": 0,
             "slay_stapler_mimic_1": 100,
             "slay_stapler_mimic_2": 100,
-            "slay_stapler_mimic_3": 96.7,
+            "slay_stapler_mimic_3": 98.3,
             "slay_stapler_mimic_4": 0,
             "slay_stapler_mimic_5": 0,
             "slay_dust_daemon_1": 100,
             "slay_dust_daemon_2": 100,
-            "slay_dust_daemon_3": 95,
+            "slay_dust_daemon_3": 98.3,
             "slay_dust_daemon_4": 0,
             "slay_dust_daemon_5": 0,
             "slay_cable_serpent_1": 100,
@@ -3518,7 +3518,7 @@
             "slay_leftovers_hydra_5": 0,
             "office_census": 100,
             "full_tour": 100,
-            "floor_cleared_1": 90,
+            "floor_cleared_1": 91.7,
             "floor_cleared_2": 100,
             "floor_cleared_3": 95,
             "elites_1": 100,
@@ -3526,10 +3526,10 @@
             "elites_3": 95,
             "elites_4": 0,
             "jackpots_1": 98.3,
-            "jackpots_2": 26.7,
+            "jackpots_2": 25,
             "jackpots_3": 0,
             "rare_finds_1": 100,
-            "rare_finds_2": 83.3,
+            "rare_finds_2": 86.7,
             "rare_finds_3": 0,
             "rare_finds_4": 0,
             "adventures_1": 100,
@@ -3551,13 +3551,13 @@
             "levels_4": 100,
             "levels_5": 100,
             "knockouts_1": 100,
-            "knockouts_2": 61.7,
+            "knockouts_2": 63.3,
             "knockouts_3": 0,
             "knockouts_4": 0,
             "rescues_1": 0,
             "rescues_2": 0,
             "rescues_3": 0,
-            "retreats_1": 5,
+            "retreats_1": 6.7,
             "retreats_2": 0,
             "retreats_3": 0,
             "retreats_4": 0,
@@ -3567,13 +3567,13 @@
             "potions_4": 0,
             "traps_1": 100,
             "traps_2": 100,
-            "traps_3": 25,
+            "traps_3": 30,
             "traps_4": 0,
             "breaks_1": 100,
             "breaks_2": 100,
             "breaks_3": 0,
             "trips_1": 100,
-            "trips_2": 48.3,
+            "trips_2": 36.7,
             "trips_3": 0,
             "bags_1": 100,
             "bags_2": 100,
@@ -3587,8 +3587,8 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 71.7,
-            "purchases_2": 1.7,
+            "purchases_1": 100,
+            "purchases_2": 88.3,
             "purchases_3": 0,
             "merchants_1": 100,
             "merchants_2": 100,
@@ -3600,7 +3600,7 @@
             "choices_2": 100,
             "choices_3": 0,
             "choices_4": 0,
-            "epics_1": 83.3,
+            "epics_1": 80,
             "epics_2": 1.7,
             "office_raider_1": 100,
             "office_raider_2": 100,
@@ -3614,11 +3614,11 @@
             "tasks_done_4": 0,
             "salvaged_1": 100,
             "salvaged_2": 100,
-            "salvaged_3": 5,
+            "salvaged_3": 8.3,
             "workbench_1": 100,
-            "workbench_2": 78.3,
+            "workbench_2": 68.3,
             "workbench_3": 0,
-            "mixing_1": 88.3,
+            "mixing_1": 91.7,
             "mixing_2": 0,
             "mixing_3": 0,
             "slay_box_file_beetle_1": 100,
@@ -3644,22 +3644,22 @@
             "slay_trolley_swarm_1": 100,
             "slay_trolley_swarm_2": 100,
             "slay_trolley_swarm_3": 100,
-            "slay_trolley_swarm_4": 71.7,
+            "slay_trolley_swarm_4": 81.7,
             "slay_trolley_swarm_5": 0,
             "slay_oil_slick_1": 100,
             "slay_oil_slick_2": 100,
             "slay_oil_slick_3": 100,
-            "slay_oil_slick_4": 73.3,
+            "slay_oil_slick_4": 85,
             "slay_oil_slick_5": 0,
             "slay_barrier_golem_1": 100,
             "slay_barrier_golem_2": 100,
             "slay_barrier_golem_3": 100,
-            "slay_barrier_golem_4": 75,
+            "slay_barrier_golem_4": 81.7,
             "slay_barrier_golem_5": 0,
             "slay_ghost_car_1": 100,
             "slay_ghost_car_2": 100,
             "slay_ghost_car_3": 100,
-            "slay_ghost_car_4": 71.7,
+            "slay_ghost_car_4": 76.7,
             "slay_ghost_car_5": 0,
             "floor_cleared_4": 98.3,
             "floor_cleared_5": 100,
@@ -3683,7 +3683,7 @@
             "lost_and_found_1": 0,
             "lost_and_found_2": 0,
             "lost_and_found_3": 0,
-            "big_bags_1": 15,
+            "big_bags_1": 73.3,
             "big_bags_2": 0,
             "big_bags_3": 0,
             "dug_in_1": 28.3,
@@ -3729,8 +3729,8 @@
         {
           "level": 16,
           "p10": 17.8,
-          "median": 21.3,
-          "p90": 25.6,
+          "median": 21.5,
+          "p90": 24.3,
           "reached": 60
         }
       ],
@@ -3747,39 +3747,39 @@
           "deathsPerEligibleHeroDay": 0
         },
         "cafeteria_depths": {
-          "eligibleHeroDays": 364,
-          "heroDaysWithDeath": 88,
-          "deathProbabilityPct": 24.2,
+          "eligibleHeroDays": 367,
+          "heroDaysWithDeath": 89,
+          "deathProbabilityPct": 24.3,
           "wilson95Pct": [
             20.1,
-            28.8
+            28.9
           ],
-          "deathsPerEligibleHeroDay": 0.242
+          "deathsPerEligibleHeroDay": 0.243
         },
         "archive": {
-          "eligibleHeroDays": 338,
+          "eligibleHeroDays": 335,
           "heroDaysWithDeath": 53,
-          "deathProbabilityPct": 15.7,
+          "deathProbabilityPct": 15.8,
           "wilson95Pct": [
-            12.2,
-            19.9
+            12.3,
+            20.1
           ],
-          "deathsPerEligibleHeroDay": 0.157
+          "deathsPerEligibleHeroDay": 0.158
         },
         "parking_garage": {
-          "eligibleHeroDays": 2159,
-          "heroDaysWithDeath": 145,
-          "deathProbabilityPct": 6.7,
+          "eligibleHeroDays": 2144,
+          "heroDaysWithDeath": 153,
+          "deathProbabilityPct": 7.1,
           "wilson95Pct": [
-            5.7,
-            7.9
+            6.1,
+            8.3
           ],
-          "deathsPerEligibleHeroDay": 0.067
+          "deathsPerEligibleHeroDay": 0.071
         }
       },
       "stateSharePct": {
         "exploring": 98.6,
-        "resting": 0.5,
+        "resting": 0.4,
         "travelling": 0.3,
         "dead": 0.7,
         "sleeping": 0
@@ -3788,7 +3788,7 @@
         "p10": 1.7,
         "median": 2.7,
         "p90": 9.5,
-        "reached": 58
+        "reached": 56
       },
       "gearPerDay": 4.8,
       "usefulGearPerDay": 0.4,
@@ -3796,7 +3796,7 @@
       "potions": {
         "acquiredPerHeroDay": 5.7,
         "usedPerHeroDay": 4.6,
-        "fullStackFallbacksPerHeroDay": 1.7,
+        "fullStackFallbacksPerHeroDay": 1.6,
         "finalCount": {
           "p10": 59,
           "median": 60,
@@ -3812,8 +3812,8 @@
           },
           "healing": {
             "foundPerHeroDay": 2.3,
-            "usedPerHeroDay": 2.4,
-            "finalMedian": 1
+            "usedPerHeroDay": 2.5,
+            "finalMedian": 0
           },
           "major": {
             "foundPerHeroDay": 2.5,
@@ -3821,19 +3821,19 @@
             "finalMedian": 59
           }
         },
-        "combinedPerHero": 6.3,
-        "combinedMedian": 5,
+        "combinedPerHero": 6.8,
+        "combinedMedian": 6,
         "materialsSpentPerHero": {
-          "scrap": 6.3
+          "scrap": 6.8
         },
-        "restTicksPerHeroDay": 0.5
+        "restTicksPerHeroDay": 0.4
       },
       "potionsByBiome": {
         "office_cubicles": {
-          "heroDays": 753.1,
+          "heroDays": 771.3,
           "foundPerDay": 5,
           "drunkPerDay": 0,
-          "emptyPouchPct": 1.9
+          "emptyPouchPct": 2
         },
         "server_room": {
           "heroDays": 358.8,
@@ -3842,78 +3842,78 @@
           "emptyPouchPct": 4.9
         },
         "cafeteria_depths": {
-          "heroDays": 218.9,
+          "heroDays": 220.4,
           "foundPerDay": 8.4,
-          "drunkPerDay": 14.3,
-          "emptyPouchPct": 5.6
+          "drunkPerDay": 14,
+          "emptyPouchPct": 5.7
         },
         "archive": {
-          "heroDays": 232.5,
-          "foundPerDay": 10.3,
+          "heroDays": 231.6,
+          "foundPerDay": 10.2,
           "drunkPerDay": 12,
-          "emptyPouchPct": 10.7
+          "emptyPouchPct": 11
         },
         "parking_garage": {
-          "heroDays": 2002.2,
+          "heroDays": 1982.6,
           "foundPerDay": 5.4,
-          "drunkPerDay": 4.4,
-          "emptyPouchPct": 4.3
+          "drunkPerDay": 4.5,
+          "emptyPouchPct": 3.7
         }
       },
       "retreatsPerHeroDay": 0,
       "rescuesPerHeroDay": 0,
       "bestInSlot": {
         "p10": 30.1,
-        "median": 48.3,
+        "median": 51.1,
         "p90": ">60",
-        "reached": 44
+        "reached": 42
       },
       "goldDayEnd": {
-        "median": 7309,
-        "p90": 10416
+        "median": 6222,
+        "p90": 10270
       },
-      "goldDay30": 3735,
+      "goldDay30": 3279,
       "todo": {
         "tasksPerHeroDay": 2.4,
         "tasksPerAwakeHeroDay": 2.4,
         "awakeDaySharePct": 100,
-        "daysWithTwoPlusPct": 85.4,
-        "awakeDaysWithTwoPlusPct": 85.4,
-        "taskGoldSharePct": 11.6,
-        "taskGoldPerHeroDay": 84,
+        "daysWithTwoPlusPct": 85.3,
+        "awakeDaysWithTwoPlusPct": 85.3,
+        "taskGoldSharePct": 11.5,
+        "taskGoldPerHeroDay": 83.1,
         "hoursToFinish": {
           "avoid_traps": {
-            "finished": 1434,
+            "finished": 1429,
             "p10": 1.5,
             "median": 8.25,
-            "p90": 22.25
+            "p90": 22
           },
           "defeat_any": {
-            "finished": 1468,
+            "finished": 1470,
             "p10": 4.25,
             "median": 7.5,
             "p90": 11.25
           },
           "defeat_monster": {
-            "finished": 934,
+            "finished": 943,
             "p10": 2.5,
             "median": 7.25,
-            "p90": 16.5
+            "p90": 16.75
           },
           "earn_gold": {
-            "finished": 1442,
+            "finished": 1433,
             "p10": 4.5,
             "median": 7.75,
             "p90": 12
           },
           "elite": {
-            "finished": 961,
+            "finished": 942,
             "p10": 1.75,
             "median": 11.75,
             "p90": 33.75
           },
           "explore_biome": {
-            "finished": 986,
+            "finished": 995,
             "p10": 4.5,
             "median": 7.5,
             "p90": 10
@@ -4190,9 +4190,9 @@
           {
             "id": "rolling_suitcase",
             "companion": true,
-            "p10": 9.6,
-            "median": 10,
-            "p90": 12.3,
+            "p10": 9.7,
+            "median": 10.4,
+            "p90": 12.9,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
@@ -4209,7 +4209,7 @@
             "id": "first_upgrade",
             "companion": true,
             "p10": 15.2,
-            "median": 18,
+            "median": 17.3,
             "p90": 18.9,
             "reached": 60,
             "guaranteeFiresPerHero": null
@@ -4217,147 +4217,153 @@
           {
             "id": "reinforce_3",
             "companion": true,
-            "p10": 36.5,
-            "median": 45.1,
-            "p90": 54.2,
-            "reached": 59,
+            "p10": 39.5,
+            "median": 48.9,
+            "p90": ">60",
+            "reached": 54,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "archive_win",
             "companion": true,
-            "p10": 36.5,
-            "median": 45.1,
-            "p90": 54.2,
-            "reached": 59,
+            "p10": 39.5,
+            "median": 49,
+            "p90": ">60",
+            "reached": 54,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "level_16",
             "companion": false,
-            "p10": 36.5,
-            "median": 45.1,
-            "p90": 54.2,
-            "reached": 59,
+            "p10": 39.5,
+            "median": 49,
+            "p90": ">60",
+            "reached": 54,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "garage_win",
             "companion": true,
-            "p10": 36.5,
-            "median": 45.1,
-            "p90": 54.2,
-            "reached": 59,
+            "p10": 39.5,
+            "median": 49,
+            "p90": ">60",
+            "reached": 54,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "gym_duffel",
             "companion": true,
-            "p10": 45.2,
-            "median": 54.5,
+            "p10": 42.3,
+            "median": 51.7,
             "p90": ">60",
-            "reached": 43,
+            "reached": 53,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "first_standoff",
             "companion": false,
-            "p10": 45.8,
-            "median": 56.4,
+            "p10": 42.6,
+            "median": 51.9,
             "p90": ">60",
-            "reached": 40,
+            "reached": 51,
             "guaranteeFiresPerHero": null
           }
         ],
         "careerGoldSharePct": 3.8,
-        "careerGoldPerHero": 1821.3,
+        "careerGoldPerHero": 1835.5,
         "rungsReachedMedian": 31,
         "finalRung": {
-          "done": 40,
-          "gym_duffel": 16,
-          "first_standoff": 3,
-          "reinforce_3": 1
+          "done": 51,
+          "reinforce_3": 6,
+          "first_standoff": 2,
+          "gym_duffel": 1
         },
-        "waitingOnCompanionPct": 28.3,
+        "waitingOnCompanionPct": 11.7,
         "days": 60
       },
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 3735,
-            "p90": 5835
+            "median": 3279,
+            "p90": 4951
           },
           "day60": {
-            "median": 7309,
-            "p90": 10416
+            "median": 6222,
+            "p90": 10270
           }
         },
         "materialsHeldMedian": {
-          "scrap": 307,
-          "parts": 118,
-          "components": 41
+          "scrap": 312,
+          "parts": 122,
+          "components": 38
         },
-        "salvagedPerHero": 215,
-        "workbenchGoldMedian": 25000,
+        "salvagedPerHero": 216.8,
+        "workbenchGoldMedian": 24000,
         "steps": {
           "armor:+1": {
-            "p10": 15.8,
-            "median": 21.2,
-            "p90": 24.7,
+            "p10": 15.6,
+            "median": 21,
+            "p90": 24.5,
             "reached": 60
           },
           "armor:+2": {
-            "p10": 27.3,
-            "median": 30.9,
-            "p90": 39.6,
+            "p10": 27.5,
+            "median": 33.4,
+            "p90": 42.7,
             "reached": 60
           },
           "armor:+3": {
-            "p10": 45.5,
-            "median": 54.5,
+            "p10": 51.1,
+            "median": ">60",
             "p90": ">60",
-            "reached": 42
+            "reached": 26
           },
           "armor:Mk 2": {
             "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 2
+            "reached": 3
           },
           "armor:Mk 3": {
-            "p10": 18.3,
+            "p10": 18,
             "median": ">60",
             "p90": ">60",
-            "reached": 10
+            "reached": 11
           },
           "weapon:+1": {
             "p10": 15.2,
-            "median": 18.1,
+            "median": 18,
             "p90": 18.9,
             "reached": 60
           },
           "weapon:+2": {
-            "p10": 21.4,
-            "median": 27.1,
-            "p90": 33.9,
+            "p10": 21.5,
+            "median": 27.5,
+            "p90": 36.4,
             "reached": 60
           },
           "weapon:+3": {
-            "p10": 36.5,
-            "median": 45.1,
-            "p90": 54.2,
-            "reached": 59
+            "p10": 39.5,
+            "median": 48.9,
+            "p90": ">60",
+            "reached": 54
           },
-          "weapon:Mk 3": {
+          "weapon:Mk 2": {
             "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 6
+            "reached": 1
+          },
+          "weapon:Mk 3": {
+            "p10": 18.9,
+            "median": ">60",
+            "p90": ">60",
+            "reached": 7
           }
         }
       },
-      "jackpotGoldShare": 1.6,
-      "elitesPerHeroDay": 1.18,
+      "jackpotGoldShare": 1.7,
+      "elitesPerHeroDay": 1.17,
       "bag": {
         "reach": [
           {
@@ -4384,23 +4390,23 @@
           {
             "capacity": 20,
             "p10": 6.8,
-            "median": 9.4,
-            "p90": 10,
-            "reached": 60
+            "median": 9.6,
+            "p90": ">60",
+            "reached": 54
           },
           {
             "capacity": 24,
-            "p10": 51.1,
+            "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 29
+            "reached": 4
           },
           {
             "capacity": 28,
-            "p10": 57.5,
+            "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 9
+            "reached": 3
           },
           {
             "capacity": 32,
@@ -4411,20 +4417,20 @@
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 2.97,
+        "purchasesPerHero": 2.33,
         "goldSpentMedian": 1900
       },
       "xpLastDay": {
         "p10": 5259,
         "median": 6219,
-        "p90": 7480,
-        "ratio": 1.42
+        "p90": 7521,
+        "ratio": 1.43
       },
       "xpLast7Days": {
         "p10": 39692,
-        "median": 43075,
-        "p90": 46267,
-        "ratio": 1.17
+        "median": 42836,
+        "p90": 46148,
+        "ratio": 1.16
       },
       "achievements": {
         "day1": {
@@ -4815,9 +4821,9 @@
         "day7": {
           "bands": {
             "common": 53,
-            "uncommon": 7,
+            "uncommon": 8,
             "rare": 2,
-            "legendary": 171
+            "legendary": 170
           },
           "monsterTiers": {
             "slay_paper_imp": [
@@ -5084,7 +5090,7 @@
             "bags_1": 100,
             "bags_2": 100,
             "bags_3": 100,
-            "bags_4": 15,
+            "bags_4": 13.3,
             "sales_1": 100,
             "sales_2": 85,
             "sales_3": 0,
@@ -5093,7 +5099,7 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 0,
+            "purchases_1": 23.3,
             "purchases_2": 0,
             "purchases_3": 0,
             "merchants_1": 95,
@@ -5199,38 +5205,38 @@
         },
         "day30": {
           "bands": {
-            "common": 118,
-            "uncommon": 12,
-            "rare": 5,
-            "legendary": 98
+            "common": 119,
+            "uncommon": 15,
+            "rare": 2,
+            "legendary": 97
           },
           "monsterTiers": {
             "slay_paper_imp": [
               100,
               100,
               98.3,
-              13.3,
+              11.7,
               0
             ],
             "slay_rogue_roomba": [
               100,
               100,
               100,
-              20,
+              16.7,
               0
             ],
             "slay_stapler_mimic": [
               100,
               100,
               98.3,
-              15,
+              11.7,
               0
             ],
             "slay_dust_daemon": [
               100,
               100,
               100,
-              16.7,
+              13.3,
               0
             ],
             "slay_cable_serpent": [
@@ -5318,31 +5324,31 @@
               0
             ],
             "slay_trolley_swarm": [
-              98.3,
-              95,
-              88.3,
-              6.7,
+              100,
+              96.7,
+              86.7,
+              10,
               0
             ],
             "slay_oil_slick": [
-              98.3,
-              98.3,
-              85,
+              100,
+              100,
+              90,
               10,
               0
             ],
             "slay_barrier_golem": [
+              100,
               98.3,
-              95,
-              85,
+              81.7,
               10,
               0
             ],
             "slay_ghost_car": [
-              98.3,
-              96.7,
-              81.7,
-              8.3,
+              100,
+              100,
+              86.7,
+              11.7,
               0
             ]
           },
@@ -5350,22 +5356,22 @@
             "slay_paper_imp_1": 100,
             "slay_paper_imp_2": 100,
             "slay_paper_imp_3": 98.3,
-            "slay_paper_imp_4": 13.3,
+            "slay_paper_imp_4": 11.7,
             "slay_paper_imp_5": 0,
             "slay_rogue_roomba_1": 100,
             "slay_rogue_roomba_2": 100,
             "slay_rogue_roomba_3": 100,
-            "slay_rogue_roomba_4": 20,
+            "slay_rogue_roomba_4": 16.7,
             "slay_rogue_roomba_5": 0,
             "slay_stapler_mimic_1": 100,
             "slay_stapler_mimic_2": 100,
             "slay_stapler_mimic_3": 98.3,
-            "slay_stapler_mimic_4": 15,
+            "slay_stapler_mimic_4": 11.7,
             "slay_stapler_mimic_5": 0,
             "slay_dust_daemon_1": 100,
             "slay_dust_daemon_2": 100,
             "slay_dust_daemon_3": 100,
-            "slay_dust_daemon_4": 16.7,
+            "slay_dust_daemon_4": 13.3,
             "slay_dust_daemon_5": 0,
             "slay_cable_serpent_1": 100,
             "slay_cable_serpent_2": 100,
@@ -5407,20 +5413,20 @@
             "slay_leftovers_hydra_3": 100,
             "slay_leftovers_hydra_4": 0,
             "slay_leftovers_hydra_5": 0,
-            "office_census": 98.3,
-            "full_tour": 98.3,
+            "office_census": 100,
+            "full_tour": 100,
             "floor_cleared_1": 98.3,
             "floor_cleared_2": 100,
             "floor_cleared_3": 90,
             "elites_1": 100,
             "elites_2": 100,
-            "elites_3": 95,
+            "elites_3": 96.7,
             "elites_4": 0,
             "jackpots_1": 100,
-            "jackpots_2": 35,
+            "jackpots_2": 28.3,
             "jackpots_3": 0,
             "rare_finds_1": 100,
-            "rare_finds_2": 78.3,
+            "rare_finds_2": 80,
             "rare_finds_3": 0,
             "rare_finds_4": 0,
             "adventures_1": 100,
@@ -5442,7 +5448,7 @@
             "levels_4": 100,
             "levels_5": 80,
             "knockouts_1": 98.3,
-            "knockouts_2": 28.3,
+            "knockouts_2": 26.7,
             "knockouts_3": 0,
             "knockouts_4": 0,
             "rescues_1": 0,
@@ -5458,7 +5464,7 @@
             "potions_4": 0,
             "traps_1": 100,
             "traps_2": 100,
-            "traps_3": 13.3,
+            "traps_3": 16.7,
             "traps_4": 0,
             "breaks_1": 100,
             "breaks_2": 100,
@@ -5478,8 +5484,8 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 28.3,
-            "purchases_2": 0,
+            "purchases_1": 90,
+            "purchases_2": 10,
             "purchases_3": 0,
             "merchants_1": 100,
             "merchants_2": 100,
@@ -5488,10 +5494,10 @@
             "stances_2": 0,
             "stances_3": 0,
             "choices_1": 100,
-            "choices_2": 55,
+            "choices_2": 58.3,
             "choices_3": 0,
             "choices_4": 0,
-            "epics_1": 85,
+            "epics_1": 83.3,
             "epics_2": 0,
             "office_raider_1": 100,
             "office_raider_2": 98.3,
@@ -5507,10 +5513,10 @@
             "salvaged_2": 100,
             "salvaged_3": 0,
             "workbench_1": 100,
-            "workbench_2": 30,
+            "workbench_2": 38.3,
             "workbench_3": 0,
             "mixing_1": 96.7,
-            "mixing_2": 3.3,
+            "mixing_2": 8.3,
             "mixing_3": 0,
             "slay_box_file_beetle_1": 100,
             "slay_box_file_beetle_2": 100,
@@ -5532,28 +5538,28 @@
             "slay_auditor_3": 98.3,
             "slay_auditor_4": 0,
             "slay_auditor_5": 0,
-            "slay_trolley_swarm_1": 98.3,
-            "slay_trolley_swarm_2": 95,
-            "slay_trolley_swarm_3": 88.3,
-            "slay_trolley_swarm_4": 6.7,
+            "slay_trolley_swarm_1": 100,
+            "slay_trolley_swarm_2": 96.7,
+            "slay_trolley_swarm_3": 86.7,
+            "slay_trolley_swarm_4": 10,
             "slay_trolley_swarm_5": 0,
-            "slay_oil_slick_1": 98.3,
-            "slay_oil_slick_2": 98.3,
-            "slay_oil_slick_3": 85,
+            "slay_oil_slick_1": 100,
+            "slay_oil_slick_2": 100,
+            "slay_oil_slick_3": 90,
             "slay_oil_slick_4": 10,
             "slay_oil_slick_5": 0,
-            "slay_barrier_golem_1": 98.3,
-            "slay_barrier_golem_2": 95,
-            "slay_barrier_golem_3": 85,
+            "slay_barrier_golem_1": 100,
+            "slay_barrier_golem_2": 98.3,
+            "slay_barrier_golem_3": 81.7,
             "slay_barrier_golem_4": 10,
             "slay_barrier_golem_5": 0,
-            "slay_ghost_car_1": 98.3,
-            "slay_ghost_car_2": 96.7,
-            "slay_ghost_car_3": 81.7,
-            "slay_ghost_car_4": 8.3,
+            "slay_ghost_car_1": 100,
+            "slay_ghost_car_2": 100,
+            "slay_ghost_car_3": 86.7,
+            "slay_ghost_car_4": 11.7,
             "slay_ghost_car_5": 0,
             "floor_cleared_4": 93.3,
-            "floor_cleared_5": 78.3,
+            "floor_cleared_5": 80,
             "rogue_1": 0,
             "rogue_2": 0,
             "rogue_3": 0,
@@ -5574,10 +5580,10 @@
             "lost_and_found_1": 0,
             "lost_and_found_2": 0,
             "lost_and_found_3": 0,
-            "big_bags_1": 8.3,
+            "big_bags_1": 31.7,
             "big_bags_2": 0,
             "big_bags_3": 0,
-            "dug_in_1": 16.7,
+            "dug_in_1": 15,
             "dug_in_2": 0,
             "dug_in_3": 0
           }
@@ -5614,14 +5620,14 @@
           "level": 12,
           "p10": 16.5,
           "median": 22.3,
-          "p90": 24.5,
+          "p90": 23.6,
           "reached": 60
         },
         {
           "level": 16,
           "p10": 22.3,
           "median": 28.7,
-          "p90": 35.3,
+          "p90": 35.7,
           "reached": 60
         }
       ],
@@ -5638,39 +5644,39 @@
           "deathsPerEligibleHeroDay": 0
         },
         "cafeteria_depths": {
-          "eligibleHeroDays": 443,
-          "heroDaysWithDeath": 70,
-          "deathProbabilityPct": 15.8,
+          "eligibleHeroDays": 439,
+          "heroDaysWithDeath": 68,
+          "deathProbabilityPct": 15.5,
           "wilson95Pct": [
-            12.7,
-            19.5
+            12.4,
+            19.2
           ],
-          "deathsPerEligibleHeroDay": 0.158
+          "deathsPerEligibleHeroDay": 0.155
         },
         "archive": {
-          "eligibleHeroDays": 294,
-          "heroDaysWithDeath": 35,
-          "deathProbabilityPct": 11.9,
+          "eligibleHeroDays": 302,
+          "heroDaysWithDeath": 37,
+          "deathProbabilityPct": 12.3,
           "wilson95Pct": [
-            8.7,
-            16.1
+            9,
+            16.4
           ],
-          "deathsPerEligibleHeroDay": 0.119
+          "deathsPerEligibleHeroDay": 0.123
         },
         "parking_garage": {
-          "eligibleHeroDays": 1330,
-          "heroDaysWithDeath": 93,
-          "deathProbabilityPct": 7,
+          "eligibleHeroDays": 1317,
+          "heroDaysWithDeath": 96,
+          "deathProbabilityPct": 7.3,
           "wilson95Pct": [
-            5.7,
-            8.5
+            6,
+            8.8
           ],
-          "deathsPerEligibleHeroDay": 0.07
+          "deathsPerEligibleHeroDay": 0.073
         }
       },
       "stateSharePct": {
         "exploring": 99.2,
-        "resting": 0.2,
+        "resting": 0.1,
         "travelling": 0.2,
         "dead": 0.5,
         "sleeping": 0
@@ -5681,16 +5687,16 @@
         "p90": 3.9,
         "reached": 60
       },
-      "gearPerDay": 2.9,
+      "gearPerDay": 3,
       "usefulGearPerDay": 0.5,
-      "equippedUpgradesPerHero": 8,
+      "equippedUpgradesPerHero": 8.1,
       "potions": {
         "acquiredPerHeroDay": 5.4,
         "usedPerHeroDay": 4.3,
         "fullStackFallbacksPerHeroDay": 1.5,
         "finalCount": {
-          "p10": 46,
-          "median": 59,
+          "p10": 44,
+          "median": 60,
           "p90": 60
         }
       },
@@ -5698,7 +5704,7 @@
         "byStrength": {
           "minor": {
             "foundPerHeroDay": 1.1,
-            "usedPerHeroDay": 0.6,
+            "usedPerHeroDay": 0.5,
             "finalMedian": 0
           },
           "healing": {
@@ -5712,17 +5718,17 @@
             "finalMedian": 58
           }
         },
-        "combinedPerHero": 10.2,
+        "combinedPerHero": 11.1,
         "combinedMedian": 10,
         "materialsSpentPerHero": {
-          "scrap": 10.2
+          "scrap": 11.1
         },
-        "restTicksPerHeroDay": 0.2
+        "restTicksPerHeroDay": 0.1
       },
       "potionsByBiome": {
         "office_cubicles": {
-          "heroDays": 1362.9,
-          "foundPerDay": 3.6,
+          "heroDays": 1374.2,
+          "foundPerDay": 3.7,
           "drunkPerDay": 0,
           "emptyPouchPct": 0.1
         },
@@ -5733,84 +5739,84 @@
           "emptyPouchPct": 0
         },
         "cafeteria_depths": {
-          "heroDays": 339.5,
+          "heroDays": 337.9,
           "foundPerDay": 8.3,
-          "drunkPerDay": 11.2,
-          "emptyPouchPct": 2.8
+          "drunkPerDay": 11.3,
+          "emptyPouchPct": 2.7
         },
         "archive": {
-          "heroDays": 238.6,
-          "foundPerDay": 10.2,
-          "drunkPerDay": 10.9,
-          "emptyPouchPct": 2.5
+          "heroDays": 244.9,
+          "foundPerDay": 10.1,
+          "drunkPerDay": 11,
+          "emptyPouchPct": 1.8
         },
         "parking_garage": {
-          "heroDays": 1216,
+          "heroDays": 1199.8,
           "foundPerDay": 6.1,
           "drunkPerDay": 6.1,
-          "emptyPouchPct": 2.3
+          "emptyPouchPct": 1.6
         }
       },
       "retreatsPerHeroDay": 0,
       "rescuesPerHeroDay": 0,
       "bestInSlot": {
-        "p10": 49.1,
+        "p10": 49.6,
         "median": ">60",
         "p90": ">60",
         "reached": 19
       },
       "goldDayEnd": {
-        "median": 6559,
-        "p90": 10694
+        "median": 6073,
+        "p90": 9856
       },
-      "goldDay30": 2024,
+      "goldDay30": 1834,
       "todo": {
         "tasksPerHeroDay": 2.4,
         "tasksPerAwakeHeroDay": 2.4,
         "awakeDaySharePct": 100,
-        "daysWithTwoPlusPct": 85.9,
-        "awakeDaysWithTwoPlusPct": 85.9,
-        "taskGoldSharePct": 12,
-        "taskGoldPerHeroDay": 62.8,
+        "daysWithTwoPlusPct": 86,
+        "awakeDaysWithTwoPlusPct": 86,
+        "taskGoldSharePct": 11.9,
+        "taskGoldPerHeroDay": 62.4,
         "hoursToFinish": {
           "avoid_traps": {
-            "finished": 1464,
+            "finished": 1459,
             "p10": 1.25,
             "median": 7.75,
-            "p90": 22
+            "p90": 22.25
           },
           "defeat_any": {
-            "finished": 1542,
+            "finished": 1545,
             "p10": 4.25,
             "median": 7.75,
             "p90": 11.75
           },
           "defeat_monster": {
-            "finished": 974,
+            "finished": 970,
             "p10": 2.5,
             "median": 7.75,
             "p90": 17.5
           },
           "earn_gold": {
-            "finished": 1505,
+            "finished": 1507,
             "p10": 4.25,
-            "median": 7.75,
-            "p90": 12
+            "median": 7.5,
+            "p90": 11.75
           },
           "elite": {
-            "finished": 751,
+            "finished": 750,
             "p10": 2,
             "median": 12,
-            "p90": 33.25
+            "p90": 33.75
           },
           "explore_biome": {
-            "finished": 1018,
+            "finished": 1022,
             "p10": 4.5,
             "median": 7.25,
             "p90": 9.75
           },
           "find_gear": {
-            "finished": 1525,
+            "finished": 1526,
             "p10": 1,
             "median": 5.75,
             "p90": 15.75
@@ -6083,7 +6089,7 @@
             "companion": true,
             "p10": 14.2,
             "median": 14.7,
-            "p90": 21.1,
+            "p90": 21.3,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
@@ -6092,7 +6098,7 @@
             "companion": false,
             "p10": 16.6,
             "median": 22.3,
-            "p90": 24.5,
+            "p90": 23.6,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
@@ -6100,114 +6106,115 @@
             "id": "first_upgrade",
             "companion": true,
             "p10": 21.4,
-            "median": 28.1,
-            "p90": 29,
+            "median": 28,
+            "p90": 28.9,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "reinforce_3",
             "companion": true,
-            "p10": 42.4,
-            "median": 56.8,
+            "p10": 49.2,
+            "median": ">60",
             "p90": ">60",
-            "reached": 36,
+            "reached": 25,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "archive_win",
             "companion": true,
-            "p10": 42.4,
+            "p10": 49.7,
             "median": ">60",
             "p90": ">60",
-            "reached": 29,
+            "reached": 18,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "level_16",
             "companion": false,
-            "p10": 42.4,
+            "p10": 49.7,
             "median": ">60",
             "p90": ">60",
-            "reached": 29,
+            "reached": 18,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "garage_win",
             "companion": true,
-            "p10": 42.4,
+            "p10": 49.8,
             "median": ">60",
             "p90": ">60",
-            "reached": 29,
+            "reached": 18,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "gym_duffel",
             "companion": true,
-            "p10": ">60",
+            "p10": 56.4,
             "median": ">60",
             "p90": ">60",
-            "reached": 3,
+            "reached": 13,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "first_standoff",
             "companion": false,
-            "p10": ">60",
+            "p10": 56.5,
             "median": ">60",
             "p90": ">60",
-            "reached": 3,
+            "reached": 11,
             "guaranteeFiresPerHero": null
           }
         ],
-        "careerGoldSharePct": 3.8,
-        "careerGoldPerHero": 1330.5,
-        "rungsReachedMedian": 26,
+        "careerGoldSharePct": 3.6,
+        "careerGoldPerHero": 1277.7,
+        "rungsReachedMedian": 25,
         "finalRung": {
-          "gym_duffel": 26,
-          "reinforce_3": 24,
+          "reinforce_3": 35,
+          "done": 11,
           "archive_win": 7,
-          "done": 3
+          "gym_duffel": 5,
+          "first_standoff": 2
         },
-        "waitingOnCompanionPct": 95,
+        "waitingOnCompanionPct": 78.3,
         "days": 60
       },
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 2024,
-            "p90": 3617
+            "median": 1834,
+            "p90": 3279
           },
           "day60": {
-            "median": 6559,
-            "p90": 10694
+            "median": 6073,
+            "p90": 9856
           }
         },
         "materialsHeldMedian": {
-          "scrap": 125,
-          "parts": 52,
-          "components": 12
+          "scrap": 145,
+          "parts": 57,
+          "components": 13
         },
-        "salvagedPerHero": 114.9,
-        "workbenchGoldMedian": 16650,
+        "salvagedPerHero": 124.5,
+        "workbenchGoldMedian": 13000,
         "steps": {
           "armor:+1": {
-            "p10": 21.7,
+            "p10": 21.8,
             "median": 28.7,
-            "p90": 35.9,
+            "p90": 42.2,
             "reached": 60
           },
           "armor:+2": {
-            "p10": 35.5,
-            "median": 42.8,
+            "p10": 35.4,
+            "median": 49.6,
             "p90": ">60",
-            "reached": 54
+            "reached": 47
           },
           "armor:+3": {
-            "p10": 56.8,
+            "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 8
+            "reached": 2
           },
           "armor:Mk 2": {
             "p10": ">60",
@@ -6229,31 +6236,25 @@
           },
           "weapon:+2": {
             "p10": 28.3,
-            "median": 35.5,
-            "p90": 49.3,
-            "reached": 59
+            "median": 35.8,
+            "p90": 56,
+            "reached": 58
           },
           "weapon:+3": {
-            "p10": 42.4,
-            "median": 56.8,
-            "p90": ">60",
-            "reached": 36
-          },
-          "weapon:Mk 2": {
-            "p10": ">60",
+            "p10": 49.2,
             "median": ">60",
             "p90": ">60",
-            "reached": 1
+            "reached": 25
           },
           "weapon:Mk 3": {
-            "p10": 28.1,
+            "p10": 21.9,
             "median": ">60",
             "p90": ">60",
             "reached": 10
           }
         }
       },
-      "jackpotGoldShare": 1.7,
+      "jackpotGoldShare": 1.8,
       "elitesPerHeroDay": 1.08,
       "bag": {
         "reach": [
@@ -6282,15 +6283,15 @@
             "capacity": 20,
             "p10": 14.1,
             "median": 14.5,
-            "p90": 14.9,
-            "reached": 60
+            "p90": 15,
+            "reached": 59
           },
           {
             "capacity": 24,
             "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 2
+            "reached": 1
           },
           {
             "capacity": 28,
@@ -6308,20 +6309,20 @@
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 2.4,
+        "purchasesPerHero": 2.37,
         "goldSpentMedian": 1900
       },
       "xpLastDay": {
-        "p10": 4796,
-        "median": 6017,
+        "p10": 4954,
+        "median": 6116,
         "p90": 7394,
-        "ratio": 1.54
+        "ratio": 1.49
       },
       "xpLast7Days": {
-        "p10": 20806,
-        "median": 41459,
-        "p90": 44638,
-        "ratio": 2.15
+        "p10": 21426,
+        "median": 42379,
+        "p90": 45055,
+        "ratio": 2.1
       },
       "achievements": {
         "day1": {
@@ -7096,17 +7097,17 @@
         },
         "day30": {
           "bands": {
-            "common": 100,
-            "uncommon": 21,
+            "common": 102,
+            "uncommon": 20,
             "rare": 6,
-            "legendary": 106
+            "legendary": 105
           },
           "monsterTiers": {
             "slay_paper_imp": [
               100,
               100,
               100,
-              58.3,
+              56.7,
               0
             ],
             "slay_rogue_roomba": [
@@ -7120,14 +7121,14 @@
               100,
               100,
               100,
-              58.3,
+              56.7,
               0
             ],
             "slay_dust_daemon": [
               100,
               100,
               100,
-              63.3,
+              61.7,
               0
             ],
             "slay_cable_serpent": [
@@ -7161,21 +7162,21 @@
             "slay_coffee_slime": [
               100,
               100,
-              76.7,
+              80,
               0,
               0
             ],
             "slay_crumb_golem": [
               100,
               100,
-              83.3,
+              86.7,
               0,
               0
             ],
             "slay_microwave_wraith": [
               100,
               100,
-              80,
+              81.7,
               1.7,
               0
             ],
@@ -7187,57 +7188,57 @@
               0
             ],
             "slay_box_file_beetle": [
-              75,
-              71.7,
-              35,
+              76.7,
+              73.3,
+              33.3,
               0,
               0
             ],
             "slay_shelf_lurker": [
-              75,
-              70,
+              76.7,
+              71.7,
               30,
               0,
               0
             ],
             "slay_microfilm_phantom": [
-              75,
-              71.7,
+              76.7,
+              73.3,
               30,
               0,
               0
             ],
             "slay_auditor": [
+              75,
               73.3,
-              71.7,
               30,
               0,
               0
             ],
             "slay_trolley_swarm": [
-              41.7,
-              41.7,
+              43.3,
+              43.3,
               3.3,
               0,
               0
             ],
             "slay_oil_slick": [
-              41.7,
-              38.3,
+              43.3,
+              40,
               3.3,
               0,
               0
             ],
             "slay_barrier_golem": [
-              41.7,
-              38.3,
+              43.3,
+              40,
               0,
               0,
               0
             ],
             "slay_ghost_car": [
-              41.7,
-              38.3,
+              43.3,
+              40,
               0,
               0,
               0
@@ -7247,7 +7248,7 @@
             "slay_paper_imp_1": 100,
             "slay_paper_imp_2": 100,
             "slay_paper_imp_3": 100,
-            "slay_paper_imp_4": 58.3,
+            "slay_paper_imp_4": 56.7,
             "slay_paper_imp_5": 0,
             "slay_rogue_roomba_1": 100,
             "slay_rogue_roomba_2": 100,
@@ -7257,12 +7258,12 @@
             "slay_stapler_mimic_1": 100,
             "slay_stapler_mimic_2": 100,
             "slay_stapler_mimic_3": 100,
-            "slay_stapler_mimic_4": 58.3,
+            "slay_stapler_mimic_4": 56.7,
             "slay_stapler_mimic_5": 0,
             "slay_dust_daemon_1": 100,
             "slay_dust_daemon_2": 100,
             "slay_dust_daemon_3": 100,
-            "slay_dust_daemon_4": 63.3,
+            "slay_dust_daemon_4": 61.7,
             "slay_dust_daemon_5": 0,
             "slay_cable_serpent_1": 100,
             "slay_cable_serpent_2": 100,
@@ -7286,17 +7287,17 @@
             "slay_legacy_mainframe_5": 0,
             "slay_coffee_slime_1": 100,
             "slay_coffee_slime_2": 100,
-            "slay_coffee_slime_3": 76.7,
+            "slay_coffee_slime_3": 80,
             "slay_coffee_slime_4": 0,
             "slay_coffee_slime_5": 0,
             "slay_crumb_golem_1": 100,
             "slay_crumb_golem_2": 100,
-            "slay_crumb_golem_3": 83.3,
+            "slay_crumb_golem_3": 86.7,
             "slay_crumb_golem_4": 0,
             "slay_crumb_golem_5": 0,
             "slay_microwave_wraith_1": 100,
             "slay_microwave_wraith_2": 100,
-            "slay_microwave_wraith_3": 80,
+            "slay_microwave_wraith_3": 81.7,
             "slay_microwave_wraith_4": 1.7,
             "slay_microwave_wraith_5": 0,
             "slay_leftovers_hydra_1": 100,
@@ -7308,13 +7309,13 @@
             "full_tour": 26.7,
             "floor_cleared_1": 100,
             "floor_cleared_2": 100,
-            "floor_cleared_3": 73.3,
+            "floor_cleared_3": 76.7,
             "elites_1": 100,
             "elites_2": 100,
-            "elites_3": 86.7,
+            "elites_3": 88.3,
             "elites_4": 0,
             "jackpots_1": 100,
-            "jackpots_2": 55,
+            "jackpots_2": 56.7,
             "jackpots_3": 0,
             "rare_finds_1": 100,
             "rare_finds_2": 85,
@@ -7331,12 +7332,12 @@
             "finds_4": 0,
             "gold_1": 100,
             "gold_2": 100,
-            "gold_3": 65,
+            "gold_3": 68.3,
             "gold_4": 0,
             "levels_1": 100,
             "levels_2": 100,
             "levels_3": 100,
-            "levels_4": 73.3,
+            "levels_4": 76.7,
             "levels_5": 16.7,
             "knockouts_1": 93.3,
             "knockouts_2": 0,
@@ -7351,7 +7352,7 @@
             "retreats_4": 0,
             "potions_1": 100,
             "potions_2": 100,
-            "potions_3": 81.7,
+            "potions_3": 83.3,
             "potions_4": 0,
             "traps_1": 100,
             "traps_2": 100,
@@ -7375,7 +7376,7 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 11.7,
+            "purchases_1": 71.7,
             "purchases_2": 0,
             "purchases_3": 0,
             "merchants_1": 100,
@@ -7401,7 +7402,7 @@
             "tasks_done_3": 100,
             "tasks_done_4": 0,
             "salvaged_1": 100,
-            "salvaged_2": 43.3,
+            "salvaged_2": 55,
             "salvaged_3": 0,
             "workbench_1": 100,
             "workbench_2": 0,
@@ -7409,43 +7410,43 @@
             "mixing_1": 91.7,
             "mixing_2": 13.3,
             "mixing_3": 0,
-            "slay_box_file_beetle_1": 75,
-            "slay_box_file_beetle_2": 71.7,
-            "slay_box_file_beetle_3": 35,
+            "slay_box_file_beetle_1": 76.7,
+            "slay_box_file_beetle_2": 73.3,
+            "slay_box_file_beetle_3": 33.3,
             "slay_box_file_beetle_4": 0,
             "slay_box_file_beetle_5": 0,
-            "slay_shelf_lurker_1": 75,
-            "slay_shelf_lurker_2": 70,
+            "slay_shelf_lurker_1": 76.7,
+            "slay_shelf_lurker_2": 71.7,
             "slay_shelf_lurker_3": 30,
             "slay_shelf_lurker_4": 0,
             "slay_shelf_lurker_5": 0,
-            "slay_microfilm_phantom_1": 75,
-            "slay_microfilm_phantom_2": 71.7,
+            "slay_microfilm_phantom_1": 76.7,
+            "slay_microfilm_phantom_2": 73.3,
             "slay_microfilm_phantom_3": 30,
             "slay_microfilm_phantom_4": 0,
             "slay_microfilm_phantom_5": 0,
-            "slay_auditor_1": 73.3,
-            "slay_auditor_2": 71.7,
+            "slay_auditor_1": 75,
+            "slay_auditor_2": 73.3,
             "slay_auditor_3": 30,
             "slay_auditor_4": 0,
             "slay_auditor_5": 0,
-            "slay_trolley_swarm_1": 41.7,
-            "slay_trolley_swarm_2": 41.7,
+            "slay_trolley_swarm_1": 43.3,
+            "slay_trolley_swarm_2": 43.3,
             "slay_trolley_swarm_3": 3.3,
             "slay_trolley_swarm_4": 0,
             "slay_trolley_swarm_5": 0,
-            "slay_oil_slick_1": 41.7,
-            "slay_oil_slick_2": 38.3,
+            "slay_oil_slick_1": 43.3,
+            "slay_oil_slick_2": 40,
             "slay_oil_slick_3": 3.3,
             "slay_oil_slick_4": 0,
             "slay_oil_slick_5": 0,
-            "slay_barrier_golem_1": 41.7,
-            "slay_barrier_golem_2": 38.3,
+            "slay_barrier_golem_1": 43.3,
+            "slay_barrier_golem_2": 40,
             "slay_barrier_golem_3": 0,
             "slay_barrier_golem_4": 0,
             "slay_barrier_golem_5": 0,
-            "slay_ghost_car_1": 41.7,
-            "slay_ghost_car_2": 38.3,
+            "slay_ghost_car_1": 43.3,
+            "slay_ghost_car_2": 40,
             "slay_ghost_car_3": 0,
             "slay_ghost_car_4": 0,
             "slay_ghost_car_5": 0,
@@ -7471,7 +7472,7 @@
             "lost_and_found_1": 0,
             "lost_and_found_2": 0,
             "lost_and_found_3": 0,
-            "big_bags_1": 0,
+            "big_bags_1": 23.3,
             "big_bags_2": 0,
             "big_bags_3": 0,
             "dug_in_1": 13.3,
@@ -7509,20 +7510,20 @@
         },
         {
           "level": 12,
-          "p10": 25.6,
-          "median": 28.9,
+          "p10": 25,
+          "median": 28.2,
           "p90": 33.5,
           "reached": 60
         },
         {
           "level": 16,
-          "p10": 31.9,
-          "median": 35.2,
-          "p90": 41,
+          "p10": 29.8,
+          "median": 34.7,
+          "p90": 39.2,
           "reached": 60
         }
       ],
-      "finalLevelMedian": 28,
+      "finalLevelMedian": 29,
       "deathByBiome": {
         "server_room": {
           "eligibleHeroDays": 429,
@@ -7535,41 +7536,41 @@
           "deathsPerEligibleHeroDay": 0.044
         },
         "cafeteria_depths": {
-          "eligibleHeroDays": 621,
-          "heroDaysWithDeath": 392,
-          "deathProbabilityPct": 63.1,
+          "eligibleHeroDays": 614,
+          "heroDaysWithDeath": 365,
+          "deathProbabilityPct": 59.4,
           "wilson95Pct": [
-            59.3,
-            66.8
+            55.5,
+            63.3
           ],
-          "deathsPerEligibleHeroDay": 0.631
+          "deathsPerEligibleHeroDay": 0.594
         },
         "archive": {
-          "eligibleHeroDays": 325,
-          "heroDaysWithDeath": 71,
-          "deathProbabilityPct": 21.8,
+          "eligibleHeroDays": 306,
+          "heroDaysWithDeath": 65,
+          "deathProbabilityPct": 21.2,
           "wilson95Pct": [
-            17.7,
-            26.7
+            17,
+            26.2
           ],
-          "deathsPerEligibleHeroDay": 0.218
+          "deathsPerEligibleHeroDay": 0.212
         },
         "parking_garage": {
-          "eligibleHeroDays": 1127,
+          "eligibleHeroDays": 1266,
           "heroDaysWithDeath": 245,
-          "deathProbabilityPct": 21.7,
+          "deathProbabilityPct": 19.4,
           "wilson95Pct": [
-            19.4,
-            24.2
+            17.3,
+            21.6
           ],
-          "deathsPerEligibleHeroDay": 0.217
+          "deathsPerEligibleHeroDay": 0.194
         }
       },
       "stateSharePct": {
-        "exploring": 96.6,
-        "resting": 1.2,
+        "exploring": 96.7,
+        "resting": 1.1,
         "travelling": 0.5,
-        "dead": 1.7,
+        "dead": 1.6,
         "sleeping": 0
       },
       "firstInventorySleep": {
@@ -7579,16 +7580,16 @@
         "reached": 58
       },
       "gearPerDay": 4.7,
-      "usefulGearPerDay": 2.1,
+      "usefulGearPerDay": 2,
       "equippedUpgradesPerHero": 0,
       "potions": {
-        "acquiredPerHeroDay": 5.8,
-        "usedPerHeroDay": 5.2,
-        "fullStackFallbacksPerHeroDay": 0.6,
+        "acquiredPerHeroDay": 6,
+        "usedPerHeroDay": 5.5,
+        "fullStackFallbacksPerHeroDay": 0.4,
         "finalCount": {
-          "p10": 2,
-          "median": 12,
-          "p90": 29
+          "p10": 3,
+          "median": 15,
+          "p90": 30
         }
       },
       "potionStrengths": {
@@ -7600,26 +7601,26 @@
           },
           "healing": {
             "foundPerHeroDay": 2.4,
-            "usedPerHeroDay": 2.5,
+            "usedPerHeroDay": 2.7,
             "finalMedian": 0
           },
           "major": {
-            "foundPerHeroDay": 1.8,
-            "usedPerHeroDay": 1.8,
-            "finalMedian": 9
+            "foundPerHeroDay": 2,
+            "usedPerHeroDay": 1.9,
+            "finalMedian": 13
           }
         },
-        "combinedPerHero": 14,
+        "combinedPerHero": 13.9,
         "combinedMedian": 14,
         "materialsSpentPerHero": {
-          "scrap": 14
+          "scrap": 13.9
         },
         "restTicksPerHeroDay": 1.1
       },
       "potionsByBiome": {
         "office_cubicles": {
-          "heroDays": 1883.6,
-          "foundPerDay": 4.6,
+          "heroDays": 1754.9,
+          "foundPerDay": 4.7,
           "drunkPerDay": 0,
           "emptyPouchPct": 1.9
         },
@@ -7630,22 +7631,22 @@
           "emptyPouchPct": 32.6
         },
         "cafeteria_depths": {
-          "heroDays": 193,
+          "heroDays": 204.7,
           "foundPerDay": 7.9,
-          "drunkPerDay": 19.8,
+          "drunkPerDay": 19,
           "emptyPouchPct": 0.8
         },
         "archive": {
-          "heroDays": 206.8,
+          "heroDays": 203.8,
           "foundPerDay": 10.1,
           "drunkPerDay": 17.1,
-          "emptyPouchPct": 8.1
+          "emptyPouchPct": 7
         },
         "parking_garage": {
-          "heroDays": 884.2,
-          "foundPerDay": 7.8,
-          "drunkPerDay": 9.7,
-          "emptyPouchPct": 21.5
+          "heroDays": 1007.5,
+          "foundPerDay": 7.9,
+          "drunkPerDay": 9.5,
+          "emptyPouchPct": 19.2
         }
       },
       "retreatsPerHeroDay": 0,
@@ -7657,60 +7658,60 @@
         "reached": 0
       },
       "goldDayEnd": {
-        "median": 5050,
-        "p90": 7937
+        "median": 4706,
+        "p90": 7601
       },
-      "goldDay30": 807,
+      "goldDay30": 1275,
       "todo": {
         "tasksPerHeroDay": 2.4,
         "tasksPerAwakeHeroDay": 2.4,
         "awakeDaySharePct": 100,
-        "daysWithTwoPlusPct": 83.6,
-        "awakeDaysWithTwoPlusPct": 83.6,
+        "daysWithTwoPlusPct": 83.4,
+        "awakeDaysWithTwoPlusPct": 83.4,
         "taskGoldSharePct": 13.1,
-        "taskGoldPerHeroDay": 48.3,
+        "taskGoldPerHeroDay": 52.1,
         "hoursToFinish": {
           "avoid_traps": {
-            "finished": 1465,
+            "finished": 1477,
             "p10": 1.25,
             "median": 7.75,
-            "p90": 23.25
+            "p90": 22.75
           },
           "defeat_any": {
-            "finished": 1551,
-            "p10": 4.5,
-            "median": 8,
+            "finished": 1542,
+            "p10": 4.25,
+            "median": 7.75,
             "p90": 12.75
           },
           "defeat_monster": {
-            "finished": 971,
-            "p10": 3,
-            "median": 8.5,
-            "p90": 20.5
+            "finished": 961,
+            "p10": 2.75,
+            "median": 8,
+            "p90": 20
           },
           "earn_gold": {
-            "finished": 1459,
-            "p10": 3.75,
+            "finished": 1468,
+            "p10": 4,
             "median": 7.5,
-            "p90": 12.75
+            "p90": 12.5
           },
           "elite": {
-            "finished": 547,
-            "p10": 1.75,
-            "median": 12,
-            "p90": 35
+            "finished": 591,
+            "p10": 2,
+            "median": 12.25,
+            "p90": 35.25
           },
           "explore_biome": {
-            "finished": 1050,
+            "finished": 1052,
             "p10": 4.5,
             "median": 7.5,
-            "p90": 11
+            "p90": 10.25
           },
           "find_gear": {
-            "finished": 1553,
+            "finished": 1520,
             "p10": 1,
             "median": 5.75,
-            "p90": 16.75
+            "p90": 16.5
           }
         },
         "staleSwapsPerTaskWrittenPct": 8.9,
@@ -8069,57 +8070,57 @@
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 807,
-            "p90": 1690
+            "median": 1275,
+            "p90": 1898
           },
           "day60": {
-            "median": 5050,
-            "p90": 7937
+            "median": 4706,
+            "p90": 7601
           }
         },
         "materialsHeldMedian": {
-          "scrap": 144,
-          "parts": 62,
-          "components": 23
+          "scrap": 182,
+          "parts": 73,
+          "components": 29
         },
-        "salvagedPerHero": 159,
+        "salvagedPerHero": 172.5,
         "workbenchGoldMedian": 9300,
         "steps": {
           "armor:+1": {
-            "p10": 33,
-            "median": 36.7,
-            "p90": 42.5,
+            "p10": 30.3,
+            "median": 36.2,
+            "p90": 42,
             "reached": 60
           },
           "armor:+2": {
-            "p10": 48,
-            "median": 51.7,
+            "p10": 45.5,
+            "median": 54,
             "p90": ">60",
-            "reached": 51
+            "reached": 47
           },
           "armor:Mk 2": {
-            "p10": 24.8,
-            "median": 30.2,
-            "p90": 33.9,
+            "p10": 21.3,
+            "median": 27.5,
+            "p90": 33.7,
             "reached": 60
           },
           "armor:Mk 3": {
-            "p10": 30.2,
-            "median": 33.7,
-            "p90": 39.9,
+            "p10": 27.1,
+            "median": 33.1,
+            "p90": 36.9,
             "reached": 60
           },
           "weapon:+1": {
-            "p10": 27.5,
-            "median": 33.3,
-            "p90": 39.9,
+            "p10": 27.2,
+            "median": 30.6,
+            "p90": 39.4,
             "reached": 60
           },
           "weapon:+2": {
-            "p10": 39.8,
+            "p10": 39.9,
             "median": 48,
-            "p90": 54.8,
-            "reached": 60
+            "p90": 54.6,
+            "reached": 59
           },
           "weapon:+3": {
             "p10": ">60",
@@ -8128,21 +8129,21 @@
             "reached": 5
           },
           "weapon:Mk 2": {
-            "p10": 21.7,
-            "median": 27.4,
-            "p90": 30.9,
+            "p10": 18.7,
+            "median": 24.3,
+            "p90": 30.4,
             "reached": 60
           },
           "weapon:Mk 3": {
-            "p10": 24.6,
-            "median": 30.5,
-            "p90": 33.9,
+            "p10": 24,
+            "median": 27.6,
+            "p90": 33.6,
             "reached": 60
           }
         }
       },
-      "jackpotGoldShare": 1.5,
-      "elitesPerHeroDay": 0.95,
+      "jackpotGoldShare": 1.7,
+      "elitesPerHeroDay": 0.97,
       "bag": {
         "reach": [
           {
@@ -8169,9 +8170,9 @@
           {
             "capacity": 20,
             "p10": 9.2,
-            "median": 9.9,
-            "p90": 21.5,
-            "reached": 59
+            "median": 12.6,
+            "p90": ">60",
+            "reached": 43
           },
           {
             "capacity": 24,
@@ -8196,20 +8197,20 @@
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 2.37,
+        "purchasesPerHero": 2.1,
         "goldSpentMedian": 1900
       },
       "xpLastDay": {
-        "p10": 200,
-        "median": 5669,
-        "p90": 7277,
-        "ratio": 36.39
+        "p10": 291,
+        "median": 5727,
+        "p90": 7330,
+        "ratio": 25.19
       },
       "xpLast7Days": {
-        "p10": 21374,
-        "median": 34818,
-        "p90": 42379,
-        "ratio": 1.98
+        "p10": 22994,
+        "median": 38294,
+        "p90": 43942,
+        "ratio": 1.91
       },
       "achievements": {
         "day1": {
@@ -8600,9 +8601,9 @@
         "day7": {
           "bands": {
             "common": 51,
-            "uncommon": 8,
+            "uncommon": 9,
             "rare": 1,
-            "legendary": 173
+            "legendary": 172
           },
           "monsterTiers": {
             "slay_paper_imp": [
@@ -8878,7 +8879,7 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 0,
+            "purchases_1": 20,
             "purchases_2": 0,
             "purchases_3": 0,
             "merchants_1": 85,
@@ -8984,10 +8985,10 @@
         },
         "day30": {
           "bands": {
-            "common": 84,
-            "uncommon": 19,
-            "rare": 11,
-            "legendary": 119
+            "common": 93,
+            "uncommon": 18,
+            "rare": 15,
+            "legendary": 107
           },
           "monsterTiers": {
             "slay_paper_imp": [
@@ -9001,14 +9002,14 @@
               100,
               100,
               100,
-              100,
+              98.3,
               0
             ],
             "slay_stapler_mimic": [
               100,
               100,
               100,
-              100,
+              98.3,
               0
             ],
             "slay_dust_daemon": [
@@ -9048,85 +9049,85 @@
             ],
             "slay_coffee_slime": [
               100,
-              96.7,
-              46.7,
+              98.3,
+              58.3,
               0,
               0
             ],
             "slay_crumb_golem": [
               100,
-              93.3,
-              46.7,
+              96.7,
+              55,
               0,
               0
             ],
             "slay_microwave_wraith": [
               100,
-              88.3,
-              43.3,
+              95,
+              58.3,
               0,
               0
             ],
             "slay_leftovers_hydra": [
               100,
-              78.3,
-              45,
+              86.7,
+              56.7,
               0,
               0
             ],
             "slay_box_file_beetle": [
-              16.7,
-              15,
-              5,
+              33.3,
+              31.7,
+              23.3,
               0,
               0
             ],
             "slay_shelf_lurker": [
+              31.7,
+              31.7,
               15,
-              15,
-              6.7,
               0,
               0
             ],
             "slay_microfilm_phantom": [
-              16.7,
-              15,
-              6.7,
+              33.3,
+              30,
+              20,
               0,
               0
             ],
             "slay_auditor": [
-              15,
-              15,
-              5,
+              31.7,
+              30,
+              11.7,
               0,
               0
             ],
             "slay_trolley_swarm": [
-              0,
-              0,
+              1.7,
+              1.7,
               0,
               0,
               0
             ],
             "slay_oil_slick": [
-              0,
-              0,
+              1.7,
+              1.7,
               0,
               0,
               0
             ],
             "slay_barrier_golem": [
-              0,
-              0,
+              1.7,
+              1.7,
               0,
               0,
               0
             ],
             "slay_ghost_car": [
-              0,
-              0,
-              0,
+              1.7,
+              1.7,
+              1.7,
               0,
               0
             ]
@@ -9140,12 +9141,12 @@
             "slay_rogue_roomba_1": 100,
             "slay_rogue_roomba_2": 100,
             "slay_rogue_roomba_3": 100,
-            "slay_rogue_roomba_4": 100,
+            "slay_rogue_roomba_4": 98.3,
             "slay_rogue_roomba_5": 0,
             "slay_stapler_mimic_1": 100,
             "slay_stapler_mimic_2": 100,
             "slay_stapler_mimic_3": 100,
-            "slay_stapler_mimic_4": 100,
+            "slay_stapler_mimic_4": 98.3,
             "slay_stapler_mimic_5": 0,
             "slay_dust_daemon_1": 100,
             "slay_dust_daemon_2": 100,
@@ -9173,39 +9174,39 @@
             "slay_legacy_mainframe_4": 0,
             "slay_legacy_mainframe_5": 0,
             "slay_coffee_slime_1": 100,
-            "slay_coffee_slime_2": 96.7,
-            "slay_coffee_slime_3": 46.7,
+            "slay_coffee_slime_2": 98.3,
+            "slay_coffee_slime_3": 58.3,
             "slay_coffee_slime_4": 0,
             "slay_coffee_slime_5": 0,
             "slay_crumb_golem_1": 100,
-            "slay_crumb_golem_2": 93.3,
-            "slay_crumb_golem_3": 46.7,
+            "slay_crumb_golem_2": 96.7,
+            "slay_crumb_golem_3": 55,
             "slay_crumb_golem_4": 0,
             "slay_crumb_golem_5": 0,
             "slay_microwave_wraith_1": 100,
-            "slay_microwave_wraith_2": 88.3,
-            "slay_microwave_wraith_3": 43.3,
+            "slay_microwave_wraith_2": 95,
+            "slay_microwave_wraith_3": 58.3,
             "slay_microwave_wraith_4": 0,
             "slay_microwave_wraith_5": 0,
             "slay_leftovers_hydra_1": 100,
-            "slay_leftovers_hydra_2": 78.3,
-            "slay_leftovers_hydra_3": 45,
+            "slay_leftovers_hydra_2": 86.7,
+            "slay_leftovers_hydra_3": 56.7,
             "slay_leftovers_hydra_4": 0,
             "slay_leftovers_hydra_5": 0,
-            "office_census": 0,
-            "full_tour": 0,
+            "office_census": 1.7,
+            "full_tour": 1.7,
             "floor_cleared_1": 100,
             "floor_cleared_2": 100,
-            "floor_cleared_3": 41.7,
+            "floor_cleared_3": 50,
             "elites_1": 100,
             "elites_2": 100,
-            "elites_3": 58.3,
+            "elites_3": 63.3,
             "elites_4": 0,
             "jackpots_1": 100,
-            "jackpots_2": 48.3,
+            "jackpots_2": 50,
             "jackpots_3": 0,
-            "rare_finds_1": 98.3,
-            "rare_finds_2": 85,
+            "rare_finds_1": 100,
+            "rare_finds_2": 83.3,
             "rare_finds_3": 0,
             "rare_finds_4": 0,
             "adventures_1": 100,
@@ -9219,12 +9220,12 @@
             "finds_4": 0,
             "gold_1": 100,
             "gold_2": 100,
-            "gold_3": 0,
+            "gold_3": 3.3,
             "gold_4": 0,
             "levels_1": 100,
             "levels_2": 100,
-            "levels_3": 56.7,
-            "levels_4": 3.3,
+            "levels_3": 68.3,
+            "levels_4": 15,
             "levels_5": 0,
             "knockouts_1": 100,
             "knockouts_2": 100,
@@ -9233,17 +9234,17 @@
             "rescues_1": 0,
             "rescues_2": 0,
             "rescues_3": 0,
-            "retreats_1": 36.7,
+            "retreats_1": 31.7,
             "retreats_2": 0,
             "retreats_3": 0,
             "retreats_4": 0,
             "potions_1": 100,
             "potions_2": 100,
-            "potions_3": 43.3,
+            "potions_3": 55,
             "potions_4": 0,
             "traps_1": 100,
             "traps_2": 100,
-            "traps_3": 1.7,
+            "traps_3": 3.3,
             "traps_4": 0,
             "breaks_1": 100,
             "breaks_2": 100,
@@ -9263,12 +9264,12 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 31.7,
-            "purchases_2": 0,
+            "purchases_1": 90,
+            "purchases_2": 11.7,
             "purchases_3": 0,
             "merchants_1": 100,
             "merchants_2": 100,
-            "merchants_3": 1.7,
+            "merchants_3": 0,
             "stances_1": 100,
             "stances_2": 0,
             "stances_3": 0,
@@ -9277,7 +9278,7 @@
             "choices_3": 0,
             "choices_4": 0,
             "epics_1": 78.3,
-            "epics_2": 1.7,
+            "epics_2": 3.3,
             "office_raider_1": 100,
             "office_raider_2": 100,
             "office_raider_3": 0,
@@ -9288,56 +9289,56 @@
             "tasks_done_2": 100,
             "tasks_done_3": 100,
             "tasks_done_4": 0,
-            "salvaged_1": 80,
-            "salvaged_2": 28.3,
+            "salvaged_1": 88.3,
+            "salvaged_2": 55,
             "salvaged_3": 0,
-            "workbench_1": 76.7,
-            "workbench_2": 5,
+            "workbench_1": 88.3,
+            "workbench_2": 16.7,
             "workbench_3": 0,
-            "mixing_1": 76.7,
-            "mixing_2": 1.7,
+            "mixing_1": 85,
+            "mixing_2": 8.3,
             "mixing_3": 0,
-            "slay_box_file_beetle_1": 16.7,
-            "slay_box_file_beetle_2": 15,
-            "slay_box_file_beetle_3": 5,
+            "slay_box_file_beetle_1": 33.3,
+            "slay_box_file_beetle_2": 31.7,
+            "slay_box_file_beetle_3": 23.3,
             "slay_box_file_beetle_4": 0,
             "slay_box_file_beetle_5": 0,
-            "slay_shelf_lurker_1": 15,
-            "slay_shelf_lurker_2": 15,
-            "slay_shelf_lurker_3": 6.7,
+            "slay_shelf_lurker_1": 31.7,
+            "slay_shelf_lurker_2": 31.7,
+            "slay_shelf_lurker_3": 15,
             "slay_shelf_lurker_4": 0,
             "slay_shelf_lurker_5": 0,
-            "slay_microfilm_phantom_1": 16.7,
-            "slay_microfilm_phantom_2": 15,
-            "slay_microfilm_phantom_3": 6.7,
+            "slay_microfilm_phantom_1": 33.3,
+            "slay_microfilm_phantom_2": 30,
+            "slay_microfilm_phantom_3": 20,
             "slay_microfilm_phantom_4": 0,
             "slay_microfilm_phantom_5": 0,
-            "slay_auditor_1": 15,
-            "slay_auditor_2": 15,
-            "slay_auditor_3": 5,
+            "slay_auditor_1": 31.7,
+            "slay_auditor_2": 30,
+            "slay_auditor_3": 11.7,
             "slay_auditor_4": 0,
             "slay_auditor_5": 0,
-            "slay_trolley_swarm_1": 0,
-            "slay_trolley_swarm_2": 0,
+            "slay_trolley_swarm_1": 1.7,
+            "slay_trolley_swarm_2": 1.7,
             "slay_trolley_swarm_3": 0,
             "slay_trolley_swarm_4": 0,
             "slay_trolley_swarm_5": 0,
-            "slay_oil_slick_1": 0,
-            "slay_oil_slick_2": 0,
+            "slay_oil_slick_1": 1.7,
+            "slay_oil_slick_2": 1.7,
             "slay_oil_slick_3": 0,
             "slay_oil_slick_4": 0,
             "slay_oil_slick_5": 0,
-            "slay_barrier_golem_1": 0,
-            "slay_barrier_golem_2": 0,
+            "slay_barrier_golem_1": 1.7,
+            "slay_barrier_golem_2": 1.7,
             "slay_barrier_golem_3": 0,
             "slay_barrier_golem_4": 0,
             "slay_barrier_golem_5": 0,
-            "slay_ghost_car_1": 0,
-            "slay_ghost_car_2": 0,
-            "slay_ghost_car_3": 0,
+            "slay_ghost_car_1": 1.7,
+            "slay_ghost_car_2": 1.7,
+            "slay_ghost_car_3": 1.7,
             "slay_ghost_car_4": 0,
             "slay_ghost_car_5": 0,
-            "floor_cleared_4": 1.7,
+            "floor_cleared_4": 10,
             "floor_cleared_5": 0,
             "rogue_1": 0,
             "rogue_2": 0,
@@ -9456,7 +9457,7 @@
       },
       "gearPerDay": 4.9,
       "usefulGearPerDay": 0.2,
-      "equippedUpgradesPerHero": 5.6,
+      "equippedUpgradesPerHero": 5.5,
       "potions": {
         "acquiredPerHeroDay": 1.5,
         "usedPerHeroDay": 0,
@@ -9503,16 +9504,16 @@
       "retreatsPerHeroDay": 0,
       "rescuesPerHeroDay": 0,
       "bestInSlot": {
-        "p10": 42.4,
+        "p10": 39.6,
         "median": ">60",
         "p90": ">60",
         "reached": 10
       },
       "goldDayEnd": {
-        "median": 905,
-        "p90": 1232
+        "median": 1008,
+        "p90": 1648
       },
-      "goldDay30": 698,
+      "goldDay30": 615,
       "todo": {
         "tasksPerHeroDay": 2.5,
         "tasksPerAwakeHeroDay": 2.5,
@@ -9543,8 +9544,8 @@
           "earn_gold": {
             "finished": 1734,
             "p10": 3.5,
-            "median": 6.5,
-            "p90": 10
+            "median": 6.25,
+            "p90": 9.75
           },
           "explore_biome": {
             "finished": 1162,
@@ -9915,61 +9916,61 @@
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 698,
-            "p90": 1571
+            "median": 615,
+            "p90": 1513
           },
           "day60": {
-            "median": 905,
-            "p90": 1232
+            "median": 1008,
+            "p90": 1648
           }
         },
         "materialsHeldMedian": {
-          "scrap": 49,
-          "parts": 24,
-          "components": 10
+          "scrap": 56,
+          "parts": 27,
+          "components": 11
         },
-        "salvagedPerHero": 146.7,
-        "workbenchGoldMedian": 2450,
+        "salvagedPerHero": 156.1,
+        "workbenchGoldMedian": 3300,
         "steps": {
           "armor:+1": {
-            "p10": 51.7,
-            "median": ">60",
+            "p10": 48.9,
+            "median": 57.5,
             "p90": ">60",
-            "reached": 29
+            "reached": 34
           },
           "armor:Mk 2": {
-            "p10": 30.5,
-            "median": 36,
-            "p90": 39.6,
+            "p10": 30,
+            "median": 33.5,
+            "p90": 39.4,
             "reached": 60
           },
           "armor:Mk 3": {
-            "p10": 36.4,
-            "median": 39.7,
-            "p90": 45.8,
+            "p10": 33.6,
+            "median": 39.3,
+            "p90": 43,
             "reached": 60
           },
           "weapon:+1": {
-            "p10": 42.8,
-            "median": 51,
-            "p90": 54.9,
+            "p10": 39.9,
+            "median": 48.3,
+            "p90": 54.4,
             "reached": 58
           },
           "weapon:Mk 2": {
-            "p10": 27.8,
-            "median": 30.7,
-            "p90": 36.1,
+            "p10": 27.2,
+            "median": 30.2,
+            "p90": 33.8,
             "reached": 60
           },
           "weapon:Mk 3": {
-            "p10": 30.7,
-            "median": 33.9,
-            "p90": 39.8,
+            "p10": 27.9,
+            "median": 33.2,
+            "p90": 36.9,
             "reached": 60
           }
         }
       },
-      "jackpotGoldShare": 3,
+      "jackpotGoldShare": 3.1,
       "elitesPerHeroDay": 0.85,
       "bag": {
         "reach": [
@@ -9996,10 +9997,10 @@
           },
           {
             "capacity": 20,
-            "p10": 15.5,
-            "median": 18.2,
-            "p90": 21.9,
-            "reached": 60
+            "p10": 15.4,
+            "median": 21.2,
+            "p90": ">60",
+            "reached": 49
           },
           {
             "capacity": 24,
@@ -10024,7 +10025,7 @@
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 2.37,
+        "purchasesPerHero": 2.18,
         "goldSpentMedian": 1900
       },
       "xpLastDay": {
@@ -10812,10 +10813,10 @@
         },
         "day30": {
           "bands": {
-            "common": 57,
-            "uncommon": 4,
-            "rare": 1,
-            "legendary": 171
+            "common": 58,
+            "uncommon": 3,
+            "rare": 4,
+            "legendary": 168
           },
           "monsterTiers": {
             "slay_paper_imp": [
@@ -11030,7 +11031,7 @@
             "elites_3": 63.3,
             "elites_4": 0,
             "jackpots_1": 100,
-            "jackpots_2": 76.7,
+            "jackpots_2": 75,
             "jackpots_3": 0,
             "rare_finds_1": 100,
             "rare_finds_2": 86.7,
@@ -11091,8 +11092,8 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 26.7,
-            "purchases_2": 0,
+            "purchases_1": 83.3,
+            "purchases_2": 1.7,
             "purchases_3": 0,
             "merchants_1": 100,
             "merchants_2": 100,
@@ -11117,13 +11118,13 @@
             "tasks_done_3": 100,
             "tasks_done_4": 0,
             "salvaged_1": 100,
-            "salvaged_2": 0,
+            "salvaged_2": 8.3,
             "salvaged_3": 0,
-            "workbench_1": 16.7,
+            "workbench_1": 41.7,
             "workbench_2": 0,
             "workbench_3": 0,
-            "mixing_1": 81.7,
-            "mixing_2": 0,
+            "mixing_1": 88.3,
+            "mixing_2": 3.3,
             "mixing_3": 0,
             "slay_box_file_beetle_1": 0,
             "slay_box_file_beetle_2": 0,
@@ -11218,7 +11219,7 @@
         },
         {
           "level": 8,
-          "p10": 7.2,
+          "p10": 7.1,
           "median": 7.7,
           "p90": 8.3,
           "reached": 60
@@ -11227,63 +11228,63 @@
           "level": 12,
           "p10": 11.7,
           "median": 12.9,
-          "p90": 14.7,
+          "p90": 14.1,
           "reached": 60
         },
         {
           "level": 16,
           "p10": 15.7,
-          "median": 17.4,
-          "p90": 19.3,
+          "median": 17.2,
+          "p90": 18.8,
           "reached": 60
         }
       ],
-      "finalLevelMedian": 39,
+      "finalLevelMedian": 40,
       "deathByBiome": {
         "server_room": {
           "eligibleHeroDays": 368,
-          "heroDaysWithDeath": 2,
-          "deathProbabilityPct": 0.5,
+          "heroDaysWithDeath": 1,
+          "deathProbabilityPct": 0.3,
           "wilson95Pct": [
-            0.1,
-            2
+            0,
+            1.5
           ],
-          "deathsPerEligibleHeroDay": 0.005
+          "deathsPerEligibleHeroDay": 0.003
         },
         "cafeteria_depths": {
-          "eligibleHeroDays": 373,
-          "heroDaysWithDeath": 129,
-          "deathProbabilityPct": 34.6,
+          "eligibleHeroDays": 371,
+          "heroDaysWithDeath": 121,
+          "deathProbabilityPct": 32.6,
           "wilson95Pct": [
-            29.9,
-            39.5
+            28,
+            37.5
           ],
-          "deathsPerEligibleHeroDay": 0.357
+          "deathsPerEligibleHeroDay": 0.342
         },
         "archive": {
-          "eligibleHeroDays": 324,
-          "heroDaysWithDeath": 62,
-          "deathProbabilityPct": 19.1,
+          "eligibleHeroDays": 317,
+          "heroDaysWithDeath": 57,
+          "deathProbabilityPct": 18,
           "wilson95Pct": [
-            15.2,
-            23.8
+            14.1,
+            22.6
           ],
-          "deathsPerEligibleHeroDay": 0.194
+          "deathsPerEligibleHeroDay": 0.183
         },
         "parking_garage": {
-          "eligibleHeroDays": 2549,
-          "heroDaysWithDeath": 194,
-          "deathProbabilityPct": 7.6,
+          "eligibleHeroDays": 2562,
+          "heroDaysWithDeath": 179,
+          "deathProbabilityPct": 7,
           "wilson95Pct": [
-            6.6,
-            8.7
+            6.1,
+            8
           ],
-          "deathsPerEligibleHeroDay": 0.079
+          "deathsPerEligibleHeroDay": 0.072
         }
       },
       "stateSharePct": {
-        "exploring": 97.9,
-        "resting": 0.8,
+        "exploring": 98.1,
+        "resting": 0.7,
         "travelling": 0.4,
         "dead": 0.9,
         "sleeping": 0
@@ -11296,11 +11297,11 @@
       },
       "gearPerDay": 4.9,
       "usefulGearPerDay": 0.3,
-      "equippedUpgradesPerHero": 10.7,
+      "equippedUpgradesPerHero": 10.8,
       "potions": {
-        "acquiredPerHeroDay": 5.6,
+        "acquiredPerHeroDay": 5.4,
         "usedPerHeroDay": 4.7,
-        "fullStackFallbacksPerHeroDay": 2,
+        "fullStackFallbacksPerHeroDay": 2.3,
         "finalCount": {
           "p10": 59,
           "median": 60,
@@ -11311,17 +11312,17 @@
         "byStrength": {
           "minor": {
             "foundPerHeroDay": 0.5,
-            "usedPerHeroDay": 0.5,
+            "usedPerHeroDay": 0.4,
             "finalMedian": 0
           },
           "healing": {
-            "foundPerHeroDay": 2.2,
-            "usedPerHeroDay": 2.4,
+            "foundPerHeroDay": 2.1,
+            "usedPerHeroDay": 2.5,
             "finalMedian": 0
           },
           "major": {
-            "foundPerHeroDay": 2.8,
-            "usedPerHeroDay": 1.8,
+            "foundPerHeroDay": 2.7,
+            "usedPerHeroDay": 1.7,
             "finalMedian": 59
           }
         },
@@ -11330,106 +11331,106 @@
         "materialsSpentPerHero": {
           "scrap": 1.9
         },
-        "restTicksPerHeroDay": 0.8
+        "restTicksPerHeroDay": 0.7
       },
       "potionsByBiome": {
         "office_cubicles": {
-          "heroDays": 405.5,
+          "heroDays": 388.5,
           "foundPerDay": 5.5,
           "drunkPerDay": 0.1,
-          "emptyPouchPct": 6.9
+          "emptyPouchPct": 5.9
         },
         "server_room": {
-          "heroDays": 307,
+          "heroDays": 307.7,
           "foundPerDay": 4.7,
           "drunkPerDay": 5,
-          "emptyPouchPct": 2.4
+          "emptyPouchPct": 2.1
         },
         "cafeteria_depths": {
-          "heroDays": 219.1,
+          "heroDays": 218.6,
           "foundPerDay": 8,
-          "drunkPerDay": 12.8,
-          "emptyPouchPct": 10.9
+          "drunkPerDay": 13.1,
+          "emptyPouchPct": 8.5
         },
         "archive": {
-          "heroDays": 223.9,
-          "foundPerDay": 10.3,
-          "drunkPerDay": 11.5,
-          "emptyPouchPct": 21.2
+          "heroDays": 221.7,
+          "foundPerDay": 10.4,
+          "drunkPerDay": 12.4,
+          "emptyPouchPct": 16.7
         },
         "parking_garage": {
-          "heroDays": 2398,
-          "foundPerDay": 5.1,
+          "heroDays": 2420,
+          "foundPerDay": 4.8,
           "drunkPerDay": 4.1,
-          "emptyPouchPct": 6.1
+          "emptyPouchPct": 5.2
         }
       },
       "retreatsPerHeroDay": 0,
       "rescuesPerHeroDay": 0,
       "bestInSlot": {
-        "p10": 28.4,
-        "median": 42.8,
+        "p10": 29.1,
+        "median": 45.1,
         "p90": ">60",
-        "reached": 44
+        "reached": 45
       },
       "goldDayEnd": {
-        "median": 7092,
-        "p90": 10492
+        "median": 5572,
+        "p90": 9877
       },
-      "goldDay30": 4341,
+      "goldDay30": 2782,
       "todo": {
         "tasksPerHeroDay": 2.7,
         "tasksPerAwakeHeroDay": 2.7,
         "awakeDaySharePct": 100,
-        "daysWithTwoPlusPct": 90.7,
-        "awakeDaysWithTwoPlusPct": 90.7,
-        "taskGoldSharePct": 13,
-        "taskGoldPerHeroDay": 107.9,
+        "daysWithTwoPlusPct": 90.9,
+        "awakeDaysWithTwoPlusPct": 90.9,
+        "taskGoldSharePct": 12.9,
+        "taskGoldPerHeroDay": 108.6,
         "hoursToFinish": {
           "avoid_traps": {
-            "finished": 1536,
+            "finished": 1547,
             "p10": 1.5,
-            "median": 7.75,
-            "p90": 22.5
+            "median": 7.5,
+            "p90": 22.25
           },
           "defeat_any": {
-            "finished": 1645,
+            "finished": 1650,
             "p10": 4.25,
             "median": 7.25,
             "p90": 11.25
           },
           "defeat_monster": {
-            "finished": 1049,
+            "finished": 1068,
             "p10": 2.5,
-            "median": 7.25,
-            "p90": 16.5
+            "median": 7,
+            "p90": 15.75
           },
           "earn_gold": {
-            "finished": 1711,
+            "finished": 1717,
             "p10": 4.5,
             "median": 7.75,
-            "p90": 12.25
+            "p90": 12
           },
           "elite": {
-            "finished": 1157,
+            "finished": 1159,
             "p10": 1.75,
-            "median": 11,
-            "p90": 29.75
+            "median": 11.25,
+            "p90": 30.25
           },
           "explore_biome": {
-            "finished": 1075,
+            "finished": 1080,
             "p10": 4.5,
             "median": 7.25,
             "p90": 10
           },
           "find_gear": {
-            "finished": 1628,
+            "finished": 1617,
             "p10": 1,
             "median": 5.5,
             "p90": 15.5
           }
         },
-        "staleSwapsPerTaskWrittenPct": 9.3,
+        "staleSwapsPerTaskWrittenPct": 9.2,
         "refillsPerHeroDay": 1.167,
         "maxRefillsPerDay": 1.167
       },
@@ -11676,7 +11677,7 @@
           {
             "id": "tasks_25",
             "companion": false,
-            "p10": 8,
+            "p10": 7.9,
             "median": 8.8,
             "p90": 10.1,
             "reached": 60,
@@ -11685,7 +11686,7 @@
           {
             "id": "rare_find",
             "companion": false,
-            "p10": 8,
+            "p10": 7.9,
             "median": 8.8,
             "p90": 10.4,
             "reached": 60,
@@ -11694,9 +11695,9 @@
           {
             "id": "rolling_suitcase",
             "companion": true,
-            "p10": 8,
-            "median": 8.9,
-            "p90": 10.4,
+            "p10": 8.1,
+            "median": 9.6,
+            "p90": 11.9,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
@@ -11704,7 +11705,7 @@
             "id": "level_12",
             "companion": false,
             "p10": 11.7,
-            "median": 13,
+            "median": 12.9,
             "p90": 14.7,
             "reached": 60,
             "guaranteeFiresPerHero": null
@@ -11714,111 +11715,111 @@
             "companion": true,
             "p10": 11.9,
             "median": 13.3,
-            "p90": 15.6,
+            "p90": 15.4,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "reinforce_3",
             "companion": true,
-            "p10": 32.1,
-            "median": 36.5,
-            "p90": 46.3,
-            "reached": 60,
+            "p10": 34.6,
+            "median": 42.7,
+            "p90": 53.9,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "archive_win",
             "companion": true,
-            "p10": 32.1,
-            "median": 36.5,
-            "p90": 46.4,
-            "reached": 60,
+            "p10": 34.6,
+            "median": 42.7,
+            "p90": 53.9,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "level_16",
             "companion": false,
-            "p10": 32.1,
-            "median": 36.5,
-            "p90": 46.4,
-            "reached": 60,
+            "p10": 34.6,
+            "median": 42.7,
+            "p90": 53.9,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "garage_win",
             "companion": true,
-            "p10": 32.1,
-            "median": 36.5,
-            "p90": 46.4,
-            "reached": 60,
+            "p10": 34.7,
+            "median": 42.7,
+            "p90": 54,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "gym_duffel",
             "companion": true,
-            "p10": 35.9,
-            "median": 43,
-            "p90": 53.9,
-            "reached": 58,
+            "p10": 35.6,
+            "median": 44.3,
+            "p90": 54,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "first_standoff",
             "companion": false,
-            "p10": 36.1,
-            "median": 45.1,
+            "p10": 35.6,
+            "median": 44.6,
             "p90": 54.2,
-            "reached": 58,
+            "reached": 59,
             "guaranteeFiresPerHero": null
           }
         ],
         "careerGoldSharePct": 3.4,
-        "careerGoldPerHero": 1928.3,
+        "careerGoldPerHero": 1924.7,
         "rungsReachedMedian": 31,
         "finalRung": {
-          "done": 58,
-          "gym_duffel": 2
+          "done": 59,
+          "reinforce_3": 1
         },
-        "waitingOnCompanionPct": 3.3,
+        "waitingOnCompanionPct": 1.7,
         "days": 60
       },
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 4341,
-            "p90": 7020
+            "median": 2782,
+            "p90": 6245
           },
           "day60": {
-            "median": 7092,
-            "p90": 10492
+            "median": 5572,
+            "p90": 9877
           }
         },
         "materialsHeldMedian": {
-          "scrap": 367,
-          "parts": 143,
-          "components": 53
+          "scrap": 376,
+          "parts": 145,
+          "components": 51
         },
-        "salvagedPerHero": 236.2,
-        "workbenchGoldMedian": 26000,
+        "salvagedPerHero": 237.8,
+        "workbenchGoldMedian": 25500,
         "steps": {
           "armor:+1": {
-            "p10": 13.7,
-            "median": 15.3,
-            "p90": 17.8,
+            "p10": 13.4,
+            "median": 14.9,
+            "p90": 17.4,
             "reached": 60
           },
           "armor:+2": {
-            "p10": 22.5,
-            "median": 25.6,
-            "p90": 31.8,
+            "p10": 23,
+            "median": 27.7,
+            "p90": 34.6,
             "reached": 60
           },
           "armor:+3": {
-            "p10": 40.1,
-            "median": 47.3,
-            "p90": 56.8,
-            "reached": 58
+            "p10": 43.7,
+            "median": 54.1,
+            "p90": ">60",
+            "reached": 46
           },
           "armor:Mk 2": {
             "p10": ">60",
@@ -11833,22 +11834,22 @@
             "reached": 8
           },
           "weapon:+1": {
-            "p10": 11.9,
-            "median": 13.7,
-            "p90": 15.6,
+            "p10": 11.7,
+            "median": 13.3,
+            "p90": 15.4,
             "reached": 60
           },
           "weapon:+2": {
-            "p10": 18.7,
-            "median": 21.7,
-            "p90": 28.2,
+            "p10": 18.9,
+            "median": 22.9,
+            "p90": 31.2,
             "reached": 60
           },
           "weapon:+3": {
-            "p10": 32.1,
-            "median": 36.5,
-            "p90": 46.3,
-            "reached": 60
+            "p10": 34.6,
+            "median": 42.7,
+            "p90": 53.9,
+            "reached": 59
           },
           "weapon:Mk 3": {
             "p10": ">60",
@@ -11858,8 +11859,8 @@
           }
         }
       },
-      "jackpotGoldShare": 1.6,
-      "elitesPerHeroDay": 1.23,
+      "jackpotGoldShare": 1.7,
+      "elitesPerHeroDay": 1.24,
       "bag": {
         "reach": [
           {
@@ -11885,45 +11886,45 @@
           },
           {
             "capacity": 20,
-            "p10": 6.7,
-            "median": 7.3,
-            "p90": 8.1,
-            "reached": 60
+            "p10": 6.8,
+            "median": 7.8,
+            "p90": ">60",
+            "reached": 48
           },
           {
             "capacity": 24,
-            "p10": 45.1,
-            "median": 53.9,
+            "p10": 58.3,
+            "median": ">60",
             "p90": ">60",
-            "reached": 42
+            "reached": 9
           },
           {
             "capacity": 28,
-            "p10": 51.9,
-            "median": 59.7,
+            "p10": 58.6,
+            "median": ">60",
             "p90": ">60",
-            "reached": 31
+            "reached": 8
           },
           {
             "capacity": 32,
             "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 1
+            "reached": 0
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 3.88,
-        "goldSpentMedian": 11900
+        "purchasesPerHero": 2.92,
+        "goldSpentMedian": 1900
       },
       "xpLastDay": {
         "p10": 5271,
         "median": 6314,
-        "p90": 7593,
-        "ratio": 1.44
+        "p90": 7699,
+        "ratio": 1.46
       },
       "xpLast7Days": {
-        "p10": 40630,
+        "p10": 40865,
         "median": 43676,
         "p90": 46515,
         "ratio": 1.14
@@ -12316,9 +12317,9 @@
         },
         "day7": {
           "bands": {
-            "common": 52,
+            "common": 53,
             "uncommon": 7,
-            "rare": 4,
+            "rare": 3,
             "legendary": 170
           },
           "monsterTiers": {
@@ -12586,7 +12587,7 @@
             "bags_1": 100,
             "bags_2": 100,
             "bags_3": 100,
-            "bags_4": 23.3,
+            "bags_4": 16.7,
             "sales_1": 100,
             "sales_2": 93.3,
             "sales_3": 0,
@@ -12595,7 +12596,7 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 6.7,
+            "purchases_1": 61.7,
             "purchases_2": 0,
             "purchases_3": 0,
             "merchants_1": 100,
@@ -12701,9 +12702,9 @@
         },
         "day30": {
           "bands": {
-            "common": 125,
-            "uncommon": 6,
-            "rare": 3,
+            "common": 127,
+            "uncommon": 5,
+            "rare": 2,
             "legendary": 99
           },
           "monsterTiers": {
@@ -12724,14 +12725,14 @@
             "slay_stapler_mimic": [
               100,
               100,
-              96.7,
+              98.3,
               0,
               0
             ],
             "slay_dust_daemon": [
               100,
               100,
-              95,
+              98.3,
               0,
               0
             ],
@@ -12823,28 +12824,28 @@
               100,
               100,
               100,
-              76.7,
+              83.3,
               0
             ],
             "slay_oil_slick": [
               100,
               100,
               100,
-              71.7,
+              85,
               0
             ],
             "slay_barrier_golem": [
               100,
               100,
               100,
-              76.7,
+              81.7,
               0
             ],
             "slay_ghost_car": [
               100,
               100,
               100,
-              73.3,
+              75,
               0
             ]
           },
@@ -12861,12 +12862,12 @@
             "slay_rogue_roomba_5": 0,
             "slay_stapler_mimic_1": 100,
             "slay_stapler_mimic_2": 100,
-            "slay_stapler_mimic_3": 96.7,
+            "slay_stapler_mimic_3": 98.3,
             "slay_stapler_mimic_4": 0,
             "slay_stapler_mimic_5": 0,
             "slay_dust_daemon_1": 100,
             "slay_dust_daemon_2": 100,
-            "slay_dust_daemon_3": 95,
+            "slay_dust_daemon_3": 98.3,
             "slay_dust_daemon_4": 0,
             "slay_dust_daemon_5": 0,
             "slay_cable_serpent_1": 100,
@@ -12911,7 +12912,7 @@
             "slay_leftovers_hydra_5": 0,
             "office_census": 100,
             "full_tour": 100,
-            "floor_cleared_1": 90,
+            "floor_cleared_1": 91.7,
             "floor_cleared_2": 100,
             "floor_cleared_3": 95,
             "elites_1": 100,
@@ -12919,7 +12920,7 @@
             "elites_3": 96.7,
             "elites_4": 0,
             "jackpots_1": 98.3,
-            "jackpots_2": 26.7,
+            "jackpots_2": 28.3,
             "jackpots_3": 0,
             "rare_finds_1": 100,
             "rare_finds_2": 83.3,
@@ -12944,13 +12945,13 @@
             "levels_4": 100,
             "levels_5": 100,
             "knockouts_1": 100,
-            "knockouts_2": 60,
+            "knockouts_2": 61.7,
             "knockouts_3": 0,
             "knockouts_4": 0,
             "rescues_1": 0,
             "rescues_2": 0,
             "rescues_3": 0,
-            "retreats_1": 5,
+            "retreats_1": 6.7,
             "retreats_2": 0,
             "retreats_3": 0,
             "retreats_4": 0,
@@ -12960,13 +12961,13 @@
             "potions_4": 0,
             "traps_1": 100,
             "traps_2": 100,
-            "traps_3": 23.3,
+            "traps_3": 31.7,
             "traps_4": 0,
             "breaks_1": 100,
             "breaks_2": 100,
             "breaks_3": 0,
             "trips_1": 100,
-            "trips_2": 45,
+            "trips_2": 40,
             "trips_3": 0,
             "bags_1": 100,
             "bags_2": 100,
@@ -12980,8 +12981,8 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 70,
-            "purchases_2": 1.7,
+            "purchases_1": 100,
+            "purchases_2": 88.3,
             "purchases_3": 0,
             "merchants_1": 100,
             "merchants_2": 100,
@@ -12993,7 +12994,7 @@
             "choices_2": 100,
             "choices_3": 0,
             "choices_4": 0,
-            "epics_1": 85,
+            "epics_1": 80,
             "epics_2": 1.7,
             "office_raider_1": 100,
             "office_raider_2": 100,
@@ -13009,9 +13010,9 @@
             "salvaged_2": 100,
             "salvaged_3": 11.7,
             "workbench_1": 100,
-            "workbench_2": 78.3,
+            "workbench_2": 70,
             "workbench_3": 0,
-            "mixing_1": 88.3,
+            "mixing_1": 90,
             "mixing_2": 0,
             "mixing_3": 0,
             "slay_box_file_beetle_1": 100,
@@ -13037,22 +13038,22 @@
             "slay_trolley_swarm_1": 100,
             "slay_trolley_swarm_2": 100,
             "slay_trolley_swarm_3": 100,
-            "slay_trolley_swarm_4": 76.7,
+            "slay_trolley_swarm_4": 83.3,
             "slay_trolley_swarm_5": 0,
             "slay_oil_slick_1": 100,
             "slay_oil_slick_2": 100,
             "slay_oil_slick_3": 100,
-            "slay_oil_slick_4": 71.7,
+            "slay_oil_slick_4": 85,
             "slay_oil_slick_5": 0,
             "slay_barrier_golem_1": 100,
             "slay_barrier_golem_2": 100,
             "slay_barrier_golem_3": 100,
-            "slay_barrier_golem_4": 76.7,
+            "slay_barrier_golem_4": 81.7,
             "slay_barrier_golem_5": 0,
             "slay_ghost_car_1": 100,
             "slay_ghost_car_2": 100,
             "slay_ghost_car_3": 100,
-            "slay_ghost_car_4": 73.3,
+            "slay_ghost_car_4": 75,
             "slay_ghost_car_5": 0,
             "floor_cleared_4": 98.3,
             "floor_cleared_5": 100,
@@ -13076,10 +13077,10 @@
             "lost_and_found_1": 0,
             "lost_and_found_2": 0,
             "lost_and_found_3": 0,
-            "big_bags_1": 20,
+            "big_bags_1": 76.7,
             "big_bags_2": 0,
             "big_bags_3": 0,
-            "dug_in_1": 33.3,
+            "dug_in_1": 30,
             "dug_in_2": 0,
             "dug_in_3": 0
           }
@@ -13116,7 +13117,7 @@
           "level": 12,
           "p10": 16.5,
           "median": 22.3,
-          "p90": 23.6,
+          "p90": 24.5,
           "reached": 60
         },
         {
@@ -13140,38 +13141,38 @@
           "deathsPerEligibleHeroDay": 0
         },
         "cafeteria_depths": {
-          "eligibleHeroDays": 447,
+          "eligibleHeroDays": 446,
           "heroDaysWithDeath": 68,
           "deathProbabilityPct": 15.2,
           "wilson95Pct": [
             12.2,
-            18.8
+            18.9
           ],
           "deathsPerEligibleHeroDay": 0.152
         },
         "archive": {
-          "eligibleHeroDays": 302,
+          "eligibleHeroDays": 297,
           "heroDaysWithDeath": 36,
-          "deathProbabilityPct": 11.9,
+          "deathProbabilityPct": 12.1,
           "wilson95Pct": [
-            8.7,
-            16.1
+            8.9,
+            16.3
           ],
-          "deathsPerEligibleHeroDay": 0.119
+          "deathsPerEligibleHeroDay": 0.121
         },
         "parking_garage": {
-          "eligibleHeroDays": 1307,
-          "heroDaysWithDeath": 104,
-          "deathProbabilityPct": 8,
+          "eligibleHeroDays": 1306,
+          "heroDaysWithDeath": 103,
+          "deathProbabilityPct": 7.9,
           "wilson95Pct": [
-            6.6,
-            9.6
+            6.5,
+            9.5
           ],
-          "deathsPerEligibleHeroDay": 0.08
+          "deathsPerEligibleHeroDay": 0.079
         }
       },
       "stateSharePct": {
-        "exploring": 99.1,
+        "exploring": 99.2,
         "resting": 0.2,
         "travelling": 0.2,
         "dead": 0.5,
@@ -13191,8 +13192,8 @@
         "usedPerHeroDay": 4.4,
         "fullStackFallbacksPerHeroDay": 1.4,
         "finalCount": {
-          "p10": 35,
-          "median": 59,
+          "p10": 34,
+          "median": 60,
           "p90": 60
         }
       },
@@ -13214,16 +13215,16 @@
             "finalMedian": 57
           }
         },
-        "combinedPerHero": 9.5,
-        "combinedMedian": 9,
+        "combinedPerHero": 9.3,
+        "combinedMedian": 8,
         "materialsSpentPerHero": {
-          "scrap": 9.5
+          "scrap": 9.3
         },
         "restTicksPerHeroDay": 0.1
       },
       "potionsByBiome": {
         "office_cubicles": {
-          "heroDays": 1386.3,
+          "heroDays": 1393.8,
           "foundPerDay": 3.6,
           "drunkPerDay": 0,
           "emptyPouchPct": 0.1
@@ -13235,22 +13236,22 @@
           "emptyPouchPct": 0
         },
         "cafeteria_depths": {
-          "heroDays": 345.4,
+          "heroDays": 344.3,
           "foundPerDay": 8.3,
           "drunkPerDay": 11.7,
           "emptyPouchPct": 2.7
         },
         "archive": {
-          "heroDays": 246.4,
-          "foundPerDay": 10.3,
-          "drunkPerDay": 11.1,
-          "emptyPouchPct": 2.5
+          "heroDays": 241.5,
+          "foundPerDay": 10.2,
+          "drunkPerDay": 11.2,
+          "emptyPouchPct": 1.7
         },
         "parking_garage": {
-          "heroDays": 1178,
+          "heroDays": 1176.6,
           "foundPerDay": 6.3,
-          "drunkPerDay": 6.3,
-          "emptyPouchPct": 2.2
+          "drunkPerDay": 6.4,
+          "emptyPouchPct": 2.5
         }
       },
       "retreatsPerHeroDay": 0,
@@ -13262,47 +13263,47 @@
         "reached": 10
       },
       "goldDayEnd": {
-        "median": 10134,
-        "p90": 14894
+        "median": 9201,
+        "p90": 16603
       },
-      "goldDay30": 1757,
+      "goldDay30": 1813,
       "todo": {
         "tasksPerHeroDay": 2.4,
         "tasksPerAwakeHeroDay": 2.4,
         "awakeDaySharePct": 100,
-        "daysWithTwoPlusPct": 85.9,
-        "awakeDaysWithTwoPlusPct": 85.9,
-        "taskGoldSharePct": 11,
-        "taskGoldPerHeroDay": 61.6,
+        "daysWithTwoPlusPct": 86,
+        "awakeDaysWithTwoPlusPct": 86,
+        "taskGoldSharePct": 10.9,
+        "taskGoldPerHeroDay": 61.5,
         "hoursToFinish": {
           "avoid_traps": {
-            "finished": 1456,
+            "finished": 1460,
             "p10": 1.25,
-            "median": 7.75,
+            "median": 8,
             "p90": 22
           },
           "defeat_any": {
-            "finished": 1543,
+            "finished": 1547,
             "p10": 4.25,
             "median": 7.75,
             "p90": 11.75
           },
           "defeat_monster": {
-            "finished": 971,
+            "finished": 968,
             "p10": 2.5,
             "median": 7.75,
-            "p90": 17.75
+            "p90": 17.5
           },
           "earn_gold": {
-            "finished": 1502,
+            "finished": 1503,
             "p10": 4.25,
             "median": 7.5,
-            "p90": 12
+            "p90": 11.75
           },
           "elite": {
-            "finished": 744,
+            "finished": 743,
             "p10": 2,
-            "median": 11.75,
+            "median": 12,
             "p90": 32.5
           },
           "explore_biome": {
@@ -13314,11 +13315,11 @@
           "find_gear": {
             "finished": 1529,
             "p10": 1,
-            "median": 5.75,
-            "p90": 15.75
+            "median": 5.5,
+            "p90": 15.5
           }
         },
-        "staleSwapsPerTaskWrittenPct": 8.4,
+        "staleSwapsPerTaskWrittenPct": 8.3,
         "refillsPerHeroDay": 1.013,
         "maxRefillsPerDay": 1.017
       },
@@ -13585,7 +13586,7 @@
             "companion": true,
             "p10": 14.2,
             "median": 14.7,
-            "p90": 21.1,
+            "p90": 21.3,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
@@ -13594,14 +13595,14 @@
             "companion": false,
             "p10": 16.6,
             "median": 22.3,
-            "p90": 23.6,
+            "p90": 24.5,
             "reached": 60,
             "guaranteeFiresPerHero": null
           },
           {
             "id": "first_upgrade",
             "companion": true,
-            "p10": 21.4,
+            "p10": 21.5,
             "median": 28.6,
             "p90": 35.9,
             "reached": 60,
@@ -13674,27 +13675,27 @@
       "workbench": {
         "goldByDay": {
           "day30": {
-            "median": 1757,
-            "p90": 3371
+            "median": 1813,
+            "p90": 3700
           },
           "day60": {
-            "median": 10134,
-            "p90": 14894
+            "median": 9201,
+            "p90": 16603
           }
         },
         "materialsHeldMedian": {
-          "scrap": 22,
-          "parts": 13,
+          "scrap": 26,
+          "parts": 15,
           "components": 2
         },
-        "salvagedPerHero": 32.1,
+        "salvagedPerHero": 31.6,
         "workbenchGoldMedian": 2000,
         "steps": {
           "armor:+1": {
-            "p10": 28.2,
+            "p10": 28.1,
             "median": ">60",
             "p90": ">60",
-            "reached": 29
+            "reached": 27
           },
           "armor:Mk 3": {
             "p10": ">60",
@@ -13703,16 +13704,16 @@
             "reached": 3
           },
           "weapon:+1": {
-            "p10": 21.4,
+            "p10": 21.5,
             "median": 28.6,
-            "p90": 35.9,
-            "reached": 59
+            "p90": 42.6,
+            "reached": 57
           },
           "weapon:+2": {
-            "p10": 42.6,
+            "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 7
+            "reached": 5
           },
           "weapon:Mk 3": {
             "p10": ">60",
@@ -13722,7 +13723,7 @@
           }
         }
       },
-      "jackpotGoldShare": 1.6,
+      "jackpotGoldShare": 1.7,
       "elitesPerHeroDay": 1.08,
       "bag": {
         "reach": [
@@ -13751,46 +13752,46 @@
             "capacity": 20,
             "p10": 14.1,
             "median": 14.5,
-            "p90": 14.9,
-            "reached": 60
+            "p90": 15,
+            "reached": 59
           },
           {
             "capacity": 24,
-            "p10": 21.7,
-            "median": 29,
-            "p90": 42.4,
-            "reached": 60
+            "p10": 21.8,
+            "median": 35.7,
+            "p90": ">60",
+            "reached": 49
           },
           {
             "capacity": 28,
-            "p10": 42.6,
-            "median": 56.3,
+            "p10": 49.1,
+            "median": ">60",
             "p90": ">60",
-            "reached": 44
+            "reached": 26
           },
           {
             "capacity": 32,
             "p10": ">60",
             "median": ">60",
             "p90": ">60",
-            "reached": 1
+            "reached": 0
           }
         ],
         "findsPerHero": 0,
-        "purchasesPerHero": 4.1,
-        "goldSpentMedian": 15900
+        "purchasesPerHero": 3.45,
+        "goldSpentMedian": 5900
       },
       "xpLastDay": {
-        "p10": 1747,
-        "median": 6017,
+        "p10": 297,
+        "median": 5950,
         "p90": 7394,
-        "ratio": 4.23
+        "ratio": 24.9
       },
       "xpLast7Days": {
-        "p10": 20806,
+        "p10": 20535,
         "median": 40815,
         "p90": 45055,
-        "ratio": 2.17
+        "ratio": 2.19
       },
       "achievements": {
         "day1": {
@@ -14565,8 +14566,8 @@
         },
         "day30": {
           "bands": {
-            "common": 101,
-            "uncommon": 21,
+            "common": 102,
+            "uncommon": 20,
             "rare": 6,
             "legendary": 105
           },
@@ -14575,14 +14576,14 @@
               100,
               100,
               100,
-              55,
+              56.7,
               0
             ],
             "slay_rogue_roomba": [
               100,
               100,
               100,
-              55,
+              56.7,
               0
             ],
             "slay_stapler_mimic": [
@@ -14644,14 +14645,14 @@
             "slay_microwave_wraith": [
               100,
               100,
-              81.7,
+              80,
               1.7,
               0
             ],
             "slay_leftovers_hydra": [
               100,
               100,
-              86.7,
+              85,
               1.7,
               0
             ],
@@ -14665,7 +14666,7 @@
             "slay_shelf_lurker": [
               76.7,
               73.3,
-              31.7,
+              30,
               0,
               0
             ],
@@ -14685,28 +14686,28 @@
             ],
             "slay_trolley_swarm": [
               41.7,
-              40,
+              41.7,
               3.3,
               0,
               0
             ],
             "slay_oil_slick": [
               41.7,
-              36.7,
+              38.3,
               3.3,
               0,
               0
             ],
             "slay_barrier_golem": [
               41.7,
-              36.7,
+              38.3,
               0,
               0,
               0
             ],
             "slay_ghost_car": [
               41.7,
-              36.7,
+              38.3,
               0,
               0,
               0
@@ -14716,12 +14717,12 @@
             "slay_paper_imp_1": 100,
             "slay_paper_imp_2": 100,
             "slay_paper_imp_3": 100,
-            "slay_paper_imp_4": 55,
+            "slay_paper_imp_4": 56.7,
             "slay_paper_imp_5": 0,
             "slay_rogue_roomba_1": 100,
             "slay_rogue_roomba_2": 100,
             "slay_rogue_roomba_3": 100,
-            "slay_rogue_roomba_4": 55,
+            "slay_rogue_roomba_4": 56.7,
             "slay_rogue_roomba_5": 0,
             "slay_stapler_mimic_1": 100,
             "slay_stapler_mimic_2": 100,
@@ -14765,12 +14766,12 @@
             "slay_crumb_golem_5": 0,
             "slay_microwave_wraith_1": 100,
             "slay_microwave_wraith_2": 100,
-            "slay_microwave_wraith_3": 81.7,
+            "slay_microwave_wraith_3": 80,
             "slay_microwave_wraith_4": 1.7,
             "slay_microwave_wraith_5": 0,
             "slay_leftovers_hydra_1": 100,
             "slay_leftovers_hydra_2": 100,
-            "slay_leftovers_hydra_3": 86.7,
+            "slay_leftovers_hydra_3": 85,
             "slay_leftovers_hydra_4": 1.7,
             "slay_leftovers_hydra_5": 0,
             "office_census": 26.7,
@@ -14783,7 +14784,7 @@
             "elites_3": 88.3,
             "elites_4": 0,
             "jackpots_1": 100,
-            "jackpots_2": 53.3,
+            "jackpots_2": 55,
             "jackpots_3": 0,
             "rare_finds_1": 100,
             "rare_finds_2": 85,
@@ -14806,7 +14807,7 @@
             "levels_2": 100,
             "levels_3": 100,
             "levels_4": 75,
-            "levels_5": 18.3,
+            "levels_5": 16.7,
             "knockouts_1": 93.3,
             "knockouts_2": 0,
             "knockouts_3": 0,
@@ -14824,7 +14825,7 @@
             "potions_4": 0,
             "traps_1": 100,
             "traps_2": 100,
-            "traps_3": 11.7,
+            "traps_3": 13.3,
             "traps_4": 0,
             "breaks_1": 100,
             "breaks_2": 100,
@@ -14844,7 +14845,7 @@
             "keepsakes_2": 0,
             "keepsakes_3": 0,
             "keepsakes_4": 0,
-            "purchases_1": 11.7,
+            "purchases_1": 70,
             "purchases_2": 0,
             "purchases_3": 0,
             "merchants_1": 100,
@@ -14870,12 +14871,12 @@
             "tasks_done_3": 100,
             "tasks_done_4": 0,
             "salvaged_1": 100,
-            "salvaged_2": 13.3,
+            "salvaged_2": 11.7,
             "salvaged_3": 0,
-            "workbench_1": 70,
+            "workbench_1": 71.7,
             "workbench_2": 0,
             "workbench_3": 0,
-            "mixing_1": 90,
+            "mixing_1": 91.7,
             "mixing_2": 10,
             "mixing_3": 0,
             "slay_box_file_beetle_1": 76.7,
@@ -14885,7 +14886,7 @@
             "slay_box_file_beetle_5": 0,
             "slay_shelf_lurker_1": 76.7,
             "slay_shelf_lurker_2": 73.3,
-            "slay_shelf_lurker_3": 31.7,
+            "slay_shelf_lurker_3": 30,
             "slay_shelf_lurker_4": 0,
             "slay_shelf_lurker_5": 0,
             "slay_microfilm_phantom_1": 76.7,
@@ -14899,26 +14900,26 @@
             "slay_auditor_4": 0,
             "slay_auditor_5": 0,
             "slay_trolley_swarm_1": 41.7,
-            "slay_trolley_swarm_2": 40,
+            "slay_trolley_swarm_2": 41.7,
             "slay_trolley_swarm_3": 3.3,
             "slay_trolley_swarm_4": 0,
             "slay_trolley_swarm_5": 0,
             "slay_oil_slick_1": 41.7,
-            "slay_oil_slick_2": 36.7,
+            "slay_oil_slick_2": 38.3,
             "slay_oil_slick_3": 3.3,
             "slay_oil_slick_4": 0,
             "slay_oil_slick_5": 0,
             "slay_barrier_golem_1": 41.7,
-            "slay_barrier_golem_2": 36.7,
+            "slay_barrier_golem_2": 38.3,
             "slay_barrier_golem_3": 0,
             "slay_barrier_golem_4": 0,
             "slay_barrier_golem_5": 0,
             "slay_ghost_car_1": 41.7,
-            "slay_ghost_car_2": 36.7,
+            "slay_ghost_car_2": 38.3,
             "slay_ghost_car_3": 0,
             "slay_ghost_car_4": 0,
             "slay_ghost_car_5": 0,
-            "floor_cleared_4": 26.7,
+            "floor_cleared_4": 25,
             "floor_cleared_5": 0,
             "rogue_1": 0,
             "rogue_2": 0,
@@ -14940,10 +14941,10 @@
             "lost_and_found_1": 0,
             "lost_and_found_2": 0,
             "lost_and_found_3": 0,
-            "big_bags_1": 51.7,
+            "big_bags_1": 58.3,
             "big_bags_2": 0,
             "big_bags_3": 0,
-            "dug_in_1": 16.7,
+            "dug_in_1": 15,
             "dug_in_2": 0,
             "dug_in_3": 0
           }

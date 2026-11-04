@@ -12,6 +12,11 @@ import { contentV27 } from './v27'
  * of Archive ticks with an empty pouch). Each deep floor now carries its own
  * loot shares, the extra potion share taken from gold; a full pouch still turns
  * a potion find into gold, so a hero with potions to spare loses little.
+ *
+ * D223: the merchant stays a working day. Production heroes had met it 862
+ * times and bought 65 times; a one-hour visit was over before most players
+ * looked. It now stays 32 adventures (eight hours), and while it is there
+ * another merchant draw pays gold instead of replacing the open visit.
  * Everything else is v27.
  */
 const base = contentV27.constants.lootWeights
@@ -28,4 +33,5 @@ export const contentV28: ContentCatalog = {
   ...contentV27,
   contentVersion: 'v28',
   biomes: contentV27.biomes.map(withShare),
+  merchant: { ...contentV27.merchant!, staysForTicks: 32, oneVisitAtATime: true },
 }

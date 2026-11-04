@@ -584,6 +584,8 @@ class TickRun {
         // draw before the feature unlocks, for choices and the merchant alike.
         if (found === 'event' && (h.choice !== undefined || content.choices === undefined || !unlocked(content, h.level, 'choices'))) found = 'gold'
         if (found === 'merchant' && (content.merchant === undefined || !unlocked(content, h.level, 'merchant'))) found = 'gold'
+        // D223: a long visit stays put; a second merchant draw while it is open pays gold.
+        if (found === 'merchant' && content.merchant?.oneVisitAtATime === true && h.merchant !== undefined && h.merchant.expiresAtTick > input.tick) found = 'gold'
         if (found === 'event') {
           const event = pickOne(this.rng.reward, content.choices!.events)
           const choice: PendingChoice = { eventId: event.id, offeredAtTick: input.tick, expiresAtTick: input.tick + content.choices!.expiresAfterTicks, biomeTier: biome.tier }
