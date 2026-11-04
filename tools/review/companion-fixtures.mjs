@@ -524,6 +524,7 @@ import { Route as IaGame } from '../../apps/web/src/routes/games/idle-angler';
 import { AuthShell } from '../../apps/web/src/lib/platformShell';
 import { NetworkProvider } from '../../apps/web/src/lib/network';
 import { LocaleProvider } from '../../apps/web/src/lib/i18n';
+import { loadContent } from '../../apps/web/src/lib/content';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
@@ -544,7 +545,9 @@ document.body.className = 'bg-ground text-ink';
 const ProfilePage = (sitePage ?? (lifePage ? PlPublic : Profile)).options.component;
 const lang = ['fr', 'de', 'es', 'it', 'pt', 'pl', 'nl'].includes(new URLSearchParams(location.search).get('lang')) ? new URLSearchParams(location.search).get('lang') : 'en';
 document.documentElement.lang = lang;
-createRoot(document.getElementById('root')).render(<LocaleProvider locale={lang}><NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider></LocaleProvider>);
+// The real client entry waits for the game's dictionary before its first render (lib/content); so does the harness,
+// or every game name, catalog line and stored story would show in English under lang=.
+loadContent(lang).catch(() => {}).then(() => createRoot(document.getElementById('root')).render(<LocaleProvider locale={lang}><NetworkProvider>{publicPage ? <ProfilePage /> : <App />}</NetworkProvider></LocaleProvider>));
 `)
 write('vite.config.mjs', `import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
