@@ -567,13 +567,15 @@ class TickRun {
             break
           }
         }
+        // D222: a floor may carry its own loot shares; the same single draw either way.
+        const loot = biome.lootWeights ?? c.lootWeights
         let found = pickWeighted<'gear' | 'potion' | 'gold' | 'merchant' | 'event'>(this.rng.encounter, [
-          ['gear', c.lootWeights.gear],
-          ['potion', c.lootWeights.potion],
-          ['gold', c.lootWeights.gold],
+          ['gear', loot.gear],
+          ['potion', loot.potion],
+          ['gold', loot.gold],
           // D139 Black Friday: the merchant's weight scaled for the day; still one draw.
-          ...(c.lootWeights.merchant === undefined ? [] : [['merchant', Math.floor((c.lootWeights.merchant * (this.occasion?.rule.effect?.merchantWeightPct ?? 100)) / 100)] as const]),
-          ...(c.lootWeights.event === undefined ? [] : [['event', c.lootWeights.event] as const]),
+          ...(loot.merchant === undefined ? [] : [['merchant', Math.floor((loot.merchant * (this.occasion?.rule.effect?.merchantWeightPct ?? 100)) / 100)] as const]),
+          ...(loot.event === undefined ? [] : [['event', loot.event] as const]),
         ])
         if (forced === 'gear' || gift) found = 'gear'
         else if (forced === 'choice') found = 'event'

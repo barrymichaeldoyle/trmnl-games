@@ -32,6 +32,22 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-04',
+    changes: [
+      {
+        title: 'More potions on the deep floors',
+        body: 'In Desk Crawler, potions turn up more often in the Cafeteria Depths, the Archive and the Parking Garage, in place of some gold, so a hero down there no longer runs its pouch dry. The Archive gets the most.',
+        fr: { title: 'Plus de potions dans les étages profonds', body: 'Dans Desk Crawler, les potions se trouvent plus souvent dans les Profondeurs de la cafétéria, les Archives et le Parking souterrain, à la place d’un peu d’or : un héros qui y descend ne vide plus sa bourse à potions. Les Archives en reçoivent le plus.' },
+        de: { title: 'Mehr Tränke in den tiefen Etagen', body: 'In Desk Crawler findest du in den Kantinentiefen, im Archiv und in der Tiefgarage öfter Tränke, dafür etwas weniger Gold, damit dein Held dort unten nicht mehr mit leerem Trankbeutel dasteht. Das Archiv bekommt die meisten.' },
+        es: { title: 'Más pociones en las plantas profundas', body: 'En Desk Crawler, las pociones aparecen más a menudo en las Profundidades de la cafetería, el Archivo y el Aparcamiento subterráneo, a cambio de algo de oro, para que un héroe allí abajo ya no se quede sin pociones. El Archivo recibe más que ninguna.' },
+        it: { title: 'Più pozioni ai piani profondi', body: 'In Desk Crawler le pozioni si trovano più spesso nelle Profondità della mensa, nell’Archivio e nel Parcheggio sotterraneo, al posto di un po’ d’oro, così un eroe laggiù non resta più senza pozioni. L’Archivio ne riceve di più.' },
+        pt: { title: 'Mais poções nos andares profundos', body: 'No Desk Crawler, as poções aparecem com mais frequência nas Profundezas do refeitório, no Arquivo e no Estacionamento subterrâneo, no lugar de um pouco de ouro, para que um herói lá embaixo não fique mais sem poções. O Arquivo recebe mais.' },
+        pl: { title: 'Więcej mikstur na głębokich piętrach', body: 'W Desk Crawler mikstury trafiają się częściej w Czeluściach stołówki, w Archiwum i na Parkingu podziemnym, zamiast części złota, więc bohater na dole nie zostaje już z pustą sakiewką na mikstury. Najwięcej dostaje Archiwum.' },
+        nl: { title: 'Meer drankjes op de diepe verdiepingen', body: 'In Desk Crawler vind je vaker drankjes in de Kantinediepten, het Archief en de Parkeergarage, in plaats van wat goud, zodat een held daar beneden niet meer zonder drankjes komt te zitten. Het Archief krijgt de meeste.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-30',
     changes: [
       {

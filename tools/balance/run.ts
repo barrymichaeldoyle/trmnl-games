@@ -96,6 +96,11 @@ export interface HeroLog {
   potionsCombined: number
   finalPotionsByStrength: Map<string, number>
   finalPotions: number
+  /** D222: per floor, ticks spent exploring or resting there, potions found and drunk there, and those ticks begun with an empty pouch. */
+  presentTicksByBiome: Map<string, number>
+  potionsFoundByBiome: Map<string, number>
+  potionsUsedByBiome: Map<string, number>
+  emptyPouchTicksByBiome: Map<string, number>
   retreats: number
   rescues: number
   elites: number
@@ -410,6 +415,10 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       potionsCombined: 0,
       finalPotionsByStrength: new Map(),
       finalPotions: 0,
+      presentTicksByBiome: new Map(),
+      potionsFoundByBiome: new Map(),
+      potionsUsedByBiome: new Map(),
+      emptyPouchTicksByBiome: new Map(),
       retreats: 0,
       rescues: 0,
       elites: 0,
@@ -527,6 +536,12 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
         markDay(log.deathDaysByBiome, biomeBefore, day)
       }
       log.potionsUsed += result.metrics.potionsUsed
+      const bump = (map: Map<string, number>, n = 1) => map.set(biomeBefore, (map.get(biomeBefore) ?? 0) + n)
+      if (hero.status === 'exploring' || hero.status === 'resting') {
+        bump(log.presentTicksByBiome)
+        if (potionsHeld(inventory) === 0) bump(log.emptyPouchTicksByBiome)
+      }
+      if (result.metrics.potionsUsed) bump(log.potionsUsedByBiome, result.metrics.potionsUsed)
       log.retreats += result.metrics.retreats
       log.rescues += result.metrics.rescues
       const outcome = result.event?.detail.outcome
@@ -535,6 +550,7 @@ export function simulateCohort(policy: Policy, heroes: number, days: number, con
       // Count the encounter outcome so gross supply and usage still conserve the stack.
       if (outcome?.variant === 'loot' && outcome.found === 'potion') {
         log.potionsFound += 1
+        bump(log.potionsFoundByBiome)
         const strength = strengthOf(content, outcome.templateId ?? content.potion.templateId)?.id ?? 'healing'
         log.potionsFoundByStrength.set(strength, (log.potionsFoundByStrength.get(strength) ?? 0) + 1)
       }
@@ -660,6 +676,13 @@ export function summarize(policy: Policy, logs: HeroLog[], totalDays: number, co
     potions: { acquiredPerHeroDay: round1(sum(l => l.potionsFound) / logs.length / totalDays), usedPerHeroDay: round1(sum(l => l.potionsUsed) / logs.length / totalDays), fullStackFallbacksPerHeroDay: round1(sum(l => l.potionFullFallbacks) / logs.length / totalDays), finalCount: { p10: pct(logs.map(l => l.finalPotions), 0.1), median: pct(logs.map(l => l.finalPotions), 0.5), p90: pct(logs.map(l => l.finalPotions), 0.9) } },
     // D131: finds, drinks and the final pouch per strength (per hero over the run), plus majors combined and the Scrap it took.
     potionStrengths: content.potions === undefined ? null : potionStrengthReport(logs, content, totalDays),
+    // D222: potions found and drunk per 96 ticks on each floor, and the share of those ticks begun with an empty pouch.
+    potionsByBiome: Object.fromEntries(
+      content.biomes
+        .map((b) => [b.id, sum((l) => l.presentTicksByBiome.get(b.id) ?? 0)] as const)
+        .filter(([, ticks]) => ticks > 0)
+        .map(([id, ticks]) => [id, { heroDays: round1(ticks / TICKS_PER_DAY), foundPerDay: round1((sum((l) => l.potionsFoundByBiome.get(id) ?? 0) / ticks) * TICKS_PER_DAY), drunkPerDay: round1((sum((l) => l.potionsUsedByBiome.get(id) ?? 0) / ticks) * TICKS_PER_DAY), emptyPouchPct: round1((sum((l) => l.emptyPouchTicksByBiome.get(id) ?? 0) / ticks) * 100) }]),
+    ),
     retreatsPerHeroDay: round1(sum(l => l.retreats) / logs.length / totalDays),
     rescuesPerHeroDay: round1(sum(l => l.rescues) / logs.length / totalDays),
     bestInSlot: censored(logs.map((l) => l.bestInSlotTick)),

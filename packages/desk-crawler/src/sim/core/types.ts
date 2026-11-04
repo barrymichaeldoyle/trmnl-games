@@ -99,6 +99,11 @@ export interface BiomeTemplate {
   readonly monsterIds: readonly string[]
   readonly lootGold: Range
   readonly trapDamage: Range
+  /**
+   * D222: this floor's loot shares, replacing `constants.lootWeights` here; absent means the catalog's. Same keys, so a
+   * merchant or event share needs the same rules. The deep floors carry more potions in place of gold.
+   */
+  readonly lootWeights?: LootWeights
 }
 
 /** Placeholders: {monster} {xp} {gold} {damage} {heal} {item} {destination} {ticks} {capacity} */
@@ -177,6 +182,9 @@ export interface StanceRule {
   readonly victoryXpPct: number
 }
 
+/** One loot draw's shares out of 100; `merchant` is the D78 visit (absent before v4), `event` a D79 decision. */
+export type LootWeights = Readonly<{ gear: number; potion: number; gold: number; merchant?: number; event?: number }>
+
 export interface SimulationConstants {
   readonly potionStackCap: number
   readonly potionHealPct: number
@@ -189,7 +197,7 @@ export interface SimulationConstants {
   readonly damageVariance: Range
   readonly combatGearDropPct: number
   /** `merchant` is the D78 visit; absent before v4. */
-  readonly lootWeights: Readonly<{ gear: number; potion: number; gold: number; merchant?: number; event?: number }>
+  readonly lootWeights: LootWeights
   readonly trapAvoidPct: number
   readonly retreatGoldLossPct: number
   readonly deathGoldLossPct: number

@@ -325,6 +325,14 @@ export function validateCatalog(content: ContentCatalog): string[] {
   if (!biomeIds.has(content.safeBiomeId)) problems.push('safe biome missing')
   for (const biome of content.biomes) {
     if (sum(Object.values(biome.weights)) !== 100) problems.push(`biome ${biome.id} weights must sum to 100`)
+    // D222: a floor's own loot shares sum to 100 and offer nothing the catalog has no rules for.
+    if (biome.lootWeights !== undefined) {
+      const loot = biome.lootWeights
+      if (sum(Object.values(loot)) !== 100) problems.push(`biome ${biome.id} loot weights must sum to 100`)
+      if (Object.values(loot).some((value) => !Number.isSafeInteger(value) || value < 0)) problems.push(`biome ${biome.id} loot weights must be whole numbers`)
+      if (loot.merchant !== undefined && !content.merchant) problems.push(`biome ${biome.id} merchant loot weight needs merchant rules`)
+      if (loot.event !== undefined && !content.choices) problems.push(`biome ${biome.id} event loot weight needs choice rules`)
+    }
     if (biome.monsterIds.length < CONTENT_LIMITS.monstersPerBiome) problems.push(`biome ${biome.id} needs ${CONTENT_LIMITS.monstersPerBiome} monsters`)
     for (const id of biome.monsterIds) {
       const monster = content.monsters.find((m) => m.id === id)
