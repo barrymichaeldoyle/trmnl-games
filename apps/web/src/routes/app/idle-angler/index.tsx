@@ -14,15 +14,20 @@ import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
 import { WaterCompany, WaterCount } from './-company'
+import { FlyCallout } from './-flyBox'
 import { LocalTime } from '../../../lib/localTime'
 import { formatDate, formatTime, useLocale, useT } from '../../../lib/i18n'
 import { iaDock } from '../../../i18n/iaDock'
 import { seo } from '../../../lib/seo'
 
-/** The dock: the angler's scene, progress, the bait in use, the waters and the latest stories. The fly box lives in the logbook. */
+/**
+ * The dock: the angler's scene, progress, the bait in use, the waters and the latest stories. The fly box lives in
+ * the logbook; while the week's fly code waits unclaimed, the dock asks for it first (TRMNL review, 2026-11-07: the
+ * screen showed a code the companion's first page never mentioned).
+ */
 export const Route = createFileRoute('/app/idle-angler/')({
   head: () => seo({ title: 'Dock · Idle Angler', index: false }),
-  loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {}), convexQuery(api.idleAngler.payload.preview, {})),
+  loader: ({ context }) => preload(context, convexQuery(api.idleAngler.anglers.dock, {}), convexQuery(api.idleAngler.payload.preview, {}), convexQuery(api.idleAngler.flies.mine, {})),
   component: DockPage,
 })
 
@@ -87,6 +92,7 @@ function DockPage() {
           <h1 id="dock-title" className="font-display text-3xl font-bold">{angler.alias}</h1>
           <span className="inline-flex flex-wrap items-center gap-x-2 text-sm text-muted"><strong className="text-ink">{words.title(angler.title)}</strong> · <Coins n={angler.gold} className="text-gold-ink" /></span>
         </div>
+        <FlyCallout notify={notify} />
         {scene ? <Scene sceneKey={scene} alt={t.sceneAlt(angler.alias, here ? words.water(here.id) : '')} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
         <div className="flex flex-col gap-1">
@@ -103,7 +109,11 @@ function DockPage() {
             <Meter label={t.logbook} value={angler.speciesLogged} max={angler.nextTitle?.species ?? angler.speciesTotal} tone="xp" />
             <p className="text-sm text-muted">{angler.nextTitle ? <>{t.nextTitle(angler.speciesLogged, angler.nextTitle.species)[0]}<strong className="text-ink">{words.title(angler.nextTitle.name)}</strong>{t.nextTitle(angler.speciesLogged, angler.nextTitle.species)[1]}</> : <>{t.allTitles(angler.speciesLogged, angler.speciesTotal)}</>}</p>
           </div>
-          <Meter label={words.cooler(angler.cooler.name)} value={angler.cooler.used} max={angler.cooler.capacity} tone="gold" />
+          {/* TRMNL review (2026-11-07): the meter is the cooler, as every other page calls it; the bucket or box it is now is named under it. */}
+          <div className="flex flex-col gap-1">
+            <Meter label={t.cooler} value={angler.cooler.used} max={angler.cooler.capacity} tone="gold" />
+            <p className="text-sm text-muted"><strong className="text-ink">{words.cooler(angler.cooler.name)}</strong> · {t.coolerHolds(angler.cooler.capacity)}</p>
+          </div>
         </div>
         {/* A full cooler releases every new catch, so its warning takes the Sell line's place under the meter. */}
         {coolerFull ? (

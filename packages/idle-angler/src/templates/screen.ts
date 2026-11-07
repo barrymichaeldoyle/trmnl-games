@@ -44,12 +44,16 @@
  * Template v21 (D220): who else fishes the water ("Quill, Bram, Tess and 8 others") under the place, behind a people
  * mark, in every layout but the quadrant; it is the first line to give way where the stories need the room.
  * Template v22: the count alone ("128 other anglers here") where the names would not fit their two lines.
+ * Template v23 (TRMNL review, 2026-11-07): the X's full-view board column starts at the top beside the stories (the
+ * framework centres a column unless told `flex--top`, so a board with no catch panel under it floated mid-column), and
+ * the X's landscape half scene is a 120 stage at 4x (was 168 at 3x): the same 3:1 proportions as the OG's, a third
+ * taller in a slot it filled only a third of, and a little more width for the column beside it.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 22
+export const TEMPLATE_VERSION = 23
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -356,7 +360,7 @@ const full = oriented(
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([144, 4], [144, 4], '')}<div class="grow w--min-0">${board(5, true)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
     <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${goal()}${stories(16, 1, 'label lg:title--small')}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
-      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
+      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left flex--top gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
     </div>
     ${recap()}`, welcome({ art: scene([156, 5], [170, 6]), arrange: 'row', qrOg: 3, qrX: 4 })),
   ready(`${header(2, 3)}
@@ -371,13 +375,13 @@ const full = oriented(
 
 /**
  * Template v15: the attention line no longer replaces the stories in the half and quarter layouts; the stories fill
- * whatever room is left below it. The X's landscape scene here is 3x on a wider stage, which gives the column beside
- * it a third more width, so its stories read as sentences rather than a few words each.
+ * whatever room is left below it. Template v23: the X's landscape scene is the OG's 120 stage at 4x, a third taller
+ * than v15's 168 at 3x and a little narrower, so it no longer reads as a strip across a slot it left two-thirds empty.
  */
 const halfHorizontal = oriented(
   'layout layout--row layout--left layout--stretch-y gap--medium',
   ready(`
-    <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [168, 3])}</div>
+    <div class="no-shrink flex flex--col flex--center-y gap--small">${scene([120, 3], [120, 4])}</div>
     <div class="flex flex--col flex--left gap--xsmall grow w--min-0 h--full">
       <div class="flex flex--row flex--wrap flex--left flex--center-y gap--small stretch-x">${nameLine()}</div>
       ${statusRow()}

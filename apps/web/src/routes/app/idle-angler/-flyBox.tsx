@@ -1,7 +1,7 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { Confetti, useBurst } from '../../../lib/confetti'
@@ -92,5 +92,57 @@ export function FlyBox({ notify, scanned }: { notify: Notify; scanned?: string }
       </ul>
     </Card>
     </div>
+  )
+}
+
+/**
+ * The dock's ask for the week's fly code (TRMNL review, 2026-11-07): the screen shows "Fly code 482 917" in its title
+ * bar and beside its QR code, and the companion's first page said nothing about it, with the box at the foot of the
+ * logbook. While the week's fly is unclaimed on a connected angler, this stands under the dock's title with the same
+ * six-digit form; a fly that lands bursts confetti and stays as a line to the box until the page is left.
+ */
+export function FlyCallout({ notify }: { notify: Notify }) {
+  const { data } = useQuery(convexQuery(api.idleAngler.flies.mine, {}))
+  const box = data as Box | undefined
+  const claim = useIntent(api.idleAngler.flies.claim, { onFeedback: notify })
+  const [code, setCode] = useState('')
+  const [burst, fire] = useBurst()
+  const [landed, setLanded] = useState(false)
+  const t = useT(iaLog)
+  if (!box?.connected || (box.claimedThisWeek && !landed)) return null
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    const ok = await claim.run({ code }, (done: { outcome: 'claimed' | 'already_claimed' | 'invalid_code' }) => {
+      if (done.outcome === 'claimed') {
+        fire()
+        setLanded(true)
+      }
+      return done.outcome === 'invalid_code' ? { error: t.wrongFlyCode } : done.outcome === 'already_claimed' ? t.flyAlready : t.flyAdded
+    })
+    if (ok) setCode('')
+  }
+  return (
+    <section aria-labelledby="fly-callout-title" className="relative flex min-w-0 flex-col gap-3 border-[3px] border-night bg-panel p-3 outline-4 outline-gold sm:px-4">
+      {burst > 0 ? <Confetti key={burst} /> : null}
+      <div className="min-w-0">
+        <p className="hud text-hud-sm whitespace-nowrap text-gold-ink">{t.flyCalloutTag}</p>
+        <h2 id="fly-callout-title" className="mt-0.5 font-display text-lg leading-tight font-bold sm:text-2xl">{landed ? t.flyAdded : t.flyCalloutTitle}</h2>
+      </div>
+      {landed ? (
+        <p className="text-sm"><Link to="/app/idle-angler/logbook" className="underline underline-offset-4">{t.flyBoxLink}</Link></p>
+      ) : (
+        <>
+          <p className="max-w-prose text-sm">{t.flyCalloutHelp}</p>
+          <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
+            <label className="flex flex-col gap-1">
+              <span className="text-sm font-semibold">{t.flyCode}</span>
+              <input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" autoComplete="off" placeholder="482 917" className="min-h-11 w-36 border-2 border-edge bg-ground px-3 text-base tracking-widest" />
+            </label>
+            <Button type="submit" disabled={code.replace(/\s/g, '').length !== 6} pending={claim.pending} busyLabel={t.checking}>{t.addFly}</Button>
+            <Link to="/app/idle-angler/logbook" className="text-sm underline underline-offset-4">{t.flyBoxLink}</Link>
+          </form>
+        </>
+      )}
+    </section>
   )
 }

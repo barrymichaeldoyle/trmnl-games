@@ -32,6 +32,22 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-07',
+    changes: [
+      {
+        title: 'The fly code is asked for on the Dock',
+        body: 'In Idle Angler, while your TRMNL shows this week’s fly code, the Dock now asks for it at the top of the page instead of leaving the fly box at the foot of the Logbook. The Dock’s meter is labelled Cooler, with the bucket or box you own named under it. On a TRMNL X, the half-screen scene is taller and the weekly board starts at the top of its column.',
+        fr: { title: 'Le code mouche est demandé sur le Ponton', body: 'Dans Idle Angler, tant que votre TRMNL affiche le code mouche de la semaine, le Ponton le demande maintenant en haut de la page au lieu de laisser la boîte à mouches au bas du Carnet. La jauge du Ponton s’appelle Glacière, avec le seau ou la boîte que vous possédez nommé dessous. Sur un TRMNL X, la scène du demi-écran est plus haute et le tableau de la semaine commence en haut de sa colonne.' },
+        de: { title: 'Der Fliegencode wird am Steg abgefragt', body: 'In Idle Angler fragt der Steg jetzt oben auf der Seite nach dem Fliegencode der Woche, solange dein TRMNL ihn zeigt, statt die Fliegendose am Ende des Buchs zu lassen. Die Anzeige am Steg heißt Kühlbox, darunter steht der Eimer oder die Box, die du besitzt. Auf einem TRMNL X ist die Szene des halben Bildschirms höher und die Wochentabelle beginnt oben in ihrer Spalte.' },
+        es: { title: 'El código de mosca se pide en el Muelle', body: 'En Idle Angler, mientras tu TRMNL muestra el código de mosca de la semana, el Muelle ahora lo pide en lo alto de la página en vez de dejar la caja de moscas al final del Diario. El medidor del Muelle se llama Nevera, con el cubo o la caja que tienes nombrado debajo. En un TRMNL X, la escena de media pantalla es más alta y la tabla semanal empieza arriba de su columna.' },
+        it: { title: 'Il codice mosca viene chiesto al Pontile', body: 'In Idle Angler, finché il tuo TRMNL mostra il codice mosca della settimana, il Pontile ora lo chiede in cima alla pagina invece di lasciare la scatola delle mosche in fondo al Diario. L’indicatore del Pontile si chiama Frigo, con il secchio o la cassetta che possiedi indicato sotto. Su un TRMNL X la scena del mezzo schermo è più alta e la classifica della settimana parte dall’alto della sua colonna.' },
+        pt: { title: 'O código da mosca é pedido no Píer', body: 'No Idle Angler, enquanto seu TRMNL mostra o código da mosca da semana, o Píer agora pede por ele no topo da página em vez de deixar a caixa de moscas no fim do Diário. O medidor do Píer chama-se Cooler, com o balde ou a caixa que você tem nomeado abaixo. Em um TRMNL X, a cena de meia tela é mais alta e o quadro da semana começa no topo da sua coluna.' },
+        pl: { title: 'Kod muchy pytany na Pomoście', body: 'W Idle Angler, dopóki TRMNL pokazuje kod muchy na ten tydzień, Pomost prosi o niego u góry strony zamiast zostawiać pudełko na muchy na końcu Wpisów. Wskaźnik na Pomoście nazywa się Lodówka, a pod nim widać wiadro lub skrzynkę, które masz. Na TRMNL X scena na pół ekranu jest wyższa, a tygodniowa tabela zaczyna się u góry swojej kolumny.' },
+        nl: { title: 'De vliegcode wordt op de Stek gevraagd', body: 'In Idle Angler vraagt de Stek nu bovenaan de pagina om de vliegcode van deze week zolang je TRMNL die toont, in plaats van de vliegendoos onderaan het Logboek te laten. De meter op de Stek heet Koelbox, met daaronder de emmer of box die je hebt. Op een TRMNL X is de scène op het halve scherm hoger en begint de weektabel bovenaan zijn kolom.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-04',
     changes: [
       {
