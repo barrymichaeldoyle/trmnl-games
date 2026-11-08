@@ -168,13 +168,17 @@ class PaintedCanvas extends Canvas {
 
   // Lines, rods, splashes and fog erase through `set`; sprites and shades through `paint`, whose character wins.
   override set(x: number, y: number, black: boolean): void {
+    // The device's row-wide paper undercoat bridges gaps between tail, fins and body.
+    // Colour sprites already paint their opaque cells; leave scenery visible through the gaps.
+    if (!black && this.region.startsWith('fish:')) return
     super.set(x, y, black)
     this.note(x, y, black ? '#' : 'w')
   }
 
   override paint(x: number, y: number, ch: string): void {
-    if (inked(ch, x, y) === null) return
-    super.paint(x, y, ch)
+    const black = inked(ch, x, y)
+    if (black === null) return
+    super.set(x, y, black)
     this.note(x, y, ch)
   }
 }

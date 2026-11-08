@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Canvas } from '@trmnl-games/engine/art/canvas'
-import { anglerPoses } from '@trmnl-games/idle-angler/art/angler'
-import { FISH_TRAITS } from '@trmnl-games/idle-angler/art/fish'
+import { anglerPoses, ROD_HAND } from '@trmnl-games/idle-angler/art/angler'
+import { FISH_TRAITS, FISH_LARGE, fishSprite } from '@trmnl-games/idle-angler/art/fish'
 import { sceneBase } from '@trmnl-games/idle-angler/art/route'
 import { anglerPlacement, composeScene, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { paintedScene, paintedSceneUri, sceneBands, sceneKeyFromUrl, sceneSteps } from '@trmnl-games/idle-angler/art/sceneColour'
@@ -40,6 +40,26 @@ describe('companion painted scene', () => {
     for (const tone of [fishTones('golden_carp').paper, ...fishTones('golden_carp').shade]) expect(held).toContain(tone)
     expect(sceneBands(holding)).toEqual({ sky: '#a8d8f0', water: '#3f80b8' })
     expect(sceneBands({ ...holding, weather: 'fog', band: 'night' })).toEqual({ sky: '#262a44', water: '#1b2f52' })
+  })
+
+  it('preserves scenery in transparent fish cells while keeping the fish body opaque', () => {
+    for (const band of bands) {
+      const key: SceneKey = { water: 'millpond', band, weather: 'clear', pose: 'holding', fish: null }
+      const backdrop = paintedScene(key)
+      const angler = anglerPlacement(key)
+      const left = angler.left + ROD_HAND.holding[0] + 1
+      const top = angler.top + ROD_HAND.holding[1] - Math.floor(FISH_LARGE.height / 2)
+      for (const fish of Object.keys(FISH_TRAITS)) {
+        const grid = paintedScene({ ...key, fish })
+        const sprite = fishSprite(fish, FISH_LARGE.width, FISH_LARGE.height)
+        sprite.rows.forEach((row, y) => [...row].forEach((ch, x) => {
+          const colour = grid[top + y]![left + x]
+          if (ch === ' ') expect(colour, `${fish}:${band}:${x},${y}`).toBe(backdrop[top + y]![left + x])
+          else expect(colour).not.toBeNull()
+          if (ch === 'w') expect(colour).toBe(fishTones(fish).paper)
+        }))
+      }
+    }
   })
 
   it('tints ripples from their water and steps the bands along whole pixel rows', () => {

@@ -45,6 +45,18 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-11-08',
     changes: [
       {
+        game: 'idle-angler',
+        title: 'Clear water around your catch',
+        body: 'Held fish on the Dock now show the scenery through the gaps around their tails and fins, instead of pale patches.',
+        fr: { title: 'Un décor visible autour de votre prise', body: 'Sur le Ponton, le décor reste désormais visible entre la queue et les nageoires du poisson tenu, à la place des taches pâles.' },
+        de: { title: 'Freie Sicht rund um deinen Fang', body: 'Bei gehaltenen Fischen am Steg bleibt die Landschaft jetzt in den Lücken um Schwanz und Flossen sichtbar, statt heller Flecken.' },
+        es: { title: 'El paisaje alrededor de tu captura', body: 'Los peces que sostienes en el Muelle ahora dejan ver el paisaje en los huecos alrededor de la cola y las aletas, en lugar de manchas claras.' },
+        it: { title: 'Il paesaggio intorno alla tua cattura', body: 'I pesci tenuti sul Pontile ora lasciano vedere il paesaggio negli spazi intorno alla coda e alle pinne, al posto delle macchie chiare.' },
+        pt: { title: 'O cenário ao redor da sua captura', body: 'Os peixes segurados no Píer agora mostram o cenário nos espaços ao redor da cauda e das barbatanas, em vez de manchas claras.' },
+        pl: { title: 'Widok wokół twojej zdobyczy', body: 'Ryby trzymane na Pomoście pokazują teraz scenerię w przerwach wokół ogona i płetw zamiast jasnych plam.' },
+        nl: { title: 'Vrij zicht rond je vangst', body: 'Bij vissen die je op de Stek vasthoudt, blijft het landschap nu zichtbaar in de openingen rond de staart en vinnen, in plaats van bleke vlekken.' },
+      },
+      {
         title: 'The dev log knows which game a change is for',
         body: 'Each change here is marked Desk Crawler or Idle Angler, or left unmarked when it is for everyone, and the page can show one game at a time. The Dock now has the same New since your last visit card as the Hero page, showing only the Idle Angler and site changes, and the Hero page’s card leaves out changes that are only about Idle Angler.',
         fr: { title: 'Le journal sait à quel jeu appartient un changement', body: 'Chaque changement est ici marqué Desk Crawler ou Idle Angler, ou laissé sans marque quand il concerne tout le monde, et la page peut n’afficher qu’un jeu à la fois. Le Ponton a maintenant la même carte Nouveau depuis votre dernière visite que la page Héros, avec seulement les changements d’Idle Angler et du site, et la carte de la page Héros laisse de côté ceux qui ne concernent qu’Idle Angler.' },

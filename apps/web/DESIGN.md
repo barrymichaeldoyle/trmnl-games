@@ -1,6 +1,6 @@
 ---
-name: Desk Crawler Companion
-description: The companion is the game screen; a dark arcade platformer HUD over the hero's own scene, the rest of the page its level select and quest log.
+name: TRMNL Games Companion
+description: A shared dark arcade companion with each game’s own painted pixel world.
 colors:
   arcade-ground: "#15122b"
   window-plum: "#221d44"
@@ -25,28 +25,28 @@ colors:
   cafeteria-coral: "#f08a6b"
 typography:
   display:
-    fontFamily: "Pixelify Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "TG Pixel Digits, Pixelify Sans, Pixelify Sans Fallback, ui-sans-serif, system-ui, sans-serif"
     fontSize: "3rem"
     fontWeight: 700
     lineHeight: 1.25
   headline:
-    fontFamily: "Pixelify Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "TG Pixel Digits, Pixelify Sans, Pixelify Sans Fallback, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.875rem"
     fontWeight: 700
     lineHeight: 1.2
   title:
-    fontFamily: "Pixelify Sans, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "TG Pixel Digits, Pixelify Sans, Pixelify Sans Fallback, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 700
     lineHeight: 1.33
   hud-title:
-    fontFamily: "Press Start 2P, ui-monospace, monospace"
+    fontFamily: "Press Start 2P, Press Start 2P Fallback, ui-monospace, monospace"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: "0.02em"
   hud-label:
-    fontFamily: "Press Start 2P, ui-monospace, monospace"
+    fontFamily: "Press Start 2P, Press Start 2P Fallback, ui-monospace, monospace"
     fontSize: "0.6875rem"
     fontWeight: 400
     lineHeight: 1.6
@@ -177,214 +177,99 @@ components:
     rounded: "{rounded.screen}"
 ---
 
-# Design System: Desk Crawler Companion
+# Design System: TRMNL Games Companion
 
 ## Overview
 
 **Creative North Star: "The Game Screen"**
 
-The companion is not a dashboard about a game; it is the game's own screen. The hero page opens on the hero's real scene, the same 1-bit art the TRMNL draws, multiplied over its biome's colour bands so the ink stays crisp and the paper takes the colour, with a platformer HUD laid over it: a party box (portrait, half-heart health, XP bar, ATK and DEF), a coin counter and a next-adventure timer, and a cream dialogue strip saying what is happening. Everything below is the level select and quest log around that screen: commands, a three-tile world map, the "While you were away" tally, the TRMNL preview, a badge-coded quest log and records.
+The companion belongs to the games themselves: a shared dark arcade shell, with each game's own painted pixel world. Desk Crawler leads with the hero's scene and HUD; Idle Angler leads with the water, weather, angler and newest catch. Public pages are a game-select experience, while help and account pages keep the same vocabulary with less visual density.
 
-The ground is a dark arcade screen. Panels sit one step lighter inside a hard 3px black outline. Game colours mean one thing everywhere: hearts red, XP green, coins gold, travel sky, rare violet. Arcade lettering (Press Start 2P) is reserved for the HUD voice: labels, nav, counters, buttons and the dialogue line, always small and uppercase. Pixelify Sans titles the page and its sections; the system sans carries every sentence so reading stays fast. The world is dark only.
-
-The TRMNL is the one monochrome object. It sits in a plum bezel with a white e-ink screen showing the device's own framework templates; the companion's colour stops at its edge. Motion is scarce and stepped: the dialogue arrow's two-step bob, the e-ink refresh flash, sheets and notices stepping into place in four frames, and one-shot gains (the coin hopping when gold arrives, a to-do checkbox hopping when ticked off) in four steps.
+The current implementation is the authority for extraction: src/styles.css, src/lib/ui.tsx, the game route folders and packages' art modules. This record was refreshed on 2026-11-08; it preserves the established world rather than introducing a redesign.
 
 **Key Characteristics:**
-- Dark arcade ground, plum windows in 3px night outlines, cream text; dark theme only.
-- The hero's scene leads, in colour, under a platformer HUD and a cream dialogue strip.
-- Hearts red, XP green, coins gold, travel sky, rare violet; never colour alone.
-- Press Start 2P for the HUD voice at two small steps; Pixelify Sans for titles; system sans for reading.
-- Gold primary buttons with a darker bottom lip; only buttons look pressable, and a choice the player cannot take yet is text, not a button (D156).
-- Square everything; only the TRMNL bezel and screen curve.
-- Pixel parts drawn as crisp SVG cell grids; pixel art rendered pixelated at integer scale.
+- Dark plum ground, lighter plum windows, hard night outlines and cream text.
+- Gold actions and current choices; semantic stat colors accompanied by labels, glyphs or shapes.
+- Pixel display titles, small arcade controls and system sans for reading.
+- Square interface controls; curved TRMNL hardware frames.
+- Shared game composition painted in color in the companion; the actual device preview keeps its own TRMNL rendering.
 
 ## Colors
 
-An arcade palette: a dark plum-black screen, one lighter window step, cream lettering, and five game colours that each carry one meaning.
+The frontmatter records the existing palette. Coin Gold marks primary actions, currency and the current choice. Heart Red and its ink tone mark health, harm and errors; XP Green marks progression and recovery. Travel Sky and Rare Violet retain their game meanings, with brighter ink variants for text on dark surfaces.
 
-### Primary
-- **Coin Gold**: the primary action fill, coins and gold earned, levels, the current-place marks (pixel cursor arrow, select chevron, current world tile outline, own leaderboard row outline, the away tally's frame), the focus ring, text selection and form accent colour. Coin Gold Hi is the primary button's hover step; Coin Gold Lo is the primary button's bottom lip and the coin's shaded centre.
+Arcade Ground fills the page; Window Plum raises panels by tone; Raised Plum separates rows and selected cells; Arcade Night outlines the composition. Cream is primary text; Muted Lilac and Faint Lilac serve secondary and unavailable information. Screen White belongs to device previews and authored art, not general page surfaces.
 
-### Secondary
-- **Heart Red**: heart fills, the danger button edge and hover fill, the destructive-disclosure rule. Heart Red Ink is its text tone and the combat and knock-out badge fill: HP changes, losses against equipped gear, rank drops, errors. A piece's own attack figure stays in cream; only a comparison is coloured.
-- **XP Green**: the XP bar fill, XP and HP-gain text, rest and revive badges, upgrades, uncommon rarity, rank gains, the countdown figure. It reads as its own ink on the dark ground.
+**The One Meaning Rule.** Reuse established semantic colors; do not give the same stat a different meaning on another page.
 
-### Tertiary
-- **Travel Sky**: the Server Room band and world tile. Travel Sky Ink is the travel badge.
-- **Rare Violet**: rare things. Rare Violet Ink names rare gear, counts potions and items found, and fills the trap badge.
+**The Never Colour Alone Rule.** Pair color with text, signs, glyphs or shape. Preserve that information in every language.
 
-### Neutral
-- **Arcade Ground**: the page, and the opaque fill behind sticky day headers.
-- **Window Plum**: every window panel and the locked world tile.
-- **Raised Plum**: the HUD nav's bottom bar, the pressed segmented cell, empty heart halves, the XP-meter outline, hairline row rules and dashed ledger rules.
-- **Arcade Night**: outlines (windows, game screen, HUD boxes, badges, world-number chips), the HUD nav fill, the away tally fill, and text on gold, cream and biome tiles.
-- **Cream**: all text on the dark ground, control edges, the portrait frame and XP-bar edge, the dialogue strip fill.
-- **Muted Lilac / Faint Lilac**: secondary text and inactive nav; locked, disabled and zero values.
-- **Bezel Plum**: the TRMNL bezel, and the detail line inside the cream dialogue strip.
-- **Screen White**: the e-ink screen inside the bezel; nowhere else.
-
-### Biome Bands
-Each biome's game screen is four bands (ceiling, upper wall, wall, floor in an 18 / 14 / 40 / 28% grid), and its world-map tile wears the upper-wall band: Office Cubicles in carpet tan (Cubicle Tan, bands #e7b96f, #f3d394, #fbe9c2, #c98f5a), Server Room in status-LED blue (Travel Sky, bands #5d8fd6, #78a9e4, #9fd0f0, #ffd166), Cafeteria Depths in ketchup coral (Cafeteria Coral, bands #f08a6b, #f9b394, #ffd9c2, #d9534f), the Archive in old-paper buff (bands #b8956a, #d1b58c, #efe1c2, #8a6a44) and the Parking Garage in concrete grey (bands #6b7280, #8a93a3, #b8c0cc, #4b5563), both since content v16 (D133). The floor band carries a 6px night rule at 25% opacity.
-
-### Named Rules
-**The One Meaning Rule.** Each game colour means one stat everywhere: red is health and harm, green is XP and recovery, gold is coins and the current choice, sky is travel and defence, violet is rare. A new surface reuses these meanings; it does not invent a sixth.
-
-**The Never Colour Alone Rule.** Every coloured mark also carries a glyph, a sign, a label or a shape: log kinds sit in glyph badges, changes carry their sign and unit, rarity has a gem whose facets grow, biomes carry their name and number, hearts fill by half-heart shape.
-
-**The Ink-On-Dark Rule.** Text on the dark ground uses a stat's ink tone (heart-red-ink, travel-sky-ink, rare-violet-ink); the raw fill is for bars, hearts, tiles and button fills.
+Game scenery uses its own palettes from the art code. Desk Crawler varies by floor, time and occasion. Idle Angler uses species and fly tones, stepped sky and water bands, weather and seasons. These scenery colors do not become new global interface accents.
 
 ## Typography
 
-**Display Font:** Pixelify Sans (self-hosted woff2, 400 to 700, SIL OFL 1.1), falling back to the system sans
-**Body Font:** system UI sans stack
-**Label/Mono Font:** Press Start 2P (self-hosted woff2, 400, SIL OFL 1.1), the HUD voice
+Display titles use the actual --font-display stack: TG Pixel Digits, Pixelify Sans, Pixelify Sans Fallback, then system sans. TG Pixel Digits keeps numerals legible; Pixelify is self-hosted with Latin and Latin Extended support. The display class disables ligatures and uses the font variation setting from styles.css.
 
-**Character:** Press Start 2P is the game talking: small, uppercase, on an 8px grid. Pixelify Sans is the level-select signage over each section. The system sans is the owner reading.
+Press Start 2P with its measured fallback is the HUD/control voice. HUD labels use the observed small control size; larger counters use their route's larger step. Body text, narrative, small labels and metadata use system sans. Only buttons and button-like controls are capitalized; section titles, ordinary labels and sentences retain sentence case (D137).
 
-### Hierarchy
-- **Display** (700, 3rem, 2.25rem below 640px, 1.25): the landing page title only.
-- **Headline** (700, 1.875rem, 1.2): page titles (Your bag, Rankings, Settings) and hero-page section titles (World map, On your TRMNL, Quest log, Records).
-- **Title** (700, 1.5rem, 1.33): window titles and world-tile biome names.
-- **HUD Title** (Press Start 2P, 0.875rem, 1.6, uppercase): the hero's name and level, the away tally heading, its figures, the countdown and top-three ranks.
-- **HUD Label** (Press Start 2P, 0.6875rem): buttons, nav from 640px, the dialogue sentence, world-number chips.
-- **Small Label** (`label-px`: system sans, 0.75rem, bold, uppercase, tabular figures): stat labels in ledgers, HP/XP/ATK figures in the party box, gain chips, log filters, day headers. Both pixel faces blur their figures below 16px (Pixelify's 2 reads as 8), so small print never uses them.
-- **Body** (400, 1rem, 1.5): sentences, log narrative, item and player names (semibold for names). Long prose holds to the reading measure.
-- **Body Small** (400, 0.875rem): notes under commands, captions, secondary lines.
-- **Meta** (600, 0.75rem, tabular): log timestamps (regular weight) and change chips.
-
-### Named Rules
-**The Two Steps Rule.** Press Start 2P runs only at 0.6875rem for nav and buttons and 0.875rem or larger for HUD headings and counters; it is always uppercase and never sets a sentence the owner must read at length. Smaller labels and figures use Small Label.
-
-**The Ledger Figure Rule.** Every number that can change sits in tabular numerals so counts and countdowns do not jitter.
+Use tabular numerals for changing figures. Preserve self-hosted font subsets and measured fallback metrics to avoid layout shifts. Do not put long reading passages in arcade lettering.
 
 ## Layout
 
-The HUD nav is sticky at the top, 52px tall, its tabs equal-width. The hero page uses a 72rem container; Bag, Rankings and Settings use 48rem; the landing page 42rem. Pages pad 16px at the sides and stack sections 32px apart.
+Use the existing route's container and responsive grid rather than imposing one page composition on every game. Shared controls have at least 44px standalone hit areas. Windows use the current spacing scale; small phones reduce button horizontal padding before the 375px step. Reading pages constrain line length; companion pages organize commands, state and history around the game's scene.
 
-The hero page reads top to bottom: the full-width game screen, the command row and its note, the world map (three tiles in a row from 640px, joined by dashed gold connectors), then from 1024px two columns (1fr and 1.1fr, 32px gap): the away tally and TRMNL preview on the left, the quest log and records on the right. On phones the HUD boxes stack above the scene so they never cover the art, and the scene crops at 4x around the hero and foe; wide screens draw it at 7x between full-width bands.
+Desk Crawler's Hero page leads with the scene and HUD, available commands, reachable floors, progress and stories. Only the next locked floor appears in the map; later destinations belong in the career view. Idle Angler's Dock leads with the waterside scene, conditions, progress, bait, waters and stories, with fly-code discovery and the game's What's new card. The front page gives the two listed games equal standing and shows signed-in players their own games first.
 
-Windows pad 12px top, 16px sides and bottom (20px sides from 640px), 12px from title to content. Ledgers go two columns from 480px with 24px between, rows divided by 2px dashed raised-plum rules. Every standalone target is at least 44px. Day headers stick under the nav on an opaque ground. The Bag's sale bar is a window pinned to the bottom with safe-area padding while gear is being selected, and the Bag's sheets and notice are pinned the same way.
+Surface briefs own page-specific sequencing. Their targets are relative to apps/web, not the repository root.
 
 ## Elevation & Depth
 
-Flat, with depth drawn as an 8-bit screen draws it: a panel sits above the ground because it is a step lighter inside a hard night outline; HUD boxes float over the scene as translucent night (85%) inside the same outline; the current thing is marked by a gold outline, not lift. Sticky elements separate by opaque fills and edges, never blur.
+Depth is drawn through tone and hard outlines rather than diffuse shadows or blur. Windows sit one plum step above the ground in night borders. The primary button has an inset darker bottom lip; pressing it moves the key down and halves the lip. Current choices use gold marks and outlines.
 
-### Shadow Vocabulary
-- **Button lip** (`box-shadow: inset 0 -4px 0 var(--color-gold-lo)`): the primary button's darker bottom row, pixel shading inside the fill. Removed when disabled.
-
-### Named Rules
-**The Drawn Depth Rule.** If something must sit above something else, give it a lighter fill and a night outline, or a gold outline when it is the current choice. Never a blur, glow or drop shadow.
+Motion comes from the existing stylesheet: stepped sheet and notice entrances, one-shot coin and checkbox feedback, the dialogue arrow and e-ink refresh. Existing goal-ready and notification states have their own animations. Respect reduced motion; do not turn every panel into a continuously animated object.
 
 ## Shapes
 
-Everything the owner touches is square: windows, buttons, tabs, inputs, tiles, badges, bars. Outlines are hard: 3px for windows, buttons and HUD boxes, 4px for the game screen and the away tally, 2px for inputs, segmented groups and badges. Only empty bag slots and unearned collection slots wear a dashed edge; disabled buttons are flat raised-plum blocks (D156). The only curves describe the TRMNL hardware.
+Interface controls, windows, tabs, badges, bars and input fields remain square. Standard windows and buttons have 3px edges; inputs and segmented controls have 2px edges; scene frames use the existing game-specific night outline. Rounded corners describe TRMNL hardware and its screen.
 
-All glyphs, hearts, coins, gems, cursor arrows, chevrons and checks are SVG cell grids with crisp edges; pixel art renders pixelated at integer scale.
-
-### Named Rules
-**The Only Curve Is the Device Rule.** Rounded corners belong to the TRMNL bezel and its screen. Nothing interactive is rounded.
-
-**The One Look For Pressable Rule (D156).** Only buttons wear a cream edge or a gold fill. A choice the player cannot take yet is not drawn as a button: an unaffordable purchase shows its price and the gold still to go, and a command with nothing to act on (Drink potion at full health) is left out. A button disabled for a moment (busy, offline, a form not yet valid) turns into a flat raised-plum block with faint text, no edge and no lip, so it never reads as a choice. Containers and rows never take a button's colours: a world tile's colour lives in its number chip, and log lines are ruled rows.
+Use authored crisp pixel glyphs and sprites, with whole-number pixel scales where the renderer supports them. Spaces in a sprite are transparent; paper and shaded body cells are opaque. The companion must preserve scenery through gaps around held fish tails and fins.
 
 ## Components
 
 ### Buttons
-Chunky arcade keys in the HUD voice.
-- **Shape:** square, 3px edge, 44px minimum height, 16px by 8px padding, HUD Label type.
-- **Primary:** gold fill, night text and edge, gold-lo bottom lip; hover to gold-hi. The decision the game is asking for (Drink potion when hurt, Travel, Claim find, Resume, an upgrade's Equip). Links styled as the primary action reuse it.
-- **Secondary:** transparent with a cream edge and cream text; hover inverts to cream fill, night text.
-- **Quiet:** muted body-type text underlined at 4px offset; hover to cream. For continuations (load more, unequip, clear selection).
-- **Danger:** heart-red edge, heart-red-ink text; hover fills heart red with night text. Destructive confirmations only.
-- **Disabled:** raised-plum fill and edge, faint text, no lip, not-allowed cursor; also applied while offline. A quiet button only fades its text. Never used for a purchase the player cannot afford, which shows its price as text instead.
-- **Pressed:** the primary key sinks two pixels into its lip (the lip halves); secondary and danger invert as on hover; quiet brightens. A tap answers before the server does.
-- **Busy:** the label becomes a present-participle line ("Travelling…"); the shape holds.
-- **Focus:** global 2px gold outline, 2px offset.
 
-### Cards / Containers (Window)
-- **Corner Style:** square.
-- **Background:** Window Plum.
-- **Shadow Strategy:** none; see Elevation & Depth.
-- **Border:** 3px Arcade Night.
-- **Internal Padding:** 12px top, 16px sides and bottom; 20px sides from 640px. A Pixelify title opens a titled window.
+Primary buttons are gold with night text and an inset lip; hover brightens the fill and a press sinks the key. Secondary buttons have cream edges and invert on interaction. Danger uses health/error tones. Quiet continuations use semibold underlined body text. Keyboard focus is the global gold outline.
 
-### Inputs / Fields
-- **Text input and select:** square, 2px cream edge, ground fill, 44px tall, 12px side padding; selects carry a 5x3 gold pixel chevron.
-- **Checkbox:** a night box with a 2px cream edge that fills gold with a night pixel tick; dashed when disabled; in a 44px hit area.
-- **Disclosure:** a currentColor pixel triangle that turns down when open.
-- **Error:** a semibold small sentence in heart-red-ink with role alert.
+Unavailable purchases show their price and remaining requirement as text. Temporarily disabled controls become flat raised-plum blocks with faint text and no lip. Busy controls stay focusable, expose aria-busy and aria-disabled, suppress repeated activation, and reserve both labels in one grid cell so their width does not jump (D219).
 
-### Glyphs
-- 8x8 cell grids drawn at integer scale (16px, 24px for titles, 8px for rank arrows) in `currentColor`. Log-kind glyphs live in `packages/desk-crawler/src/art/glyphs.ts` because the device draws them; companion-only glyphs (nav, records, buttons, achievement families) live in `apps/web/src/lib/glyphs.tsx` and never reach a template.
-- **Section titles** (`SectionTitle`, and `Card`'s `icon`) lead with a 24px glyph in the stat ink they are about (to-do green, raids violet, stance and world map sky, everything else gold), so the long Hero page has landmarks.
-- **Buttons** may lead with a 16px glyph (`Button`'s `icon`) when it names the action at a glance: potion, pause, play, travel, tag for Sell, coin for Buy. Skip it where the label would wrap.
-- **Records** rows lead with their stat's glyph in its ink; **Rankings** mark first place with a crown and second and third with medals beside the gold numerals, and rank changes carry an up or down arrow beside the word.
+### Windows and inputs
 
-### Navigation (HUD Nav)
-- **Style:** sticky night bar with a 4px raised-plum bottom edge; the gold-tile mark and "Desk Crawler" in gold HUD type at left from 640px; four equal tabs (Hero, Bag, Ranks, Settings), muted HUD Micro (HUD Label from 640px). Each tab carries its glyph (hero, bag, trophy, cog) above the label on phones and beside it from 1024px; between 640 and 1024px the label stands alone beside the cursor. The Bag tab carries the slots used as a count badge: night pixel digits on a gold square with a 2px night ring, on the glyph's top-right corner on phones and after the label from 640px.
-- **Active:** gold-ink text with the gold pixel cursor arrow (aria-current); hover to cream.
+Windows use the shared lighter plum fill and hard night border; they are containers, not pressable keys. Text inputs and selects use ground fill, cream edges and a 44px control height. Selects and disclosures use pixel chevrons. Checkboxes use the authored pixel tick; errors are readable text with alert semantics.
 
-### Segmented Tabs and Text Filters
-- **Segmented tabs:** square cells inside a 2px cream edge, divided by 2px edges; the pressed cell fills Raised Plum with gold text and the cursor arrow. Ranking period, device layout.
-- **Text filters:** muted HUD Micro (or body small for the device picker); the pressed option goes gold-ink with the cursor arrow. Device picker.
-- **Badge filters:** the quest log's filters are 44px square badges holding the glyph of the lines they keep ("All" in Small Label), so all seven fit one phone row. Unpressed: window plum, raised edge, muted glyph. Pressed: the kind's badge fill, night glyph, gold outline; the chosen filter's name reads beneath in Small Label.
+### Navigation and filters
 
-### Game Screen (signature)
-- **Frame:** 4px night outline; biome bands behind the 1-bit scene in multiply blend.
-- **HUD boxes:** night at 85% in 3px night outlines. Party box: 52px portrait in a 3px cream frame; name and gold level; ten 18x16 pixel hearts filling by half-heart; XP bar (10px, 2px cream edge, green fill); ATK and DEF. Opposite: coin counter in gold and the next-adventure box with the countdown in XP green.
-- **Dialogue strip:** cream with a 4px night top rule, a 16px glyph, the HUD Label sentence, an optional bezel-plum detail line, and a 5x3 night "more" arrow in the corner bobbing 2px in two steps (1.2s), the only idle motion.
+The shared shell provides game-aware navigation with glyphs, readable labels and a gold current-page mark. Desk Crawler's Bag tab counts occupied slots whenever nonempty (D221). Segmented controls use pressed raised-plum cells with gold labels. Text and badge filters follow their existing route variants. Do not copy a fixed four-tab inventory into every game.
 
-### World Map Tile
-- A window tile, 16px padding; the world-number chip carries its biome band with a night numeral (D156: a filled tile read as a button); biome name in Title type; status line; Travel as the primary button. The current tile gains a 4px gold outline and a gold "You’re here" status; only the next locked floor shows (D157), with a night chip, a faint numeral and muted text ("Opens at level 8"); later floors are listed on the Career page. Tiles join with 4px dashed gold connectors from 640px; on phones each world is one row (chip, name and status, Travel at the right) with no connectors.
+### Game scenes and device previews
 
-### Stance Row
-- The segmented-tab pattern as a radiogroup: three equal cells (Cautious, Balanced, Bold) in a 2px cream edge, the chosen one pressed in Raised Plum with gold text and the cursor arrow; one body-small line beneath names the chosen stance, its blurb and its thresholds.
+The companion paints the device composition in its game's colors. Desk Crawler's current renderer lives with its hero route and art package. Idle Angler's Scene measures its container, composes at a clamped width and uses whole-number 2x, 3x or 4x scales, over stepped sky and water bands. Its PNG is transparent where the scenery bands should show through; individual fish and fly icons use crisp colored SVG cell paths.
 
-### Keepsake Strip
-- A window strip in a 4px gold outline: a 48px night tile with the design, "This week" in HUD Label gold, "Keepsake code ready" in Title type, and Enter code as the primary button; the code form opens beneath a 3px night rule. After a claim the strip names the keepsake and offers Shelf as a secondary button.
+The TRMNL preview remains a separate device frame using actual device layouts and rendering. Keep the monochrome or supported device palette inside that frame; do not apply companion scenery treatment to the device screenshot.
 
-### While You Were Away Tally
-- Night fill in a 4px gold frame: HUD Title heading in gold, the visit time beside it, then a dashed-rule ledger of HUD Micro labels and HUD Title figures in their stat ink (zero in faint). A 3px gold-edged HUD line counts gains during the visit.
+### Ledgers and stories
 
-### Quest Log Row
-- A row ruled off by a 2px raised-plum line (D156: boxed lines read as buttons): a 32px badge (2px night edge) filled with its kind's game colour holding a night glyph, the narrative sentence beside it (bold names), then the timestamp and change chips in stat inks. Day headers are HUD Micro, sticky. Companion commands (all `system` lines) take their command's glyph (coin for a sale or purchase, sword for equipping, play, pause, door for the first shift, potion, bag for a claimed find, shield for stance). Achievements earned one after another in the same minute fold into one line ("3 achievements: A, B and C"). The log shows twelve lines, then Show more adds twenty.
+Use ruled rows and tabular figures for histories, resources and comparisons. Glyphs identify story kinds; signed changes carry units and semantic ink. Shared section titles provide clear landmarks. Avoid making every row look like a button or wrapping every fact in a separate window.
 
-### Achievement Badge
-- The Achievements page (D126) opens on a summary window: a gold Found meter (families started of all families), the tiers earned beneath it, then a ledger of Closest (the next tier nearest to coming, with its count and, for a monster, its floor), Rarest and Latest, each name opening its sheet. A day after the last unlock a Hint row may follow (D127): the quest glyph in gold, one semibold sentence naming a companion action, a small line saying which "?" it fills or the tier count, and a quiet link to the page that does it. Shelves follow on the ground, each a Pixelify title with its glyph (Lifetime and Set pieces gold, the three floors' monsters in heart-red-ink, Decisions gold, Raids violet) and a "2 of 4" count.
-- Badges sit in an auto-filling grid of 6rem minimum cells (three across on a phone, two at 320px, seven at 48rem): a window tile whose 3px edge takes the rarity band as a bag slot takes gear rarity (common night, uncommon XP green, rare violet, legendary gold), a 40px gold badge holding the family's glyph in night with its tier numeral on a night tab, the name in two lines of small semibold text, one 8px square per tier (gold earned, hollow ahead), a thin gold bar with a compact count toward the next tier, and the band's word in its ink. Tapping opens a sheet with the blurb, tier pips, rarity, earned date and a gold meter toward the next tier.
-- Unearned families stand on their shelf after the earned ones as dashed "?" slots with the first tier's rarity band, or "Not yet"; never a name, and a legendary first tier never shows its band.
+### What's new
 
-### Bag Slot
-- A square night cell in a 3px edge coloured by rarity (common on Raised Plum, uncommon XP green, rare violet, epic gold), holding the piece's 16x16 icon at 3x (ink in cream, white cells in Raised Plum) with its gem at 2x in the bottom-left corner. Top-right: a green pixel arrow up for an upgrade, a red (HP ink) arrow down for a piece weaker than the equipped one, or a muted `L12` level lock on a night tab; top-left in a sale: a 2px cream checkbox that fills gold with a night tick, the edge going gold. A held find wears a gold dashed edge; an empty slot is a dithered cell in a dashed Raised Plum edge; a busy slot dims its icon under a dither. Slots sit in an auto-filling grid of 4.5rem minimum cells (four across on a phone).
-
-### Sheet
-- A native modal dialog: a window pinned to the bottom of a phone with safe-area padding, centred at 28rem from 640px, over a 75% night backdrop. Title in Pixelify Sans receives focus; actions in a two-column button grid; Escape, the backdrop and Close dismiss it. Errors raised inside it show inside it.
-
-### Notice
-- The latest action's outcome in a pinned window above the phone's bottom edge (lifted above the sale bar): a semibold small sentence in XP green or heart-red-ink with a dismiss cross. Successes clear after five seconds; errors stay. Every page's commands report here (Hero, Bag, Settings); only a form's validation stays beside its input, and an error raised inside an open sheet shows in the sheet.
-
-### Device Bezel
-- Bezel Plum, 1.4rem corners, fluid padding; white 0.375rem screen at the device's aspect ratio; the scene stands in until the live template render fades in (200ms), then a six-step black-then-white flash over 420ms when a new screen loads.
+The public dev log labels game-specific changes and can filter by game. The Hero and Dock cards show their own game's changes plus shared changes, using the same account dismissal mark (D225). Keep messages player-facing and localized.
 
 ## Do's and Don'ts
 
-### Do:
-- **Do** lead with the hero's scene in colour under the HUD; it is the companion's first viewport.
-- **Do** put grouped content in a window: Window Plum inside a 3px Arcade Night outline.
-- **Do** keep each game colour to its one meaning and pair it with a glyph, sign, label or shape.
-- **Do** set text on the dark ground in the stat's ink tone, not the raw fill.
-- **Do** set HUD labels, nav, counters and buttons in Press Start 2P at its small steps, uppercase.
-- **Do** mark the current choice with the gold pixel cursor arrow or a gold outline.
-- **Do** keep every control square, hard-edged and at least 44px tall.
-- **Do** draw icons, hearts, arrows, checks and chevrons as crisp SVG cell grids, and render pixel art pixelated at integer scale.
-- **Do** show a price the player cannot pay yet as text, and the one feature that opens next as a quiet "Coming up" line (D157); keep the rest of what is locked on the Career page.
-- **Don't** draw a locked feature or an unaffordable purchase as a card or a button (D156, D157).
-- **Do** keep the device preview 1-bit inside its plum bezel.
-
-### Don't:
-- **Don't** add a light theme; the arcade screen is dark only.
-- **Don't** set sentences or long prose in Press Start 2P, or labels and buttons in Pixelify Sans.
-- **Don't** round buttons, inputs, tabs, windows, tiles or badges; only the bezel and its screen curve.
-- **Don't** use drop shadows, blurs or glows for depth; the primary button's inset lip is the only shading.
-- **Don't** convey state by colour alone.
-- **Don't** fall back to the 1-bit logbook or the navy menu-window recolour; this world replaced both.
-- **Don't** add idle motion beyond the dialogue arrow bob and the e-ink refresh; entrances are four stepped frames at most.
+- **Do** preserve the established arcade shell and each game's own pixel world.
+- **Do** use the current code for exact measurements, responsive behavior and state semantics.
+- **Do** keep reading text legible, focus visible and controls usable on phones.
+- **Do** preserve transparent sprite gaps and opaque body pixels.
+- **Don't** replace the interface with rounded dashboard cards, generic icons or blurred glass.
+- **Don't** apply the obsolete monochrome companion direction or require the original three-floor MVP layout.
+- **Don't** infer launch status from implementation; use the platform registry and confirmed decisions.

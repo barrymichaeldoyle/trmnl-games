@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-06T18:00:00Z",
-  "title": "Design System: Desk Crawler Companion",
+  "generatedAt": "2026-11-08T15:44:38.535614+00:00",
+  "title": "Design System: TRMNL Games Companion",
   "extensions": {
     "colorMeta": {
       "arcade-ground": {
@@ -343,7 +343,7 @@
       },
       "small-label": {
         "displayName": "Small Label",
-        "purpose": "label-px: ledger labels, party-box figures, gain chips, log filters, day headers (system sans, bold, tabular caps)."
+        "purpose": "Sentence-case system sans labels and figures; bold and tabular. Capitalization is reserved for button-like controls."
       },
       "body": {
         "displayName": "Body",
@@ -369,7 +369,7 @@
       {
         "name": "menu-bob",
         "value": "1.2s infinite; 0-49% translateY(0), 50-100% translateY(2px)",
-        "purpose": "The dialogue strip's \"more\" arrow: the only idle motion."
+        "purpose": "Dialogue arrow bob; other existing status indicators retain their own authored animations."
       },
       {
         "name": "eink-refresh",
@@ -385,6 +385,11 @@
         "name": "reduced-motion",
         "value": "animation and transition 0.01ms",
         "purpose": "All motion effectively instant under prefers-reduced-motion."
+      },
+      {
+        "name": "coin-hop",
+        "value": "320ms steps(4, end)",
+        "purpose": "One-shot gain feedback; see styles.css."
       }
     ],
     "breakpoints": [
@@ -409,7 +414,7 @@
       "refersTo": "button-primary",
       "description": "The decision the game is asking for: gold key with a darker bottom lip.",
       "html": "<div class=\"ds-root ds-stage\"><button class=\"ds-btn ds-btn-primary\">Drink potion (4)</button><button class=\"ds-btn ds-btn-primary\" disabled>Travel</button></div>",
-      "css": ":host,.ds-root{--ground:#15122b;--ink:#f4f1ff;--muted:#b9b2e6;--faint:#8d86c0;--edge:#f4f1ff;--window:#221d44;--night:#0c0a1c;--gold:#ffd166;--gold-hi:#ffe08f;--gold-lo:#b07a00;--raised:#2c2650;--hp:#e5483b;--hp-ink:#ff7b72;--xp:#4fd18b;} .ds-stage{background:var(--ground);color:var(--ink);padding:16px;font-family:ui-sans-serif,system-ui,sans-serif;display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ds-btn{font-family:'Press Start 2P',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.02em;line-height:1.6;font-size:.6875rem;min-height:44px;padding:8px 16px;border-radius:0;cursor:pointer;} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px} .ds-btn:disabled{border:3px dashed var(--faint);background:transparent;color:var(--muted);box-shadow:none;cursor:not-allowed} .ds-btn-primary{background:var(--gold);color:var(--night);border:3px solid var(--night);box-shadow:inset 0 -4px 0 var(--gold-lo)} .ds-btn-primary:hover:not(:disabled){background:var(--gold-hi)}"
+      "css": ":host,.ds-root{--ground:#15122b;--ink:#f4f1ff;--muted:#b9b2e6;--faint:#8d86c0;--edge:#f4f1ff;--window:#221d44;--night:#0c0a1c;--gold:#ffd166;--gold-hi:#ffe08f;--gold-lo:#b07a00;--raised:#2c2650;--hp:#e5483b;--hp-ink:#ff7b72;--xp:#4fd18b;} .ds-stage{background:var(--ground);color:var(--ink);padding:16px;font-family:ui-sans-serif,system-ui,sans-serif;display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ds-btn{font-family:'Press Start 2P',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.02em;line-height:1.6;font-size:.6875rem;min-height:44px;padding:8px 16px;border-radius:0;cursor:pointer;} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px} .ds-btn:disabled{border:3px dashed var(--faint);background:transparent;color:var(--muted);box-shadow:none;cursor:not-allowed} .ds-btn-primary{background:var(--gold);color:var(--night);border:3px solid var(--night);box-shadow:inset 0 -4px 0 var(--gold-lo)} .ds-btn-primary:hover:not(:disabled){background:var(--gold-hi)} .ds-btn:disabled{border-color:var(--raised);background:var(--raised);color:var(--faint);box-shadow:none;cursor:not-allowed} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
     },
     {
       "name": "Secondary Button",
@@ -417,7 +422,7 @@
       "refersTo": "button-secondary",
       "description": "Routine actions: cream edge, inverts to cream on hover.",
       "html": "<div class=\"ds-root ds-stage\"><button class=\"ds-btn ds-btn-secondary\">Pause adventures</button></div>",
-      "css": ":host,.ds-root{--ground:#15122b;--ink:#f4f1ff;--muted:#b9b2e6;--faint:#8d86c0;--edge:#f4f1ff;--window:#221d44;--night:#0c0a1c;--gold:#ffd166;--gold-hi:#ffe08f;--gold-lo:#b07a00;--raised:#2c2650;--hp:#e5483b;--hp-ink:#ff7b72;--xp:#4fd18b;} .ds-stage{background:var(--ground);color:var(--ink);padding:16px;font-family:ui-sans-serif,system-ui,sans-serif;display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ds-btn{font-family:'Press Start 2P',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.02em;line-height:1.6;font-size:.6875rem;min-height:44px;padding:8px 16px;border-radius:0;cursor:pointer;} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px} .ds-btn:disabled{border:3px dashed var(--faint);background:transparent;color:var(--muted);box-shadow:none;cursor:not-allowed} .ds-btn-secondary{background:transparent;color:var(--ink);border:3px solid var(--edge)} .ds-btn-secondary:hover{background:var(--ink);color:var(--night)}"
+      "css": ":host,.ds-root{--ground:#15122b;--ink:#f4f1ff;--muted:#b9b2e6;--faint:#8d86c0;--edge:#f4f1ff;--window:#221d44;--night:#0c0a1c;--gold:#ffd166;--gold-hi:#ffe08f;--gold-lo:#b07a00;--raised:#2c2650;--hp:#e5483b;--hp-ink:#ff7b72;--xp:#4fd18b;} .ds-stage{background:var(--ground);color:var(--ink);padding:16px;font-family:ui-sans-serif,system-ui,sans-serif;display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ds-btn{font-family:'Press Start 2P',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.02em;line-height:1.6;font-size:.6875rem;min-height:44px;padding:8px 16px;border-radius:0;cursor:pointer;} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px} .ds-btn:disabled{border:3px dashed var(--faint);background:transparent;color:var(--muted);box-shadow:none;cursor:not-allowed} .ds-btn-secondary{background:transparent;color:var(--ink);border:3px solid var(--edge)} .ds-btn-secondary:hover{background:var(--ink);color:var(--night)} .ds-btn:disabled{border-color:var(--raised);background:var(--raised);color:var(--faint);box-shadow:none;cursor:not-allowed} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
     },
     {
       "name": "Danger Button",
@@ -425,7 +430,7 @@
       "refersTo": "button-danger",
       "description": "Destructive confirmations only.",
       "html": "<div class=\"ds-root ds-stage\"><button class=\"ds-btn ds-btn-danger\">Delete progress</button></div>",
-      "css": ":host,.ds-root{--ground:#15122b;--ink:#f4f1ff;--muted:#b9b2e6;--faint:#8d86c0;--edge:#f4f1ff;--window:#221d44;--night:#0c0a1c;--gold:#ffd166;--gold-hi:#ffe08f;--gold-lo:#b07a00;--raised:#2c2650;--hp:#e5483b;--hp-ink:#ff7b72;--xp:#4fd18b;} .ds-stage{background:var(--ground);color:var(--ink);padding:16px;font-family:ui-sans-serif,system-ui,sans-serif;display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ds-btn{font-family:'Press Start 2P',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.02em;line-height:1.6;font-size:.6875rem;min-height:44px;padding:8px 16px;border-radius:0;cursor:pointer;} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px} .ds-btn:disabled{border:3px dashed var(--faint);background:transparent;color:var(--muted);box-shadow:none;cursor:not-allowed} .ds-btn-danger{background:transparent;color:var(--hp-ink);border:3px solid var(--hp)} .ds-btn-danger:hover{background:var(--hp);color:var(--night)}"
+      "css": ":host,.ds-root{--ground:#15122b;--ink:#f4f1ff;--muted:#b9b2e6;--faint:#8d86c0;--edge:#f4f1ff;--window:#221d44;--night:#0c0a1c;--gold:#ffd166;--gold-hi:#ffe08f;--gold-lo:#b07a00;--raised:#2c2650;--hp:#e5483b;--hp-ink:#ff7b72;--xp:#4fd18b;} .ds-stage{background:var(--ground);color:var(--ink);padding:16px;font-family:ui-sans-serif,system-ui,sans-serif;display:flex;gap:8px;flex-wrap:wrap;align-items:center} .ds-btn{font-family:'Press Start 2P',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.02em;line-height:1.6;font-size:.6875rem;min-height:44px;padding:8px 16px;border-radius:0;cursor:pointer;} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px} .ds-btn:disabled{border:3px dashed var(--faint);background:transparent;color:var(--muted);box-shadow:none;cursor:not-allowed} .ds-btn-danger{background:transparent;color:var(--hp-ink);border:3px solid var(--hp)} .ds-btn-danger:hover{background:var(--hp);color:var(--night)} .ds-btn:disabled{border-color:var(--raised);background:var(--raised);color:var(--faint);box-shadow:none;cursor:not-allowed} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}"
     },
     {
       "name": "Window",
@@ -470,78 +475,36 @@
   ],
   "narrative": {
     "northStar": "The Game Screen",
-    "overview": "The companion is not a dashboard about a game; it is the game's own screen. The hero page opens on the hero's real scene, the same 1-bit art the TRMNL draws, multiplied over its biome's colour bands so the ink stays crisp and the paper takes the colour, with a platformer HUD laid over it: a party box (portrait, half-heart health, XP bar, ATK and DEF), a coin counter and a next-adventure timer, and a cream dialogue strip saying what is happening. Everything below is the level select and quest log around that screen: commands, a three-tile world map, the \"While you were away\" tally, the TRMNL preview, a badge-coded quest log and records.\n\nThe ground is a dark arcade screen. Panels sit one step lighter inside a hard 3px black outline. Game colours mean one thing everywhere: hearts red, XP green, coins gold, travel sky, rare violet. Arcade lettering (Press Start 2P) is reserved for the HUD voice: labels, nav, counters, buttons and the dialogue line, always small and uppercase. Pixelify Sans titles the page and its sections; the system sans carries every sentence so reading stays fast. The world is dark only.\n\nThe TRMNL is the one monochrome object. It sits in a plum bezel with a white e-ink screen showing the device's own framework templates; the companion's colour stops at its edge. Motion is scarce and stepped: the dialogue arrow's two-step bob and the e-ink refresh flash.",
+    "overview": "**Creative North Star: \"The Game Screen\"**\n\nThe companion belongs to the games themselves: a shared dark arcade shell, with each game's own painted pixel world. Desk Crawler leads with the hero's scene and HUD; Idle Angler leads with the water, weather, angler and newest catch. Public pages are a game-select experience, while help and account pages keep the same vocabulary with less visual density.\n\nThe current implementation is the authority for extraction: src/styles.css, src/lib/ui.tsx, the game route folders and packages' art modules. This record was refreshed on 2026-11-08; it preserves the established world rather than introducing a redesign.",
     "keyCharacteristics": [
-      "Dark arcade ground, plum windows in 3px night outlines, cream text; dark theme only.",
-      "The hero's scene leads, in colour, under a platformer HUD and a cream dialogue strip.",
-      "Hearts red, XP green, coins gold, travel sky, rare violet; never colour alone.",
-      "Press Start 2P for the HUD voice at two small steps; Pixelify Sans for titles; system sans for reading.",
-      "Gold primary buttons with a darker bottom lip; dashed edges stamp locked and disabled states.",
-      "Square everything; only the TRMNL bezel and screen curve.",
-      "Pixel parts drawn as crisp SVG cell grids; pixel art rendered pixelated at integer scale."
+      "Dark plum ground, lighter plum windows, hard night outlines and cream text.",
+      "Gold actions and current choices; semantic stat colors accompanied by labels, glyphs or shapes.",
+      "Pixel display titles, small arcade controls and system sans for reading.",
+      "Square interface controls; curved TRMNL hardware frames.",
+      "Shared game composition painted in color in the companion; the actual device preview keeps its own TRMNL rendering."
     ],
     "rules": [
       {
-        "name": "The One Meaning Rule",
-        "body": "Each game colour means one stat everywhere: red is health and harm, green is XP and recovery, gold is coins and the current choice, sky is travel and defence, violet is rare. A new surface reuses these meanings; it does not invent a sixth.",
+        "name": "The One Meaning Rule.",
+        "body": "Reuse established semantic colors; do not give the same stat a different meaning on another page.",
         "section": "colors"
       },
       {
-        "name": "The Never Colour Alone Rule",
-        "body": "Every coloured mark also carries a glyph, a sign, a label or a shape: log kinds sit in glyph badges, changes carry their sign and unit, rarity has a gem whose facets grow, biomes carry their name and number, hearts fill by half-heart shape.",
+        "name": "The Never Colour Alone Rule.",
+        "body": "Pair color with text, signs, glyphs or shape. Preserve that information in every language.",
         "section": "colors"
-      },
-      {
-        "name": "The Ink-On-Dark Rule",
-        "body": "Text on the dark ground uses a stat's ink tone (heart-red-ink, travel-sky-ink, rare-violet-ink); the raw fill is for bars, hearts, tiles and button fills.",
-        "section": "colors"
-      },
-      {
-        "name": "The Two Steps Rule",
-        "body": "Press Start 2P runs only at 0.6875rem for nav and buttons and 0.875rem or larger for HUD headings and counters; it is always uppercase and never sets a sentence the owner must read at length. Smaller labels and figures use Small Label.",
-        "section": "typography"
-      },
-      {
-        "name": "The Ledger Figure Rule",
-        "body": "Every number that can change sits in tabular numerals so counts and countdowns do not jitter.",
-        "section": "typography"
-      },
-      {
-        "name": "The Drawn Depth Rule",
-        "body": "If something must sit above something else, give it a lighter fill and a night outline, or a gold outline when it is the current choice. Never a blur, glow or drop shadow.",
-        "section": "elevation"
-      },
-      {
-        "name": "The Only Curve Is the Device Rule",
-        "body": "Rounded corners belong to the TRMNL bezel and its screen. Nothing interactive is rounded.",
-        "section": "shapes"
-      },
-      {
-        "name": "The Stamp, Don't Fade Rule",
-        "body": "Disabled and locked states keep their shape and gain a dashed edge and muted text; they never vanish or drop to bare low opacity.",
-        "section": "shapes"
       }
     ],
     "dos": [
-      "Do lead with the hero's scene in colour under the HUD; it is the companion's first viewport.",
-      "Do put grouped content in a window: Window Plum inside a 3px Arcade Night outline.",
-      "Do keep each game colour to its one meaning and pair it with a glyph, sign, label or shape.",
-      "Do set text on the dark ground in the stat's ink tone, not the raw fill.",
-      "Do set HUD labels, nav, counters and buttons in Press Start 2P at its small steps, uppercase.",
-      "Do mark the current choice with the gold pixel cursor arrow or a gold outline.",
-      "Do keep every control square, hard-edged and at least 44px tall.",
-      "Do draw icons, hearts, arrows, checks and chevrons as crisp SVG cell grids, and render pixel art pixelated at integer scale.",
-      "Do stamp disabled and locked states with a dashed edge and muted text.",
-      "Do keep the device preview 1-bit inside its plum bezel."
+      "preserve the established arcade shell and each game's own pixel world.",
+      "use the current code for exact measurements, responsive behavior and state semantics.",
+      "keep reading text legible, focus visible and controls usable on phones.",
+      "preserve transparent sprite gaps and opaque body pixels."
     ],
     "donts": [
-      "Don't add a light theme; the arcade screen is dark only.",
-      "Don't set sentences or long prose in Press Start 2P, or labels and buttons in Pixelify Sans.",
-      "Don't round buttons, inputs, tabs, windows, tiles or badges; only the bezel and its screen curve.",
-      "Don't use drop shadows, blurs or glows for depth; the primary button's inset lip is the only shading.",
-      "Don't convey state by colour alone.",
-      "Don't fall back to the 1-bit logbook or the navy menu-window recolour; this world replaced both.",
-      "Don't add idle motion beyond the dialogue arrow bob and the e-ink refresh."
+      "replace the interface with rounded dashboard cards, generic icons or blurred glass.",
+      "apply the obsolete monochrome companion direction or require the original three-floor MVP layout.",
+      "infer launch status from implementation; use the platform registry and confirmed decisions."
     ]
   }
 }
