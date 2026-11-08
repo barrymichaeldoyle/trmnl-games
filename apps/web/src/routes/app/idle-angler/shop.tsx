@@ -54,7 +54,7 @@ function ShopPage() {
   const seaKnown = sea?.opensAfter ? sea.opensAfter.logged >= sea.opensAfter.species : false
   // D156/D167: an affordable purchase is a Buy button with its price; one the angler cannot pay yet is its price and what is still to go.
   const buy = (price: number, open: () => void) => (gold >= price
-    ? <Button className="inline-flex items-center justify-center gap-2" disabled={buying} onClick={open}>{t.buy} <Coins n={price} /></Button>
+    ? <Button className="inline-flex items-center justify-center gap-2" disabled={buying} onClick={() => { rod.clearFeedback(); cooler.clearFeedback(); access.clearFeedback(); charter.clearFeedback(); open() }}>{t.buy} <Coins n={price} /></Button>
     : <Price price={price} gold={gold} />)
   const gateOf = (water: string) => dock.waters?.find((w) => w.id === water)?.opensAfter ?? null
   const nextRod = dock.shop.rod
@@ -175,16 +175,16 @@ function ShopPage() {
         busyLabel={t.buying}
         cancelLabel={common.cancel}
         pending={buying}
+        error={rod.error ?? cooler.error ?? access.error ?? charter.error}
         onClose={() => setOffer(null)}
         onConfirm={async () => {
           if (!offer || buying) return
-          await offer.buy()
-          setOffer(null)
+          if (await offer.buy()) setOffer(null)
         }}
       >
         {offer ? <Rows rows={[...offer.rows, [common.cost, <Coins n={offer.price} />], [common.coinsLeft, <Coins n={gold - offer.price} />]]} /> : null}
       </ConfirmSheet>
-      <NoticeBar notice={notice} onDismiss={dismiss} />
+      <NoticeBar notice={offer ? null : notice} onDismiss={dismiss} />
     </>
   )
 }

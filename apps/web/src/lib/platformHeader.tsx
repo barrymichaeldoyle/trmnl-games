@@ -3,6 +3,7 @@ import { Link, useLocation } from '@tanstack/react-router'
 import { GamesLink, currentGame } from './gameSwitcher'
 import { PRELOAD_CLERK_UI } from './clerkUi'
 import { useT } from './i18n'
+import { games } from '@trmnl-games/platform'
 import { shellMessages } from '../i18n/shell'
 
 /** The site's outer frame: header, footer and the home page share it, so the bar never changes width between pages. */
@@ -17,7 +18,8 @@ const NAV_LINK = 'inline-flex min-h-11 items-center underline-offset-4 hover:und
 export function PlatformHeader() {
   // Inside a game the switcher names the place, so phones read the wordmark but do not show it: the row has no room for both.
   const t = useT(shellMessages)
-  const inGame = useLocation({ select: (location) => currentGame(location.pathname.replace(/\/$/, '')) !== null })
+  const game = useLocation({ select: (location) => currentGame(location.pathname.replace(/\/$/, '')) })
+  const inGame = game !== null
   return (
     <header className="border-b border-rule">
       {/* One row at every width: phones get a slimmer bar, and below 360px the wordmark is read but not shown. */}
@@ -26,8 +28,8 @@ export function PlatformHeader() {
         <Link to="/" className="flex min-h-11 min-w-0 items-center gap-2 font-display text-lg font-semibold"><img src="/favicon.svg" alt="" width={24} height={24} className="shrink-0 [image-rendering:pixelated]" /><span className={`truncate ${inGame ? 'max-sm:sr-only' : 'max-[359px]:sr-only'}`}>TRMNL Games</span></Link>
         <nav aria-label={t.platformNav} className="flex shrink-0 items-center gap-4 text-sm">
           <Show when="signed-out">
-            <Link to="/help/desk-crawler" className={NAV_LINK} activeProps={{ 'aria-current': 'page', className: 'underline' }}>{t.help}</Link>
-            <SignInButton mode="modal"><button type="button" {...PRELOAD_CLERK_UI} className="hud uppercase text-hud-sm min-h-10 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">{t.signIn}</button></SignInButton>
+            <Link to={game ? games[game].helpPath : '/help/desk-crawler'} className={NAV_LINK} activeProps={{ 'aria-current': 'page', className: 'underline' }}>{t.help}</Link>
+            <SignInButton mode="modal"><button type="button" {...PRELOAD_CLERK_UI} className="hud uppercase text-hud-sm min-h-11 border-[3px] border-edge px-3 hover:bg-ink hover:text-night active:bg-ink active:text-night">{t.signIn}</button></SignInButton>
           </Show>
           <Show when="signed-in">
             <GamesLink />

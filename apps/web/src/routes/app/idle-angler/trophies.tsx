@@ -82,7 +82,7 @@ function TrophiesPage() {
                   <p className="text-sm">{trophy.grams ? formatWeight(trophy.grams) : ''} · {words.water(trophy.water)}</p>
                   <p className="text-sm text-muted">{t.mountedOn} <LocalTime at={trophy.at} format={day} /></p>
                   {/* A quiet button under the details: taking a fish down is rare, and a boxed one beside them squeezed them into a narrow column on phones. */}
-                  <Button variant="quiet" className="-ml-3 text-sm min-[375px]:-ml-4" disabled={takeDown.pending} onClick={() => setAsking(trophy)}>{t.takeDown}</Button>
+                  <Button variant="quiet" className="-ml-3 text-sm min-[375px]:-ml-4" disabled={takeDown.pending} onClick={() => { takeDown.clearFeedback(); setAsking(trophy) }}>{t.takeDown}</Button>
                 </div>
               </li>
             ))}
@@ -138,16 +138,16 @@ function TrophiesPage() {
         busyLabel={t.takingDown}
         cancelLabel={t.keepIt}
         pending={takeDown.pending}
+        error={takeDown.error}
         onClose={() => setAsking(null)}
         onConfirm={async () => {
           if (!asking) return
-          await takeDown.run({ trophyId: asking.id }, t.takenDown)
-          setAsking(null)
+          if (await takeDown.run({ trophyId: asking.id }, t.takenDown)) setAsking(null)
         }}
       >
         <p>{t.takeDownBody}</p>
       </ConfirmSheet>
-      <NoticeBar notice={notice} onDismiss={dismiss} />
+      <NoticeBar notice={asking ? null : notice} onDismiss={dismiss} />
     </>
   )
 }

@@ -7,6 +7,8 @@ import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import { readyOrders, useAngler, type Dock } from '../../../lib/idleAngler'
 import { useT } from '../../../lib/i18n'
+import { catchesForSale } from '../../../lib/coolerSelection'
+import { iaCoolerReview } from '../../../i18n/iaCoolerReview'
 import { iaCooler } from '../../../i18n/iaCooler'
 import { iaCommon } from '../../../i18n/ia'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
@@ -15,6 +17,7 @@ import { FishIcon } from './-art'
 import { Coins, Price } from './-coins'
 import { FishName, FishText } from './-fish'
 import type { Id } from '@trmnl-games/backend/data-model'
+import { SelectionBar } from './-selectionBar'
 import { Rows } from './-rows'
 import { seo } from '../../../lib/seo'
 
@@ -39,8 +42,12 @@ function CoolerPage() {
   const mount = useIntent(api.idleAngler.full.mountCatch, { onFeedback: notify })
   const [mounting, setMounting] = useState<{ id: Id<'catches'>; name: string; grams: number; cost: number } | null>(null)
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set())
-  const [askingAll, setAskingAll] = useState(false)
+  const [saleReview, setSaleReview] = useState<{ ids: string[]; includeTrophies: boolean } | null>(null)
+  const [selectionHeight, setSelectionHeight] = useState(0)
+  const [orderReview, setOrderReview] = useState<{ id: string; catchIds: Id<'catches'>[]; reward: number } | null>(null)
+  const [baiting, setBaiting] = useState<Id<'catches'> | null>(null)
   const t = useT(iaCooler)
+  const review = useT(iaCoolerReview)
   const common = useT(iaCommon)
   const words = useAngler()
   const formatWeight = words.weight
@@ -48,6 +55,9 @@ function CoolerPage() {
   const full = dock.full ?? null
   const catches = dock.catches ?? []
   const picked = catches.filter((c) => chosen.has(c.id))
+  const trophyCount = (rows: typeof catches) => rows.filter((fish) => full?.catchActions[fish.id]?.mountCost != null).length
+  const reviewed = saleReview ? catchesForSale(catches, saleReview.ids, full?.catchActions, true) : []
+  const saleRows = saleReview ? catchesForSale(catches, saleReview.ids, full?.catchActions, saleReview.includeTrophies) : []
   const total = (rows: typeof catches) => rows.reduce((sum, row) => sum + row.value, 0)
   const toggle = (id: string) => setChosen((current) => {
     const next = new Set(current)
@@ -57,10 +67,15 @@ function CoolerPage() {
   })
   const ready = readyOrders(dock)
   const wanted = new Set(ready.flatMap((r) => r.going.map((c) => c.id)))
-  const wantedInCooler = catches.filter((c) => wanted.has(c.id)).length
   const sellRows = async (rows: typeof catches) => {
-    if (rows.length === 0) return
-    if (await sell.run({ catchIds: rows.map((r) => r.id) }, t.sold(rows.length, total(rows)))) setChosen(new Set())
+    if (rows.length === 0) return false
+    const ok = await sell.run({ catchIds: rows.map((r) => r.id) }, t.sold(rows.length, total(rows)))
+    if (ok) setChosen(new Set())
+    return ok
+  }
+  const openSale = (rows: typeof catches, includeTrophies = false) => {
+    sell.clearFeedback()
+    setSaleReview({ ids: rows.map((fish) => fish.id), includeTrophies })
   }
   return (
     <>
@@ -84,7 +99,7 @@ function CoolerPage() {
                   ))}
                 </ul>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <Button className="inline-flex items-center justify-center gap-2" pending={handOver.pending} busyLabel={t.selling} onClick={() => void handOver.run({ orderId: order.id, catchIds: order.catchIds }, t.soldToFishmonger(reward))}>
+                  <Button className="inline-flex items-center justify-center gap-2" pending={handOver.pending} busyLabel={t.selling} onClick={() => { if (trophyCount(going)) { handOver.clearFeedback(); setOrderReview({ id: order.id, catchIds: order.catchIds, reward }) } else void handOver.run({ orderId: order.id, catchIds: order.catchIds }, t.soldToFishmonger(reward)) }}>
                     {t.sell} <Coins n={reward} sign />
                   </Button>
                   <span className="text-sm text-muted">{t.market} <Coins n={market} /></span>
@@ -117,9 +132,9 @@ function CoolerPage() {
                   const wallFull = full !== null && full.pegs.free === 0
                   return (
                     <div className="flex flex-wrap items-center gap-2 border-b border-rule pb-2 pl-8">
-                      {bait ? <Button variant="secondary" disabled={asBait.pending} onClick={() => void asBait.run({ catchId: fish.id }, t.toDeadbait(words.species(fish.speciesId)))}>{t.useAsBait}</Button> : null}
+                      {bait ? <Button variant="secondary" disabled={asBait.pending} onClick={() => { if (cost !== null) { asBait.clearFeedback(); setBaiting(fish.id) } else void asBait.run({ catchId: fish.id }, t.toDeadbait(words.species(fish.speciesId))) }}>{t.useAsBait}</Button> : null}
                       {cost === null ? null : wallFull ? <span className="text-sm text-muted">{t.wallFull} <Link to="/app/idle-angler/trophies" className="underline underline-offset-4">{t.addPegs}</Link></span>
-                        : dock.angler!.gold >= cost ? <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={mount.pending} onClick={() => setMounting({ id: fish.id, name: words.species(fish.speciesId), grams: fish.grams, cost })}>{t.mount} <Coins n={cost} /></Button>
+                        : dock.angler!.gold >= cost ? <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={mount.pending} onClick={() => { mount.clearFeedback(); setMounting({ id: fish.id, name: words.species(fish.speciesId), grams: fish.grams, cost }) }}>{t.mount} <Coins n={cost} /></Button>
                         : <div className="flex flex-wrap items-center gap-x-2 text-sm"><span className="text-muted">{t.mount}</span><Price price={cost} gold={dock.angler!.gold} /></div>}
                     </div>
                   )
@@ -127,39 +142,61 @@ function CoolerPage() {
               </li>
             ))}
           </ul>
-          {/* D156: no dead button while nothing is ticked; the Sell button appears with the first fish chosen. */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            {picked.length > 0 ? (
-              <Button className="inline-flex items-center justify-center gap-2" pending={sell.pending} busyLabel={t.selling} onClick={() => void sellRows(picked)}>
-                {t.sellN(picked.length)} <Coins n={total(picked)} sign />
-              </Button>
-            ) : null}
-            <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={sell.pending} onClick={() => setAskingAll(true)}>{t.sellAll} <Coins n={total(catches)} sign /></Button>
+            <Button variant="secondary" disabled={sell.pending} onClick={() => openSale(catches)}>{review.sellCatch}</Button>
+            {trophyCount(catches) > 0 ? <p className="text-sm text-muted">{review.trophiesKept(trophyCount(catches))}</p> : null}
             {picked.length === 0 ? <span className="text-sm text-muted">{t.orTick}</span> : null}
           </div>
           <Rows className="mt-3" rows={[[t.price, t.priceValue], [t.coolerFull, t.coolerFullValue]]} />
         </Card>
       )}
+      {picked.length > 0 ? <SelectionBar onHeight={setSelectionHeight}>
+          <p role="status" className="flex items-center gap-2 text-sm tabular-nums">{review.selected(picked.length)} · <Coins n={total(picked)} sign /></p>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button allowOffline variant="quiet" disabled={sell.pending} onClick={() => setChosen(new Set())}>{review.clear}</Button>
+            <Button pending={sell.pending} busyLabel={t.selling} onClick={() => { if (trophyCount(picked)) openSale(picked, true); else void sellRows(picked) }}>{t.sellN(picked.length)}</Button>
+          </div>
+      </SelectionBar> : null}
       <ConfirmSheet
-        open={askingAll}
-        title={t.sellAllTitle(catches.length)}
-        confirmLabel={t.sellFor(total(catches))}
+        open={saleReview !== null}
+        title={review.reviewSale}
+        confirmLabel={t.sellFor(total(saleRows))}
         busyLabel={t.selling}
         cancelLabel={common.cancel}
         pending={sell.pending}
-        onClose={() => setAskingAll(false)}
+        disabled={saleRows.length === 0}
+        error={sell.error}
+        onClose={() => setSaleReview(null)}
         onConfirm={async () => {
           if (sell.pending) return
-          await sellRows(catches)
-          setAskingAll(false)
+          if (await sellRows(saleRows)) setSaleReview(null)
         }}
       >
+        {trophyCount(reviewed) > 0 ? <>
+          <label className="flex min-h-11 cursor-pointer items-center gap-3">
+            <input type="checkbox" className="pixel-check size-5 shrink-0" checked={saleReview?.includeTrophies ?? false} disabled={sell.pending} onChange={(event) => setSaleReview((current) => current ? { ...current, includeTrophies: event.target.checked } : null)} />
+            {review.includeTrophies}
+          </label>
+          <p className="text-sm">{saleReview?.includeTrophies ? review.trophyWarning : review.trophiesKept(trophyCount(reviewed))}</p>
+        </> : null}
         <Rows rows={[
-          [t.fish, `${catches.length}`],
-          [t.youGet, <Coins n={total(catches)} sign className="text-gold-ink" />],
-          wantedInCooler > 0 ? [t.fishmonger, t.paysMoreFor(wantedInCooler)] : null,
+          [t.fish, `${saleRows.length}`],
+          [t.youGet, <Coins n={total(saleRows)} sign className="text-gold-ink" />],
+          saleRows.some((fish) => wanted.has(fish.id)) ? [t.fishmonger, t.paysMoreFor(saleRows.filter((fish) => wanted.has(fish.id)).length)] : null,
           [t.logbook, t.keepsBests],
         ]} />
+      </ConfirmSheet>
+      <ConfirmSheet open={orderReview !== null} title={t.fishmonger} confirmLabel={t.sellFor(orderReview?.reward ?? 0)} busyLabel={t.selling} cancelLabel={common.cancel} pending={handOver.pending} error={handOver.error} onClose={() => setOrderReview(null)} onConfirm={async () => {
+        if (orderReview && await handOver.run({ orderId: orderReview.id, catchIds: orderReview.catchIds }, t.soldToFishmonger(orderReview.reward))) setOrderReview(null)
+      }}>
+        <p>{review.trophyWarning}</p>
+        <Rows rows={[[t.fish, `${orderReview?.catchIds.length ?? 0}`], [t.youGet, <Coins n={orderReview?.reward ?? 0} sign />]]} />
+      </ConfirmSheet>
+      <ConfirmSheet open={baiting !== null} title={t.useAsBait} confirmLabel={t.useAsBait} busyLabel={t.useAsBait} cancelLabel={common.cancel} pending={asBait.pending} error={asBait.error} onClose={() => setBaiting(null)} onConfirm={async () => {
+        const fish = catches.find((fish) => fish.id === baiting)
+        if (fish && await asBait.run({ catchId: fish.id }, t.toDeadbait(words.species(fish.speciesId)))) setBaiting(null)
+      }}>
+        <p>{review.trophyWarning}</p>
       </ConfirmSheet>
       <ConfirmSheet
         open={mounting !== null}
@@ -168,16 +205,16 @@ function CoolerPage() {
         busyLabel={t.mounting}
         cancelLabel={common.cancel}
         pending={mount.pending}
+        error={mount.error}
         onClose={() => setMounting(null)}
         onConfirm={async () => {
           if (!mounting) return
-          await mount.run({ catchId: mounting.id }, t.mounted(mounting.name))
-          setMounting(null)
+          if (await mount.run({ catchId: mounting.id }, t.mounted(mounting.name))) setMounting(null)
         }}
       >
         {mounting ? <Rows rows={[[t.goesTo, t.goesToValue], [common.cost, <Coins n={mounting.cost} />], [common.coinsLeft, <Coins n={dock.angler.gold - mounting.cost} />], [t.notSold, t.notSoldValue]]} /> : null}
       </ConfirmSheet>
-      <NoticeBar notice={notice} onDismiss={dismiss} />
+      <NoticeBar notice={saleReview || mounting || baiting || orderReview ? null : notice} lifted={picked.length > 0 ? selectionHeight : false} onDismiss={dismiss} />
     </>
   )
 }

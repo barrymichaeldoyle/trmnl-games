@@ -23,8 +23,7 @@ import { seo } from '../../../lib/seo'
 
 /**
  * The dock: the angler's scene, progress, the bait in use, the waters and the latest stories. The fly box lives in
- * the logbook; while the week's fly code waits unclaimed, the dock asks for it first (TRMNL review, 2026-11-07: the
- * screen showed a code the companion's first page never mentioned).
+ * the logbook; its code callout stays on the first page, after operational status and the scene.
  */
 export const Route = createFileRoute('/app/idle-angler/')({
   head: () => seo({ title: 'Dock · Idle Angler', index: false }),
@@ -93,9 +92,6 @@ function DockPage() {
           <h1 id="dock-title" className="font-display text-3xl font-bold">{angler.alias}</h1>
           <span className="inline-flex flex-wrap items-center gap-x-2 text-sm text-muted"><strong className="text-ink">{words.title(angler.title)}</strong> · <Coins n={angler.gold} className="text-gold-ink" /></span>
         </div>
-        <FlyCallout notify={notify} />
-        <WhatsNewCard game="idle-angler" />
-        {scene ? <Scene sceneKey={scene} alt={t.sceneAlt(angler.alias, here ? words.water(here.id) : '')} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
         <div className="flex flex-col gap-1">
           <p className="text-lg font-semibold">
@@ -105,6 +101,16 @@ function DockPage() {
           {dock.nextTickAt && !destination && angler.status !== 'paused' ? <p className="text-sm text-muted">{t.nextCast} {time(dock.nextTickAt)}.</p> : null}
           <WaterCompany />
         </div>
+        {/* Operational warnings precede the scene and optional updates. */}
+        {coolerFull ? (
+          <p className="font-semibold text-hp-ink">
+            {t.coolerFull} <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">{t.sellCatch}</Link>.
+          </p>
+        ) : null}
+        {angler.status !== 'paused' && usable.length === 0 ? <p className="mb-3 font-semibold text-hp-ink">{t.noBaitFor(baitWater ? words.water(baitWater.id) : '', Boolean(destination))} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.buyBait}</Link>.</p> : null}
+        {angler.status !== 'paused' && usable.length > 0 && !fishing ? <p className="mb-3 font-semibold text-hp-ink"><a href="#dock-bait" className="underline underline-offset-4">{t.bareHookNow}</a>{usable.every((b) => b.units === 0) ? <>, <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.orBuySome}</Link></> : null}.</p> : null}
+        {scene ? <Scene sceneKey={scene} alt={t.sceneAlt(angler.alias, here ? words.water(here.id) : '')} /> : null}
+        <FlyCallout notify={notify} />
         {/* The logbook meter counts species towards the next title; the sentence under it says what the title is, in words a first visit can follow. */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1">
@@ -117,12 +123,6 @@ function DockPage() {
             <p className="text-sm text-muted"><strong className="text-ink">{words.cooler(angler.cooler.name)}</strong> · {t.coolerHolds(angler.cooler.capacity)}</p>
           </div>
         </div>
-        {/* A full cooler releases every new catch, so its warning takes the Sell line's place under the meter. */}
-        {coolerFull ? (
-          <p className="font-semibold text-hp-ink">
-            {t.coolerFull} <Link to="/app/idle-angler/cooler" className="underline underline-offset-4">{t.sellCatch}</Link>.
-          </p>
-        ) : null}
         {!coolerFull && catches.length > 0 ? (
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 underline underline-offset-4">{t.sell(catches.length)} <Coins n={coolerValue} sign /></Link></p>
         ) : null}
@@ -148,9 +148,7 @@ function DockPage() {
         </Card>
       ) : null}
 
-      <Card title={t.bait}>
-        {usable.length === 0 ? <p className="mb-3 font-semibold text-hp-ink">{t.noBaitFor(baitWater ? words.water(baitWater.id) : '', Boolean(destination))} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.buyBait}</Link>.</p> : null}
-        {usable.length > 0 && !fishing ? <p className="mb-3 font-semibold text-hp-ink">{t.bareHookNow}{usable.every((b) => b.units === 0) ? <>, <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.orBuySome}</Link></> : null}.</p> : null}
+      <section id="dock-bait" className="scroll-mt-20"><Card title={t.bait}>
         {/* D167: Desk Crawler's stance picker (one look for a choice): the bait on the hook is the pressed cell with the cursor, the others are what a tap switches to. */}
         {usable.length > 0 ? <p className="mb-2 text-sm text-muted">{t.onHook}</p> : null}
         <div role="group" aria-label={t.baitGroup} className="flex flex-wrap gap-0.5 border-2 border-edge bg-edge">
@@ -175,7 +173,7 @@ function DockPage() {
           <dt className="text-muted">{t.noBait}</dt><dd>{t.noBaitValue}</dd>
         </dl>
         <p className="mt-3 text-sm"><Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.whatBaitCatches}</Link></p>
-      </Card>
+      </Card></section>
 
       <Card title={t.waters}>
         <ul className="flex flex-col gap-3">
@@ -204,6 +202,7 @@ function DockPage() {
         <p className="mt-3 text-sm text-muted">{t.weatherNote}{full?.season ? <> {t.seasonNote(words.season(full.season.id).toLowerCase())} <LocalTime at={full.season.endsAt} format={(d) => formatDate(locale, d, { weekday: 'long' })} />.</> : null} {t.moveNote}</p>
       </Card>
 
+      <WhatsNewCard game="idle-angler" />
       <Card title={t.latest}>
         <ol className="flex flex-col gap-2">
           {dock.logs?.slice(0, 10).map((log) => (

@@ -85,8 +85,8 @@ export function useNotice(): { notice: Notice | null; notify: (feedback: { error
   return { notice, ...handlers }
 }
 
-/** The pinned notice above the phone's bottom edge, lifted above a pinned bar when one is showing. */
-export function NoticeBar({ notice, lifted = false, onDismiss }: { notice: Notice | null; lifted?: boolean; onDismiss: () => void }) {
+/** The pinned notice: `lifted` accepts the legacy bar offset or a measured bar height in pixels. */
+export function NoticeBar({ notice, lifted = false, onDismiss }: { notice: Notice | null; lifted?: boolean | number; onDismiss: () => void }) {
   const dismiss = useRef(onDismiss)
   dismiss.current = onDismiss
   useEffect(() => {
@@ -96,7 +96,7 @@ export function NoticeBar({ notice, lifted = false, onDismiss }: { notice: Notic
   }, [notice])
   const text = notice?.text ?? ''
   return (
-    <div className={`pointer-events-none fixed inset-x-0 z-30 flex flex-col items-center px-4 ${lifted ? 'bottom-[calc(5.5rem+env(safe-area-inset-bottom))]' : 'bottom-[calc(1rem+env(safe-area-inset-bottom))]'}`}>
+    <div style={typeof lifted === 'number' ? { bottom: `calc(${lifted}px + 1rem)` } : undefined} className={`pointer-events-none fixed inset-x-0 z-30 flex flex-col items-center px-4 ${lifted ? 'bottom-[calc(5.5rem+env(safe-area-inset-bottom))]' : 'bottom-[calc(1rem+env(safe-area-inset-bottom))]'}`}>
       {/* Real boxes, not display: contents, which some browsers drop from the accessibility tree; stacked, an empty one takes no space. */}
       <div role="status" aria-live="polite" className="flex w-full max-w-md">{notice?.kind === 'ok' ? <NoticePanel key={notice.key} text={text} tone="text-xp-ink" onDismiss={onDismiss} /> : null}</div>
       <div role="alert" className="flex w-full max-w-md">{notice?.kind === 'error' ? <NoticePanel key={notice.key} text={text} tone="text-hp-ink" onDismiss={onDismiss} /> : null}</div>

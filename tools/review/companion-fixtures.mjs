@@ -16,6 +16,8 @@
  *   notes=1 (D133: /field-notes for a level-17 veteran with most notes open)   notes=new (a fresh hero, the Office's note only)
  *   roster=locked (P37: Warrior level 4, the Hero page's locked card)   roster=open (one hero, the Rogue ready to recruit)   roster=two (a parked Warrior, the Rogue current, switch spent)   roster=undo (the same, inside the ten-minute undo)
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
+ *   signedout=1 (game-aware signed-out entry; no session or backend)
+ *   trophy=all|bait (D226: all catches are trophy-size, or the first bait-sized catch is a trophy)
  *   whatsnew=1 (D154: the What's new card, with every entry after 12 October)
  *   rank=9 (D152: the hero ninth on every board, so the rankings open with the rows around it)
  *   lang=fr|de (D169: the companion in French or German)
@@ -346,7 +348,7 @@ if (v2 && iaDock.angler) {
     pegs: { pegs: 6, free: params.get('pegs') === 'full' ? 0 : 3, next: { pegs: 12, price: 800 } },
     deadbait: 6,
     trophies: { minPercent: 60, fee: 100 },
-    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && i === 0 && params.get('trophy') !== 'none' ? 192 : null }])),
+    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && (params.get('trophy') === 'all' || i === (params.get('trophy') === 'bait' ? 2 : 0)) && params.get('trophy') !== 'none' ? 192 : null }])),
   };
   // Issue #6: trophy=poor leaves too few coins to mount the trophy-sized fish.
   if (params.get('trophy') === 'poor') iaDock.angler.gold = 120;
@@ -458,7 +460,7 @@ const settle = () => new Promise((resolveIt, reject) => setTimeout(() => (flag('
 // Every mutation call is recorded on window.__mutations ({ fn, args }) for tools/review/scan-landing.mjs.
 export const useMutation = (fn) => useCallback(Object.assign(async (args) => { (window.__mutations ??= []).push({ fn: String(fn), args }); return settle() }, { withOptimisticUpdate() { return this } }), []);
 export const useAction = () => useCallback(async () => settle(), []);
-export const useConvexAuth = () => ({ isLoading: false, isAuthenticated: true });
+export const useConvexAuth = () => ({ isLoading: false, isAuthenticated: !new URLSearchParams(location.search).has('signedout') });
 // Paper Lives' story (D182) pages the fixture life's lines; story=long repeats them back to birth so "Show earlier years" shows.
 const plStory = () => {
   const logs = (paperLives[params.get('pl') ?? 'adult'] ?? paperLives.adult).logs ?? []
@@ -472,11 +474,12 @@ export class ConvexError extends Error { constructor(data) { super(typeof data =
 export const paginationOptsValidator = {};
 `)
 write('clerk.jsx', `import React from 'react';
-export const Show = ({ when, children }) => (when === 'signed-in' ? <>{children}</> : null);
+const signedIn = !new URLSearchParams(location.search).has('signedout');
+export const Show = ({ when, children }) => ((when === 'signed-in') === signedIn ? <>{children}</> : null);
 export const SignInButton = ({ children }) => <>{children}</>;
 export const SignUpButton = ({ children }) => <>{children}</>;
 export const UserButton = () => <span className="inline-block size-7 rounded-full bg-raised" aria-hidden="true" />;
-export const useAuth = () => ({ isLoaded: true, isSignedIn: true });
+export const useAuth = () => ({ isLoaded: true, isSignedIn: signedIn });
 export const useUser = () => ({ user: null, isLoaded: true });
 export const useClerk = () => ({ signOut: async () => {} });
 `)

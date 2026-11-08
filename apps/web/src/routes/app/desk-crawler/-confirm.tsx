@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Button } from '../../../lib/ui'
+import { ActionFeedback, Button } from '../../../lib/ui'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { useT } from '../../../lib/i18n'
 import { dcScreenMessages } from '../../../i18n/dcScreen'
@@ -20,7 +20,7 @@ export function ConfirmButtons({ confirmLabel, busyLabel, cancelLabel, pending, 
  * Ask before an action that could set the player back or slow them down: what it costs, how often it can be done,
  * whether it can be undone. A stray tap only opens this; the confirm button commits.
  */
-export function ConfirmSheet({ open, title, children, ...choice }: Omit<Choice, 'onCancel'> & { open: boolean; title: ReactNode; children: ReactNode; onClose: () => void }) {
+export function ConfirmSheet({ open, title, children, error, ...choice }: Omit<Choice, 'onCancel'> & { open: boolean; title: ReactNode; children: ReactNode; error?: string | null; onClose: () => void }) {
   const { onClose, ...rest } = choice
   const t = useT(dcScreenMessages)
   return (
@@ -29,6 +29,7 @@ export function ConfirmSheet({ open, title, children, ...choice }: Omit<Choice, 
         <div className="flex flex-col gap-3">
           <SheetTitle>{title}</SheetTitle>
           {children}
+          <ActionFeedback error={error ?? null} message={null} />
           <ConfirmButtons {...rest} onCancel={onClose} />
         </div>
       ) : null}

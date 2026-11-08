@@ -66,7 +66,7 @@ function SettingsPage() {
           <div className="mt-3">
             {angler.status === 'paused'
               ? <Button pending={resume.pending} onClick={() => void resume.run({}, t.resumed)}>{t.resume}</Button>
-              : <Button variant="secondary" disabled={pause.pending} onClick={() => setAskingPause(true)}>{t.pause}</Button>}
+              : <Button variant="secondary" disabled={pause.pending} onClick={() => { pause.clearFeedback(); setAskingPause(true) }}>{t.pause}</Button>}
           </div>
           <ActionFeedback error={pause.error ?? resume.error} message={pause.message ?? resume.message} />
         </Card>
@@ -107,11 +107,11 @@ function SettingsPage() {
         busyLabel={t.pausing}
         cancelLabel={t.keepFishing}
         pending={pause.pending}
+        error={pause.error}
         onClose={() => setAskingPause(false)}
         onConfirm={async () => {
           if (pause.pending) return
-          await pause.run({}, t.pausedDone)
-          setAskingPause(false)
+          if (await pause.run({}, t.pausedDone)) setAskingPause(false)
         }}
       >
         <Consequences>
