@@ -4,7 +4,7 @@
 
 **Salvage and the workbench (D129), 2026-10-12.** Built as content v13 and achievement catalog version 5 and switched on in production at 16:27 UTC the same day; run 807, the first on v13, completed clean ([spec](salvage.md), [evidence](evidence/workbench.md)). Salvage sits beside Sell on the Bag page and strips gear into three material rows outside the bag; the Workbench card raises an equipped piece Mk II → Mk III, then +1 to +3, and fits a chosen affix to rare or epic gear, each for materials plus gold under a receipt. The simulator's draws are untouched and v12 replays unchanged; the 90-day harness shows the daily manager's gold hoard spent on the workbench from the second month. 
 
-**Idle Angler listed (D224), 2026-11-08.** TRMNL approved the plugin; the listing URL is set in packages/platform, every pitch shows Install, and the one-off launch reset (`idleAngler/launchReset`) and the launch email wait for Barry's go.
+**Idle Angler listed (D224), 2026-11-08.** TRMNL approved the plugin; the listing URL is set in packages/platform, every pitch shows Install, the one-off launch reset restarted the three pre-listing anglers (`completed:370:3`) and the launch email went to the 30-address list the same day.
 
 **Idle Angler (D115), 2026-10-09.** The second game is built through slice S6 and deployed hidden: every Idle Angler page answers not-found to anyone but admins, and its empty world ticks cleanly in production beside Desk Crawler's. The shared engine (`packages/engine`, `apps/backend/convex/lib/engine/`) now runs both games' ticks, rankings and lifecycle. Desk Crawler's behavior is unchanged and its tests pass. Barry's S7 checklist is in the [spec](idle-angler.md#s7-checklist-barry).
 
