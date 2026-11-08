@@ -20,7 +20,7 @@ import { ConfirmSheet, Consequences } from './-confirm'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
 import { RosterCard } from './-rosterCard'
-import { WhatsNewCard } from './-whatsNew'
+import { WhatsNewCard } from '../../../lib/whatsNewCard'
 import { IdleAnglerNote } from './-idleAnglerNote'
 import { FloorCompany, FloorCount } from './-company'
 import { messagesFor, useT } from '../../../lib/i18n'
@@ -68,7 +68,7 @@ function HeroHome() {
       <GameScreen hero={{ ...hero, biomeName, targetName, bagReady }} />
       <ReturnNudge />
       <IdleAnglerNote />
-      <WhatsNewCard />
+      <WhatsNewCard game="desk-crawler" />
       <HeroSheet hero={hero} />
     </div>
   )

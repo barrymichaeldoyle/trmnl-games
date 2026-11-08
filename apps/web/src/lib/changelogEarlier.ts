@@ -3,9 +3,86 @@ import type { ChangelogEntry } from './changelogRecent'
 /** The public dev log before the newest entries (changelogRecent.ts), newest first; the What's new page shows both. */
 export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-10-30',
+    changes: [
+      {
+        game: 'desk-crawler',
+        title: 'The Bag tab counts again',
+        body: 'In Desk Crawler, the Bag tab shows how many slots are in use whenever your bag holds anything, not only when it is nearly full.',
+        fr: { title: 'L’onglet Sac compte de nouveau', body: 'Dans Desk Crawler, l’onglet Sac indique combien d’emplacements sont occupés dès que votre sac contient quelque chose, et plus seulement quand il est presque plein.' },
+        de: { title: 'Der Tasche-Tab zählt wieder', body: 'In Desk Crawler zeigt der Tasche-Tab, wie viele Plätze belegt sind, sobald deine Tasche etwas enthält, nicht erst, wenn sie fast voll ist.' },
+        es: { title: 'La pestaña Bolsa vuelve a contar', body: 'En Desk Crawler, la pestaña Bolsa muestra cuántos huecos están ocupados siempre que tu bolsa tenga algo, no solo cuando está casi llena.' },
+        it: { title: 'La scheda Borsa conta di nuovo', body: 'In Desk Crawler la scheda Borsa mostra quanti spazi sono occupati ogni volta che la borsa contiene qualcosa, non solo quando è quasi piena.' },
+        pt: { title: 'A aba Bolsa volta a contar', body: 'No Desk Crawler, a aba Bolsa mostra quantos espaços estão ocupados sempre que sua bolsa tem algo, não só quando está quase cheia.' },
+        pl: { title: 'Zakładka Torba znów liczy', body: 'W Desk Crawler zakładka Torba pokazuje, ile miejsc jest zajętych, gdy tylko coś jest w torbie, a nie dopiero gdy jest prawie pełna.' },
+        nl: { title: 'Het Tas-tabblad telt weer', body: 'In Desk Crawler laat het Tas-tabblad zien hoeveel plekken bezet zijn zodra je tas iets bevat, niet pas als hij bijna vol is.' },
+      },
+      {
+        game: 'idle-angler',
+        title: 'See who fishes your water',
+        body: 'Idle Angler now shows who else is fishing your water: on your TRMNL, three names and how many more; on the Dock, a count for every water and the whole list behind See everyone.',
+        fr: { title: 'Voyez qui pêche avec vous', body: 'Idle Angler montre maintenant qui d’autre pêche au même endroit que vous : sur votre TRMNL, trois noms et combien d’autres ; sur le Ponton, le nombre pour chaque plan d’eau et la liste complète derrière Voir tout le monde.' },
+        de: { title: 'Sieh, wer an deinem Gewässer angelt', body: 'Idle Angler zeigt jetzt, wer sonst noch an deinem Gewässer angelt: auf deinem TRMNL drei Namen und wie viele weitere, am Steg die Zahl für jedes Gewässer und die ganze Liste hinter Alle ansehen.' },
+        es: { title: 'Mira quién pesca en tu agua', body: 'Idle Angler muestra ahora quién más pesca en tu agua: en tu TRMNL, tres nombres y cuántos más; en el Muelle, la cifra de cada agua y la lista completa tras Ver a todos.' },
+        it: { title: 'Guarda chi pesca nelle tue acque', body: 'Idle Angler ora mostra chi altro pesca nelle tue acque: sul TRMNL tre nomi e quanti altri, al Pontile il numero per ogni specchio d’acqua e l’elenco completo dietro Vedi tutti.' },
+        pt: { title: 'Veja quem pesca na sua água', body: 'O Idle Angler agora mostra quem mais está pescando na sua água: no TRMNL, três nomes e quantos mais; no Píer, a contagem de cada água e a lista completa em Ver todos.' },
+        pl: { title: 'Zobacz, kto łowi z tobą', body: 'Idle Angler pokazuje teraz, kto jeszcze łowi na twoim łowisku: na TRMNL trzy imiona i ilu jeszcze, na Pomoście liczbę przy każdym łowisku i pełną listę pod Zobacz wszystkich.' },
+        nl: { title: 'Zie wie er bij jou vist', body: 'Idle Angler laat nu zien wie er nog meer op jouw water vist: op je TRMNL drie namen en hoeveel anderen, op de Stek het aantal bij elk water en de hele lijst achter Bekijk iedereen.' },
+      },
+      {
+        game: 'desk-crawler',
+        title: 'Keepsakes land on your shelf',
+        body: 'Scanning the keepsake code on your Desk Crawler screen now opens your keepsakes page, with confetti and the new design marked on the shelf.',
+        fr: { title: 'Les souvenirs arrivent sur votre étagère', body: 'Scanner le code souvenir de votre écran Desk Crawler ouvre maintenant la page des souvenirs, avec des confettis et le nouveau modèle signalé sur l’étagère.' },
+        de: { title: 'Andenken landen in deinem Regal', body: 'Wenn du den Andenken-Code auf deinem Desk-Crawler-Bildschirm scannst, öffnet sich jetzt die Andenken-Seite, mit Konfetti und dem neuen Motiv im Regal markiert.' },
+        es: { title: 'Los recuerdos llegan a tu estante', body: 'Al escanear el código de recuerdo de tu pantalla de Desk Crawler se abre ahora la página de recuerdos, con confeti y el nuevo diseño marcado en el estante.' },
+        it: { title: 'I ricordi arrivano sul tuo scaffale', body: 'Scansionando il codice ricordo sullo schermo di Desk Crawler si apre ora la pagina dei ricordi, con i coriandoli e il nuovo modello segnato sullo scaffale.' },
+        pt: { title: 'As lembranças chegam à sua estante', body: 'Ao escanear o código de lembrança na tela do Desk Crawler, a página de lembranças agora abre, com confete e o novo modelo marcado na estante.' },
+        pl: { title: 'Pamiątki trafiają na półkę', body: 'Zeskanowanie kodu pamiątki z ekranu Desk Crawler otwiera teraz stronę pamiątek, z konfetti i nowym wzorem oznaczonym na półce.' },
+        nl: { title: 'Aandenkens landen op je plank', body: 'Als je de aandenkencode op je Desk Crawler-scherm scant, opent nu de aandenkenpagina, met confetti en het nieuwe ontwerp gemarkeerd op de plank.' },
+      },
+      {
+        title: 'Buttons hold still',
+        body: 'A button keeps its width while it works, so nothing beside it jumps when its label changes.',
+        fr: { title: 'Des boutons qui ne bougent plus', body: 'Un bouton garde sa largeur pendant qu’il travaille : rien ne saute à côté quand son texte change.' },
+        de: { title: 'Knöpfe bleiben stehen', body: 'Ein Knopf behält seine Breite, während er arbeitet, damit nichts daneben springt, wenn sich seine Beschriftung ändert.' },
+        es: { title: 'Los botones se quedan quietos', body: 'Un botón mantiene su ancho mientras trabaja, así nada a su lado salta cuando cambia su texto.' },
+        it: { title: 'I pulsanti restano fermi', body: 'Un pulsante mantiene la sua larghezza mentre lavora, così niente accanto salta quando cambia la scritta.' },
+        pt: { title: 'Os botões ficam parados', body: 'Um botão mantém a largura enquanto trabalha, então nada ao lado pula quando o texto muda.' },
+        pl: { title: 'Przyciski stoją w miejscu', body: 'Przycisk zachowuje szerokość, gdy pracuje, więc nic obok nie skacze, kiedy zmienia się jego napis.' },
+        nl: { title: 'Knoppen blijven stilstaan', body: 'Een knop houdt zijn breedte terwijl hij bezig is, zodat er niets naast verspringt als het opschrift verandert.' },
+      },
+      {
+        game: 'idle-angler',
+        title: 'Fly codes land with a splash',
+        body: 'Scanning the fly code on your Idle Angler screen now opens your fly box at the top of the logbook, with confetti and the new fly marked as it lands.',
+        fr: { title: 'Les codes mouche arrivent en fanfare', body: 'Scanner le code mouche de votre écran Idle Angler ouvre maintenant votre boîte à mouches en haut du carnet, avec des confettis et la nouvelle mouche signalée à son arrivée.' },
+        de: { title: 'Fliegencodes kommen mit Konfetti an', body: 'Wenn du den Fliegencode auf deinem Idle-Angler-Bildschirm scannst, öffnet sich deine Fliegendose jetzt oben im Fangbuch, mit Konfetti und der neuen Fliege markiert.' },
+        es: { title: 'Los códigos de mosca llegan con confeti', body: 'Al escanear el código de mosca de tu pantalla de Idle Angler, tu caja de moscas se abre ahora arriba del Cuaderno, con confeti y la nueva mosca marcada al llegar.' },
+        it: { title: 'I codici delle mosche arrivano con i coriandoli', body: 'Scansionando il codice mosca sullo schermo di Idle Angler, la scatola delle mosche si apre ora in cima al registro, con i coriandoli e la nuova mosca segnata appena arriva.' },
+        pt: { title: 'Os códigos de mosca chegam com confete', body: 'Ao escanear o código de mosca na tela do Idle Angler, sua caixa de moscas agora abre no topo do Caderno, com confete e a nova mosca marcada assim que chega.' },
+        pl: { title: 'Kody much przychodzą z konfetti', body: 'Zeskanowanie kodu muchy z ekranu Idle Angler otwiera teraz pudełko na muchy na górze Rejestru, z konfetti i oznaczoną nową muchą.' },
+        nl: { title: 'Vliegcodes komen binnen met confetti', body: 'Als je de vliegcode op je Idle Angler-scherm scant, opent je vliegendoos nu bovenaan het Logboek, met confetti en de nieuwe vlieg gemarkeerd zodra hij binnenkomt.' },
+      },
+      {
+        game: 'desk-crawler',
+        title: 'See who shares your floor',
+        body: 'Your TRMNL now names up to three other heroes on your hero’s floor under the status line, with how many more are there. In the companion, the world map shows how many heroes are on each floor, and See everyone lists everyone on yours, linked to their public pages.',
+        fr: { title: 'Voyez qui partage votre étage', body: 'Votre TRMNL nomme désormais jusqu’à trois autres héros présents à l’étage de votre héros, sous la ligne d’état, avec le nombre de ceux qui restent. Dans le compagnon, la carte du monde indique combien de héros se trouvent à chaque étage, et Voir tout le monde liste tous ceux du vôtre, avec un lien vers leur page publique.' },
+        de: { title: 'Sieh, wer auf deiner Etage ist', body: 'Dein TRMNL nennt jetzt unter der Statuszeile bis zu drei andere Helden auf der Etage deines Helden und wie viele noch dort sind. In der Begleit-App zeigt die Weltkarte, wie viele Helden auf jeder Etage sind, und Alle ansehen listet alle auf deiner Etage auf, mit Links zu ihren öffentlichen Seiten.' },
+        es: { title: 'Mira quién comparte tu planta', body: 'Tu TRMNL ahora nombra, bajo la línea de estado, hasta tres héroes más que están en la planta de tu héroe, y cuántos más hay. En la app, el mapa del mundo muestra cuántos héroes hay en cada planta, y Ver a todos enumera a todos los de la tuya, con enlaces a sus páginas públicas.' },
+        it: { title: 'Scopri chi c’è al tuo piano', body: 'Il tuo TRMNL ora nomina, sotto la riga di stato, fino a tre altri eroi al piano del tuo eroe, e quanti altri ce ne sono. Nell’app, la mappa del mondo mostra quanti eroi ci sono a ogni piano, e Vedi tutti elenca tutti quelli del tuo, con i link alle loro pagine pubbliche.' },
+        pt: { title: 'Veja quem divide o seu andar', body: 'O seu TRMNL agora mostra, abaixo da linha de status, até três outros heróis no andar do seu herói e quantos mais estão lá. No app, o mapa do mundo mostra quantos heróis há em cada andar, e Ver todos lista todo mundo no seu, com links para as páginas públicas deles.' },
+        pl: { title: 'Zobacz, kto jest na twoim piętrze', body: 'Twój TRMNL pokazuje teraz pod linią stanu do trzech innych bohaterów na piętrze twojego bohatera i ilu jest tam jeszcze. W aplikacji mapa świata pokazuje, ilu bohaterów jest na każdym piętrze, a Zobacz wszystkich wymienia wszystkich z twojego, z linkami do ich publicznych stron.' },
+        nl: { title: 'Zie wie er op je verdieping is', body: 'Je TRMNL noemt nu onder de statusregel tot drie andere helden op de verdieping van je held, en hoeveel er nog meer zijn. In de app toont de wereldkaart hoeveel helden er op elke verdieping zijn, en Bekijk iedereen toont iedereen op die van jou, met links naar hun openbare pagina’s.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-27',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'Lighter help and log pages',
         body: 'The Desk Crawler guide now loads in your language alone, about a tenth of what it fetched before, and the Log tab opens straight onto your entries instead of a placeholder. The More tab lists its pages in two columns.',
         fr: { title: 'Aide et journal plus légers', body: 'Le guide de Desk Crawler ne charge plus que votre langue, environ un dixième de ce qu’il récupérait avant, et l’onglet Journal s’ouvre directement sur vos entrées au lieu d’un espace réservé. L’onglet Plus présente ses pages sur deux colonnes.' },
@@ -28,6 +105,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een snellere, nettere begeleider', body: 'De begeleider laadt veel minder script: hij haalt de spelnamen in jouw taal alleen op wanneer je daarin leest, in plaats van alle talen tegelijk. De houding van je held wisselen vraagt niet meer om bevestiging, want je kunt altijd terug. Het getal op het tabblad Tas verschijnt nu alleen als een vondst op een plek wacht of de tas bijna vol is. De stand toont de vijf rond jou en de top 5, de rest is één tik verder. Het logboek houdt zijn tellers voor overvallen en collega’s uit zicht tot er een is, en het tabblad Meer zet de winkel onder een eigen kop, met de installaties ingeklapt.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A Rogue heals to its own limit',
         body: 'A decision that healed a Rogue could push it past its maximum HP, and the game then paused that hero for a service check until someone looked. Healing now stops at the right limit, the paused hero is back at work, and a pause like this now tells us the same hour it happens.',
         fr: { title: 'Un Voleur se soigne jusqu’à sa propre limite', body: 'Une décision qui soignait un Voleur pouvait le pousser au-delà de ses PV maximum, et le jeu mettait alors ce héros en pause pour une vérification technique jusqu’à ce que quelqu’un s’en occupe. Le soin s’arrête désormais à la bonne limite, le héros en pause a repris le travail, et une pause de ce genre nous est maintenant signalée dans l’heure.' },
@@ -71,6 +149,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Er komt een tweede spel aan: Idle Angler', body: 'Idle Angler is een visspel dat zichzelf speelt op je TRMNL: je visser werpt elk kwartier uit, vult een logboek met 58 soorten en spaart voor de spullen die nieuw water openen. Het gebruikt hetzelfde account als je held. TRMNL beoordeelt het voor de marketplace, dus tik op de pagina van het spel op ‘Laat het me weten’ en we mailen je één keer, op de dag dat je het kunt installeren. De voorpagina toont nu beide spellen, en Desk Crawler heeft een eigen pagina.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Rivals are gone; raids stay random',
         body: 'You can still follow other players from their hero pages and see them under Rankings, but you can no longer name one of them your rival. Naming a rival sent half your hero’s raids after their desk and told them who named you, and the one-way rule confused more people than it amused. Desk raids now pick their targets by chance from everyone, as they did before, and nothing about following is shown to the player you follow.',
         fr: { title: 'Les rivaux disparaissent, les raids restent au hasard', body: 'Vous pouvez toujours suivre d’autres joueurs depuis leur page de héros et les voir sous Classements, mais vous ne pouvez plus désigner l’un d’eux comme rival. Désigner un rival envoyait la moitié des raids de votre héros sur son bureau et lui disait qui l’avait désigné, et cette règle à sens unique a dérouté plus de monde qu’elle n’en a amusé. Les raids de bureau choisissent de nouveau leurs cibles au hasard parmi tout le monde, et rien de ce que vous suivez n’est montré au joueur suivi.' },
@@ -82,6 +161,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Rivalen zijn weg, raids blijven willekeurig', body: 'Je kunt nog steeds andere spelers volgen via hun heldenpagina en ze onder Ranglijsten zien, maar je kunt er geen meer als rivaal kiezen. Een rivaal kreeg de helft van de raids van je held en hoorde wie hem had gekozen, en die eenrichtingsregel bracht meer mensen in de war dan ze vermaakte. Bureau-raids kiezen hun doelen weer willekeurig uit iedereen, en wie je volgt ziet daar niets van.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Rankings run by the day and the week',
         body: 'The two recent boards are now Today and This week. Today starts again at 00:00 UTC and the week on Monday at 00:00 UTC, when the keepsake code changes. They used to count the last 24 hours and the last seven days, so a big night stayed on the board into the next evening. Your TRMNL shows This week, as before.',
         fr: { title: 'Les classements suivent le jour et la semaine', body: 'Les deux classements récents sont désormais Aujourd’hui et Semaine. La journée repart à 00:00 UTC et la semaine le lundi à 00:00 UTC, quand le code souvenir change. Ils comptaient avant les dernières 24 heures et les sept derniers jours, si bien qu’une grosse nuit restait au classement jusqu’au soir suivant. Votre TRMNL affiche la semaine, comme avant.' },
@@ -98,6 +178,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-19',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'The keepsake code under the QR has its space back',
         body: 'When a keepsake is waiting, the caption under the QR code on your TRMNL ran the label into the code, as in “Keepsake482 917”. It now reads “Keepsake 482 917”.',
         fr: { title: 'Le code souvenir sous le QR retrouve son espace', body: 'Quand un souvenir attend, la légende sous le QR code de votre TRMNL collait l’étiquette au code, comme « Code482 917 ». Elle affiche maintenant « Code 482 917 ».' },
@@ -109,6 +190,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'De aandenken-code onder de QR heeft zijn spatie terug', body: 'Als er een aandenken wacht, plakte het bijschrift onder de QR-code op je TRMNL het label aan de code, zoals ‘Aandenken482 917’. Nu staat er ‘Aandenken 482 917’.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Desk Crawler speaks five more languages',
         body: 'The site, the companion and your TRMNL screen now come in Spanish, Italian, Brazilian Portuguese, Polish and Dutch, as well as English, French and German. Pick one at the bottom of any page or under Account; your TRMNL follows your TRMNL account’s language, or the one you pick. Your hero, gear and history carry over, and older stories are translated too.',
         fr: { title: 'Desk Crawler parle cinq langues de plus', body: 'Le site, le compagnon et votre écran TRMNL existent maintenant en espagnol, italien, portugais du Brésil, polonais et néerlandais, en plus de l’anglais, du français et de l’allemand. Choisissez-en une en bas de n’importe quelle page ou dans Compte ; votre TRMNL suit la langue de votre compte TRMNL, ou celle que vous choisissez. Votre héros, votre équipement et votre historique sont conservés, et les anciennes histoires sont traduites aussi.' },
@@ -125,6 +207,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-18',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'Choose your own stance',
         body: 'When stances open at level 7, your hero now starts with none chosen and plays Balanced until you pick. A new goal asks you to choose one, and any of the three counts, Balanced included. It takes the place of the old goal that asked for Bold.',
         fr: { title: 'Choisissez votre posture', body: 'Quand les postures s’ouvrent au niveau 7, votre héros commence sans posture et joue Équilibré jusqu’à votre choix. Un nouvel objectif vous demande d’en choisir une, et n’importe laquelle des trois compte, Équilibré compris. Il remplace l’ancien objectif qui demandait Audacieux.' },
@@ -136,6 +219,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Kies zelf je houding', body: 'Als de houdingen op niveau 7 opengaan, begint je held zonder gekozen houding en speelt hij Evenwichtig tot jij kiest. Een nieuw doel vraagt je er een te kiezen, en elk van de drie telt, ook Evenwichtig. Het vervangt het oude doel dat om Roekeloos vroeg.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A tidier companion',
         body: 'Rankings open on the 7-day board, the same one your TRMNL shows. The Career page folds the goals you have done, so it opens on the current one. The name tag and makeover moved to the More tab, next to your names, and Pause moved there too. The Bag tab counts the spares waiting to be sold or salvaged.',
         fr: { title: 'Un compagnon plus clair', body: 'Les classements s’ouvrent sur le classement sur 7 jours, le même que sur votre TRMNL. La page Carrière replie les objectifs atteints et s’ouvre sur l’objectif en cours. Le badge nominatif et le relooking sont passés dans l’onglet Plus, à côté de vos noms, tout comme la pause. L’onglet Sac compte les objets en trop à vendre ou recycler.' },
@@ -147,6 +231,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een opgeruimdere app', body: 'Ranglijsten openen op de lijst van 7 dagen, dezelfde die je TRMNL toont. De Carrièrepagina klapt behaalde doelen in, zodat hij opent op het huidige doel. Het naamplaatje en de make-over zijn naar het tabblad Meer verhuisd, naast je namen, net als Pauzeren. Het tabblad Tas telt de reserves die wachten op verkopen of demonteren.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A full bag no longer stops your hero',
         body: 'When the bag fills up, your hero holds the next find for you and keeps adventuring, earning XP and gold as usual. Further finds stay behind until you make room, and your TRMNL keeps showing the adventure with a short note about the bag. Selling or salvaging a spare moves the held find into the bag, and the Bag page can do it in one tap.',
         fr: { title: 'Un sac plein n’arrête plus votre héros', body: 'Quand le sac est plein, votre héros vous garde la prochaine trouvaille et continue l’aventure, en gagnant XP et or comme d’habitude. Les trouvailles suivantes restent sur place jusqu’à ce que vous fassiez de la place, et votre TRMNL continue d’afficher l’aventure avec une courte note sur le sac. Vendre ou recycler un objet en trop fait passer la trouvaille dans le sac, et la page Sac peut le faire en une touche.' },
@@ -158,6 +243,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een volle tas houdt je held niet meer tegen', body: 'Als de tas vol raakt, houdt je held de volgende vondst voor je vast en gaat door met avonturen, met XP en goud zoals altijd. Latere vondsten blijven liggen tot je ruimte maakt, en je TRMNL blijft het avontuur tonen met een korte notitie over de tas. Een reserve verkopen of demonteren zet de bewaarde vondst in de tas, en de Taspagina doet dat met één tik.' },
       },
       {
+        game: 'desk-crawler',
         title: 'No more goal asking you to switch to Bold',
         body: 'The “Switch to Bold” goal sent heroes into the Cafeteria Depths on the riskiest stance, and many were knocked out there. It is gone from the ladder: a hero waiting on it moves on to the desk raid goal. Heroes who already reached it keep it.',
         fr: { title: 'Plus d’objectif pour passer en Audacieux', body: 'L’objectif « Passez en Audacieux » envoyait les héros dans les Profondeurs de la cafétéria avec la posture la plus risquée, et beaucoup y étaient mis K.-O. Il quitte l’échelle : un héros qui l’attendait passe à l’objectif de raid de bureau. Les héros qui l’avaient atteint le gardent.' },
@@ -174,6 +260,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-17',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'Your TRMNL says when a goal reward is waiting',
         body: 'When you reach a goal, the goal line on your TRMNL turns black and tells you to claim the gold in the companion, instead of showing the next goal. The next goal comes back once you have claimed it.',
         fr: { title: 'Votre TRMNL indique quand une récompense d’objectif attend', body: 'Quand vous atteignez un objectif, la ligne d’objectif de votre TRMNL passe en noir et vous invite à récupérer l’or dans le compagnon, au lieu d’afficher l’objectif suivant. L’objectif suivant revient une fois la récompense récupérée.' },
@@ -185,6 +272,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Je TRMNL meldt wanneer er een doelbeloning klaarligt', body: 'Als je een doel bereikt, wordt de doelregel op je TRMNL zwart en zegt hij dat je het goud in de app moet ophalen, in plaats van het volgende doel te tonen. Het volgende doel komt terug zodra je het hebt opgehaald.' },
       },
       {
+        game: 'desk-crawler',
         title: 'More of the adventure log fits in the full landscape layout',
         body: 'In the full landscape layout, the newest entry now keeps its XP, gold, HP and time on its own line when they fit, and the changes on older entries take only the room they need. Fewer entries wrap, so the log shows one or two more.',
         fr: { title: 'Le journal d’aventure en montre plus en paysage plein écran', body: 'En paysage plein écran, l’entrée la plus récente garde son XP, son or, ses PV et son heure sur sa propre ligne quand ils tiennent, et les gains des entrées plus anciennes ne prennent que la place nécessaire. Moins d’entrées passent à la ligne, donc le journal en montre une ou deux de plus.' },
@@ -196,6 +284,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Meer van het avonturenlogboek past in de volledige liggende indeling', body: 'In de volledige liggende indeling houdt de nieuwste regel nu zijn XP, goud, HP en tijd op een eigen regel als die passen, en de wijzigingen bij oudere regels nemen alleen de ruimte die ze nodig hebben. Minder regels lopen door, dus het logboek toont er een of twee meer.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Desk Crawler’s marks show under the Dark theme',
         body: 'With your TRMNL set to the Dark theme, the hearts, XP bar, gold and potion marks, log icons and the rule under the scene used to vanish. They now draw in the theme’s ink, so they show on every theme.',
         fr: { title: 'Les symboles de Desk Crawler s’affichent avec le thème Sombre', body: 'Avec votre TRMNL réglé sur le thème Sombre, les cœurs, la barre d’XP, les symboles d’or et de potions, les icônes du journal et la ligne sous la scène disparaissaient. Ils s’affichent maintenant dans l’encre du thème, donc sur tous les thèmes.' },
@@ -207,6 +296,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'De markeringen van Desk Crawler zijn zichtbaar in het donkere thema', body: 'Met je TRMNL op het donkere thema verdwenen de hartjes, de XP-balk, de goud- en drankjestekens, de logboekiconen en de lijn onder de scène. Ze worden nu in de inkt van het thema getekend, dus ze zijn in elk thema zichtbaar.' },
       },
       {
+        game: 'desk-crawler',
         title: 'The bag-full panel fits every TRMNL layout',
         body: 'When the bag is full, the panel with the bag’s QR code no longer runs into the header or off the edge in the half, side and quarter layouts. Smaller slots show a smaller code and leave out the scene.',
         fr: { title: 'Le panneau « Sac plein » tient dans toutes les mises en page TRMNL', body: 'Quand le sac est plein, le panneau avec le QR code du sac ne déborde plus sur l’en-tête ni hors de l’écran dans les mises en page demi, côté et quart. Les petits emplacements montrent un code plus petit et laissent la scène de côté.' },
@@ -218,6 +308,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Het paneel voor een volle tas past in elke TRMNL-indeling', body: 'Als de tas vol is, botst het paneel met de QR-code van de tas niet meer tegen de kop en loopt het niet meer van de rand in de halve, zij- en kwartindeling. Kleinere vakken tonen een kleinere code en laten de scène weg.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Scan the screen to collect your keepsake',
         body: 'While a keepsake waits, the QR code on your TRMNL collects it: scan it with your phone and it goes straight onto your shelf. The code is printed beside the QR where there is room, so it shows even with the title bar turned off.',
         fr: { title: 'Scannez l’écran pour récupérer votre souvenir', body: 'Tant qu’un souvenir attend, le QR code de votre TRMNL le récupère : scannez-le avec votre téléphone et il rejoint directement votre étagère. Le code est imprimé à côté du QR quand il y a la place, donc il reste visible même sans barre de titre.' },
@@ -229,6 +320,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Scan het scherm om je aandenken te verzamelen', body: 'Terwijl er een aandenken wacht, verzamelt de QR-code op je TRMNL het: scan hem met je telefoon en het gaat meteen op je plank. De code staat naast de QR als er ruimte is, dus hij is ook zichtbaar met de titelbalk uit.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Desk Crawler fits its screen with the title bar hidden',
         body: 'With the TRMNL title bar turned off, older adventure entries ran under the leaderboard and the recap. The screen now drops the oldest entries to fit, as it does with the bar shown.',
         fr: { title: 'Desk Crawler tient dans l’écran sans barre de titre', body: 'Quand la barre de titre TRMNL était masquée, les anciennes aventures passaient sous le classement et le récapitulatif. L’écran retire maintenant les plus anciennes pour tenir, comme avec la barre affichée.' },
@@ -240,6 +332,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Desk Crawler past op zijn scherm met verborgen titelbalk', body: 'Met de titelbalk van TRMNL uit liepen oudere avonturenregels onder de ranglijst en de samenvatting. Het scherm laat nu de oudste regels weg om te passen, net als met de balk zichtbaar.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Career unlocks are listed by level',
         body: 'On the Career page, What opens when now lists each feature from the lowest unlock level to the highest, so you can see what comes next in order.',
         fr: { title: 'Les déblocages de carrière sont listés par niveau', body: 'Sur la page Carrière, Ce qui s’ouvre et quand liste maintenant chaque fonction du niveau le plus bas au plus élevé, pour voir ce qui vient ensuite dans l’ordre.' },
@@ -256,6 +349,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-16',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'A sorted bag starts the next adventure',
         body: 'When your bag has a free slot and nothing is waiting, adventures resume on their own within 15 minutes. You do not need to tap Resume. You can still pick another area from the bag page before the next adventure. If your bag was already sorted, the next adventure picks up where you left off.',
         fr: { title: 'Un sac rangé relance la prochaine aventure', body: 'Quand votre sac a une place libre et que rien n’attend, les aventures reprennent toutes seules en moins de 15 minutes. Inutile d’appuyer sur Reprendre. Vous pouvez encore choisir une autre zone depuis la page Sac avant la prochaine aventure. Si votre sac était déjà rangé, la prochaine aventure reprend là où vous en étiez.' },
@@ -267,6 +361,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een opgeruimde tas start het volgende avontuur', body: 'Als je tas een vrije plek heeft en er niets wacht, gaan de avonturen binnen 15 minuten vanzelf verder. Je hoeft niet op Verdergaan te tikken. Je kunt vóór het volgende avontuur nog een ander gebied kiezen op de Taspagina. Was je tas al opgeruimd, dan gaat het volgende avontuur verder waar je was.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A level goal before each locked one',
         body: 'Office decisions wait until level 5, so Reach level 5 comes first and shows your progress. The wandering merchant at level 6, the Cafeteria at level 8 and the Parking Garage at level 16 get the same. If you were waiting on one of those, that level is your goal now.',
         fr: { title: 'Un objectif de niveau avant chaque chose encore fermée', body: 'Les décisions du bureau attendent le niveau 5, alors Atteignez le niveau 5 passe devant et montre votre progression. Le marchand ambulant au niveau 6, la Cafétéria au niveau 8 et le Parking souterrain au niveau 16 aussi. Si vous attendiez l’un d’eux, ce niveau est maintenant votre objectif.' },
@@ -278,6 +373,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een niveaudoel vóór elk vergrendeld doel', body: 'Kantoorbeslissingen wachten tot niveau 5, dus Bereik niveau 5 komt eerst en toont je voortgang. Hetzelfde geldt voor de rondtrekkende koopman op niveau 6, de Kantine op 8 en de Parkeergarage op 16. Wachtte je op een daarvan, dan is dat niveau nu je doel.' },
       },
       {
+        game: 'desk-crawler',
         title: 'More room for portrait adventures',
         body: 'On full-screen portrait displays, the event log uses the whole width. Your goal and today’s tasks sit together below it, beside a compact leaderboard that keeps your own row in view. Available on TRMNL X. On both X and OG portrait screens, health and gear line up beneath the hero, with the QR code at the top right. Portrait events fit on one row when there is room for the icon, full story, closely grouped stats and a separate timestamp; longer stories keep the details below. A vertical rule separates the goal and tasks from the leaderboard.',
         fr: { title: 'Plus de place pour les aventures en portrait', body: 'En plein écran portrait, le journal occupe toute la largeur. Votre objectif et les tâches du jour sont regroupés dessous, à côté d’un classement compact qui garde votre ligne visible. Disponible sur TRMNL X. Sur les écrans portrait X et OG, la santé et l’équipement s’alignent sous le héros, avec le code QR en haut à droite. En portrait, les événements tiennent sur une ligne si l’icône, le récit complet, les statistiques regroupées et l’heure bien séparée y entrent ; sinon les détails restent dessous. Un trait vertical sépare l’objectif et les tâches du classement.' },
@@ -289,6 +385,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Meer ruimte voor staande avonturen', body: 'Op volledige staande schermen gebruikt het gebeurtenissenlogboek de hele breedte. Je doel en de taken van vandaag staan samen eronder, naast een compacte ranglijst die je eigen regel in beeld houdt. Beschikbaar op TRMNL X. Op staande X- en OG-schermen staan gezondheid en uitrusting onder de held, met de QR-code rechtsboven. Staande gebeurtenissen passen op één regel als er ruimte is voor het icoon, het hele verhaal, dicht gegroepeerde cijfers en een losse tijd; langere verhalen houden de details eronder. Een verticale lijn scheidt het doel en de taken van de ranglijst.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Buy-a-bag goals link to the Bag page',
         body: 'A goal like the Laptop Backpack no longer says it is done, or that the reward is waiting, before you have bought the bag. When you have the gold, the goal links straight to the Bag page.',
         fr: { title: 'Les objectifs d’achat mènent à la page Sac', body: 'Un objectif comme le sac à dos pour ordinateur ne dit plus qu’il est fait, ni que la récompense attend, avant l’achat. Quand vous avez l’or, l’objectif mène directement à la page Sac.' },
@@ -300,6 +397,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Doelen om een tas te kopen linken naar de Taspagina', body: 'Een doel zoals de Laptoprugzak zegt niet meer dat het gehaald is, of dat de beloning klaarligt, voordat je de tas hebt gekocht. Heb je het goud, dan linkt het doel meteen naar de Taspagina.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Equipping gear and switching to Bold mark the goal done right away',
         body: 'Putting on a piece of gear you found, or landing on Bold after another stance, marks that goal done immediately. The reward still waits on Claim.',
         fr: { title: 'Équiper et passer en Audacieux cochent l’objectif tout de suite', body: 'Enfiler un équipement trouvé, ou arriver sur Audacieux après un autre style, marque cet objectif comme fait immédiatement. La récompense attend toujours sur Récupérer.' },
@@ -311,6 +409,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Uitrusting dragen en naar Roekeloos schakelen vinken het doel meteen af', body: 'Een gevonden stuk uitrusting aantrekken, of op Roekeloos uitkomen vanuit een andere houding, vinkt dat doel meteen af. De beloning wacht nog op Ophalen.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A clearer TRMNL preview in either orientation',
         body: 'The TRMNL preview now lets you switch between landscape and portrait and remembers your choice. Adventure logs in the vertical half layout keep clear of the leaderboard below.',
         fr: { title: 'Un aperçu TRMNL plus clair dans les deux orientations', body: 'L’aperçu TRMNL permet maintenant de passer du paysage au portrait et mémorise votre choix. Dans la demi-page verticale, le journal d’aventure reste au-dessus du classement.' },
@@ -322,6 +421,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een duidelijker TRMNL-voorbeeld in elke stand', body: 'Met het TRMNL-voorbeeld kun je nu wisselen tussen liggend en staand, en het onthoudt je keuze. Avonturenlogboeken in de verticale halve indeling blijven uit de buurt van de ranglijst eronder.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A goal you finish here is marked done right away',
         body: 'A goal you finish in the companion, such as salvaging a piece of gear, is marked done immediately. The reward waits on the Claim button instead of the next adventure.',
         fr: { title: 'Un objectif fini ici est coché tout de suite', body: 'Un objectif que vous terminez dans le compagnon, comme démonter un équipement, est marqué comme fait immédiatement. La récompense attend sur le bouton Récupérer, au lieu de la prochaine aventure.' },
@@ -333,6 +433,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een doel dat je hier haalt, wordt meteen afgevinkt', body: 'Een doel dat je in de app haalt, zoals een stuk uitrusting demonteren, wordt meteen afgevinkt. De beloning wacht op de knop Ophalen in plaats van op het volgende avontuur.' },
       },
       {
+        game: 'desk-crawler',
         title: 'The office keeps a public count',
         body: 'The Desk Crawler page now shows how many heroes have started, how many monsters they have defeated and how much gear they have found. One more number joins them, and it changes: gear sold, gear salvaged, potions drunk, and a few others. The numbers update with every adventure.',
         fr: { title: 'Le bureau tient un compte public', body: 'La page Desk Crawler indique maintenant combien de héros ont commencé, combien de monstres ils ont vaincus et combien d’équipement ils ont trouvé. Un chiffre de plus les rejoint, et il change : équipement vendu, équipement démonté, potions bues, et quelques autres. Les chiffres se mettent à jour à chaque aventure.' },
@@ -355,6 +456,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'De site blijft in de taal die je koos', body: 'De vertaler van Chrome herschreef de pagina en kon hem laten crashen. De site spreekt al Engels, Frans en Duits, dus de browser laat de pagina zoals hij is. Wissel van taal met de kiezer onderaan elke pagina, of onder Account.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A cleared bag says so, and gold stays in view',
         body: 'Once the bag has room, the companion offers Resume instead of sending you back to the bag. After you resume, it says the next adventure is the one that starts again. The bag page keeps your gold in view while you shop.',
         fr: { title: 'Un sac libéré le dit, et l’or reste visible', body: 'Dès que le sac a de la place, le compagnon propose Reprendre au lieu de vous renvoyer au sac. Après la reprise, il dit que la prochaine aventure est celle qui repart. La page du sac garde votre or en vue pendant les achats.' },
@@ -366,6 +468,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een opgeruimde tas zegt het, en goud blijft in beeld', body: 'Zodra de tas ruimte heeft, biedt de app Verdergaan aan in plaats van je terug te sturen naar de tas. Na het verdergaan zegt hij dat het volgende avontuur het avontuur is dat weer begint. De Taspagina houdt je goud in beeld terwijl je winkelt.' },
       },
       {
+        game: 'desk-crawler',
         title: 'A full bag stops the adventure view',
         body: 'When adventures stop because the bag is full, every TRMNL layout says so and shows a large code straight to the bag, with the slots used and anything waiting to be claimed. In the companion, one confirmation sells the weakest spare, claims a waiting find and sends the hero back out.',
         fr: { title: 'Un sac plein arrête la vue d’aventure', body: 'Quand les aventures s’arrêtent parce que le sac est plein, chaque écran TRMNL le dit et montre un grand code qui ouvre le sac, avec les places utilisées et la trouvaille en attente. Dans le compagnon, une confirmation vend le plus faible en trop, récupère la trouvaille et renvoie le héros.' },
@@ -377,6 +480,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een volle tas stopt het avonturenbeeld', body: 'Als de avonturen stoppen omdat de tas vol is, zegt elke TRMNL-indeling dat en toont een grote code die rechtstreeks naar de tas leidt, met de bezette plekken en wat er klaarligt om op te halen. In de app verkoopt één bevestiging de zwakste reserve, haalt een wachtende vondst op en stuurt de held weer op pad.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Rankings say when they were updated',
         body: 'The rankings now show the last update beside the group name, instead of a line of explanation under it.',
         fr: { title: 'Le classement indique quand il a été mis à jour', body: 'Le classement affiche maintenant la dernière mise à jour à côté du nom du groupe, à la place d’une ligne d’explication en dessous.' },
@@ -393,6 +497,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-15',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'Desk Crawler speaks French and German',
         body: 'The site, the companion and your TRMNL screen now come in French and German as well as English. Pages follow your browser’s language, and you can pick one at the bottom of any page or under Account. Your TRMNL follows the language of your TRMNL account, or the one you pick. Your hero, gear and history carry over, and older stories are translated too.',
         fr: { title: 'Desk Crawler parle français et allemand', body: 'Le site, le compagnon et l’écran de votre TRMNL existent maintenant en français et en allemand, en plus de l’anglais. Les pages suivent la langue de votre navigateur, et vous pouvez en choisir une en bas de chaque page ou dans Compte. Votre TRMNL suit la langue de votre compte TRMNL, ou celle que vous choisissez. Votre héros, votre équipement et votre historique sont conservés, et les anciennes histoires sont traduites aussi.' },
@@ -415,6 +520,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een pagina die een update mist, biedt herladen aan', body: 'Als de site wordt bijgewerkt terwijl je hem openhebt en een pagina zijn nieuwe onderdelen niet kan laden, zegt de pagina nu dat er net een nieuwe versie online staat en geeft je een knop Herladen. Vroeger vroeg hij je de verbinding te controleren, en Opnieuw proberen hielp niet.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Your TRMNL fits at any display scale or text size',
         body: 'If you set a larger display scale or text size on your TRMNL, every layout now keeps inside the screen. Where the header gets too wide, the row of hearts and the XP bar leave their numbers, and smaller details like the stance and gear make way. A very long hero name shortens, and a full bag keeps its code on screen. At the normal size nothing changes.',
         fr: { title: 'Votre TRMNL s’adapte à toutes les échelles d’affichage et tailles de texte', body: 'Si vous choisissez une échelle d’affichage ou une taille de texte plus grande sur votre TRMNL, chaque mise en page reste désormais dans l’écran. Quand l’en-tête devient trop large, la rangée de cœurs et la barre d’XP perdent leurs chiffres, et les petits détails comme la posture et l’équipement s’effacent. Un nom de héros très long se raccourcit, et un sac plein garde son code à l’écran. À la taille normale, rien ne change.' },
@@ -431,6 +537,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-14',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'A dot on the Hero tab when a goal reward is waiting',
         body: 'When your hero reaches a goal, the Hero tab now shows a dot from any page, and the goal card glows with a full-width Claim button. Claiming pops the confetti and the card turns straight into your next goal.',
         fr: { title: 'Un point sur l’onglet Héros quand une récompense d’objectif attend', body: 'Quand votre héros atteint un objectif, l’onglet Héros affiche maintenant un point depuis n’importe quelle page, et la carte d’objectif s’illumine avec un bouton Récupérer sur toute la largeur. Récupérer lance les confettis et la carte passe directement à votre objectif suivant.' },
@@ -442,6 +549,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Een stip op het tabblad Held als er een doelbeloning klaarligt', body: 'Als je held een doel bereikt, toont het tabblad Held nu vanaf elke pagina een stip, en de doelkaart licht op met een brede knop Ophalen. Ophalen laat de confetti vliegen en de kaart wordt meteen je volgende doel.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Stories on your TRMNL show icons for what changed',
         body: 'Each story now shows its XP, gold, HP, potions and bag slots as an icon and a number, like the overnight recap, instead of boxed labels. A story that changed nothing simply has no icons. With a larger display scale or text size on a TRMNL X, the numbers no longer spill out of their columns, and a purchase no longer squeezes its story into a narrow column. At the largest sizes, the weekly board, then the scene, then smaller details make room so your latest story still shows.',
         fr: { title: 'Les histoires sur votre TRMNL montrent des icônes pour ce qui a changé', body: 'Chaque histoire affiche maintenant son XP, son or, ses PV, ses potions et ses places de sac sous forme d’icône et de nombre, comme le bilan de la nuit, au lieu d’étiquettes encadrées. Une histoire qui n’a rien changé n’a tout simplement pas d’icônes. Avec une échelle d’affichage ou une taille de texte plus grande sur un TRMNL X, les nombres ne débordent plus de leurs colonnes, et un achat ne tasse plus son histoire dans une colonne étroite. Aux plus grandes tailles, le classement de la semaine, puis la scène, puis les petits détails font de la place pour que votre dernière histoire reste visible.' },
@@ -453,6 +561,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Verhalen op je TRMNL tonen iconen voor wat er veranderde', body: 'Elk verhaal toont nu zijn XP, goud, HP, drankjes en tasplekken als icoon met een getal, zoals de nachtsamenvatting, in plaats van labels in vakjes. Een verhaal dat niets veranderde, heeft gewoon geen iconen. Met een grotere schaal of tekst op een TRMNL X lopen de getallen niet meer uit hun kolommen, en een aankoop perst zijn verhaal niet meer in een smalle kolom. Op de grootste maten maken de weeklijst, dan de scène en dan kleinere details plaats, zodat je nieuwste verhaal zichtbaar blijft.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Elites can dig in',
         body: 'From level 12, on the Cafeteria Depths and deeper, an elite sometimes digs in and takes a few adventures to beat. Your TRMNL shows its health going down, and your hero comes back to it between rests. It hits hard and can knock your hero out, and it leaves after four hours. When it falls it pays many times an elite’s XP and gold and a rare or epic find. You can walk away from it on the Hero page.',
         fr: { title: 'Les élites peuvent se retrancher', body: 'À partir du niveau 12, dans les Profondeurs de la cafétéria et plus bas, une élite se retranche parfois et demande quelques aventures pour être battue. Votre TRMNL montre sa santé qui baisse, et votre héros y revient entre deux pauses. Elle frappe fort, peut mettre votre héros K.-O. et part au bout de quatre heures. Quand elle tombe, elle rapporte plusieurs fois l’XP et l’or d’une élite, plus une trouvaille rare ou épique. Vous pouvez la laisser tranquille depuis la page Héros.' },
@@ -464,6 +573,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Elites kunnen zich ingraven', body: 'Vanaf niveau 12, in de Kantinediepten en dieper, graaft een elite zich soms in en kost het een paar avonturen om hem te verslaan. Je TRMNL toont hoe zijn gezondheid daalt, en je held gaat tussen het rusten door terug. Hij slaat hard en kan je held knock-out slaan, en hij vertrekt na vier uur. Valt hij, dan levert hij vele malen de XP en het goud van een elite op en een zeldzame of epische vondst. Je kunt weglopen via de pagina Held.' },
       },
       {
+        game: 'desk-crawler',
         title: 'What’s new has a home in More',
         body: 'Hiding the What’s new card on the Hero tab used to leave no easy way back to the list of changes. It now has its own row on the More tab, with the day of the latest update.',
         fr: { title: 'Les nouveautés ont leur place dans Plus', body: 'Masquer la carte Nouveautés de l’onglet Héros ne laissait aucun moyen simple de retrouver la liste des changements. Elle a maintenant sa propre ligne dans l’onglet Plus, avec le jour de la dernière mise à jour.' },
@@ -475,6 +585,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Wat is er nieuw heeft een plek onder Meer', body: 'Wie de kaart Wat is er nieuw op het tabblad Held verborg, had geen makkelijke weg terug naar de lijst met wijzigingen. Die heeft nu een eigen regel op het tabblad Meer, met de dag van de laatste update.' },
       },
       {
+        game: 'desk-crawler',
         title: 'The quarter-size TRMNL view says when your hero is paused or knocked out',
         body: 'If Desk Crawler shares your TRMNL with other plugins in a quarter slot, it now says “Paused by you” while you have paused, and the time your hero is back after a knockout. A long hero name no longer hides your level, and the latest adventure gets more of the width.',
         fr: { title: 'La vue en quart de votre TRMNL dit quand votre héros est en pause ou K.-O.', body: 'Si Desk Crawler partage votre TRMNL avec d’autres plugins dans un emplacement d’un quart, il affiche maintenant « Mis en pause par vous » pendant votre pause, et l’heure du retour de votre héros après un K.-O. Un nom de héros long ne cache plus votre niveau, et la dernière aventure profite de plus de largeur.' },
@@ -486,6 +597,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'De kwartweergave op TRMNL zegt wanneer je held gepauzeerd of knock-out is', body: 'Deelt Desk Crawler je TRMNL met andere plugins in een kwartvak, dan staat er nu ‘Door jou gepauzeerd’ zolang je gepauzeerd hebt, en de tijd waarop je held terug is na een knock-out. Een lange heldennaam verbergt je niveau niet meer, en het nieuwste avontuur krijgt meer breedte.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Less on the Hero page until you need it',
         body: 'Features you haven’t reached yet no longer stack up as locked cards. The Hero page names the next one to open and its level, and the world map shows the floors you can visit plus the next one. The Career page still lists everything that opens later.',
         fr: { title: 'Moins de choses sur la page Héros tant que vous n’en avez pas besoin', body: 'Les fonctions que vous n’avez pas encore atteintes ne s’empilent plus en cartes verrouillées. La page Héros nomme la prochaine à s’ouvrir et son niveau, et la carte du monde montre les étages que vous pouvez visiter, plus le suivant. La page Carrière liste toujours tout ce qui s’ouvre plus tard.' },
@@ -508,6 +620,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Knoppen zijn makkelijker te herkennen', body: 'Alleen wat je kunt aantikken ziet er nu uit als een knop. Iets wat je nog niet kunt betalen, toont de prijs en hoeveel goud je nog nodig hebt in plaats van een grijze knop, Drankje drinken verschijnt alleen als je held gewond is, de wereldkaart markeert waar je bent, en het questlogboek is een gewone lijst.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Rankings show the players around you',
         body: 'The weekly board on your TRMNL now centres on your hero, so you see who is just ahead of you and who is just behind as well as the top of the board. In the app, Rankings opens with the two players either side of you once you are below fifth.',
         fr: { title: 'Le classement montre les joueurs autour de vous', body: 'Le classement de la semaine sur votre TRMNL se centre maintenant sur votre héros : vous voyez qui est juste devant et juste derrière vous, en plus du haut du classement. Dans l’app, Classement s’ouvre sur les deux joueurs de chaque côté de vous dès que vous êtes au-delà de la cinquième place.' },
@@ -519,6 +632,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'Ranglijsten tonen de spelers om je heen', body: 'De weeklijst op je TRMNL is nu gecentreerd op je held, zodat je ziet wie net voor en net achter je staat, naast de top van de lijst. In de app opent Ranglijsten met de twee spelers aan weerszijden van je zodra je onder de vijfde plek staat.' },
       },
       {
+        game: 'desk-crawler',
         title: 'The workbench opens at level 4',
         body: 'Salvage and the workbench used to be there from your first adventure, but the first upgrade needs level 4, so early materials could not be spent. They now open together at level 4. Your TRMNL says when, and your next goal is to salvage a piece of gear. Before that, sell your spares for gold, which pays for the first bags.',
         fr: { title: 'L’établi s’ouvre au niveau 4', body: 'Le démontage et l’établi étaient là dès votre première aventure, mais la première amélioration demande le niveau 4 : les premiers matériaux ne servaient donc à rien. Ils s’ouvrent maintenant ensemble au niveau 4. Votre TRMNL vous prévient, et votre objectif suivant est de démonter une pièce d’équipement. D’ici là, vendez l’équipement en trop pour de l’or, qui paie les premiers sacs.' },
@@ -530,6 +644,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
         nl: { title: 'De werkbank gaat open op niveau 4', body: 'Demonteren en de werkbank waren er vanaf je eerste avontuur, maar de eerste opwaardering vraagt niveau 4, dus vroege materialen kon je niet besteden. Ze gaan nu samen open op niveau 4. Je TRMNL zegt wanneer, en je volgende doel is een stuk uitrusting demonteren. Verkoop tot dan je reserves voor goud, waarmee je de eerste tassen betaalt.' },
       },
       {
+        game: 'desk-crawler',
         title: 'Goals done in the app show as done straight away',
         body: 'Equipping a find or changing your stance for a goal used to leave the goal card asking for it until your hero’s next adventure, up to fifteen minutes later. The card now says the goal is done as soon as you do it. Your hero still marks it off, and the reward arrives, on that next adventure.',
         fr: { title: 'Les objectifs remplis dans l’app s’affichent tout de suite', body: 'Équiper une trouvaille ou changer de posture pour un objectif laissait la carte d’objectif le réclamer jusqu’à la prochaine aventure de votre héros, jusqu’à quinze minutes plus tard. La carte indique maintenant l’objectif rempli dès que vous le faites. Votre héros le coche toujours à cette prochaine aventure, et la récompense arrive à ce moment-là.' },
@@ -546,6 +661,7 @@ export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-10-13',
     changes: [
       {
+        game: 'desk-crawler',
         title: 'Desk Crawler is on the TRMNL marketplace',
         body: 'Install it from the marketplace listing, link your TRMNL and your hero starts adventuring every fifteen minutes.',
         fr: { title: 'Desk Crawler est sur la boutique TRMNL', body: 'Installez-le depuis sa fiche sur la boutique, liez votre TRMNL et votre héros part à l’aventure toutes les quinze minutes.' },

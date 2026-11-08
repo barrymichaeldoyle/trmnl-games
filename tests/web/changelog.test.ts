@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CHANGELOG, changeKeys } from '../../apps/web/src/lib/changelog'
+import { CHANGELOG, changeIsFor, changeKeys, GAME_TAGS } from '../../apps/web/src/lib/changelog'
 import { EARLIER_CHANGES } from '../../apps/web/src/lib/changelogEarlier'
 import { latestChanges, RECENT_CHANGES } from '../../apps/web/src/lib/changelogRecent'
 
@@ -17,5 +17,22 @@ describe('changelog split', () => {
 
   it('shows the front page the same newest three as the whole log', () => {
     expect(latestChanges(3).map((change) => change.key)).toEqual(changeKeys().slice(0, 3).map((change) => change.key))
+  })
+
+  it('tags each change with one game or none, and gives each game its own and the shared changes (D225)', () => {
+    const all = CHANGELOG.flatMap((entry) => entry.changes)
+    for (const change of all) expect(change.game === undefined || GAME_TAGS.includes(change.game), change.title).toBe(true)
+    const shared = all.filter((change) => change.game === undefined)
+    expect(shared.length).toBeGreaterThan(0)
+    for (const game of GAME_TAGS) {
+      const keys = changeKeys('en', game)
+      expect(keys.length).toBe(all.filter((change) => changeIsFor(change, game)).length)
+      expect(keys.length).toBeGreaterThanOrEqual(shared.length)
+      expect(keys.length).toBeLessThan(all.length)
+    }
+    expect(changeKeys('en').length).toBe(all.length)
+    // The entries about the second game's own pages belong to it alone.
+    expect(all.find((change) => change.title === 'The fly code is asked for on the Dock')?.game).toBe('idle-angler')
+    expect(all.find((change) => change.title === 'Idle Angler is here')?.game).toBeUndefined()
   })
 })

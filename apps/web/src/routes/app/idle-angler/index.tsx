@@ -15,6 +15,7 @@ import { GoalCard } from './-goalCard'
 import { Rows } from './-rows'
 import { WaterCompany, WaterCount } from './-company'
 import { FlyCallout } from './-flyBox'
+import { WhatsNewCard } from '../../../lib/whatsNewCard'
 import { LocalTime } from '../../../lib/localTime'
 import { formatDate, formatTime, useLocale, useT } from '../../../lib/i18n'
 import { iaDock } from '../../../i18n/iaDock'
@@ -93,6 +94,7 @@ function DockPage() {
           <span className="inline-flex flex-wrap items-center gap-x-2 text-sm text-muted"><strong className="text-ink">{words.title(angler.title)}</strong> · <Coins n={angler.gold} className="text-gold-ink" /></span>
         </div>
         <FlyCallout notify={notify} />
+        <WhatsNewCard game="idle-angler" />
         {scene ? <Scene sceneKey={scene} alt={t.sceneAlt(angler.alias, here ? words.water(here.id) : '')} /> : null}
         {/* Status, conditions and timing on their own lines: run together, a phone wrapped them mid-phrase. */}
         <div className="flex flex-col gap-1">

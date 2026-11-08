@@ -26,7 +26,7 @@ Use current official platform documentation when local skills or older examples 
 - Treat TRMNL tokens as read-only installation credentials. Clerk authentication governs game mutations.
 - Add only fields used by the current release. Use additive migrations for future systems.
 - Update contracts, tests, and docs when behavior changes. Explain differences from proposals.
-- A change players can see gets a dated entry at the top of `apps/web/src/lib/changelogRecent.ts` (the public /whats-new page, D153; older days move to `changelogEarlier.ts` once the recent file passes ten changes) in the same commit, written for players, with its French and German (`fr`, `de`; D169).
+- A change players can see gets a dated entry at the top of `apps/web/src/lib/changelogRecent.ts` (the public /whats-new page, D153; older days move to `changelogEarlier.ts` once the recent file passes ten changes) in the same commit, written for players, in every language (`fr`, `de`, `es`, `it`, `pt`, `pl`, `nl`; D169, D193), with `game: 'desk-crawler'` or `game: 'idle-angler'` when it is about one game and no `game` when every player sees it (D225).
 - Preserve player progress across continuous releases. Never reset production for a balance patch.
 - A route's `head` function stays in the main bundle, so it reads only `apps/web/src/i18n/heads.ts` (or the help and legal head modules beside the routes), never a page's catalog; the catalog reads its title back from there. Nothing referenced by a route's `head`, `loader` or module scope may import a page's copy or a game's translations (D212).
 
