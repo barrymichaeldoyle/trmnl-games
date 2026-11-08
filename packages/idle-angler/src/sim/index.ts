@@ -1,6 +1,6 @@
 export * from './types'
 export { simulateAngler, SIMULATION_VERSION, IdleAnglerInvariantError, activeBait, bitePermille, candidates, conditionsAt, waterOf, rodOf, coolerOf, baitOf } from './simulate'
-export { starterAngler, zeroCounters, FIRST_LOG } from './starter'
+export { starterAngler, zeroCounters, FIRST_LOG, LAUNCH_LOG } from './starter'
 export * from './shop'
 export * from './conditions'
 export * from './progress'

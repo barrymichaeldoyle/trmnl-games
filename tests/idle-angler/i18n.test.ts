@@ -37,6 +37,7 @@ const BACKEND_LINES = [
   'Handed a Roach to the fishmonger for 61 coins.', 'Handed 2 Roach and Rudd to the fishmonger for 120 coins.', 'Asked the fishmonger for a different order.', 'A 250 g Dace goes in the deadbait box.', 'The 2.6 kg Tench goes up on the wall.',
   'The wall now has 12 pegs.', 'Booked a charter for 96 casts.', 'Entered the Perch Open at the Millpond with 640 g.', 'Gold in the Chub Open at River Bend with 2.1 kg. 500 coins.', 'Bronze in the Mirror Carp Open at Heron Lake with 12.4 kg. 150 coins.',
   'Achievement: First Bite', 'Achievement: Specimen Perch', '3 achievements: Specimen Perch, First Perch, A Kilo Fish', 'You set up on the bank of the Millpond.',
+  'Idle Angler is on the TRMNL marketplace, and every angler starts again on the Millpond. Thanks for testing.',
 ]
 
 const lines = [...simulatedLines(), ...BACKEND_LINES]

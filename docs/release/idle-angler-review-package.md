@@ -1,6 +1,6 @@
 # Idle Angler marketplace review package (draft)
 
-**Status (2026-10-20): submitted for review and emailed; waiting on TRMNL.** Translated into all eight languages the site speaks (D200). Plugin 568 exists in TRMNL, private, with its icon and URLs; Desk Crawler's listing is approved and live, so the condition in [the S7 checklist](../idle-angler.md#s7-checklist-barry) ("after Desk Crawler is approved") holds. Submitting, the listing edits below, the video and the email are Barry's actions (or need his explicit go for each).
+**Status (2026-11-08): approved and listed at trmnl.com/integrations/idle-angler (D224); the listing URL is live on every surface, the world reset and the launch email are the remaining launch-day steps (docs/operations.md).** Submitted 2026-10-20; Mario's review feedback was fixed 2026-11-07 (template v23). Translated into all eight languages the site speaks (D200). Plugin 568 exists in TRMNL, private, with its icon and URLs; Desk Crawler's listing is approved and live, so the condition in [the S7 checklist](../idle-angler.md#s7-checklist-barry) ("after Desk Crawler is approved") holds. Submitting, the listing edits below, the video and the email are Barry's actions (or need his explicit go for each).
 
 ## Listing
 

@@ -97,6 +97,7 @@ export const pt: IaLanguage = {
     'The ice is going out. You walk back to Heron Lake.': 'O gelo está derretendo. Você volta a pé para o Lago das garças.',
     'The charter ties up. You walk back along the Harbour Pier.': 'O barco atraca. Você volta pelo Píer do porto.',
     'You set up on the bank of the Millpond.': 'Você se instala na margem do Lago do moinho.',
+    'Idle Angler is on the TRMNL marketplace, and every angler starts again on the Millpond. Thanks for testing.': 'O Idle Angler está no marketplace do TRMNL, e cada pescador recomeça no Lago do moinho. Obrigado por testar.',
     'You set up at the end of the Harbour Pier.': 'Você se instala na ponta do Píer do porto.',
     'Unlocked: rod and cooler upgrades in the tackle shop.': 'Desbloqueado: varas e caixas térmicas melhores na loja.',
     'Unlocked: fishmonger orders. Three are on the slate.': 'Desbloqueado: os pedidos do peixeiro. Há três no quadro.',

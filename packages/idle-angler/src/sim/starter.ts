@@ -37,3 +37,5 @@ export function starterAngler(content: IdleAnglerCatalog, tick: number): AnglerS
 }
 
 export const FIRST_LOG = 'You set up on the bank of the Millpond.'
+/** D224: the one log line the public-launch reset writes under the first, in every restarted angler's log. */
+export const LAUNCH_LOG = 'Idle Angler is on the TRMNL marketplace, and every angler starts again on the Millpond. Thanks for testing.'

@@ -96,6 +96,7 @@ export const nl: IaLanguage = {
     'The ice is going out. You walk back to Heron Lake.': 'Het ijs smelt. Je loopt terug naar het Reigermeer.',
     'The charter ties up. You walk back along the Harbour Pier.': 'De boot meert aan. Je loopt terug over de Havenpier.',
     'You set up on the bank of the Millpond.': 'Je installeert je aan de oever van de Molenvijver.',
+    'Idle Angler is on the TRMNL marketplace, and every angler starts again on the Millpond. Thanks for testing.': 'Idle Angler staat in de TRMNL-marketplace, en elke visser begint opnieuw bij de Molenvijver. Bedankt voor het testen.',
     'You set up at the end of the Harbour Pier.': 'Je installeert je aan het eind van de Havenpier.',
     'Unlocked: rod and cooler upgrades in the tackle shop.': 'Ontgrendeld: betere hengels en koelboxen in de winkel.',
     'Unlocked: fishmonger orders. Three are on the slate.': 'Ontgrendeld: bestellingen van de visboer. Er staan er drie op het bord.',

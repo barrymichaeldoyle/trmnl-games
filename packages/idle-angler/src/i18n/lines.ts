@@ -1,5 +1,5 @@
 import { contentV5 } from '../content/v5'
-import { FIRST_LOG } from '../sim/starter'
+import { FIRST_LOG, LAUNCH_LOG } from '../sim/starter'
 
 /**
  * D200: every fixed English line Idle Angler writes or sends whole: scenery, runs, arrivals and returns, the first log,
@@ -12,6 +12,7 @@ export const FIXED_LINES: readonly string[] = [
   'The ice is going out. You walk back to Heron Lake.',
   'The charter ties up. You walk back along the Harbour Pier.',
   FIRST_LOG,
+  LAUNCH_LOG,
   'You set up at the end of the Harbour Pier.',
   'Unlocked: rod and cooler upgrades in the tackle shop.',
   'Unlocked: fishmonger orders. Three are on the slate.',
