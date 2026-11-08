@@ -9,7 +9,7 @@
 | Name | Idle Angler | Unchanged |
 | Description (≤50) | A fishing game that plays itself on your TRMNL (46 characters, saved 2026-10-19) | Done |
 | Icon | Saved ([`idle-angler-plugin-icon.png`](../assets/idle-angler-plugin-icon.png), 512×512) | Unchanged |
-| Featured image | Regenerated 2026-10-20 at template v19 from setting 506054 (blob 19687629): night at the Millpond, "Barry the dev · Expert", 12 of 58 species, goal Fill ten orders, best 3.2 kg rainbow trout | Done. The fictional candidate from the `listing` preview state (content v6, template v19) is [`idle-angler-featured.png`](../assets/idle-angler-featured.png), also the game page's sample |
+| Featured image | Regenerated 2026-10-20 at template v19 from setting 506054 (blob 19687629); to regenerate again after the launch reset, press Generate marketplace preview on trmnl.com/plugin_settings/506054/edit once the restarted angler has a catch or two | The fictional candidate from the `listing` preview state (content v6, template v23, redrawn 2026-11-08) is [`idle-angler-featured.png`](../assets/idle-angler-featured.png), also the game page's sample |
 | Categories | games, entertainment | Unchanged |
 | Refresh | Every 15 minutes | Unchanged |
 | Installation URL | `https://trmnlgames.com/connect/trmnl/idle-angler/install` | Unchanged |
