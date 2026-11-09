@@ -152,6 +152,8 @@ export interface IaLanguage {
     readonly noFishYet: string
     readonly yourBest: (weight: string) => string
     readonly rankBest: (rank: number, weight: string) => string
+    /** The board's reset day behind the rank ("until Mon"). */
+    readonly until: (day: string) => string
     readonly labels: Readonly<Record<DeviceLabel, string>>
   }
 }

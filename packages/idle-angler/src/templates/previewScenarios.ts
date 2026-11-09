@@ -1,3 +1,4 @@
+import { weekEndsAt } from '@trmnl-games/engine/calendar'
 import { contentV1 } from '../content/v1'
 import { contentV2 } from '../content/v2'
 import { contentV6 } from '../content/v6'
@@ -64,6 +65,7 @@ const base: IdleAnglerPayloadInput = {
   board: {
     rank: 3,
     ownGrams: 1900,
+    endsAt: weekEndsAt(PREVIEW_NOW),
     top: [
       { rank: 1, name: 'Quillfeather_Longname', grams: 5240, own: false },
       { rank: 2, name: 'Mo', grams: 3410, own: false },

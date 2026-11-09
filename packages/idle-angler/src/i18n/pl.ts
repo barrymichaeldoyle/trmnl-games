@@ -211,6 +211,7 @@ export const pl: IaLanguage = {
     noFishYet: 'W tym tygodniu jeszcze bez ryb',
     yourBest: (weight) => `Twoja najlepsza ${weight}`,
     rankBest: (rank, weight) => `${rank}. miejsce, najlepsza ${weight}`,
+    until: (day) => `do ${day}`,
     labels: { fly: 'Mucha', fly_code: 'Kod muchy', last_12_hours: 'Ostatnie 12 godzin', released: 'Wypuszczona', newest_catch: 'Najnowsza zdobycz', goal: 'Cel:', back_soon: 'Zaraz wracamy', finish_setup: 'Dokończ konfigurację', save_plugin: 'Zapisz plugin w TRMNL. Pierwszy rzut w ciągu 15 minut.', ready: '%name%: gotowe do łowienia' },
   },
 }

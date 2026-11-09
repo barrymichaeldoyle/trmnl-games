@@ -3,6 +3,52 @@ import type { ChangelogEntry } from './changelogRecent'
 /** The public dev log before the newest entries (changelogRecent.ts), newest first; the What's new page shows both. */
 export const EARLIER_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-07',
+    changes: [
+      {
+        game: 'idle-angler',
+        title: 'The fly code is asked for on the Dock',
+        body: 'In Idle Angler, while your TRMNL shows this week’s fly code, the Dock now asks for it at the top of the page instead of leaving the fly box at the foot of the Logbook. The Dock’s meter is labelled Cooler, with the bucket or box you own named under it. On a TRMNL X, the half-screen scene is taller and the weekly board starts at the top of its column.',
+        fr: { title: 'Le code mouche est demandé sur le Ponton', body: 'Dans Idle Angler, tant que votre TRMNL affiche le code mouche de la semaine, le Ponton le demande maintenant en haut de la page au lieu de laisser la boîte à mouches au bas du Carnet. La jauge du Ponton s’appelle Glacière, avec le seau ou la boîte que vous possédez nommé dessous. Sur un TRMNL X, la scène du demi-écran est plus haute et le tableau de la semaine commence en haut de sa colonne.' },
+        de: { title: 'Der Fliegencode wird am Steg abgefragt', body: 'In Idle Angler fragt der Steg jetzt oben auf der Seite nach dem Fliegencode der Woche, solange dein TRMNL ihn zeigt, statt die Fliegendose am Ende des Buchs zu lassen. Die Anzeige am Steg heißt Kühlbox, darunter steht der Eimer oder die Box, die du besitzt. Auf einem TRMNL X ist die Szene des halben Bildschirms höher und die Wochentabelle beginnt oben in ihrer Spalte.' },
+        es: { title: 'El código de mosca se pide en el Muelle', body: 'En Idle Angler, mientras tu TRMNL muestra el código de mosca de la semana, el Muelle ahora lo pide en lo alto de la página en vez de dejar la caja de moscas al final del Diario. El medidor del Muelle se llama Nevera, con el cubo o la caja que tienes nombrado debajo. En un TRMNL X, la escena de media pantalla es más alta y la tabla semanal empieza arriba de su columna.' },
+        it: { title: 'Il codice mosca viene chiesto al Pontile', body: 'In Idle Angler, finché il tuo TRMNL mostra il codice mosca della settimana, il Pontile ora lo chiede in cima alla pagina invece di lasciare la scatola delle mosche in fondo al Diario. L’indicatore del Pontile si chiama Frigo, con il secchio o la cassetta che possiedi indicato sotto. Su un TRMNL X la scena del mezzo schermo è più alta e la classifica della settimana parte dall’alto della sua colonna.' },
+        pt: { title: 'O código da mosca é pedido no Píer', body: 'No Idle Angler, enquanto seu TRMNL mostra o código da mosca da semana, o Píer agora pede por ele no topo da página em vez de deixar a caixa de moscas no fim do Diário. O medidor do Píer chama-se Cooler, com o balde ou a caixa que você tem nomeado abaixo. Em um TRMNL X, a cena de meia tela é mais alta e o quadro da semana começa no topo da sua coluna.' },
+        pl: { title: 'Kod muchy pytany na Pomoście', body: 'W Idle Angler, dopóki TRMNL pokazuje kod muchy na ten tydzień, Pomost prosi o niego u góry strony zamiast zostawiać pudełko na muchy na końcu Wpisów. Wskaźnik na Pomoście nazywa się Lodówka, a pod nim widać wiadro lub skrzynkę, które masz. Na TRMNL X scena na pół ekranu jest wyższa, a tygodniowa tabela zaczyna się u góry swojej kolumny.' },
+        nl: { title: 'De vliegcode wordt op de Stek gevraagd', body: 'In Idle Angler vraagt de Stek nu bovenaan de pagina om de vliegcode van deze week zolang je TRMNL die toont, in plaats van de vliegendoos onderaan het Logboek te laten. De meter op de Stek heet Koelbox, met daaronder de emmer of box die je hebt. Op een TRMNL X is de scène op het halve scherm hoger en begint de weektabel bovenaan zijn kolom.' },
+      },
+    ],
+  },
+  {
+    date: '2026-11-04',
+    changes: [
+      {
+        game: 'desk-crawler',
+        title: 'The merchant stays the day',
+        body: 'In Desk Crawler, the wandering merchant now stays about eight hours instead of one, and the Hero page shows what it sells with a button straight to its offers. A merchant deal alert that turns up overnight waits for the morning.',
+        fr: { title: 'Le marchand reste la journée', body: 'Dans Desk Crawler, le marchand ambulant reste maintenant environ huit heures au lieu d’une, et la page Héros montre ce qu’il vend avec un bouton qui mène droit à ses offres. Une alerte de bonne affaire qui arrive la nuit attend le matin.' },
+        de: { title: 'Der Händler bleibt den ganzen Tag', body: 'In Desk Crawler bleibt der wandernde Händler jetzt etwa acht Stunden statt einer, und die Helden-Seite zeigt, was er verkauft, mit einem Knopf direkt zu seinen Angeboten. Eine Händlerangebot-Benachrichtigung in der Nacht wartet bis zum Morgen.' },
+        es: { title: 'El mercader se queda el día', body: 'En Desk Crawler, el mercader ambulante se queda ahora unas ocho horas en lugar de una, y la página Héroe muestra lo que vende con un botón directo a sus ofertas. Una alerta de oferta del mercader que llega de noche espera a la mañana.' },
+        it: { title: 'Il mercante resta tutto il giorno', body: 'In Desk Crawler il mercante ambulante ora resta circa otto ore invece di una, e la pagina Eroe mostra cosa vende con un pulsante che porta dritto alle sue offerte. Un avviso di affare del mercante che arriva di notte aspetta il mattino.' },
+        pt: { title: 'O mercador fica o dia todo', body: 'No Desk Crawler, o mercador ambulante agora fica cerca de oito horas em vez de uma, e a página Herói mostra o que ele vende com um botão direto para as ofertas. Um alerta de oferta do mercador que chega de madrugada espera a manhã.' },
+        pl: { title: 'Kupiec zostaje na cały dzień', body: 'W Desk Crawler wędrowny kupiec zostaje teraz około ośmiu godzin zamiast jednej, a strona Bohater pokazuje, co sprzedaje, z przyciskiem prosto do jego ofert. Alert o okazji u kupca, który przyjdzie w nocy, czeka do rana.' },
+        nl: { title: 'De koopman blijft de hele dag', body: 'In Desk Crawler blijft de rondtrekkende koopman nu zo’n acht uur in plaats van één, en de pagina Held laat zien wat hij verkoopt, met een knop die meteen naar zijn aanbiedingen gaat. Een melding over een koopje die ’s nachts binnenkomt, wacht tot de ochtend.' },
+      },
+      {
+        game: 'desk-crawler',
+        title: 'More potions on the deep floors',
+        body: 'In Desk Crawler, potions turn up more often in the Cafeteria Depths, the Archive and the Parking Garage, in place of some gold, so a hero down there no longer runs its pouch dry. The Archive gets the most.',
+        fr: { title: 'Plus de potions dans les étages profonds', body: 'Dans Desk Crawler, les potions se trouvent plus souvent dans les Profondeurs de la cafétéria, les Archives et le Parking souterrain, à la place d’un peu d’or : un héros qui y descend ne vide plus sa bourse à potions. Les Archives en reçoivent le plus.' },
+        de: { title: 'Mehr Tränke in den tiefen Etagen', body: 'In Desk Crawler findest du in den Kantinentiefen, im Archiv und in der Tiefgarage öfter Tränke, dafür etwas weniger Gold, damit dein Held dort unten nicht mehr mit leerem Trankbeutel dasteht. Das Archiv bekommt die meisten.' },
+        es: { title: 'Más pociones en las plantas profundas', body: 'En Desk Crawler, las pociones aparecen más a menudo en las Profundidades de la cafetería, el Archivo y el Aparcamiento subterráneo, a cambio de algo de oro, para que un héroe allí abajo ya no se quede sin pociones. El Archivo recibe más que ninguna.' },
+        it: { title: 'Più pozioni ai piani profondi', body: 'In Desk Crawler le pozioni si trovano più spesso nelle Profondità della mensa, nell’Archivio e nel Parcheggio sotterraneo, al posto di un po’ d’oro, così un eroe laggiù non resta più senza pozioni. L’Archivio ne riceve di più.' },
+        pt: { title: 'Mais poções nos andares profundos', body: 'No Desk Crawler, as poções aparecem com mais frequência nas Profundezas do refeitório, no Arquivo e no Estacionamento subterrâneo, no lugar de um pouco de ouro, para que um herói lá embaixo não fique mais sem poções. O Arquivo recebe mais.' },
+        pl: { title: 'Więcej mikstur na głębokich piętrach', body: 'W Desk Crawler mikstury trafiają się częściej w Czeluściach stołówki, w Archiwum i na Parkingu podziemnym, zamiast części złota, więc bohater na dole nie zostaje już z pustą sakiewką na mikstury. Najwięcej dostaje Archiwum.' },
+        nl: { title: 'Meer drankjes op de diepe verdiepingen', body: 'In Desk Crawler vind je vaker drankjes in de Kantinediepten, het Archief en de Parkeergarage, in plaats van wat goud, zodat een held daar beneden niet meer zonder drankjes komt te zitten. Het Archief krijgt de meeste.' },
+      },
+    ],
+  },
+  {
     date: '2026-10-30',
     changes: [
       {

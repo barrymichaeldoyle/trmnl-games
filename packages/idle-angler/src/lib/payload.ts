@@ -1,4 +1,4 @@
-import type { Locale } from '@trmnl-games/platform'
+import { INTL_TAG, type Locale } from '@trmnl-games/platform'
 import { fishBase, qrBase, sceneBase } from '../art/route'
 import { anglerWords } from '../i18n'
 import { poseFor } from '../art/scene'
@@ -112,6 +112,8 @@ export interface PayloadBoard {
   readonly top: ReadonlyArray<{ readonly rank: number; readonly name: string; readonly grams: number; readonly own: boolean }>
   /** The angler's own heaviest fish this week at this water, for a row below the top; null before one. */
   readonly ownGrams?: number | null
+  /** When this week's board starts again (Monday 00:00 UTC), named on the rank line as the owner's weekday. */
+  readonly endsAt?: number
 }
 
 /**
@@ -119,6 +121,9 @@ export interface PayloadBoard {
  * (template v7) before its clamp pass trims names, and a long name that wrapped there left the stories too little room;
  * the X shows the full name, which fits.
  */
+/** The weekday a moment falls on in UTC, short and in the owner's language ("Mon", "lun."): the board's reset day. */
+const weekdayShort = (at: number, locale: Locale) => new Intl.DateTimeFormat(INTL_TAG[locale], { weekday: 'short', timeZone: 'UTC' }).format(new Date(at))
+
 const shortName = (name: string) => (name.length > 10 ? `${name.slice(0, 9)}\u2026` : name)
 
 const BAND_WORD: Readonly<Record<TimeBand, string>> = { dawn: 'dawn', day: 'day', dusk: 'dusk', night: 'night' }
@@ -268,7 +273,7 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     board: input.board
       ? {
           label: say.thisWeek(words.waterName(water.id).at),
-          rank_label: input.board.ownGrams == null ? say.noFishYet : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)),
+          rank_label: [input.board.ownGrams == null ? say.noFishYet : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)), ...(input.board.endsAt ? [say.until(weekdayShort(input.board.endsAt, input.locale ?? 'en'))] : [])].join(' \u00b7 '),
           rows: [
             ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), weight_label: formatWeight(row.grams), own: row.own })),
             ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, name_short: shortName(angler.alias), weight_label: formatWeight(input.board.ownGrams), own: true }] : []),

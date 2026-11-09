@@ -63,6 +63,7 @@ function ShopPage() {
   const openWaters = new Set(dock.waters?.filter((w) => w.open).map((w) => w.id))
   // Deadbait comes from the cooler, never a tub.
   const usableBait = angler.bait.filter((b) => b.class !== 'deadbait' && dock.waters?.some((w) => openWaters.has(w.id) && w.baits.includes(b.class)))
+  const lacking = (dock.waters ?? []).filter((w) => w.open && !angler.bait.some((b) => b.units > 0 && w.baits.includes(b.class)))
   const baitRow = (b: (typeof angler.bait)[number]) => {
     const waters = dock.waters?.filter((w) => w.baits.includes(b.class)).map((w) => words.water(w.id)) ?? []
     const catches = baitCatches(b.class, seen)
@@ -165,6 +166,8 @@ function ShopPage() {
       </Card>
 
       <Card title={t.bait}>
+        {/* Open waters the angler holds no bait for, named before the tubs: the dock says the same at each water. */}
+        {lacking.length > 0 ? <p className="mb-3 text-sm font-semibold text-hp-ink">{t.noBaitAt(lacking.map((w) => words.water(w.id)).join(', '), lacking.length)}</p> : null}
         <ul className="flex flex-col gap-3">{usableBait.map(baitRow)}</ul>
         <p className="mt-3 text-sm text-muted">{t.baitNote}</p>
       </Card>

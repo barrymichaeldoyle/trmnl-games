@@ -243,7 +243,8 @@ export const dock = query({
         id: w.id,
         name: w.name,
         // Logbook gate (titles.ts): species of the previous water needed, and how many are logged.
-        opensAfter: w.opensAfter ? { waterId: w.opensAfter.water, waterName: waterOf(content, w.opensAfter.water).name, species: w.opensAfter.species, logged: speciesLogged(content, angler.logbook, w.opensAfter.water) } : null,
+        // The gate names up to two species still to log at that water (epics aside), so the player knows what to fish for, not just how many.
+        opensAfter: w.opensAfter ? { waterId: w.opensAfter.water, waterName: waterOf(content, w.opensAfter.water).name, species: w.opensAfter.species, logged: speciesLogged(content, angler.logbook, w.opensAfter.water), missing: content.species.filter((s) => s.water === w.opensAfter!.water && s.rarity !== 'epic' && angler.logbook[s.id] === undefined).slice(0, 2).map((s) => s.id) } : null,
         access: w.access ?? null,
         open: canFish(content, state, w.id, now),
         // D162: a charter water needs a ticket, and a seasonal water is closed out of season.

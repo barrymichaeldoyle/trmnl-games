@@ -50,12 +50,15 @@
  * taller in a slot it filled only a third of, and a little more width for the column beside it.
  * Template v24: the weekly board's heading names its water ("This week at River Bend") on up to two lines; before,
  * "This week" alone left the board looking like a world table.
+ * Template v25: the board's rank line ends with the day the week starts again ("until Mon"), and the company line
+ * clamps to two lines through the framework's `data-clamp` rather than a style block (trmnlp's lint flags the latter);
+ * the fitter still swaps an overflowing company line for the count once the framework has clamped it.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 24
+export const TEMPLATE_VERSION = 25
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -102,7 +105,7 @@ const place = `<div class="flex flex--row flex--top gap--[3px] w--min-0 pr--3" d
  * v22: where the names would not fit those two lines, the fitter swaps in the count alone (`company_short`), so "and 125
  * others" is never the part cut off.
  */
-const company = `{% if company %}<div class="flex flex--row flex--left flex--top gap--[3px] stretch-x w--min-0" data-company="true" data-give-way="0.5"><img class="${ICON}" src="{{ m_people }}" alt=""><span class="${LABEL} w--min-0" data-company-text="true" data-short="{{ company_short | escape }}">{{ company | escape }}</span></div>{% endif %}`
+const company = `{% if company %}<div class="flex flex--row flex--left flex--top gap--[3px] stretch-x w--min-0" data-company="true" data-give-way="0.5"><img class="${ICON}" src="{{ m_people }}" alt=""><span class="${LABEL} w--min-0" data-company-text="true" data-clamp="2" data-short="{{ company_short | escape }}">{{ company | escape }}</span></div>{% endif %}`
 
 /** Where the angler is, then the conditions. */
 const statusRow = (withConditions = true) => row(`${place}${withConditions ? conditionMarks : ''}`, 'data-status-row="true"')
@@ -235,7 +238,7 @@ const stories = (limit: number, clamp = 1, classes = 'description lg:title--smal
  * what made the room stays hidden (the X's board, beside the list, never gives it any). Nothing spills or lacks a story
  * at the normal scale, so this only changes a scaled screen.
  */
-const aliasStyle = `<style>[data-alias]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}[data-company-text]{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}</style>`
+const aliasStyle = `<style>[data-alias]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>`
 
 const fitStories = `<script>
 (() => {

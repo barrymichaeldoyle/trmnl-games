@@ -209,6 +209,7 @@ export const it: IaLanguage = {
     noFishYet: 'Ancora nessun pesce qui questa settimana',
     yourBest: (weight) => `Il tuo migliore ${weight}`,
     rankBest: (rank, weight) => `${rank}º, migliore ${weight}`,
+    until: (day) => `fino a ${day}`,
     labels: { fly: 'Mosca', fly_code: 'Codice mosca', last_12_hours: 'Ultime 12 ore', released: 'Rilasciato', newest_catch: 'Ultima cattura', goal: 'Obiettivo:', back_soon: 'Torniamo presto', finish_setup: 'Completa la configurazione', save_plugin: 'Salva il plugin in TRMNL. Il primo lancio arriva entro 15 minuti.', ready: '%name% può pescare' },
   },
 }

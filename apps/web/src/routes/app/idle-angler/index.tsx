@@ -108,6 +108,7 @@ function DockPage() {
         {angler.status !== 'paused' && usable.length === 0 ? <p className="mb-3 font-semibold text-hp-ink">{t.noBaitFor(baitWater ? words.water(baitWater.id) : '', Boolean(destination))} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.buyBait}</Link>.</p> : null}
         {angler.status !== 'paused' && usable.length > 0 && !fishing ? <p className="mb-3 font-semibold text-hp-ink"><a href="#dock-bait" className="underline underline-offset-4">{t.bareHookNow}</a>{usable.every((b) => b.units === 0) ? <>, <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.orBuySome}</Link></> : null}.</p> : null}
         {scene ? <Scene sceneKey={scene} alt={t.sceneAlt(angler.alias, here ? words.water(here.id) : '')} /> : null}
+        {scene ? <p className="mt-2 text-sm"><Link to="/app/idle-angler/trmnl" className="underline underline-offset-4">{t.seeOnTrmnl}</Link></p> : null}
         <FlyCallout notify={notify} />
         {/* The logbook meter counts species towards the next title; the sentence under it says what the title is, in words a first visit can follow. */}
         <div className="grid gap-4 sm:grid-cols-2">
@@ -265,6 +266,7 @@ function LockedLine({ water, pass }: { water: NonNullable<Dock['waters']>[number
     <p className="text-sm text-muted">
       {gateLine ?? t.opensLater}{pass && !pass.owned ? <>{before}{shop(link, pass.price)}</> : water.access && !pass ? t.withPass(words.pass(water.access)) : ''}.
       {pass?.owned ? <> {t.passHeld(words.pass(pass.id))}</> : null}
+      {gate && !gateMet && gate.missing?.length ? <> {t.stillToLog} {gate.missing.map((id, i) => <span key={id}>{i > 0 ? ', ' : ''}<FishName id={id} /></span>)}.</> : null}
     </p>
   )
 }

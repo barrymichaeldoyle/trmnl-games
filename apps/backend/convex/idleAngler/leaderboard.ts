@@ -42,7 +42,7 @@ export const view = query({
 })
 
 /** Device board: this week's heaviest fish at the angler's water, its first rows and the angler's own rank. */
-export async function readDeviceBoard(ctx: QueryCtx, angler: Doc<'anglers'>, now: number): Promise<{ rank: number | null; ownGrams: number | null; top: Array<Pick<BoardRow, 'rank' | 'name' | 'grams' | 'own'>> }> {
+export async function readDeviceBoard(ctx: QueryCtx, angler: Doc<'anglers'>, now: number): Promise<{ rank: number | null; ownGrams: number | null; endsAt: number; top: Array<Pick<BoardRow, 'rank' | 'name' | 'grams' | 'own'>> }> {
   const board = await readBoard(ctx, angler.waterId, weekKey(now), angler._id, DEVICE_TOP)
-  return { rank: board.own?.rank ?? null, ownGrams: board.own?.grams ?? null, top: board.entries.map(({ rank, name, grams, own }) => ({ rank, name, grams, own })) }
+  return { rank: board.own?.rank ?? null, ownGrams: board.own?.grams ?? null, endsAt: weekEndsAt(now), top: board.entries.map(({ rank, name, grams, own }) => ({ rank, name, grams, own })) }
 }

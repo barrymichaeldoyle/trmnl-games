@@ -11,6 +11,8 @@ const company = (and: string, more: (k: number) => string) => (names: readonly s
 /** D200: the Idle Angler Dock: status, meters, the recap, bait, waters and the latest stories. */
 export const iaDock = defineMessages({
   en: {
+    seeOnTrmnl: 'See it on your TRMNL',
+    stillToLog: 'Still to log there:',
     speciesOf: (seen: number, total: number) => `${seen}/${total} species`,
     sceneAlt: (alias: string, water: string) => `${alias} fishing at ${water}`,
     paused: 'Fishing is paused.',
@@ -82,6 +84,8 @@ export const iaDock = defineMessages({
     seeWall: 'See the wall',
   },
   fr: {
+    seeOnTrmnl: 'Voir sur votre TRMNL',
+    stillToLog: 'Encore à noter là-bas :',
     speciesOf: (seen: number, total: number) => `${seen}/${total} espèces`,
     sceneAlt: (alias: string, water: string) => `${alias} pêche ${water}`,
     paused: 'La pêche est en pause.',
@@ -153,6 +157,8 @@ export const iaDock = defineMessages({
     seeWall: 'Voir le mur',
   },
   de: {
+    seeOnTrmnl: 'Auf deinem TRMNL ansehen',
+    stillToLog: 'Dort noch einzutragen:',
     speciesOf: (seen: number, total: number) => `${seen}/${total} Arten`,
     sceneAlt: (alias: string, water: string) => `${alias} beim Angeln: ${water}`,
     paused: 'Das Angeln ist pausiert.',
@@ -224,6 +230,8 @@ export const iaDock = defineMessages({
     seeWall: 'Zur Wand',
   },
   es: {
+    seeOnTrmnl: 'Verlo en tu TRMNL',
+    stillToLog: 'Aún por anotar allí:',
     speciesOf: (seen: number, total: number) => `${seen}/${total} especies`,
     sceneAlt: (alias: string, water: string) => `${alias} pescando ${water}`,
     paused: 'La pesca está en pausa.',
@@ -295,6 +303,8 @@ export const iaDock = defineMessages({
     seeWall: 'Ver la pared',
   },
   it: {
+    seeOnTrmnl: 'Guardalo sul tuo TRMNL',
+    stillToLog: 'Ancora da registrare lì:',
     speciesOf: (seen: number, total: number) => `${seen}/${total} specie`,
     sceneAlt: (alias: string, water: string) => `${alias} pesca ${water}`,
     paused: 'La pesca è in pausa.',
@@ -366,6 +376,8 @@ export const iaDock = defineMessages({
     seeWall: 'Vedi la parete',
   },
   pt: {
+    seeOnTrmnl: 'Veja no seu TRMNL',
+    stillToLog: 'Ainda por registrar lá:',
     speciesOf: (seen: number, total: number) => `${seen}/${total} espécies`,
     sceneAlt: (alias: string, water: string) => `${alias} pescando ${water}`,
     paused: 'A pesca está pausada.',
@@ -437,6 +449,8 @@ export const iaDock = defineMessages({
     seeWall: 'Ver a parede',
   },
   pl: {
+    seeOnTrmnl: 'Zobacz na swoim TRMNL',
+    stillToLog: 'Do zapisania tam jeszcze:',
     speciesOf: (seen: number, total: number) => `Gatunki: ${seen}/${total}`,
     sceneAlt: (alias: string, water: string) => `${alias} łowi: ${water}`,
     paused: 'Łowienie jest wstrzymane.',
@@ -508,6 +522,8 @@ export const iaDock = defineMessages({
     seeWall: 'Zobacz ścianę',
   },
   nl: {
+    seeOnTrmnl: 'Bekijk het op je TRMNL',
+    stillToLog: 'Daar nog te loggen:',
     speciesOf: (seen: number, total: number) => `${seen}/${total} soorten`,
     sceneAlt: (alias: string, water: string) => `${alias} vist: ${water}`,
     paused: 'Vissen is gepauzeerd.',

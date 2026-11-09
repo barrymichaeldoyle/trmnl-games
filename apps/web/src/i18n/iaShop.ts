@@ -3,6 +3,7 @@ import { defineMessages } from '../lib/i18n'
 /** D200: the Idle Angler tackle shop: rods, coolers, the charter, passes and bait. */
 export const iaShop = defineMessages({
   en: {
+    noBaitAt: (list: string, n: number) => `No bait for ${list}. ${n === 1 ? 'Its' : 'Their'} tubs are below.`,
     title: 'Tackle shop',
     buy: 'Buy',
     held: (n: number) => `${n} held`,
@@ -68,6 +69,7 @@ export const iaShop = defineMessages({
     buying: 'Buying…',
   },
   fr: {
+    noBaitAt: (list: string, n: number) => `Pas d’appât pour ${list}. ${n === 1 ? 'Ses' : 'Leurs'} pots sont ci-dessous.`,
     title: 'Magasin de pêche',
     buy: 'Acheter',
     held: (n: number) => `${n} en stock`,
@@ -133,6 +135,7 @@ export const iaShop = defineMessages({
     buying: 'Achat…',
   },
   de: {
+    noBaitAt: (list: string, n: number) => `Kein Köder für ${list}. Die Dosen dafür stehen unten.`,
     title: 'Angelladen',
     buy: 'Kaufen',
     held: (n: number) => `${n} vorrätig`,
@@ -198,6 +201,7 @@ export const iaShop = defineMessages({
     buying: 'Wird gekauft…',
   },
   es: {
+    noBaitAt: (list: string, n: number) => `Sin cebo para ${list}. ${n === 1 ? 'Sus' : 'Sus'} botes están abajo.`,
     title: 'Tienda de pesca',
     buy: 'Comprar',
     held: (n: number) => `${n} en reserva`,
@@ -263,6 +267,7 @@ export const iaShop = defineMessages({
     buying: 'Comprando…',
   },
   it: {
+    noBaitAt: (list: string, n: number) => `Nessuna esca per ${list}. I barattoli sono qui sotto.`,
     title: 'Negozio di pesca',
     buy: 'Compra',
     held: (n: number) => `${n} in scorta`,
@@ -328,6 +333,7 @@ export const iaShop = defineMessages({
     buying: 'Acquisto…',
   },
   pt: {
+    noBaitAt: (list: string, n: number) => `Sem isca para ${list}. Os potes estão abaixo.`,
     title: 'Loja de pesca',
     buy: 'Comprar',
     held: (n: number) => `${n} em estoque`,
@@ -393,6 +399,7 @@ export const iaShop = defineMessages({
     buying: 'Comprando…',
   },
   pl: {
+    noBaitAt: (list: string, n: number) => `Brak przynęty na łowisko: ${list}. Pojemniki są poniżej.`,
     title: 'Sklep wędkarski',
     buy: 'Kup',
     held: (n: number) => `Zapas: ${n}`,
@@ -458,6 +465,7 @@ export const iaShop = defineMessages({
     buying: 'Kupowanie…',
   },
   nl: {
+    noBaitAt: (list: string, n: number) => `Geen aas voor ${list}. De potjes staan hieronder.`,
     title: 'Hengelsportwinkel',
     buy: 'Kopen',
     held: (n: number) => `${n} op voorraad`,

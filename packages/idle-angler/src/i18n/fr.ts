@@ -209,6 +209,7 @@ export const fr: IaLanguage = {
     noFishYet: 'Pas encore de poisson ici cette semaine',
     yourBest: (weight) => `Votre record ${weight}`,
     rankBest: (rank, weight) => `N° ${rank}, record ${weight}`,
+    until: (day) => `jusqu’à ${day}`,
     labels: { fly: 'Mouche', fly_code: 'Code mouche', last_12_hours: '12 dernières heures', released: 'Relâché', newest_catch: 'Dernière prise', goal: 'Objectif :', back_soon: 'De retour bientôt', finish_setup: 'Terminez la configuration', save_plugin: 'Enregistrez le plugin dans TRMNL. Le premier lancer arrive dans les 15 minutes.', ready: 'Tout est prêt pour %name%' },
   },
 }
