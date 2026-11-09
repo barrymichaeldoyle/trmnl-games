@@ -8,7 +8,7 @@ import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import { readyOrders, useAngler, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
-import { FishIcon, Scene } from './-art'
+import { FishIcon, Mark, Scene } from './-art'
 import { FishName, FishText, FromWater, WaterName } from './-fish'
 import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
@@ -176,30 +176,57 @@ function DockPage() {
       </Card></section>
 
       <Card title={t.waters}>
-        <ul className="flex flex-col gap-3">
-          {shownWaters.map((water) => (
-            <li key={water.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-rule pb-3 last:border-b-0">
-              <div className="min-w-0">
-                <p className="flex flex-wrap items-center gap-x-3 font-semibold"><span><WaterName id={water.id} />{water.id === angler.waterId ? <span className="text-muted"> · {t.here}</span> : water.id === angler.travelTo ? <span className="text-muted"> · {t.headingThere}</span> : ''}</span><WaterCount others={water.others ?? 0} /></p>
-                {water.rank ? <p className="text-sm"><strong>{words.waterRank(water.rank.id, water.id)}</strong> · <span className="text-muted">{water.rank.next ? t.rankNext(water.rank.next.species - water.rank.logged, words.lang.waterRanks[water.rank.next.id] ?? water.rank.next.id) : t.rankTop}</span></p> : null}
+        {/* One row per water, built to compare at a glance: the name with where the angler is, who else is there and the
+            bite chance for the bait the angler would fish there, the rank beside the name; the weather with its change time
+            and the species logged; then the water's baits with the tubs held (a zero links to the shop) and a compact Fish here. The
+            time band is the same at every water, so it stays in the header. */}
+        <ul className="flex flex-col">
+          {shownWaters.map((water) => {
+            const isHere = water.id === angler.waterId
+            const going = water.id === angler.travelTo
+            const baits = water.baits.filter((b) => b !== 'deadbait' || !full || full.features.deadbait)
+            const units = (b: string) => angler.bait.find((x) => x.class === b)?.units ?? 0
+            return (
+              <li key={water.id} className={`flex flex-col gap-1.5 border-b border-rule py-3 first:pt-0 last:border-b-0 last:pb-0 ${isHere || going ? 'border-l-4 border-l-sky pl-3' : ''}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="flex min-w-0 flex-wrap items-center gap-x-2 font-semibold">
+                    <WaterName id={water.id} />
+                    {water.rank ? <span className="font-normal text-muted">{words.lang.waterRanks[water.rank.id] ?? water.rank.id}</span> : null}
+                    {isHere ? <span className="hud text-hud-sm uppercase text-sky-ink">{t.here}</span> : going ? <span className="hud text-hud-sm uppercase text-sky-ink">{t.headingThere}</span> : null}
+                  </p>
+                  <p className="flex shrink-0 items-center gap-3 text-sm font-semibold tabular-nums">
+                    <WaterCount others={water.others ?? 0} />
+                    {water.open ? <span className="inline-flex items-center gap-1" title={t.biteChance(water.bitePercent)}><Mark name="catch" /><span aria-hidden="true">{water.bitePercent}%</span><span className="sr-only">{t.biteChance(water.bitePercent)}</span></span> : null}
+                  </p>
+                </div>
                 {water.open ? (
                   <>
-                    <p className="text-sm text-muted">{t.until(words.band(water.band), words.weather(water.weather).toLowerCase())} {time(water.weatherUntil)}</p>
-                    <p className="text-sm text-muted">{t.baitList(water.baits.filter((b) => b !== 'deadbait' || !full || full.features.deadbait).map((b) => words.bait(b)).join(', '))}</p>
+                    <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted">
+                      <span className="inline-flex items-center gap-1.5"><Mark name={water.weather as 'clear'} />{t.until(words.weather(water.weather))} {time(water.weatherUntil)}</span>
+                      {water.rank ? <span>· {t.speciesOf(water.rank.logged, water.rank.total)}</span> : null}
+                    </p>
+                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm tabular-nums">
+                        {baits.map((b) => units(b) > 0
+                          ? <span key={b}><span className="text-muted">{words.bait(b)}</span> <strong className="font-semibold">{units(b)}</strong></span>
+                          : <Link key={b} to="/app/idle-angler/shop" className="text-faint underline underline-offset-4" title={t.buyBait}>{words.bait(b)} 0</Link>)}
+                      </p>
+                      {!isHere && !going ? (
+                        <Button variant="secondary" className="ml-auto min-h-0! py-1!" disabled={travel.pending} onClick={() => {
+                          const next = travelBait(water)
+                          void travel.run({ waterId: water.id as never }, t.headingNotice(words.water(water.id), next ? words.bait(next.class).toLowerCase() : null))
+                        }}>{t.fishHere}</Button>
+                      ) : null}
+                    </div>
                     {held(water).length === 0 ? <p className="text-sm text-hp-ink">{t.noneOfItsBait}</p> : null}
                   </>
                 ) : water.closed ? <p className="text-sm text-muted">{t.winterOnly}</p> : water.charter ? <p className="text-sm text-muted">{t.charterLine} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.bookInShop}</Link>.</p> : <LockedLine water={water} pass={water.access ? dock.shop?.access.find((a) => a.id === water.access) ?? null : null} />}
-              </div>
-              {water.open && water.id !== angler.waterId && water.id !== angler.travelTo ? (
-                <Button variant="secondary" disabled={travel.pending} onClick={() => {
-                  const next = travelBait(water)
-                  void travel.run({ waterId: water.id as never }, t.headingNotice(words.water(water.id), next ? words.bait(next.class).toLowerCase() : null))
-                }}>{t.fishHere}</Button>
-              ) : null}
-            </li>
-          ))}
+              </li>
+            )
+          })}
         </ul>
-        <p className="mt-3 text-sm text-muted">{t.weatherNote}{full?.season ? <> {t.seasonNote(words.season(full.season.id).toLowerCase())} <LocalTime at={full.season.endsAt} format={(d) => formatDate(locale, d, { weekday: 'long' })} />.</> : null} {t.moveNote}</p>
+        {/* The weather cadence and the cost of moving live on the help page; only the season's end is news. */}
+        {full?.season ? <p className="mt-3 text-sm text-muted">{t.seasonNote(words.season(full.season.id).toLowerCase())} <LocalTime at={full.season.endsAt} format={(d) => formatDate(locale, d, { weekday: 'long' })} />.</p> : null}
       </Card>
 
       <WhatsNewCard game="idle-angler" />

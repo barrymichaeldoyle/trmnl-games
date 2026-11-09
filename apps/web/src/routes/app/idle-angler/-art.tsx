@@ -1,3 +1,4 @@
+import { IA_MARKS, type IaMark } from '@trmnl-games/idle-angler/art/marks'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { inked, type Sprite } from '@trmnl-games/engine/art/canvas'
 import { fishSprite, FISH_LARGE, FISH_SMALL } from '@trmnl-games/idle-angler/art/fish'
@@ -82,5 +83,16 @@ export function Scene({ sceneKey, alt }: { sceneKey: SceneKey; alt: string }) {
       {/* Sized to its pixels, never stretched: the bands take the few columns the whole-number scale leaves over. */}
       <img src={painted} alt={alt} width={width * scale} height={STAGE_HEIGHT * scale} style={{ width: width * scale, height: STAGE_HEIGHT * scale }} className="relative mx-auto block max-w-full object-cover object-left [image-rendering:pixelated]" />
     </div>
+  )
+}
+
+/** One of the device's 8x8 marks (weather, the catch fish) as a crisp inline SVG in the current colour, for rows that pair a mark with a number. Decorative: the text beside it names the thing. */
+export function Mark({ name, size = 16, className = '' }: { name: IaMark; size?: number; className?: string }) {
+  const rows = IA_MARKS[name] as readonly string[]
+  const path = rows.flatMap((row, y) => [...row.matchAll(/#+/g)].map((run) => `M${run.index} ${y}h${run[0].length}v1h-${run[0].length}z`)).join('')
+  return (
+    <svg viewBox={`0 0 ${rows[0]!.length} ${rows.length}`} width={size} height={size} aria-hidden="true" shapeRendering="crispEdges" className={`shrink-0 fill-current ${className}`}>
+      <path d={path} />
+    </svg>
   )
 }
