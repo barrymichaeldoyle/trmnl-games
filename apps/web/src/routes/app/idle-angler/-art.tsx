@@ -1,9 +1,10 @@
 import { IA_MARKS, type IaMark } from '@trmnl-games/idle-angler/art/marks'
+import type { Dock } from '../../../lib/idleAngler'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { inked, type Sprite } from '@trmnl-games/engine/art/canvas'
 import { fishSprite, FISH_LARGE, FISH_SMALL } from '@trmnl-games/idle-angler/art/fish'
-import { paintedSceneUri, sceneSteps } from '@trmnl-games/idle-angler/art/sceneColour'
-import { clampStageWidth, MIN_STAGE_WIDTH, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
+import { paintedSceneUri, sceneKeyFromUrl, sceneSteps } from '@trmnl-games/idle-angler/art/sceneColour'
+import { clampStageWidth, MIN_STAGE_WIDTH, poseFor, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { fishTones, flyTones, type Tones } from '@trmnl-games/idle-angler/art/tones'
 
 /**
@@ -96,3 +97,18 @@ export function Mark({ name, size = 16, className = '' }: { name: IaMark; size?:
     </svg>
   )
 }
+
+/** The scene from the dock alone: the water the angler fishes or heads to, its band and weather, and the pose the latest story calls for. */
+
+function sceneFromDock(dock: Dock | undefined): SceneKey | null {
+  const angler = dock?.angler
+  const water = dock?.waters?.find((w) => w.id === (angler?.travelTo ?? angler?.waterId))
+  if (!angler || !water) return null
+  const pose = poseFor(angler.status === 'paused' ? 'paused' : angler.travelTo ? 'travelling' : 'fishing', dock?.logs?.[0]?.kind ?? null)
+  // The dock does not say which fish was held, so a catch shows the angler waiting rather than holding nothing.
+  return { water: water.id as SceneKey['water'], band: water.band as SceneKey['band'], weather: water.weather as SceneKey['weather'], season: (dock?.full?.season?.id ?? null) as SceneKey['season'], pose: pose === 'holding' ? 'waiting' : pose, fish: null, fly: null }
+}
+
+/** The scene the device shows, from the preview payload's scene when it has one, else drawn from the dock's own water, weather and status. */
+export const dockScene = (preview: { scene_base?: unknown } | null | undefined, dock: Dock | undefined): SceneKey | null =>
+  (typeof preview?.scene_base === 'string' && preview.scene_base ? sceneKeyFromUrl(`${preview.scene_base}/152/3.png`) : null) ?? sceneFromDock(dock)

@@ -1,0 +1,203 @@
+{
+  "v": 1,
+  "game": "idle-angler",
+  "data_state": "ready",
+  "status": "fishing",
+  "status_label": "Casting at River Bend",
+  "conditions_label": "dusk, overcast",
+  "band_label": "Dusk",
+  "weather_label": "Overcast",
+  "labels": {
+    "fly": "Fly",
+    "fly_code": "Fly code",
+    "last_12_hours": "Last 12 hours",
+    "released": "Released",
+    "newest_catch": "Newest catch",
+    "goal": "Goal:",
+    "back_soon": "Back soon",
+    "finish_setup": "Finish setting up",
+    "save_plugin": "Save the plugin in TRMNL. The first cast is within 15 minutes.",
+    "ready": "%name% is ready to fish"
+  },
+  "season": null,
+  "goal_line": null,
+  "company": "Quill, Mo, Bea and 8 others",
+  "company_short": "11 other anglers here",
+  "goal_claim": null,
+  "weather": "overcast",
+  "band": "dusk",
+  "alias": "Wren",
+  "title": "Old Hand",
+  "title_pct": 50,
+  "title_next_at": 20,
+  "title_logged": 17,
+  "gold": 1240,
+  "water_id": "river_bend",
+  "water_name": "River Bend",
+  "rod_name": "Fibreglass Rod",
+  "cooler_used": 7,
+  "cooler_capacity": 18,
+  "cooler_full": false,
+  "cooler_label": "7/18",
+  "bait_label": "Maggots 34",
+  "bait_name": "Maggots",
+  "bait_count": 34,
+  "species_logged": 17,
+  "species_total": 30,
+  "stories": [
+    {
+      "kind": "catch",
+      "summary": "A 1.9 kg Barbel took the maggots at dusk. A new personal best.",
+      "u": 1793641500
+    },
+    {
+      "kind": "ambient",
+      "summary": "A kingfisher flashes past, low and blue.",
+      "u": 1793637900
+    },
+    {
+      "kind": "catch",
+      "summary": "A 410 g Chub took the maggots in the day.",
+      "u": 1793633400
+    },
+    {
+      "kind": "got_away",
+      "summary": "Something heavy took the maggots and kept going.",
+      "u": 1793629800
+    },
+    {
+      "kind": "catch",
+      "summary": "A 230 g Dace took the maggots in the day.",
+      "u": 1793626200
+    },
+    {
+      "kind": "ambient",
+      "summary": "Leaves drift down the main flow.",
+      "u": 1793622000
+    },
+    {
+      "kind": "catch",
+      "summary": "A 620 g Grayling took the maggots in the day.",
+      "u": 1793617800
+    },
+    {
+      "kind": "catch",
+      "summary": "A 1.1 kg Chub took the maggots in the day.",
+      "u": 1793613600
+    },
+    {
+      "kind": "ambient",
+      "summary": "Water chatters over the gravel run.",
+      "u": 1793609400
+    },
+    {
+      "kind": "catch",
+      "summary": "A 90 g Gudgeon took the maggots at first light.",
+      "u": 1793605200
+    },
+    {
+      "kind": "release",
+      "summary": "Cooler full. Released a 340 g Dace.",
+      "u": 1793601000
+    },
+    {
+      "kind": "ambient",
+      "summary": "A trout rises once, out of reach.",
+      "u": 1793596800
+    },
+    {
+      "kind": "catch",
+      "summary": "A 1.4 kg Barbel took the maggots in the dark.",
+      "u": 1793592600
+    },
+    {
+      "kind": "ambient",
+      "summary": "The far bank is all willow roots.",
+      "u": 1793588400
+    },
+    {
+      "kind": "catch",
+      "summary": "A 180 g Dace took the maggots in the dark.",
+      "u": 1793584200
+    },
+    {
+      "kind": "got_away",
+      "summary": "Something heavy took the maggots and kept going.",
+      "u": 1793580000
+    }
+  ],
+  "recap": "Last 12 hours: 7 fish, best 1.9 kg Barbel, 1 got away",
+  "recap_items": [
+    {
+      "k": "catch",
+      "text": "7 fish"
+    },
+    {
+      "k": "best",
+      "text": "Best 1.9 kg Barbel"
+    },
+    {
+      "k": "got_away",
+      "text": "1 got away"
+    }
+  ],
+  "board": {
+    "label": "This week at River Bend",
+    "rank_label": "#3, best 1.9 kg",
+    "rows": [
+      {
+        "rank": 1,
+        "name": "Quillfeather_Longname",
+        "name_short": "Quillfeat…",
+        "weight_label": "5.2 kg",
+        "own": false
+      },
+      {
+        "rank": 2,
+        "name": "Mo",
+        "name_short": "Mo",
+        "weight_label": "3.4 kg",
+        "own": false
+      },
+      {
+        "rank": 3,
+        "name": "Wren",
+        "name_short": "Wren",
+        "weight_label": "1.9 kg",
+        "own": true
+      },
+      {
+        "rank": 4,
+        "name": "Hidden player",
+        "name_short": "Hidden pl…",
+        "weight_label": "1.6 kg",
+        "own": false
+      },
+      {
+        "rank": 5,
+        "name": "Bea",
+        "name_short": "Bea",
+        "weight_label": "1.1 kg",
+        "own": false
+      }
+    ]
+  },
+  "latest_catch": {
+    "species_id": "barbel",
+    "name": "Barbel",
+    "weight_label": "1.9 kg"
+  },
+  "newest_catch": {
+    "name": "Barbel",
+    "weight_label": "1.9 kg",
+    "released": false,
+    "fish_base": ""
+  },
+  "attention": null,
+  "attention_kind": null,
+  "qr": "app",
+  "qr_base": "",
+  "qr_label": "Your dock",
+  "scene_base": "",
+  "stale": false
+}

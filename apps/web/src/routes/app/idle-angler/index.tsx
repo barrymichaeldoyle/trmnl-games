@@ -2,13 +2,11 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
-import { poseFor, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
-import { sceneKeyFromUrl } from '@trmnl-games/idle-angler/art/sceneColour'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import { readyOrders, useAngler, type Dock } from '../../../lib/idleAngler'
 import { Button, Card, Meter, NoticeBar, useNotice } from '../../../lib/ui'
-import { FishIcon, Mark, Scene } from './-art'
+import { dockScene, FishIcon, Mark, Scene } from './-art'
 import { FishName, FishText, FromWater, WaterName } from './-fish'
 import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
@@ -48,7 +46,7 @@ function DockPage() {
   const here = dock.waters?.find((w) => w.id === angler.waterId)
   const destination = angler.travelTo ? dock.waters?.find((w) => w.id === angler.travelTo) : null
   // The scene the device shows, painted here in colour; without a device image yet, the dock's own water, weather and status draw the same scene.
-  const scene: SceneKey | null = (typeof preview?.scene_base === 'string' && preview.scene_base ? sceneKeyFromUrl(`${preview.scene_base}/152/3.png`) : null) ?? sceneFromDock(dock)
+  const scene = dockScene(preview, dock)
   // While travelling, bait choices are for the water the angler is heading to: the next cast is there.
   const baitWater = destination ?? here
   // Bait this water uses that the angler holds, plus the one in use even when it ran out.
@@ -269,15 +267,4 @@ function LockedLine({ water, pass }: { water: NonNullable<Dock['waters']>[number
       {pass?.owned ? <> {t.passHeld(words.pass(pass.id))}</> : null}
     </p>
   )
-}
-
-/** The scene from the dock alone: the water the angler fishes or heads to, its band and weather, and the pose the latest story calls for. */
-
-function sceneFromDock(dock: Dock): SceneKey | null {
-  const angler = dock.angler
-  const water = dock.waters?.find((w) => w.id === (angler?.travelTo ?? angler?.waterId))
-  if (!angler || !water) return null
-  const pose = poseFor(angler.status === 'paused' ? 'paused' : angler.travelTo ? 'travelling' : 'fishing', dock.logs?.[0]?.kind ?? null)
-  // The dock does not say which fish was held, so a catch shows the angler waiting rather than holding nothing.
-  return { water: water.id as SceneKey['water'], band: water.band as SceneKey['band'], weather: water.weather as SceneKey['weather'], season: (dock.full?.season?.id ?? null) as SceneKey['season'], pose: pose === 'holding' ? 'waiting' : pose, fish: null, fly: null }
 }

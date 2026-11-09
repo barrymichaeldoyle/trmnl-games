@@ -49,6 +49,8 @@ write('index.html', '<!doctype html><html lang="en"><head><meta charset="UTF-8">
 write('styles.css', readFileSync(resolve(root, 'apps/web/src/styles.css'), 'utf8').replace('@import "tailwindcss";', '@import "tailwindcss";\n@source "../../apps/web/src";'))
 write('fixture.json', readFileSync(resolve(import.meta.dirname, 'fixtures/companion.json'), 'utf8'))
 write('paper-lives.json', readFileSync(resolve(import.meta.dirname, 'fixtures/paper-lives.json'), 'utf8'))
+// The Idle Angler device payload (catch scenario), dumped by tools/review/dump-idle-angler-payload.ts, so On your TRMNL renders a real screen.
+write('idle-angler-payload.json', readFileSync(resolve(import.meta.dirname, 'fixtures/idle-angler-payload.json'), 'utf8'))
 
 // A pathname router with the handful of router APIs the companion uses.
 write('router.jsx', `import React, { useSyncExternalStore, createContext, useContext } from 'react';
@@ -77,6 +79,7 @@ export const Outlet = () => { const Page = useContext(OutletContext); return Pag
 // Queries from the fixture; mutations settle locally.
 write('data.js', `import fixture from './fixture.json';
 import paperLives from './paper-lives.json';
+import iaPayload from './idle-angler-payload.json';
 import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
 import { contentV16 } from '../../packages/desk-crawler/src/content/v16';
 import { loreView } from '../../packages/desk-crawler/src/sim/core/biomes';
@@ -400,7 +403,7 @@ const queries = {
     return { waterId: water.id, others: water.others, named: names.slice(0, Math.max(0, water.others - 1)).map(([name, id, profile]) => ({ name, standing: { kind: 'title', id }, profile })) };
   },
   'idleAngler/anglers:logbook': () => iaBook,
-  'idleAngler/payload:preview': () => ({ scene_base: '' }),
+  'idleAngler/payload:preview': () => iaPayload,
   'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: params.get('wall') === 'empty' ? [] : [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),
   'idleAngler/full:opens': () => (params.get('v2') ? { period: 'o2026-10-24', startsAt: now - 36e5 * 5, endsAt: now + 864e5, on: true, prizes: [500, 300, 150], waters: [['millpond', 'Millpond', 'perch', 'Perch'], ['river_bend', 'River Bend', 'chub', 'Chub'], ['heron_lake', 'Heron Lake', 'mirror_carp', 'Mirror Carp']].map(([id, name, tid, tname], w) => ({ id, name, target: { id: tid, name: tname }, own: w === 1 ? { rank: 4, speciesId: tid, grams: 1300 } : null, entries: w === 2 ? [] : [['Quillfeather_Longname', 2400], ['Mo', 1900], ['Bea', 1500], ['Barry', 1300]].map(([n, g], i) => ({ rank: i + 1, name: n, speciesId: tid, grams: g, own: n === 'Barry', profile: false })) })) } : null),
   'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
@@ -512,6 +515,7 @@ import { Route as IaSettings } from '../../apps/web/src/routes/app/idle-angler/s
 import { Route as IaRankings } from '../../apps/web/src/routes/app/idle-angler/rankings';
 import { Route as IaAchievements } from '../../apps/web/src/routes/app/idle-angler/achievements';
 import { Route as IaTrophies } from '../../apps/web/src/routes/app/idle-angler/trophies';
+import { Route as IaDevice } from '../../apps/web/src/routes/app/idle-angler/trmnl';
 import { Route as PlShell } from '../../apps/web/src/routes/app/paper-lives';
 import { Route as PlLife } from '../../apps/web/src/routes/app/paper-lives/index';
 import { Route as PlPeople } from '../../apps/web/src/routes/app/paper-lives/people';
@@ -532,7 +536,7 @@ import { loadContent } from '../../apps/web/src/lib/content';
 import { OutletContext, useLocation } from './router.jsx';
 import './styles.css';
 const pages = { '/app/desk-crawler': Hero.options.component, '/app/desk-crawler/inventory': Bag.options.component, '/app/desk-crawler/leaderboard': Ranks.options.component, '/app/desk-crawler/settings': Settings.options.component, '/app/desk-crawler/log': Log.options.component, '/app/desk-crawler/achievements': DcAchievements.options.component, '/app/desk-crawler/career': Career.options.component, '/app/desk-crawler/field-notes': FieldNotes.options.component, '/app/desk-crawler/roster': Roster.options.component, '/app/desk-crawler/keepsakes': Keepsakes.options.component, '/app/desk-crawler/trmnl': Device.options.component,
-  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component,
+  '/app/idle-angler': IaDock.options.component, '/app/idle-angler/cooler': IaCooler.options.component, '/app/idle-angler/shop': IaShop.options.component, '/app/idle-angler/logbook': IaLogbook.options.component, '/app/idle-angler/settings': IaSettings.options.component, '/app/idle-angler/rankings': IaRankings.options.component, '/app/idle-angler/achievements': IaAchievements.options.component, '/app/idle-angler/trophies': IaTrophies.options.component, '/app/idle-angler/trmnl': IaDevice.options.component,
   '/app/paper-lives': PlLife.options.component, '/app/paper-lives/people': PlPeople.options.component, '/app/paper-lives/work': PlWork.options.component, '/app/paper-lives/settings': PlSettings.options.component, '/app/paper-lives/album': PlAlbum.options.component, '/app/paper-lives/rankings': PlRankings.options.component, '/app/paper-lives/achievements': PlAchievements.options.component };
 const lifePage = /^\\/profile\\/[^/]+\\/lives\\/\\d+/.test(location.pathname);
 // D210: the signed-in front page, game pages and library, outside the companion shell.

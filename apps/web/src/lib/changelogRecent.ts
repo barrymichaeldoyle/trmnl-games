@@ -46,6 +46,18 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     changes: [
       {
         game: 'idle-angler',
+        title: 'See your TRMNL screen in the companion',
+        body: 'Under More, On your TRMNL shows the screen your Idle Angler plugin is drawing right now, in each layout, on each device and in both orientations, as Desk Crawler has had.',
+        fr: { title: 'Votre écran TRMNL dans le compagnon', body: 'Sous Plus, Sur votre TRMNL montre l’écran que votre plugin Idle Angler dessine en ce moment, dans chaque mise en page, sur chaque appareil et dans les deux orientations, comme Desk Crawler le proposait déjà.' },
+        de: { title: 'Dein TRMNL-Bildschirm im Begleiter', body: 'Unter Mehr zeigt Auf deinem TRMNL den Bildschirm, den dein Idle-Angler-Plugin gerade zeichnet, in jedem Layout, auf jedem Gerät und in beiden Ausrichtungen, wie es Desk Crawler schon hatte.' },
+        es: { title: 'Tu pantalla TRMNL en el compañero', body: 'En Más, En tu TRMNL muestra la pantalla que tu plugin de Idle Angler dibuja ahora mismo, en cada disposición, en cada dispositivo y en ambas orientaciones, como ya tenía Desk Crawler.' },
+        it: { title: 'Il tuo schermo TRMNL nel compagno', body: 'Sotto Altro, Sul tuo TRMNL mostra la schermata che il tuo plugin di Idle Angler sta disegnando ora, in ogni layout, su ogni dispositivo e in entrambi gli orientamenti, come già aveva Desk Crawler.' },
+        pt: { title: 'Sua tela TRMNL no companheiro', body: 'Em Mais, No seu TRMNL mostra a tela que seu plugin do Idle Angler está desenhando agora, em cada layout, em cada aparelho e nas duas orientações, como o Desk Crawler já tinha.' },
+        pl: { title: 'Twój ekran TRMNL w aplikacji', body: 'W zakładce Więcej, Na twoim TRMNL pokazuje ekran, który twoja wtyczka Idle Angler rysuje w tej chwili, w każdym układzie, na każdym urządzeniu i w obu orientacjach, tak jak miał już Desk Crawler.' },
+        nl: { title: 'Je TRMNL-scherm in de companion', body: 'Onder Meer toont Op je TRMNL het scherm dat je Idle Angler-plugin nu tekent, in elke indeling, op elk apparaat en in beide richtingen, zoals Desk Crawler al had.' },
+      },
+      {
+        game: 'idle-angler',
         title: 'Waters you can compare at a glance',
         body: 'Each water on the Dock now shows its bite chance for the bait you would fish there, beside how many anglers are at it, and your rank there sits by its name. The weather line keeps only the weather and when it changes, with your species logged there. Bait is listed with the tubs you hold, and a zero links to the shop. The water you are fishing is marked, the Fish here buttons are smaller, and the notes on weather and moving have gone to the help page.',
         fr: { title: 'Des plans d’eau comparables d’un coup d’œil', body: 'Chaque plan d’eau du Ponton affiche désormais sa chance de touche avec l’appât que vous y pêcheriez, à côté du nombre de pêcheurs présents, et votre rang y figure près du nom. La ligne météo ne garde que la météo et l’heure de son changement, avec vos espèces notées là-bas. Les appâts sont listés avec les pots que vous avez, et un zéro renvoie au magasin. Le plan d’eau où vous pêchez est signalé, les boutons Pêcher ici sont plus petits, et les notes sur la météo et les déplacements sont passées dans l’aide.' },

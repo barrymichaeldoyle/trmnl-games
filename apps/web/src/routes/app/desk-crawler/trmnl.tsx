@@ -12,6 +12,8 @@ import { preload } from '../../../lib/preload'
 import { LoadingState } from '../../../lib/ui'
 import { latestLogQuery } from './-queries'
 
+import { DeviceStandIn } from './-deviceStandIn'
+
 const DevicePreview = lazy(() => import('./-devicePreview').then((module) => ({ default: module.DevicePreview })))
 
 /** What the owner's TRMNL is showing (companion.md "Display help"), on its own page under More (D124). */
@@ -29,7 +31,7 @@ function DevicePage() {
     <>
       <h1 className="font-display text-3xl font-bold">{t.trmnlTitle}</h1>
       <p className="text-muted">{t.trmnlIntro}</p>
-      <Suspense fallback={<DeviceStandIn sceneUrl={artUrl(hero.scenePath)} heroName={hero.name} />}>
+      <Suspense fallback={<SceneStandIn sceneUrl={artUrl(hero.scenePath)} heroName={hero.name} />}>
         <DevicePreview sceneUrl={artUrl(hero.scenePath)} heroName={hero.name} />
       </Suspense>
       <nav aria-label="TRMNL" className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
@@ -41,25 +43,8 @@ function DevicePage() {
   )
 }
 
-/**
- * What the device preview looks like before its chunk and template render
- * arrive: the same bezel at the TRMNL X aspect ratio holding the hero's scene,
- * with the control rows' height reserved, so nothing moves when it takes over.
- */
-function DeviceStandIn({ sceneUrl, heroName }: { sceneUrl: string; heroName: string }) {
+/** The bezel holding the hero's scene while the preview's chunk loads. */
+function SceneStandIn({ sceneUrl, heroName }: { sceneUrl: string; heroName: string }) {
   const t = useT(dcPagesMessages)
-  return (
-    <figure className="flex flex-col gap-3" aria-busy="true">
-      <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)]">
-        <div className="relative overflow-hidden rounded-md bg-white" style={{ aspectRatio: '1872 / 1404' }}>
-          <img src={sceneUrl} alt={t.currentScene(heroName)} width={760} height={200} decoding="async" className="absolute inset-0 m-auto w-full [image-rendering:pixelated]" />
-        </div>
-      </div>
-      <figcaption className="text-sm text-muted">
-        {/* Matches the preview's three control rows: layout, device and orientation. */}
-        <div aria-hidden="true" className="h-[9.25rem]" />
-        <p className="mt-3">{t.loadingTrmnl}</p>
-      </figcaption>
-    </figure>
-  )
+  return <DeviceStandIn standIn={<img src={sceneUrl} alt={t.currentScene(heroName)} width={760} height={200} decoding="async" className="absolute inset-0 m-auto w-full [image-rendering:pixelated]" />} caption={t.loadingTrmnl} />
 }

@@ -66,6 +66,7 @@ import { Route as AppIdleAnglerLogbookRouteImport } from './routes/app/idle-angl
 import { Route as AppIdleAnglerRankingsRouteImport } from './routes/app/idle-angler/rankings'
 import { Route as AppIdleAnglerSettingsRouteImport } from './routes/app/idle-angler/settings'
 import { Route as AppIdleAnglerShopRouteImport } from './routes/app/idle-angler/shop'
+import { Route as AppIdleAnglerTrmnlRouteImport } from './routes/app/idle-angler/trmnl'
 import { Route as AppIdleAnglerTrophiesRouteImport } from './routes/app/idle-angler/trophies'
 import { Route as AppLittlePlotIndexRouteImport } from './routes/app/little-plot/index'
 import { Route as AppLittlePlotAchievementsRouteImport } from './routes/app/little-plot/achievements'
@@ -384,6 +385,11 @@ const AppIdleAnglerShopRoute = AppIdleAnglerShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => AppIdleAnglerRoute,
 } as any)
+const AppIdleAnglerTrmnlRoute = AppIdleAnglerTrmnlRouteImport.update({
+  id: '/trmnl',
+  path: '/trmnl',
+  getParentRoute: () => AppIdleAnglerRoute,
+} as any)
 const AppIdleAnglerTrophiesRoute = AppIdleAnglerTrophiesRouteImport.update({
   id: '/trophies',
   path: '/trophies',
@@ -590,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
+  '/app/idle-angler/trmnl': typeof AppIdleAnglerTrmnlRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
   '/app/little-plot/achievements': typeof AppLittlePlotAchievementsRoute
   '/app/little-plot/catalogue': typeof AppLittlePlotCatalogueRoute
@@ -671,6 +678,7 @@ export interface FileRoutesByTo {
   '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
+  '/app/idle-angler/trmnl': typeof AppIdleAnglerTrmnlRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
   '/app/little-plot/achievements': typeof AppLittlePlotAchievementsRoute
   '/app/little-plot/catalogue': typeof AppLittlePlotCatalogueRoute
@@ -759,6 +767,7 @@ export interface FileRoutesById {
   '/app/idle-angler/rankings': typeof AppIdleAnglerRankingsRoute
   '/app/idle-angler/settings': typeof AppIdleAnglerSettingsRoute
   '/app/idle-angler/shop': typeof AppIdleAnglerShopRoute
+  '/app/idle-angler/trmnl': typeof AppIdleAnglerTrmnlRoute
   '/app/idle-angler/trophies': typeof AppIdleAnglerTrophiesRoute
   '/app/little-plot/achievements': typeof AppLittlePlotAchievementsRoute
   '/app/little-plot/catalogue': typeof AppLittlePlotCatalogueRoute
@@ -848,6 +857,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/rankings'
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
+    | '/app/idle-angler/trmnl'
     | '/app/idle-angler/trophies'
     | '/app/little-plot/achievements'
     | '/app/little-plot/catalogue'
@@ -929,6 +939,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/rankings'
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
+    | '/app/idle-angler/trmnl'
     | '/app/idle-angler/trophies'
     | '/app/little-plot/achievements'
     | '/app/little-plot/catalogue'
@@ -1016,6 +1027,7 @@ export interface FileRouteTypes {
     | '/app/idle-angler/rankings'
     | '/app/idle-angler/settings'
     | '/app/idle-angler/shop'
+    | '/app/idle-angler/trmnl'
     | '/app/idle-angler/trophies'
     | '/app/little-plot/achievements'
     | '/app/little-plot/catalogue'
@@ -1493,6 +1505,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIdleAnglerShopRouteImport
       parentRoute: typeof AppIdleAnglerRoute
     }
+    '/app/idle-angler/trmnl': {
+      id: '/app/idle-angler/trmnl'
+      path: '/trmnl'
+      fullPath: '/app/idle-angler/trmnl'
+      preLoaderRoute: typeof AppIdleAnglerTrmnlRouteImport
+      parentRoute: typeof AppIdleAnglerRoute
+    }
     '/app/idle-angler/trophies': {
       id: '/app/idle-angler/trophies'
       path: '/trophies'
@@ -1731,6 +1750,7 @@ interface AppIdleAnglerRouteChildren {
   AppIdleAnglerRankingsRoute: typeof AppIdleAnglerRankingsRoute
   AppIdleAnglerSettingsRoute: typeof AppIdleAnglerSettingsRoute
   AppIdleAnglerShopRoute: typeof AppIdleAnglerShopRoute
+  AppIdleAnglerTrmnlRoute: typeof AppIdleAnglerTrmnlRoute
   AppIdleAnglerTrophiesRoute: typeof AppIdleAnglerTrophiesRoute
   AppIdleAnglerIndexRoute: typeof AppIdleAnglerIndexRoute
 }
@@ -1742,6 +1762,7 @@ const AppIdleAnglerRouteChildren: AppIdleAnglerRouteChildren = {
   AppIdleAnglerRankingsRoute: AppIdleAnglerRankingsRoute,
   AppIdleAnglerSettingsRoute: AppIdleAnglerSettingsRoute,
   AppIdleAnglerShopRoute: AppIdleAnglerShopRoute,
+  AppIdleAnglerTrmnlRoute: AppIdleAnglerTrmnlRoute,
   AppIdleAnglerTrophiesRoute: AppIdleAnglerTrophiesRoute,
   AppIdleAnglerIndexRoute: AppIdleAnglerIndexRoute,
 }

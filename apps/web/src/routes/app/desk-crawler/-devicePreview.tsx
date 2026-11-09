@@ -1,8 +1,9 @@
 import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { api } from '@trmnl-games/backend/api'
-import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
+import { screenMarkup as deskCrawlerMarkup } from '@trmnl-games/desk-crawler/templates/screen'
+import { screenMarkup as idleAnglerMarkup } from '@trmnl-games/idle-angler/templates/screen'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { browserUtcOffset, localSceneUrl as sceneForNow, useMinute } from '../../../lib/localClock'
 import { useT } from '../../../lib/i18n'
@@ -12,12 +13,16 @@ import { PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, previewSize, type Pr
 const STORAGE_KEY = 'desk-crawler.preview'
 const LAYOUTS = Object.keys(PREVIEW_LAYOUTS) as PreviewLayout[]
 const DEVICES = Object.keys(PREVIEW_DEVICES) as PreviewDevice[]
-let renderer: Promise<{ engine: import('liquidjs').Liquid; templates: Record<PreviewLayout, import('liquidjs').Template[]> }> | undefined
-const getRenderer = () => renderer ??= import('liquidjs').then(({ Liquid }) => {
+/** The games with a device preview: each has its own templates and payload query, in the same framework shell. */
+export type PreviewGame = 'desk-crawler' | 'idle-angler'
+const MARKUP: Record<PreviewGame, Record<PreviewLayout, string>> = { 'desk-crawler': deskCrawlerMarkup, 'idle-angler': idleAnglerMarkup }
+type Renderer = { engine: import('liquidjs').Liquid; templates: Record<PreviewLayout, import('liquidjs').Template[]> }
+const renderers: Partial<Record<PreviewGame, Promise<Renderer>>> = {}
+const getRenderer = (game: PreviewGame) => renderers[game] ??= import('liquidjs').then(({ Liquid }) => {
   const engine = new Liquid({ timezoneOffset: 0 })
-  const templates = Object.fromEntries(LAYOUTS.map((layout) => [layout, engine.parse(screenMarkup[layout])])) as Record<PreviewLayout, import('liquidjs').Template[]>
+  const templates = Object.fromEntries(LAYOUTS.map((layout) => [layout, engine.parse(MARKUP[game][layout])])) as Record<PreviewLayout, import('liquidjs').Template[]>
   return { engine, templates }
-}).catch((error) => { renderer = undefined; throw error })
+}).catch((error) => { delete renderers[game]; throw error })
 
 /** Per-viewer convenience only: the remembered device and layout. Storage can be unavailable. */
 function remembered(): { device: PreviewDevice; layout: PreviewLayout; portrait: boolean } {
@@ -40,8 +45,21 @@ function remembered(): { device: PreviewDevice; layout: PreviewLayout; portrait:
  */
 export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroName: string }) {
   const now = useMinute()
+  const t = useT(dcPagesMessages)
+  return <GamePreview game="desk-crawler" title={heroName} standIn={<img src={sceneForNow(sceneUrl, now)} alt={t.currentScene(heroName)} width={760} height={200} decoding="async" className="absolute inset-0 m-auto w-full [image-rendering:pixelated]" />} />
+}
+
+/**
+ * Either game's preview: the owner's payload rendered through that game's templates in the chosen layout, device
+ * and orientation (remembered per viewer). `standIn` fills the bezel until the render lands and whenever it fails;
+ * `title` names the owner in the frame's title.
+ */
+export function GamePreview({ game, title, standIn }: { game: PreviewGame; title: string; standIn: ReactNode }) {
+  const now = useMinute()
   const utcOffset = browserUtcOffset(now)
-  const { data: payload, isError: payloadError } = useQuery({ ...convexQuery(api.trmnlPayload.mine, { now: now ?? 0, utcOffset }), enabled: now !== null, throwOnError: false })
+  const deskCrawler = useQuery({ ...convexQuery(api.trmnlPayload.mine, { now: now ?? 0, utcOffset }), enabled: now !== null && game === 'desk-crawler', throwOnError: false })
+  const idleAngler = useQuery({ ...convexQuery(api.idleAngler.payload.preview, {}), enabled: game === 'idle-angler', throwOnError: false })
+  const { data: payload, isError: payloadError } = game === 'desk-crawler' ? deskCrawler : idleAngler
   const [choice, setChoice] = useState<{ device: PreviewDevice; layout: PreviewLayout; portrait: boolean }>({ device: 'x', layout: 'markup', portrait: false })
   const [html, setHtml] = useState<string | null>(null)
   const [scale, setScale] = useState(0)
@@ -51,7 +69,6 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
   const t = useT(dcPagesMessages)
   const device = PREVIEW_DEVICES[choice.device]
   const size = previewSize(choice.device, choice.portrait)
-  const localSceneUrl = sceneForNow(sceneUrl, now)
 
   useEffect(() => setChoice(remembered()), [])
 
@@ -69,15 +86,16 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
     if (!payload || now === null) return
     let cancelled = false
     void (async () => {
-      const { engine, templates } = await getRenderer()
+      const { engine, templates } = await getRenderer(game)
       // TRMNL renders in UTC and the screen route adds the owner's offset as `utc_offset`; the browser's offset stands in for the TRMNL setting here.
-      const inner = await engine.render(templates[choice.layout], { ...sceneUrlsAt(payload, now, utcOffset), utc_offset: utcOffset })
-      if (!cancelled) { setHtml(previewDocument(inner, choice.device, choice.layout, `${heroName} on ${device.label}`, { shadeOtherSlots: true, portrait: choice.portrait })); setFailed(false) }
+      const context = game === 'desk-crawler' ? sceneUrlsAt(payload as Parameters<typeof sceneUrlsAt>[0], now, utcOffset) : payload
+      const inner = await engine.render(templates[choice.layout], { ...context, utc_offset: utcOffset })
+      if (!cancelled) { setHtml(previewDocument(inner, choice.device, choice.layout, `${title} on ${device.label}`, { shadeOtherSlots: true, portrait: choice.portrait })); setFailed(false) }
     })().catch(() => { if (!cancelled) { setFailed(true); setHtml(null) } })
     return () => {
       cancelled = true
     }
-  }, [payload, now, utcOffset, choice, heroName, device.label])
+  }, [game, payload, now, utcOffset, choice, title, device.label])
 
   useEffect(() => {
     const element = frame.current
@@ -92,7 +110,7 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
       <div className="rounded-[1.4rem] bg-[#3a3566] p-[clamp(0.5rem,2.5vw,1rem)]">
         <div ref={frame} className="relative overflow-hidden rounded-md bg-white" style={{ aspectRatio: `${size.width} / ${size.height}` }}>
           {/* Scene stand-in: also what screen readers get, since the iframe is decorative duplication of the page. */}
-          <img src={localSceneUrl} alt={t.currentScene(heroName)} width={760} height={200} decoding="async" className={`absolute inset-0 m-auto w-full [image-rendering:pixelated] transition-opacity duration-200 ${!payloadError && html && scale && loaded === html ? 'opacity-0' : 'opacity-100'}`} />
+          <div className={`absolute inset-0 transition-opacity duration-200 ${!payloadError && html && scale && loaded === html ? 'opacity-0' : 'opacity-100'}`}>{standIn}</div>
           {!payloadError && html && scale ? (
             <iframe
               title={t.previewTitle(t.layouts[choice.layout], device.label)}
@@ -161,3 +179,4 @@ export function DevicePreview({ sceneUrl, heroName }: { sceneUrl: string; heroNa
     </figure>
   )
 }
+

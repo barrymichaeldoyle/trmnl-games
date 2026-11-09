@@ -25,6 +25,7 @@ export const Route = createFileRoute('/app/idle-angler/settings')({
 const MORE_LINKS = [
   { to: '/app/idle-angler/rankings', key: 'rankings' },
   { to: '/app/idle-angler/achievements', key: 'achievements' },
+  { to: '/app/idle-angler/trmnl', key: 'trmnl' },
   { to: '/help/idle-angler', key: 'help' },
 ] as const
 
