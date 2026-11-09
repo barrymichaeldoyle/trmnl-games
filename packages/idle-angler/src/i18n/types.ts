@@ -147,7 +147,8 @@ export interface IaLanguage {
     readonly fish: (n: number) => string
     readonly best: (weight: string, fish: string) => string
     readonly gotAway: (n: number) => string
-    readonly thisWeek: string
+    /** The weekly board's heading with the water's "at" form ("This week at River Bend"). */
+    readonly thisWeek: (at: string) => string
     readonly noFishYet: string
     readonly yourBest: (weight: string) => string
     readonly rankBest: (rank: number, weight: string) => string

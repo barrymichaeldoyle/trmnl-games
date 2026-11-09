@@ -25,6 +25,7 @@
  * Idle Angler (D115): /app/idle-angler, /cooler, /shop, /logbook, /settings, with ia=full (cooler full), ia=empty (empty cooler, no bait here),
  *   ia=paused, ia=pending, ia=none (not started), ia=rich (Master Angler at the pier with every pass)
  *   goal=ready (D166, with v2=1: two reached goals waiting on the Dock's Claim button and a dot on the Dock tab)
+ *   permit=due (the Harbour Pier's species are logged, so only the Pier Permit stands in the way)
  *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) goal=count (a counted goal with its progress bar) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
  *   company=none|crowd (D220: nobody else at the angler's water, or 23 there; three others by default)
  *   ranks=1 (D204, content v6: each water's rank on the Dock and in the Logbook, River Bend one species off Veteran, Millpond at Master)
@@ -308,7 +309,7 @@ const iaDock = ia === 'none' ? { gameState: null, angler: null } : {
   waters: [
     { id: 'millpond', name: 'Millpond', opensAfter: null, access: null, open: true, weather: 'clear', band: 'dusk', bitePercent: 17, baits: ['worms', 'bread', 'spinner'], weatherUntil: now + 36e5 * 2 },
     { id: 'river_bend', name: 'River Bend', opensAfter: { waterId: 'millpond', waterName: 'Millpond', species: 6, logged: 7 }, access: 'waders', open: true, weather: 'overcast', band: 'dusk', bitePercent: 21, baits: ['worms', 'maggots', 'spinner'], weatherUntil: now + 36e5 * 2 },
-    { id: 'harbour_pier', name: 'Harbour Pier', opensAfter: { waterId: 'river_bend', waterName: 'River Bend', species: 5, logged: ia === 'rich' ? 9 : 3 }, access: 'pier_permit', open: ia === 'rich', weather: 'fog', band: 'dusk', bitePercent: 18, baits: ['ragworm', 'strip', 'spinner'], weatherUntil: now + 36e5 * 2 },
+    { id: 'harbour_pier', name: 'Harbour Pier', opensAfter: { waterId: 'river_bend', waterName: 'River Bend', species: 5, logged: ia === 'rich' ? 9 : params.get('permit') === 'due' ? 5 : 3 }, access: 'pier_permit', open: ia === 'rich', weather: 'fog', band: 'dusk', bitePercent: 18, baits: ['ragworm', 'strip', 'spinner'], weatherUntil: now + 36e5 * 2 },
   ],
   shop: { rod: ia === 'rich' ? null : { name: 'Carbon Rod', price: 700, limitGrams: 10000, biteBonusPercent: 10 }, cooler: { name: 'Dockside Crate', price: 1500, capacity: 24 }, access: [{ id: 'waders', name: 'Waders', price: 250, water: 'river_bend', owned: true }, { id: 'pier_permit', name: 'Pier Permit', price: 900, water: 'harbour_pier', owned: ia === 'rich' }] },
   logs: [['A 1.9 kg Barbel took the maggots at dusk. A new personal best.', 96], ['A kingfisher flashes past, low and blue.', 0], ['A 410 g Chub took the maggots in the day.', 41], ['Something heavy took the maggots and kept going.', 0], ['Sold 6 fish for 312 gold.', 0]].map(([summary], i) => ({ id: 'l' + i, at: now - i * 36e5, kind: 'catch', summary, gold: 0 })),

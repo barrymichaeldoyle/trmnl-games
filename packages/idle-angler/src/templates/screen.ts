@@ -48,12 +48,14 @@
  * framework centres a column unless told `flex--top`, so a board with no catch panel under it floated mid-column), and
  * the X's landscape half scene is a 120 stage at 4x (was 168 at 3x): the same 3:1 proportions as the OG's, a third
  * taller in a slot it filled only a third of, and a little more width for the column beside it.
+ * Template v24: the weekly board's heading names its water ("This week at River Bend") on up to two lines; before,
+ * "This week" alone left the board looking like a world table.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 23
+export const TEMPLATE_VERSION = 24
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -288,13 +290,14 @@ const fitStories = `<script>
 
 /**
  * This week's heaviest fish at the angler's water: the trophy and water, the angler's rank and best, then each row's
- * name and weight. Each row is itself the label, so an inverted own row keeps its text white (a `.label` child would
+ * name and weight. The heading names the water ("This week at River Bend") and may take two lines in a narrow
+ * column, since the water is the point of it. Each row is itself the label, so an inverted own row keeps its text white (a `.label` child would
  * set its own colour), as Desk Crawler's board does. The OG shows the short names, except where the board spans the
  * whole view (`wide`, template v15) and a full name fits.
  */
 const board = (rows: number, wide = false) =>
   `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true" data-give-way="-1">` +
-  `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="1">{{ board.label | escape }}</span></div>` +
+  `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="2">{{ board.label | escape }}</span></div>` +
   `<span class="${LABEL} w--full" data-clamp="1">{{ board.rank_label | escape }}</span>` +
   `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. ${wide ? '{{ row.name | escape }}' : '<span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span>'}</span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
 

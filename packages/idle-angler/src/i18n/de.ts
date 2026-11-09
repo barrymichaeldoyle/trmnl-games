@@ -204,7 +204,7 @@ export const de: IaLanguage = {
     fish: (c) => `${c} ${fish(c)}`,
     best: (weight, x) => `Bester: ${x} ${weight}`,
     gotAway: (c) => `${c} entkommen`,
-    thisWeek: 'Diese Woche',
+    thisWeek: (at) => `Diese Woche ${at}`,
     noFishYet: 'Diese Woche noch kein Fisch hier',
     yourBest: (weight) => `Dein Bester ${weight}`,
     rankBest: (rank, weight) => `Platz ${rank}, Bester ${weight}`,

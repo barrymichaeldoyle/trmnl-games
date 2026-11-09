@@ -103,7 +103,7 @@ export const en: IaLanguage = {
     fish: (n) => `${n} fish`,
     best: (weight, fish) => `Best ${weight} ${fish}`,
     gotAway: (n) => `${n} got away`,
-    thisWeek: 'This week',
+    thisWeek: (at) => `This week ${at}`,
     noFishYet: 'No fish here this week yet',
     yourBest: (weight) => `Your best ${weight}`,
     rankBest: (rank, weight) => `#${rank}, best ${weight}`,

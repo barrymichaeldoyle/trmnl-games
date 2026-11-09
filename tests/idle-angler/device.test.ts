@@ -109,7 +109,7 @@ describe('Idle Angler payload', () => {
     const english = buildPayload(scenarios.listing!)
     const french = buildPayload({ ...scenarios.listing!, locale: 'fr' })
     expect(english.status_label).toBe('Casting at River Bend')
-    expect(french).toMatchObject({ status_label: 'Pêche au Méandre', band_label: 'Crépuscule', weather_label: 'Couvert', title: 'Spécialiste', goal_line: 'Prendre un poisson sous la pluie', board: { label: 'Cette semaine', rank_label: 'N° 3, record 1,9 kg' } })
+    expect(french).toMatchObject({ status_label: 'Pêche au Méandre', band_label: 'Crépuscule', weather_label: 'Couvert', title: 'Spécialiste', goal_line: 'Prendre un poisson sous la pluie', board: { label: 'Cette semaine au Méandre', rank_label: 'N° 3, record 1,9 kg' } })
     expect(french.stories[0]!.summary).toBe('Un barbeau de 1,9 kg a mordu aux asticots au crépuscule. Nouveau record personnel.')
     const html = await new Liquid().parseAndRender(screenMarkup.markup, french)
     expect(html).toContain('12 dernières heures')
@@ -242,7 +242,7 @@ describe('Idle Angler markup', () => {
     // Template v18: no progress ticks; the title stays beside the name.
     expect(html).not.toContain('data-xp-ticks')
     expect(html).toContain('Old Hand')
-    expect(buildPayload(scenarios.catch!)).toMatchObject({ title: 'Old Hand', title_next_at: 20, board: { label: 'This week', rank_label: '#3, best 1.9 kg', rows: [{ rank: 1, weight_label: '5.2 kg' }, {}, { rank: 3, own: true }, {}, {}] } })
+    expect(buildPayload(scenarios.catch!)).toMatchObject({ title: 'Old Hand', title_next_at: 20, board: { label: 'This week at River Bend', rank_label: '#3, best 1.9 kg', rows: [{ rank: 1, weight_label: '5.2 kg' }, {}, { rank: 3, own: true }, {}, {}] } })
     expect(buildPayload(scenarios.outsideTop!).board?.rows.at(-1)).toMatchObject({ rank: 19, weight_label: '610 g', own: true })
     expect(buildPayload(scenarios.unranked!).board?.rank_label).toBe('No fish here this week yet')
     const full = await liquid.parseAndRender(screenMarkup.markup, { ...buildPayload(scenarios.coolerFull!), fly_code: null })

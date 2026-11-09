@@ -188,7 +188,7 @@ function DockPage() {
                     <p className="text-sm text-muted">{t.baitList(water.baits.filter((b) => b !== 'deadbait' || !full || full.features.deadbait).map((b) => words.bait(b)).join(', '))}</p>
                     {held(water).length === 0 ? <p className="text-sm text-hp-ink">{t.noneOfItsBait}</p> : null}
                   </>
-                ) : water.closed ? <p className="text-sm text-muted">{t.winterOnly}</p> : water.charter ? <p className="text-sm text-muted">{t.charterLine} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.bookInShop}</Link>.</p> : <p className="text-sm text-muted">{water.opensAfter ? <>{t.opensOnce(water.opensAfter.species, Math.min(water.opensAfter.logged, water.opensAfter.species))[0]}<FromWater id={water.opensAfter.waterId} />{t.opensOnce(water.opensAfter.species, Math.min(water.opensAfter.logged, water.opensAfter.species))[1]}</> : t.opensLater}{water.access ? t.withPass(words.pass(water.access)) : ''}.</p>}
+                ) : water.closed ? <p className="text-sm text-muted">{t.winterOnly}</p> : water.charter ? <p className="text-sm text-muted">{t.charterLine} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.bookInShop}</Link>.</p> : <LockedLine water={water} pass={water.access ? dock.shop?.access.find((a) => a.id === water.access) ?? null : null} />}
               </div>
               {water.open && water.id !== angler.waterId && water.id !== angler.travelTo ? (
                 <Button variant="secondary" disabled={travel.pending} onClick={() => {
@@ -215,6 +215,32 @@ function DockPage() {
       </Card>
       <NoticeBar notice={notice} onDismiss={dismiss} />
     </>
+  )
+}
+
+/**
+ * The next locked water's line: the species it needs and, when a pass opens it, that pass linked into the shop with its
+ * price (the dock's other costs all link with a price; the pass used to be a bare mention). With the species in hand
+ * and the pass still unbought, the pass is the only thing in the way, so the line becomes the call to buy it. Without
+ * the shop in the payload the pass stays a plain mention.
+ */
+function LockedLine({ water, pass }: { water: NonNullable<Dock['waters']>[number]; pass: NonNullable<Dock['shop']>['access'][number] | null }) {
+  const t = useT(iaDock)
+  const words = useAngler()
+  const gate = water.opensAfter
+  const gateMet = !gate || gate.logged >= gate.species
+  const gateLine = gate ? <>{t.opensOnce(gate.species, Math.min(gate.logged, gate.species))[0]}<FromWater id={gate.waterId} />{t.opensOnce(gate.species, Math.min(gate.logged, gate.species))[1]}</> : null
+  const shop = (text: string, price: number) => <Link to="/app/idle-angler/shop" className="inline-flex items-center gap-1 underline underline-offset-4">{text}<Coins n={price} /></Link>
+  if (pass && !pass.owned && gateMet) {
+    const [before, after] = t.needPass(words.pass(pass.id))
+    return <p className="text-sm font-semibold text-hp-ink">{shop(before, pass.price)}{after}</p>
+  }
+  const [before, link] = pass && !pass.owned ? t.passInShop(words.pass(pass.id)) : ['', '']
+  return (
+    <p className="text-sm text-muted">
+      {gateLine ?? t.opensLater}{pass && !pass.owned ? <>{before}{shop(link, pass.price)}</> : water.access && !pass ? t.withPass(words.pass(water.access)) : ''}.
+      {pass?.owned ? <> {t.passHeld(words.pass(pass.id))}</> : null}
+    </p>
   )
 }
 

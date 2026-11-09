@@ -42,6 +42,23 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-09',
+    changes: [
+      {
+        game: 'idle-angler',
+        title: 'Permits from the Dock, and a board that names its water',
+        body: 'The next locked water on the Dock now links straight to its pass in the shop, with the price. Once your logbook has the species it needs, the line tells you the pass is all that is left. On the TRMNL screen, the weekly board now says which water it is for, such as This week at River Bend.',
+        fr: { title: 'Les permis depuis le Ponton, et un tableau qui nomme son eau', body: 'Le prochain plan d’eau fermé sur le Ponton renvoie maintenant directement à son permis au magasin, avec le prix. Quand votre carnet compte les espèces demandées, la ligne indique qu’il ne manque plus que le permis. Sur l’écran TRMNL, le tableau de la semaine dit désormais de quelle eau il s’agit, par exemple Cette semaine au Méandre.' },
+        de: { title: 'Karten vom Steg aus, und eine Tafel, die ihr Gewässer nennt', body: 'Das nächste gesperrte Gewässer am Steg verweist jetzt direkt auf seine Karte im Laden, mit Preis. Sobald dein Logbuch die nötigen Arten enthält, sagt die Zeile, dass nur noch die Karte fehlt. Auf dem TRMNL-Bildschirm nennt die Wochentafel jetzt ihr Gewässer, etwa Diese Woche an der Flussbiegung.' },
+        es: { title: 'Permisos desde el Muelle, y un tablero que nombra su agua', body: 'La siguiente agua cerrada en el Muelle ahora enlaza directamente con su permiso en la tienda, con el precio. Cuando tu cuaderno tiene las especies necesarias, la línea indica que solo falta el permiso. En la pantalla TRMNL, el tablero semanal ahora dice a qué agua pertenece, por ejemplo Esta semana en el Recodo del río.' },
+        it: { title: 'Permessi dal Pontile, e una classifica che nomina la sua acqua', body: 'La prossima acqua chiusa sul Pontile ora rimanda direttamente al suo permesso in negozio, con il prezzo. Quando il registro ha le specie richieste, la riga dice che manca solo il permesso. Sullo schermo TRMNL, la classifica della settimana ora indica a quale acqua si riferisce, per esempio Questa settimana all’Ansa del fiume.' },
+        pt: { title: 'Licenças a partir do Píer, e um quadro que diz qual é a água', body: 'A próxima água fechada no Píer agora leva direto à sua licença na loja, com o preço. Quando o seu registro tem as espécies necessárias, a linha diz que só falta a licença. Na tela do TRMNL, o quadro da semana agora diz a qual água pertence, por exemplo Esta semana na Curva do rio.' },
+        pl: { title: 'Przepustki z Pomostu i tablica, która nazywa swoje łowisko', body: 'Następne zamknięte łowisko na Pomoście prowadzi teraz prosto do swojej przepustki w sklepie, z ceną. Gdy rejestr ma już wymagane gatunki, wiersz mówi, że brakuje tylko przepustki. Na ekranie TRMNL tygodniowa tablica podaje teraz swoje łowisko, na przykład W tym tygodniu w Zakolu rzeki.' },
+        nl: { title: 'Passen vanaf de Stek, en een bord dat zijn water noemt', body: 'Het volgende gesloten water op de Stek linkt nu rechtstreeks naar zijn pas in de winkel, met de prijs. Zodra je logboek de benodigde soorten heeft, zegt de regel dat alleen de pas nog ontbreekt. Op het TRMNL-scherm noemt het weekbord nu zijn water, bijvoorbeeld Deze week bij de Rivierbocht.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-08',
     changes: [
       {

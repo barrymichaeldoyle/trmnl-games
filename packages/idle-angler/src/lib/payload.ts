@@ -267,7 +267,7 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     // This week's heaviest fish at this water: the first rows, then the angler's own when it is further down.
     board: input.board
       ? {
-          label: say.thisWeek,
+          label: say.thisWeek(words.waterName(water.id).at),
           rank_label: input.board.ownGrams == null ? say.noFishYet : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)),
           rows: [
             ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), weight_label: formatWeight(row.grams), own: row.own })),
