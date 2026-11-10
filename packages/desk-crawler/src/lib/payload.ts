@@ -52,6 +52,8 @@ export interface PayloadHero {
   readonly lastTick: number
   readonly lastAdvancedAt?: number
   readonly quarantined: boolean
+  /** D229: the daily sweep paused the hero for a quiet owner; the screen says so instead of "Paused by you". */
+  readonly pausedReason?: 'dormant'
   /** D78: an open merchant visit ends at this tick. */
   readonly merchantExpiresAtTick?: number
   /** D79: a pending choice resolves by itself at this tick. */
@@ -398,7 +400,7 @@ export function buildPayload(input: PayloadInput) {
       etaLabel = words.knockedOutBackAt
       break
     case 'paused':
-      statusLabel = words.pausedByYou
+      statusLabel = hero.pausedReason === 'dormant' ? words.lieDown : words.pausedByYou
       break
     case 'sleeping':
       if (hero.wakeAtTick !== undefined) {

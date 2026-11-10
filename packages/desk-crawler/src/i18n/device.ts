@@ -16,6 +16,8 @@ export interface DeviceWords {
   readonly knockedOutBack: (duration: string) => string
   readonly knockedOutBackAt: string
   readonly pausedByYou: string
+  /** D229: the daily sweep paused the hero while no TRMNL showed it; the next screen fetch gets it up again. */
+  readonly lieDown: string
   readonly resumePending: string
   readonly resumeSoon: string
   readonly resumeAt: string
@@ -138,6 +140,7 @@ const en: DeviceWords = {
   knockedOutBack: (duration) => `Knocked out. Back in about ${duration}`,
   knockedOutBackAt: 'Knocked out, back at',
   pausedByYou: 'Paused by you',
+  lieDown: 'Had a lie-down. Adventures resume soon',
   resumePending: 'Resume pending',
   resumeSoon: 'Adventures resume soon',
   resumeAt: 'Adventures resume at',
@@ -212,6 +215,7 @@ const fr: DeviceWords = {
   knockedOutBack: (duration) => `K.-O. De retour dans ${duration} environ`,
   knockedOutBackAt: 'K.-O., de retour à',
   pausedByYou: 'Mis en pause par vous',
+  lieDown: 'Petite sieste. Les aventures reprennent bientôt',
   resumePending: 'Reprise imminente',
   resumeSoon: 'Les aventures reprennent bientôt',
   resumeAt: 'Reprise des aventures à',
@@ -286,6 +290,7 @@ const de: DeviceWords = {
   knockedOutBack: (duration) => `K. o. Zurück in etwa ${duration}`,
   knockedOutBackAt: 'K. o., zurück um',
   pausedByYou: 'Von dir pausiert',
+  lieDown: 'Kurz hingelegt. Die Abenteuer gehen bald weiter',
   resumePending: 'Fortsetzen steht bevor',
   resumeSoon: 'Die Abenteuer gehen bald weiter',
   resumeAt: 'Abenteuer gehen weiter um',
@@ -368,6 +373,7 @@ const es: DeviceWords = {
   knockedOutBack: (duration) => `K.O. Vuelve en unos ${duration}`,
   knockedOutBackAt: 'K.O., vuelve a las',
   pausedByYou: 'En pausa por ti',
+  lieDown: 'Una siestecita. Las aventuras siguen pronto',
   resumePending: 'Reanudación inminente',
   resumeSoon: 'Las aventuras se reanudan pronto',
   resumeAt: 'Las aventuras se reanudan a las',
@@ -442,6 +448,7 @@ const it: DeviceWords = {
   knockedOutBack: (duration) => `KO. Torna tra circa ${duration}`,
   knockedOutBackAt: 'KO, torna alle',
   pausedByYou: 'In pausa da te',
+  lieDown: 'Un riposino. Le avventure riprendono presto',
   resumePending: 'Ripresa imminente',
   resumeSoon: 'Le avventure riprendono presto',
   resumeAt: 'Le avventure riprendono alle',
@@ -516,6 +523,7 @@ const pt: DeviceWords = {
   knockedOutBack: (duration) => `Nocaute. Volta em cerca de ${duration}`,
   knockedOutBackAt: 'Nocaute, volta às',
   pausedByYou: 'Pausado por você',
+  lieDown: 'Uma soneca. As aventuras voltam em breve',
   resumePending: 'Retomada iminente',
   resumeSoon: 'As aventuras voltam em breve',
   resumeAt: 'As aventuras voltam às',
@@ -590,6 +598,7 @@ const pl: DeviceWords = {
   knockedOutBack: (duration) => `Nokaut. Powrót za około ${duration}`,
   knockedOutBackAt: 'Nokaut, powrót o',
   pausedByYou: 'Wstrzymane przez ciebie',
+  lieDown: 'Krótka drzemka. Przygody wkrótce ruszą dalej',
   resumePending: 'Zaraz wznowienie',
   resumeSoon: 'Przygody wkrótce się wznowią',
   resumeAt: 'Przygody wznowią się o',
@@ -664,6 +673,7 @@ const nl: DeviceWords = {
   knockedOutBack: (duration) => `Knock-out. Terug over ongeveer ${duration}`,
   knockedOutBackAt: 'Knock-out, terug om',
   pausedByYou: 'Door jou gepauzeerd',
+  lieDown: 'Even gaan liggen. De avonturen gaan snel verder',
   resumePending: 'Gaat zo verder',
   resumeSoon: 'De avonturen gaan zo verder',
   resumeAt: 'Avonturen gaan verder om',

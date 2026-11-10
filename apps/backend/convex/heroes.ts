@@ -37,6 +37,7 @@ import type { HeroState } from '@trmnl-games/desk-crawler/sim/core/types'
 import { INVENTORY_READ } from '@trmnl-games/desk-crawler/sim/core/limits'
 import { isBagFull, nextTier } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { nextPouchTier, potionCap } from '@trmnl-games/desk-crawler/sim/core/pouch'
+import { wakeHero } from './dormancy'
 
 const intentResult = intentReturns({
   operationId: v.string(),
@@ -102,6 +103,7 @@ export const mine = query({
       effects: liveEffects(hero.effects, world?.currentTick ?? 0).map((active) => ({ id: active.id, name: effectById(content, active.id)?.name ?? active.id, blurb: effectById(content, active.id)?.blurb ?? '', kind: effectById(content, active.id)?.kind ?? 'boon', ticksLeft: active.untilTick - (world?.currentTick ?? 0) })),
       gold: hero.gold,
       status: hero.status,
+      pausedReason: hero.pausedReason ?? null,
       biomeId: hero.biomeId,
       targetBiomeId: hero.targetBiomeId ?? null,
       arriveAtTick: hero.arriveAtTick ?? null,
@@ -551,7 +553,7 @@ export const resume = mutation({
       const hero = await requirePlayableHero(ctx, user)
       if (hero.status === 'exploring' || hero.status === 'resting') return { changed: false }
       if (hero.status !== 'paused') throw appError('INVALID_STATE', hero.status === 'sleeping' ? 'Use Resume adventures after managing your bag.' : 'Your hero cannot resume right now.')
-      await ctx.db.patch(hero._id, { status: hero.pausedFromStatus ?? 'exploring', pausedFromStatus: undefined })
+      await ctx.db.patch(hero._id, { status: hero.pausedFromStatus ?? 'exploring', pausedFromStatus: undefined, pausedReason: undefined })
       await commandLog(ctx, hero, 'resume', 'Resumed adventures.')
       return { changed: true }
     }),
@@ -615,6 +617,8 @@ export const recordCompanionVisit = mutation({
     await runIntent(ctx, args.operationId, 'heroes.recordCompanionVisit', { expectedLogSequence: args.expectedLogSequence }, async (user) => {
       const hero = await currentHero(ctx, user)
       if (hero === null || hero.activationState !== 'active') throw appError('TRMNL_REQUIRED', 'No active hero yet.')
+      // D229: opening the companion is a sign of life; a hero having a lie-down gets up before the recap is set.
+      if (await wakeHero(ctx, hero)) return { changed: true, recapChanged: true }
       if (hero.logSequence !== args.expectedLogSequence) return { changed: false, recapChanged: true }
       const previous = hero.companionVisitBaseline
       if (previous && previous.logSequence > hero.logSequence) return { changed: false }

@@ -18,6 +18,7 @@ import type * as connections from "../connections.js";
 import type * as crons from "../crons.js";
 import type * as deletion from "../deletion.js";
 import type * as devSeed from "../devSeed.js";
+import type * as dormancy from "../dormancy.js";
 import type * as feedback from "../feedback.js";
 import type * as follows from "../follows.js";
 import type * as heroReminder from "../heroReminder.js";
@@ -154,6 +155,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   deletion: typeof deletion;
   devSeed: typeof devSeed;
+  dormancy: typeof dormancy;
   feedback: typeof feedback;
   follows: typeof follows;
   heroReminder: typeof heroReminder;

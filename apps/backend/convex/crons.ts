@@ -39,4 +39,7 @@ crons.cron('engagement snapshot', '52 23 * * *', internal.admin.snapshotEngageme
 /** D198: the one reminder to owners who never opened the companion, mid-morning in Europe; sends nothing until HERO_REMINDERS=on. */
 crons.cron('hero reminders', '7 9 * * *', internal.heroReminder.queueDaily, {})
 
+/** D229: heroes and anglers nobody has watched for two weeks have a lie-down until a screen or a visit wakes them. */
+crons.daily('quiet owners', { hourUTC: 4, minuteUTC: 17 }, internal.dormancy.sweep, {})
+
 export default crons

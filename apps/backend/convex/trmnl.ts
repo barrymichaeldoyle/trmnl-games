@@ -20,6 +20,7 @@ import { assertNotRevoked, identityHash } from './deletion'
 import { intentReturns, narrowChanged, runIntent } from './lib/intent'
 import { MANAGEMENT_PROOF_MS, verifyManagementJwt } from './lib/trmnlManagement'
 import { parseTrmnlLocale } from './lib/trmnlUser'
+import { wakeOwnerOf } from './dormancy'
 
 /** D115: which game's profile is being deleted, its player character, and its name in messages. */
 const gameDeleting = (slug: GameSlug) => (ctx: Parameters<typeof gameDeletingFor>[0], userId: Id<'users'>) => gameDeletingFor(ctx, slug, userId)
@@ -299,6 +300,8 @@ export const recordScreenServed = internalMutation({
     const instance = await ctx.db.get(instanceId)
     if (instance === null || (instance.lastScreenServedAt ?? 0) >= at) return null
     await ctx.db.patch(instanceId, { lastScreenServedAt: at })
+    // D229: a screen fetched is the owner's sign of life; a hero or angler having a lie-down gets up.
+    await wakeOwnerOf(ctx, instance)
     return null
   },
 })

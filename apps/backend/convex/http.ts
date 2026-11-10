@@ -136,6 +136,8 @@ const idleAnglerScreen = httpAction(async (ctx, request) => {
   }
   if (result === null || result.outcome !== 'payload') return notFound()
   if (result.recordUserFor !== undefined) await ctx.runMutation(internal.trmnl.recordTrmnlUser, { userId: result.recordUserFor, ...(utcOffset === null ? {} : { utcOffset }), ...(locale === null ? {} : { locale }) })
+  // D229: telemetry only, as for Desk Crawler; a failed write never fails a valid screen.
+  if (result.screenServedFor !== undefined) { try { await ctx.runMutation(internal.trmnl.recordScreenServed, { instanceId: result.screenServedFor, at: now }) } catch { /* next request retries */ } }
   // D180: this week's fly code also rides in the standing QR, as Desk Crawler's keepsake does.
   const flyQr = result.flyCode && process.env.CONVEX_SITE_URL ? flyQrBase(result.flyCode) : null
   return json(200, { ...idleAnglerMarkup, merge_variables: { ...result.payload, fly_code: result.flyCode, fly_qr_base: flyQr ? `${process.env.CONVEX_SITE_URL}${flyQr}` : '', utc_offset: utcOffset } })

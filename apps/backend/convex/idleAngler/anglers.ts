@@ -61,7 +61,10 @@ export const REFUSAL: Record<string, string> = {
 
 export async function commandLog(ctx: MutationCtx, angler: Doc<'anglers'>, operation: string, summary: string, gold = 0): Promise<number> {
   const sequence = angler.logSequence + 1
-  await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'command', sequence, at: Date.now(), kind: 'system', summary: summary.slice(0, 90), detail: { v: 1, operation }, deltas: { gold } })
+  const at = Date.now()
+  await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'command', sequence, at, kind: 'system', summary: summary.slice(0, 90), detail: { v: 1, operation }, deltas: { gold } })
+  // D229: a command is the owner's sign of life for the quiet-owner sweep.
+  await ctx.db.patch(angler._id, { lastCommandAt: at })
   return sequence
 }
 
@@ -184,7 +187,7 @@ export const resume = mutation({
         const world = await readEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
         const sequence = await commandLog(ctx, angler, 'idleAngler.resume', 'Line back in the water.')
         // No catch-up: the next tick is the first that counts.
-        await ctx.db.patch(angler._id, { status: 'fishing', logSequence: sequence, lastTick: Math.max(angler.lastTick, world?.currentTick ?? 0) })
+        await ctx.db.patch(angler._id, { status: 'fishing', pausedReason: undefined, logSequence: sequence, lastTick: Math.max(angler.lastTick, world?.currentTick ?? 0) })
         return { changed: true }
       }),
     ),

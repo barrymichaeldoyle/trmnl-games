@@ -7,6 +7,8 @@ const STATUS_GLYPH: Record<string, string> = { exploring: 'combat', resting: 're
 
 export type PulseHero = {
   status: string
+  /** D229: the daily sweep paused the hero for a quiet owner; the companion's own visit wakes it. */
+  pausedReason?: 'dormant' | null
   simulationState: string
   biomeName: string
   targetName: string
@@ -47,7 +49,7 @@ function sentence(hero: PulseHero, t: (typeof dcScreenMessages)['en']): string {
     case 'dead':
       return t.knockedOut
     case 'paused':
-      return t.pausedByYou
+      return hero.pausedReason === 'dormant' ? t.lieDown : t.pausedByYou
     case 'sleeping':
       return hero.wakeAtTick !== null ? t.readyToResume : hero.bagReady ? t.roomInBag : t.stoppedForBag
     default:

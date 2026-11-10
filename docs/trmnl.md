@@ -222,7 +222,7 @@ Pending onboarding (D09) reuses v1 `unlinked` privacy-safe fields; no new payloa
 
 Seven-day score and group are always labeled with rank (for example Last 7 days / Levels 4–7). A newer live level does not move an old snapshot rank into a different group. Group change clears delta; Top 5 entries all belong to that published group. global_total_players is a separate publication count, never substituted for the group denominator.
 
-Sleeping is ready gameplay data, not service_paused/stale: show retained-find/bag guidance and idle sprite. A scheduled wake remains sleeping until evaluated. held_item is empty after claim; when bag remains full, explain free-space/Resume requirements. No device/companion-visit inactivity timer is used. Name-version mismatch or missing owner masks copied public names until refreshed.
+Sleeping is ready gameplay data, not service_paused/stale: show retained-find/bag guidance and idle sprite. A scheduled wake remains sleeping until evaluated. held_item is empty after claim; when bag remains full, explain free-space/Resume requirements. No device/companion-visit inactivity timer changes the screen's own semantics; since D229 the daily quiet-owner sweep pauses a hero whose owner's installations and companion have been silent for two weeks, and the next screen request wakes it ([gameplay](gameplay.md)). Name-version mismatch or missing owner masks copied public names until refreshed.
 
 These v1 changes happen before any consumer is released; shipped compatibility rules still apply thereafter. Public examples remain illustrative, not live data or rendered proof.
 

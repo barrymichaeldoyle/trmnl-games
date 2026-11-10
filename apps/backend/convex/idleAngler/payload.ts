@@ -16,6 +16,7 @@ import { readDeviceBoard } from './leaderboard'
 import { deviceFlyCode, flyTotal } from './flies'
 import { flyForClaim } from '@trmnl-games/idle-angler/content/flies'
 import { deviceLocale, trmnlUserChanged } from '../lib/trmnlUser'
+import { SCREEN_SERVED_THROTTLE_MS } from '../trmnlPayload'
 import { waterCompany } from './presence'
 
 /**
@@ -24,7 +25,7 @@ import { waterCompany } from './presence'
  */
 export const forInstance = internalQuery({
   args: { tokenHash: v.string(), uuid: v.string(), now: v.number(), utcOffset: v.optional(v.union(v.number(), v.null())), locale: v.optional(v.union(v.string(), v.null())) },
-  returns: v.union(v.null(), v.object({ outcome: v.literal('recoverable') }), v.object({ outcome: v.literal('payload'), payload: v.any(), flyCode: v.union(v.string(), v.null()), recordUserFor: v.optional(v.id('users')) })),
+  returns: v.union(v.null(), v.object({ outcome: v.literal('recoverable') }), v.object({ outcome: v.literal('payload'), payload: v.any(), flyCode: v.union(v.string(), v.null()), recordUserFor: v.optional(v.id('users')), screenServedFor: v.optional(v.id('trmnlInstances')) })),
   handler: async (ctx, args) => {
     const instance = await ctx.db.query('trmnlInstances').withIndex('by_uuid', (q) => q.eq('uuid', args.uuid)).unique()
     if (!instance) {
@@ -41,7 +42,9 @@ export const forInstance = internalQuery({
     const userChanged = trmnlUserChanged(user, args.utcOffset, args.locale)
     // Device envelope only: the companion's preview never carries the weekly fly code.
     const flyCode = payload.status === 'fishing' || payload.status === 'paused' || payload.status === 'travelling' ? await deviceFlyCode(ctx, user._id, args.now) : null
-    return { outcome: 'payload' as const, payload, flyCode, ...(userChanged ? { recordUserFor: user._id } : {}) }
+    // D229: the same hourly screen telemetry Desk Crawler keeps, so a quiet owner can be told from a watching one.
+    const screenStale = instance.lastScreenServedAt === undefined || args.now - instance.lastScreenServedAt >= SCREEN_SERVED_THROTTLE_MS
+    return { outcome: 'payload' as const, payload, flyCode, ...(userChanged ? { recordUserFor: user._id } : {}), ...(screenStale ? { screenServedFor: instance._id } : {}) }
   },
 })
 

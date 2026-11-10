@@ -321,6 +321,10 @@ export default defineSchema({
     activatedAt: v.optional(v.number()),
     gold: v.number(),
     status: v.union(v.literal('fishing'), v.literal('paused')),
+    /** D229: set when the daily sweep paused the angler for a quiet owner; absent for the player's own pause. */
+    pausedReason: v.optional(v.literal('dormant')),
+    /** D229: when the owner last gave a command, the angler's sign of life beside its screen telemetry. */
+    lastCommandAt: v.optional(v.number()),
     waterId,
     travelTo: v.optional(waterId),
     rodTier: v.number(),
@@ -971,6 +975,8 @@ export default defineSchema({
     arriveAtTick: v.optional(v.number()),
     reviveAtTick: v.optional(v.number()),
     pausedFromStatus: v.optional(v.union(v.literal('exploring'), v.literal('resting'))),
+    /** D229: set when the daily sweep paused the hero for a quiet owner; absent for the player's own pause. */
+    pausedReason: v.optional(v.literal('dormant')),
     wakeAtTick: v.optional(v.number()),
     weaponId: v.optional(v.id('items')),
     armorId: v.optional(v.id('items')),

@@ -41,7 +41,7 @@ Activation is TRMNL-exclusive as in Desk Crawler (D09): the angler is pending un
 
 ### Status
 
-`fishing`, `travelling` (one tick, arrives the next, no cast), `paused` (owner's choice, no casts, no XP) and `pending`. There is no resting, sleeping or dead state. A full cooler does not change status.
+`fishing`, `travelling` (one tick, arrives the next, no cast), `paused` (owner's choice, or the daily quiet-owner sweep's with `pausedReason: dormant`, D229; no casts, no XP) and `pending`. There is no resting, sleeping or dead state. A full cooler does not change status.
 
 ### The cast
 
