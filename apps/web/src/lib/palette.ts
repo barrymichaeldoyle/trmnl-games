@@ -21,13 +21,14 @@ export const KIND_TONE: Record<string, string> = {
   system: 'text-muted',
 }
 
-/** Each biome's world-map tile: Office Cubicles in carpet tan, Server Room in status-LED blue, Cafeteria Depths in ketchup coral, the Archive in old-paper buff, the Parking Garage in concrete grey. */
+/** Each biome's world-map tile: Office Cubicles in carpet tan, Server Room in status-LED blue, Cafeteria Depths in ketchup coral, the Archive in old-paper buff, the Parking Garage in concrete grey, the Boiler Room in furnace copper. */
 export const BIOME_SWATCH: Record<string, string> = {
   office_cubicles: 'bg-[#f3d394] text-night',
   server_room: 'bg-sky text-night',
   cafeteria_depths: 'bg-[#f08a6b] text-night',
   archive: 'bg-[#d1b58c] text-night',
   parking_garage: 'bg-[#b8c0cc] text-night',
+  boiler_room: 'bg-[#d9a070] text-night',
 }
 
 /** Item rarity: name colour plus a gem whose facets grow with rarity. */
@@ -67,4 +68,5 @@ export const BIOME_BANDS: Record<string, readonly [string, string, string, strin
   cafeteria_depths: ['#f08a6b', '#f9b394', '#ffd9c2', '#d9534f'],
   archive: ['#b8956a', '#d1b58c', '#efe1c2', '#8a6a44'],
   parking_garage: ['#6b7280', '#8a93a3', '#b8c0cc', '#4b5563'],
+  boiler_room: ['#7a3b22', '#a35a33', '#d9a070', '#3a2a24'],
 }

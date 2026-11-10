@@ -312,7 +312,7 @@ export function visit(hero: HeroState, inventory: ItemSnapshot[], tick: number, 
     for (const slot of ['weaponId', 'armorId'] as const) {
       for (;;) {
         const item = kept.find((row) => row.id === h[slot])
-        const step = item === undefined ? undefined : nextStep(content, item)
+        const step = item === undefined ? undefined : nextStep(content, item, h.level)
         if (item === undefined || step === undefined || h.gold < step.gold) break
         if (Object.keys(materialShortfall(heldMaterials(kept), step.materials)).length > 0) break
         const next = applyStep(content, item, step)

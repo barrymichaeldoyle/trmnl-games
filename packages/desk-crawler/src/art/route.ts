@@ -8,7 +8,7 @@ import { isOccasionArt, type OccasionArt } from './occasions'
 import { BWRY_PALETTE, bwryInk, BwryInk, sceneColours } from './sceneColour'
 import type { SceneTime } from './sceneTime'
 
-const BIOMES = new Set<BiomeArt>(['office_cubicles', 'server_room', 'cafeteria_depths', 'archive', 'parking_garage'])
+const BIOMES = new Set<BiomeArt>(['office_cubicles', 'server_room', 'cafeteria_depths', 'archive', 'parking_garage', 'boiler_room'])
 const SCALES = new Set([FULL_SCALE, SMALL_SCALE, LARGE_SCALE, MEDIUM_SCALE])
 
 /**

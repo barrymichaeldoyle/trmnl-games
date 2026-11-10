@@ -1,0 +1,112 @@
+{
+  "content": "v30",
+  "before": "v29",
+  "heroes": 90,
+  "days": 90,
+  "rows": [
+    {
+      "cohort": "daily",
+      "eligibleHeroWeeks": 992,
+      "standoffsPerHeroWeek": 1.1,
+      "starts": 1113,
+      "winShare": 76.1,
+      "ended": {
+        "won": 847,
+        "knockout": 131,
+        "clock": 135,
+        "other": 0
+      },
+      "medianFightTicksToWin": 3,
+      "medianTicksToWin": 3,
+      "knockoutsPerHeroDayAt12": {
+        "before": 0.02,
+        "after": 0.034,
+        "changePct": 70
+      },
+      "xpMedianChangePct": 41.1,
+      "goldEarnedMedianChangePct": 14.2,
+      "finalLevelMedian": {
+        "before": 47,
+        "after": 53
+      }
+    },
+    {
+      "cohort": "three-day",
+      "eligibleHeroWeeks": 968.5,
+      "standoffsPerHeroWeek": 1.1,
+      "starts": 1048,
+      "winShare": 74.4,
+      "ended": {
+        "won": 780,
+        "knockout": 123,
+        "clock": 145,
+        "other": 0
+      },
+      "medianFightTicksToWin": 3,
+      "medianTicksToWin": 3,
+      "knockoutsPerHeroDayAt12": {
+        "before": 0.018000000000000002,
+        "after": 0.028999999999999998,
+        "changePct": 61.5
+      },
+      "xpMedianChangePct": 37.1,
+      "goldEarnedMedianChangePct": 12.8,
+      "finalLevelMedian": {
+        "before": 46,
+        "after": 52
+      }
+    },
+    {
+      "cohort": "seven-day",
+      "eligibleHeroWeeks": 908.7,
+      "standoffsPerHeroWeek": 1,
+      "starts": 930,
+      "winShare": 74.4,
+      "ended": {
+        "won": 692,
+        "knockout": 118,
+        "clock": 120,
+        "other": 0
+      },
+      "medianFightTicksToWin": 4,
+      "medianTicksToWin": 4,
+      "knockoutsPerHeroDayAt12": {
+        "before": 0.013000000000000001,
+        "after": 0.021,
+        "changePct": 60
+      },
+      "xpMedianChangePct": 35.2,
+      "goldEarnedMedianChangePct": 12.1,
+      "finalLevelMedian": {
+        "before": 43,
+        "after": 48
+      }
+    },
+    {
+      "cohort": "unattended",
+      "eligibleHeroWeeks": 406.7,
+      "standoffsPerHeroWeek": 0,
+      "starts": 0,
+      "winShare": 0,
+      "ended": {
+        "won": 0,
+        "knockout": 0,
+        "clock": 0,
+        "other": 0
+      },
+      "medianFightTicksToWin": null,
+      "medianTicksToWin": null,
+      "knockoutsPerHeroDayAt12": {
+        "before": 0,
+        "after": 0,
+        "changePct": 0
+      },
+      "xpMedianChangePct": 0,
+      "goldEarnedMedianChangePct": 0,
+      "finalLevelMedian": {
+        "before": 14,
+        "after": 14
+      }
+    }
+  ]
+}

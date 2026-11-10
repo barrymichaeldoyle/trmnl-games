@@ -8,7 +8,7 @@ import type { HeroClass, NumericCounter } from '../sim/core/types'
  * never logs, so a hero who did the deed before an achievement existed earns
  * it on the first evaluation after release.
  */
-export const ACHIEVEMENTS_VERSION = 13
+export const ACHIEVEMENTS_VERSION = 14
 
 export type AchievementPredicate =
   | { readonly kind: 'counter'; readonly counter: NumericCounter; readonly atLeast: number }
@@ -455,6 +455,45 @@ counter('dug_in', 'Dug in', 'Lifetime', 'standoffsWon', [1, 10, 50], [
   ['Pest Control', 'Beat ten elites that had dug in.'],
   ['Building Management', 'Beat fifty elites that had dug in.'],
 ])
+
+// ---------------------------------------------------------------- D228 The Boiler Room (catalog version 14; appended, never edited)
+
+monster('pipe_python', 'Pipe Python', 'Boiler Room', [
+  ['Stopcock', 'Turned the stopcock on a python.'],
+  ['Plumber’s Mate', 'Five pythons gone slack.'],
+  ['Pipe Fitter', 'Twenty-five pythons, all in knots.'],
+  ['Lagged', 'A hundred pythons tied off.'],
+  ['Mains Pressure', 'Five hundred pythons tied off.'],
+])
+monster('fuse_box_fiend', 'Fuse Box Fiend', 'Boiler Room', [
+  ['Tripped', 'Flipped the breaker on a fiend.'],
+  ['Spare Fuse', 'Five fiends, five fuses.'],
+  ['Electrician', 'Twenty-five fiends earthed.'],
+  ['Certified Safe', 'A hundred fiends earthed.'],
+  ['Off Grid', 'Five hundred fiends earthed.'],
+])
+monster('furnace_hound', 'Furnace Hound', 'Boiler Room', [
+  ['Down, Boy', 'Shut the furnace door on a hound.'],
+  ['Good Dog', 'Five hounds put out.'],
+  ['Stoker', 'Twenty-five hounds put out.'],
+  ['Fire Warden', 'A hundred hounds put out.'],
+  ['Cold Furnace', 'Five hundred hounds put out.'],
+])
+monster('caretaker', 'Caretaker', 'Boiler Room', [
+  ['Work Order', 'The caretaker accepted the paperwork, once.'],
+  ['Shift Change', 'Five caretakers clocked out.'],
+  ['Keyholder', 'Twenty-five shifts without a complaint.'],
+  ['Site Manager', 'A hundred caretakers clocked out.'],
+  ['Freehold', 'Five hundred caretakers clocked out.'],
+])
+family('floor_cleared_6', 'Boiler Room Cleared', 'Set piece', [['Boiler Room Cleared', 'Twenty-five of each in the Boiler Room.']], () => ({ kind: 'biomeMonsters', biomeId: 'boiler_room', atLeast: 25 }))
+family('long_service', 'Long service', 'Lifetime', [
+  ['Vice President', 'Level 24. The title came with a parking space.'],
+  ['Partner', 'Level 28. Your name is on the door, in small letters.'],
+  ['Board Member', 'Level 32. Meetings now come with biscuits.'],
+  ['Chief Executive', 'Level 40. Nobody tells you anything any more.'],
+  ['Founder', 'Level 50. The building was renamed after you while you were out.'],
+], (i) => ({ kind: 'level', atLeast: [24, 28, 32, 40, 50][i]! }))
 
 /** Families in display order. */
 export const ACHIEVEMENT_FAMILIES: readonly AchievementFamily[] = families

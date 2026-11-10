@@ -20,6 +20,10 @@ const samples: Array<[string, Parameters<typeof composeScene>[0], Parameters<typ
   ['garage-trolleys', 'parking_garage', 'fight', { kind: 'monster', id: 'trolley_swarm', elite: false }],
   ['garage-slick', 'parking_garage', 'fight', { kind: 'monster', id: 'oil_slick', elite: true }],
   ['garage-barrier', 'parking_garage', 'knocked_out', { kind: 'monster', id: 'barrier_golem', elite: false }],
+  ['boiler-fight', 'boiler_room', 'fight', { kind: 'monster', id: 'furnace_hound', elite: false }],
+  ['boiler-python', 'boiler_room', 'fight', { kind: 'monster', id: 'pipe_python', elite: true }],
+  ['boiler-fiend', 'boiler_room', 'fight', { kind: 'monster', id: 'fuse_box_fiend', elite: false }],
+  ['boiler-caretaker', 'boiler_room', 'knocked_out', { kind: 'monster', id: 'caretaker', elite: false }],
 ]
 for (const [name, biome, pose, subject] of samples) {
   const { width, height, ink } = composeScene(biome, pose, subject).scaled(FULL_SCALE)

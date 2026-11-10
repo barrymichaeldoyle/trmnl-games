@@ -71,7 +71,10 @@ export function measureRung(predicate: CareerPredicate, hero: HeroState, content
     case 'pouch':
       return { value: potionCap(content, hero), target: predicate.atLeast }
     case 'biomeWin': {
-      const ids = content.biomes.find((b) => b.id === predicate.biomeId)?.monsterIds ?? []
+      // D228: a win on the floor or any deeper one. A weekly visitor can level past a floor between visits and go
+      // straight to the next; the goal is about going down, not about that one floor, so it is not held there.
+      const floor = content.biomes.find((b) => b.id === predicate.biomeId)
+      const ids = floor === undefined ? [] : content.biomes.filter((b) => b.id === floor.id || (!b.safe && b.tier > floor.tier)).flatMap((b) => b.monsterIds)
       return { value: ids.reduce((sum, id) => sum + (hero.counters.monsterWins[id] ?? 0), 0), target: 1 }
     }
     case 'stance':
@@ -111,13 +114,21 @@ export function liveRung(rules: CareerRule, from: number, reached: readonly { re
  * hero waiting on the raid goal meets "Reach level 7" first, while one already level 7 and Bold keeps the raid goal.
  * D155: a rung the new ladder moves from ahead of the pointer to before it is still ahead for this hero, so an unmet
  * one comes first too, wherever it now sits: moving "Salvage a piece of gear" up the ladder skips nobody past it.
+ * D227: a pointer past the old ladder's end lands on the first rung the new ladder appends after the old last rung.
+ * D228: with `open`, a rung inserted right before the old last rung comes first when the hero has not met it, as it
+ * would for a hero standing on that last rung, so a finished hero meets "Win a fight in the Boiler Room" too.
  */
 export function remapRung(from: CareerRule, to: CareerRule, rung: number, open?: (rung: CareerRung) => boolean): number {
-  // D227: a pointer past the old ladder's end lands on the first rung the new ladder appends after the old last rung.
   if (rung >= from.rungs.length) {
     const last = from.rungs[from.rungs.length - 1]
     const index = last === undefined ? -1 : to.rungs.findIndex((entry) => entry.id === last.id)
-    return index < 0 ? to.rungs.length : index + 1
+    if (index < 0) return to.rungs.length
+    if (open !== undefined) {
+      let start = index
+      while (start > 0 && !from.rungs.some((entry) => entry.id === to.rungs[start - 1]!.id)) start -= 1
+      for (let j = start; j < index; j += 1) if (!to.rungs[j]!.retired && open(to.rungs[j]!)) return j
+    }
+    return index + 1
   }
   for (let i = rung; i < from.rungs.length; i += 1) {
     const index = to.rungs.findIndex((entry) => entry.id === from.rungs[i]!.id)

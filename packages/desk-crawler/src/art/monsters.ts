@@ -1,6 +1,6 @@
 import { sprite } from './canvas'
 
-/* Twenty monsters, ~24x24, facing left toward the hero. Reserved art (LICENSE). */
+/* Twenty-four monsters, ~24x24, facing left toward the hero. Reserved art (LICENSE). */
 
 // ---------------------------------------------------------------- Office Cubicles
 
@@ -376,6 +376,92 @@ export const ghostCar = sprite(`
       ####             ####
 `)
 
+// ---------------------------------------------------------------- Boiler Room (D228)
+
+export const pipePython = sprite(`
+                  ####
+                 #wwww####
+                 #wwwwwwww#
+        ####     #w##wwwwww#
+       #wwww#    #wwwwwwww#
+      #w#wwww#   ##wwwwwww#
+     #wwwwwwww#   ########
+    ##wwwwwwww##  #wwwwww#
+   #w##wwwwww##w####wwwwww#
+   #w#wwwwwwwwww#ww#wwwww#
+   ##w#wwwwww#ww#ww#wwww##
+    #w#ww##ww#w#ww#www##
+    ##w#wwwww#ww##w#w##
+     ###wwwwww#ww###
+       ###wwww#ww#
+         ########
+`)
+
+export const fuseBoxFiend = sprite(`
+      ##################
+     #wwwwwwwwwwwwwwwwww#
+     #w################w#
+     #w#w#w#w#w#w#w#w#w#w#
+     #w#w#w#w#w#w#w#w#w#w#
+     #w################w#
+     #w#::::::::::::::#w#
+     #w#::#w##::##w#::#w#
+     #w#::####::####::#w#
+     #w#::::::::::::::#w#
+     #w#:::##::::##:::#w#
+     #w#::::######::::#w#
+     #w################w#
+     #wwwwwwwwwwwwwwwwww#
+      ##################
+    #  ##            ##  #
+   ##  ##            ##  ##
+`)
+
+export const furnaceHound = sprite(`
+                          ###
+                         #w#
+       ############     #w#
+      #wwwwwwwwwwww##  #w#
+  ####wwwwwwwwwwwwwww##w#
+ #wwww##############wwww#
+ #w#ww#::::::::::::#wwww#
+ #wwww#:.:.:.:.:.:.#wwww#
+ #wwww#::::::::::::#wwww#
+ ##www##############wwww#
+  #ww##=w=w=w=w=w=#wwww#
+ #w#w##=w=w=w=w=w=#wwww#
+ #w#w##############www##
+  #www#wwwwwwwwwwwwwww#
+   ####  ####    ####
+   #ww#  #ww#    #ww#
+   ####  ####    ####
+`)
+
+export const caretaker = sprite(`
+        ########
+       #wwwwwwww#
+      ############
+       #wwwwwwww#
+       #w#wwww#w#
+       #wwwwwwww#
+       #ww####ww#
+        #wwwwww#
+     ####wwwwww####
+    #www##wwww##www#
+   #wwwww#wwww#wwwww#
+   #w#www#wwww#www#w#
+   #w#www#wwww#www#w#
+   #w#www#wwww#www#w#
+   #w#www########ww#w#
+   ##www#wwwwww#ww##w#
+    #www#wwwwww#ww# #w#
+    ####wwwwwwww####w#
+       #www##www#  #w#
+       #www##www#  #w#
+       #www##www#  ###
+       #####  ####
+`)
+
 export const monsterArt = {
   paper_imp: paperImp,
   rogue_roomba: rogueRoomba,
@@ -397,4 +483,8 @@ export const monsterArt = {
   oil_slick: oilSlick,
   barrier_golem: barrierGolem,
   ghost_car: ghostCar,
+  pipe_python: pipePython,
+  fuse_box_fiend: fuseBoxFiend,
+  furnace_hound: furnaceHound,
+  caretaker,
 } as const

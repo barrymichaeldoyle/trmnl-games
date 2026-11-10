@@ -711,6 +711,12 @@ export interface WorkbenchRule {
   readonly epicYieldMultiplier: number
   readonly steps: readonly WorkbenchStep[]
   readonly affix: { readonly gold: number; readonly materials: MaterialCount }
+  /**
+   * D228: the lowest gear tier that reinforces when the hero's level cannot equip the next tier; absent means the
+   * catalog's top tier, so a piece below it always upgrades first. v30 sets 3: a level-12 hero's Mk III piece
+   * reinforces as it did before tier 4 existed, and a level-1 hero's Letter Opener still waits for Mk II.
+   */
+  readonly reinforceFromTier?: number
 }
 
 /** D131: one potion strength, its own stack row keyed by `templateId`. */

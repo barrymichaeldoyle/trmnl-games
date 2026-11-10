@@ -6,8 +6,8 @@ import type { HeroCounters } from '@trmnl-games/desk-crawler/sim/core/types'
 import { catalogs } from '@trmnl-games/desk-crawler/content'
 import { baseState, content, findSeed, run } from './helpers'
 
-/** D133: monster and floor families appended for the Archive and the Parking Garage resolve under the catalog that has them. */
-const current = catalogs.v16
+/** D133, D228: monster and floor families appended for the Archive, the Parking Garage and the Boiler Room resolve under the catalog that has them. */
+const current = catalogs.v30
 
 const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<AchievementState> = {}): AchievementState => ({
   level: 1,
@@ -19,9 +19,9 @@ const state = (overrides: Partial<HeroCounters> = {}, extra: Partial<Achievement
 
 describe('achievement catalog (D65)', () => {
   it('holds the launch set with unique, catalog-backed ids', () => {
-    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3 + 3 + 3 + 3)
+    expect(ACHIEVEMENTS).toHaveLength(165 + 8 * 5 + 2 + 4 + 3 + 3 + 3 + 1 + 3 + 3 + 3 + 3 + 4 * 5 + 1 + 5)
     expect(new Set(ACHIEVEMENTS.map((a) => a.id)).size).toBe(ACHIEVEMENTS.length)
-    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1 + 1 + 1 + 1)
+    expect(ACHIEVEMENT_FAMILIES).toHaveLength(12 + 5 + 17 + 5 + 2 + 1 + 2 + 1 + 8 + 2 + 3 + 2 + 1 + 1 + 1 + 1 + 4 + 1 + 1)
     for (const def of ACHIEVEMENTS) {
       expect(ACHIEVEMENT_FAMILIES.some((f) => f.id === def.family)).toBe(true)
       expect(def.name.length).toBeLessThanOrEqual(24)

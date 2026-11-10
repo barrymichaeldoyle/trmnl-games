@@ -21,7 +21,7 @@ import { de } from '../../packages/desk-crawler/src/i18n/de'
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 const catalog = catalogs[ACTIVE_CONTENT]
 /** The monster each floor's picture shows; a floor not listed shows its first monster. */
-const FEATURED: Record<string, string> = { office_cubicles: 'stapler_mimic', server_room: 'cable_serpent', cafeteria_depths: 'coffee_slime', archive: 'box_file_beetle', parking_garage: 'ghost_car' }
+const FEATURED: Record<string, string> = { office_cubicles: 'stapler_mimic', server_room: 'cable_serpent', cafeteria_depths: 'coffee_slime', archive: 'box_file_beetle', parking_garage: 'ghost_car', boiler_room: 'furnace_hound' }
 
 const outDir = join(root, 'apps/web/public/games/desk-crawler/floors')
 mkdirSync(outDir, { recursive: true })

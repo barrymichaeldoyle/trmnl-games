@@ -27,7 +27,7 @@ const SUBJECT_X = 92
 /** D139: an occasion's floor prop stands here, in the clear band between the hero and its foe. */
 const DECOR_X = 66
 
-export type BiomeArt = 'office_cubicles' | 'server_room' | 'cafeteria_depths' | 'archive' | 'parking_garage'
+export type BiomeArt = 'office_cubicles' | 'server_room' | 'cafeteria_depths' | 'archive' | 'parking_garage' | 'boiler_room'
 export type Subject =
   | { kind: 'monster'; id: keyof typeof monsterArt; elite: boolean }
   | { kind: 'prop'; id: PropId }
@@ -292,6 +292,62 @@ function parkingGarage(c: Canvas): void {
   c.rect(118, 35, 14, 2, ':')
 }
 
+function boilerRoom(c: Canvas): void {
+  // Two riveted boilers at the edges, a furnace in the back wall with a glowing grate, gauges, a fuse board, pipes
+  // along the ceiling and a grating floor (D228). The middle stays clear for the hero and the foe.
+  c.region = 'pipe'
+  c.hline(0, STAGE_WIDTH - 1, 0)
+  c.hline(0, STAGE_WIDTH - 1, 2)
+  c.hline(0, STAGE_WIDTH - 1, 1, 'w')
+  for (let x = 10; x < STAGE_WIDTH; x += 28) c.vline(x, 0, 3)
+  // A second pipe drops down the back wall on each side to the boilers.
+  c.vline(16, 3, 8)
+  c.vline(136, 3, 8)
+  for (const left of [0, 138]) {
+    c.region = 'boiler'
+    c.rect(left, 6, 14, 26, '#')
+    c.rect(left + 1, 7, 12, 24, ':')
+    c.region = 'rivet'
+    for (let y = 9; y < 31; y += 4) {
+      c.paint(left + 2, y, 'w')
+      c.paint(left + 11, y, 'w')
+    }
+    c.region = 'hatch'
+    c.rect(left + 4, 16, 6, 6, '#')
+    c.rect(left + 5, 17, 4, 4, 'w')
+  }
+  // The furnace: a brick housing, an iron door and a grate that glows.
+  c.region = 'brick'
+  c.rect(56, 8, 30, 20, '#')
+  c.rect(57, 9, 28, 18, ':')
+  c.region = 'door'
+  c.rect(62, 12, 18, 14, '#')
+  c.rect(63, 13, 16, 12, 'w')
+  c.region = 'grate'
+  c.rect(65, 18, 12, 6, '=')
+  c.region = 'glow'
+  c.rect(65, 15, 12, 2, '.')
+  // Gauges either side of the furnace, needles up.
+  c.region = 'gauge'
+  for (const x of [46, 86]) {
+    c.rect(x, 6, 7, 7, '#')
+    c.rect(x + 1, 7, 5, 5, 'w')
+    c.vline(x + 3, 8, 10)
+  }
+  // The fuse board on the right wall.
+  c.region = 'board'
+  c.rect(121, 6, 15, 9, '#')
+  c.rect(122, 7, 13, 7, 'w')
+  c.region = 'fuse'
+  for (const x of [124, 127, 130, 133]) c.vline(x, 9, 12)
+  // The grating floor, and a puddle under the left boiler's bleed valve.
+  c.region = 'grating'
+  c.hline(0, STAGE_WIDTH - 1, 34, '=')
+  c.hline(0, STAGE_WIDTH - 1, 35, '=')
+  c.region = 'puddle'
+  c.rect(14, 36, 12, 1, ':')
+}
+
 const burst = sprite(`
    #
  # # #
@@ -334,7 +390,7 @@ function windowView(c: Canvas, view: NonNullable<Dressing['window']>): void {
 }
 
 
-const BACKDROPS: Record<BiomeArt, (c: Canvas, time: SceneTime, view?: Dressing['window']) => void> = { office_cubicles: office, server_room: serverRoom, cafeteria_depths: cafeteria, archive, parking_garage: parkingGarage }
+const BACKDROPS: Record<BiomeArt, (c: Canvas, time: SceneTime, view?: Dressing['window']) => void> = { office_cubicles: office, server_room: serverRoom, cafeteria_depths: cafeteria, archive, parking_garage: parkingGarage, boiler_room: boilerRoom }
 
 /** Draw a sprite with a 1px white halo so it stays legible over busy backdrops. */
 function drawWithHalo(c: Canvas, s: Sprite, left: number, top: number, region: string): void {

@@ -41,6 +41,10 @@ const MONSTER: Record<keyof typeof monsterArt, string> = {
   oil_slick: '#6b3fa0',
   barrier_golem: '#f2c14e',
   ghost_car: '#b8c6d6',
+  pipe_python: '#c98f5a',
+  fuse_box_fiend: '#f0a03a',
+  furnace_hound: '#ff7a1a',
+  caretaker: '#8a7a66',
 }
 
 const PROP: Record<PropId, string> = {
@@ -231,6 +235,25 @@ const BACKDROP: Record<BiomeArt, Record<SceneTime, Record<string, Tones>>> = {
     }
     return { day: tones, night: tones }
   })(),
+  boiler_room: (() => {
+    const tones: Record<string, Tones> = {
+      pipe: { ink: '#5a4a3a', paper: '#8a7a66' },
+      boiler: { ink: '#3a2a24', shade: ['#7a3b22', '#a35a33'] },
+      rivet: { paper: '#d9a070' },
+      hatch: { ink: '#3a2a24', paper: '#ffb347' },
+      brick: { ink: '#5a2e22', shade: ['#8a4a3a', '#a85a44'] },
+      door: { ink: '#2b2622', paper: '#4b4541' },
+      grate: { ink: '#1b1530', paper: '#ff7a1a' },
+      glow: { ink: '#ffb347' },
+      gauge: { ink: '#3a3f4a', paper: '#f4f1e6' },
+      board: { ink: '#3a3f4a', paper: '#b8bfc9' },
+      fuse: { ink: '#c0392b' },
+      grating: { ink: '#4b4541' },
+      puddle: { shade: ['#5a4a3a', '#8a7a66'] },
+      ground: { ink: '#2b2622' },
+    }
+    return { day: tones, night: tones }
+  })(),
 }
 
 /** How each foe and prop paints on the companion: paper and shade over the page's ink; exported for the Field notes page (D133). */
@@ -255,6 +278,10 @@ export const FOE: Record<string, Tones> = {
   'monster:oil_slick': { paper: '#3a3f4a', shade: ['#6b3fa0', '#2fbf9f'] },
   'monster:barrier_golem': { paper: '#f2c14e', shade: ['#8a5a00', '#c98f1a'] },
   'monster:ghost_car': { paper: '#d9e4ee', shade: ['#6f7b8f', '#b8c6d6'] },
+  'monster:pipe_python': { paper: '#c98f5a', shade: ['#7a5a34', '#b08a52'] },
+  'monster:fuse_box_fiend': { paper: '#b8bfc9', shade: ['#f0a03a', '#ffe08f'] },
+  'monster:furnace_hound': { paper: '#3a2a24', shade: ['#c0392b', '#ff7a1a'] },
+  'monster:caretaker': { paper: '#6b6257', shade: ['#8a7a66', '#b8a888'] },
   'prop:chest': { paper: '#d9a066', shade: ['#8a5a2c', '#b5793f'] },
   'prop:gold': { paper: '#f2c14e' },
   'prop:potion': { paper: '#e6eef5', shade: ['#b8303a', '#e0505a'] },

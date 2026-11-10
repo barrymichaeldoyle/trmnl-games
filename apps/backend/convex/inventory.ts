@@ -203,7 +203,7 @@ async function adjustMaterials(ctx: MutationCtx, hero: Doc<'heroes'>, items: Doc
 /** The workbench as the companion shows it for one piece of gear (D129): the next step, its price, the result, and what is short. */
 function stepView(content: ContentCatalog, hero: Doc<'heroes'>, item: Doc<'items'>, held: MaterialCount) {
   const snapshot = snapshotOf(item)
-  const step = nextStep(content, snapshot)
+  const step = nextStep(content, snapshot, hero.level)
   if (step === undefined) return null
   const next = applyStep(content, snapshot, step)
   const short = materialShortfall(held, step.materials)
@@ -824,7 +824,7 @@ export const upgrade = mutation({
       requireWorkbench(content, hero)
       const item = await workbenchItem(ctx, hero, args.itemId)
       const snapshot = snapshotOf(item)
-      const step = nextStep(content, snapshot)
+      const step = nextStep(content, snapshot, hero.level)
       if (step === undefined) throw appError('INVALID_STATE', 'This item is fully reinforced.')
       const next = applyStep(content, snapshot, step)
       if (next.requiredLevel > hero.level) throw appError('LEVEL_TOO_LOW', `${workbenchSuffix(content, next)} needs level ${next.requiredLevel}.`)

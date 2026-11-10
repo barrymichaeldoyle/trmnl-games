@@ -49,10 +49,11 @@ Weights are integer probabilities out of 100. They must sum to 100 in content va
 | `cafeteria_depths` / Cafeteria Depths | 8 | 45 | 25 | 15 | 15 | Tier 3 |
 | `archive` / Archive | 12 | 50 | 25 | 15 | 10 | Tier 4, drops tier-3 gear (D133, content v16) |
 | `parking_garage` / Parking Garage | 16 | 50 | 25 | 15 | 10 | Tier 5, drops tier-3 gear (D133, content v16) |
+| `boiler_room` / Boiler Room | 20 | 50 | 25 | 15 | 10 | Tier 6, drops tier-4 gear (D228, content v30) |
 
-The Archive and the Parking Garage (D133, [spec](biomes.md)) are difficulty tiers 4 and 5 for monsters, to-do targets and pay, potion drops and merchant and decision gold, but name tier 3 as the gear tier they drop (`gearTier`), since the workbench ceiling is its own slice. Their field notes (one per floor and per monster, read on the companion once the hero has stood there or beaten it) change nothing in play.
+The Boiler Room (D228, [spec](biomes.md#the-boiler-room-d228)) is difficulty tier 6 at level 20 and the first floor to drop a new gear tier: tier 4 (attack 18, defense 14, required level 20), with a Mk IV workbench step that carries a piece's reinforcement with it. The Archive and the Parking Garage (D133, [spec](biomes.md)) are difficulty tiers 4 and 5 for monsters, to-do targets and pay, potion drops and merchant and decision gold, but name tier 3 as the gear tier they drop (`gearTier`), since the workbench ceiling is its own slice. Their field notes (one per floor and per monster, read on the companion once the hero has stood there or beaten it) change nothing in play.
 
-Approved content floor (D26): 4 monsters per biome (12 total; 20 under content v16), and 4 summary variants for each of combat/loot/trap/rest per biome (48 total), plus required lifecycle summaries. Variants describe the actual outcome; cosmetic RNG never alters rewards. Examples: Rogue Roomba, Paper Imp, Cable Serpent, Dust Daemon, Coffee Slime, Crumb Golem. Tone: mildly absurd office fantasy, warm, concise, no insults tied to personal identity.
+Approved content floor (D26): 4 monsters per biome (12 total; 20 under content v16; 24 under content v30), and 4 summary variants for each of combat/loot/trap/rest per biome (48 total), plus required lifecycle summaries. Variants describe the actual outcome; cosmetic RNG never alters rewards. Examples: Rogue Roomba, Paper Imp, Cable Serpent, Dust Daemon, Coffee Slime, Crumb Golem. Tone: mildly absurd office fantasy, warm, concise, no insults tied to personal identity.
 
 | Tier | Monster HP | ATK | DEF | XP on victory | Gold on victory | Trap damage |
 | --- | --- | --- | --- | --- | --- | --- |

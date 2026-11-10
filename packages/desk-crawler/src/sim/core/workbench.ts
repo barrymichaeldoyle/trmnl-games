@@ -73,15 +73,20 @@ export function heldMaterials(inventory: readonly Pick<ItemSnapshot, 'kind' | 't
 
 /**
  * The item's next workbench step, or undefined when it is fully reinforced: the tier step above its tier while one
- * exists, then the reinforce step above its reinforcement.
+ * exists, then the reinforce step above its reinforcement. D228: given the hero's level, a tier the hero could not
+ * equip yet does not count, so a piece reinforces at its own tier until the level for the next tier arrives, and the
+ * tier step then carries the reinforcement with it.
  */
-export function nextStep(content: ContentCatalog, item: Pick<ItemSnapshot, 'templateId' | 'requiredLevel' | 'tier' | 'reinforced' | 'kind'>): WorkbenchStep | undefined {
+export function nextStep(content: ContentCatalog, item: Pick<ItemSnapshot, 'templateId' | 'requiredLevel' | 'tier' | 'reinforced' | 'kind'>, level?: number): WorkbenchStep | undefined {
   const rules = content.workbench
   if (rules === undefined || !isGear(item.kind)) return undefined
   const tier = itemTier(content, item)
+  const reachable = (toTier: number) => level === undefined || (content.gearTiers[toTier]?.requiredLevel ?? 0) <= level
+  // Below the reinforcing tier the next tier is always the step, reachable or not (the intent says what level it needs).
+  const reinforces = tier >= (rules.reinforceFromTier ?? gearTierNumbers(content).at(-1) ?? tier)
   const tierStep = rules.steps.find((step) => step.kind === 'tier' && step.toTier === tier + 1)
-  if (tierStep !== undefined) return tierStep
-  if (rules.steps.some((step) => step.kind === 'tier' && step.toTier > tier)) return undefined
+  if (tierStep !== undefined && tierStep.kind === 'tier' && (!reinforces || reachable(tierStep.toTier))) return tierStep
+  if (rules.steps.some((step) => step.kind === 'tier' && step.toTier > tier && (!reinforces || reachable(step.toTier)))) return undefined
   return rules.steps.find((step) => step.kind === 'reinforce' && step.to === (item.reinforced ?? 0) + 1)
 }
 
@@ -201,6 +206,7 @@ export function workbenchProblems(content: ContentCatalog): string[] {
     if (i > 0 && step.gold <= reinforceSteps[i - 1]!.gold) problems.push(`${name} must cost more gold than +${i}`)
   })
   if (reinforceSteps.length > 9) problems.push('at most nine reinforcement steps')
+  if (rules.reinforceFromTier !== undefined && !tiers.includes(rules.reinforceFromTier)) problems.push(`reinforcing from unknown tier ${rules.reinforceFromTier}`)
   count('affix gold', rules.affix.gold)
   checkCost('affix', rules.affix.materials)
   if (Object.values(rules.affix.materials).every((n) => n === 0) && rules.affix.gold === 0) problems.push('an affix choice must cost something')
