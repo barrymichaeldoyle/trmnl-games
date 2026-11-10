@@ -92,10 +92,14 @@ export function firstOpenRung(rules: CareerRule, hero: HeroState, content: Conte
   return rules.rungs.length
 }
 
-/** The first rung at or after `from` that is not retired; the ladder's length when none is left. */
-export function liveRung(rules: CareerRule, from: number): number {
+/**
+ * The first rung at or after `from` that is not retired and, given the hero's record, not already reached; the
+ * ladder's length when none is left. D227: a later ladder may move a rung the hero has done further along, and a
+ * rung reached once is never paid twice.
+ */
+export function liveRung(rules: CareerRule, from: number, reached: readonly { readonly id: string }[] = []): number {
   let i = from
-  while (rules.rungs[i]?.retired) i += 1
+  while (rules.rungs[i] !== undefined && (rules.rungs[i]!.retired || reached.some((entry) => entry.id === rules.rungs[i]!.id))) i += 1
   return i
 }
 
@@ -109,6 +113,12 @@ export function liveRung(rules: CareerRule, from: number): number {
  * one comes first too, wherever it now sits: moving "Salvage a piece of gear" up the ladder skips nobody past it.
  */
 export function remapRung(from: CareerRule, to: CareerRule, rung: number, open?: (rung: CareerRung) => boolean): number {
+  // D227: a pointer past the old ladder's end lands on the first rung the new ladder appends after the old last rung.
+  if (rung >= from.rungs.length) {
+    const last = from.rungs[from.rungs.length - 1]
+    const index = last === undefined ? -1 : to.rungs.findIndex((entry) => entry.id === last.id)
+    return index < 0 ? to.rungs.length : index + 1
+  }
   for (let i = rung; i < from.rungs.length; i += 1) {
     const index = to.rungs.findIndex((entry) => entry.id === from.rungs[i]!.id)
     if (index < 0) continue
@@ -145,7 +155,7 @@ export function eventCount(hero: HeroState, event: GuaranteedEvent): number {
 /** The hero's current rung under the catalog, or undefined off the ladder. */
 export function currentRung(content: ContentCatalog, hero: HeroState): CareerRung | undefined {
   const rules = content.career
-  return hero.career === undefined || rules === undefined ? undefined : rules.rungs[liveRung(rules, hero.career.rung)]
+  return hero.career === undefined || rules === undefined ? undefined : rules.rungs[liveRung(rules, hero.career.rung, hero.career.reached)]
 }
 
 /**
@@ -213,7 +223,7 @@ export function applyCareer(input: SimulationInput, result: SimulationResult): S
       events.push(careerEvent(input, result, { variant: 'career', phase: 'reached', id, title, ...(next === undefined ? {} : { next }), gold }))
     }
     let state: CareerState = hero.career ?? { rung: firstOpenRung(rules, before, content), startedTick: tick, reached: [] }
-    if (liveRung(rules, state.rung) !== state.rung) state = { rung: liveRung(rules, state.rung), startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
+    if (liveRung(rules, state.rung, state.reached) !== state.rung) state = { rung: liveRung(rules, state.rung, state.reached), startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
     // Arm the rung's guarantee once its feature is on; it counts adventures from here.
     const rung = rules.rungs[state.rung]
     const feature = rung?.guarantee === undefined ? undefined : guaranteeFeature(rung.guarantee.event)
@@ -237,14 +247,14 @@ export interface ReachedRung {
 /**
  * Mark the current rung done when the hero has already satisfied it. One rung per call, the same step a tick takes,
  * so a companion action and the next adventure cannot both pay it. A hero with no place on the ladder is left alone:
- * the tick's first evaluation backfills that place without pay. A pointer sitting on a rung a later catalog retired
- * moves past it with no gold and no line.
+ * the tick's first evaluation backfills that place without pay. A pointer sitting on a rung a later catalog retired,
+ * or on one the hero already reached under an earlier ladder (D227), moves past it with no gold and no line.
  */
 export function reachSatisfiedRung(hero: HeroState, content: ContentCatalog, tick: number, at?: number): { hero: HeroState; reached?: ReachedRung } {
   const rules = content.career
   if (rules === undefined || rules.rungs.length === 0 || hero.career === undefined) return { hero }
   let state = hero.career
-  const live = liveRung(rules, state.rung)
+  const live = liveRung(rules, state.rung, state.reached)
   if (live !== state.rung) {
     state = { rung: live, startedTick: state.startedTick, reached: state.reached, ...(state.unclaimed === undefined ? {} : { unclaimed: state.unclaimed }) }
     hero = { ...hero, career: state }
@@ -252,7 +262,7 @@ export function reachSatisfiedRung(hero: HeroState, content: ContentCatalog, tic
   const current = rules.rungs[state.rung]
   if (current === undefined || !rungSatisfied(current, hero, content)) return { hero }
   const gold = current.supersedes !== undefined && state.reached.some((entry) => entry.id === current.supersedes) ? 0 : current.gold
-  const next = liveRung(rules, state.rung + 1)
+  const next = liveRung(rules, state.rung + 1, state.reached)
   const when = at === undefined ? {} : { at }
   const following = rules.rungs[next]
   return {

@@ -593,3 +593,63 @@ describe('"Choose a stance" (D192, content v27)', () => {
     expect(remapRung(catalogs.v26.career!, v27.career!, raid, () => false)).toBe(from)
   })
 })
+
+describe('the +3 goal moves last and the ladder names levels 20 and 24 (D227, content v29)', () => {
+  const v28 = catalogs.v28
+  const v29 = catalogs.v29
+  const ids = (content: ContentCatalog) => content.career!.rungs.map((r) => r.id)
+  const index = (content: ContentCatalog, id: string) => ids(content).indexOf(id)
+  const unmet = (open: string[]) => (rung: { id: string }) => open.includes(rung.id)
+
+  it('is valid, keeps every other rung in order, appends the two level goals and ends on the +3 goal', () => {
+    expect(validateCatalog(v29)).toEqual([])
+    expect(ids(v29)).toEqual([...ids(v28).filter((id) => id !== 'reinforce_3'), 'level_20', 'level_24', 'reinforce_3'])
+    expect(v29.career!.rungs.find((r) => r.id === 'reinforce_3')).toEqual(v28.career!.rungs.find((r) => r.id === 'reinforce_3'))
+    v29.career!.rungs.forEach((rung, i) => {
+      const next = v29.career!.rungs[i + 1]
+      const { full } = careerLine({ variant: 'career', phase: 'reached', id: rung.id, title: rung.title, ...(next ? { next: next.title } : {}), gold: rung.gold })
+      expect([...full].length).toBeLessThanOrEqual(v29.constants.summaryMaxCodePoints)
+    })
+  })
+
+  it('remaps a hero waiting on +3 to the first Garage-era goal it has not met, or past them to level 20', () => {
+    const from = v28.career!
+    const to = v29.career!
+    const at = index(v28, 'reinforce_3')
+    // Already past the Archive and the Garage but no Gym Duffel yet: the bag goal comes first.
+    expect(remapRung(from, to, at, unmet(['reinforce_3', 'gym_duffel', 'first_standoff', 'level_20', 'level_24']))).toBe(index(v29, 'gym_duffel'))
+    // Everything behind the wall done, level 19: the new level goal.
+    expect(remapRung(from, to, at, unmet(['reinforce_3', 'level_20', 'level_24']))).toBe(index(v29, 'level_20'))
+    // Level 24 with every other goal done: only the +3 goal is left, at the end.
+    expect(remapRung(from, to, at, unmet(['reinforce_3']))).toBe(index(v29, 'reinforce_3'))
+    // Not yet in the Archive: the Archive goal, as before.
+    expect(remapRung(from, to, at, unmet(['reinforce_3', 'archive_win', 'level_16', 'garage_win', 'gym_duffel', 'first_standoff', 'level_20', 'level_24']))).toBe(index(v29, 'archive_win'))
+    // Below the wall nothing moves but the index.
+    for (const id of ['first_win', 'level_12', 'first_upgrade']) expect(remapRung(from, to, index(v28, id), unmet([id, 'reinforce_3']))).toBe(index(v29, id))
+    // Past +3 under v28: the pointer keeps its own goal; the +3 goal is reached and will not pay again.
+    expect(remapRung(from, to, index(v28, 'gym_duffel'), unmet(['gym_duffel', 'level_20']))).toBe(index(v29, 'gym_duffel'))
+    // A hero that finished the v28 ladder lands on the first appended goal.
+    expect(remapRung(from, to, from.rungs.length, unmet([]))).toBe(index(v29, 'level_20'))
+    expect(remapRung(from, to, from.rungs.length)).toBe(index(v29, 'level_20'))
+    // Rolling back, a hero on the moved +3 goal keeps it.
+    expect(remapRung(to, from, index(v29, 'reinforce_3'), unmet(['reinforce_3']))).toBe(index(v28, 'reinforce_3'))
+  })
+
+  it('never pays a rung reached under an earlier ladder twice: the pointer walks past it with no line', () => {
+    const reached = ['first_upgrade', 'reinforce_3', 'archive_win', 'level_16', 'garage_win', 'gym_duffel', 'first_standoff'].map((id, i) => ({ id, tick: i }))
+    const career: CareerState = { rung: index(v29, 'level_20'), startedTick: 0, reached: [{ id: 'first_win', tick: 0 }, ...reached] }
+    const { hero: h, inventory } = hero({ level: 26, biomeId: 'parking_garage', bagCapacity: 24, career }, { combatWins: 1000, topReinforcement: 3, standoffsWon: 1 })
+    expect(liveRung(v29.career!, index(v29, 'level_24') + 1, career.reached)).toBe(v29.career!.rungs.length)
+    // Level 20 pays, then level 24, and the walk ends with the ladder's last line because +3 is already done.
+    const first = run(h, inventory, 10, 1, v29)
+    expect(careerLines(first).map((e) => e.summary)).toEqual(['Goal reached: Reach level 20. Next: Reach level 24.'])
+    const second = run(first.nextHero, inventory, 11, 2, v29)
+    expect(careerLines(second).map((e) => e.summary)).toEqual(['Goal reached: Reach level 24. That was the last one, for now.'])
+    expect(second.nextHero.career!.rung).toBe(v29.career!.rungs.length)
+    expect(second.nextHero.career!.reached.filter((e) => e.id === 'reinforce_3')).toHaveLength(1)
+    expect(careerProblems(second.nextHero.career!, v29)).toBeUndefined()
+    const third = run(second.nextHero, inventory, 12, 3, v29)
+    expect(careerLines(third)).toEqual([])
+    expect(currentRung(v29, second.nextHero)).toBeUndefined()
+  })
+})

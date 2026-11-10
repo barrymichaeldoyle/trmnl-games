@@ -47,7 +47,7 @@ Unlocks are predicates over hero state, so they are retroactive by construction:
 
 ### The ladder
 
-The ladder is an ordered list of rungs in the catalog, under a new `career` rule. Each rung is a predicate over the same bounded state achievements use (lifetime counters, level, bag capacity, pouch tier), a title, a blurb, a gold bonus, and optionally a guarantee (below). Rungs are append-only and content-versioned like achievement ids. The launch ladder:
+The ladder is an ordered list of rungs in the catalog, under a new `career` rule. Each rung is a predicate over the same bounded state achievements use (lifetime counters, level, bag capacity, pouch tier), a title, a blurb, a gold bonus, and optionally a guarantee (below). Rungs are content-versioned like achievement ids: new ones are appended or inserted by id, and a rung may move, since stored pointers are remapped by id at the switch (D135, D155, D227). The launch ladder:
 
 | # | Objective | Predicate | Companion? | Gold | Guarantee |
 | --- | --- | --- | --- | --- | --- |
@@ -75,6 +75,9 @@ The ladder is an ordered list of rungs in the catalog, under a new `career` rule
 | 19 | Reach level 12 | `level ≥ 12` | no | 100 | |
 | 20–24 | Salvage (moved to 7a in v23), Upgrade, Reinforce to +3, Win in the Archive, Win in the Parking Garage | see v13 and v16 | Bag page / Hero page | 60–150 | Appended in v13 (D129) and v16 (D133). The upgrade goal stays here: a level-4 hero needs about five more days of gold and Scrap for Mk II, and a goal that waits that long holds up every goal behind it (D155) |
 | 25 | Buy the Gym Duffel | `bagCapacity ≥ 24` | Bag page | 150 | Appended in v22 (D146); rung 18's blurb no longer calls the Rolling Suitcase the biggest bag |
+| 26 | Beat an elite that dug in | `standoffsWon ≥ 1` | no | 200 | Appended in v24 (D163) |
+| 27–28 | Reach level 20, Reach level 24 | `level ≥ 20`, `level ≥ 24` | no | 150, 200 | Appended in v29 (D227) |
+| 29 | Reinforce an item to +3 | `topReinforcement ≥ 3` | Bag page | 150 | Moved from after "Upgrade a piece of gear" to the end of the ladder in v29 (D227): a 12,000-gold sink held five finished goals behind it |
 
 Eight of nineteen rungs need the companion, and each is a thing the player would do anyway; none asks for a visit for its own sake. Companion rungs alternate with passive ones so a device-only player always has a visible goal and reaches it on their own about half the time, then sees the companion rung sit until they visit. That is the one soft nudge in the design, and it costs nothing: the hero keeps earning, unlocking and finishing tasks regardless.
 
@@ -146,6 +149,8 @@ counters.careerRungs, counters.itemsEquipped                                    
 12. **"Switch to Bold" is retired (D190, content v26).** The harness traced a three-to-four-fold rise in Cafeteria knockouts for players who visit every few days to v17, whose only change was this goal and "Reach level 7": the goal lands one level before the Cafeteria opens, and the hero stays Bold into it. The rung keeps its index as retired, so heroes who reached it keep it and a pointer on it moves to the raid goal without gold ([evidence](evidence/full-bag.md)).
 
 13. **"Choose a stance" (D192, content v27).** When stances unlock the hero has none chosen and plays Balanced; the goal asks the player to pick one, any of the three, so it teaches the stances without steering anyone into Bold. Predicate kind `stanceChosen` (the hero has a stance of its own once stances are open). It sits where "Switch to Bold" was and supersedes it.
+
+14. **The +3 goal moves last, and "Reach level 20" and "Reach level 24" come before it (D227, content v29).** On 2026-11-10 twenty-one production heroes stood on "Reinforce an item to +3" for four to fifteen days, eighteen of them already past the Archive and the Garage: the rung costs 12,000 gold against 500 to 1,000 a day, and the ladder is read in order, so the five goals behind it were done and uncelebrated. The +3 goal is now the last rung and the two level goals sit before it. A rung the hero reached under an earlier ladder is skipped wherever a later ladder puts it, with no pay and no line, so a moved goal never pays twice; a pointer past the old ladder's end lands on the first appended goal, so a finished hero sees the new ones. Harness (60 heroes, 60 days, v29, [evidence](evidence/ladder-v29-60-days.json)): the daily cohort now reaches the Archive goal on day 13, the Garage on day 18, the Gym Duffel on day 22, the dug-in elite and level 20 on day 28, level 24 on day 29 and +3 on day 37; under v28 every one of those paid on day 39, the day +3 was done. Three-day and seven-day managers follow the same order about four and twelve days later.
 
 ## Open points for Barry (settled 2026-10-12)
 

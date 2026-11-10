@@ -42,6 +42,23 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-10',
+    changes: [
+      {
+        game: 'desk-crawler',
+        title: 'The +3 goal waits at the end of the ladder',
+        body: 'Reinforce an item to +3 is now the last career goal, after the Archive, the Parking Garage, the Gym Duffel and a dug-in elite, so a hero that has done those sees them celebrated instead of waiting on 12,000 gold. Two new goals, Reach level 20 and Reach level 24, come before it. A goal you already reached stays done wherever it now sits.',
+        fr: { title: 'L’objectif +3 attend au bout de l’échelle', body: 'Renforcez un objet jusqu’à +3 est désormais le dernier objectif de carrière, après les Archives, le Parking souterrain, le Sac de sport et une élite retranchée : un héros qui les a déjà accomplis les voit célébrés au lieu d’attendre 12 000 pièces d’or. Deux nouveaux objectifs, Atteignez le niveau 20 et Atteignez le niveau 24, le précèdent. Un objectif déjà atteint reste acquis, où qu’il se trouve désormais.' },
+        de: { title: 'Das +3-Ziel wartet am Ende der Leiter', body: 'Verstärke einen Gegenstand auf +3 ist jetzt das letzte Karriereziel, nach dem Archiv, der Tiefgarage, der Sporttasche und einer eingegrabenen Elite: Ein Held, der das schon geschafft hat, sieht es gefeiert, statt auf 12.000 Gold zu warten. Zwei neue Ziele, Erreiche Stufe 20 und Erreiche Stufe 24, kommen davor. Ein schon erreichtes Ziel bleibt erledigt, wo immer es jetzt steht.' },
+        es: { title: 'La meta +3 espera al final de la escalera', body: 'Refuerza un objeto hasta +3 es ahora la última meta de carrera, después del Archivo, el Aparcamiento subterráneo, la Bolsa de deporte y una élite atrincherada: un héroe que ya las ha hecho las ve celebradas en vez de esperar 12.000 de oro. Dos metas nuevas, Llega al nivel 20 y Llega al nivel 24, van antes. Una meta ya alcanzada sigue hecha, esté donde esté ahora.' },
+        it: { title: 'L’obiettivo +3 aspetta in fondo alla scala', body: 'Rinforza un oggetto fino a +3 è ora l’ultimo obiettivo di carriera, dopo l’Archivio, il Parcheggio sotterraneo, il Borsone da palestra e un’élite trincerata: un eroe che li ha già fatti li vede festeggiati invece di aspettare 12.000 monete. Due nuovi obiettivi, Raggiungi il livello 20 e Raggiungi il livello 24, vengono prima. Un obiettivo già raggiunto resta fatto, ovunque si trovi ora.' },
+        pt: { title: 'A meta +3 espera no fim da escada', body: 'Reforce um item até +3 agora é a última meta de carreira, depois do Arquivo, do Estacionamento subterrâneo, da Bolsa de academia e de uma elite entrincheirada: um herói que já fez tudo isso vê essas metas celebradas em vez de esperar 12.000 de ouro. Duas metas novas, Chegue ao nível 20 e Chegue ao nível 24, vêm antes. Uma meta já alcançada continua feita, onde quer que esteja agora.' },
+        pl: { title: 'Cel +3 czeka na końcu drabiny', body: 'Wzmocnij przedmiot do +3 jest teraz ostatnim celem kariery, po Archiwum, Parkingu podziemnym, Torbie sportowej i okopanej elicie: bohater, który już to zrobił, widzi te cele uczczone, zamiast czekać na 12 000 złota. Dwa nowe cele, Osiągnij poziom 20 i Osiągnij poziom 24, stoją przed nim. Cel już osiągnięty pozostaje zaliczony, gdziekolwiek teraz stoi.' },
+        nl: { title: 'Het +3-doel wacht aan het einde van de ladder', body: 'Versterk een voorwerp tot +3 is nu het laatste carrièredoel, na het Archief, de Parkeergarage, de Sporttas en een ingegraven elite: een held die dat al heeft gedaan ziet het gevierd in plaats van te wachten op 12.000 goud. Twee nieuwe doelen, Bereik niveau 20 en Bereik niveau 24, komen ervoor. Een doel dat je al had bereikt blijft behaald, waar het nu ook staat.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-09',
     changes: [
       {

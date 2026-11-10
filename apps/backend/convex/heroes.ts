@@ -461,7 +461,8 @@ function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
   // D132: a retired rung shows only where the hero reached it; the count and position skip the rest.
   const shown = rules.rungs.map((entry, index) => ({ entry, index })).filter(({ entry }) => !entry.retired || reachedAt.has(entry.id))
   return {
-    rung: shown.filter(({ index }) => index < state.rung).length,
+    // D227: a rung the hero reached under an earlier ladder counts as done wherever this ladder puts it.
+    rung: shown.filter(({ entry, index }) => index < state.rung || reachedAt.has(entry.id)).length,
     total: shown.length,
     // D129: rewards waiting for the Claim button, oldest first.
     unclaimed: (state.unclaimed ?? []).map((reward) => ({ id: reward.id, title: titleOf(reward.id), gold: reward.gold, at: reward.at ?? null })),
@@ -473,7 +474,7 @@ function careerView(content: ContentCatalog, hero: Doc<'heroes'>) {
       blurb: entry.blurb,
       gold: entry.gold,
       companion: entry.companion ?? false,
-      state: index < state.rung ? ('done' as const) : entry.id === rung?.id ? ('current' as const) : ('ahead' as const),
+      state: index < state.rung || reachedAt.has(entry.id) ? ('done' as const) : entry.id === rung?.id ? ('current' as const) : ('ahead' as const),
       reachedAt: reachedAt.get(entry.id) ?? null,
     })),
   }
