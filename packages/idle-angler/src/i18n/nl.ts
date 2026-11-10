@@ -162,6 +162,7 @@ export const nl: IaLanguage = {
     achievements: (c, names) => `${c} prestaties: ${names}`,
     enteredOpen: (x, water, weight) => `${cap(x.a)} van ${weight} schrijft je in voor de Open ${water.at}.`,
     medal: (place, x, water, weight, prize) => `${['Goud', 'Zilver', 'Brons'][place]} in de Open ${water.at} met ${x.a} van ${weight}. ${n(prize)} munten.`,
+    passedOpen: (place, x, water) => `Eén medaille per weekend: je ${['goud', 'zilver', 'brons'][place]} in de Open ${water.at} (${x.name}) gaat naar de volgende visser.`,
     sold: (c, coins) => `${c} ${vis(c)} verkocht voor ${n(coins)} munten.`,
     bought: (item) => `Gekocht: ${item}.`,
     boughtBait: (tubs, bait) => `Gekocht: ${tubs} ${tubs === 1 ? 'bakje' : 'bakjes'} ${bait.name.toLowerCase()}.`,

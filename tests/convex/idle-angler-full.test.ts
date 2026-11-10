@@ -208,6 +208,47 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(medals.map((m) => m.place).sort()).toEqual([1, 2, 3])
   })
 
+  it('hands one medal an angler a weekend, passes the other place down and says so (D230)', async () => {
+    const ids = [await seedAngler(t, {}, 'Ana'), await seedAngler(t, {}, 'Bo'), await seedAngler(t, {}, 'Cy')]
+    const saturday = Date.UTC(2026, 9, 24, 12, 0)
+    await t.run(async (ctx) => {
+      const docs = await Promise.all(ids.map(async (id) => (await ctx.db.get(id))!))
+      // That week's targets are the Crucian Carp and the Grayling. Ana leads both waters: a 1,200 g crucian (75% of
+      // 1,600) and a 900 g grayling (60% of 1,500). The crucian is her medal.
+      await recordCatch(ctx, docs[0]!, { waterId: 'millpond', speciesId: 'crucian_carp', grams: 1200 }, saturday, true)
+      await recordCatch(ctx, docs[1]!, { waterId: 'millpond', speciesId: 'crucian_carp', grams: 900 }, saturday + 1, true)
+      await recordCatch(ctx, docs[0]!, { waterId: 'river_bend', speciesId: 'grayling', grams: 900 }, saturday + 2, true)
+      await recordCatch(ctx, docs[2]!, { waterId: 'river_bend', speciesId: 'grayling', grams: 700 }, saturday + 3, true)
+    })
+    // On Sunday the Rankings card already says which of Ana's places will pass down.
+    vi.setSystemTime(Date.UTC(2026, 9, 25, 12, 0))
+    const card = await as('Ana').query(api.idleAngler.full.opens, {})
+    expect(card.waters.filter((w: { own: unknown }) => w.own).map((w: { id: string; own: { rank: number; passes: boolean } }) => [w.id, w.own.rank, w.own.passes])).toEqual([
+      ['millpond', 1, false],
+      ['river_bend', 1, true],
+    ])
+    vi.setSystemTime(Date.UTC(2026, 9, 26, 0, 10))
+    await t.mutation(internal.idleAngler.full.closeOpens, {})
+    const after = await Promise.all(ids.map(angler))
+    expect(after.map((a) => a.counters.medals ?? 0)).toEqual([1, 1, 1])
+    // Ana gold at the Millpond (500), Bo silver there (300), Cy gold at River Bend (500) in Ana's place.
+    expect(after.map((a) => a.gold)).toEqual([500, 300, 500])
+    const medals = await t.run(async (ctx) => await ctx.db.query('iaTrophies').collect())
+    expect(medals.map((m) => [m.water, m.place]).sort()).toEqual([
+      ['millpond', 1],
+      ['millpond', 2],
+      ['river_bend', 1],
+    ])
+    const stories = await t.run(async (ctx) => (await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', ids[0]!)).collect()).filter((l) => l.kind === 'open').map((l) => l.summary))
+    expect(stories).toEqual(['Gold in the Crucian Carp Open at the Millpond with 1.2 kg. 500 coins.', 'One medal a weekend: your gold in the Grayling Open at River Bend passed to the next angler.'])
+    const awards = await t.run(async (ctx) => await ctx.db.query('iaOpenAwards').collect())
+    // Every water gets its receipt, so a rerun awards nothing twice; only two held entries.
+    expect(awards.filter((a) => a.awarded > 0).map((a) => [a.waterId, a.awarded]).sort()).toEqual([
+      ['millpond', 2],
+      ['river_bend', 1],
+    ])
+  })
+
   it('purges the wall and the shelf with the angler', async () => {
     const id = await seedAngler(t, {}, 'Pat')
     await t.run(async (ctx) => {

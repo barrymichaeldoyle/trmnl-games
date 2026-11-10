@@ -148,6 +148,7 @@ export function anglerWords(locale: Locale): AnglerWords {
     [re(`(\\d+) achievements: (.+)`), (m) => lang.tell.achievements(Number(m[1]), m[2]!.split(', ').map(achievementName).join(', '))],
     [re(`Entered the ${SPECIES} Open at ${WATER_THE} with ${W}\\.`), (m) => lang.tell.enteredOpen(fishOf(m[1]!), waterOf(m[2]!), decimal(m[3]!))],
     [re(`(Gold|Silver|Bronze) in the ${SPECIES} Open at ${WATER_THE} with ${W}\\. (\\d+) coins\\.`), (m) => lang.tell.medal(PLACES.indexOf(m[1] as (typeof PLACES)[number]) as 0 | 1 | 2, fishOf(m[2]!), waterOf(m[3]!), decimal(m[4]!), Number(m[5]))],
+    [re(`One medal a weekend: your (gold|silver|bronze) in the ${SPECIES} Open at ${WATER_THE} passed to the next angler\\.`), (m) => lang.tell.passedOpen(['gold', 'silver', 'bronze'].indexOf(m[1]!) as 0 | 1 | 2, fishOf(m[2]!), waterOf(m[3]!))],
     [re(`Sold (\\d+) fish for (\\d+) coins\\.`), (m) => lang.tell.sold(Number(m[1]), Number(m[2]))],
     [re(`Bought the (${alternation([...ROD_BY_NAME.keys(), ...COOLER_BY_NAME.keys(), ...ACCESS_BY_NAME.keys()])})\\.`), (m) => lang.tell.bought(lang.rods[ROD_BY_NAME.get(m[1]!) ?? ''] ?? lang.coolers[COOLER_BY_NAME.get(m[1]!) ?? ''] ?? lang.access[ACCESS_BY_NAME.get(m[1]!) ?? '']!)],
     [re(`Bought (\\d+) tubs? of ${BAIT_LOWER}\\.`), (m) => lang.tell.boughtBait(Number(m[1]), baitOf(BAIT_BY_LOWER.get(m[2]!)))],

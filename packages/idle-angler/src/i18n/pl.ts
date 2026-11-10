@@ -165,6 +165,7 @@ export const pl: IaLanguage = {
     achievements: (c, names) => `Osiągnięcia (${c}): ${names}`,
     enteredOpen: (x, water, weight) => `Zgłoszenie do zawodów Open ${water.at}: ${x.a}, ${weight}.`,
     medal: (place, x, water, weight, prize) => `${['Złoto', 'Srebro', 'Brąz'][place]} w zawodach Open ${water.at}: ${x.a}, ${weight}. Nagroda: ${coins(prize)}.`,
+    passedOpen: (place, x, water) => `Jeden medal na weekend: twoje ${['złoto', 'srebro', 'brąz'][place]} w zawodach Open ${water.at} (${x.name}) przechodzi na następnego wędkarza.`,
     sold: (c, value) => `Sprzedane: ${ryby(c)} za ${coins(value)}.`,
     bought: (item) => `Kupione: ${item}.`,
     boughtBait: (tubs, bait) => `Kupione: ${bait.name.toLowerCase()}, ${tubs} ${form(tubs, 'pudełko', 'pudełka', 'pudełek')}.`,

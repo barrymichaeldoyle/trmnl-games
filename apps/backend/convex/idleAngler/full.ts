@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { claimGoalReward, fillOrder, formatWeight, openPeriod, openTarget, orderDay, swapOrder, waterOf, type WaterId } from '@trmnl-games/idle-angler/sim'
+import { awardOpens, claimGoalReward, fillOrder, formatWeight, openPeriod, openTarget, orderDay, swapOrder, waterOf, type WaterId } from '@trmnl-games/idle-angler/sim'
 import { baitFromCatch, buyCharter, buyPegs, mountFish, pegsOf } from '@trmnl-games/idle-angler/sim/shop'
 import { deriveStreamSeed } from '@trmnl-games/engine/seed'
 import type { Doc, Id } from '../_generated/dataModel'
@@ -12,7 +12,7 @@ import { awardAfterAnglerIntent } from './achievements'
 import { asCatch, speciesName } from './dockFull'
 import { REFUSAL, commandLog, intentResult, playableAngler, shopIntent, strip, worldContentOf } from './anglers'
 import { currentAngler } from './profile'
-import { readBoard } from './records'
+import { OPEN_AWARD_DEPTH, readBoard, topRows } from './records'
 import { IDLE_ANGLER_RUNTIME } from './runtime'
 
 /**
@@ -193,7 +193,12 @@ export const trophies = query({
   },
 })
 
-/** This weekend's Opens: the target at each water, the top rows and the viewer's own. */
+/**
+ * This weekend's Opens: the target at each water, the top rows and the viewer's own. `own.passes` marks a top-three
+ * place the viewer holds that would pass to the next angler on Monday because their one medal that weekend (D230) is
+ * a better place elsewhere, judged by the same award the cron runs, so the card never promises a medal the shelf
+ * will not show.
+ */
 export const opens = query({
   args: {},
   returns: v.any(),
@@ -206,11 +211,21 @@ export const opens = query({
     const period = openPeriod(now)
     const saturday = Date.parse(`${period.slice(1)}T00:00:00Z`)
     const waters = []
+    const boards = []
     for (const water of content.waters) {
       const target = openTarget(content, water.id, now)
       if (!target) continue
       const board = await readBoard(ctx, water.id, period, angler?._id ?? null, 10)
-      waters.push({ id: water.id, name: water.name, target: { id: target.id, name: target.name }, ...board })
+      waters.push({ id: water.id, name: water.name, target: { id: target.id, name: target.name }, ...board, own: board.own ? { ...board.own, passes: false } : null })
+      const rank = board.own?.rank
+      if (angler && rank !== null && rank !== undefined && rank <= 3) boards.push({ waterId: water.id, rows: await topRows(ctx, water.id, period, OPEN_AWARD_DEPTH) })
+    }
+    // Only a viewer placed at two or more waters can see a place pass; one board alone always keeps its places.
+    if (angler && boards.length >= 2) {
+      const { passes } = awardOpens(content, boards)
+      for (const water of waters) {
+        if (water.own && passes.some((p) => p.anglerId === angler._id && p.waterId === water.id)) water.own = { ...water.own, passes: true }
+      }
     }
     return { period, startsAt: saturday, endsAt: saturday + 2 * DAY_MS, on: now >= saturday && now < saturday + 2 * DAY_MS, waters, prizes: content.opens.prizes }
   },
@@ -219,8 +234,10 @@ export const opens = query({
 const PLACE = ['Gold', 'Silver', 'Bronze'] as const
 
 /**
- * Monday 00:10 UTC: last weekend's Opens close. Each water's top three take a medal and its coins, once (the
- * `iaOpenAwards` receipt), with a story line. Reads are three rows per water.
+ * Monday 00:10 UTC: last weekend's Opens close. One medal an angler a weekend (D230): the pure award hands each water's
+ * top three their medals and coins, every gold first, so an angler leading two waters keeps the better one and the
+ * other passes down; the holder of a passed place is told where it went. Awarded once per water (the `iaOpenAwards`
+ * receipt). Reads are `OPEN_AWARD_DEPTH` rows per water.
  */
 export const closeOpens = internalMutation({
   args: {},
@@ -231,26 +248,35 @@ export const closeOpens = internalMutation({
     if (!content?.opens) return null
     const period = openPeriod(Date.now() - 3 * DAY_MS)
     const at = Date.parse(`${period.slice(1)}T12:00:00Z`)
+    const boards: Array<{ waterId: WaterId; rows: Doc<'iaCatchRecords'>[] }> = []
     for (const water of content.waters) {
-      const target = openTarget(content, water.id, at)
-      if (!target) continue
+      if (!openTarget(content, water.id, at)) continue
       const done = await ctx.db.query('iaOpenAwards').withIndex('by_period_and_waterId', (q) => q.eq('period', period).eq('waterId', water.id)).unique()
       if (done) continue
-      const top = await ctx.db.query('iaCatchRecords').withIndex('by_waterId_and_period_and_grams', (q) => q.eq('waterId', water.id).eq('period', period)).order('desc').take(3)
-      for (const [place, row] of top.entries()) {
-        const angler = await ctx.db.get(row.anglerId)
-        if (angler === null) continue
-        const prize = content.opens.prizes[place]!
-        await ctx.db.insert('iaTrophies', { anglerId: angler._id, userId: angler.userId, kind: 'medal', speciesId: row.speciesId, grams: row.grams, water: water.id, periodKey: period, place: place + 1, at: Date.now() })
-        const sequence = angler.logSequence + 1
-        const summary = `${PLACE[place]} in the ${target.name} Open at ${waterOf(content, water.id).the} with ${formatWeight(row.grams)}. ${prize} coins.`
-        await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'lifecycle', sequence, at: Date.now(), kind: 'open', summary, detail: { v: 1, speciesId: row.speciesId, grams: row.grams, waterId: water.id as WaterId, place: place + 1 }, deltas: { gold: prize } })
-        const counters = { ...angler.counters, medals: (angler.counters.medals ?? 0) + 1, goldEarned: angler.counters.goldEarned + prize }
-        await ctx.db.patch(angler._id, { gold: angler.gold + prize, counters, logSequence: sequence })
-        await awardAfterAnglerIntent(ctx, angler, content, world?.currentTick ?? 0)
-      }
-      await ctx.db.insert('iaOpenAwards', { period, waterId: water.id, awarded: top.length, at: Date.now() })
+      boards.push({ waterId: water.id, rows: await topRows(ctx, water.id, period, OPEN_AWARD_DEPTH) })
     }
+    if (boards.length === 0) return null
+    const { awards, passes } = awardOpens(content, boards)
+    const openName = (waterId: WaterId) => `${openTarget(content, waterId, at)!.name} Open at ${waterOf(content, waterId).the}`
+    for (const { waterId, place, row } of awards) {
+      const angler = await ctx.db.get(row.anglerId)
+      if (angler === null) continue
+      const prize = content.opens.prizes[place]!
+      await ctx.db.insert('iaTrophies', { anglerId: angler._id, userId: angler.userId, kind: 'medal', speciesId: row.speciesId, grams: row.grams, water: waterId, periodKey: period, place: place + 1, at: Date.now() })
+      let sequence = angler.logSequence + 1
+      const summary = `${PLACE[place]} in the ${openName(waterId)} with ${formatWeight(row.grams)}. ${prize} coins.`
+      await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'lifecycle', sequence, at: Date.now(), kind: 'open', summary, detail: { v: 1, speciesId: row.speciesId, grams: row.grams, waterId, place: place + 1 }, deltas: { gold: prize } })
+      // The places this angler held elsewhere, named so Sunday's board and Monday's shelf agree in the angler's own story.
+      for (const pass of passes.filter((p) => p.anglerId === row.anglerId)) {
+        sequence += 1
+        const passed = `One medal a weekend: your ${PLACE[pass.place].toLowerCase()} in the ${openName(pass.waterId)} passed to the next angler.`
+        await ctx.db.insert('iaTickLogs', { anglerId: angler._id, source: 'lifecycle', sequence, at: Date.now(), kind: 'open', summary: passed, detail: { v: 1, speciesId: pass.row.speciesId, grams: pass.row.grams, waterId: pass.waterId, place: pass.place + 1, passed: true }, deltas: { gold: 0 } })
+      }
+      const counters = { ...angler.counters, medals: (angler.counters.medals ?? 0) + 1, goldEarned: angler.counters.goldEarned + prize }
+      await ctx.db.patch(angler._id, { gold: angler.gold + prize, counters, logSequence: sequence })
+      await awardAfterAnglerIntent(ctx, angler, content, world?.currentTick ?? 0)
+    }
+    for (const board of boards) await ctx.db.insert('iaOpenAwards', { period, waterId: board.waterId, awarded: awards.filter((a) => a.waterId === board.waterId).length, at: Date.now() })
     return null
   },
 })

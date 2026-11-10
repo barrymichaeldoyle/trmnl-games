@@ -55,6 +55,14 @@ export async function recordCatch(ctx: MutationCtx, angler: Doc<'anglers'>, fish
 
 export type BoardRow = { rank: number; name: string; speciesId: string; grams: number; own: boolean; profile: boolean }
 
+/** How deep the Monday award reads each Open board (D230): three medals, plus room for anglers whose medal is elsewhere. */
+export const OPEN_AWARD_DEPTH = 20
+
+/** A board's heaviest rows, heaviest first, as the award and the Rankings card read them. */
+export async function topRows(ctx: QueryCtx, waterId: WaterId, period: string, limit: number) {
+  return await ctx.db.query('iaCatchRecords').withIndex('by_waterId_and_period_and_grams', (q) => q.eq('waterId', waterId).eq('period', period)).order('desc').take(limit)
+}
+
 /**
  * A water's board: its first `limit` rows by weight, and the viewer's own row and rank when it is within
  * `BOARD_DEPTH`. Names are the owner's current public name; a row whose owner is gone, suspended or deleting, or whose

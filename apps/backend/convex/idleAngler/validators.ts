@@ -93,4 +93,6 @@ export const iaLogDetail = v.object({
   runId: v.optional(v.string()),
   orderId: v.optional(v.string()),
   place: v.optional(v.number()),
+  /** D230: a top-three Open place that passed to the next angler because the holder's one medal that weekend is elsewhere. */
+  passed: v.optional(v.boolean()),
 })

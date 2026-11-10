@@ -99,6 +99,8 @@ export interface IaLanguage {
     readonly achievements: (n: number, names: string) => string
     readonly enteredOpen: (fish: FishName, water: WaterName, weight: string) => string
     readonly medal: (place: 0 | 1 | 2, fish: FishName, water: WaterName, weight: string, prize: number) => string
+    /** D230: a top-three place the angler held at another water, passed on because one medal a weekend counts. */
+    readonly passedOpen: (place: 0 | 1 | 2, fish: FishName, water: WaterName) => string
     readonly sold: (n: number, coins: number) => string
     readonly bought: (item: string) => string
     readonly boughtBait: (tubs: number, bait: BaitName) => string

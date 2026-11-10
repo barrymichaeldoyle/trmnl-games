@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { contentV1, contentV2, contentV3, contentV4, contentV5 } from '@trmnl-games/idle-angler/content'
 import {
+  awardOpens,
   bitePermille,
   claimGoalReward,
   candidates,
@@ -257,6 +258,48 @@ describe('the trophy wall and the Opens', () => {
     expect(entersOpen(content, 'millpond', target.id, SPRING)).toBe(false)
     expect(openTarget(content, 'frozen_tarn', saturday)).toBeUndefined()
     expect(openTarget(content, 'frozen_tarn', WINTER + 5 * 86_400_000)).toBeDefined()
+  })
+})
+
+describe('one medal a weekend (D230)', () => {
+  const row = (anglerId: string, speciesId: string, grams: number, at = 0) => ({ anglerId, speciesId, grams, at })
+
+  it('keeps an angler leading two waters at the one with the larger share of its species, and passes the other down', () => {
+    // Perch top 1,400 g; chub top 2,500 g: Ana's 1,200 g perch (86%) beats her 1,500 g chub (60%).
+    const boards = [
+      { waterId: 'millpond' as const, rows: [row('ana', 'perch', 1200), row('bo', 'perch', 900), row('cy', 'perch', 700), row('di', 'perch', 500)] },
+      { waterId: 'river_bend' as const, rows: [row('ana', 'chub', 1500), row('bo', 'chub', 1400), row('eve', 'chub', 1200), row('fay', 'chub', 1000)] },
+    ]
+    const { awards, passes } = awardOpens(contentV2, boards)
+    const at = (waterId: string) => awards.filter((a) => a.waterId === waterId).sort((a, b) => a.place - b.place).map((a) => a.row.anglerId)
+    // Every gold is settled first, so Bo takes River Bend's gold in Ana's place rather than the Millpond's silver.
+    expect(at('millpond')).toEqual(['ana', 'cy', 'di'])
+    expect(at('river_bend')).toEqual(['bo', 'eve', 'fay'])
+    expect(passes.map((p) => [p.anglerId, p.waterId, p.place])).toEqual([
+      ['bo', 'millpond', 1],
+      ['ana', 'river_bend', 0],
+    ])
+    expect(new Set(awards.map((a) => a.row.anglerId)).size).toBe(awards.length)
+  })
+
+  it('awards every gold before any silver, so a leader is never pushed to silver by a tie elsewhere', () => {
+    const boards = [
+      { waterId: 'millpond' as const, rows: [row('ana', 'perch', 700, 5), row('bo', 'perch', 600)] },
+      { waterId: 'river_bend' as const, rows: [row('ana', 'chub', 1250, 1), row('cy', 'chub', 1100)] },
+    ]
+    const { awards } = awardOpens(contentV2, boards)
+    // Equal shares (half of each top weight): the earlier catch, the chub, keeps gold; the Millpond's gold passes to Bo.
+    expect(awards.map((a) => [a.waterId, a.place, a.row.anglerId])).toEqual([
+      ['river_bend', 0, 'ana'],
+      ['millpond', 0, 'bo'],
+      ['river_bend', 1, 'cy'],
+    ])
+  })
+
+  it('leaves a lone board untouched', () => {
+    const { awards, passes } = awardOpens(contentV2, [{ waterId: 'millpond' as const, rows: [row('ana', 'perch', 1000), row('bo', 'perch', 800), row('cy', 'perch', 600), row('di', 'perch', 400)] }])
+    expect(awards.map((a) => a.row.anglerId)).toEqual(['ana', 'bo', 'cy'])
+    expect(passes).toEqual([])
   })
 })
 

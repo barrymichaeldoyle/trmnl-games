@@ -31,7 +31,7 @@ const WATERS = ['millpond', 'river_bend', 'harbour_pier', 'heron_lake', 'deep_se
 type Row = { rank: number; name: string; speciesId: string; grams: number; own: boolean; profile: boolean }
 type View = { waterId: (typeof WATERS)[number]; period: 'week' | 'all'; weekEndsAt: number; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number } | null; full: boolean }
 
-type Opens = { period: string; startsAt: number; endsAt: number; on: boolean; prizes: number[]; waters: Array<{ id: string; name: string; target: { id: string; name: string }; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number } | null }> }
+type Opens = { period: string; startsAt: number; endsAt: number; on: boolean; prizes: number[]; waters: Array<{ id: string; name: string; target: { id: string; name: string }; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number; passes: boolean } | null }> }
 
 const weekdayIn = (locale: Locale) => (date: Date) => date.toLocaleString(INTL_TAG[locale], { weekday: 'long', hour: '2-digit', minute: '2-digit' })
 
@@ -94,7 +94,7 @@ function OpensCard({ opens }: { opens: Opens }) {
   return (
     <Card title={opens.on ? t.opensOn : t.opensNext} icon="medal">
       <p className="mb-1 text-sm text-muted">
-        {opens.on ? <>{t.until} <LocalTime at={opens.endsAt} format={weekday} />.</> : <><LocalTime at={opens.startsAt} format={weekday} /> {t.to} <LocalTime at={opens.endsAt} format={weekday} />.</>} {t.enter}
+        {opens.on ? <>{t.until} <LocalTime at={opens.endsAt} format={weekday} />.</> : <><LocalTime at={opens.startsAt} format={weekday} /> {t.to} <LocalTime at={opens.endsAt} format={weekday} />.</>} {t.enter} {t.oneMedal}
       </p>
       <p className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span className="text-muted">{t.topThree}</span>
@@ -116,6 +116,8 @@ function OpensCard({ opens }: { opens: Opens }) {
                   <span className="inline-flex items-center gap-1 font-semibold tabular-nums"><Glyph name="crown" size={12} className="text-gold-ink" />{words.weight(leader.grams)}</span>
                   <span className={`max-w-full truncate text-sm ${leader.own ? 'font-semibold text-gold-ink' : 'text-muted'}`}>{leader.name}</span>
                   {w.own && !leader.own ? <span className="text-sm text-muted tabular-nums">{t.you} {words.weight(w.own.grams)}{w.own.rank ? ` · #${w.own.rank}` : ''}</span> : null}
+                  {/* D230: a top-three place that would pass to the next angler on Monday, since a better one elsewhere is this angler's one medal. */}
+                  {w.own?.passes ? <span className="text-sm text-muted">{t.passes}</span> : null}
                 </span>
               ) : opens.on ? <span className="shrink-0 text-sm text-muted">{t.noEntries}</span> : null}
             </li>
