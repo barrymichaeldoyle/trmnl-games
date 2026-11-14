@@ -1,6 +1,6 @@
 # Idle Angler badges: icons, the wall and the moment you earn one (P48)
 
-Proposed 2026-11-14 after Barry asked for icons on Idle Angler's achievements, an achievements wall, and a celebration when someone earns one, on the TRMNL and in the companion. Proposal only: nothing is approved or built.
+Proposed 2026-11-14 after Barry asked for icons on Idle Angler's achievements, an achievements wall, and a celebration when someone earns one, on the TRMNL and in the companion. Approved as D231 on 2026-11-14. Status by slice is in the change record at the end.
 
 ## What is there now
 
@@ -105,3 +105,7 @@ Badge names and blurbs already exist in all eight languages. New strings ("Achie
 | B3 Companion celebration | `achievementsSeenAt`, `markSeen`, the Dock card with confetti, the dots | convex-test: a new unlock shows once, an absent field shows nothing older than the release, two tabs dismiss once |
 | B4 Device panel | The payload's `badge`, the template bump, the panel in every layout | The preview sweep above, clean |
 | B5 Profile and words | Six badges on the profile, the eight languages, help and What's new | Profile not-found parity unchanged; i18n completeness test |
+
+## Change record
+
+- 2026-11-14, B1: badge art built. 22 pictures, species from their fish sprites, six frames (locked, ring, double ring, heavy studded ring, sunburst, solid disc). Change from the spec: the laurel and four studs did not read at 32 pixels, so tier 3 is a heavy studded ring, tier 4 a sunburst and tier 5 a solid disc (the device cuts the picture out of it; the companion paints it violet under the picture). Species wear tier 1 and tier 5. Route, colour layers, a completeness test and the review sheet tool (`tools/art/idleAnglerBadges.ts`). Waiting on Barry's review of the sheet before B2.

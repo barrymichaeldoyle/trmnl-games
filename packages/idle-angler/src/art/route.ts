@@ -5,6 +5,7 @@ import { anglerPoses, type AnglerPose } from './angler'
 import { Canvas } from '@trmnl-games/engine/art/canvas'
 import { FISH_LARGE, FISH_TRAITS, fishSprite } from './fish'
 import { FLIES } from '../content/flies'
+import { badgeCanvas, hasBadge, type BadgeFrame } from './badges'
 import { composeScene, MAX_STAGE_WIDTH, MIN_STAGE_WIDTH, SCENE_VERSION, STAGE_HEIGHT, type SceneKey } from './scene'
 
 /**
@@ -13,6 +14,7 @@ import { composeScene, MAX_STAGE_WIDTH, MIN_STAGE_WIDTH, SCENE_VERSION, STAGE_HE
  *   (v3, the same without the season, still renders while devices catch up)
  *   /art/ia/qr/v1/<target>/<scale>.png
  *   /art/ia/fish/v1/<species>/<scale>.png   (template v2's newest-catch panel)
+ *   /art/ia/badge/v1/<family>/<frame>/<scale>.png   (P48: an achievement badge, frame 0 locked to 5)
  * Every part is allowlisted and the stage width bounded (`MIN_STAGE_WIDTH` to `MAX_STAGE_WIDTH`, D125), so the
  * route can never draw arbitrary text, mint arbitrary codes or render an unbounded image.
  */
@@ -47,6 +49,11 @@ export const FISH_VERSION = 1
 /** The large catalogue sprite (30x12) at whole-number scales: 3 for the OG's portrait panel up to 8 for the X. */
 export const FISH_SCALES = new Set([2, 3, 4, 5, 6, 8])
 export const fishBase = (speciesId: string) => `/art/ia/fish/v${FISH_VERSION}/${speciesId}`
+
+export const BADGE_VERSION = 1
+/** The 32x32 medallion at whole-number scales: 1 for the narrowest columns up to 6. */
+export const BADGE_SCALES = new Set([1, 2, 3, 4, 5, 6])
+export const badgeBase = (family: string, frame: BadgeFrame) => `/art/ia/badge/v${BADGE_VERSION}/${family}/${frame}`
 
 /** The scene image path for a key: `sceneBase(key)` then the stage width and the whole-number scale. */
 export const scenePath = (key: SceneKey, width: number, scale: number) => `${sceneBase(key)}/${width}/${scale}.png`
@@ -91,6 +98,14 @@ export function renderIdleAnglerArt(path: string, origin: string): { png: Uint8A
     const canvas = new Canvas(FISH_LARGE.width, FISH_LARGE.height)
     canvas.draw(fishSprite(fish[2]!, FISH_LARGE.width, FISH_LARGE.height), 0, 0)
     const { width, height, ink } = canvas.scaled(scale)
+    return { png: encodePng1Bit(width, height, ink), immutable: true }
+  }
+  const badge = /^\/art\/ia\/badge\/v(\d+)\/([a-z_]+)\/(\d)\/(\d)\.png$/.exec(path)
+  if (badge) {
+    const frame = Number(badge[3])
+    const scale = Number(badge[4])
+    if (Number(badge[1]) !== BADGE_VERSION || !hasBadge(badge[2]!) || frame > 5 || !BADGE_SCALES.has(scale)) return null
+    const { width, height, ink } = badgeCanvas(badge[2]!, frame as BadgeFrame).scaled(scale)
     return { png: encodePng1Bit(width, height, ink), immutable: true }
   }
   const parsed = parseScenePath(path)
