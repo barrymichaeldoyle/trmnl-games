@@ -3,7 +3,7 @@ import { internal } from './_generated/api'
 import { httpAction } from './_generated/server'
 import { sha256Hex } from './lib/hash'
 import { verifySvix } from './lib/svix'
-import { renderScenePng } from '@trmnl-games/desk-crawler/art/route'
+import { renderBadgePng, renderScenePng } from '@trmnl-games/desk-crawler/art/route'
 import { renderHeroCardPng } from '@trmnl-games/desk-crawler/art/heroCard'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { DEFAULT_COMPANION_ORIGIN, keepsakeQrFields, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
@@ -294,7 +294,8 @@ http.route({
       return new Response(new Blob([png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' } })
     }
     const isQr = path.startsWith('/art/qr/')
-    const png = isQr ? renderQrPng(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN) : renderScenePng(path)
+    // P49: Desk Crawler's achievement badges, immutable per versioned path like its scenes.
+    const png = isQr ? renderQrPng(path, process.env.COMPANION_ORIGIN ?? DEFAULT_COMPANION_ORIGIN) : path.startsWith('/art/badge/') ? renderBadgePng(path) : renderScenePng(path)
     if (png === null) return new Response('Not found', { status: 404 })
     const cache = isQr ? 'public, max-age=86400' : 'public, max-age=31536000, immutable'
     return new Response(new Blob([png.slice().buffer as ArrayBuffer], { type: 'image/png' }), { status: 200, headers: { 'Content-Type': 'image/png', 'Cache-Control': cache } })
