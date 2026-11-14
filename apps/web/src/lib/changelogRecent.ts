@@ -45,6 +45,17 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     date: '2026-11-14',
     changes: [
       {
+        title: 'Real confetti',
+        body: 'Claiming a goal, adding a fly or a keepsake, and earning a badge now set off confetti across the whole screen, tumbling down from where it happened, instead of a small pixel burst inside the card. If your device is set to reduce motion, there is none.',
+        fr: { title: 'De vrais confettis', body: 'Réclamer un objectif, ajouter une mouche ou un souvenir et obtenir un badge lancent maintenant des confettis sur tout l’écran, qui retombent depuis l’endroit de l’action, au lieu d’une petite gerbe de pixels dans la carte. Si votre appareil est réglé pour réduire les animations, il n’y en a pas.' },
+        de: { title: 'Echtes Konfetti', body: 'Ein Ziel einlösen, eine Fliege oder ein Andenken hinzufügen und ein Abzeichen verdienen lässt jetzt Konfetti über den ganzen Bildschirm regnen, ausgehend von der Stelle, an der es passiert ist, statt eines kleinen Pixelregens in der Karte. Ist dein Gerät auf weniger Bewegung eingestellt, gibt es keines.' },
+        es: { title: 'Confeti de verdad', body: 'Reclamar un objetivo, añadir una mosca o un recuerdo y ganar una insignia ahora lanzan confeti por toda la pantalla, que cae desde donde ocurrió, en lugar de una pequeña ráfaga de píxeles dentro de la tarjeta. Si tu dispositivo está configurado para reducir el movimiento, no aparece.' },
+        it: { title: 'Coriandoli veri', body: 'Riscattare un obiettivo, aggiungere una mosca o un ricordo e ottenere un distintivo ora fanno piovere coriandoli su tutto lo schermo, a partire dal punto in cui è successo, invece di una piccola esplosione di pixel nella scheda. Se il tuo dispositivo è impostato per ridurre il movimento, non ce ne sono.' },
+        pt: { title: 'Confete de verdade', body: 'Resgatar uma meta, adicionar uma mosca ou uma lembrança e ganhar um emblema agora soltam confete pela tela inteira, caindo de onde aconteceu, em vez de uma pequena explosão de pixels dentro do cartão. Se o seu aparelho estiver configurado para reduzir movimento, não aparece.' },
+        pl: { title: 'Prawdziwe konfetti', body: 'Odebranie celu, dodanie muchy lub pamiątki i zdobycie odznaki wywołują teraz konfetti na całym ekranie, opadające z miejsca, w którym to się stało, zamiast małego wybuchu pikseli w karcie. Jeśli twoje urządzenie ma ograniczony ruch, konfetti się nie pojawia.' },
+        nl: { title: 'Echte confetti', body: 'Een doel ophalen, een vlieg of aandenken toevoegen en een badge verdienen laten nu confetti over het hele scherm dwarrelen, vanaf de plek waar het gebeurde, in plaats van een kleine pixelregen in de kaart. Staat je apparaat op minder beweging, dan is er geen.' },
+      },
+      {
         game: 'desk-crawler',
         title: 'Badges on the Records shelves',
         body: 'Every achievement on the Records page now has a pixel badge instead of the same sword or trophy: each monster as itself, and a picture for everything else, from the rubber duck on your desk to the boiler room’s flame. The frame climbs from copper to silver, gold and blue with the tiers and turns violet when a family is finished. Tap a badge to see all its tiers. Ones you have not earned stay a question mark.',

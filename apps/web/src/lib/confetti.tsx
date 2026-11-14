@@ -1,20 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { Shape } from 'canvas-confetti'
 
-/** Confetti pieces: a fixed scatter so the burst reads the same every time, in the game's four inks. */
-const CONFETTI = Array.from({ length: 28 }, (_, i) => ({ x: ((i * 37) % 100) - 50, y: -(40 + ((i * 53) % 70)), spin: ((i * 97) % 360), delay: (i * 13) % 120, tone: ['bg-gold', 'bg-xp', 'bg-hp', 'bg-sky'][i % 4]! }))
+/** The games' inks: gold, XP green, HP red, sky, rare violet and cream. */
+const COLOURS = ['#ffd166', '#4fd18b', '#e5483b', '#5d8fd6', '#a77bff', '#f4f1ff']
 
-/** A one-shot pixel confetti burst over its (relatively positioned) parent (D129); reduced motion collapses it to a flash. */
+/**
+ * A celebration's confetti (D129, reworked 2026-11-14): real confetti over the whole screen, fired from where the
+ * celebration sits (its relatively positioned parent), tumbling and falling with `canvas-confetti`. The library loads
+ * only when a burst fires, so no page pays for it up front; it draws on its own full-screen canvas and skips the burst
+ * entirely under reduced motion.
+ */
 export function Confetti() {
-  return (
-    <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-1/2 h-0 overflow-visible">
-      {CONFETTI.map((piece, i) => (
-        <span key={i} className={`confetti absolute left-1/2 size-2 ${piece.tone}`} style={{ '--dx': `${piece.x * 2.6}px`, '--dy': `${piece.y * 1.6}px`, '--spin': `${piece.spin}deg`, animationDelay: `${piece.delay}ms` } as React.CSSProperties} />
-      ))}
-    </span>
-  )
+  const anchor = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const parent = anchor.current?.parentElement
+    if (!parent) return
+    let cancelled = false
+    void import('canvas-confetti').then(({ default: confetti }) => {
+      if (cancelled) return
+      const box = parent.getBoundingClientRect()
+      const origin = { x: (box.left + box.width / 2) / window.innerWidth, y: Math.min(0.9, (box.top + box.height / 3) / window.innerHeight) }
+      const base = { origin, colors: COLOURS, disableForReducedMotion: true, zIndex: 100, shapes: ['square', 'circle'] as Shape[] }
+      // A strong pop upward from the celebration, then a wider, softer spray that drifts down across the screen.
+      void confetti({ ...base, particleCount: 110, spread: 70, startVelocity: 48, ticks: 260, scalar: 1.35 })
+      setTimeout(() => {
+        if (!cancelled) void confetti({ ...base, particleCount: 70, spread: 130, startVelocity: 32, decay: 0.92, ticks: 300, scalar: 1.1 })
+      }, 140)
+    }).catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+  return <span ref={anchor} aria-hidden="true" className="hidden" />
 }
 
-/** A claim's burst: `fire()` starts one, and it clears itself after the animation; render `<Confetti key={burst} />` while `burst > 0`. */
+/** A claim's burst: `fire()` starts one, and it clears itself afterwards; render `<Confetti key={burst} />` while `burst > 0`. */
 export function useBurst(): [number, () => void] {
   const [burst, setBurst] = useState(0)
   useEffect(() => {
