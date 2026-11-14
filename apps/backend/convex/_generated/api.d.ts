@@ -13,6 +13,7 @@ import type * as admin from "../admin.js";
 import type * as alerts from "../alerts.js";
 import type * as alertsPush from "../alertsPush.js";
 import type * as analytics from "../analytics.js";
+import type * as badges from "../badges.js";
 import type * as census from "../census.js";
 import type * as connections from "../connections.js";
 import type * as crons from "../crons.js";
@@ -151,6 +152,7 @@ declare const fullApi: ApiFromModules<{
   alerts: typeof alerts;
   alertsPush: typeof alertsPush;
   analytics: typeof analytics;
+  badges: typeof badges;
   census: typeof census;
   connections: typeof connections;
   crons: typeof crons;

@@ -2,13 +2,14 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@trmnl-games/backend/api'
 import { ACHIEVEMENTS, ACHIEVEMENT_BY_ID, ACHIEVEMENT_FAMILIES, RARITY_PERCENT_MIN_POPULATION, rarityBand, tierLabel, type RarityBand } from '@trmnl-games/desk-crawler/content/achievements'
-import { useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { Glyph, SectionTitle, type GlyphName } from '../../../lib/glyphs'
 import { Button, Meter } from '../../../lib/ui'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { LocalTime } from '../../../lib/localTime'
 import { AchievementHint } from './-achievementHint'
 import { DcBadge } from './-badge'
+import { useNewBadges } from './-newBadges'
 import { formatDate, formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { useContent } from '../../../lib/useContent'
 import { dcAchievementsMessages, shelfTitle } from '../../../i18n/dcAchievements'
@@ -51,6 +52,9 @@ function Rarity({ id, rarity }: { id: string; rarity: View['rarity'] }) {
 
 
 type EarnedFamily = Family & { earned: Earned }
+
+/** P49: the badges new since the last look, tagged New on their tiles for this visit. */
+const NewIds = createContext<ReadonlySet<string>>(new Set())
 
 /** Shelves in reading order: what every hero earns first, then each floor's monsters, then the rarer set pieces. A category not listed gets its own shelf after these. */
 const SHELVES: ReadonlyArray<{ category: string; glyph: GlyphName; tone: string }> = [
@@ -95,7 +99,8 @@ function EarnedTile({ family, rarity, onOpen }: { family: EarnedFamily; rarity: 
   const locale = useLocale()
   const name = c.text(family.earned.name)
   const r = rarityOf(family.earned.id, rarity, t)
-  const label = [family.tiers > 1 ? t.tierOf(name, family.earned.tier, family.tiers) : name, r ? t.bands[r.band] : null].filter(Boolean).join(', ')
+  const isNew = useContext(NewIds).has(family.earned.id)
+  const label = [isNew ? t.newTag : null, family.tiers > 1 ? t.tierOf(name, family.earned.tier, family.tiers) : name, r ? t.bands[r.band] : null].filter(Boolean).join(', ')
   return (
     <li className="min-w-0">
       <button type="button" onClick={onOpen} aria-label={label} className={`flex size-full min-h-36 flex-col items-center gap-2 border-[3px] ${r ? BAND_EDGE[r.band] : 'border-night'} bg-panel px-2 pt-3 pb-2.5 text-center hover:bg-raised active:bg-raised`}>
@@ -105,6 +110,7 @@ function EarnedTile({ family, rarity, onOpen }: { family: EarnedFamily; rarity: 
           {family.tiers > 1 ? <span className="hud absolute -top-1 -right-2 border-2 border-night bg-night px-0.5 text-[0.5rem] leading-3 text-gold-ink">{tierLabel(family.earned.tier)}</span> : null}
         </span>
         <span className="line-clamp-2 text-sm leading-tight font-semibold hyphens-auto [overflow-wrap:anywhere]">{name}</span>
+        {isNew ? <span className="bg-gold px-1 text-xs font-semibold whitespace-nowrap text-night">{t.newTag}</span> : null}
         <span aria-hidden="true" className="mt-auto flex w-full flex-col items-center gap-1.5">
           {family.tiers > 1 ? <TierPips tier={family.earned.tier} tiers={family.tiers} /> : null}
           {family.next ? (
@@ -223,6 +229,16 @@ function Summary({ view, earned, onOpen }: { view: View; earned: EarnedFamily[];
 export function Achievements() {
   const { data } = useQuery(convexQuery(api.achievements.mine, {}))
   const [openId, setOpenId] = useState<string | null>(null)
+  // P49: badges new since the last look keep a New tag for this visit; opening the page marks them seen.
+  const fresh = useNewBadges()
+  const [newIds, setNewIds] = useState<ReadonlySet<string>>(new Set())
+  const freshKey = fresh.badges.map((b) => b.id).join(',')
+  useEffect(() => {
+    if (!freshKey) return
+    setNewIds((held) => new Set([...held, ...freshKey.split(',')]))
+    void fresh.seen()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [freshKey])
   const t = useT(dcAchievementsMessages)
   const c = useContent()
   if (!data) return null
@@ -230,6 +246,7 @@ export function Achievements() {
   const earned = view.families.filter((f): f is EarnedFamily => f.earned !== null)
   const opened = earned.find((f) => f.family === openId) ?? null
   return (
+    <NewIds.Provider value={newIds}>
     <div className="flex min-w-0 flex-col gap-8">
       <section aria-labelledby="achievements-title" className="flex min-w-0 flex-col gap-3">
         <SectionTitle id="achievements-title" glyph="achievement" as="h1">{t.title}</SectionTitle>
@@ -254,6 +271,7 @@ export function Achievements() {
       })}
       <EarnedSheet family={opened} rarity={view.rarity} onClose={() => setOpenId(null)} />
     </div>
+    </NewIds.Provider>
   )
 }
 

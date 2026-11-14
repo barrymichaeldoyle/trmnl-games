@@ -28,7 +28,7 @@
  *   permit=due (the Harbour Pier's species are logged, so only the Pier Permit stands in the way)
  *   v2=1 (D162: content v2's goal, slate, season, run, charter and wall; /app/idle-angler/trophies) pegs=full (D167: no free peg, so no Mount) goal=orders (an order goal) goal=count (a counted goal with its progress bar) orders=none (nothing the cooler can fill)   v2=new (a first-day angler with everything locked)
  *   company=none|crowd (D220: nobody else at the angler's water, or 23 there; three others by default)
- *   badges=new|one (P48: three new badges, or one, for the Dock's celebration card, the More dot and the New tags)
+ *   badges=new|one (P48, P49: three new badges, or one, for the Dock's or Hero page's celebration card, the More dot and the New tags)
  *   ranks=1 (D204, content v6: each water's rank on the Dock and in the Logbook, River Bend one species off Veteran, Millpond at Master)
  *   away=upgraded (the recap's lost fish all broke free on the old rod: the rod held now lands them)   away=mixed (one on the old rod, two still too heavy)
  *   passes=all (issue #7: every pass owned)   trophy=none (issue #6: no trophy-sized fish, the mount goal points at the wall)   trophy=poor (too few coins to mount)   wall=empty (nothing mounted)
@@ -410,6 +410,13 @@ const queries = {
   'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
   'idleAngler/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, own: { rank: 3, speciesId: 'barbel', grams: 1900 }, entries: [['Quillfeather_Longname', 'pike', 5240], ['Mo', 'chub', 2410], ['Barry', 'barbel', 1900], ['Hidden player', 'grayling', 1210], ['Bea', 'dace', 380]].map(([name, speciesId, grams], i) => ({ rank: i + 1, name, speciesId, grams, own: name === 'Barry', profile: name === 'Mo' })) }),
   // P48: new badges for the Dock's card, the More dot and the New tags: badges=new (three) or badges=one.
+  // P49: Desk Crawler's new badges for the Hero card, the More dots and the New tags: badges=new (three) or badges=one.
+  'badges:fresh': () => {
+    const which = params.get('badges')
+    const all = [{ id: 'jackpots_3', family: 'jackpots', tier: 3, at: Date.now() - 36e5 * 10, share: 0.03 }, { id: 'elites_2', family: 'elites', tier: 2, at: Date.now() - 36e5 * 2, share: 0.2 }, { id: 'slay_paper_imp_4', family: 'slay_paper_imp', tier: 4, at: Date.now() - 36e5, share: 0.4 }]
+    const badges = which === 'new' ? all : which === 'one' ? [all[1]] : []
+    return { badges, newest: badges.length ? Math.max(...badges.map((b) => b.at)) : Date.now() }
+  },
   'idleAngler/badges:fresh': () => {
     const which = params.get('badges')
     const all = [{ id: 'specimen_roach', family: 'species_roach', tier: 2, at: now - 36e5 * 10, percent: 4 }, { id: 'night_fishing_2', family: 'night_fishing', tier: 2, at: now - 36e5 * 2, percent: 22 }, { id: 'first_perch', family: 'species_perch', tier: 1, at: now - 36e5, percent: 61 }]

@@ -1022,6 +1022,8 @@ export default defineSchema({
     counters: heroCounters,
     /** Last achievement catalog version evaluated for this hero; absent means never (D65). */
     achievementsVersion: v.optional(v.number()),
+    /** P49: unlocks after this moment are new to the owner (the Hero page's celebration card); absent reads as the release. */
+    achievementsSeenAt: v.optional(v.number()),
     scoreHour: v.optional(v.number()),
     scoreHourXp: v.number(),
     companionVisitBaseline: v.optional(v.object({ at: v.number(), level: v.number(), lifetimeXp: v.number(), logSequence: v.number(), counters: heroCounters })),

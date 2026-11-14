@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
-import { Card } from '../../../lib/ui'
+import { Card, NotifyDot } from '../../../lib/ui'
+import { dcAchievementsMessages } from '../../../i18n/dcAchievements'
+import { useNewBadges } from './-newBadges'
 import { Glyph, type GlyphName } from '../../../lib/glyphs'
 import { captureAnalytics } from '../../../lib/analytics'
 import { SPONSOR_URL } from '../../../lib/prose'
@@ -22,6 +24,8 @@ const MORE_LINKS = [
 
 export function MoreLinks() {
   const t = useT(dcMoreMessages)
+  const tAch = useT(dcAchievementsMessages)
+  const newBadges = useNewBadges().badges.length > 0
   const locale = useLocale()
   const day = changeDay(CHANGELOG[0]!.date, false, locale)
   return (
@@ -34,6 +38,7 @@ export function MoreLinks() {
               <span className="flex items-center gap-2">
                 <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center border-2 border-night bg-night text-gold-ink"><Glyph name={link.glyph} size={18} /></span>
                 <span className="font-semibold underline underline-offset-4 [overflow-wrap:anywhere]">{t.links[link.key].label}</span>
+                {link.key === 'achievements' && newBadges ? <><NotifyDot /><span className="sr-only">{tAch.newAchievement}</span></> : null}
               </span>
               <span className="text-xs text-muted">{t.links[link.key].blurb.replace('{day}', day)}</span>
             </Link>

@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, Outlet, createFileRoute, useLocation } from '@tanstack/react-router'
 import { api } from '@trmnl-games/backend/api'
 import { Card, CountBadge, LoadingState, NotifyDot } from '../../lib/ui'
+import { dcAchievementsMessages } from '../../i18n/dcAchievements'
+import { useNewBadges } from './desk-crawler/-newBadges'
 import { seo } from '../../lib/seo'
 import { NameRepair } from './desk-crawler/-nameRepair'
 import { preload } from '../../lib/preload'
@@ -45,6 +47,9 @@ function AppShell() {
 
 function SignedInApp() {
   const t = useT(dcShellMessages)
+  const tAch = useT(dcAchievementsMessages)
+  // P49: the More tab shows a dot while a badge waits to be celebrated, since achievements live under More.
+  const newBadges = useNewBadges().badges.length > 0
   const { data: me, isPending } = useQuery(convexQuery(api.users.me, {}))
   // One small query feeds both tab marks from any tab, in place of the whole hero and bag views the shell once watched.
   const { data: badges } = useQuery(convexQuery(api.inventory.badges, {}))
@@ -102,7 +107,7 @@ function SignedInApp() {
           {NAV.map((item) => {
             const mark = item.to === '/app/desk-crawler/inventory' ? bagMark : null
             const count = mark?.count
-            const dot = item.to === '/app/desk-crawler' && rewardWaiting
+            const dot = (item.to === '/app/desk-crawler' && rewardWaiting) || (item.label === 'more' && newBadges)
             return (
               <li key={item.to} className="flex-1">
                 <Link
@@ -120,7 +125,7 @@ function SignedInApp() {
                   <span className="flex items-center">
                     {t.nav[item.label]}
                     {mark ? <><CountBadge count={mark.count} className="ml-2 hidden sm:flex" /><span className="sr-only">{mark.text}</span></> : null}
-                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{t.rewardReady}</span></> : null}
+                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{item.label === 'more' ? tAch.newAchievement : t.rewardReady}</span></> : null}
                   </span>
                 </Link>
               </li>
