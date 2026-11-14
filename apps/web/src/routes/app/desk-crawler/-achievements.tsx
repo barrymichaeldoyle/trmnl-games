@@ -8,6 +8,7 @@ import { Button, Meter } from '../../../lib/ui'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { LocalTime } from '../../../lib/localTime'
 import { AchievementHint } from './-achievementHint'
+import { DcBadge } from './-badge'
 import { formatDate, formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { useContent } from '../../../lib/useContent'
 import { dcAchievementsMessages, shelfTitle } from '../../../i18n/dcAchievements'
@@ -47,15 +48,6 @@ function Rarity({ id, rarity }: { id: string; rarity: View['rarity'] }) {
     </span>
   )
 }
-
-/** Each family wears the glyph of what it counts; monster families share the sword, set pieces the trophy. */
-const FAMILY_GLYPH: Record<string, GlyphName> = {
-  elites: 'star', jackpots: 'coin', rare_finds: 'loot', epics: 'loot', finds: 'loot', adventures: 'travel', trips: 'travel', gold: 'coin',
-  levels: 'levelup', knockouts: 'death', rescues: 'revive', retreats: 'flag', potions: 'potion', traps: 'trap', breaks: 'rest',
-  bags: 'bag', big_bags: 'bag', sales: 'tag', keepsakes: 'keepsake', purchases: 'coin', merchants: 'merchant', stances: 'shield', choices: 'choice',
-  office_raider: 'raid', desk_defender: 'raid', tasks_done: 'todo', networking: 'meeting', lost_and_found: 'lost_property', dug_in: 'star',
-}
-const familyGlyph = (family: Family): GlyphName => FAMILY_GLYPH[family.family] ?? (family.family.startsWith('slay_') ? 'combat' : 'trophy')
 
 
 type EarnedFamily = Family & { earned: Earned }
@@ -107,9 +99,10 @@ function EarnedTile({ family, rarity, onOpen }: { family: EarnedFamily; rarity: 
   return (
     <li className="min-w-0">
       <button type="button" onClick={onOpen} aria-label={label} className={`flex size-full min-h-36 flex-col items-center gap-2 border-[3px] ${r ? BAND_EDGE[r.band] : 'border-night'} bg-panel px-2 pt-3 pb-2.5 text-center hover:bg-raised active:bg-raised`}>
-        <span aria-hidden="true" className="relative grid size-10 shrink-0 place-items-center border-2 border-night bg-gold text-night">
-          <Glyph name={familyGlyph(family)} />
-          {family.tiers > 1 ? <span className="hud absolute -top-2 -right-3 border-2 border-night bg-night px-0.5 text-[0.5rem] leading-3 text-gold-ink">{tierLabel(family.earned.tier)}</span> : null}
+        {/* P49: the family's badge, its frame climbing with the tier; the tab keeps the tier's numeral. */}
+        <span aria-hidden="true" className="relative shrink-0">
+          <DcBadge family={family.family} tier={family.earned.tier} />
+          {family.tiers > 1 ? <span className="hud absolute -top-1 -right-2 border-2 border-night bg-night px-0.5 text-[0.5rem] leading-3 text-gold-ink">{tierLabel(family.earned.tier)}</span> : null}
         </span>
         <span className="line-clamp-2 text-sm leading-tight font-semibold hyphens-auto [overflow-wrap:anywhere]">{name}</span>
         <span aria-hidden="true" className="mt-auto flex w-full flex-col items-center gap-1.5">
@@ -135,7 +128,7 @@ function LockedTile({ family, rarity }: { family: Family; rarity: View['rarity']
   const preview = r && r.band !== 'legendary' ? r : null
   return (
     <li className="flex min-h-24 min-w-0 flex-col items-center justify-center gap-2 border-[3px] border-dashed border-faint px-2 py-3 text-center text-muted">
-      <span aria-hidden="true" className="hud grid size-10 place-items-center border-2 border-dashed border-faint text-hud-sm">?</span>
+      <DcBadge family={family.family} tier={0} scale={1} />
       <span className="text-xs">
         <span className="sr-only">{t.notEarned}{preview ? ', ' : ''}</span>
         {preview ? <span className={`font-semibold ${BAND_TONE[preview.band]}`}>{t.bands[preview.band]}</span> : <span aria-hidden="true">{t.notYet}</span>}
@@ -154,7 +147,7 @@ function EarnedSheet({ family, rarity, onClose, showcase = false }: { family: Ea
       {family ? (
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center border-2 border-night bg-gold text-night"><Glyph name={familyGlyph(family)} size={24} /></span>
+            <DcBadge family={family.family} tier={family.earned.tier} />
             <div className="min-w-0">
               <SheetTitle>{c.text(family.earned.name)}{family.tiers > 1 ? <span className="hud ml-2 align-middle text-hud-sm text-gold-ink">{tierLabel(family.earned.tier)}</span> : null}</SheetTitle>
               <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted">
@@ -164,6 +157,12 @@ function EarnedSheet({ family, rarity, onClose, showcase = false }: { family: Ea
             </div>
           </div>
           <p>{c.text(family.earned.blurb)}</p>
+          {/* P49: every tier of the family as its badge, those still ahead faded. */}
+          {family.tiers > 1 ? (
+            <ul className="flex flex-wrap gap-1" aria-hidden="true">
+              {Array.from({ length: family.tiers }, (_, i) => <li key={i} className={i < family.earned.tier ? '' : 'opacity-35'}><DcBadge family={family.family} tier={i + 1} scale={1} /></li>)}
+            </ul>
+          ) : null}
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <Rarity id={family.earned.id} rarity={rarity} />
             {family.earned.unlockedAt ? <span className="text-xs tabular-nums text-muted">{t.earned}<LocalTime at={family.earned.unlockedAt} format={earnedOn(locale)} /></span> : null}
