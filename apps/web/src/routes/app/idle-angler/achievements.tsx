@@ -9,6 +9,8 @@ import { formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { iaLog } from '../../../i18n/iaLog'
 import { useAngler } from '../../../lib/idleAngler'
 import { BadgeIcon } from './-art'
+import { useNewBadges } from './-newBadges'
+import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/app/idle-angler/achievements')({
   head: () => seo({ title: 'Achievements · Idle Angler', index: false }),
@@ -51,7 +53,18 @@ function AchievementsPage() {
   const t = useT(iaLog)
   const words = useAngler()
   const locale = useLocale()
+  // P48: badges new since the last look keep a New tag for this visit; opening the page marks them seen.
+  const fresh = useNewBadges()
+  const [newIds, setNewIds] = useState<ReadonlySet<string>>(new Set())
+  const freshKey = fresh.badges.map((b) => b.id).join(',')
+  useEffect(() => {
+    if (!freshKey) return
+    setNewIds((held) => new Set([...held, ...freshKey.split(',')]))
+    void fresh.seen()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [freshKey])
   if (!mine) return null
+  const NewTag = ({ id }: { id: string | undefined }) => (id && newIds.has(id) ? <span className="ml-2 inline-block bg-gold px-1 align-middle text-xs font-semibold whitespace-nowrap text-night">{t.newTag}</span> : null)
   // Rarity comes from the last hourly publication; an achievement it has not counted yet shows none.
   const rarity = (id: string) => {
     const held = mine.rarity?.counts[id] ?? 0
@@ -75,6 +88,7 @@ function AchievementsPage() {
               <li key={f.family} className="flex flex-col items-center gap-1 text-center">
                 <BadgeIcon family={f.family} tier={f.earned!.tier} />
                 <span className="w-full hyphens-auto text-xs font-semibold leading-tight break-words">{words.achievement(f.earned!.id).name}</span>
+                <NewTag id={f.earned!.id} />
               </li>
             ))}
           </ul>
@@ -96,6 +110,7 @@ function AchievementsPage() {
                       <span className="w-full hyphens-auto text-xs leading-tight break-words">
                         <span className="sr-only">{words.achievement(f.earned.id).name}. </span>
                         <span aria-hidden="true">{words.achievement(f.earned.id).family}</span>
+                        <NewTag id={f.earned.id} />
                       </span>
                     ) : (
                       <span className="text-xs text-muted">{t.notYet}</span>
@@ -117,7 +132,7 @@ function AchievementsPage() {
                     <BadgeIcon family={f.family} tier={f.earned?.tier ?? 0} />
                     <div className="min-w-0 flex-1">
                       <p className="flex items-center justify-between gap-2">
-                        <span className="font-semibold">{shown ? shown.name : (f.next ? words.achievement(f.next.id).family : f.name)}</span>
+                        <span className="font-semibold">{shown ? shown.name : (f.next ? words.achievement(f.next.id).family : f.name)}<NewTag id={f.earned?.id} /></span>
                         <Pips earned={f.earned?.tier ?? 0} tiers={f.tiers} />
                       </p>
                       <p className="text-sm text-muted">

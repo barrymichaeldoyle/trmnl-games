@@ -109,7 +109,7 @@ export const en: IaLanguage = {
     yourBest: (weight) => `Your best ${weight}`,
     rankBest: (rank, weight) => `#${rank}, best ${weight}`,
     until: (day) => `until ${day}`,
-    labels: { fly: 'Fly', fly_code: 'Fly code', last_12_hours: 'Last 12 hours', released: 'Released', newest_catch: 'Newest catch', goal: 'Goal:', back_soon: 'Back soon', finish_setup: 'Finish setting up', save_plugin: 'Save the plugin in TRMNL. The first cast is within 15 minutes.', ready: '%name% is ready to fish' },
+    labels: { fly: 'Fly', fly_code: 'Fly code', last_12_hours: 'Last 12 hours', released: 'Released', newest_catch: 'Newest catch', goal: 'Goal:', back_soon: 'Back soon', finish_setup: 'Finish setting up', save_plugin: 'Save the plugin in TRMNL. The first cast is within 15 minutes.', ready: '%name% is ready to fish', achievement: 'Achievement', more_badges: '+%n% more' },
   },
 }
 

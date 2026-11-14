@@ -210,6 +210,6 @@ export const nl: IaLanguage = {
     yourBest: (weight) => `Je beste ${weight}`,
     rankBest: (rank, weight) => `Plaats ${rank}, beste ${weight}`,
     until: (day) => `tot ${day}`,
-    labels: { fly: 'Vlieg', fly_code: 'Vliegcode', last_12_hours: 'Laatste 12 uur', released: 'Teruggezet', newest_catch: 'Nieuwste vangst', goal: 'Doel:', back_soon: 'Zo terug', finish_setup: 'Rond het instellen af', save_plugin: 'Sla de plugin op in TRMNL. De eerste worp volgt binnen 15 minuten.', ready: '%name% kan gaan vissen' },
+    labels: { fly: 'Vlieg', fly_code: 'Vliegcode', last_12_hours: 'Laatste 12 uur', released: 'Teruggezet', newest_catch: 'Nieuwste vangst', goal: 'Doel:', back_soon: 'Zo terug', finish_setup: 'Rond het instellen af', save_plugin: 'Sla de plugin op in TRMNL. De eerste worp volgt binnen 15 minuten.', ready: '%name% kan gaan vissen', achievement: 'Prestatie', more_badges: '+%n% meer' },
   },
 }

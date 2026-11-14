@@ -53,12 +53,20 @@
  * Template v25: the board's rank line ends with the day the week starts again ("until Mon"), and the company line
  * clamps to two lines through the framework's `data-clamp` rather than a style block (trmnlp's lint flags the latter);
  * the fitter still swaps an overflowing company line for the count once the framework has clamped it.
+ * Template v26 (P48): a new achievement's badge for six hours after it is earned, under any attention line's place
+ * (an attention line wins and the payload then sends no badge). The full portrait gives it a panel, the badge beside the
+ * inverted "Achievement" tag and its name, as does the X's landscape in the newest catch's place beside the board; the
+ * OG's landscape and the half and quarter layouts one line above the stories (a smaller badge, the tag and the name),
+ * since a panel there left room for one story.
+ * The panel gives way after the newest catch and the board, before the recap; the line holds on longer, after the
+ * company line, the weather and the time of day, since for its six hours it is the newest thing on the screen. Either
+ * steps aside before a scaled screen loses its last story. In a narrow column the name wraps under the tag.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 25
+export const TEMPLATE_VERSION = 26
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -326,6 +334,18 @@ const catchPanel = (og: number, x: number) =>
   `<span class="title title--small">{{ newest_catch.name | escape }}</span>{% if newest_catch.weight_label %}<span class="${LABEL}">{{ newest_catch.weight_label }}</span>{% endif %}</div></div>{% endif %}`
 
 /**
+ * P48: a new badge, held for six hours. `panel` is the full layouts' block: the badge (`og`/`x` its scales) beside the
+ * inverted tag, the name and "+2 more"; otherwise one line with the badge at `og`/`x`, the tag and the name.
+ */
+const badge = (og: number, x: number, panel: boolean) =>
+  `{% if badge %}<div class="flex flex--row flex--left flex--center-y ${panel ? 'gap--medium' : 'gap--small'} stretch-x no-shrink" data-badge="true" data-give-way="${panel ? -0.5 : 2.5}">` +
+  `{% if badge.base != "" %}<div class="no-shrink"><img class="image lg:hidden" src="{{ badge.base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ badge.base }}/${x}.png" alt=""></div>{% endif %}` +
+  (panel
+    ? `<div class="flex flex--col flex--left gap--xsmall grow w--min-0"><div class="flex flex--row"><span class="${LABEL} label--inverted">{{ badge.label | escape }}</span></div>` +
+      `<span class="title title--small" data-clamp="2">{{ badge.name | escape }}</span>{% if badge.more_label %}<span class="${LABEL}">{{ badge.more_label | escape }}</span>{% endif %}</div></div>{% endif %}`
+    : `<div class="flex flex--row flex--wrap flex--left flex--center-y gap--xsmall grow w--min-0"><span class="${LABEL} label--inverted w--min-0" data-clamp="1">{{ badge.label | escape }}</span><span class="${LABEL} text--bold w--min-0" data-clamp="1">{{ badge.name | escape }}{% if badge.more_label %} {{ badge.more_label | escape }}{% endif %}</span></div></div>{% endif %}`)
+
+/**
  * Before activation: what to do next and the code to the companion. Template v15: where there is room the scene of the
  * first water heads it (the payload sends one before activation), so the first screen a new player or a reviewer sees
  * already shows the game; the code and the words sit beside each other (`row`) or stacked (`col`) below it.
@@ -364,14 +384,15 @@ const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
   ready(`${header(2, 3, true)}
     <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([144, 4], [144, 4], '')}<div class="grow w--min-0">${board(5, true)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
-    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${goal()}${stories(16, 1, 'label lg:title--small')}</div>
-    <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}
-      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left flex--top gap--medium">${board(6)}{% assign board_rows = board.rows | size %}{% if attention == nil and board_rows < 6 %}${catchPanel(4, 5)}{% endif %}</div></div>
+    <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${badge(1, 1, false)}${goal()}${stories(16, 1, 'label lg:title--small')}</div>
+    <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}{% assign board_rows = board.rows | size %}{% if board_rows >= 6 %}${badge(1, 1, false)}{% endif %}
+      <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left flex--top gap--medium">${board(6)}{% if attention == nil and board_rows < 6 %}{% if badge %}${badge(2, 2, true)}{% else %}${catchPanel(4, 5)}{% endif %}{% endif %}</div></div>
     </div>
     ${recap()}`, welcome({ art: scene([156, 5], [170, 6]), arrange: 'row', qrOg: 3, qrX: 4 })),
   ready(`${header(2, 3)}
     ${scene([153, 3], [152, 5])}
     ${attention(3)}
+    ${badge(2, 3, true)}
     ${goal()}
     ${stories(16, 2, 'label')}
     ${catchPanel(3, 8)}
@@ -394,6 +415,7 @@ const halfHorizontal = oriented(
       ${company}
       ${counters('short')}
       ${attention(1)}
+      ${badge(1, 1, false)}
       ${stories(16, 1)}
     </div>
     ${qr(2, 4)}`, welcome({ arrange: 'row', qrOg: 3, qrX: 4, small: true })),
@@ -405,6 +427,7 @@ const halfHorizontal = oriented(
       ${company}
       ${counters()}
       ${attention()}
+      ${badge(1, 1, false)}
       ${stories(16, 2)}
     </div>`, welcome({ art: scene([220, 2], [185, 4]), arrange: 'row', qrOg: 2, qrX: 4, small: true })),
 )
@@ -415,6 +438,7 @@ const halfVertical = oriented(
     ${header(2, 2)}
     ${scene([182, 2], [161, 3])}
     ${attention()}
+    ${badge(1, 1, false)}
     ${goal()}
     ${stories(16, 2)}
     ${recap()}`, welcome({ art: scene([182, 2], [161, 3]), arrange: 'col', qrOg: 3, qrX: 5 })),
@@ -425,6 +449,7 @@ const halfVertical = oriented(
     ${company}
     ${counters('short')}
     ${attention(3)}
+    ${badge(1, 1, false)}
     ${stories(16, 3, 'description')}
     ${board(5)}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4, true)}</div>`, welcome({ art: scene([205, 1], [177, 2]), arrange: 'col', qrOg: 3, qrX: 5 })),
@@ -443,12 +468,14 @@ const quadrant = oriented(
       ${qr(2, 3)}
     </div>
     ${attention(2)}
+    ${badge(1, 1, false)}
     ${stories(16, 2)}`, welcome({ arrange: 'row', qrOg: 2, qrX: 3, small: true })),
   ready(`
     <div class="no-shrink flex flex--row flex--left flex--center-y gap--small stretch-x">${nameLine('title title--small')}</div>
     ${statusRow(false)}
     ${counters('compact')}
     ${attention(3)}
+    ${badge(1, 1, false)}
     ${stories(16, 3, 'description')}
     <div class="no-shrink flex flex--row flex--center-x stretch-x">${qr(2, 4, true)}</div>`, welcome({ arrange: 'col', qrOg: 2, qrX: 3, small: true })),
   true,

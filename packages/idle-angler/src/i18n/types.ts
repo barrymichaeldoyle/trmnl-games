@@ -48,6 +48,9 @@ export type DeviceLabel =
   | 'finish_setup'
   | 'save_plugin'
   | 'ready'
+  /** P48: the badge panel's tag, and how many more badges came with it ("+%n% more"). */
+  | 'achievement'
+  | 'more_badges'
 
 export interface IaLanguage {
   readonly species: Readonly<Record<string, FishName>>

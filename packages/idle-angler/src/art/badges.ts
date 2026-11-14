@@ -1,5 +1,5 @@
 import { Canvas, type Sprite } from '@trmnl-games/engine/art/canvas'
-import { ACHIEVEMENTS } from '../content/achievements'
+import { ACHIEVEMENTS, ACHIEVEMENT_BY_ID } from '../content/achievements'
 import { FISH_TRAITS, fishSprite } from './fish'
 
 /**
@@ -486,7 +486,7 @@ function inLeaf(x: number, y: number, angle: number, side: 1 | -1): boolean {
 }
 
 /** The frame by tier, as rows: the ring 2 cells thick at radius 11.5 to 13.5, and what each tier adds outside it. */
-function frameRows(frame: BadgeFrame): string[] {
+function frameRows(frame: BadgeFrame, open = false): string[] {
   const grid = Array.from({ length: BADGE_SIZE }, () => Array.from({ length: BADGE_SIZE }, () => ' '))
   const put = (x: number, y: number, ch = '#') => {
     if (x >= 0 && y >= 0 && x < BADGE_SIZE && y < BADGE_SIZE) grid[y]![x] = ch
@@ -523,7 +523,8 @@ function frameRows(frame: BadgeFrame): string[] {
         case 5: {
           // The top tier: the sunburst round a solid disc, the picture cut out of it in paper (`badgeLayers`).
           const ray = d >= 14 && d < 16.6 && Array.from({ length: 16 }, (_, i) => i * 22.5).some((a) => toRad(apart(angle, a)) * d <= (16.6 - d) * 0.75)
-          ink = d < 13.5 || ray
+          // `open`: a fish keeps a paper window inside a thick ring, since a fish cut out of ink does not read.
+          ink = (open ? d >= 10 && d < 13.5 : d < 13.5) || ray
           break
         }
       }
@@ -539,21 +540,19 @@ function speciesSize(species: string): [number, number] {
   return body === 'flat' ? [20, 13] : body === 'eel' ? [22, 9] : [20, 10]
 }
 
-/**
- * One cell of a picture cut out of the top tier's solid disc. A picture swaps ink and paper. A fish keeps its outline
- * and marks as ink and turns its body and shading to paper, so it reads as a clean silhouette rather than inverted
- * noise.
- */
-const cutoutCell = (ch: string, fish: boolean): string => (ch === ' ' ? ' ' : fish ? (ch === '#' ? '#' : 'w') : ch === '#' ? 'w' : ch === 'w' ? '#' : ch)
+/** One cell of a picture cut out of the top tier's solid disc: ink becomes paper and paper ink. */
+const cutoutCell = (ch: string): string => (ch === '#' ? 'w' : ch === 'w' ? '#' : ch)
 
 /**
  * The medallion's layers, each a full-size sprite: the paper disc, the frame and the picture (or the fish). On the
- * device (`cutout`) the top tier cuts the picture out of its solid disc, ink to paper; the companion paints the disc
- * in the tier's colour instead and keeps the picture as it is.
+ * device (`cutout`) the top tier cuts a picture out of its solid disc, ink to paper, and gives a fish a paper window in
+ * a thick ring instead (a cut-out fish reads as noise at 2x); the companion paints the disc in the tier's colour and
+ * keeps the picture as it is.
  */
 export function badgeLayers(family: string, frame: BadgeFrame, cutout = true): { disc: Sprite; frame: Sprite; picture: Sprite } {
   const disc: string[] = []
-  const ring = frameRows(frame)
+  const species = speciesOfFamily(family)
+  const ring = frameRows(frame, cutout && species !== null)
   for (let y = 0; y < BADGE_SIZE; y += 1) {
     let discRow = ''
     for (let x = 0; x < BADGE_SIZE; x += 1) {
@@ -561,7 +560,6 @@ export function badgeLayers(family: string, frame: BadgeFrame, cutout = true): {
     }
     disc.push(discRow)
   }
-  const species = speciesOfFamily(family)
   const art: readonly string[] = species ? (SPECIES_PICTURES[species] ?? fishSprite(species, ...speciesSize(species)).rows) : ((BADGE_PICTURES as Record<string, readonly string[]>)[family] ?? [])
   const width = art[0]?.length ?? 0
   const left = Math.floor((BADGE_SIZE - width) / 2)
@@ -569,7 +567,7 @@ export function badgeLayers(family: string, frame: BadgeFrame, cutout = true): {
   const rows: string[] = Array.from({ length: BADGE_SIZE }, () => ' '.repeat(BADGE_SIZE))
   art.forEach((row, dy) => {
     // Locked pictures are a checker silhouette: the outline is there, the ink is not.
-    const drawn = frame === 0 ? [...row].map((ch) => (ch === ' ' ? ' ' : ':')).join('') : frame === 5 && cutout ? [...row].map((ch) => cutoutCell(ch, species !== null)).join('') : row
+    const drawn = frame === 0 ? [...row].map((ch) => (ch === ' ' ? ' ' : ':')).join('') : frame === 5 && cutout && species === null ? [...row].map((ch) => cutoutCell(ch)).join('') : row
     rows[top + dy] = rows[top + dy]!.slice(0, left) + drawn + rows[top + dy]!.slice(left + width)
   })
   const sprite = (r: string[]): Sprite => ({ width: BADGE_SIZE, height: BADGE_SIZE, rows: r })
@@ -603,4 +601,23 @@ const TIER_COUNTS: ReadonlyMap<string, number> = ACHIEVEMENTS.reduce((counts, a)
 export function frameForTier(family: string, tier: number): BadgeFrame {
   if (tier <= 0) return 0
   return (tier >= (TIER_COUNTS.get(family) ?? 5) ? 5 : Math.min(4, tier)) as BadgeFrame
+}
+
+/** Badges on a public profile (P48). */
+export const SHOWCASE_BADGES = 6
+
+/**
+ * The badges a public profile shows: each family's highest earned tier, finished families first, then the rarest
+ * (`counts` holders out of the publication's players), then the higher tier. Automatic; players do not choose.
+ */
+export function showcaseBadges(unlocked: readonly string[], counts: Readonly<Record<string, number>> | null = null): Array<{ family: string; tier: number; id: string }> {
+  const best = new Map<string, { family: string; tier: number; id: string }>()
+  for (const id of unlocked) {
+    const def = ACHIEVEMENT_BY_ID.get(id)
+    if (def && def.tier > (best.get(def.family)?.tier ?? 0)) best.set(def.family, { family: def.family, tier: def.tier, id })
+  }
+  const held = (id: string) => counts?.[id] ?? Number.MAX_SAFE_INTEGER
+  return [...best.values()]
+    .sort((a, b) => frameForTier(b.family, b.tier) - frameForTier(a.family, a.tier) || held(a.id) - held(b.id) || b.tier - a.tier || a.family.localeCompare(b.family))
+    .slice(0, SHOWCASE_BADGES)
 }

@@ -14,7 +14,7 @@ import { composeScene, MAX_STAGE_WIDTH, MIN_STAGE_WIDTH, SCENE_VERSION, STAGE_HE
  *   (v3, the same without the season, still renders while devices catch up)
  *   /art/ia/qr/v1/<target>/<scale>.png
  *   /art/ia/fish/v1/<species>/<scale>.png   (template v2's newest-catch panel)
- *   /art/ia/badge/v1/<family>/<frame>/<scale>.png   (P48: an achievement badge, frame 0 locked to 5)
+ *   /art/ia/badge/v2/<family>/<frame>/<scale>.png   (P48: an achievement badge, frame 0 locked to 5)
  * Every part is allowlisted and the stage width bounded (`MIN_STAGE_WIDTH` to `MAX_STAGE_WIDTH`, D125), so the
  * route can never draw arbitrary text, mint arbitrary codes or render an unbounded image.
  */
@@ -50,7 +50,8 @@ export const FISH_VERSION = 1
 export const FISH_SCALES = new Set([2, 3, 4, 5, 6, 8])
 export const fishBase = (speciesId: string) => `/art/ia/fish/v${FISH_VERSION}/${speciesId}`
 
-export const BADGE_VERSION = 1
+/** v2: a fish on the top frame sits in a paper window rather than cut out of the disc. */
+export const BADGE_VERSION = 2
 /** The 32x32 medallion at whole-number scales: 1 for the narrowest columns up to 6. */
 export const BADGE_SCALES = new Set([1, 2, 3, 4, 5, 6])
 export const badgeBase = (family: string, frame: BadgeFrame) => `/art/ia/badge/v${BADGE_VERSION}/${family}/${frame}`

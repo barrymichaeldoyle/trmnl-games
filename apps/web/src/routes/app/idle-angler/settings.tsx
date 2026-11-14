@@ -6,7 +6,7 @@ import { api } from '@trmnl-games/backend/api'
 import { useIntent } from '../../../lib/intent'
 import { preload } from '../../../lib/preload'
 import type { Dock } from '../../../lib/idleAngler'
-import { ActionFeedback, Button, Card, LoadingState, NoticeBar, useNotice } from '../../../lib/ui'
+import { ActionFeedback, Button, Card, LoadingState, NoticeBar, useNotice, NotifyDot } from '../../../lib/ui'
 import { AlertsCard, type AlertKindCopy } from '../desk-crawler/-alerts'
 import { ConfirmSheet, Consequences } from '../desk-crawler/-confirm'
 import { seo } from '../../../lib/seo'
@@ -14,6 +14,8 @@ import { useT } from '../../../lib/i18n'
 import { iaMore } from '../../../i18n/iaMore'
 import { iaCommon } from '../../../i18n/ia'
 import { useAngler } from '../../../lib/idleAngler'
+import { iaLog } from '../../../i18n/iaLog'
+import { useNewBadges } from './-newBadges'
 
 /** The More tab: links to rankings, achievements and help, then settings (pause, public profile, alerts, deleting Idle Angler progress alone). */
 export const Route = createFileRoute('/app/idle-angler/settings')({
@@ -40,6 +42,8 @@ function SettingsPage() {
   const [confirm, setConfirm] = useState('')
   const [askingPause, setAskingPause] = useState(false)
   const t = useT(iaMore)
+  const tLog = useT(iaLog)
+  const newBadges = useNewBadges().badges.length > 0
   const words = useAngler()
   const alertKinds: readonly AlertKindCopy[] = [{ id: 'coolerFull', name: t.alertCooler, blurb: t.alertCoolerBlurb }, { id: 'baitOut', name: t.alertBait, blurb: t.alertBaitBlurb }]
   const angler = dock?.angler
@@ -53,7 +57,7 @@ function SettingsPage() {
           {MORE_LINKS.map((link) => (
             <li key={link.to} className="border-b border-rule last:border-b-0">
               <Link to={link.to} className="flex min-h-12 flex-col justify-center py-2">
-                <span className="font-semibold underline underline-offset-4">{t.links[link.key].label}</span>
+                <span className="flex items-center gap-2 font-semibold"><span className="underline underline-offset-4">{t.links[link.key].label}</span>{link.key === 'achievements' && newBadges ? <><NotifyDot /><span className="sr-only">{tLog.newAchievement}</span></> : null}</span>
                 <span className="text-sm text-muted">{t.links[link.key].blurb}</span>
               </Link>
             </li>

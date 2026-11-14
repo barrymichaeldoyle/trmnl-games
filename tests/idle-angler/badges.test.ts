@@ -48,6 +48,55 @@ describe('Idle Angler badges (P48)', () => {
     const png = renderIdleAnglerArt(`${badgeBase('night_fishing', 2)}/3.png`, ORIGIN)
     expect(png?.immutable).toBe(true)
     expect(renderIdleAnglerArt(`${badgeBase('species_barbel', 5)}/2.png`, ORIGIN)).not.toBeNull()
-    for (const bad of ['/art/ia/badge/v1/kraken/1/2.png', '/art/ia/badge/v1/species_kraken/1/2.png', '/art/ia/badge/v1/catches/6/2.png', '/art/ia/badge/v1/catches/1/7.png', '/art/ia/badge/v2/catches/1/2.png']) expect(renderIdleAnglerArt(bad, ORIGIN), bad).toBeNull()
+    for (const bad of ['/art/ia/badge/v2/kraken/1/2.png', '/art/ia/badge/v2/species_kraken/1/2.png', '/art/ia/badge/v2/catches/6/2.png', '/art/ia/badge/v2/catches/1/7.png', '/art/ia/badge/v1/catches/1/2.png']) expect(renderIdleAnglerArt(bad, ORIGIN), bad).toBeNull()
+  })
+})
+
+describe('Idle Angler badge panel (P48, template v26)', async () => {
+  const { Liquid } = await import('liquidjs')
+  const { buildPayload, badgeToShow, BADGE_WINDOW_MS } = await import('@trmnl-games/idle-angler/payload')
+  const { previewScenarios, PREVIEW_NOW } = await import('@trmnl-games/idle-angler/templates/previewScenarios')
+  const { screenMarkup } = await import('@trmnl-games/idle-angler/templates/screen')
+  const scenarios = previewScenarios('https://art.example')
+  const liquid = new Liquid({ timezoneOffset: 0 })
+
+  it('celebrates the highest frame first, then the newest, and counts the rest', () => {
+    const now = PREVIEW_NOW
+    expect(badgeToShow([{ achievementId: 'first_perch', at: now - 1000 }, { achievementId: 'specimen_perch', at: now - 5000 }, { achievementId: 'catches_1', at: now - 100 }], now)).toMatchObject({ def: { id: 'specimen_perch' }, frame: 5, more: 2 })
+    expect(badgeToShow([{ achievementId: 'catches_1', at: now - 5000 }, { achievementId: 'got_away_1', at: now - 100 }], now)).toMatchObject({ def: { id: 'got_away_1' }, more: 1 })
+    expect(badgeToShow([{ achievementId: 'catches_1', at: now - BADGE_WINDOW_MS - 1 }], now)).toBeNull()
+    expect(badgeToShow([{ achievementId: 'not_a_badge', at: now }], now)).toBeNull()
+  })
+
+  it('sends the badge with its art, name and tag, and holds it back under an attention line', () => {
+    expect(buildPayload(scenarios.badge!).badge).toEqual({ name: 'Night Owl', label: 'Achievement', more: 0, more_label: null, base: 'https://art.example/art/ia/badge/v2/night_fishing/2' })
+    expect(buildPayload(scenarios.badgeSpecies!).badge).toMatchObject({ name: 'Specimen Perch', more_label: '+2 more', base: 'https://art.example/art/ia/badge/v2/species_perch/5' })
+    expect(buildPayload({ ...scenarios.badge!, locale: 'de' }).badge).toMatchObject({ label: 'Erfolg' })
+    expect(buildPayload(scenarios.badgeBareHook!).badge).toBeNull()
+    expect(buildPayload(scenarios.catch!).badge).toBeNull()
+  })
+
+  it('draws the badge in every layout, served by the art route', async () => {
+    const payload = { ...buildPayload(scenarios.badgeSpecies!), fly_code: null }
+    for (const [layout, markup] of Object.entries(screenMarkup)) {
+      const html = await liquid.parseAndRender(markup, payload)
+      expect(html, layout).toContain('data-badge="true"')
+      expect(html, layout).toContain('Specimen Perch')
+      for (const [, path] of html.matchAll(/src="https:\/\/art\.example(\/art\/ia\/badge\/[^"]+)"/g)) expect(renderIdleAnglerArt(path!, ORIGIN), path).not.toBeNull()
+    }
+  })
+})
+
+describe('Idle Angler profile badges (P48 B5)', async () => {
+  const { showcaseBadges } = await import('@trmnl-games/idle-angler/art/badges')
+  it('shows each family once at its best tier, finished families then the rarest first, six at most', () => {
+    const ids = ['catches_1', 'catches_2', 'seasons_1', 'got_away_1', 'night_fishing_1', 'first_perch', 'specimen_perch', 'sales_1', 'orders_1', 'flies_1']
+    const shown = showcaseBadges(ids, { got_away_1: 30, night_fishing_1: 2, sales_1: 10 })
+    expect(shown).toHaveLength(6)
+    expect(shown.slice(0, 2).map((b) => b.id).sort()).toEqual(['seasons_1', 'specimen_perch'])
+    expect(shown.find((b) => b.family === 'catches')).toMatchObject({ tier: 2 })
+    // Among the unfinished first tiers, the rarest come first; ones nobody has counted yet go after.
+    expect(shown.indexOf(shown.find((b) => b.id === 'night_fishing_1')!)).toBeLessThan(shown.indexOf(shown.find((b) => b.id === 'got_away_1')!))
+    expect(showcaseBadges([])).toEqual([])
   })
 })

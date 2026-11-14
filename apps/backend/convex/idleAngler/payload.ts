@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { contentV1 } from '@trmnl-games/idle-angler/content'
-import { buildPayload, MAX_RECAP_STORIES } from '@trmnl-games/idle-angler/payload'
+import { BADGE_WINDOW_MS, buildPayload, MAX_BADGE_UNLOCKS, MAX_RECAP_STORIES } from '@trmnl-games/idle-angler/payload'
 import { conditionsAt } from '@trmnl-games/idle-angler/sim/simulate'
 import { goalLine, goalWaiting, speciesLogged } from '@trmnl-games/idle-angler/sim'
 import { toAnglerState } from './adapter'
@@ -62,6 +62,10 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
   const logs = angler
     ? (await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', angler._id)).order('desc').take(MAX_RECAP_STORIES)).filter((log) => log.source !== 'command')
     : []
+  // P48: the newest unlocks inside the badge window, a bounded read on the owner's unlock index.
+  const unlocks = angler && angler.activationState === 'active'
+    ? (await ctx.db.query('iaAchievements').withIndex('by_userId_and_unlockedAt', (q) => q.eq('userId', user._id).gte('unlockedAt', now - BADGE_WINDOW_MS)).order('desc').take(MAX_BADGE_UNLOCKS)).map((row) => ({ achievementId: row.achievementId, at: row.unlockedAt }))
+    : []
   return buildPayload({
     content,
     now,
@@ -91,6 +95,7 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
     locale: deviceLocale(user),
     board: angler && angler.activationState === 'active' ? await readDeviceBoard(ctx, angler, now) : null,
     // D220: the water's other anglers, three named at most.
+    unlocks,
     company: angler && angler.activationState === 'active' && angler.status === 'fishing' && angler.travelTo === undefined ? await deviceCompany(ctx, angler) : null,
     stories: logs.map((log) => ({ kind: log.kind, summary: log.summary, at: log.at, ...(log.detail.speciesId === undefined ? {} : { speciesId: log.detail.speciesId }), ...(log.detail.grams === undefined ? {} : { grams: log.detail.grams }), ...(log.kind === 'achievement' && log.detail.name !== undefined ? { title: log.detail.name } : {}) })),
   })

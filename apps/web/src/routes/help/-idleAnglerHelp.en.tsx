@@ -77,6 +77,7 @@ export const en: HelpPage = {
       <p>Each week your TRMNL shows a six-digit fly code beside its QR code and in its title bar. Scan the QR code, or type the code on the Dock (which asks for it while the week's fly waits) or the Log page, to add that week's fly to your box. Your angler wears the newest fly on their hat. One fly a week: a new code arrives every Monday at 00:00 UTC, and last week's code still works until the next Monday in case your screen refreshed late. After all {F.flies} flies, the designs come round again. Flies change nothing about fishing.</p>
       <h2 id="achievements">Achievements</h2>
       <p>Achievements come in tiers, for fishing, the logbook, your tackle and waters, trading, and each species. The Achievements page under More shows the tiers you have, the share of anglers who have each one and how far you are from the next. Your public profile shows them when Idle Angler is on it.</p>
+      <p>Each achievement has a pixel badge, and its frame climbs from copper to violet as you earn the tiers. A new badge is celebrated once on the Dock and shows on your TRMNL for six hours, unless the screen has something more urgent to say. Your public profile shows your six best.</p>
       <h2 id="alerts">Alerts</h2>
       <p>Turn on alerts under Settings on the More page to get a notification on that phone when your cooler fills or your angler runs out of bait. They are off until you turn them on, and you get at most two a day across all your games.</p>
       <h2 id="pausing-and-removing">Pausing and removing</h2>

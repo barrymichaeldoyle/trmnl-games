@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { titleFor } from '@trmnl-games/idle-angler/sim'
+import { showcaseBadges } from '@trmnl-games/idle-angler/art/badges'
 import { paginator } from 'convex-helpers/server/pagination'
 import { platformAchievements, PLATFORM_ACHIEVEMENTS } from '@trmnl-games/platform'
 import schema from './schema'
@@ -9,6 +10,7 @@ import { internalMutation, query, type QueryCtx } from './_generated/server'
 import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { currentHero } from './lib/gameProfile'
 import { readEngineWorld } from './lib/engine/world'
+import { IDLE_ANGLER_RUNTIME } from './idleAngler/runtime'
 import { DESK_CRAWLER_RUNTIME } from './lib/engine/deskCrawler'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
 import { pagePublic } from './lib/publicPage'
@@ -42,7 +44,8 @@ async function crossGame(ctx: QueryCtx, user: Doc<'users'>) {
   const hero = await currentHero(ctx, user)
   const angler = await currentAngler(ctx, user)
   const dcUnlocks = (await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_UNLOCK_ROWS)).length
-  const iaUnlocks = (await ctx.db.query('iaAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_SW_UNLOCKS)).length
+  const iaIds = (await ctx.db.query('iaAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_SW_UNLOCKS)).map((row) => row.achievementId)
+  const iaUnlocks = iaIds.length
   // D159: Paper Lives counts like any game.
   const life = await currentLife(ctx, user)
   const plUnlocks = (await ctx.db.query('plAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_PL_UNLOCKS)).length
@@ -53,7 +56,15 @@ async function crossGame(ctx: QueryCtx, user: Doc<'users'>) {
   const desk = await currentDesk(ctx, user)
   const pwUnlocks = (await ctx.db.query('pwAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_PW_UNLOCKS)).length
   const games = (hero?.activationState === 'active' ? 1 : 0) + (angler?.activationState === 'active' ? 1 : 0) + (life?.activationState === 'active' ? 1 : 0) + (plot?.activationState === 'active' ? 1 : 0) + (desk?.activationState === 'active' ? 1 : 0)
-  return { hero, angler, life, plot, desk, dcUnlocks, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks + lpUnlocks + pwUnlocks }
+  return { hero, angler, life, plot, desk, dcUnlocks, iaIds, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks + lpUnlocks + pwUnlocks }
+}
+
+/** Holders per Idle Angler achievement from the current publication, for ordering a profile's badges; null before one. */
+async function idleAnglerRarity(ctx: QueryCtx): Promise<Record<string, number> | null> {
+  const world = await readEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
+  const publicationId = world?.publishedPublicationId as unknown as Id<'iaLeaderboardPublications'> | undefined
+  if (!publicationId) return null
+  return (await ctx.db.query('iaAchievementStats').withIndex('by_publicationId', (q) => q.eq('publicationId', publicationId)).unique())?.counts ?? null
 }
 
 /** All-time rank in a game's published set, or null. */
@@ -75,7 +86,7 @@ export const view = query({
     if (normalized.length < ALIAS_RULE.min || normalized.length > ALIAS_RULE.max) return null
     const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalized)).first()
     if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
-    const { hero, angler, life, plot, desk, dcUnlocks, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected } = await crossGame(ctx, user)
+    const { hero, angler, life, plot, desk, dcUnlocks, iaIds, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected } = await crossGame(ctx, user)
     const admin = (await adminRef(ctx)) !== null
     const showIdleAngler = angler !== null && angler.activationState === 'active' && pagePublic(angler) && ((await gameStatusOf(ctx, 'idle-angler')) === 'live' || admin)
     const showDesk = hero !== null && hero.activationState === 'active' && pagePublic(hero)
@@ -94,6 +105,8 @@ export const view = query({
               // D162: the trophy wall, at most 24 mounted fish, and the medal count.
               wall: (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24)).map((t) => ({ speciesId: t.speciesId ?? '', grams: t.grams ?? 0 })),
               medals: angler.counters.medals ?? 0,
+              // P48: six badges, finished families and the rarest first, rarity from the current publication.
+              badges: showcaseBadges(iaIds, await idleAnglerRarity(ctx)),
             }]
           : []),
         ...(showPaperLives ? [await paperLivesSection(ctx, user, life, plUnlocks)] : []),

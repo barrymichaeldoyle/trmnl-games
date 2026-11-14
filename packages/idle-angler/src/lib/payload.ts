@@ -1,5 +1,7 @@
 import { INTL_TAG, type Locale } from '@trmnl-games/platform'
-import { fishBase, qrBase, sceneBase } from '../art/route'
+import { badgeBase, fishBase, qrBase, sceneBase } from '../art/route'
+import { frameForTier } from '../art/badges'
+import { ACHIEVEMENT_BY_ID } from '../content/achievements'
 import { anglerWords } from '../i18n'
 import { poseFor } from '../art/scene'
 import { WEATHER_WORD } from '../sim/conditions'
@@ -19,6 +21,10 @@ export const STALE_AFTER_MS = 30 * 60 * 1000
 export const MAX_STORIES = 16
 /** The recap covers the last twelve hours of stories (idle-angler.md "Device"). */
 export const RECAP_MS = 12 * 3_600_000
+/** P48: how long a new badge holds its panel on the screen; long enough to outlast a few skipped refreshes. */
+export const BADGE_WINDOW_MS = 6 * 3_600_000
+/** P48: unlocks the backend reads for the badge panel, newest first. */
+export const MAX_BADGE_UNLOCKS = 8
 /** Stories the backend reads for the recap: a busy twelve hours is under 60 lines. */
 export const MAX_RECAP_STORIES = 60
 
@@ -104,6 +110,22 @@ export interface IdleAnglerPayloadInput {
   readonly locale?: Locale
   /** D220: the other anglers at this water: up to three public names by species logged there, and how many in all. */
   readonly company?: { readonly names: readonly string[]; readonly others: number } | null
+  /** P48: the newest unlocks (up to `MAX_BADGE_UNLOCKS`), for the badge panel; absent leaves it off. */
+  readonly unlocks?: ReadonlyArray<{ readonly achievementId: string; readonly at: number }>
+}
+
+/**
+ * P48: the badge to celebrate, from unlocks inside the window: the highest frame (a finished family first), then the
+ * newest. The rest count as "+2 more".
+ */
+export function badgeToShow(unlocks: IdleAnglerPayloadInput['unlocks'], now: number) {
+  const fresh = (unlocks ?? []).flatMap((u) => {
+    const def = ACHIEVEMENT_BY_ID.get(u.achievementId)
+    return def && now - u.at <= BADGE_WINDOW_MS && u.at <= now + 60_000 ? [{ def, at: u.at, frame: frameForTier(def.family, def.tier) }] : []
+  })
+  if (fresh.length === 0) return null
+  const best = fresh.reduce((top, u) => (u.frame > top.frame || (u.frame === top.frame && u.at > top.at) ? u : top))
+  return { def: best.def, frame: best.frame, more: fresh.length - 1 }
 }
 
 export interface PayloadBoard {
@@ -193,6 +215,17 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
           ...(best && bestName && best.grams !== undefined ? [{ k: 'best', text: say.best(formatWeight(best.grams), bestName) }] : []),
           ...(gotAway ? [{ k: 'got_away', text: say.gotAway(gotAway) }] : []),
         ]
+  // P48: a new badge holds a panel for six hours, unless something needs the companion more.
+  const shown = attention === null ? badgeToShow(input.unlocks, now) : null
+  const badge = shown
+    ? {
+        name: words.achievement(shown.def.id).name,
+        label: labels.achievement,
+        more: shown.more,
+        more_label: shown.more > 0 ? labels.more_badges.replace('%n%', String(shown.more)) : null,
+        base: input.artBaseUrl ? `${input.artBaseUrl}${badgeBase(shown.def.family, shown.frame)}` : '',
+      }
+    : null
   const latest = stories[0]
   const latestCatch =
     latest && (latest.kind === 'catch' || latest.kind === 'release') && latest.speciesId
@@ -282,6 +315,7 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
       : null,
     latest_catch: latestCatch,
     newest_catch: newestCatch,
+    badge,
     attention,
     attention_kind: attentionKind,
     // A full cooler sends the code to the cooler page; otherwise to the dock.

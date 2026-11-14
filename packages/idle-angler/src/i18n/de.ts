@@ -210,6 +210,6 @@ export const de: IaLanguage = {
     yourBest: (weight) => `Dein Bester ${weight}`,
     rankBest: (rank, weight) => `Platz ${rank}, Bester ${weight}`,
     until: (day) => `bis ${day}`,
-    labels: { fly: 'Fliege', fly_code: 'Fliegencode', last_12_hours: 'Letzte 12 Stunden', released: 'Freigelassen', newest_catch: 'Neuester Fang', goal: 'Ziel:', back_soon: 'Bald zurück', finish_setup: 'Einrichtung abschließen', save_plugin: 'Speichere das Plugin in TRMNL. Der erste Wurf kommt innerhalb von 15 Minuten.', ready: '%name% ist bereit zum Angeln' },
+    labels: { fly: 'Fliege', fly_code: 'Fliegencode', last_12_hours: 'Letzte 12 Stunden', released: 'Freigelassen', newest_catch: 'Neuester Fang', goal: 'Ziel:', back_soon: 'Bald zurück', finish_setup: 'Einrichtung abschließen', save_plugin: 'Speichere das Plugin in TRMNL. Der erste Wurf kommt innerhalb von 15 Minuten.', ready: '%name% ist bereit zum Angeln', achievement: 'Erfolg', more_badges: '+%n% weitere' },
   },
 }

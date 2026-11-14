@@ -344,6 +344,8 @@ export default defineSchema({
     simulationState: v.union(v.literal('healthy'), v.literal('quarantined')),
     quarantineReasonCode: v.optional(v.string()),
     achievementsVersion: v.optional(v.number()),
+    /** P48: unlocks after this moment are new to the owner (the Dock's celebration card); absent reads as the release. */
+    achievementsSeenAt: v.optional(v.number()),
     // D162 (content v2): the goal, the fishmonger's slate, a charter ticket, the wall's pegs and the last run announced.
     goal: v.optional(v.object({ rung: v.number(), castsAtStart: v.number(), unclaimed: v.optional(v.array(v.object({ id: v.string(), coins: v.number() }))) })),
     orders: v.optional(v.array(order)),

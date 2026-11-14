@@ -7,14 +7,14 @@ import { SiteShell } from '../../lib/prose'
 import { seo } from '../../lib/seo'
 import { Card } from '../../lib/ui'
 import { anglerWords } from '@trmnl-games/idle-angler/i18n'
-import { FishIcon } from '../app/idle-angler/-art'
+import { BadgeIcon, FishIcon } from '../app/idle-angler/-art'
 import { FishName } from '../app/idle-angler/-fish'
 import { formatDate, messagesFor, useLocale, useT } from '../../lib/i18n'
 import { headMessages } from '../../i18n/heads'
 import { publicPagesMessages } from '../../i18n/publicPages'
 import { preloadContent } from '../../lib/content'
 
-type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives' | 'little-plot' | 'pixel-wars'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number }
+type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives' | 'little-plot' | 'pixel-wars'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number; badges?: Array<{ family: string; tier: number; id: string }> }
 type Profile = { alias: string; games: Game[]; platform: Array<{ id: string; name: string; blurb: string; share: number | null }> } | null
 
 const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { alias })
@@ -67,6 +67,12 @@ function ProfilePage() {
                     {game.life.album.map((life) => (
                       <li key={life.ordinal} className="text-sm"><Link to="/profile/$alias/lives/$n" params={{ alias: profile.alias, n: String(life.ordinal) }} className="underline underline-offset-4">{life.name}</Link> <span className="text-muted">· lived to {life.age}{life.generation > 1 ? `, generation ${life.generation}` : ''}</span></li>
                     ))}
+                  </ul>
+                ) : null}
+                {/* P48: the six best badges, finished families and the rarest first; each names itself on hover and to screen readers. */}
+                {game.badges && game.badges.length > 0 ? (
+                  <ul className="mt-3 flex flex-wrap gap-2" aria-label={t.bestBadges}>
+                    {game.badges.map((b) => <li key={b.family} title={words.achievement(b.id).name}><BadgeIcon family={b.family} tier={b.tier} scale={2} /><span className="sr-only">{words.achievement(b.id).name}</span></li>)}
                   </ul>
                 ) : null}
                 {game.wall && game.wall.length > 0 ? (

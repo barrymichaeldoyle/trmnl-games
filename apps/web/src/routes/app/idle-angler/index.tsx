@@ -10,6 +10,7 @@ import { dockScene, FishIcon, Mark, Scene } from './-art'
 import { FishName, FishText, FromWater, WaterName } from './-fish'
 import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
+import { NewBadgesCard } from './-newBadges'
 import { Rows } from './-rows'
 import { WaterCompany, WaterCount } from './-company'
 import { FlyCallout } from './-flyBox'
@@ -126,6 +127,7 @@ function DockPage() {
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 underline underline-offset-4">{t.sell(catches.length)} <Coins n={coolerValue} sign /></Link></p>
         ) : null}
         {fishmongerPays > 0 ? <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 font-semibold text-gold-ink underline underline-offset-4">{t.fishmongerBuying} <Coins n={fishmongerPays} sign /></Link></p> : null}
+        <NewBadgesCard />
         {full ? <GoalCard full={full} fishmonger={fishmongerPays > 0} notify={notify} /> : null}
         {/* Issue #6: the wall's way in from the Dock once it opens, with what is on it. */}
         {full?.features.trophies ? <p className="text-sm"><Link to="/app/idle-angler/trophies" className="underline underline-offset-4">{t.trophyWall}</Link> <span className="text-muted">· {t.pegs(full.pegs.pegs - full.pegs.free, full.pegs.pegs)}</span></p> : null}

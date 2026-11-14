@@ -150,7 +150,9 @@ async function sweepOne(page, file) {
       return codes.some((c) => r.left < c.right - 1 && r.right > c.left + 1 && r.top < c.bottom - 1 && r.bottom > c.top + 1)
     }).map((e) => ({ text: e.innerText.slice(0, 40), right: e.getBoundingClientRect().right }))
     const adaptiveStories = Array.from(layoutEl.querySelectorAll('[data-adaptive-story]')).filter(visible).map(el => ({ arrangement: el.dataset.storyArrangement, text: el.querySelector('[data-adaptive-text]').innerText, metadataRows: Array.from(el.querySelectorAll('[data-story-time]')).filter(visible).length }));
-    return { adaptiveStories, bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, underBoard, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
+    // P48: whether an Idle Angler badge is on the screen, so a sweep can tell one that gave way.
+    const badges = Array.from(layoutEl.querySelectorAll('[data-badge]')).filter(visible).length
+    return { badges, adaptiveStories, bound, overflow, broken, textOverflow, titleOverflow, underRibbon, underCode, underBoard, lists, recaps, hearts, ticks, counters, rankRows, chips, sceneTop: scene ? scene.getBoundingClientRect().top : null, storyTop: lists.length ? layoutEl.querySelector('[data-story-list]').getBoundingClientRect().top : null }
   }, noTitleBar)
   // Regression for the X side view: an inner ledger can outgrow its fixed flex slot during reflow.
   // Grow only the inner box, rerun the real fitter, then restore it before taking the normal screenshot.

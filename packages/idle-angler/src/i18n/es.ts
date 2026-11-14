@@ -211,6 +211,6 @@ export const es: IaLanguage = {
     yourBest: (weight) => `Tu mejor ${weight}`,
     rankBest: (rank, weight) => `Puesto ${rank}, mejor ${weight}`,
     until: (day) => `hasta el ${day}`,
-    labels: { fly: 'Mosca', fly_code: 'Código de mosca', last_12_hours: 'Últimas 12 horas', released: 'Liberado', newest_catch: 'Última captura', goal: 'Objetivo:', back_soon: 'Volvemos pronto', finish_setup: 'Termina la configuración', save_plugin: 'Guarda el plugin en TRMNL. El primer lance llega en menos de 15 minutos.', ready: '%name% ya puede pescar' },
+    labels: { fly: 'Mosca', fly_code: 'Código de mosca', last_12_hours: 'Últimas 12 horas', released: 'Liberado', newest_catch: 'Última captura', goal: 'Objetivo:', back_soon: 'Volvemos pronto', finish_setup: 'Termina la configuración', save_plugin: 'Guarda el plugin en TRMNL. El primer lance llega en menos de 15 minutos.', ready: '%name% ya puede pescar', achievement: 'Logro', more_badges: '+%n% más' },
   },
 }

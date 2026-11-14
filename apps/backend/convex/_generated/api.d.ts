@@ -27,6 +27,7 @@ import type * as http from "../http.js";
 import type * as idleAngler_achievements from "../idleAngler/achievements.js";
 import type * as idleAngler_adapter from "../idleAngler/adapter.js";
 import type * as idleAngler_anglers from "../idleAngler/anglers.js";
+import type * as idleAngler_badges from "../idleAngler/badges.js";
 import type * as idleAngler_dockFull from "../idleAngler/dockFull.js";
 import type * as idleAngler_flies from "../idleAngler/flies.js";
 import type * as idleAngler_full from "../idleAngler/full.js";
@@ -164,6 +165,7 @@ declare const fullApi: ApiFromModules<{
   "idleAngler/achievements": typeof idleAngler_achievements;
   "idleAngler/adapter": typeof idleAngler_adapter;
   "idleAngler/anglers": typeof idleAngler_anglers;
+  "idleAngler/badges": typeof idleAngler_badges;
   "idleAngler/dockFull": typeof idleAngler_dockFull;
   "idleAngler/flies": typeof idleAngler_flies;
   "idleAngler/full": typeof idleAngler_full;

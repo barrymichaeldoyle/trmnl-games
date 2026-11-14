@@ -108,6 +108,11 @@ export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerP
         ...stories.slice(1),
       ],
     },
+    // P48 (template v26): a new badge's panel, a species badge with more beside it, and a badge an attention line holds back.
+    badge: { ...b, unlocks: [{ achievementId: 'night_fishing_2', at: minutes(40) }] },
+    badgeSpecies: { ...b, unlocks: [{ achievementId: 'specimen_perch', at: minutes(62) }, { achievementId: 'first_perch', at: minutes(62) }, { achievementId: 'big_ones_1', at: minutes(62) }] },
+    badgeFinished: { ...b, unlocks: [{ achievementId: 'rods_3', at: minutes(200) }, { achievementId: 'seasons_1', at: minutes(30) }] },
+    badgeBareHook: { ...b, angler: { ...angler, bait: { maggots: 0, worms: 12 } }, unlocks: [{ achievementId: 'night_fishing_2', at: minutes(40) }] },
     outsideTop: { ...b, board: { ...b.board!, rank: 19, ownGrams: 610, top: b.board!.top.map((row) => ({ ...row, own: false })) } },
     unranked: { ...b, board: { ...b.board!, rank: null, ownGrams: null, top: b.board!.top.map((row) => ({ ...row, own: false })) } },
     longText: { ...b, angler: { ...angler, alias: 'WWWWWWWWWWWWWWWWWWWW', gold: 999999, coolerTier: 4, speciesLogged: 20 }, coolerUsed: 23, company: { names: ['WWWWWWWWWWWWWWWWWWWW', 'MMMMMMMMMMMMMMMMMMMM', 'QQQQQQQQQQQQQQQQQQQQ'], others: 128 }, stories: stories.map((s) => ({ ...s, summary: 'An 18.0 kg Conger Eel took the mackerel strip in the dark. A new personal best.' })) },

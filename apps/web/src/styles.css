@@ -287,6 +287,15 @@
   .coin-hop {
     animation: coin-hop 320ms steps(4, end) both;
   }
+  /* P48: a new badge drops onto the Dock's card in steps, as a pixel sprite would, once. */
+  .badge-pop-in {
+    animation: badge-pop-in 480ms steps(6, end) both;
+  }
+}
+@keyframes badge-pop-in {
+  0% { transform: scale(0.4) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
 /* D129: a claimed goal's confetti: each piece flies out to its own offset, turns, and fades, in four steps a stage. */

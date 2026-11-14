@@ -15,6 +15,8 @@ import type { Dock } from '../../lib/idleAngler'
 import { useAlertOpened } from './desk-crawler/-alerts'
 import { useT } from '../../lib/i18n'
 import { iaCommon } from '../../i18n/ia'
+import { iaLog } from '../../i18n/iaLog'
+import { useNewBadges } from './idle-angler/-newBadges'
 import { homeMessages } from '../../i18n/home'
 import { pitchMessages } from '../../i18n/pitch'
 
@@ -44,6 +46,9 @@ function Shell() {
   const { data, isPending } = useQuery(convexQuery(api.idleAngler.anglers.dock, {}))
   const dock = data as Dock | undefined
   const t = useT(iaCommon)
+  const tLog = useT(iaLog)
+  // P48: the More tab shows a dot while a badge waits to be celebrated, since achievements live under More.
+  const newBadges = useNewBadges().badges.length > 0
   const home = useT(homeMessages)
   const pitch = useT(pitchMessages)
   const listing = useGames()
@@ -100,7 +105,7 @@ function Shell() {
           {NAV.map((item) => {
             // The Cooler tab carries how many fish are in it as a badge, like Desk Crawler's Bag tab; an empty cooler has none.
             const count = item.to === '/app/idle-angler/cooler' && coolerUsed > 0 ? coolerUsed : undefined
-            const dot = item.to === '/app/idle-angler' && rewardWaiting
+            const dot = (item.to === '/app/idle-angler' && rewardWaiting) || (item.key === 'more' && newBadges)
             return (
               <li key={item.to} className="flex-1">
                 <Link
@@ -117,7 +122,7 @@ function Shell() {
                   <span className="flex items-center">
                     {t.nav[item.key]}
                     {count !== undefined ? <><CountBadge count={count} className="ml-2 hidden sm:flex" /><span className="sr-only">{t.fishCount(count)}</span></> : null}
-                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{t.rewardWaiting}</span></> : null}
+                    {dot ? <><NotifyDot className="ml-2 hidden sm:block" /><span className="sr-only">{item.key === 'more' ? tLog.newAchievement : t.rewardWaiting}</span></> : null}
                   </span>
                 </Link>
               </li>
