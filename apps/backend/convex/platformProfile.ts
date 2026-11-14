@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import { titleFor } from '@trmnl-games/idle-angler/sim'
 import { showcaseBadges } from '@trmnl-games/idle-angler/art/badges'
+import { showcaseBadges as showcaseDeskBadges } from '@trmnl-games/desk-crawler/art/badges'
 import { paginator } from 'convex-helpers/server/pagination'
 import { platformAchievements, PLATFORM_ACHIEVEMENTS } from '@trmnl-games/platform'
 import schema from './schema'
@@ -11,6 +12,7 @@ import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { currentHero } from './lib/gameProfile'
 import { readEngineWorld } from './lib/engine/world'
 import { IDLE_ANGLER_RUNTIME } from './idleAngler/runtime'
+import { readWorld } from './world'
 import { DESK_CRAWLER_RUNTIME } from './lib/engine/deskCrawler'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
 import { pagePublic } from './lib/publicPage'
@@ -43,7 +45,8 @@ import type { EngineRuntime } from './lib/engine/runtime'
 async function crossGame(ctx: QueryCtx, user: Doc<'users'>) {
   const hero = await currentHero(ctx, user)
   const angler = await currentAngler(ctx, user)
-  const dcUnlocks = (await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_UNLOCK_ROWS)).length
+  const dcIds = (await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_UNLOCK_ROWS)).map((row) => row.achievementId)
+  const dcUnlocks = dcIds.length
   const iaIds = (await ctx.db.query('iaAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_SW_UNLOCKS)).map((row) => row.achievementId)
   const iaUnlocks = iaIds.length
   // D159: Paper Lives counts like any game.
@@ -56,7 +59,15 @@ async function crossGame(ctx: QueryCtx, user: Doc<'users'>) {
   const desk = await currentDesk(ctx, user)
   const pwUnlocks = (await ctx.db.query('pwAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_PW_UNLOCKS)).length
   const games = (hero?.activationState === 'active' ? 1 : 0) + (angler?.activationState === 'active' ? 1 : 0) + (life?.activationState === 'active' ? 1 : 0) + (plot?.activationState === 'active' ? 1 : 0) + (desk?.activationState === 'active' ? 1 : 0)
-  return { hero, angler, life, plot, desk, dcUnlocks, iaIds, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks + lpUnlocks + pwUnlocks }
+  return { hero, angler, life, plot, desk, dcIds, dcUnlocks, iaIds, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected: dcUnlocks + iaUnlocks + plUnlocks + lpUnlocks + pwUnlocks }
+}
+
+/** Holders per Desk Crawler achievement from the current publication, for ordering a profile's badges (P49); null before one. */
+async function deskCrawlerRarity(ctx: QueryCtx): Promise<Record<string, number> | null> {
+  const world = await readWorld(ctx)
+  const publication = world?.publishedPublicationId ? await ctx.db.get(world.publishedPublicationId) : null
+  if (publication === null || publication.state !== 'published') return null
+  return (await ctx.db.query('achievementStats').withIndex('by_publicationId', (q) => q.eq('publicationId', publication._id)).unique())?.counts ?? null
 }
 
 /** Holders per Idle Angler achievement from the current publication, for ordering a profile's badges; null before one. */
@@ -86,7 +97,7 @@ export const view = query({
     if (normalized.length < ALIAS_RULE.min || normalized.length > ALIAS_RULE.max) return null
     const user = await ctx.db.query('users').withIndex('by_normalizedAlias', (q) => q.eq('normalizedAlias', normalized)).first()
     if (user === null || user.state !== 'active' || user.nameRepairRequired) return null
-    const { hero, angler, life, plot, desk, dcUnlocks, iaIds, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected } = await crossGame(ctx, user)
+    const { hero, angler, life, plot, desk, dcIds, dcUnlocks, iaIds, iaUnlocks, plUnlocks, lpUnlocks, pwUnlocks, games, collected } = await crossGame(ctx, user)
     const admin = (await adminRef(ctx)) !== null
     const showIdleAngler = angler !== null && angler.activationState === 'active' && pagePublic(angler) && ((await gameStatusOf(ctx, 'idle-angler')) === 'live' || admin)
     const showDesk = hero !== null && hero.activationState === 'active' && pagePublic(hero)
@@ -98,7 +109,7 @@ export const view = query({
     return {
       alias: user.publicAlias,
       games: [
-        ...(showDesk ? [{ slug: 'desk-crawler' as const, name: hero.name, level: hero.level, since: hero.activatedAt ?? hero.createdAt, rank: await overallRank(ctx, DESK_CRAWLER_RUNTIME, hero._id), achievements: dcUnlocks, page: `/desk-crawler/heroes/${encodeURIComponent(user.publicAlias)}` }] : []),
+        ...(showDesk ? [{ slug: 'desk-crawler' as const, name: hero.name, level: hero.level, since: hero.activatedAt ?? hero.createdAt, rank: await overallRank(ctx, DESK_CRAWLER_RUNTIME, hero._id), achievements: dcUnlocks, page: `/desk-crawler/heroes/${encodeURIComponent(user.publicAlias)}`, badges: showcaseDeskBadges(dcIds, await deskCrawlerRarity(ctx)) }] : []),
         ...(showIdleAngler
           ? [{
               slug: 'idle-angler' as const, name: user.publicAlias, title: titleFor(Object.keys(angler.logbook).length).name, since: angler.activatedAt ?? angler.createdAt, rank: null, achievements: iaUnlocks, species: Object.keys(angler.logbook).length, page: null,
