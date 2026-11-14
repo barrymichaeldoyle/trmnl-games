@@ -12,6 +12,9 @@ import { monsterArt } from './monsters'
  * pictures below is read as transparent.
  */
 export const BADGE_SIZE = 40
+/** The art route's version for badges: `/art/badge/v1/<family>/<frame>/<scale>.png`. */
+export const BADGE_VERSION = 1
+export const badgeBase = (family: string, frame: BadgeFrame) => `/art/badge/v${BADGE_VERSION}/${family}/${frame}`
 export { BADGE_FRAMES, type BadgeFrame } from '@trmnl-games/engine/art/badge'
 
 /** A picture's rows with '.' as transparent, trimmed to its ink so the medallion centres what is drawn, not the grid. */

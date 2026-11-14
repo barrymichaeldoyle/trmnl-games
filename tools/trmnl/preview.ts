@@ -18,7 +18,7 @@ import { buildPayload, MAX_RECAP_EVENTS, type ActivityEntry, type PayloadInput }
 import { displayLogDeltas } from '@trmnl-games/desk-crawler/log'
 import { sceneUrlsAt } from '@trmnl-games/desk-crawler/art/sceneTime'
 import { screenMarkup } from '@trmnl-games/desk-crawler/templates/screen'
-import { renderScenePng } from '@trmnl-games/desk-crawler/art/route'
+import { renderBadgePng, renderScenePng } from '@trmnl-games/desk-crawler/art/route'
 import { DEFAULT_COMPANION_ORIGIN, keepsakeQrFields, renderQrPng } from '@trmnl-games/desk-crawler/art/qr'
 import { isPreviewTheme, PREVIEW_DEVICES, PREVIEW_LAYOUTS, previewDocument, type PreviewDevice, type PreviewLayout, type PreviewTheme } from '@trmnl-games/desk-crawler/templates/preview'
 import { KEEPSAKE_FREE_SCENARIOS, NO_OFFSET_SCENARIOS, PREVIEW_KEEPSAKE_CODE, PREVIEW_NOW, PREVIEW_UTC_OFFSET, previewScenarios, withOvernightRecap } from '@trmnl-games/desk-crawler/templates/previewScenarios'
@@ -33,7 +33,7 @@ const withLocalArt = (html: string) =>
     ? html.replace(/https:\/\/local-art\.invalid(\/art\/[^"'\s)]+\.png)/g, (_match, path: string) => {
         let uri = artCache.get(path)
         if (uri === undefined) {
-          const png = path.startsWith('/art/qr/') ? renderQrPng(path, DEFAULT_COMPANION_ORIGIN) : renderScenePng(path)
+          const png = path.startsWith('/art/qr/') ? renderQrPng(path, DEFAULT_COMPANION_ORIGIN) : path.startsWith('/art/badge/') ? renderBadgePng(path) : renderScenePng(path)
           uri = png ? `data:image/png;base64,${Buffer.from(png).toString('base64')}` : `${LOCAL_ART_ORIGIN}${path}`
           artCache.set(path, uri)
         }

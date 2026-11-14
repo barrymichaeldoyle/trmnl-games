@@ -4,7 +4,7 @@ import { encodePng1Bit, encodePngPalette } from './png'
 import { propArt, type PropId } from './props'
 import { composeScene, FULL_SCALE, LARGE_SCALE, MEDIUM_SCALE, SCENE_VERSION, scenePlacements, SMALL_SCALE, STAGE_HEIGHT, STAGE_WIDTH, type BiomeArt, type Subject } from './scene'
 import { Canvas } from './canvas'
-import { badgeCanvas, hasBadge, type BadgeFrame } from './badges'
+import { BADGE_VERSION, badgeCanvas, hasBadge, type BadgeFrame } from './badges'
 import { isOccasionArt, type OccasionArt } from './occasions'
 import { BWRY_PALETTE, bwryInk, BwryInk, sceneColours } from './sceneColour'
 import type { SceneTime } from './sceneTime'
@@ -51,9 +51,8 @@ export function parseScenePath(path: string): { biome: BiomeArt; pose: HeroPose;
 }
 
 /** P49: an achievement badge, `/art/badge/v1/<family>/<frame>/<scale>.png`, frame 0 locked to 5; families and scales allowlisted. */
-export const BADGE_VERSION = 1
 export const BADGE_SCALES = new Set([1, 2, 3, 4])
-export const badgeBase = (family: string, frame: BadgeFrame) => `/art/badge/v${BADGE_VERSION}/${family}/${frame}`
+export { badgeBase } from './badges'
 
 export function renderBadgePng(path: string): Uint8Array | null {
   const badge = /^\/art\/badge\/v(\d+)\/([a-z_]+)\/(\d)\/(\d)\.png$/.exec(path)

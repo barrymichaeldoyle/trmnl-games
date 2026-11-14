@@ -53,7 +53,8 @@ import { GLYPHS, glyphRows } from '../art/glyphs'
 import { hudMarkUri } from '../art/hud'
 import { DEVICE_WORDS, type DeviceWords } from '../i18n/device'
 
-export const TEMPLATE_VERSION = 67
+/** v68 (P49): an achievement's celebration tag leads with its badge. */
+export const TEMPLATE_VERSION = 68
 
 /**
  * D169: one of the template's own words, from the payload's `labels` in the owner's language. The English default keeps
@@ -421,8 +422,9 @@ const statusLine = (clamp: number, fit: number, company = true) =>
  * A big moment (level-up, elite win, jackpot, rare find) gets an inverted badge above the newest story. Its own row keeps
  * it at its text's size where the column stretches its children (the portrait's `flex--stretch-x`).
  */
+/** The celebration tag (D44); for an achievement (P49) the badge leads it, the 40-pixel medallion at 1x. */
 const celebrationBadge = (classes: string) => `
-      {% if celebration %}<div class="no-shrink flex flex--row flex--left" data-celebration="true"><span class="${classes} label--inverted ${ink('bg', 'red')}">{{ celebration | escape }}</span></div>{% endif %}`
+      {% if celebration %}<div class="no-shrink flex flex--row flex--left flex--center-y gap--small" data-celebration="true">{% if celebration_badge != blank %}<img class="image no-shrink" src="{{ celebration_badge }}/1.png" alt="" data-celebration-badge="true">{% endif %}<span class="${classes} label--inverted w--min-0 ${ink('bg', 'red')}" data-clamp="2">{{ celebration | escape }}</span></div>{% endif %}`
 
 /**
  * Whole story/stat pairs; the fitter keeps the longest newest-first prefix that fits. `rowFit` is the plain length the

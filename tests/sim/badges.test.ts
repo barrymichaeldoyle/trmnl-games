@@ -49,3 +49,26 @@ describe('Desk Crawler badges (P49 C1)', () => {
     expect(shown.find((b) => b.family === 'adventures')).toMatchObject({ tier: 2 })
   })
 })
+
+describe('Desk Crawler celebration badge (P49 C4, template v68)', async () => {
+  const { buildPayload } = await import('@trmnl-games/desk-crawler/payload')
+  const { previewScenarios } = await import('@trmnl-games/desk-crawler/templates/previewScenarios')
+  const { screenMarkup } = await import('@trmnl-games/desk-crawler/templates/screen')
+  const { Liquid } = await import('liquidjs')
+  const states = previewScenarios('https://art.example').groups.states
+
+  it('holds an achievement for six hours with its badge, and lets a newer big moment through', () => {
+    expect(buildPayload(states.badge!)).toMatchObject({ celebration: 'Achievement: Elite Problem', celebration_badge: 'https://art.example/art/badge/v1/elites/2' })
+    // A monster family finished outranks a first tier earned at the same moment.
+    expect(buildPayload(states.badgeMonster!).celebration_badge).toBe('https://art.example/art/badge/v1/slay_paper_imp/5')
+    expect(buildPayload(states.badgeThenLevelUp!)).toMatchObject({ celebration: 'Level up! Now level 6', celebration_badge: '' })
+    expect(buildPayload({ ...states.badge!, unlocks: [{ achievementId: 'elites_2', at: states.badge!.now - 7 * 3_600_000 }] }).celebration_badge).toBe('')
+  })
+
+  it('draws the badge in the tag, from an art path the route serves', async () => {
+    const html = await new Liquid().parseAndRender(screenMarkup.markup, { ...buildPayload(states.badge!), keepsake_code: null })
+    const src = /src="https:\/\/art\.example(\/art\/badge\/[^"]+)" alt="" data-celebration-badge/.exec(html)
+    expect(src).not.toBeNull()
+    expect(renderBadgePng(src![1]!)).not.toBeNull()
+  })
+})

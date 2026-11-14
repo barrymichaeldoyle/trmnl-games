@@ -9,7 +9,7 @@ import { floorCompany } from './lib/presence'
 
 import { bagUsed as countBag } from '@trmnl-games/desk-crawler/sim/core/bag'
 import { potionsHeld } from '@trmnl-games/desk-crawler/sim/core/potions'
-import { buildPayload, MAX_LOGS, MAX_RECAP_EVENTS, recapPeriod, type PayloadInput } from '@trmnl-games/desk-crawler/payload'
+import { buildPayload, MAX_LOGS, MAX_RECAP_EVENTS, recapPeriod, type PayloadInput, BADGE_WINDOW_MS, MAX_BADGE_UNLOCKS } from '@trmnl-games/desk-crawler/payload'
 import { readWorld, worldContent } from './world'
 import { readDeviceRanking } from './lib/rankingRead'
 import { keepsakeCode, keepsakeGrant } from './lib/keepsakes'
@@ -218,6 +218,10 @@ async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number, instan
     artBaseUrl: process.env.CONVEX_SITE_URL ?? null,
     latestEvent,
     newestEvent,
+    // P49: the newest unlocks inside six hours, so an achievement holds the celebration tag with its badge.
+    unlocks: hero
+      ? (await ctx.db.query('heroAchievements').withIndex('by_userId_and_unlockedAt', (q) => q.eq('userId', user._id).gte('unlockedAt', now - BADGE_WINDOW_MS)).order('desc').take(MAX_BADGE_UNLOCKS)).map((row) => ({ achievementId: row.achievementId, at: row.unlockedAt }))
+      : [],
     ranking: hero ? await readDeviceRanking(ctx, world, hero) : null,
     // D138: the X full landscape shows today's tasks and the current goal beside the stories.
     ...(hero?.todo && content.todo ? { todoTasks: hero.todo.tasks.map((task) => ({ label: taskLabel(task, content), progress: task.progress, target: task.target, done: task.doneTick !== undefined })) } : {}),

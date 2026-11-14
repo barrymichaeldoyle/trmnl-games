@@ -10,6 +10,8 @@ import { QR_LARGE_SCALE, QR_SCALE, qrBasePath, qrPath, type QrTarget } from '../
 import { sceneFor, scenePath, type LatestEvent } from '../art/sceneKey'
 import type { HeroGender } from '../art/hero'
 import { isOccasionArt, type OccasionArt } from '../art/occasions'
+import { badgeBase, frameForTier } from '../art/badges'
+import { ACHIEVEMENT_BY_ID } from '../content/achievements'
 import { occasionAt } from '../sim/core/occasions'
 import { nextSlotAfter, slotEta, SLOT_MS } from '../sim/schedule'
 import { bold } from '../sim/core/narrative'
@@ -98,6 +100,8 @@ export interface PayloadInput {
   readonly latestEvent: LatestEvent | null
   /** The newest log of any kind, for the celebration; defaults to `latestEvent`. An achievement log carries its `title` (D65). */
   readonly newestEvent?: LatestEvent | null
+  /** P49: the newest unlocks (up to `MAX_BADGE_UNLOCKS`), so an achievement's celebration holds six hours with its badge. */
+  readonly unlocks?: ReadonlyArray<{ readonly achievementId: string; readonly at: number }>
   /** Seven-day own-group ranking from the published set; null before any publication. */
   readonly ranking: PayloadRanking | null
   /** D138: today's to-do tasks (labels keep their [[bold marks]]); absent before the list arrives. */
@@ -244,6 +248,21 @@ export function celebrationFor(latest: LatestEvent | null, level: number, locale
   return null
 }
 
+/** P49: how long an achievement's celebration holds on the screen, outlasting the next adventures and a few skipped refreshes. */
+export const BADGE_WINDOW_MS = 6 * 3_600_000
+/** P49: unlocks the backend reads for the celebration, newest first. */
+export const MAX_BADGE_UNLOCKS = 8
+
+/** P49: the achievement to celebrate from unlocks inside the window: the highest frame (a finished family first), then the newest. */
+export function badgeToShow(unlocks: PayloadInput['unlocks'], now: number) {
+  const fresh = (unlocks ?? []).flatMap((u) => {
+    const def = ACHIEVEMENT_BY_ID.get(u.achievementId)
+    return def && now - u.at <= BADGE_WINDOW_MS && u.at <= now + 60_000 ? [{ def, at: u.at, frame: frameForTier(def.family, def.tier) }] : []
+  })
+  if (fresh.length === 0) return null
+  return fresh.reduce((top, u) => (u.frame > top.frame || (u.frame === top.frame && u.at > top.at) ? u : top))
+}
+
 /** "45 min", "2 h", "1 h 15 min" for a number of quarter-hour ticks. */
 export function aboutDuration(ticks: number, locale: Locale = 'en'): string {
   const minutes = (ticks * SLOT_MS) / 60_000
@@ -258,6 +277,20 @@ export function buildPayload(input: PayloadInput) {
   const locale = input.locale ?? 'en'
   const words = DEVICE_WORDS[locale]
   const t = contentTranslator(locale)
+  /**
+   * The celebration tag (D44) and, for an achievement, its badge (P49). A newest log that is itself a big moment (a
+   * level-up, an elite win, a jackpot, a find, a career step) shows at once; otherwise an achievement earned in the last
+   * six hours holds the tag with its badge, rather than giving way at the next adventure.
+   */
+  const celebrationOf = (allowed: boolean): { celebration: string | null; celebration_badge: string } => {
+    if (!allowed || hero === null) return { celebration: null, celebration_badge: '' }
+    const newest = input.newestEvent === undefined ? input.latestEvent : input.newestEvent
+    const moment = celebrationFor(newest, hero.level, locale)
+    if (moment !== null && newest?.kind !== 'achievement') return { celebration: moment, celebration_badge: '' }
+    const shown = badgeToShow(input.unlocks, now)
+    if (shown) return { celebration: words.achievement(t.text(shown.def.name)), celebration_badge: input.artBaseUrl ? `${input.artBaseUrl}${badgeBase(shown.def.family, shown.frame)}` : '' }
+    return { celebration: moment, celebration_badge: '' }
+  }
   const heroGender = hero?.gender === 'female' ? ('female' as const) : ('male' as const)
   const biomeName = (id: string | undefined) => content.biomes.find((b) => b.id === id)?.name ?? ''
   const lastCompletedAt = world?.lastCompletedAt
@@ -366,6 +399,7 @@ export function buildPayload(input: PayloadInput) {
       goal: null,
       standoff: null,
       celebration: null,
+      celebration_badge: '',
       attention: servicePaused ? words.maintenance : words.signIn,
       notice: null,
     }
@@ -508,7 +542,7 @@ export function buildPayload(input: PayloadInput) {
     // D163: a dug-in elite's name, its HP left (never 0 while it stands) and when it leaves (UTC seconds); null without one.
     standoff: standoffField(hero, content, now, locale),
     // The badge sits above the newest story, so it waits while the travel line leads.
-    celebration: attention === null && travelLine === null && logs.length > 0 ? celebrationFor(input.newestEvent === undefined ? input.latestEvent : input.newestEvent, hero.level, locale) : null,
+    ...celebrationOf(attention === null && travelLine === null && logs.length > 0),
     attention,
     notice,
   }

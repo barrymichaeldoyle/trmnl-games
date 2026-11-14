@@ -547,7 +547,7 @@ describe('log lines (D44)', () => {
   })
 
   it('celebrates a big moment with a badge', async () => {
-    expect(await render({ ...payload(), celebration: 'Level up! Now level 6' })).toMatch(/label--inverted bg--red 1bit:bg--black 2bit:bg--black 4bit:bg--black">Level up! Now level 6</)
+    expect(await render({ ...payload(), celebration: 'Level up! Now level 6' })).toMatch(/label--inverted w--min-0 bg--red 1bit:bg--black 2bit:bg--black 4bit:bg--black" data-clamp="2">Level up! Now level 6</)
     expect(await render(payload())).not.toMatch(/class="[^"]*label--inverted/)
   })
 
@@ -557,7 +557,7 @@ describe('log lines (D44)', () => {
     for (const [key, markup] of Object.entries(screenMarkup)) {
       const html = await new Liquid({ timezoneOffset: 0 }).parseAndRender(markup, { ...vars, celebration: name, log: [{ ...vars.log[0], k: 'achievement', n: 'Achievement: [[Nine Lives (Expired)]]', d: '' }, ...vars.log] })
       // The quadrant has no room for a badge (D44); the other three show it.
-      if (key !== 'markup_quadrant') expect(html).toContain(`4bit:bg--black">${name}<`)
+      if (key !== 'markup_quadrant') expect(html).toContain(`4bit:bg--black" data-clamp="2">${name}<`)
       expect(html.includes(glyphUri('achievement', 16)) || html.includes(glyphUri('achievement', 24))).toBe(true)
     }
   })
