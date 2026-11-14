@@ -408,17 +408,27 @@ const queries = {
   'idleAngler/full:opens': () => (params.get('v2') ? { period: 'o2026-10-24', startsAt: now - 36e5 * 5, endsAt: now + 864e5, on: true, prizes: [500, 300, 150], waters: [['millpond', 'Millpond', 'perch', 'Perch'], ['river_bend', 'River Bend', 'chub', 'Chub'], ['heron_lake', 'Heron Lake', 'mirror_carp', 'Mirror Carp']].map(([id, name, tid, tname], w) => ({ id, name, target: { id: tid, name: tname }, own: w === 1 ? { rank: 4, speciesId: tid, grams: 1300 } : null, entries: w === 2 ? [] : [['Quillfeather_Longname', 2400], ['Mo', 1900], ['Bea', 1500], ['Barry', 1300]].map(([n, g], i) => ({ rank: i + 1, name: n, speciesId: tid, grams: g, own: n === 'Barry', profile: false })) })) } : null),
   'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
   'idleAngler/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, own: { rank: 3, speciesId: 'barbel', grams: 1900 }, entries: [['Quillfeather_Longname', 'pike', 5240], ['Mo', 'chub', 2410], ['Barry', 'barbel', 1900], ['Hidden player', 'grayling', 1210], ['Bea', 'dace', 380]].map(([name, speciesId, grams], i) => ({ rank: i + 1, name, speciesId, grams, own: name === 'Barry', profile: name === 'Mo' })) }),
-  'idleAngler/achievements:mine': () => ({ earnedCount: 23, rarity: { counts: { catches_3: 12, logbook_2: 7, got_away_1: 30 }, totalPlayers: 41 }, families: [
-    { family: 'catches', name: 'Catches', category: 'Fishing', tiers: 5, earned: { id: 'catches_3', name: 'Regular on the Bank', blurb: 'A hundred fish from the bank.', tier: 3 }, next: { id: 'catches_4', name: 'Old Hand', tier: 4 }, value: 412, target: 1000 },
-    { family: 'got_away', name: 'Got away', category: 'Fishing', tiers: 3, earned: { id: 'got_away_1', name: 'The One That Got Away', blurb: 'The line went slack.', tier: 1 }, next: { id: 'got_away_2', name: 'Snapped Again', tier: 2 }, value: 7, target: 10 },
-    { family: 'epic_catches', name: 'Epic catches', category: 'Fishing', tiers: 2, earned: null, next: { id: 'epic_catches_1', name: 'Once in a Season', tier: 1 }, value: 0, target: 1 },
-    { family: 'logbook', name: 'Logbook', category: 'Logbook', tiers: 4, earned: { id: 'logbook_2', name: 'Naturalist', blurb: 'You know a rudd from a roach.', tier: 2 }, next: { id: 'logbook_3', name: 'Field Guide', tier: 3 }, value: 14, target: 20 },
-    { family: 'rods', name: 'Rods', category: 'Progress', tiers: 3, earned: { id: 'rods_3', name: 'Beachcaster', blurb: 'Built for the biggest fish in the sea.', tier: 3 }, next: null, value: 4, target: 4 },
-    { family: 'sales', name: 'Sales', category: 'Trade', tiers: 4, earned: { id: 'sales_2', name: 'Regular Supplier', blurb: 'They know your cooler.', tier: 2 }, next: { id: 'sales_3', name: 'Wholesale', tier: 3 }, value: 182, target: 250 },
-    { family: 'species_roach', name: 'Roach', category: 'Species', tiers: 2, earned: { id: 'specimen_roach', name: 'Specimen Roach', blurb: '', tier: 2 }, next: null, value: 590, target: 450 },
-    { family: 'species_chub', name: 'Chub', category: 'Species', tiers: 2, earned: { id: 'first_chub', name: 'First Chub', blurb: '', tier: 1 }, next: { id: 'specimen_chub', name: 'Specimen Chub', tier: 2 }, value: 2100, target: 1875 },
-    { family: 'species_salmon', name: 'Salmon', category: 'Species', tiers: 2, earned: null, next: { id: 'first_salmon', name: 'First Salmon', tier: 1 }, value: 0, target: 1 },
-  ] }),
+  'idleAngler/achievements:mine': () => {
+    // P48: badges on every family; unlockedAt orders the Latest row; species in every state, a ray among them.
+    const ago = (h) => now - 36e5 * h
+    const fam = (family, name, category, tiers, tier, earnedId, earnedName, blurb, nextId, nextName, value, target, h) => ({ family, name, category, tiers, earned: tier ? { id: earnedId, name: earnedName, blurb, tier, unlockedAt: ago(h) } : null, next: nextId ? { id: nextId, name: nextName, tier: tier + 1 } : null, value, target })
+    const sp = (id, name, tier, h) => ({ family: 'species_' + id, name, category: 'Species', tiers: 2, earned: tier ? { id: (tier === 2 ? 'specimen_' : 'first_') + id, name: (tier === 2 ? 'Specimen ' : 'First ') + name, blurb: '', tier, unlockedAt: ago(h) } : null, next: tier === 2 ? null : { id: (tier ? 'specimen_' : 'first_') + id, name: (tier ? 'Specimen ' : 'First ') + name, tier: tier + 1 }, value: 0, target: 1 })
+    if (params.get('quiet')) return { earnedCount: 0, rarity: null, families: [fam('catches', 'Catches', 'Fishing', 5, 0, '', '', '', 'catches_1', 'First Bite', 0, 1, 0), sp('roach', 'Roach', 0, 0), sp('perch', 'Perch', 0, 0)] }
+    return { earnedCount: 23, rarity: { counts: { catches_3: 12, logbook_2: 7, got_away_1: 30, medals_1: 2, night_fishing_2: 9 }, totalPlayers: 41 }, families: [
+      fam('catches', 'Catches', 'Fishing', 5, 3, 'catches_3', 'Regular on the Bank', 'A hundred fish from the bank.', 'catches_4', 'Old Hand', 412, 1000, 30),
+      fam('got_away', 'Got away', 'Fishing', 3, 1, 'got_away_1', 'The One That Got Away', 'The line went slack.', 'got_away_2', 'Snapped Again', 7, 10, 80),
+      fam('night_fishing', 'Night fishing', 'Fishing', 3, 2, 'night_fishing_2', 'Night Owl', 'The flask is always full.', 'night_fishing_3', 'Moonlighter', 61, 250, 2),
+      fam('epic_catches', 'Epic catches', 'Fishing', 3, 0, '', '', '', 'epic_catches_1', 'Once in a Season', 0, 1, 0),
+      fam('seasons', 'Seasons', 'Fishing', 1, 1, 'seasons_1', 'All Year Round', 'A fish in every season.', null, null, 4, 4, 200),
+      fam('logbook', 'Logbook', 'Logbook', 7, 2, 'logbook_2', 'Naturalist', 'You know a rudd from a roach.', 'logbook_3', 'Field Guide', 14, 20, 50),
+      fam('flies', 'Flies', 'Logbook', 4, 1, 'flies_1', 'First Fly', 'Pinned to your hat for luck.', 'flies_2', 'Half a Box', 3, 6, 120),
+      fam('rods', 'Rods', 'Progress', 4, 4, 'rods_4', 'Beachcaster', 'Built for the biggest fish in the sea.', null, null, 4, 4, 300),
+      fam('medals', 'Medals', 'Progress', 3, 1, 'medals_1', 'On the Podium', 'A medal from a weekend Open.', 'medals_2', 'Medal Collector', 1, 5, 6),
+      fam('gold_earned', 'Coins earned', 'Trade', 4, 4, 'gold_earned_4', 'Fish Baron', 'A hundred thousand coins from fish.', null, null, 100000, 100000, 400),
+      fam('sales', 'Sales', 'Trade', 4, 2, 'sales_2', 'Regular Supplier', 'They know your cooler.', 'sales_3', 'Wholesale', 182, 250, 20),
+      sp('roach', 'Roach', 2, 10), sp('perch', 'Perch', 1, 1), sp('chub', 'Chub', 1, 40), sp('pike', 'Pike', 2, 60), sp('golden_carp', 'Golden Carp', 0, 0), sp('salmon', 'Salmon', 0, 0), sp('thornback_ray', 'Thornback Ray', 1, 90), sp('eel', 'Eel', 0, 0),
+    ] }
+  },
   'heroes:mine': () => hero,
   'presence:here': () => {
     const others = params.get('company') === 'none' ? 0 : params.get('company') === 'crowd' ? 23 : hero.biomes.find((b) => b.id === hero.biomeId)?.others ?? 0;

@@ -107,11 +107,10 @@ export const flyTones = (flyId: string): Tones => FLY_TONES[flyId] ?? FLY_DEFAUL
 /**
  * Achievement badges (P48): each frame's colour in the companion, copper to the top tier's violet. The ring and its
  * studs or rays take `ring`; the top tier's solid disc takes it too, with the picture painted over it as usual.
- * Locked badges are drawn in `locked` over a faint disc.
+ * Locked badges have no disc: the dotted ring and the checker silhouette in `locked`, which reads on both themes.
  */
 export const BADGE_TONES = {
   disc: '#f4f1ff',
-  lockedDisc: '#e4e0f2',
   locked: '#8c86a8',
   rings: ['#8c86a8', '#c7794a', '#a9b3c6', '#e0a92a', '#5d8fd6', '#a77bff'],
 } as const

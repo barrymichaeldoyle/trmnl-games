@@ -1,4 +1,5 @@
 import { Canvas, type Sprite } from '@trmnl-games/engine/art/canvas'
+import { ACHIEVEMENTS } from '../content/achievements'
 import { FISH_TRAITS, fishSprite } from './fish'
 
 /**
@@ -357,43 +358,43 @@ export const BADGE_PICTURES = {
     '................',
     '................',
   ]),
-  /** The year: the summer sun and a winter snowflake either side of a line. */
+  /** A wall calendar on its rings, a fish on the page. */
   seasons: picture([
-    '..#..#..........',
-    '...####.........',
-    '.#######........',
-    '..######......#.',
-    '.#######.....#..',
-    '...####.....#...',
-    '..#..#.....#....',
-    '..........#.....',
-    '.........#......',
-    '........#.......',
-    '.......#..#.#.#.',
-    '......#....###..',
-    '.....#....#####.',
-    '....#......###..',
-    '...#......#.#.#.',
+    '...#...#...#....',
+    '.##############.',
+    '.#.#...#...#..#.',
+    '.#############..',
+    '.#............#.',
+    '.#.##.##.##.#.#.',
+    '.#............#.',
+    '.#...######...#.',
+    '.#..########.##.',
+    '.#.##.#######.#.',
+    '.#..########.##.',
+    '.#...######...#.',
+    '.#............#.',
+    '.#.##.##.##.#.#.',
+    '.##############.',
     '................',
   ]),
   /** Three fish running upstream in a line. */
   runs: picture([
+    '..........####..',
+    '.......#.######.',
+    '.......####.###.',
+    '.......#.######.',
+    '..........####..',
     '................',
-    '.........#####..',
-    '.......########.',
-    '.......###.###..',
-    '.........#####..',
+    '......####......',
+    '...#.######.....',
+    '...####.###.....',
+    '...#.######.....',
+    '......####......',
     '................',
-    '....#####.......',
-    '..########......',
-    '..###.###.......',
-    '....#####.......',
-    '................',
-    '.#####..........',
-    '########........',
-    '###.###.........',
-    '.#####..........',
-    '................',
+    '..####..........',
+    '#.######........',
+    '####.###........',
+    '#.######........',
   ]),
   /** Two rosettes hung on a line. */
   rosettes: picture([
@@ -434,6 +435,28 @@ export const BADGE_PICTURES = {
     '................',
   ]),
 } as const satisfies Record<string, readonly string[]>
+
+/** Species whose sprite does not read at badge size, drawn by hand: the ray from above, spots and eyes on its back. */
+const SPECIES_PICTURES: Readonly<Record<string, readonly string[]>> = {
+  thornback_ray: picture([
+    '.......##.......',
+    '......#ww#......',
+    '.....#wwww#.....',
+    '....#w#ww#w#....',
+    '...#wwwwwwww#...',
+    '..#ww#wwww#ww#..',
+    '.#wwwwwwwwwwww#.',
+    '#wwww#wwww#wwww#',
+    '.#wwwwwwwwwwww#.',
+    '..##ww#ww#ww##..',
+    '....##wwww##....',
+    '......#ww#......',
+    '.......##.......',
+    '.......#........',
+    '........#.......',
+    '.......#........',
+  ]),
+}
 
 export type BadgePictureId = keyof typeof BADGE_PICTURES
 
@@ -510,6 +533,19 @@ function frameRows(frame: BadgeFrame): string[] {
   return grid.map((row) => row.join(''))
 }
 
+/** A fish's size in the medallion: flatfish are drawn from above, so they get the height. */
+function speciesSize(species: string): [number, number] {
+  const body = FISH_TRAITS[species]?.body
+  return body === 'flat' ? [20, 13] : body === 'eel' ? [22, 9] : [20, 10]
+}
+
+/**
+ * One cell of a picture cut out of the top tier's solid disc. A picture swaps ink and paper. A fish keeps its outline
+ * and marks as ink and turns its body and shading to paper, so it reads as a clean silhouette rather than inverted
+ * noise.
+ */
+const cutoutCell = (ch: string, fish: boolean): string => (ch === ' ' ? ' ' : fish ? (ch === '#' ? '#' : 'w') : ch === '#' ? 'w' : ch === 'w' ? '#' : ch)
+
 /**
  * The medallion's layers, each a full-size sprite: the paper disc, the frame and the picture (or the fish). On the
  * device (`cutout`) the top tier cuts the picture out of its solid disc, ink to paper; the companion paints the disc
@@ -526,14 +562,14 @@ export function badgeLayers(family: string, frame: BadgeFrame, cutout = true): {
     disc.push(discRow)
   }
   const species = speciesOfFamily(family)
-  const art: readonly string[] = species ? fishSprite(species, 20, 10).rows : ((BADGE_PICTURES as Record<string, readonly string[]>)[family] ?? [])
+  const art: readonly string[] = species ? (SPECIES_PICTURES[species] ?? fishSprite(species, ...speciesSize(species)).rows) : ((BADGE_PICTURES as Record<string, readonly string[]>)[family] ?? [])
   const width = art[0]?.length ?? 0
   const left = Math.floor((BADGE_SIZE - width) / 2)
   const top = Math.floor((BADGE_SIZE - art.length) / 2)
   const rows: string[] = Array.from({ length: BADGE_SIZE }, () => ' '.repeat(BADGE_SIZE))
   art.forEach((row, dy) => {
     // Locked pictures are a checker silhouette: the outline is there, the ink is not.
-    const drawn = frame === 0 ? [...row].map((ch) => (ch === ' ' ? ' ' : ':')).join('') : frame === 5 && cutout ? [...row].map((ch) => (ch === '#' ? 'w' : ch === 'w' ? '#' : ch)).join('') : row
+    const drawn = frame === 0 ? [...row].map((ch) => (ch === ' ' ? ' ' : ':')).join('') : frame === 5 && cutout ? [...row].map((ch) => cutoutCell(ch, species !== null)).join('') : row
     rows[top + dy] = rows[top + dy]!.slice(0, left) + drawn + rows[top + dy]!.slice(left + width)
   })
   const sprite = (r: string[]): Sprite => ({ width: BADGE_SIZE, height: BADGE_SIZE, rows: r })
@@ -556,5 +592,15 @@ export const hasBadge = (family: string): boolean => {
   return species ? species in FISH_TRAITS : family in BADGE_PICTURES
 }
 
-/** Which frame a family's tier wears: a species' first catch is the plain ring and its specimen the laurel. */
-export const frameForTier = (family: string, tier: number): BadgeFrame => (speciesOfFamily(family) ? (tier >= 2 ? 5 : tier >= 1 ? 1 : 0) : (Math.max(0, Math.min(5, tier)) as BadgeFrame))
+/** How many tiers each family has in the current catalog. */
+const TIER_COUNTS: ReadonlyMap<string, number> = ACHIEVEMENTS.reduce((counts, a) => counts.set(a.family, Math.max(counts.get(a.family) ?? 0, a.tier)), new Map<string, number>())
+
+/**
+ * Which frame a family's tier wears: the family's last tier always wears the top frame, so a finished family looks
+ * finished whether it has one tier or seven, and the tiers before it climb copper, silver, gold and sky. A species'
+ * first catch is the ring and its specimen the top frame by the same rule.
+ */
+export function frameForTier(family: string, tier: number): BadgeFrame {
+  if (tier <= 0) return 0
+  return (tier >= (TIER_COUNTS.get(family) ?? 5) ? 5 : Math.min(4, tier)) as BadgeFrame
+}

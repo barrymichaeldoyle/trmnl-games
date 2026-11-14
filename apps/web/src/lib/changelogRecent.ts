@@ -42,6 +42,23 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-14',
+    changes: [
+      {
+        game: 'idle-angler',
+        title: 'Badges for your achievements',
+        body: 'Every achievement on the Achievements page now has a pixel badge. Its frame climbs from copper to silver, gold and blue as a family’s tiers come in, and turns violet once you hold them all. Your latest badges sit at the top, each family shows a bar to its next tier, and the species are a grid of fish: a ring for the first one caught, the violet frame for a specimen.',
+        fr: { title: 'Des badges pour vos succès', body: 'Chaque succès de la page Succès a maintenant son badge en pixels. Son cadre passe du cuivre à l’argent, à l’or puis au bleu à mesure que vous obtenez les niveaux d’une famille, et devient violet quand vous les avez tous. Vos derniers badges sont en haut, chaque famille montre une barre jusqu’au niveau suivant, et les espèces forment une grille de poissons : un anneau pour le premier pris, le cadre violet pour un spécimen.' },
+        de: { title: 'Abzeichen für deine Erfolge', body: 'Jeder Erfolg auf der Erfolge-Seite hat jetzt ein Pixel-Abzeichen. Sein Rahmen steigt von Kupfer über Silber und Gold zu Blau, während du die Stufen einer Familie erreichst, und wird violett, sobald du alle hast. Deine neuesten Abzeichen stehen oben, jede Familie zeigt einen Balken bis zur nächsten Stufe, und die Arten sind ein Raster aus Fischen: ein Ring für den ersten Fang, der violette Rahmen für ein Exemplar.' },
+        es: { title: 'Insignias para tus logros', body: 'Cada logro de la página Logros tiene ahora su insignia en píxeles. Su marco sube del cobre a la plata, el oro y el azul a medida que consigues los niveles de una familia, y se vuelve violeta cuando los tienes todos. Tus últimas insignias están arriba, cada familia muestra una barra hasta su siguiente nivel, y las especies son una cuadrícula de peces: un aro por el primero pescado y el marco violeta por un ejemplar.' },
+        it: { title: 'Distintivi per i tuoi traguardi', body: 'Ogni traguardo della pagina Traguardi ha ora il suo distintivo in pixel. La cornice sale dal rame all’argento, all’oro e al blu man mano che ottieni i livelli di una famiglia, e diventa viola quando li hai tutti. I tuoi ultimi distintivi stanno in alto, ogni famiglia mostra una barra fino al livello successivo, e le specie sono una griglia di pesci: un anello per il primo pescato, la cornice viola per un esemplare.' },
+        pt: { title: 'Emblemas para suas conquistas', body: 'Cada conquista da página Conquistas agora tem um emblema em pixels. A moldura sobe do cobre para a prata, o ouro e o azul conforme você ganha os níveis de uma família, e fica violeta quando você tem todos. Seus emblemas mais recentes ficam no topo, cada família mostra uma barra até o próximo nível, e as espécies são uma grade de peixes: um anel para o primeiro pescado, a moldura violeta para um exemplar.' },
+        pl: { title: 'Odznaki za osiągnięcia', body: 'Każde osiągnięcie na stronie Osiągnięcia ma teraz pikselową odznakę. Jej ramka przechodzi od miedzi przez srebro i złoto do niebieskiej w miarę zdobywania poziomów rodziny, a gdy masz wszystkie, robi się fioletowa. Najnowsze odznaki są na górze, każda rodzina ma pasek do następnego poziomu, a gatunki to siatka ryb: pierścień za pierwszą złowioną, fioletowa ramka za okaz.' },
+        nl: { title: 'Badges voor je prestaties', body: 'Elke prestatie op de pagina Prestaties heeft nu een pixelbadge. De rand klimt van koper naar zilver, goud en blauw naarmate je de niveaus van een familie haalt, en wordt paars zodra je ze allemaal hebt. Je nieuwste badges staan bovenaan, elke familie toont een balk tot het volgende niveau, en de soorten zijn een raster van vissen: een ring voor de eerste vangst, de paarse rand voor een exemplaar.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-10',
     changes: [
       {

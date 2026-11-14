@@ -24,9 +24,14 @@ describe('Idle Angler badges (P48)', () => {
     expect(badgeLayers('catches', 0).picture.rows.join('')).not.toContain('#')
   })
 
-  it('maps tiers to frames, a species specimen to the top frame', () => {
+  it('gives a family\'s last tier the top frame and climbs to it from copper', () => {
+    expect(frameForTier('catches', 0)).toBe(0)
     expect(frameForTier('catches', 3)).toBe(3)
-    expect(frameForTier('catches', 9)).toBe(5)
+    expect(frameForTier('catches', 5)).toBe(5)
+    expect(frameForTier('seasons', 1)).toBe(5)
+    expect(frameForTier('rods', 3)).toBe(3)
+    expect(frameForTier('rods', 4)).toBe(5)
+    expect(frameForTier('logbook', 6)).toBe(4)
     expect(frameForTier('species_pike', 1)).toBe(1)
     expect(frameForTier('species_pike', 2)).toBe(5)
   })

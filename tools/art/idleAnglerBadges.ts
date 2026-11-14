@@ -37,11 +37,11 @@ const dot = (x: number, y: number, hex: string) => {
 families.forEach((family, row) => {
   const top = row * step + 3
   // A species wears only the locked ring, the first catch's ring and the specimen's top frame.
-  const tiers = speciesOfFamily(family) ? [0, 1, null, null, null, 2] : BADGE_FRAMES
-  tiers.forEach((tier, column) => {
-    if (tier === null) return
+  const frames = speciesOfFamily(family) ? [0, 1, null, null, null, 5] as const : BADGE_FRAMES
+  frames.forEach((frame, column) => {
+    if (frame === null) return
     const left = column * step + 3
-    for (const { sprite, tones } of badgeColourLayers(family, tier)) {
+    for (const { sprite, tones } of badgeColourLayers(family, frame)) {
       sprite.rows.forEach((cells, y) => [...cells].forEach((ch, x) => {
         const black = inked(ch, x, y)
         if (black === null) return

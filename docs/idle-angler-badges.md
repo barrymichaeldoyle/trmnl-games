@@ -54,7 +54,7 @@ The Achievements page (Log tab → Achievements) becomes a wall:
 - **Top:** earned out of total, and the five most recent badges in a row, newest first.
 - **Then the five categories** as now (Fishing, Logbook, Progress, Trade, Species), each a grid of badge tiles: four across at 390 wide, more on wider screens. A tile shows the family's highest earned badge in its tier frame with the tier as pips under it, or the locked outline with a thin progress bar toward tier 1. The tile carries no text but the family name, so the wall reads as a wall.
 - **Species** is a grid of fish badges in logbook order: silhouette until the first catch, ring for the first, laurel for the specimen. Its heading keeps the count ("31 of 58 species").
-- **Tapping a tile** opens a sheet: the badge large, the family's tiers in a row (earned in ink, the rest outlined), the earned tier's name and blurb, the date it was earned, "held by 12% of anglers", and the progress line to the next tier ("Night Owl: 14 of 25").
+- **Tapping a tile** (not built, D232) opens a sheet: the badge large, the family's tiers in a row (earned in ink, the rest outlined), the earned tier's name and blurb, the date it was earned, "held by 12% of anglers", and the progress line to the next tier ("Night Owl: 14 of 25").
 - A tile earned since the player last opened the wall carries a small New tag until they leave the page.
 
 ## 3. Celebrating in the companion
@@ -109,3 +109,4 @@ Badge names and blurbs already exist in all eight languages. New strings ("Achie
 ## Change record
 
 - 2026-11-14, B1: badge art built. 22 pictures, species from their fish sprites, six frames (locked, ring, double ring, heavy studded ring, sunburst, solid disc). Change from the spec: the laurel and four studs did not read at 32 pixels, so tier 3 is a heavy studded ring, tier 4 a sunburst and tier 5 a solid disc (the device cuts the picture out of it; the companion paints it violet under the picture). Species wear tier 1 and tier 5. Route, colour layers, a completeness test and the review sheet tool (`tools/art/idleAnglerBadges.ts`). Waiting on Barry's review of the sheet before B2.
+- 2026-11-14, B1 redraws and B2 (D232): Seasons, Runs and the Thornback Ray redrawn; a family's last tier wears the top frame; locked badges lose their disc. B2 is the existing Achievements page with badges, the Latest card, tier pips, bars and the species grid, rather than a new wall with a tap sheet (Barry: "I just meant make the existing achievements screen look better").

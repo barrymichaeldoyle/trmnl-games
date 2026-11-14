@@ -6,6 +6,8 @@ import { fishSprite, FISH_LARGE, FISH_SMALL } from '@trmnl-games/idle-angler/art
 import { paintedSceneUri, sceneKeyFromUrl, sceneSteps } from '@trmnl-games/idle-angler/art/sceneColour'
 import { clampStageWidth, MIN_STAGE_WIDTH, poseFor, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { fishTones, flyTones, type Tones } from '@trmnl-games/idle-angler/art/tones'
+import { badgeColourLayers } from '@trmnl-games/idle-angler/art/badgeColour'
+import { BADGE_SIZE, frameForTier } from '@trmnl-games/idle-angler/art/badges'
 
 /**
  * Idle Angler's art in colour (idle-angler.md "Companion"): the device's 1-bit sprites painted with the tones in
@@ -34,6 +36,20 @@ function PaintedSprite({ sprite, tones, scale = 3, className = '' }: { sprite: S
 export function FishIcon({ id, size = 'small', scale = 3, className = '' }: { id: string; size?: 'small' | 'large'; scale?: number; className?: string }) {
   const dims = size === 'large' ? FISH_LARGE : FISH_SMALL
   return <PaintedSprite sprite={fishSprite(id, dims.width, dims.height)} tones={fishTones(id)} scale={scale} className={className} />
+}
+
+/**
+ * An achievement badge (P48): the family's picture, or its fish, in the medallion whose frame shows the tier; tier 0
+ * is the locked outline. The device's layers painted in the companion's colours, stacked.
+ */
+export function BadgeIcon({ family, tier, scale = 2, className = '' }: { family: string; tier: number; scale?: number; className?: string }) {
+  const frame = frameForTier(family, tier)
+  const layers = useMemo(() => badgeColourLayers(family, frame), [family, frame])
+  return (
+    <span aria-hidden="true" className={`relative inline-block shrink-0 ${className}`} style={{ width: BADGE_SIZE * scale, height: BADGE_SIZE * scale }}>
+      {layers.map((layer, i) => <PaintedSprite key={i} sprite={layer.sprite} tones={layer.tones} scale={scale} className="absolute inset-0" />)}
+    </span>
+  )
 }
 
 /** A fly from the box in its colours, drawn from the rows the box sends. */
