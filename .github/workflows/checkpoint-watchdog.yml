@@ -1,6 +1,9 @@
-# Missing-checkpoint alert (recovery-runbook.md): every half hour, fails when the newest protected checkpoint
-# artifact is older than 90 minutes, which emails the workflow's committer. Quiet until the first capture has ever
-# uploaded one, so an unconfigured environment does not page anyone.
+# Missing-checkpoint alert (recovery-runbook.md): every half hour, fails (which emails the workflow's committer) when
+# the newest finished capture run failed, or when the newest protected checkpoint artifact is older than 12 hours.
+# GitHub delays and drops scheduled runs under load: the hourly capture has in practice run every four to seven hours,
+# so the old 90-minute age limit failed every check while every capture succeeded (D238). A failed capture alerts at
+# once; captures that stop running altogether alert after 12 hours. Quiet until the first capture has ever uploaded
+# an artifact, so an unconfigured environment does not page anyone.
 name: Checkpoint watchdog
 on:
   schedule:
@@ -14,9 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Age of the newest successful checkpoint
+      - name: Newest capture run and checkpoint age
         env:
           GH_TOKEN: ${{ github.token }}
+          MAX_AGE_SECONDS: '43200'
         run: |
           # Only a real capture uploads an artifact; an unconfigured capture job ends successfully without one.
           latest=$(gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" --jq '[.artifacts[] | select((.name | startswith("protected-checkpoint-")) and (.expired | not)) | .created_at] | sort | last // empty')
@@ -24,9 +28,18 @@ jobs:
             echo "No checkpoint artifact yet; nothing to guard."
             exit 0
           fi
+          failed=0
+          # The newest finished capture: a failure means the export or the sealing broke, whatever the schedule does.
+          run=$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/protected-checkpoint.yml/runs?status=completed&per_page=1" --jq '.workflow_runs[0] | "\(.conclusion) \(.created_at) \(.html_url)"')
+          echo "Newest finished capture: $run"
+          case "$run" in
+            success*|"") ;;
+            *) echo "::error::The newest protected checkpoint capture did not succeed: $run"; failed=1 ;;
+          esac
           age=$(( $(date -u +%s) - $(date -u -d "$latest" +%s) ))
           echo "Newest successful checkpoint: $latest ($((age / 60)) minutes ago)"
-          if [ "$age" -gt 5400 ]; then
-            echo "::error::No successful protected checkpoint in the last 90 minutes."
-            exit 1
+          if [ "$age" -gt "$MAX_AGE_SECONDS" ]; then
+            echo "::error::No successful protected checkpoint in the last $((MAX_AGE_SECONDS / 3600)) hours."
+            failed=1
           fi
+          exit "$failed"
