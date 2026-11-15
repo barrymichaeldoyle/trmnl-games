@@ -11,8 +11,9 @@ import { Button } from '../../../lib/ui'
 import { useContent } from '../../../lib/useContent'
 import { dcAchievementsMessages } from '../../../i18n/dcAchievements'
 import { DcBadge } from './-badge'
+import { goalText } from '@trmnl-games/desk-crawler/content/achievementGoals'
 
-type Fresh = { badges: Array<{ id: string; family: string; tier: number; at: number; share: number | null }>; newest: number } | null
+type Fresh = { badges: Array<{ id: string; family: string; tier: number; goal?: string; at: number; share: number | null }>; newest: number } | null
 
 const BAND_TONE: Record<RarityBand, string> = { common: 'text-muted', uncommon: 'text-xp-ink', rare: 'text-rare-ink', legendary: 'text-gold-ink' }
 
@@ -60,6 +61,8 @@ export function NewBadgesCard() {
         <DcBadge family={best.family} tier={best.tier} scale={2} className="badge-pop-in" />
         <div className="min-w-0">
           <p className="font-display text-2xl leading-tight font-bold hyphens-auto break-words">{c.text(def.name)}{tiered ? <span className="hud ml-2 align-middle text-hud-sm text-gold-ink">{tierLabel(best.tier)}</span> : null}</p>
+          {/* D241: what earned it, then the joke. */}
+          {best.goal ? <p className="text-sm font-semibold">{goalText(best.goal, c)}</p> : null}
           <p className="text-sm text-muted">{c.text(def.blurb)}</p>
           {band && best.share !== null ? <p className="text-sm"><span className={`font-semibold ${BAND_TONE[band]}`}>{t.bands[band]}</span> <span className="text-muted">{t.percentOfHeroes(best.share < 0.01 ? '<1' : String(Math.round(best.share * 100)))}</span></p> : null}
         </div>

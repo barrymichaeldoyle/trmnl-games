@@ -9,6 +9,7 @@ import { currentUser } from './lib/intent'
 import { achievementState, keepsakeTotal, MAX_UNLOCK_ROWS } from './lib/achievements'
 import { ACHIEVEMENTS_VERSION } from '@trmnl-games/desk-crawler/content/achievements'
 import { familyProgress } from '@trmnl-games/desk-crawler/sim/core/achievements'
+import { achievementGoal } from '@trmnl-games/desk-crawler/content/achievementGoals'
 import { readWorld, worldContent } from './world'
 
 /**
@@ -42,8 +43,8 @@ export const mine = query({
         category: family.category,
         tier: family.tier,
         tiers: family.tiers,
-        earned: family.earned ? { id: family.earned.id, name: family.earned.name, blurb: family.earned.blurb, tier: family.earned.tier, unlockedAt: unlocked.get(family.earned.id) ?? null } : null,
-        next: family.next ? { id: family.next.id, tier: family.next.tier } : null,
+        earned: family.earned ? { id: family.earned.id, name: family.earned.name, blurb: family.earned.blurb, goal: achievementGoal(family.earned, content), tier: family.earned.tier, unlockedAt: unlocked.get(family.earned.id) ?? null } : null,
+        next: family.next ? { id: family.next.id, tier: family.next.tier, goal: achievementGoal(family.next, content) } : null,
         value: family.value,
         target: family.target,
       })),

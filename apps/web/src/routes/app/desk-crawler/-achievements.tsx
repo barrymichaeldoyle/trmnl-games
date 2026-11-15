@@ -9,14 +9,15 @@ import { Sheet, SheetTitle } from './-bagSlots'
 import { LocalTime } from '../../../lib/localTime'
 import { AchievementHint } from './-achievementHint'
 import { DcBadge } from './-badge'
+import { goalText } from '@trmnl-games/desk-crawler/content/achievementGoals'
 import { useNewBadges } from './-newBadges'
 import { formatDate, formatNumber, useLocale, useT } from '../../../lib/i18n'
 import { useContent } from '../../../lib/useContent'
 import { dcAchievementsMessages, shelfTitle } from '../../../i18n/dcAchievements'
 import { INTL_TAG, type Locale } from '@trmnl-games/platform'
 
-type Earned = { id: string; name: string; blurb: string; tier: number; unlockedAt: number | null }
-type Family = { family: string; name: string; category: string; tier: number; tiers: number; earned: Earned | null; next: { id: string; tier: number } | null; value: number; target: number }
+type Earned = { id: string; name: string; blurb: string; goal?: string; tier: number; unlockedAt: number | null }
+type Family = { family: string; name: string; category: string; tier: number; tiers: number; earned: Earned | null; next: { id: string; tier: number; goal?: string } | null; value: number; target: number }
 type View = { unlocked: Array<{ id: string; unlockedAt: number }>; families: Family[]; rarity: { counts: Record<string, number>; totalPlayers: number; scoreAt: number } | null }
 
 const BAND_TONE: Record<RarityBand, string> = { common: 'text-muted', uncommon: 'text-xp-ink', rare: 'text-rare-ink', legendary: 'text-gold-ink' }
@@ -100,7 +101,7 @@ function EarnedTile({ family, rarity, onOpen }: { family: EarnedFamily; rarity: 
   const name = c.text(family.earned.name)
   const r = rarityOf(family.earned.id, rarity, t)
   const isNew = useContext(NewIds).has(family.earned.id)
-  const label = [isNew ? t.newTag : null, family.tiers > 1 ? t.tierOf(name, family.earned.tier, family.tiers) : name, r ? t.bands[r.band] : null].filter(Boolean).join(', ')
+  const label = [isNew ? t.newTag : null, family.tiers > 1 ? t.tierOf(name, family.earned.tier, family.tiers) : name, family.earned.goal ? goalText(family.earned.goal, c) : null, r ? t.bands[r.band] : null].filter(Boolean).join(', ')
   return (
     <li className="min-w-0">
       <button type="button" onClick={onOpen} aria-label={label} className={`flex size-full min-h-36 flex-col items-center gap-2 border-[3px] ${r ? BAND_EDGE[r.band] : 'border-night'} bg-panel px-2 pt-3 pb-2.5 text-center hover:bg-raised active:bg-raised`}>
@@ -110,6 +111,8 @@ function EarnedTile({ family, rarity, onOpen }: { family: EarnedFamily; rarity: 
           {family.tiers > 1 ? <span className="hud absolute -top-1 -right-2 border-2 border-night bg-night px-0.5 text-[0.5rem] leading-3 text-gold-ink">{tierLabel(family.earned.tier)}</span> : null}
         </span>
         <span className="line-clamp-2 text-sm leading-tight font-semibold hyphens-auto [overflow-wrap:anywhere]">{name}</span>
+        {/* D241: what earned it, so a joke name never stands alone. */}
+        {family.earned.goal ? <span className="line-clamp-3 text-xs leading-tight text-muted hyphens-auto [overflow-wrap:anywhere]">{goalText(family.earned.goal, c)}</span> : null}
         {isNew ? <span className="bg-gold px-1 text-xs font-semibold whitespace-nowrap text-night">{t.newTag}</span> : null}
         <span aria-hidden="true" className="mt-auto flex w-full flex-col items-center gap-1.5">
           {family.tiers > 1 ? <TierPips tier={family.earned.tier} tiers={family.tiers} /> : null}
@@ -162,7 +165,8 @@ function EarnedSheet({ family, rarity, onClose, showcase = false }: { family: Ea
               </p>
             </div>
           </div>
-          <p>{c.text(family.earned.blurb)}</p>
+          {family.earned.goal ? <p className="font-semibold">{goalText(family.earned.goal, c)}</p> : null}
+          <p className="text-muted">{c.text(family.earned.blurb)}</p>
           {/* P49: every tier of the family as its badge, those still ahead faded. */}
           {family.tiers > 1 ? (
             <ul className="flex flex-wrap gap-1" aria-hidden="true">
@@ -174,7 +178,7 @@ function EarnedSheet({ family, rarity, onClose, showcase = false }: { family: Ea
             {family.earned.unlockedAt ? <span className="text-xs tabular-nums text-muted">{t.earned}<LocalTime at={family.earned.unlockedAt} format={earnedOn(locale)} /></span> : null}
           </div>
           {/* Another hero's progress toward the next tier is theirs; the showcase shows only what is earned. */}
-          {showcase ? null : family.next ? <Meter label={t.tier(tierLabel(family.next.tier))} value={Math.min(family.value, family.target)} max={family.target} tone="gold" /> : family.tiers > 1 ? <p className="text-sm text-muted">{t.topTier}</p> : null}
+          {showcase ? null : family.next ? <Meter label={family.next.goal ? t.nextGoal(tierLabel(family.next.tier), goalText(family.next.goal, c)) : t.tier(tierLabel(family.next.tier))} value={Math.min(family.value, family.target)} max={family.target} tone="gold" /> : family.tiers > 1 ? <p className="text-sm text-muted">{t.topTier}</p> : null}
           <Button variant="secondary" className="mt-1" allowOffline onClick={onClose}>{t.close}</Button>
         </div>
       ) : null}
@@ -275,7 +279,7 @@ export function Achievements() {
   )
 }
 
-type Shown = { id: string; tier: number; name: string; blurb: string }
+type Shown = { id: string; tier: number; name: string; blurb: string; goal?: string }
 
 const tiersOf = (family: string) => ACHIEVEMENTS.filter((def) => def.family === family).length
 

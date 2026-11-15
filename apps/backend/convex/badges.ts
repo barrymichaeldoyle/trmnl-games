@@ -1,11 +1,12 @@
 import { v } from 'convex/values'
 import { ACHIEVEMENT_BY_ID } from '@trmnl-games/desk-crawler/content/achievements'
 import { frameForTier } from '@trmnl-games/desk-crawler/art/badges'
+import { achievementGoal } from '@trmnl-games/desk-crawler/content/achievementGoals'
 import { mutation, query } from './_generated/server'
 import { appError } from './lib/errors'
 import { currentHero } from './lib/gameProfile'
 import { currentUser, intentReturns, runIntent } from './lib/intent'
-import { readWorld } from './world'
+import { readWorld, worldContent } from './world'
 
 /**
  * P49 (desk-crawler-badges.md "Celebrating in the companion"): Desk Crawler's badges earned since the owner last
@@ -22,7 +23,7 @@ export const MAX_NEW_BADGES = 8
 export const fresh = query({
   args: {},
   returns: v.union(v.null(), v.object({
-    badges: v.array(v.object({ id: v.string(), family: v.string(), tier: v.number(), at: v.number(), share: v.union(v.number(), v.null()) })),
+    badges: v.array(v.object({ id: v.string(), family: v.string(), tier: v.number(), goal: v.string(), at: v.number(), share: v.union(v.number(), v.null()) })),
     newest: v.number(),
   })),
   handler: async (ctx) => {
@@ -36,9 +37,10 @@ export const fresh = query({
     const publication = world?.publishedPublicationId ? await ctx.db.get(world.publishedPublicationId) : null
     const stats = publication && publication.state === 'published' ? await ctx.db.query('achievementStats').withIndex('by_publicationId', (q) => q.eq('publicationId', publication._id)).unique() : null
     const share = (id: string) => (stats && stats.totalPlayers > 0 && (stats.counts[id] ?? 0) > 0 ? (stats.counts[id] ?? 0) / stats.totalPlayers : null)
+    const content = worldContent(world)
     const badges = rows.flatMap((row) => {
       const def = ACHIEVEMENT_BY_ID.get(row.achievementId)
-      return def ? [{ id: def.id, family: def.family, tier: def.tier, at: row.unlockedAt, share: share(def.id), frame: frameForTier(def.family, def.tier) }] : []
+      return def ? [{ id: def.id, family: def.family, tier: def.tier, goal: achievementGoal(def, content), at: row.unlockedAt, share: share(def.id), frame: frameForTier(def.family, def.tier) }] : []
     })
     badges.sort((a, b) => b.frame - a.frame || (a.share ?? 2) - (b.share ?? 2) || b.at - a.at)
     return { badges: badges.map(({ frame: _frame, ...badge }) => badge), newest: rows[0]!.unlockedAt }

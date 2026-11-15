@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import { internalQuery, query, type QueryCtx } from './_generated/server'
 import { ACHIEVEMENT_BY_ID, ACHIEVEMENT_FAMILIES } from '@trmnl-games/desk-crawler/content/achievements'
+import { achievementGoal } from '@trmnl-games/desk-crawler/content/achievementGoals'
 import { withCounterDefaults } from '@trmnl-games/desk-crawler/sim/core/starter'
 import { FULL_SCALE } from '@trmnl-games/desk-crawler/art/scene'
 import { sceneFor, scenePath } from '@trmnl-games/desk-crawler/art/sceneKey'
@@ -64,10 +65,10 @@ export const view = query({
 
     // Highest earned tier per family, in catalog order.
     const rows = await ctx.db.query('heroAchievements').withIndex('by_userId_and_achievementId', (q) => q.eq('userId', user._id)).take(MAX_UNLOCK_ROWS)
-    const best = new Map<string, { id: string; tier: number; name: string; blurb: string }>()
+    const best = new Map<string, { id: string; tier: number; name: string; blurb: string; goal: string }>()
     for (const row of rows) {
       const def = ACHIEVEMENT_BY_ID.get(row.achievementId)
-      if (def && (best.get(def.family)?.tier ?? 0) < def.tier) best.set(def.family, { id: def.id, tier: def.tier, name: def.name, blurb: def.blurb })
+      if (def && (best.get(def.family)?.tier ?? 0) < def.tier) best.set(def.family, { id: def.id, tier: def.tier, name: def.name, blurb: def.blurb, goal: achievementGoal(def, content) })
     }
     const achievements = ACHIEVEMENT_FAMILIES.flatMap((family) => {
       const earned = best.get(family.id)

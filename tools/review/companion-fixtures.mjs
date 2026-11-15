@@ -82,6 +82,9 @@ write('data.js', `import fixture from './fixture.json';
 import paperLives from './paper-lives.json';
 import iaPayload from './idle-angler-payload.json';
 import { ACHIEVEMENTS } from '../../packages/desk-crawler/src/content/achievements';
+import { achievementGoal } from '../../packages/desk-crawler/src/content/achievementGoals';
+import { catalogs as dcCatalogs, ACTIVE_CONTENT as DC_ACTIVE } from '../../packages/desk-crawler/src/content/index';
+const dcGoal = (def) => achievementGoal(def, dcCatalogs[DC_ACTIVE]);
 import { contentV16 } from '../../packages/desk-crawler/src/content/v16';
 import { loreView } from '../../packages/desk-crawler/src/sim/core/biomes';
 import { useCallback, useState } from 'react';
@@ -149,9 +152,9 @@ if (flag('achievements')) {
     if (reached === 0) { f.earned = null; f.tier = 0; f.next = { id: defs[0].id, tier: 1 }; f.value = 0; f.target = 1; return }
     const top = defs[reached - 1];
     defs.slice(0, reached).forEach((d, k) => unlocked.push({ id: d.id, unlockedAt: now - 86400000 * (i + 1) + k * 3600000 }));
-    f.tier = reached; f.earned = { id: top.id, name: top.name, blurb: top.blurb, tier: reached, unlockedAt: now - 86400000 * (i + 1) + (reached - 1) * 3600000 };
+    f.tier = reached; f.earned = { id: top.id, name: top.name, blurb: top.blurb, goal: dcGoal(top), tier: reached, unlockedAt: now - 86400000 * (i + 1) + (reached - 1) * 3600000 };
     const next = defs[reached];
-    f.next = next ? { id: next.id, tier: next.tier } : null; f.target = next ? (next.predicate.atLeast ?? 1) : 0; f.value = next ? Math.floor(f.target * ((i * 37) % 97) / 100) : 0;
+    f.next = next ? { id: next.id, tier: next.tier, goal: dcGoal(next) } : null; f.target = next ? (next.predicate.atLeast ?? 1) : 0; f.value = next ? Math.floor(f.target * ((i * 37) % 97) / 100) : 0;
   });
   counts[a.families[2].earned?.id] = 1;
   a.unlocked = unlocked; a.rarity = { counts, totalPlayers: 41, scoreAt: now - 1800000 };
@@ -414,7 +417,7 @@ const queries = {
   'badges:fresh': () => {
     const which = params.get('badges')
     const all = [{ id: 'jackpots_3', family: 'jackpots', tier: 3, at: Date.now() - 36e5 * 10, share: 0.03 }, { id: 'elites_2', family: 'elites', tier: 2, at: Date.now() - 36e5 * 2, share: 0.2 }, { id: 'slay_paper_imp_4', family: 'slay_paper_imp', tier: 4, at: Date.now() - 36e5, share: 0.4 }]
-    const badges = which === 'new' ? all : which === 'one' ? [all[1]] : []
+    const badges = (which === 'new' ? all : which === 'one' ? [all[1]] : []).map((b) => ({ ...b, goal: dcGoal(ACHIEVEMENTS.find((d) => d.id === b.id)) }))
     return { badges, newest: badges.length ? Math.max(...badges.map((b) => b.at)) : Date.now() }
   },
   'idleAngler/badges:fresh': () => {
