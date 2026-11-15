@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "apps/web/src/routes/app/idle-angler/index.tsx"
+        ],
+        "createdAt": "2026-11-15T13:41:35.339Z",
+        "reason": "user confirmed (Barry, 2026-11-15): the Dock Waters list's sky left border marks the water being fished, intentional since dfbce2b"
+      }
+    ]
+  }
+}
