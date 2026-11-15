@@ -8,6 +8,9 @@ import { SEASON_NAME } from '../sim/seasons'
 import { TITLES, WATER_RANKS } from '../sim/titles'
 import type { FishName, IaLanguage } from './types'
 
+/** D242: "a, b or c", for the coming Open's baits. */
+const list = (items: readonly string[], or: string) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} ${or} ${items[items.length - 1]}`)
+
 /**
  * English, the source: every line here is the one the simulator and backend write, so a stored line parsed and told
  * again in English comes back unchanged (tests/idle-angler/i18n.test.ts holds every simulated line to that).
@@ -108,6 +111,7 @@ export const en: IaLanguage = {
     noFishYet: 'No fish here this week yet',
     openBoard: (fish, water) => `${fish} Open ${water.at}`,
     notEntered: 'Not entered yet',
+    openSoon: (fish, baits) => `Weekend Open: ${fish} on ${list(baits.map((b) => b.toLowerCase()), 'or')}`,
     yourBest: (weight) => `Your best ${weight}`,
     rankBest: (rank, weight) => `#${rank}, best ${weight}`,
     until: (day) => `until ${day}`,

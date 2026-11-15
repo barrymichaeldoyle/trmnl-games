@@ -2,6 +2,9 @@ import { en } from './en'
 import { company } from './company'
 import type { FishName, IaLanguage } from './types'
 
+/** D242: "a, b or c", for the coming Open's baits. */
+const list = (items: readonly string[], or: string) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} ${or} ${items[items.length - 1]}`)
+
 /** D200: Idle Angler in French (vous, as the rest of the site). */
 const f = (name: string, article: 'un' | 'une'): FishName => ({ name, a: `${article} ${name.charAt(0).toLowerCase()}${name.slice(1)}` })
 const cap = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
@@ -210,6 +213,7 @@ export const fr: IaLanguage = {
     noFishYet: 'Pas encore de poisson ici cette semaine',
     openBoard: (fish, water) => `Open ${water.of} : ${fish}`,
     notEntered: 'Pas encore inscrit',
+    openSoon: (fish, baits) => `Open du week-end : ${fish}, appât ${list(baits.map((b) => b.toLowerCase()), 'ou')}`,
     yourBest: (weight) => `Votre record ${weight}`,
     rankBest: (rank, weight) => `N° ${rank}, record ${weight}`,
     until: (day) => `jusqu’à ${day}`,

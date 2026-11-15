@@ -208,7 +208,7 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(medals.map((m) => m.place).sort()).toEqual([1, 2, 3])
   })
 
-  it('names the weekend Open from Monday and shows its board on the Dock, in Rankings and on the device (D240)', async () => {
+  it('names the weekend Open from Monday and shows its board on the Dock, in Rankings and on the device (D240, D242)', async () => {
     await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Ana')
     const bo = await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Bo')
     await seedAngler(t, { logbook: logbookOf(['minnow', 'roach']) }, 'Cy')
@@ -217,6 +217,9 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(monday.open).toMatchObject({ waterId: 'millpond', target: { id: 'crucian_carp' }, on: false, own: null, startsAt: Date.UTC(2026, 9, 24), endsAt: Date.UTC(2026, 9, 26) })
     expect((await as('Cy').query(api.idleAngler.anglers.dock, {})).open).toBeNull()
     expect((await as('Ana').query(api.idleAngler.payload.preview, {})).board.label).toBe('This week at the Millpond')
+    // D242: Monday to Friday the device names the coming target first in its stories, with no time.
+    expect((await as('Ana').query(api.idleAngler.payload.preview, {})).stories[0]).toEqual({ kind: 'open', summary: 'Weekend Open: Crucian Carp on bread' })
+    expect((await as('Cy').query(api.idleAngler.payload.preview, {})).stories.some((s: { kind: string }) => s.kind === 'open')).toBe(false)
     // Saturday: Bo enters; Ana sees the leader and the device shows the Open's board in place of the week's.
     vi.setSystemTime(Date.UTC(2026, 9, 24, 12, 0))
     await t.run(async (ctx) => {
@@ -228,6 +231,7 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(device.label).toBe('Crucian Carp Open at the Millpond')
     expect(device.rank_label).toBe('Not entered yet \u00b7 until Sun')
     expect(device.rows.map((r: { name: string }) => r.name)).toEqual(['Bo'])
+    expect((await as('Ana').query(api.idleAngler.payload.preview, {})).stories.some((s: { kind: string; u?: number }) => s.kind === 'open' && s.u === undefined)).toBe(false)
     const board = await as('Ana').query(api.idleAngler.leaderboard.view, { waterId: 'millpond', period: 'open' })
     expect(board).toMatchObject({ open: { targetId: 'crucian_carp', on: true }, own: null })
     expect(board.entries.map((r: { name: string }) => r.name)).toEqual(['Bo'])

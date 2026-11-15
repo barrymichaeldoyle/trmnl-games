@@ -13,6 +13,8 @@ import { readEngineWorld } from '../lib/engine/world'
 import { currentAngler, idleAnglerProfile } from './profile'
 import { IDLE_ANGLER_RUNTIME, IDLE_ANGLER_SCHEDULE } from './runtime'
 import { readDeviceBoard } from './leaderboard'
+import { anglerOpen } from './records'
+import type { IdleAnglerCatalog } from '@trmnl-games/idle-angler/sim'
 import { deviceFlyCode, flyTotal } from './flies'
 import { flyForClaim } from '@trmnl-games/idle-angler/content/flies'
 import { deviceLocale, trmnlUserChanged } from '../lib/trmnlUser'
@@ -94,11 +96,19 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
     artBaseUrl: process.env.CONVEX_SITE_URL ?? null,
     locale: deviceLocale(user),
     board: angler && angler.activationState === 'active' ? await readDeviceBoard(ctx, content, angler, now) : null,
+    // D242: Monday to Friday the coming Open at this water is named in the stories.
+    upcomingOpen: angler && angler.activationState === 'active' ? await upcomingOpen(ctx, content, angler, now) : null,
     // D220: the water's other anglers, three named at most.
     unlocks,
     company: angler && angler.activationState === 'active' && angler.status === 'fishing' && angler.travelTo === undefined ? await deviceCompany(ctx, angler) : null,
     stories: logs.map((log) => ({ kind: log.kind, summary: log.summary, at: log.at, ...(log.detail.speciesId === undefined ? {} : { speciesId: log.detail.speciesId }), ...(log.detail.grams === undefined ? {} : { grams: log.detail.grams }), ...(log.kind === 'achievement' && log.detail.name !== undefined ? { title: log.detail.name } : {}) })),
   })
+}
+
+/** D242: the coming weekend's Open at the angler's water, before it starts; null while it runs or where there is none. */
+async function upcomingOpen(ctx: QueryCtx, content: IdleAnglerCatalog, angler: Doc<'anglers'>, now: number) {
+  const open = await anglerOpen(ctx, content, angler, now, angler.waterId)
+  return open && !open.on ? { speciesId: open.target.id, baits: open.target.baits } : null
 }
 
 /** D220: the three others at the angler's water with the most species logged there, by public name, and the head count. */

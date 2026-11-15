@@ -110,6 +110,11 @@ export interface IdleAnglerPayloadInput {
   readonly locale?: Locale
   /** D220: the other anglers at this water: up to three public names by species logged there, and how many in all. */
   readonly company?: { readonly names: readonly string[]; readonly others: number } | null
+  /**
+   * D242: Monday to Friday, the coming weekend Open at the angler's water: its target and the baits it takes. Pinned
+   * second in the stories (the newest cast stays first), with no time, so the target is named days before it runs.
+   */
+  readonly upcomingOpen?: { readonly speciesId: string; readonly baits: readonly string[] } | null
   /** P48: the newest unlocks (up to `MAX_BADGE_UNLOCKS`), for the badge panel; absent leaves it off. */
   readonly unlocks?: ReadonlyArray<{ readonly achievementId: string; readonly at: number }>
 }
@@ -175,7 +180,7 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
       qr_base: input.artBaseUrl && !servicePaused ? `${input.artBaseUrl}${qrBase('home')}` : '',
       // Template v15: the welcome shows the water a new angler starts at, quiet, at the hour's light and weather.
       scene_base: input.artBaseUrl ? `${input.artBaseUrl}${sceneBase({ water: angler?.waterId ?? content.waters[0]!.id, band: input.band, weather: input.weather, season: seasonAt(content, now) ?? null, pose: 'waiting', fish: null, fly: null })}` : '',
-      stories: [] as Array<{ kind: string; summary: string; u: number }>,
+      stories: [] as Array<{ kind: string; summary: string; u?: number }>,
       stale: false,
     }
   }
@@ -301,7 +306,10 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     species_logged: angler.speciesLogged,
     species_total: content.species.length,
     // Template v15: each story's moment in unix seconds; the screen shows it as the owner's clock time (`utc_offset`).
-    stories: stories.map((s) => ({ kind: s.kind, summary: s.summary, u: Math.floor(s.at / 1000) })),
+    stories: ((told: Array<{ kind: string; summary: string; u?: number }>) =>
+      input.upcomingOpen && !travelling ? [{ kind: 'open', summary: say.openSoon(words.species(input.upcomingOpen.speciesId), input.upcomingOpen.baits.map((b) => words.bait(b))) }, ...told] : told)(
+      stories.map((s) => ({ kind: s.kind, summary: s.summary, u: Math.floor(s.at / 1000) })),
+    ),
     recap,
     recap_items: recapItems,
     // This week's heaviest fish at this water (the weekend Open's while it runs, D240): the first rows, then the angler's own when it is further down.

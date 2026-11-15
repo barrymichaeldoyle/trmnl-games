@@ -157,6 +157,8 @@ export interface IaLanguage {
     readonly noFishYet: string
     /** D240: the board's heading while the water's weekend Open runs, from the target's label name and the water. */
     readonly openBoard: (fish: string, water: WaterName) => string
+    /** D242: Monday to Friday, the coming weekend's Open at this water: its target and the baits it takes (label names). */
+    readonly openSoon: (fish: string, baits: readonly string[]) => string
     /** D240: the Open board's rank line before the angler has entered. */
     readonly notEntered: string
     readonly yourBest: (weight: string) => string

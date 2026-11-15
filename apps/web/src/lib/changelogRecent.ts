@@ -46,6 +46,18 @@ export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
     changes: [
       {
         game: 'idle-angler',
+        title: 'Your TRMNL names the weekend Open',
+        body: 'From Monday to Friday your TRMNL’s stories start with the coming weekend Open at your water: the target fish and the bait it takes, so you can stock up before Saturday.',
+        fr: { title: 'Votre TRMNL annonce l’Open du week-end', body: 'Du lundi au vendredi, les histoires de votre TRMNL commencent par l’Open du week-end à venir sur votre plan d’eau : le poisson cible et l’appât qu’il prend, pour faire vos réserves avant samedi.' },
+        de: { title: 'Dein TRMNL nennt das Wochenend-Open', body: 'Von Montag bis Freitag beginnen die Geschichten auf deinem TRMNL mit dem kommenden Wochenend-Open an deinem Gewässer: dem Zielfisch und dem Köder, auf den er beißt, damit du dich vor Samstag eindecken kannst.' },
+        es: { title: 'Tu TRMNL anuncia el Open del fin de semana', body: 'De lunes a viernes, las historias de tu TRMNL empiezan con el próximo Open de tu agua: el pez objetivo y el cebo que acepta, para que te abastezcas antes del sábado.' },
+        it: { title: 'Il tuo TRMNL annuncia l’Open del weekend', body: 'Dal lunedì al venerdì le storie del tuo TRMNL iniziano con il prossimo Open della tua acqua: il pesce bersaglio e l’esca che prende, così puoi rifornirti prima di sabato.' },
+        pt: { title: 'Seu TRMNL anuncia o Open do fim de semana', body: 'De segunda a sexta, as histórias do seu TRMNL começam com o próximo Open da sua água: o peixe-alvo e a isca que ele aceita, para você se abastecer antes de sábado.' },
+        pl: { title: 'Twój TRMNL zapowiada weekendowy Open', body: 'Od poniedziałku do piątku historie na twoim TRMNL zaczynają się od nadchodzących zawodów Open na twoim łowisku: ryby docelowej i przynęty, na którą bierze, żebyś zdążył się zaopatrzyć przed sobotą.' },
+        nl: { title: 'Je TRMNL noemt de weekend-Open', body: 'Van maandag tot vrijdag beginnen de verhalen op je TRMNL met de komende weekend-Open op je water: de doelvis en het aas waarop hij bijt, zodat je vóór zaterdag kunt inslaan.' },
+      },
+      {
+        game: 'idle-angler',
         title: 'The weekend Open, named from Monday',
         body: 'The Dock now shows the weekend Open at your water all week: the target fish, when it runs and the bait and hours it bites at, with a warning if you have none of that bait. During the weekend it adds your place. Rankings puts the Opens first and has an Open tab with each water’s full board, and your TRMNL shows your water’s Open board in place of the week’s from Saturday to Sunday night. The logbook opens on the water you fish, with the others folded away until you tap them.',
         fr: { title: 'L’Open du week-end, annoncé dès le lundi', body: 'Le Ponton affiche maintenant toute la semaine l’Open de votre plan d’eau : le poisson cible, ses horaires, l’appât et les heures où il mord, avec un avertissement si vous n’avez pas cet appât. Le week-end, il ajoute votre place. Les Classements mettent les Opens en premier avec un onglet Open qui montre le classement complet de chaque plan d’eau, et votre TRMNL affiche le classement de l’Open de votre plan d’eau à la place de celui de la semaine, du samedi au dimanche soir. Le carnet s’ouvre sur le plan d’eau où vous pêchez, les autres repliés jusqu’à ce que vous les touchiez.' },

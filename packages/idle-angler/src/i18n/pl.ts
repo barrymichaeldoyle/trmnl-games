@@ -2,6 +2,9 @@ import { en } from './en'
 import { company } from './company'
 import type { FishName, IaLanguage } from './types'
 
+/** D242: "a, b or c", for the coming Open's baits. */
+const list = (items: readonly string[], or: string) => (items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} ${or} ${items[items.length - 1]}`)
+
 /**
  * D200: Idle Angler in Polish (ty, as the rest of the site; "aplikacja" for the companion). Names stay in the
  * nominative, so lines are built around them, after a colon or with the name as the subject, as Desk Crawler's are.
@@ -212,6 +215,7 @@ export const pl: IaLanguage = {
     noFishYet: 'W tym tygodniu jeszcze bez ryb',
     openBoard: (fish, water) => `Open ${water.at}: ${fish}`,
     notEntered: 'Jeszcze bez zgłoszenia',
+    openSoon: (fish, baits) => `Open w weekend: ${fish}, przynęta ${list(baits.map((b) => b.toLowerCase()), 'lub')}`,
     yourBest: (weight) => `Twoja najlepsza ${weight}`,
     rankBest: (rank, weight) => `${rank}. miejsce, najlepsza ${weight}`,
     until: (day) => `do ${day}`,
