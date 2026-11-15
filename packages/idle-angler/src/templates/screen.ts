@@ -61,12 +61,15 @@
  * The panel gives way after the newest catch and the board, before the recap; the line holds on longer, after the
  * company line, the weather and the time of day, since for its six hours it is the newest thing on the screen. Either
  * steps aside before a scaled screen loses its last story. In a narrow column the name wraps under the tag.
+ * Template v27: the fly caption may wrap between its word and its code and the code's row beside it may shrink, so
+ * the German "Fliege 482 917" at `screen--scale-xxlarge` no longer runs past the portrait half's and quadrant's edge;
+ * the title bar drops the word where the framework would otherwise cut the code's last digits.
  */
 import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 26
+export const TEMPLATE_VERSION = 27
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -146,7 +149,7 @@ const titleBar = (orientation: 'landscape' | 'portrait', narrow = false, short =
 <div class="title_bar ${orientation === 'landscape' ? 'portrait:hidden' : 'landscape:hidden'}">
   <img class="image image-stroke ${ADAPTIVE}" src="${TITLE_ICON}" alt="">
   <span class="title${narrow ? '{% if fly_code %} hidden lg:inline-block{% endif %}' : ''}">Idle Angler</span>
-  {% if fly_code %}<span class="instance">${short ? L('fly') : L('fly_code')} {{ fly_code | escape }}</span>{% endif %}
+  {% if fly_code %}<span class="instance" data-fly-title="true" data-short="{{ fly_code | escape }}">${short ? L('fly') : L('fly_code')} {{ fly_code | escape }}</span>{% endif %}
 </div>`
 
 /** One layout in both orientations, each followed by its own title bar; the marks are assigned once ahead of both. */
@@ -173,9 +176,13 @@ const FLY_ASSIGNS = `{% assign fly_waiting = false %}{% if fly_code and fly_qr_b
 
 /** Template v18: `beside` sets the fly caption to the code's left, at its foot, so a short header is not made taller by it. */
 const qr = (og: number, x: number, beside = false) => {
-  const caption = `{% if fly_waiting %}<span class="${LABEL} ${beside ? 'text--right' : 'text--center'} text--bold" data-fly-caption="true" data-give-way="6.8">${L('fly')}&nbsp;{{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}`
+  // Template v27: an ordinary space between the word and the code, so a long word ("Fliege") at a large device scale
+  // wraps the code under it rather than pushing the row past the screen's edge; the six digits stay together.
+  const caption = `{% if fly_waiting %}<span class="${LABEL} ${beside ? 'text--right' : 'text--center'} text--bold w--min-0" data-fly-caption="true" data-give-way="6.8">${L('fly')} {{ fly_code | escape | replace: " ", "&nbsp;" }}</span>{% endif %}`
   const code = `<img class="image lg:hidden" src="{{ qr_base }}/${og}.png" alt=""><img class="image hidden lg:block" src="{{ qr_base }}/${x}.png" alt="">`
-  return `{% if qr_base != "" %}<div class="no-shrink flex ${beside ? 'flex--row flex--bottom gap--small' : 'flex--col flex--center-x gap--xsmall'}" data-companion-qr="true">${beside ? caption + code : code + caption}</div>{% endif %}`
+  // Template v27: beside its caption the code's row may shrink (`w--min-0`), so the caption wraps rather than the row
+  // running off a narrow column at a large device scale; stacked, it keeps its size.
+  return `{% if qr_base != "" %}<div class="flex ${beside ? 'w--min-0 flex--row flex--bottom gap--small' : 'no-shrink flex--col flex--center-x gap--xsmall'}" data-companion-qr="true">${beside ? caption + code : code + caption}</div>{% endif %}`
 }
 
 /**
@@ -292,7 +299,12 @@ const fitStories = `<script>
       if (short(restored)) { extra.classList.add('hidden'); count = place(); } else count = restored;
     }
   };
-  const fit = () => view.querySelectorAll('.layout').forEach(fitLayout);
+  // Template v27: a title bar too narrow for the fly code (German "Fliege" at a large device scale) drops the word,
+  // since the framework's ellipsis would otherwise hide the code's last digits.
+  const fitTitle = () => view.querySelectorAll('[data-fly-title]').forEach((el) => {
+    if (shown(el) && el.dataset.short && el.scrollWidth > el.clientWidth + 1) el.textContent = el.dataset.short;
+  });
+  const fit = () => { fitTitle(); view.querySelectorAll('.layout').forEach(fitLayout); };
   window.addEventListener('trmnl:terminalize:stats', fit);
   window.addEventListener('load', () => { if (window.TRMNL_PLUGINS_READY) fit(); }, { once: true });
   if (window.TRMNL_PLUGINS_READY) fit();

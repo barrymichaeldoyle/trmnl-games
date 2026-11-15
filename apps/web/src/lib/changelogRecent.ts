@@ -42,6 +42,23 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-15',
+    changes: [
+      {
+        game: 'idle-angler',
+        title: 'The fly code fits at the largest screen sizes',
+        body: 'With your TRMNL set to its largest text, a long word before the fly code (Fliege in German) pushed the code off the edge of narrow layouts and cut its last digits in the title bar. The code now moves to its own line beside the QR code, and the title bar shows the digits alone when the word will not fit.',
+        fr: { title: 'Le code mouche tient aux plus grandes tailles d’écran', body: 'Avec votre TRMNL réglé sur son plus grand texte, un mot long devant le code mouche (Fliege en allemand) poussait le code hors des mises en page étroites et coupait ses derniers chiffres dans la barre de titre. Le code passe maintenant sur sa propre ligne à côté du QR code, et la barre de titre n’affiche que les chiffres quand le mot ne tient pas.' },
+        de: { title: 'Der Fliegencode passt auch bei den größten Bildschirmgrößen', body: 'War dein TRMNL auf die größte Schrift eingestellt, schob das Wort Fliege den Code in schmalen Layouts über den Rand und schnitt in der Titelleiste die letzten Ziffern ab. Der Code rückt jetzt neben dem QR-Code in eine eigene Zeile, und die Titelleiste zeigt nur die Ziffern, wenn das Wort nicht passt.' },
+        es: { title: 'El código de la mosca cabe en los tamaños de pantalla más grandes', body: 'Con tu TRMNL en su texto más grande, una palabra larga delante del código de la mosca (Fliege en alemán) empujaba el código fuera del borde en los diseños estrechos y cortaba sus últimas cifras en la barra de título. El código pasa ahora a su propia línea junto al código QR, y la barra de título muestra solo las cifras cuando la palabra no cabe.' },
+        it: { title: 'Il codice della mosca entra anche alle dimensioni più grandi', body: 'Con il TRMNL impostato sul testo più grande, una parola lunga prima del codice della mosca (Fliege in tedesco) spingeva il codice oltre il bordo nei layout stretti e ne tagliava le ultime cifre nella barra del titolo. Ora il codice va su una riga sua accanto al codice QR, e la barra del titolo mostra solo le cifre quando la parola non ci sta.' },
+        pt: { title: 'O código da mosca cabe nos maiores tamanhos de tela', body: 'Com o TRMNL no maior tamanho de texto, uma palavra longa antes do código da mosca (Fliege em alemão) empurrava o código para fora da borda nos layouts estreitos e cortava seus últimos dígitos na barra de título. O código agora vai para uma linha própria ao lado do QR code, e a barra de título mostra só os dígitos quando a palavra não cabe.' },
+        pl: { title: 'Kod muchy mieści się przy największych rozmiarach ekranu', body: 'Gdy TRMNL miał ustawiony największy tekst, długie słowo przed kodem muchy (Fliege po niemiecku) wypychało kod poza krawędź wąskich układów i ucinało jego ostatnie cyfry na pasku tytułu. Kod przechodzi teraz do osobnej linii obok kodu QR, a pasek tytułu pokazuje same cyfry, gdy słowo się nie mieści.' },
+        nl: { title: 'De vliegcode past ook bij de grootste schermformaten', body: 'Stond je TRMNL op de grootste tekst, dan duwde een lang woord voor de vliegcode (Fliege in het Duits) de code in smalle indelingen over de rand en sneed de titelbalk de laatste cijfers af. De code gaat nu op een eigen regel naast de QR-code, en de titelbalk toont alleen de cijfers als het woord niet past.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-14',
     changes: [
       {
