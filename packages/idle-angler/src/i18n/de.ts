@@ -207,6 +207,8 @@ export const de: IaLanguage = {
     gotAway: (c) => `${c} entkommen`,
     thisWeek: (at) => `Diese Woche ${at}`,
     noFishYet: 'Diese Woche noch kein Fisch hier',
+    openBoard: (fish, water) => `Open ${water.at}: ${fish}`,
+    notEntered: 'Noch nicht gemeldet',
     yourBest: (weight) => `Dein Bester ${weight}`,
     rankBest: (rank, weight) => `Platz ${rank}, Bester ${weight}`,
     until: (day) => `bis ${day}`,

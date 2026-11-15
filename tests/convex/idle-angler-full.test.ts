@@ -208,6 +208,39 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(medals.map((m) => m.place).sort()).toEqual([1, 2, 3])
   })
 
+  it('names the weekend Open from Monday and shows its board on the Dock, in Rankings and on the device (D240)', async () => {
+    await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Ana')
+    const bo = await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Bo')
+    await seedAngler(t, { logbook: logbookOf(['minnow', 'roach']) }, 'Cy')
+    // Monday: the coming weekend's target at the Millpond (the Crucian Carp that week), with no place yet.
+    const monday = await as('Ana').query(api.idleAngler.anglers.dock, {})
+    expect(monday.open).toMatchObject({ waterId: 'millpond', target: { id: 'crucian_carp' }, on: false, own: null, startsAt: Date.UTC(2026, 9, 24), endsAt: Date.UTC(2026, 9, 26) })
+    expect((await as('Cy').query(api.idleAngler.anglers.dock, {})).open).toBeNull()
+    expect((await as('Ana').query(api.idleAngler.payload.preview, {})).board.label).toBe('This week at the Millpond')
+    // Saturday: Bo enters; Ana sees the leader and the device shows the Open's board in place of the week's.
+    vi.setSystemTime(Date.UTC(2026, 9, 24, 12, 0))
+    await t.run(async (ctx) => {
+      await recordCatch(ctx, (await ctx.db.get(bo))!, { waterId: 'millpond', speciesId: 'crucian_carp', grams: 900 }, Date.now(), true)
+    })
+    expect((await as('Ana').query(api.idleAngler.anglers.dock, {})).open).toMatchObject({ on: true, own: null, leader: { grams: 900, own: false } })
+    expect((await as('Bo').query(api.idleAngler.anglers.dock, {})).open).toMatchObject({ on: true, own: { rank: 1, grams: 900 } })
+    const device = (await as('Ana').query(api.idleAngler.payload.preview, {})).board
+    expect(device.label).toBe('Crucian Carp Open at the Millpond')
+    expect(device.rank_label).toBe('Not entered yet \u00b7 until Sun')
+    expect(device.rows.map((r: { name: string }) => r.name)).toEqual(['Bo'])
+    const board = await as('Ana').query(api.idleAngler.leaderboard.view, { waterId: 'millpond', period: 'open' })
+    expect(board).toMatchObject({ open: { targetId: 'crucian_carp', on: true }, own: null })
+    expect(board.entries.map((r: { name: string }) => r.name)).toEqual(['Bo'])
+    // An angler below the Opens' unlock keeps the week's board on the device.
+    expect((await as('Cy').query(api.idleAngler.payload.preview, {})).board.label).toBe('This week at the Millpond')
+  })
+
+  it('opens the logbook on the water being fished (D240)', async () => {
+    await seedAngler(t, { waterId: 'river_bend', access: ['waders'] }, 'Pat')
+    const book = (await as('Pat').query(api.idleAngler.anglers.logbook, {}))!
+    expect(book.filter((w: { here: boolean }) => w.here).map((w: { water: { id: string } }) => w.water.id)).toEqual(['river_bend'])
+  })
+
   it('hands one medal an angler a weekend, passes the other place down and says so (D230)', async () => {
     const ids = [await seedAngler(t, {}, 'Ana'), await seedAngler(t, {}, 'Bo'), await seedAngler(t, {}, 'Cy')]
     const saturday = Date.UTC(2026, 9, 24, 12, 0)

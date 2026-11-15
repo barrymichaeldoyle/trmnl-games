@@ -136,6 +136,8 @@ export interface PayloadBoard {
   readonly ownGrams?: number | null
   /** When this week's board starts again (Monday 00:00 UTC), named on the rank line as the owner's weekday. */
   readonly endsAt?: number
+  /** D240: set while the water's weekend Open runs; the board is then that Open's, for this target. */
+  readonly open?: { readonly speciesId: string }
 }
 
 /**
@@ -302,11 +304,11 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     stories: stories.map((s) => ({ kind: s.kind, summary: s.summary, u: Math.floor(s.at / 1000) })),
     recap,
     recap_items: recapItems,
-    // This week's heaviest fish at this water: the first rows, then the angler's own when it is further down.
+    // This week's heaviest fish at this water (the weekend Open's while it runs, D240): the first rows, then the angler's own when it is further down.
     board: input.board
       ? {
-          label: say.thisWeek(words.waterName(water.id).at),
-          rank_label: [input.board.ownGrams == null ? say.noFishYet : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)), ...(input.board.endsAt ? [say.until(weekdayShort(input.board.endsAt, input.locale ?? 'en'))] : [])].join(' \u00b7 '),
+          label: input.board.open ? say.openBoard(words.species(input.board.open.speciesId), words.waterName(water.id)) : say.thisWeek(words.waterName(water.id).at),
+          rank_label: [input.board.ownGrams == null ? (input.board.open ? say.notEntered : say.noFishYet) : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)), ...(input.board.endsAt ? [say.until(weekdayShort(input.board.endsAt, input.locale ?? 'en'))] : [])].join(' \u00b7 '),
           rows: [
             ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), weight_label: formatWeight(row.grams), own: row.own })),
             ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, name_short: shortName(angler.alias), weight_label: formatWeight(input.board.ownGrams), own: true }] : []),

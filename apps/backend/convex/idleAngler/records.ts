@@ -1,6 +1,7 @@
-import { openPeriod, type WaterId } from '@trmnl-games/idle-angler/sim'
+import { openPeriod, openTarget, openWindow, unlocked, type IdleAnglerCatalog, type WaterId } from '@trmnl-games/idle-angler/sim'
 import type { Doc, Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
+import { toAnglerState } from './adapter'
 import { currentAngler } from './profile'
 import { pagePublic } from '../lib/publicPage'
 
@@ -88,5 +89,28 @@ export async function readBoard(ctx: QueryCtx, waterId: WaterId, period: string,
     entries,
     own: ownRow ? { rank: ownIndex >= 0 ? ownIndex + 1 : null, speciesId: ownRow.speciesId, grams: ownRow.grams } : null,
     full: rows.length === BOARD_DEPTH,
+  }
+}
+
+/**
+ * D240: this weekend's Open at the angler's water (the one it is heading to while travelling), for the Dock and the
+ * device: the target and its bites, the window, the leader and the angler's own entry. Monday to Friday it names the
+ * coming weekend. Null before the Opens unlock or where the water holds none (Frozen Tarn outside winter).
+ */
+export async function anglerOpen(ctx: QueryCtx, content: IdleAnglerCatalog, angler: Doc<'anglers'>, now: number, waterId: WaterId = angler.travelTo ?? angler.waterId) {
+  if (!content.opens || !unlocked(content, toAnglerState(angler), 'opens')) return null
+  const target = openTarget(content, waterId, now)
+  if (!target) return null
+  const window = openWindow(now)
+  const board = window.on ? await readBoard(ctx, waterId, window.period, angler._id, 1) : null
+  return {
+    waterId,
+    target: { id: target.id, baits: target.baits, times: target.times ?? null, weather: target.weather ?? null },
+    startsAt: window.startsAt,
+    endsAt: window.endsAt,
+    on: window.on,
+    period: window.period,
+    leader: board?.entries[0] ? { grams: board.entries[0].grams, own: board.entries[0].own } : null,
+    own: board?.own ? { rank: board.own.rank, grams: board.own.grams } : null,
   }
 }

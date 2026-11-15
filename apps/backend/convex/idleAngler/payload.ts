@@ -93,7 +93,7 @@ export async function payloadFor(ctx: QueryCtx, user: Doc<'users'>, now: number,
     band,
     artBaseUrl: process.env.CONVEX_SITE_URL ?? null,
     locale: deviceLocale(user),
-    board: angler && angler.activationState === 'active' ? await readDeviceBoard(ctx, angler, now) : null,
+    board: angler && angler.activationState === 'active' ? await readDeviceBoard(ctx, content, angler, now) : null,
     // D220: the water's other anglers, three named at most.
     unlocks,
     company: angler && angler.activationState === 'active' && angler.status === 'fishing' && angler.travelTo === undefined ? await deviceCompany(ctx, angler) : null,

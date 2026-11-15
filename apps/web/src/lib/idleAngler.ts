@@ -45,6 +45,18 @@ export interface Dock {
   readonly nextTickAt?: number
   /** D162: content v2's goal, slate, season and wall; null under v1. */
   readonly full?: FullDock | null
+  /** D240: this weekend's Open at the angler's water (Monday to Friday the coming one); null before Opens unlock. */
+  readonly open?: DockOpen | null
+}
+
+export interface DockOpen {
+  readonly waterId: string
+  readonly target: { id: string; baits: readonly string[]; times: readonly string[] | null; weather: readonly string[] | null }
+  readonly startsAt: number
+  readonly endsAt: number
+  readonly on: boolean
+  readonly leader: { grams: number; own: boolean } | null
+  readonly own: { rank: number | null; grams: number } | null
 }
 
 type Feature = 'shop_upgrades' | 'orders' | 'opens' | 'trophies' | 'deadbait'

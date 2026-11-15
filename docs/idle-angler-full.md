@@ -162,6 +162,7 @@ That is 28 new species and 58 in all. Titles extend past Master Angler (26): Old
 - **Medals.** A cron at Monday 00:10 UTC reads each water's top three and awards gold, silver and bronze medals with 500, 300 and 150 coins. Every entrant gets a rosette. With few players a medal is easy to win, which is fine for a cosy game.
 - **One medal an angler a weekend (D230).** Entry stays automatic at every water, but the award hands each angler one medal: every gold is awarded first, then the silvers, then the bronzes, and at each water the medal goes to the heaviest remaining fish whose angler holds no medal that weekend. An angler leading two waters keeps the one where their fish is the larger share of its species' top weight (the earlier catch on a tie); the other place passes to the next angler, and the holder's Monday story says where it went. The Rankings card runs the same pure award on Sunday and marks a place of the viewer's that will pass down. Rosettes and `opensEntered` stay per entry.
 - **Device.** A status line ("Fishing the Perch Open at the Millpond") during the window, and a medal line with the celebration badge on Monday.
+- **Told in advance (D240).** The Dock names the coming target at the angler's water from Monday, with its baits and hours; Rankings leads with the Opens and, during the window, opens on each water's full Open board; the device's board is the Open's board for the angler's water during the window.
 
 ### The trophy wall
 

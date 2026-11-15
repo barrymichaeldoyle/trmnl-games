@@ -208,6 +208,8 @@ export const pt: IaLanguage = {
     gotAway: (c) => (c === 1 ? '1 escapou' : `${c} escaparam`),
     thisWeek: (at) => `Esta semana ${at}`,
     noFishYet: 'Nenhum peixe aqui esta semana ainda',
+    openBoard: (fish, water) => `Open ${water.of}: ${fish}`,
+    notEntered: 'Ainda sem inscrição',
     yourBest: (weight) => `Seu melhor ${weight}`,
     rankBest: (rank, weight) => `${rank}º, melhor ${weight}`,
     until: (day) => `até ${day}`,

@@ -8,7 +8,8 @@ import { preload } from '../../../lib/preload'
 import { codeSearch } from '../../../lib/scanCodes'
 import { useAnalyticsView } from '../../../lib/analyticsProvider'
 import { useAngler, type WaterRank } from '../../../lib/idleAngler'
-import { Card, NoticeBar, useNotice } from '../../../lib/ui'
+import { NoticeBar, useNotice } from '../../../lib/ui'
+import { Glyph } from '../../../lib/glyphs'
 import { Gem, SpriteIcon } from '../desk-crawler/-bagSlots'
 import { FishIcon } from './-art'
 import { FlyBox } from './-flyBox'
@@ -45,7 +46,7 @@ function LogbookPage() {
   const [fromScan] = useState(Boolean(scanned))
   const { data } = useQuery(convexQuery(api.idleAngler.anglers.logbook, {}))
   const { notice, notify, dismiss } = useNotice()
-  const book = data as Array<{ water: { id: string; name: string }; rank?: WaterRank | null; species: Entry[] }> | null | undefined
+  const book = data as Array<{ water: { id: string; name: string }; here?: boolean; rank?: WaterRank | null; species: Entry[] }> | null | undefined
   const t = useT(iaLog)
   const words = useAngler()
   const formatWeight = words.weight
@@ -66,8 +67,15 @@ function LogbookPage() {
         </ul>
       </div>
       {fromScan ? <FlyBox notify={notify} scanned={scanned} /> : null}
-      {book.map(({ water, rank, species }) => (
-        <Card key={water.id} title={words.water(water.id)} icon="pin">
+      {/* D240: the water being fished opens; the others collapse to their name and count, so it is never a long scroll away. */}
+      {book.map(({ water, here, rank, species }) => (
+        <details key={water.id} open={here} className="window min-w-0 px-3 py-2 min-[375px]:px-4 sm:px-5">
+          <summary className="min-h-11 cursor-pointer py-1">
+            <Glyph name="pin" size={24} className="shrink-0 text-gold-ink" />
+            <h2 className="min-w-0 flex-1 font-display text-2xl font-bold">{words.water(water.id)}</h2>
+            <span className="shrink-0 text-sm text-muted tabular-nums">{here ? <span className="mr-2 font-semibold text-sky-ink">{t.here}</span> : null}{species.filter((x) => x.seen).length}/{species.length}</span>
+          </summary>
+          <div className="pt-2 pb-2">
           {rank ? <p className="mb-3 text-sm"><strong>{words.waterRank(rank.id, water.id)}</strong> · <span className="text-muted">{t.speciesOf(rank.logged, rank.total)} · {rank.next ? t.rankNext(rank.next.species - rank.logged, words.lang.waterRanks[rank.next.id] ?? rank.next.id) : t.rankTop}</span></p> : null}
           <ul className="grid gap-3 sm:grid-cols-2">
             {species.map((s) => (
@@ -92,7 +100,8 @@ function LogbookPage() {
               </li>
             ))}
           </ul>
-        </Card>
+          </div>
+        </details>
       ))}
       {fromScan ? null : <FlyBox notify={notify} scanned={scanned} />}
       <NoticeBar notice={notice} onDismiss={dismiss} />

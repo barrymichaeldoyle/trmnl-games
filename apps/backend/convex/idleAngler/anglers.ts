@@ -19,6 +19,7 @@ import { awardAfterAnglerIntent } from './achievements'
 import { accessId, baitClass, waterId } from './validators'
 import { MAX_RECAP_STORIES, RECAP_MS } from '@trmnl-games/idle-angler/payload'
 import { fullDock } from './dockFull'
+import { anglerOpen } from './records'
 
 /**
  * Idle Angler companion API (idle-angler.md "Selling and the shop"). Every change is
@@ -314,6 +315,8 @@ export const dock = query({
       worldTick: world?.currentTick ?? 0,
       // D162: content v2's goal, slate, season and wall; absent under v1.
       full: fullDock(content, angler, catches, mounted, now, user.trmnlUtcOffset) ?? null,
+      // D240: this weekend's Open at the angler's water, named from Monday so there is time to set up for it.
+      open: await anglerOpen(ctx, content, angler, now),
     }
   },
 })
@@ -338,6 +341,8 @@ export const logbook = query({
     const trophyRule = content.trophies && unlocked(content, toAnglerState(angler), 'trophies') ? content.trophies : null
     return content.waters.map((w) => ({
       water: { id: w.id, name: w.name },
+      // D240: the water the angler fishes (or is heading to) opens expanded; the rest start collapsed.
+      here: w.id === angler.waterId || w.id === angler.travelTo,
       rank: rankAt(content, angler.logbook, w.id),
       // Issue #10: rarest last, whatever order the catalog appended its season visitors in.
       species: sortByRarity(content.species.filter((s) => s.water === w.id)).map((s) => {

@@ -19,6 +19,17 @@ export function openPeriod(at: number): string {
   return `o${new Date(saturday).toISOString().slice(0, 10)}`
 }
 
+/**
+ * D240: the weekend of the week `at` falls in: its board period, Saturday 00:00 UTC, Monday 00:00 UTC, and whether it
+ * is running. Monday to Friday it is the coming weekend, so the companion can name the target days ahead.
+ */
+export function openWindow(at: number): { period: string; startsAt: number; endsAt: number; on: boolean } {
+  const period = openPeriod(at)
+  const startsAt = Date.parse(`${period.slice(1)}T00:00:00Z`)
+  const endsAt = startsAt + 2 * DAY_MS
+  return { period, startsAt, endsAt, on: at >= startsAt && at < endsAt }
+}
+
 /** The week's target at a water, or undefined when the water holds no Open that week (Frozen Tarn outside winter). */
 export function openTarget(content: IdleAnglerCatalog, waterId: WaterId, at: number): SpeciesDef | undefined {
   const rotation = content.opens?.rotation[waterId]

@@ -155,6 +155,10 @@ export interface IaLanguage {
     /** The weekly board's heading with the water's "at" form ("This week at River Bend"). */
     readonly thisWeek: (at: string) => string
     readonly noFishYet: string
+    /** D240: the board's heading while the water's weekend Open runs, from the target's label name and the water. */
+    readonly openBoard: (fish: string, water: WaterName) => string
+    /** D240: the Open board's rank line before the angler has entered. */
+    readonly notEntered: string
     readonly yourBest: (weight: string) => string
     readonly rankBest: (rank: number, weight: string) => string
     /** The board's reset day behind the rank ("until Mon"). */

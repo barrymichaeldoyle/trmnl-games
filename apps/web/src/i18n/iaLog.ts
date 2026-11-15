@@ -3,6 +3,7 @@ import { defineMessages } from '../lib/i18n'
 /** D200: the Idle Angler logbook, fly box, achievements and trophy wall. */
 export const iaLog = defineMessages({
   en: {
+    here: 'Fishing here',
     logbook: 'Logbook',
     speciesOf: (seen: number, total: number) => `${seen} of ${total} species`,
     // D204: the rank at a water and what the next one needs.
@@ -90,6 +91,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Frees the peg. The fish is gone and the mounting cost isn’t refunded.',
   },
   fr: {
+    here: 'Vous pêchez ici',
     logbook: 'Carnet',
     speciesOf: (seen: number, total: number) => `${seen} espèces sur ${total}`,
     // D204: the rank at a water and what the next one needs.
@@ -177,6 +179,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Libère le crochet. Le poisson disparaît et le coût du montage n’est pas remboursé.',
   },
   de: {
+    here: 'Du angelst hier',
     logbook: 'Fangbuch',
     speciesOf: (seen: number, total: number) => `${seen} von ${total} Arten`,
     // D204: the rank at a water and what the next one needs.
@@ -264,6 +267,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Gibt den Haken frei. Der Fisch ist weg, und die Kosten fürs Präparieren werden nicht erstattet.',
   },
   es: {
+    here: 'Pescas aquí',
     logbook: 'Cuaderno',
     speciesOf: (seen: number, total: number) => `${seen} de ${total} especies`,
     // D204: the rank at a water and what the next one needs.
@@ -351,6 +355,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Libera el gancho. El pez desaparece y no se devuelve el coste de disecarlo.',
   },
   it: {
+    here: 'Peschi qui',
     logbook: 'Registro',
     speciesOf: (seen: number, total: number) => `${seen} specie su ${total}`,
     // D204: the rank at a water and what the next one needs.
@@ -438,6 +443,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Libera il gancio. Il pesce se ne va e il costo dell’imbalsamazione non viene rimborsato.',
   },
   pt: {
+    here: 'Você pesca aqui',
     logbook: 'Caderno',
     speciesOf: (seen: number, total: number) => `${seen} de ${total} espécies`,
     // D204: the rank at a water and what the next one needs.
@@ -525,6 +531,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Libera o gancho. O peixe some e o custo de empalhar não é devolvido.',
   },
   pl: {
+    here: 'Łowisz tutaj',
     logbook: 'Rejestr',
     speciesOf: (seen: number, total: number) => `Gatunki: ${seen} z ${total}`,
     // D204: the rank at a water and what the next one needs.
@@ -612,6 +619,7 @@ export const iaLog = defineMessages({
     takeDownBody: 'Zwalnia haczyk. Ryba znika, a koszt wypchania nie wraca.',
   },
   nl: {
+    here: 'Je vist hier',
     logbook: 'Logboek',
     speciesOf: (seen: number, total: number) => `${seen} van ${total} soorten`,
     // D204: the rank at a water and what the next one needs.

@@ -29,7 +29,8 @@ export const Route = createFileRoute('/app/idle-angler/rankings')({
 const WATERS = ['millpond', 'river_bend', 'harbour_pier', 'heron_lake', 'deep_sea', 'frozen_tarn'] as const
 
 type Row = { rank: number; name: string; speciesId: string; grams: number; own: boolean; profile: boolean }
-type View = { waterId: (typeof WATERS)[number]; period: 'week' | 'all'; weekEndsAt: number; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number } | null; full: boolean }
+type Period = 'open' | 'week' | 'all'
+type View = { waterId: (typeof WATERS)[number]; period: Period; weekEndsAt: number; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number } | null; full: boolean; open?: { targetId: string | null; on: boolean; startsAt: number; endsAt: number } }
 
 type Opens = { period: string; startsAt: number; endsAt: number; on: boolean; prizes: number[]; waters: Array<{ id: string; name: string; target: { id: string; name: string }; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number; passes: boolean } | null }> }
 
@@ -38,14 +39,14 @@ const weekdayIn = (locale: Locale) => (date: Date) => date.toLocaleString(INTL_T
 /** D167's segmented picker (the Dock's bait choice): the pressed cell carries the cursor, the rest are what a tap switches to. */
 function Segmented<T extends string>({ label, options, value, onChange, wrap = false }: { label: string; options: ReadonlyArray<{ id: T; label: string }>; value: T; onChange: (id: T) => void; wrap?: boolean }) {
   return (
-    <div role="group" aria-label={label} className={`grid gap-0.5 border-2 border-edge bg-edge ${wrap ? 'grid-cols-2 min-[480px]:grid-cols-3' : 'grid-cols-2'}`}>
+    <div role="group" aria-label={label} className={`grid gap-0.5 border-2 border-edge bg-edge ${wrap ? 'grid-cols-2 min-[480px]:grid-cols-3' : options.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
       {options.map((option) => (
         <button
           key={option.id}
           type="button"
           aria-pressed={value === option.id}
           onClick={() => onChange(option.id)}
-          className={`menu-cursor flex min-h-11 items-center justify-center px-2 py-2 label-px uppercase tracking-wide whitespace-nowrap not-aria-pressed:before:hidden ${value === option.id ? 'bg-navy text-gold' : 'bg-panel text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink'}`}
+          className={`menu-cursor flex min-h-11 items-center justify-center px-2 py-2 text-center label-px uppercase tracking-wide ${!wrap && options.length === 3 ? '' : 'whitespace-nowrap'} not-aria-pressed:before:hidden ${value === option.id ? 'bg-navy text-gold' : 'bg-panel text-muted hover:bg-rule hover:text-ink active:bg-rule active:text-ink'}`}
         >
           {option.label}
         </button>
@@ -130,42 +131,53 @@ function OpensCard({ opens }: { opens: Opens }) {
 
 function RankingsPage() {
   const { data: first } = useQuery(convexQuery(api.idleAngler.leaderboard.view, {}))
+  const { data: opensData } = useQuery(convexQuery(api.idleAngler.full.opens, {}))
+  const opens = opensData as Opens | null | undefined
   const [water, setWater] = useState<View['waterId'] | null>(null)
-  const [period, setPeriod] = useState<View['period']>('week')
+  // D240: while the Opens run, their boards lead; the weekly and all-time boards are a tap away.
+  const [picked, setPicked] = useState<Period | null>(null)
+  const period: Period = picked === 'open' && !opens?.on ? 'week' : (picked ?? (opens?.on ? 'open' : 'week'))
   const chosen = water ?? (first as View | undefined)?.waterId ?? 'millpond'
   // The previous board stays while the next loads, so switching water or period never collapses the card.
   const { data, isPlaceholderData } = useQuery({ ...convexQuery(api.idleAngler.leaderboard.view, { waterId: chosen, period }), placeholderData: keepPreviousData })
   const view = data as View | undefined
-  const { data: opensData } = useQuery(convexQuery(api.idleAngler.full.opens, {}))
-  const opens = opensData as Opens | null | undefined
   const t = useT(iaRankings)
   const words = useAngler()
   const weekday = weekdayIn(useLocale())
   const waterLabel = (id: string) => (id === 'deep_sea' ? t.charter : words.water(id))
   const week = period === 'week'
-  const PERIODS = [{ id: 'week' as const, label: t.thisWeek }, { id: 'all' as const, label: t.allTime }]
+  const PERIODS = [...(opens?.on ? [{ id: 'open' as const, label: t.open }] : []), { id: 'week' as const, label: t.thisWeek }, { id: 'all' as const, label: t.allTime }]
   const waterOptions = WATERS.map((id) => ({ id, label: waterLabel(id) }))
+  const openView = view?.period === 'open' ? view.open : undefined
+  const title = (v: View) => (v.period === 'open' ? t.openCardTitle(chosen === 'deep_sea' ? words.water(chosen) : waterLabel(chosen)) : t.cardTitle(chosen === 'deep_sea' ? words.water(chosen) : waterLabel(chosen), v.period === 'week'))
   return (
     <>
       <h1 className="font-display text-3xl font-bold">{t.title}</h1>
-      {/* A running Open is the thing to chase, so it leads; next weekend's waits under the boards. */}
-      {opens?.on ? <OpensCard opens={opens} /> : null}
-      <Segmented label={t.period} options={PERIODS} value={period} onChange={setPeriod} />
+      {/* D240: the Opens lead all week, this weekend's targets named from Monday, so there is time to set up. */}
+      {opens ? <OpensCard opens={opens} /> : null}
+      <Segmented label={t.period} options={PERIODS} value={period} onChange={setPicked} />
       <Segmented label={t.water} options={waterOptions} value={chosen} onChange={setWater} wrap />
       {!view ? <LoadingState label={t.loading} /> : (
-        <Card title={t.cardTitle(chosen === 'deep_sea' ? words.water(chosen) : waterLabel(chosen), week)} className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
-          <p className="mb-3 text-sm text-muted">
-            {t.heaviestHere}
-            {view.period === 'week' ? <> {t.startsAgain} <LocalTime at={view.weekEndsAt} format={weekday} />.</> : null}
-          </p>
+        <Card title={title(view)} className={isPlaceholderData ? 'opacity-60 transition-opacity' : 'transition-opacity'}>
+          {openView ? (
+            <p className="mb-3 text-sm text-muted">
+              {openView.targetId ? <span className="mr-1 inline-flex items-center gap-2 align-middle font-semibold text-ink"><FishIcon id={openView.targetId} scale={2} /><FishName id={openView.targetId} /></span> : null}
+              {openView.targetId ? <>{t.openHeaviest} {t.until} <LocalTime at={openView.endsAt} format={weekday} />.</> : t.noOpenHere}
+            </p>
+          ) : (
+            <p className="mb-3 text-sm text-muted">
+              {t.heaviestHere}
+              {view.period === 'week' ? <> {t.startsAgain} <LocalTime at={view.weekEndsAt} format={weekday} />.</> : null}
+            </p>
+          )}
           {view.own ? (
             <p className="mb-3 flex flex-wrap items-center gap-x-2 font-semibold">
               {view.own.rank ? <>{t.youAre} <span className="text-gold-ink">#{view.own.rank}</span> {t.with}</> : t.yourBest}
               <span className="inline-flex items-center gap-2"><FishIcon id={view.own.speciesId} scale={2} /><span className="tabular-nums">{words.weight(view.own.grams)}</span> <FishName id={view.own.speciesId} /></span>
             </p>
-          ) : view.entries.length > 0 ? <p className="mb-3 text-sm text-muted">{t.youHaveNone(week)}</p> : null}
+          ) : view.entries.length > 0 ? <p className="mb-3 text-sm text-muted">{openView ? t.notEntered : t.youHaveNone(week)}</p> : null}
           {view.entries.length === 0 ? (
-            <p className="py-3 text-muted">{t.noneLanded(week)}</p>
+            openView && !openView.targetId ? null : <p className="py-3 text-muted">{openView ? t.noEntriesYet : t.noneLanded(week)}</p>
           ) : (
             <ol className="flex flex-col divide-y divide-rule">
               {view.entries.map((row) => <RankRow key={row.rank} row={row} />)}
@@ -174,7 +186,6 @@ function RankingsPage() {
           {view.full ? <p className="mt-3 text-sm text-muted">{t.top100}</p> : null}
         </Card>
       )}
-      {opens && !opens.on ? <OpensCard opens={opens} /> : null}
     </>
   )
 }
