@@ -281,7 +281,7 @@ type Link = { readonly label: string; readonly blurb: string }
 export const iaMore = defineMessages({
   en: {
     title: 'More',
-    links: { rankings: { label: 'Rankings', blurb: 'The heaviest fish at each water, this week and all time.' }, achievements: { label: 'Achievements', blurb: 'Every tier you have earned and what comes next.' }, trmnl: { label: 'On your TRMNL', blurb: 'What your screen shows now, in each layout and on each device.' }, help: { label: 'How Idle Angler works', blurb: 'Bait, weather, waters and the cooler.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Rankings', blurb: 'The heaviest fish at each water, this week and all time.' }, achievements: { label: 'Achievements', blurb: 'Every tier you have earned and what comes next.' }, trmnl: { label: 'On your TRMNL', blurb: 'What your screen shows now, in each layout and on each device.' }, help: { label: 'How Idle Angler works', blurb: 'Bait, weather, waters and the cooler.' }, whatsNew: { label: 'What’s new', blurb: 'Every change to Idle Angler, newest first. Last updated {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'On your TRMNL',
     trmnlIntro: 'The Idle Angler plugin draws a new screen after every cast. This is the same picture, in each layout and on each device.',
     currentScene: (name: string) => `${name}'s water right now`,
@@ -340,7 +340,7 @@ export const iaMore = defineMessages({
   },
   fr: {
     title: 'Plus',
-    links: { rankings: { label: 'Classements', blurb: 'Le plus gros poisson de chaque plan d’eau, cette semaine et de tout temps.' }, achievements: { label: 'Succès', blurb: 'Chaque niveau obtenu et ce qui vient ensuite.' }, trmnl: { label: 'Sur votre TRMNL', blurb: 'Ce que votre écran affiche maintenant, dans chaque mise en page et sur chaque appareil.' }, help: { label: 'Comment fonctionne Idle Angler', blurb: 'Appâts, météo, plans d’eau et glacière.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Classements', blurb: 'Le plus gros poisson de chaque plan d’eau, cette semaine et de tout temps.' }, achievements: { label: 'Succès', blurb: 'Chaque niveau obtenu et ce qui vient ensuite.' }, trmnl: { label: 'Sur votre TRMNL', blurb: 'Ce que votre écran affiche maintenant, dans chaque mise en page et sur chaque appareil.' }, help: { label: 'Comment fonctionne Idle Angler', blurb: 'Appâts, météo, plans d’eau et glacière.' }, whatsNew: { label: 'Nouveautés', blurb: 'Tous les changements d’Idle Angler, du plus récent au plus ancien. Dernière mise à jour le {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'Sur votre TRMNL',
     trmnlIntro: 'Le plugin Idle Angler dessine un nouvel écran après chaque lancer. Voici la même image, dans chaque mise en page et sur chaque appareil.',
     currentScene: (name: string) => `Le plan d’eau de ${name} en ce moment`,
@@ -399,7 +399,7 @@ export const iaMore = defineMessages({
   },
   de: {
     title: 'Mehr',
-    links: { rankings: { label: 'Ranglisten', blurb: 'Der schwerste Fisch an jedem Gewässer, diese Woche und aller Zeiten.' }, achievements: { label: 'Erfolge', blurb: 'Jede erreichte Stufe und was als Nächstes kommt.' }, trmnl: { label: 'Auf deinem TRMNL', blurb: 'Was dein Bildschirm gerade zeigt, in jedem Layout und auf jedem Gerät.' }, help: { label: 'So funktioniert Idle Angler', blurb: 'Köder, Wetter, Gewässer und Kühlbox.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Ranglisten', blurb: 'Der schwerste Fisch an jedem Gewässer, diese Woche und aller Zeiten.' }, achievements: { label: 'Erfolge', blurb: 'Jede erreichte Stufe und was als Nächstes kommt.' }, trmnl: { label: 'Auf deinem TRMNL', blurb: 'Was dein Bildschirm gerade zeigt, in jedem Layout und auf jedem Gerät.' }, help: { label: 'So funktioniert Idle Angler', blurb: 'Köder, Wetter, Gewässer und Kühlbox.' }, whatsNew: { label: 'Neuigkeiten', blurb: 'Jede Änderung an Idle Angler, die neueste zuerst. Zuletzt aktualisiert am {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'Auf deinem TRMNL',
     trmnlIntro: 'Das Idle-Angler-Plugin zeichnet nach jedem Wurf einen neuen Bildschirm. Das ist dasselbe Bild, in jedem Layout und auf jedem Gerät.',
     currentScene: (name: string) => `Das Gewässer von ${name} gerade jetzt`,
@@ -458,7 +458,7 @@ export const iaMore = defineMessages({
   },
   es: {
     title: 'Más',
-    links: { rankings: { label: 'Clasificación', blurb: 'El pez más pesado de cada agua, esta semana e histórico.' }, achievements: { label: 'Logros', blurb: 'Cada nivel conseguido y lo que viene.' }, trmnl: { label: 'En tu TRMNL', blurb: 'Lo que muestra tu pantalla ahora, en cada disposición y en cada dispositivo.' }, help: { label: 'Cómo funciona Idle Angler', blurb: 'Cebo, tiempo, aguas y nevera.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Clasificación', blurb: 'El pez más pesado de cada agua, esta semana e histórico.' }, achievements: { label: 'Logros', blurb: 'Cada nivel conseguido y lo que viene.' }, trmnl: { label: 'En tu TRMNL', blurb: 'Lo que muestra tu pantalla ahora, en cada disposición y en cada dispositivo.' }, help: { label: 'Cómo funciona Idle Angler', blurb: 'Cebo, tiempo, aguas y nevera.' }, whatsNew: { label: 'Novedades', blurb: 'Cada cambio de Idle Angler, lo más reciente primero. Última actualización: {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'En tu TRMNL',
     trmnlIntro: 'El plugin de Idle Angler dibuja una pantalla nueva después de cada lance. Esta es la misma imagen, en cada disposición y en cada dispositivo.',
     currentScene: (name: string) => `El agua de ${name} ahora mismo`,
@@ -517,7 +517,7 @@ export const iaMore = defineMessages({
   },
   it: {
     title: 'Altro',
-    links: { rankings: { label: 'Classifiche', blurb: 'Il pesce più pesante di ogni acqua, questa settimana e di sempre.' }, achievements: { label: 'Traguardi', blurb: 'Ogni livello ottenuto e cosa viene dopo.' }, trmnl: { label: 'Sul tuo TRMNL', blurb: 'Cosa mostra ora il tuo schermo, in ogni layout e su ogni dispositivo.' }, help: { label: 'Come funziona Idle Angler', blurb: 'Esche, tempo, acque e frigo.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Classifiche', blurb: 'Il pesce più pesante di ogni acqua, questa settimana e di sempre.' }, achievements: { label: 'Traguardi', blurb: 'Ogni livello ottenuto e cosa viene dopo.' }, trmnl: { label: 'Sul tuo TRMNL', blurb: 'Cosa mostra ora il tuo schermo, in ogni layout e su ogni dispositivo.' }, help: { label: 'Come funziona Idle Angler', blurb: 'Esche, tempo, acque e frigo.' }, whatsNew: { label: 'Novità', blurb: 'Ogni modifica a Idle Angler, dalla più recente. Ultimo aggiornamento: {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'Sul tuo TRMNL',
     trmnlIntro: 'Il plugin di Idle Angler disegna una nuova schermata dopo ogni lancio. Questa è la stessa immagine, in ogni layout e su ogni dispositivo.',
     currentScene: (name: string) => `L’acqua di ${name} in questo momento`,
@@ -576,7 +576,7 @@ export const iaMore = defineMessages({
   },
   pt: {
     title: 'Mais',
-    links: { rankings: { label: 'Rankings', blurb: 'O peixe mais pesado de cada água, nesta semana e no geral.' }, achievements: { label: 'Conquistas', blurb: 'Cada nível conquistado e o que vem depois.' }, trmnl: { label: 'No seu TRMNL', blurb: 'O que sua tela mostra agora, em cada layout e em cada aparelho.' }, help: { label: 'Como o Idle Angler funciona', blurb: 'Isca, tempo, águas e cooler.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Rankings', blurb: 'O peixe mais pesado de cada água, nesta semana e no geral.' }, achievements: { label: 'Conquistas', blurb: 'Cada nível conquistado e o que vem depois.' }, trmnl: { label: 'No seu TRMNL', blurb: 'O que sua tela mostra agora, em cada layout e em cada aparelho.' }, help: { label: 'Como o Idle Angler funciona', blurb: 'Isca, tempo, águas e cooler.' }, whatsNew: { label: 'Novidades', blurb: 'Cada mudança no Idle Angler, das mais recentes às mais antigas. Última atualização: {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'No seu TRMNL',
     trmnlIntro: 'O plugin do Idle Angler desenha uma nova tela depois de cada lançamento. Esta é a mesma imagem, em cada layout e em cada aparelho.',
     currentScene: (name: string) => `A água de ${name} agora`,
@@ -635,7 +635,7 @@ export const iaMore = defineMessages({
   },
   pl: {
     title: 'Więcej',
-    links: { rankings: { label: 'Rankingi', blurb: 'Najcięższa ryba z każdego łowiska, w tym tygodniu i wszech czasów.' }, achievements: { label: 'Osiągnięcia', blurb: 'Każdy zdobyty poziom i co dalej.' }, trmnl: { label: 'Na twoim TRMNL', blurb: 'Co twój ekran pokazuje teraz, w każdym układzie i na każdym urządzeniu.' }, help: { label: 'Jak działa Idle Angler', blurb: 'Przynęty, pogoda, łowiska i lodówka.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Rankingi', blurb: 'Najcięższa ryba z każdego łowiska, w tym tygodniu i wszech czasów.' }, achievements: { label: 'Osiągnięcia', blurb: 'Każdy zdobyty poziom i co dalej.' }, trmnl: { label: 'Na twoim TRMNL', blurb: 'Co twój ekran pokazuje teraz, w każdym układzie i na każdym urządzeniu.' }, help: { label: 'Jak działa Idle Angler', blurb: 'Przynęty, pogoda, łowiska i lodówka.' }, whatsNew: { label: 'Nowości', blurb: 'Każda zmiana w Idle Angler, od najnowszych. Ostatnia aktualizacja: {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'Na twoim TRMNL',
     trmnlIntro: 'Wtyczka Idle Angler rysuje nowy ekran po każdym rzucie. To ten sam obraz, w każdym układzie i na każdym urządzeniu.',
     currentScene: (name: string) => `Łowisko gracza ${name} w tej chwili`,
@@ -694,7 +694,7 @@ export const iaMore = defineMessages({
   },
   nl: {
     title: 'Meer',
-    links: { rankings: { label: 'Ranglijsten', blurb: 'De zwaarste vis bij elk water, deze week en aller tijden.' }, achievements: { label: 'Prestaties', blurb: 'Elk behaald niveau en wat er nog komt.' }, trmnl: { label: 'Op je TRMNL', blurb: 'Wat je scherm nu toont, in elke indeling en op elk apparaat.' }, help: { label: 'Zo werkt Idle Angler', blurb: 'Aas, weer, wateren en de koelbox.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help', Link>,
+    links: { rankings: { label: 'Ranglijsten', blurb: 'De zwaarste vis bij elk water, deze week en aller tijden.' }, achievements: { label: 'Prestaties', blurb: 'Elk behaald niveau en wat er nog komt.' }, trmnl: { label: 'Op je TRMNL', blurb: 'Wat je scherm nu toont, in elke indeling en op elk apparaat.' }, help: { label: 'Zo werkt Idle Angler', blurb: 'Aas, weer, wateren en de koelbox.' }, whatsNew: { label: 'Wat is er nieuw', blurb: 'Elke wijziging aan Idle Angler, nieuwste eerst. Laatst bijgewerkt op {day}.' } } as Record<'rankings' | 'achievements' | 'trmnl' | 'help' | 'whatsNew', Link>,
     trmnlTitle: 'Op je TRMNL',
     trmnlIntro: 'De Idle Angler-plugin tekent na elke worp een nieuw scherm. Dit is hetzelfde beeld, in elke indeling en op elk apparaat.',
     currentScene: (name: string) => `Het water van ${name} op dit moment`,

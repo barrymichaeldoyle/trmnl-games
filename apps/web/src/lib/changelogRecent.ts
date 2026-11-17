@@ -42,6 +42,22 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-17',
+    changes: [
+      {
+        title: 'New to you, near the top',
+        body: 'The card that lists changes on the Hero page and the Dock is now called New to you, because it shows what you have not seen yet rather than what changed since your last visit. It sits near the top of the page; tap Nice, or open the changes, and it stays away until something else is added. What’s new is always on the More tab in both games.',
+        fr: { title: 'Nouveau pour vous, en haut de page', body: 'La carte qui liste les changements sur la page Héros et le Ponton s’appelle désormais Nouveau pour vous, car elle montre ce que vous n’avez pas encore vu, et non ce qui a changé depuis votre dernière visite. Elle se trouve en haut de la page ; touchez Super, ou ouvrez les changements, et elle disparaît jusqu’au prochain ajout. Les nouveautés restent toujours dans l’onglet Plus des deux jeux.' },
+        de: { title: 'Neu für dich, weiter oben', body: 'Die Karte mit den Änderungen auf der Heldenseite und am Steg heißt jetzt Neu für dich, weil sie zeigt, was du noch nicht gesehen hast, und nicht, was sich seit deinem letzten Besuch geändert hat. Sie steht weit oben auf der Seite; tippe auf Super oder öffne die Änderungen, und sie bleibt weg, bis etwas Neues dazukommt. Die Neuigkeiten findest du in beiden Spielen immer im Tab Mehr.' },
+        es: { title: 'Nuevo para ti, más arriba', body: 'La tarjeta que lista los cambios en la página del héroe y en el Muelle ahora se llama Nuevo para ti, porque muestra lo que aún no has visto y no lo que cambió desde tu última visita. Está cerca de la parte superior; toca Genial o abre los cambios y no volverá hasta que haya algo nuevo. Las novedades siguen siempre en la pestaña Más de los dos juegos.' },
+        it: { title: 'Novità per te, più in alto', body: 'La scheda che elenca le modifiche nella pagina dell’eroe e al Pontile ora si chiama Novità per te, perché mostra ciò che non hai ancora visto e non ciò che è cambiato dalla tua ultima visita. Sta in cima alla pagina; tocca Bello, o apri le modifiche, e non torna finché non arriva qualcosa di nuovo. Le novità restano sempre nella scheda Altro di entrambi i giochi.' },
+        pt: { title: 'Novo para você, mais no alto', body: 'O cartão que lista as mudanças na página do herói e no Píer agora se chama Novo para você, porque mostra o que você ainda não viu, e não o que mudou desde sua última visita. Ele fica perto do topo da página; toque em Legal, ou abra as mudanças, e ele some até algo novo chegar. As novidades continuam sempre na aba Mais dos dois jogos.' },
+        pl: { title: 'Nowe dla ciebie, wyżej na stronie', body: 'Karta z listą zmian na stronie bohatera i na Pomoście nazywa się teraz Nowe dla ciebie, bo pokazuje to, czego jeszcze nie widziałeś, a nie to, co zmieniło się od ostatniej wizyty. Jest blisko góry strony; dotknij Super albo otwórz zmiany, a zniknie do następnej nowości. Nowości są zawsze w karcie Więcej w obu grach.' },
+        nl: { title: 'Nieuw voor jou, bovenaan', body: 'De kaart met de wijzigingen op de heldenpagina en de Stek heet nu Nieuw voor jou, omdat ze toont wat je nog niet hebt gezien en niet wat er sinds je laatste bezoek is veranderd. Ze staat bovenaan de pagina; tik op Top of open de wijzigingen, en ze blijft weg tot er iets nieuws bij komt. Wat is er nieuw staat altijd op het tabblad Meer in beide games.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-15',
     changes: [
       {

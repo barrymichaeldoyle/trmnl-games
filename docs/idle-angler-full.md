@@ -177,7 +177,7 @@ One pass over the whole companion, done with goals because goals change what the
 
 - **D156:** only buttons look pressable.
 - **D157:** locked features stay hidden, with one "Coming up" line.
-- **D154:** "New since your last visit".
+- **D154, D243:** "New to you", acknowledged with Nice.
 - **D152:** boards show your neighbours.
 - **The Dock:** shows the current water, the next one and how to reach it, not every water.
 - **The Cooler:** orders first, then fish with Sell, Hand over, Use as bait and Mount, each enabled only when it applies.

@@ -109,6 +109,8 @@ function DockPage() {
         ) : null}
         {angler.status !== 'paused' && usable.length === 0 ? <p className="mb-3 font-semibold text-hp-ink">{t.noBaitFor(baitWater ? words.water(baitWater.id) : '', Boolean(destination))} <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.buyBait}</Link>.</p> : null}
         {angler.status !== 'paused' && usable.length > 0 && !fishing ? <p className="mb-3 font-semibold text-hp-ink"><a href="#dock-bait" className="underline underline-offset-4">{t.bareHookNow}</a>{usable.every((b) => b.units === 0) ? <>, <Link to="/app/idle-angler/shop" className="underline underline-offset-4">{t.orBuySome}</Link></> : null}.</p> : null}
+        {/* D243: changes the player has not acknowledged, above the scene; once seen they live on the More tab. */}
+        <WhatsNewCard game="idle-angler" />
         {scene ? <Scene sceneKey={scene} alt={t.sceneAlt(angler.alias, here ? words.water(here.id) : '')} /> : null}
         {scene ? <p className="mt-2 text-sm"><Link to="/app/idle-angler/trmnl" className="underline underline-offset-4">{t.seeOnTrmnl}</Link></p> : null}
         <FlyCallout notify={notify} />
@@ -232,7 +234,6 @@ function DockPage() {
         {full?.season ? <p className="mt-3 text-sm text-muted">{t.seasonNote(words.season(full.season.id).toLowerCase())} <LocalTime at={full.season.endsAt} format={(d) => formatDate(locale, d, { weekday: 'long' })} />.</p> : null}
       </Card>
 
-      <WhatsNewCard game="idle-angler" />
       <Card title={t.latest}>
         <ol className="flex flex-col gap-2">
           {dock.logs?.slice(0, 10).map((log) => (

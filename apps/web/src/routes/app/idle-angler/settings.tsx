@@ -10,7 +10,8 @@ import { ActionFeedback, Button, Card, LoadingState, NoticeBar, useNotice, Notif
 import { AlertsCard, type AlertKindCopy } from '../desk-crawler/-alerts'
 import { ConfirmSheet, Consequences } from '../desk-crawler/-confirm'
 import { seo } from '../../../lib/seo'
-import { useT } from '../../../lib/i18n'
+import { useLocale, useT } from '../../../lib/i18n'
+import { CHANGELOG, changeDay, changeIsFor } from '../../../lib/changelog'
 import { iaMore } from '../../../i18n/iaMore'
 import { iaCommon } from '../../../i18n/ia'
 import { useAngler } from '../../../lib/idleAngler'
@@ -45,6 +46,10 @@ function SettingsPage() {
   const tLog = useT(iaLog)
   const newBadges = useNewBadges().badges.length > 0
   const words = useAngler()
+  const locale = useLocale()
+  // The day of the newest change an angler would see: Idle Angler's own or one for everyone.
+  const latest = CHANGELOG.find((entry) => entry.changes.some((change) => changeIsFor(change, 'idle-angler')))
+  const lastChange = latest ? changeDay(latest.date, false, locale) : ''
   const alertKinds: readonly AlertKindCopy[] = [{ id: 'coolerFull', name: t.alertCooler, blurb: t.alertCoolerBlurb }, { id: 'baitOut', name: t.alertBait, blurb: t.alertBaitBlurb }]
   const angler = dock?.angler
   if (!angler) return null
@@ -62,6 +67,13 @@ function SettingsPage() {
               </Link>
             </li>
           ))}
+          {/* D243: always here, so the changes stay one tap away once the Dock's New to you card is acknowledged. */}
+          <li className="border-b border-rule last:border-b-0">
+            <Link to="/whats-new" search={{ game: 'idle-angler' }} className="flex min-h-12 flex-col justify-center py-2">
+              <span className="font-semibold underline underline-offset-4">{t.links.whatsNew.label}</span>
+              <span className="text-sm text-muted">{t.links.whatsNew.blurb.replace('{day}', lastChange)}</span>
+            </Link>
+          </li>
         </ul>
       </Card>
       <h2 className="font-display text-2xl font-bold">{t.settings}</h2>

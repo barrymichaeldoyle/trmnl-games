@@ -66,10 +66,11 @@ function HeroHome() {
       <h1 className="sr-only">{t.yourHero(hero.name)}</h1>
       <KeepsakeCallout />
       <PlaylistNudge activatedAt={hero.activatedAt} screenServed={hero.screenServed} />
+      {/* D243: changes the player has not acknowledged, above the game screen; once seen they live on the More tab. */}
+      <WhatsNewCard game="desk-crawler" />
       <GameScreen hero={{ ...hero, biomeName, targetName, bagReady }} />
       <ReturnNudge />
       <IdleAnglerNote />
-      <WhatsNewCard game="desk-crawler" />
       <HeroSheet hero={hero} />
     </div>
   )
