@@ -183,6 +183,8 @@ Per-angler seed as [simulation](simulation.md): SHA-256 of `[worldSeed, anglerId
 
 ## Leaderboards
 
+Superseded by D116 and D244: each water has a weekly and an all-time board of each angler's best fish, kept or released, the rarest first and then the heaviest, in `iaCatchRecords`; the weekend Opens rank one species by weight. The original plan follows.
+
 The same three boards as Desk Crawler (overall, 24 hours, 7 days) over XP, the same level groups, the same hourly immutable generation with Top 5, population and individual ranks from one publication. Released fish count for XP, so a player who never visits still ranks; what they forgo is gold. A "biggest catch" board is not in the MVP because it would need a per-species scan; the logbook and the record achievements cover it.
 
 ## Achievements

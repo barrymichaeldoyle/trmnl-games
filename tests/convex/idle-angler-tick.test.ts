@@ -109,6 +109,38 @@ describe('Idle Angler tick on the shared engine (D115, S2)', () => {
     expect(view).toMatchObject({ waterId: 'millpond', period: 'all', entries: [{ rank: 1, name: 'Reel', speciesId: 'common_carp', grams: 6100, own: false }, { rank: 2, name: 'Mo', grams: 2400, own: true }], own: { rank: 2, grams: 2400 } })
   })
 
+  it('ranks the week and all-time boards rarest first, then heaviest, and backfills older rows (D244)', async () => {
+    const anglerId = await seedAngler(t, { status: 'paused' }, 'Reel')
+    const rival = await seedAngler(t, { status: 'paused', logbook: { eel: { count: 2, bestGrams: 1800, firstTick: 1 }, pike: { count: 1, bestGrams: 9000, firstTick: 2 } } }, 'Mo')
+    const { recordCatch, weekKey } = await import('../../apps/backend/convex/idleAngler/records')
+    const at = Date.UTC(2026, 10, 17, 12)
+    await t.run(async (ctx) => {
+      const reel = (await ctx.db.get(anglerId))!
+      // A rare carp, then a lighter epic that takes the row, then a heavier rare that does not.
+      await recordCatch(ctx, reel, { waterId: 'millpond', speciesId: 'common_carp', grams: 6100 }, at)
+      await recordCatch(ctx, reel, { waterId: 'millpond', speciesId: 'golden_carp', grams: 2000 }, at + 1)
+      await recordCatch(ctx, reel, { waterId: 'millpond', speciesId: 'common_carp', grams: 9000 }, at + 2)
+      // Mo's rows predate D244: a heavy uncommon this week, and an all-time roach the logbook beats with its eel.
+      for (const period of [weekKey(at), 'all']) {
+        await ctx.db.insert('iaCatchRecords', { waterId: 'millpond', period, anglerId: rival, userId: (await ctx.db.get(rival))!.userId, speciesId: period === 'all' ? 'roach' : 'bream', grams: period === 'all' ? 300 : 3400, at, earlierFirst: -at })
+      }
+    })
+    const { internal } = await import('../../apps/backend/convex/_generated/api')
+    await t.mutation(internal.idleAngler.records.backfillRarity, {})
+    await t.finishAllScheduledFunctions(vi.runAllTimers)
+    const rows = await t.run(async (ctx) => await ctx.db.query('iaCatchRecords').collect())
+    expect(rows.map((r) => [r.anglerId === anglerId ? 'Reel' : 'Mo', r.period === 'all' ? 'all' : 'week', r.speciesId, r.grams, r.rarityRank])).toEqual([
+      ['Reel', 'week', 'golden_carp', 2000, 3],
+      ['Reel', 'all', 'golden_carp', 2000, 3],
+      ['Mo', 'week', 'bream', 3400, 1],
+      // The pike is River Bend's, so the Millpond's all-time row takes the eel.
+      ['Mo', 'all', 'eel', 1800, 2],
+    ])
+    vi.setSystemTime(at)
+    const week = await t.withIdentity({ issuer: 'issuer', subject: 'Mo' }).query(api.idleAngler.leaderboard.view, { waterId: 'millpond', period: 'week' })
+    expect(week).toMatchObject({ entries: [{ rank: 1, name: 'Reel', speciesId: 'golden_carp', rarity: 'epic', grams: 2000 }, { rank: 2, name: 'Mo', speciesId: 'bream', rarity: 'uncommon', grams: 3400, own: true }], own: { rank: 2, rarity: 'uncommon' } })
+  })
+
   it('starts the weekly board on Monday in UTC', async () => {
     const { weekKey, weekEndsAt } = await import('../../apps/backend/convex/idleAngler/records')
     expect(weekKey(Date.UTC(2026, 9, 11, 23, 59))).toBe('w2026-10-05')

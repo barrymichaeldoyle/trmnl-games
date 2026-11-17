@@ -136,9 +136,11 @@ export function badgeToShow(unlocks: IdleAnglerPayloadInput['unlocks'], now: num
 export interface PayloadBoard {
   /** The angler's rank when within the board's depth; null when not ranked or further down. */
   readonly rank: number | null
-  readonly top: ReadonlyArray<{ readonly rank: number; readonly name: string; readonly grams: number; readonly own: boolean }>
-  /** The angler's own heaviest fish this week at this water, for a row below the top; null before one. */
+  /** D244: each row's fish, named with its rarity gem; the week ranks rarest first, then heaviest. */
+  readonly top: ReadonlyArray<{ readonly rank: number; readonly name: string; readonly speciesId?: string; readonly grams: number; readonly own: boolean }>
+  /** The angler's own best fish this week at this water, for a row below the top; null before one. */
   readonly ownGrams?: number | null
+  readonly ownSpeciesId?: string | null
   /** When this week's board starts again (Monday 00:00 UTC), named on the rank line as the owner's weekday. */
   readonly endsAt?: number
   /** D240: set while the water's weekend Open runs; the board is then that Open's, for this target. */
@@ -238,6 +240,11 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
     latest && (latest.kind === 'catch' || latest.kind === 'release') && latest.speciesId
       ? { species_id: latest.speciesId, name: content.species.some((s) => s.id === latest.speciesId) ? words.species(latest.speciesId) : latest.speciesId, weight_label: latest.grams === undefined ? null : formatWeight(latest.grams) }
       : null
+  // D244: a board row's fish and its rarity gem; a row from before the rows carried a species shows the weight alone.
+  const fishOf = (speciesId: string | null | undefined) => {
+    const species = speciesId ? content.species.find((s) => s.id === speciesId) : undefined
+    return species ? { fish: words.species(species.id), rarity: species.rarity } : {}
+  }
   // The newest fish landed among the stories shown, for the catch panel (template v2).
   const newest = stories.find((story) => (story.kind === 'catch' || story.kind === 'release') && story.speciesId !== undefined)
   const newestSpecies = newest ? content.species.find((s) => s.id === newest.speciesId) : undefined
@@ -318,8 +325,8 @@ export function buildPayload(input: IdleAnglerPayloadInput) {
           label: input.board.open ? say.openBoard(words.species(input.board.open.speciesId), words.waterName(water.id)) : say.thisWeek(words.waterName(water.id).at),
           rank_label: [input.board.ownGrams == null ? (input.board.open ? say.notEntered : say.noFishYet) : input.board.rank === null ? say.yourBest(formatWeight(input.board.ownGrams)) : say.rankBest(input.board.rank, formatWeight(input.board.ownGrams)), ...(input.board.endsAt ? [say.until(weekdayShort(input.board.endsAt, input.locale ?? 'en'))] : [])].join(' \u00b7 '),
           rows: [
-            ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), weight_label: formatWeight(row.grams), own: row.own })),
-            ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, name_short: shortName(angler.alias), weight_label: formatWeight(input.board.ownGrams), own: true }] : []),
+            ...input.board.top.map((row) => ({ rank: row.rank, name: row.name, name_short: shortName(row.name), ...fishOf(row.speciesId), weight_label: formatWeight(row.grams), own: row.own })),
+            ...(input.board.rank !== null && input.board.ownGrams != null && !input.board.top.some((row) => row.own) ? [{ rank: input.board.rank, name: angler.alias, name_short: shortName(angler.alias), ...fishOf(input.board.ownSpeciesId), weight_label: formatWeight(input.board.ownGrams), own: true }] : []),
           ],
         }
       : null,

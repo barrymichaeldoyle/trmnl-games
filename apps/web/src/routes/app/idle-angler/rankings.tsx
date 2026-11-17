@@ -9,6 +9,7 @@ import { Card, LoadingState } from '../../../lib/ui'
 import { FishIcon } from './-art'
 import { Coins } from './-coins'
 import { FishName } from './-fish'
+import { Gem } from '../desk-crawler/-bagSlots'
 import { LocalTime } from '../../../lib/localTime'
 import { seo } from '../../../lib/seo'
 import { INTL_TAG, type Locale } from '@trmnl-games/platform'
@@ -17,8 +18,9 @@ import { iaRankings } from '../../../i18n/iaMore'
 import { useAngler } from '../../../lib/idleAngler'
 
 /**
- * Idle Angler rankings (2026-10-10): each water's heaviest fish, this week and of all time. No XP or levels: the fish
- * itself is the score. Opens on the angler's own water.
+ * Idle Angler rankings (2026-10-10): each water's best fish, this week and of all time. No XP or levels: the fish
+ * itself is the score, the rarest first and then the heaviest (D244), each row with its rarity gem. Opens on the
+ * angler's own water.
  */
 export const Route = createFileRoute('/app/idle-angler/rankings')({
   head: () => seo({ title: 'Rankings · Idle Angler', index: false }),
@@ -28,9 +30,9 @@ export const Route = createFileRoute('/app/idle-angler/rankings')({
 
 const WATERS = ['millpond', 'river_bend', 'harbour_pier', 'heron_lake', 'deep_sea', 'frozen_tarn'] as const
 
-type Row = { rank: number; name: string; speciesId: string; grams: number; own: boolean; profile: boolean }
+type Row = { rank: number; name: string; speciesId: string; rarity: string; grams: number; own: boolean; profile: boolean }
 type Period = 'open' | 'week' | 'all'
-type View = { waterId: (typeof WATERS)[number]; period: Period; weekEndsAt: number; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number } | null; full: boolean; open?: { targetId: string | null; on: boolean; startsAt: number; endsAt: number } }
+type View = { waterId: (typeof WATERS)[number]; period: Period; weekEndsAt: number; entries: Row[]; own: { rank: number | null; speciesId: string; rarity: string; grams: number } | null; full: boolean; open?: { targetId: string | null; on: boolean; startsAt: number; endsAt: number } }
 
 type Opens = { period: string; startsAt: number; endsAt: number; on: boolean; prizes: number[]; waters: Array<{ id: string; name: string; target: { id: string; name: string }; entries: Row[]; own: { rank: number | null; speciesId: string; grams: number; passes: boolean } | null }> }
 
@@ -80,7 +82,7 @@ function RankRow({ row }: { row: Row }) {
         ) : (
           <span className="block truncate font-semibold">{row.name}</span>
         )}
-        <span className="mt-1 flex items-center gap-2 text-sm"><FishIcon id={row.speciesId} scale={2} /><FishName id={row.speciesId} /></span>
+        <span className="mt-1 flex items-center gap-2 text-sm"><FishIcon id={row.speciesId} scale={2} /><FishName id={row.speciesId} /><Gem rarity={row.rarity} scale={2} /><span className="sr-only">{words.rarity(row.rarity)}</span></span>
       </span>
       <span className="shrink-0 font-semibold tabular-nums leading-6">{words.weight(row.grams)}</span>
     </li>
@@ -166,14 +168,14 @@ function RankingsPage() {
             </p>
           ) : (
             <p className="mb-3 text-sm text-muted">
-              {t.heaviestHere}
+              {t.bestHere}
               {view.period === 'week' ? <> {t.startsAgain} <LocalTime at={view.weekEndsAt} format={weekday} />.</> : null}
             </p>
           )}
           {view.own ? (
             <p className="mb-3 flex flex-wrap items-center gap-x-2 font-semibold">
               {view.own.rank ? <>{t.youAre} <span className="text-gold-ink">#{view.own.rank}</span> {t.with}</> : t.yourBest}
-              <span className="inline-flex items-center gap-2"><FishIcon id={view.own.speciesId} scale={2} /><span className="tabular-nums">{words.weight(view.own.grams)}</span> <FishName id={view.own.speciesId} /></span>
+              <span className="inline-flex items-center gap-2"><FishIcon id={view.own.speciesId} scale={2} /><span className="tabular-nums">{words.weight(view.own.grams)}</span> <FishName id={view.own.speciesId} /><Gem rarity={view.own.rarity} scale={2} /></span>
             </p>
           ) : view.entries.length > 0 ? <p className="mb-3 text-sm text-muted">{openView ? t.notEntered : t.youHaveNone(week)}</p> : null}
           {view.entries.length === 0 ? (

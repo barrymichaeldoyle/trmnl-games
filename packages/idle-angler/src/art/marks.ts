@@ -54,6 +54,15 @@ export const IA_MARKS = {
   /** System and service lines: a dot. */
   system: ['........', '........', '...##...', '..####..', '..####..', '...##...', '........', '........'],
 
+  /**
+   * D244: the board's rarity gems, the companion's (Desk Crawler's bag gems): wider with each rarity, so rarity never
+   * rests on colour. Five rows tall at every rarity; drawn at twice their cells.
+   */
+  gemCommon: ['.#.', '###', '.#.', '...', '...'],
+  gemUncommon: ['.###.', '#####', '.###.', '..#..', '.....'],
+  gemRare: ['.#####.', '#######', '.#####.', '..###..', '...#...'],
+  gemEpic: ['.#######.', '#########', '.#######.', '..#####..', '...###...'],
+
   /** XP ticks the width of Desk Crawler's: empty, half and full. */
   tickEmpty: ['#########', '#.......#', '#.......#', '#########'],
   tickHalf: ['#########', '#####...#', '#####...#', '#########'],

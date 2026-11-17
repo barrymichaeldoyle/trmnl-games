@@ -65,13 +65,15 @@ const base: IdleAnglerPayloadInput = {
   board: {
     rank: 3,
     ownGrams: 1900,
+    ownSpeciesId: 'barbel',
     endsAt: weekEndsAt(PREVIEW_NOW),
+    // D244: rarest first, then heaviest, so the 1.6 kg Grayling sits under the lighter Pike and above the heavier Chub.
     top: [
-      { rank: 1, name: 'Quillfeather_Longname', grams: 5240, own: false },
-      { rank: 2, name: 'Mo', grams: 3410, own: false },
-      { rank: 3, name: 'Wren', grams: 1900, own: true },
-      { rank: 4, name: 'Hidden player', grams: 1630, own: false },
-      { rank: 5, name: 'Bea', grams: 1120, own: false },
+      { rank: 1, name: 'Quillfeather_Longname', speciesId: 'salmon', grams: 5240, own: false },
+      { rank: 2, name: 'Mo', speciesId: 'rainbow_trout', grams: 3410, own: false },
+      { rank: 3, name: 'Wren', speciesId: 'barbel', grams: 1900, own: true },
+      { rank: 4, name: 'Hidden player', speciesId: 'grayling', grams: 1630, own: false },
+      { rank: 5, name: 'Bea', speciesId: 'chub', grams: 2120, own: false },
     ],
   },
 }
@@ -113,7 +115,7 @@ export function previewScenarios(artBaseUrl: string): Record<string, IdleAnglerP
     badgeSpecies: { ...b, unlocks: [{ achievementId: 'specimen_perch', at: minutes(62) }, { achievementId: 'first_perch', at: minutes(62) }, { achievementId: 'big_ones_1', at: minutes(62) }] },
     badgeFinished: { ...b, unlocks: [{ achievementId: 'rods_3', at: minutes(200) }, { achievementId: 'seasons_1', at: minutes(30) }] },
     badgeBareHook: { ...b, angler: { ...angler, bait: { maggots: 0, worms: 12 } }, unlocks: [{ achievementId: 'night_fishing_2', at: minutes(40) }] },
-    outsideTop: { ...b, board: { ...b.board!, rank: 19, ownGrams: 610, top: b.board!.top.map((row) => ({ ...row, own: false })) } },
+    outsideTop: { ...b, board: { ...b.board!, rank: 19, ownGrams: 610, ownSpeciesId: 'dace', top: b.board!.top.map((row) => ({ ...row, own: false })) } },
     unranked: { ...b, board: { ...b.board!, rank: null, ownGrams: null, top: b.board!.top.map((row) => ({ ...row, own: false })) } },
     longText: { ...b, angler: { ...angler, alias: 'WWWWWWWWWWWWWWWWWWWW', gold: 999999, coolerTier: 4, speciesLogged: 20 }, coolerUsed: 23, company: { names: ['WWWWWWWWWWWWWWWWWWWW', 'MMMMMMMMMMMMMMMMMMMM', 'QQQQQQQQQQQQQQQQQQQQ'], others: 128 }, stories: stories.map((s) => ({ ...s, summary: 'An 18.0 kg Conger Eel took the mackerel strip in the dark. A new personal best.' })) },
     stale: { ...b, world: { ...b.world!, lastCompletedAt: PREVIEW_NOW - 90 * 60_000 } },

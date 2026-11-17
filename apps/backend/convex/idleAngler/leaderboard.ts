@@ -30,7 +30,7 @@ export const cleanupPublication = internalMutation({
 })
 
 /**
- * Companion board: one water's heaviest fish this week or of all time, and the viewer's own row and rank. D240: the
+ * Companion board: one water's best fish this week or of all time (rarest, then heaviest, D244), and the viewer's own row and rank. D240: the
  * `open` period is that water's weekend Open, with its target; a water holding none that weekend has no rows.
  */
 export const view = query({
@@ -54,13 +54,13 @@ export const view = query({
 })
 
 /**
- * Device board: this week's heaviest fish at the angler's water, its first rows and the angler's own rank. D240: while
+ * Device board: this week's best fish at the angler's water (rarest, then heaviest, D244), its first rows and the angler's own rank. D240: while
  * that water's weekend Open runs and the angler has the Opens, the board is the Open's instead, ending Sunday night.
  */
-export async function readDeviceBoard(ctx: QueryCtx, content: IdleAnglerCatalog, angler: Doc<'anglers'>, now: number): Promise<{ rank: number | null; ownGrams: number | null; endsAt: number; open?: { speciesId: string }; top: Array<Pick<BoardRow, 'rank' | 'name' | 'grams' | 'own'>> }> {
+export async function readDeviceBoard(ctx: QueryCtx, content: IdleAnglerCatalog, angler: Doc<'anglers'>, now: number): Promise<{ rank: number | null; ownGrams: number | null; ownSpeciesId: string | null; endsAt: number; open?: { speciesId: string }; top: Array<Pick<BoardRow, 'rank' | 'name' | 'speciesId' | 'grams' | 'own'>> }> {
   const open = await anglerOpen(ctx, content, angler, now, angler.waterId)
   const live = open?.on ? open : null
   const board = await readBoard(ctx, angler.waterId, live ? live.period : weekKey(now), angler._id, DEVICE_TOP)
   // The Open's last moment is Sunday 23:59 UTC, so the rank line names Sunday, not the Monday the window closes on.
-  return { rank: board.own?.rank ?? null, ownGrams: board.own?.grams ?? null, endsAt: live ? live.endsAt - 60_000 : weekEndsAt(now), ...(live ? { open: { speciesId: live.target.id } } : {}), top: board.entries.map(({ rank, name, grams, own }) => ({ rank, name, grams, own })) }
+  return { rank: board.own?.rank ?? null, ownGrams: board.own?.grams ?? null, ownSpeciesId: board.own?.speciesId ?? null, endsAt: live ? live.endsAt - 60_000 : weekEndsAt(now), ...(live ? { open: { speciesId: live.target.id } } : {}), top: board.entries.map(({ rank, name, speciesId, grams, own }) => ({ rank, name, speciesId, grams, own })) }
 }

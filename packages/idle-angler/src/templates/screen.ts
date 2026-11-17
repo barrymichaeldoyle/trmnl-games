@@ -69,7 +69,7 @@ import { markUri, STORY_GLYPHS, type IaMark } from '../art/marks'
 import { en } from '../i18n/en'
 import type { DeviceLabel } from '../i18n/types'
 
-export const TEMPLATE_VERSION = 27
+export const TEMPLATE_VERSION = 28
 
 /** D200: one of the template's own words in the owner's language, read from the payload's `labels` with the English as the default. */
 const L = (key: DeviceLabel) => `{{ labels.${key} | default: "${en.device.labels[key]}" }}`
@@ -84,11 +84,22 @@ const TITLE_ICON = svgDataUri(
 
 /** Every mark a layout uses, assigned once at its top so the markup repeats a variable rather than the SVG. */
 const MARKS: readonly IaMark[] = ['cooler', 'hook', 'coin', 'book', 'pin', 'people', 'trophy', 'star', 'goal', 'day', 'dawn', 'dusk', 'night', 'clear', 'overcast', 'rain', 'wind', 'fog', ...STORY_GLYPHS]
-const ASSIGNS = MARKS.map((mark) => `{% assign m_${mark} = "${markUri(mark, 32)}" %}`).join('')
+/** D244: the board's rarity gems at twice their cells, so a rarer gem is wider (6, 10, 14 and 18 by 10 pixels). */
+const GEMS = [['common', 'gemCommon', 3], ['uncommon', 'gemUncommon', 5], ['rare', 'gemRare', 7], ['epic', 'gemEpic', 9]] as const
+const ASSIGNS =
+  MARKS.map((mark) => `{% assign m_${mark} = "${markUri(mark, 32)}" %}`).join('') +
+  GEMS.map(([rarity, mark, cells]) => `{% assign m_gem_${rarity} = "${markUri(mark, cells * 2, 10)}" %}`).join('')
+
 
 /** 16px on the OG; 20px on the X, where the text beside it is larger. */
 /** D181: the framework repaints `image--adaptive` marks in the theme's ink, so they stay visible under TRMNL's Dark theme. */
 const ADAPTIVE = 'image--adaptive'
+/**
+ * A board row's gem at its own width (D244), three cells to the pixel pair on the X, whose text is larger. The angler's
+ * own row is inverted, and an adaptive mark takes the framework's icon ink, so there the gem sits in an `inverse` span,
+ * which hands it the inverted ink under every theme.
+ */
+const gem = `{% if row.rarity %}{% if row.own %}<span class="inverse flex">{% endif %}{% case row.rarity %}${GEMS.map(([rarity, , cells]) => `{% when "${rarity}" %}<img class="w--[${cells * 2}px] h--[10px] lg:w--[${cells * 3}px] lg:h--[15px] no-shrink ${ADAPTIVE}" src="{{ m_gem_${rarity} }}" alt="">`).join('')}{% endcase %}{% if row.own %}</span>{% endif %}{% endif %}`
 const ICON = `w--[16px] h--[16px] lg:w--[20px] lg:h--[20px] no-shrink ${ADAPTIVE}`
 const LABEL = 'label lg:title--small'
 
@@ -312,17 +323,20 @@ const fitStories = `<script>
 </script>`
 
 /**
- * This week's heaviest fish at the angler's water: the trophy and water, the angler's rank and best, then each row's
+ * This week's best fish at the angler's water: the trophy and water, the angler's rank and best, then each row's
  * name and weight. The heading names the water ("This week at River Bend") and may take two lines in a narrow
  * column, since the water is the point of it. Each row is itself the label, so an inverted own row keeps its text white (a `.label` child would
  * set its own colour), as Desk Crawler's board does. The OG shows the short names, except where the board spans the
  * whole view (`wide`, template v15) and a full name fits.
+ * Template v28 (D244): the week ranks rarest first, so each row shows its fish's rarity gem before the weight, and the
+ * fish's name where the row has room (`fish`, and always on the X); the OG's landscape board beside the scene shows
+ * the gem alone, since the name there cut the anglers' names to nothing.
  */
-const board = (rows: number, wide = false) =>
+const board = (rows: number, wide = false, fish = wide) =>
   `{% if board %}<div class="no-shrink flex flex--col gap--xsmall w--full" data-board="true" data-give-way="-1">` +
   `<div class="flex flex--row flex--center-y gap--[3px] w--full"><img class="${ICON}" src="{{ m_trophy }}" alt=""><span class="${LABEL} grow w--min-0" data-clamp="2">{{ board.label | escape }}</span></div>` +
   `<span class="${LABEL} w--full" data-clamp="1">{{ board.rank_label | escape }}</span>` +
-  `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. ${wide ? '{{ row.name | escape }}' : '<span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span>'}</span><span class="no-shrink">{{ row.weight_label }}</span></div>{% endfor %}</div>{% endif %}`
+  `{% for row in board.rows limit:${rows} %}<div class="${LABEL} flex flex--row flex--between flex--center-y gap--small w--full{% if row.own %} label--inverted{% endif %}" data-rank-row="{{ row.rank }}"><span class="grow w--min-0" data-clamp="1">{{ row.rank }}. ${wide ? '{{ row.name | escape }}' : '<span class="lg:hidden">{{ row.name_short | default: row.name | escape }}</span><span class="hidden lg:inline">{{ row.name | escape }}</span>'}</span><span class="no-shrink flex flex--row flex--center-y gap--[3px]">${gem}${fish ? '<span>{{ row.fish | escape }}</span>' : '<span class="hidden lg:inline">{{ row.fish | escape }}</span>'}<span>{{ row.weight_label }}</span></span></div>{% endfor %}</div>{% endif %}`
 
 /**
  * The twelve-hour recap as Desk Crawler's ribbon: a rule, then its name in bold and each fact behind its mark. Each
@@ -395,7 +409,7 @@ const header = (qrOg: number, qrX: number, beside = false) => `
 const full = oriented(
   'layout layout--col layout--top layout--stretch-x gap--small lg:gap--large',
   ready(`${header(2, 3, true)}
-    <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([144, 4], [144, 4], '')}<div class="grow w--min-0">${board(5, true)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
+    <div class="lg:hidden no-shrink stretch-x">{% if board %}<div class="flex flex--row flex--top gap--medium stretch-x">${scene([144, 4], [144, 4], '')}<div class="grow w--min-0">${board(5, true, false)}</div></div>{% else %}${scene([156, 5], [156, 5])}{% endif %}</div>
     <div class="lg:hidden flex flex--col flex--left flex--top gap--small flex-auto h--min-0 w--full">${attention(1)}${badge(1, 1, false)}${goal()}${stories(16, 1, 'label lg:title--small')}</div>
     <div class="hidden lg:flex flex--col flex--left flex--top gap--medium flex-auto h--min-0 w--full">${scene([170, 6], [170, 6])}${attention(1)}{% assign board_rows = board.rows | size %}{% if board_rows >= 6 %}${badge(1, 1, false)}{% endif %}
       <div class="flex flex--row flex--stretch gap--large flex-auto h--min-0 w--full"><div class="grow w--min-0 flex flex--col flex--left gap--small">${goal()}${stories(16, 2)}</div><div class="no-shrink flex flex--col flex--left flex--top gap--medium">${board(6)}{% if attention == nil and board_rows < 6 %}{% if badge %}${badge(2, 2, true)}{% else %}${catchPanel(4, 5)}{% endif %}{% endif %}</div></div>

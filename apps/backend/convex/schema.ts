@@ -398,6 +398,9 @@ export default defineSchema({
    * Idle Angler boards (2026-10-10): each angler's heaviest fish per water, once for the week (`period` is the Monday,
    * "w2026-10-05", UTC) and once for all time ("all"). A landed fish, kept or released, replaces the row when heavier.
    * `earlierFirst` is minus the catch time, so equal weights rank the earlier catch first.
+   * D244: the week and all-time rows keep the angler's rarest fish, then its heaviest, and rank by `rarityRank` (0
+   * common to 3 epic) before weight; an Open's rows are one species and still rank by weight. Optional only until
+   * `idleAngler/records:backfillRarity` has run over the rows written before it.
    */
   iaCatchRecords: defineTable({
     waterId,
@@ -406,10 +409,12 @@ export default defineSchema({
     userId: v.id('users'),
     speciesId: v.string(),
     grams: v.number(),
+    rarityRank: v.optional(v.number()),
     at: v.number(),
     earlierFirst: v.number(),
   })
     .index('by_waterId_and_period_and_grams', ['waterId', 'period', 'grams', 'earlierFirst'])
+    .index('by_waterId_and_period_and_rarityRank_and_grams', ['waterId', 'period', 'rarityRank', 'grams', 'earlierFirst'])
     .index('by_anglerId_and_waterId_and_period', ['anglerId', 'waterId', 'period'])
     .index('by_period', ['period']),
 
