@@ -10,9 +10,9 @@ import { readEngineWorld } from '../lib/engine/world'
 import { fromAnglerState, toAnglerState } from './adapter'
 import { awardAfterAnglerIntent } from './achievements'
 import { asCatch, speciesName } from './dockFull'
-import { REFUSAL, commandLog, intentResult, playableAngler, shopIntent, strip, worldContentOf } from './anglers'
+import { HELD_REFUSAL, REFUSAL, commandLog, intentResult, playableAngler, shopIntent, strip, worldContentOf } from './anglers'
 import { currentAngler } from './profile'
-import { OPEN_AWARD_DEPTH, readBoard, topRows } from './records'
+import { OPEN_AWARD_DEPTH, byWallOrder, readBoard, topRows } from './records'
 import { IDLE_ANGLER_RUNTIME } from './runtime'
 
 /**
@@ -67,6 +67,7 @@ export const handOverOrder = mutation({
         const { world, content } = await worldContentOf(ctx)
         const rows = []
         for (const id of catchIds) rows.push(await ownCatch(ctx, angler, id))
+        if (rows.some((row) => row.held)) throw appError('INVALID_STATE', HELD_REFUSAL)
         const result = fillOrder(content, toAnglerState(angler), orderId, rows.map(asCatch))
         if (!result.ok) throw appError('INVALID_STATE', result.code === 'WRONG_FISH' ? 'Those fish do not fit this order.' : result.code === 'WRONG_COUNT' ? 'This order needs a different number of fish.' : 'That order is no longer on the slate.')
         for (const row of rows) await ctx.db.delete(row._id)
@@ -111,12 +112,32 @@ export const useAsBait = mutation({
         const angler = await playableAngler(ctx, user)
         const { world, content } = await worldContentOf(ctx)
         const row = await ownCatch(ctx, angler, catchId)
+        if (row.held) throw appError('INVALID_STATE', HELD_REFUSAL)
         const result = baitFromCatch(content, toAnglerState(angler), row)
         if (!result.ok) throw appError('INVALID_STATE', REFUSAL[result.code] ?? 'That is not possible right now.')
         await ctx.db.delete(row._id)
         const sequence = await commandLog(ctx, angler, 'idleAngler.useAsBait', `A ${formatWeight(row.grams)} ${speciesName(content, row.speciesId)} goes in the deadbait box.`)
         await ctx.db.patch(angler._id, { ...fromAnglerState(result.angler), logSequence: sequence })
         await awardAfterAnglerIntent(ctx, angler, content, world?.currentTick ?? 0)
+        return { changed: true }
+      }),
+    ),
+})
+
+/**
+ * D245: set a cooler fish aside, or let it go again. A held fish keeps its cooler slot, and no sale, fishmonger order
+ * or deadbait takes it, so a trophy waiting for coins or a peg cannot be sold by mistake. Mounting still takes it.
+ */
+export const holdCatch = mutation({
+  args: { operationId: v.string(), catchId: v.id('catches'), held: v.boolean() },
+  returns: intentResult,
+  handler: async (ctx, { operationId, catchId, held }) =>
+    strip(
+      await runIntent(ctx, operationId, 'idleAngler.hold', { catchId, held }, async (user) => {
+        const angler = await playableAngler(ctx, user)
+        const row = await ownCatch(ctx, angler, catchId)
+        if ((row.held === true) === held) return { changed: false }
+        await ctx.db.patch(row._id, { held: held ? true : undefined })
         return { changed: true }
       }),
     ),
@@ -177,7 +198,7 @@ export const buyCharterTicket = mutation({
   handler: async (ctx, { operationId }) => strip(await shopIntent('idleAngler.buyCharter', (c, a) => buyCharter(c, a), (n) => `Booked a charter for ${n.charterCasts ?? 0} casts.`)(ctx, operationId, {})),
 })
 
-/** The trophy wall and shelf: every mounted fish, the newest medals, and the rosettes (one per Open entered). */
+/** The trophy wall and shelf: every mounted fish (rarest, then heaviest, first: D245), the newest medals, and the rosettes (one per Open entered). */
 export const trophies = query({
   args: {},
   returns: v.any(),
@@ -189,7 +210,7 @@ export const trophies = query({
     const wall = await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(MOUNTED_MAX)
     const medals = await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'medal')).order('desc').take(SHELF_PAGE)
     const describe = (t: Doc<'iaTrophies'>) => ({ id: t._id, speciesId: t.speciesId ?? null, name: t.speciesId ? speciesName(content, t.speciesId) : null, grams: t.grams ?? null, water: waterOf(content, t.water).name, at: t.at, peg: t.peg ?? null, place: t.place ?? null, period: t.periodKey ?? null })
-    return { pegs: pegsOf(content, toAnglerState(angler)), wall: wall.map(describe).sort((a, b) => (a.peg ?? 0) - (b.peg ?? 0)), medals: medals.map(describe), rosettes: angler.counters.opensEntered ?? 0 }
+    return { pegs: pegsOf(content, toAnglerState(angler)), wall: [...wall].sort(byWallOrder).map(describe), medals: medals.map(describe), rosettes: angler.counters.opensEntered ?? 0 }
   },
 })
 

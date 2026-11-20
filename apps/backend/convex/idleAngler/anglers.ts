@@ -28,6 +28,8 @@ import { anglerOpen } from './records'
  */
 
 export const MAX_SELL = 24
+/** D245: a held fish stays in the cooler until it is let go. */
+export const HELD_REFUSAL = 'That fish is set aside. Let it go first.'
 
 export async function worldContentOf(ctx: QueryCtx): Promise<{ world: Doc<'worldState'> | null; content: IdleAnglerCatalog }> {
   const world = await readEngineWorld(ctx, IDLE_ANGLER_RUNTIME)
@@ -146,6 +148,7 @@ export const sellCatches = mutation({
         for (const id of catchIds) {
           const row = await ctx.db.get(id)
           if (row === null || row.anglerId !== angler._id) throw appError('INVALID_STATE', 'One of those fish is no longer in your cooler.')
+          if (row.held) throw appError('INVALID_STATE', HELD_REFUSAL)
           rows.push(row)
         }
         const next = sell(toAnglerState(angler), rows.map((r) => r.value))
@@ -227,7 +230,8 @@ export const dock = query({
     const logged = speciesLogged(content, angler.logbook)
     const catches = await ctx.db.query('catches').withIndex('by_anglerId', (q) => q.eq('anglerId', angler._id)).take(32)
     // D167: the mounted fish, so the cooler offers Mount only while a peg is free. At most the wall's 24, read under v2 only.
-    const mounted = content.trophies ? (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24)).length : 0
+    // D245: the rows themselves, so each trophy-sized cooler fish can be weighed against the heaviest of its kind on the wall.
+    const mounted = content.trophies ? await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24) : []
     // The recap reads as many stories as the device's (MAX_RECAP_STORIES); the Latest list shows the newest 20.
     const recentLogs = await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', angler._id)).order('desc').take(MAX_RECAP_STORIES)
     const logs = recentLogs.slice(0, 20)
@@ -290,7 +294,7 @@ export const dock = query({
       },
       catches: catches
         // `record`: this fish is the species' heaviest in the logbook, so selling it sells the personal best.
-        .map((c) => ({ id: c._id, speciesId: c.speciesId, name: content.species.find((s) => s.id === c.speciesId)?.name ?? c.speciesId, grams: c.grams, value: c.value, caughtTick: c.caughtTick, record: angler.logbook[c.speciesId]?.bestGrams === c.grams }))
+        .map((c) => ({ id: c._id, speciesId: c.speciesId, name: content.species.find((s) => s.id === c.speciesId)?.name ?? c.speciesId, grams: c.grams, value: c.value, caughtTick: c.caughtTick, record: angler.logbook[c.speciesId]?.bestGrams === c.grams, held: c.held === true }))
         .sort((a, b) => b.caughtTick - a.caughtTick),
       waters,
       shop: {

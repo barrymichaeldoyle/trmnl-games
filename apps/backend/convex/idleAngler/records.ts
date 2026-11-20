@@ -42,6 +42,9 @@ export const periodKey = (period: Period, at: number) => (period === 'all' ? 'al
 const RARITY_OF: ReadonlyMap<string, Rarity> = new Map(Object.values(catalogs).flatMap((content) => content.species.map((s) => [s.id, s.rarity] as const)))
 export const speciesRarity = (speciesId: string): Rarity => RARITY_OF.get(speciesId) ?? 'common'
 export const rarityRankOf = (speciesId: string) => RARITY_RANK[speciesRarity(speciesId)]
+/** D245: the trophy wall's order: the rarest fish first, then the heaviest, then the one mounted first. */
+export const byWallOrder = (a: { speciesId?: string; grams?: number; at: number }, b: { speciesId?: string; grams?: number; at: number }) =>
+  rarityRankOf(b.speciesId ?? '') - rarityRankOf(a.speciesId ?? '') || (b.grams ?? 0) - (a.grams ?? 0) || a.at - b.at
 /** Every species' water, as the all-time rebuild reads the logbook. */
 const WATER_OF: ReadonlyMap<string, string> = new Map(Object.values(catalogs).flatMap((content) => content.species.map((s) => [s.id, s.water] as const)))
 

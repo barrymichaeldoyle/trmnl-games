@@ -12,6 +12,7 @@ import { MAX_UNLOCK_ROWS } from './lib/achievements'
 import { currentHero } from './lib/gameProfile'
 import { readEngineWorld } from './lib/engine/world'
 import { IDLE_ANGLER_RUNTIME } from './idleAngler/runtime'
+import { byWallOrder } from './idleAngler/records'
 import { readWorld } from './world'
 import { DESK_CRAWLER_RUNTIME } from './lib/engine/deskCrawler'
 import { ALIAS_RULE, normalizeAlias } from './lib/names'
@@ -113,8 +114,8 @@ export const view = query({
         ...(showIdleAngler
           ? [{
               slug: 'idle-angler' as const, name: user.publicAlias, title: titleFor(Object.keys(angler.logbook).length).name, since: angler.activatedAt ?? angler.createdAt, rank: null, achievements: iaUnlocks, species: Object.keys(angler.logbook).length, page: null,
-              // D162: the trophy wall, at most 24 mounted fish, and the medal count.
-              wall: (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24)).map((t) => ({ speciesId: t.speciesId ?? '', grams: t.grams ?? 0 })),
+              // D162: the trophy wall, at most 24 mounted fish (rarest, then heaviest, first: D245), and the medal count.
+              wall: (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(24)).sort(byWallOrder).map((t) => ({ speciesId: t.speciesId ?? '', grams: t.grams ?? 0 })),
               medals: angler.counters.medals ?? 0,
               // P48: six badges, finished families and the rarest first, rarity from the current publication.
               badges: showcaseBadges(iaIds, await idleAnglerRarity(ctx)),

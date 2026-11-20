@@ -21,10 +21,10 @@ const FEATURE_NAMES = { shop_upgrades: 'Rod and cooler upgrades', orders: 'Fishm
 
 /**
  * The Dock's content v2 block (D162): the goal, the next locked feature, the slate with the fish that fit each order,
- * the season and its run, the charter ticket and the wall's pegs (and how many are free), and what each cooler fish can do. Undefined under
+ * the season and its run, the charter ticket and the wall's pegs (and how many are free), and what each cooler fish can do (with the heaviest of its species on the wall, D245). Undefined under
  * content v1, so the companion shows the MVP Dock unchanged until the switch.
  */
-export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, catches: readonly Doc<'catches'>[], mounted: number, now: number, utcOffsetSeconds: number | undefined) {
+export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, catches: readonly Doc<'catches'>[], mounted: readonly Doc<'iaTrophies'>[], now: number, utcOffsetSeconds: number | undefined) {
   if (!content.goals) return undefined
   const state = toAnglerState(angler)
   const logged = speciesLogged(content, angler.logbook)
@@ -33,7 +33,8 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
   const season = seasonAt(content, now)
   const fishFor = (order: Order) =>
     catches
-      .filter((c) => catchMatches(content, order, asCatch(c)))
+      // D245: a held fish is never offered to the fishmonger.
+      .filter((c) => !c.held && catchMatches(content, order, asCatch(c)))
       .sort((a, b) => a.value - b.value)
       .slice(0, order.count)
   const features = Object.fromEntries((Object.keys(FEATURE_NAMES) as Array<keyof typeof FEATURE_NAMES>).map((f) => [f, unlocked(content, state, f)]))
@@ -41,6 +42,9 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
   // Issue #6: the mount goal points at the cooler only while a fish there is big enough; otherwise the wall says what to catch.
   const mountGoal = goal?.predicate.kind === 'counter' && goal.predicate.counter === 'trophiesMounted'
   const trophySized = [...mountCosts.values()].some((cost) => cost !== null)
+  // D245: the heaviest mounted fish of each species, so the cooler says whether a trophy-sized fish beats the wall's.
+  const wallBest = new Map<string, number>()
+  for (const t of mounted) if (t.speciesId !== undefined && t.grams !== undefined) wallBest.set(t.speciesId, Math.max(t.grams, wallBest.get(t.speciesId) ?? 0))
   return {
     goal: {
       // D167: a goal met by filling orders, which the companion links to the cooler only while an order can be filled.
@@ -67,14 +71,15 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
     // Only runs at waters the angler can fish (D157): a newcomer is not told about the charter's cod.
     runs: runsAt(content, now).filter((r) => canFish(content, { ...state, charterCasts: 1 }, r.water)).map((r) => ({ id: r.id, line: r.line, water: r.water, species: speciesName(content, r.species) })),
     charter: content.charterTicket ? { price: content.charterTicket.price, casts: content.charterTicket.casts, castsLeft: angler.charterCasts ?? 0 } : null,
-    pegs: { pegs: pegsOf(content, state), free: Math.max(0, pegsOf(content, state) - mounted), next: nextPegs(content, state) },
+    pegs: { pegs: pegsOf(content, state), free: Math.max(0, pegsOf(content, state) - mounted.length), next: nextPegs(content, state) },
     // Issue #6: the mounting rule, so the companion's copy reads its numbers from content.
     trophies: content.trophies ? { minPercent: content.trophies.minPercent, fee: content.trophies.fee } : null,
     deadbait: angler.bait.deadbait ?? 0,
     catchActions: Object.fromEntries(
       catches.map((c) => {
         const species = content.species.find((s) => s.id === c.speciesId)
-        return [c._id, { bait: features.deadbait === true && species?.baitFish === true, mountCost: mountCosts.get(c._id) ?? null }]
+        const mountCost = mountCosts.get(c._id) ?? null
+        return [c._id, { bait: features.deadbait === true && species?.baitFish === true && !c.held, mountCost, wallGrams: mountCost === null ? null : (wallBest.get(c.speciesId) ?? null) }]
       }),
     ),
   }

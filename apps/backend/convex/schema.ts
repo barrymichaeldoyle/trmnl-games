@@ -392,6 +392,8 @@ export default defineSchema({
     band: v.optional(timeBand),
     weather: v.optional(weather),
     season: v.optional(season),
+    /** D245: set aside in the cooler: it keeps its slot, and no sale, order or deadbait takes it until it is let go. */
+    held: v.optional(v.literal(true)),
   }).index('by_anglerId', ['anglerId']),
 
   /**

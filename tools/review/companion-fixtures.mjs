@@ -18,6 +18,7 @@
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   signedout=1 (game-aware signed-out entry; no session or backend)
  *   trophy=all|bait (D226: all catches are trophy-size, or the first bait-sized catch is a trophy)
+ *   wall=1 (D245: each trophy-size catch has a mounted one of its kind, heavier for even rows, lighter for odd) hold=1 (D245: the second catch is held)
  *   whatsnew=1 (D154: the What's new card, with every entry after 12 October)
  *   rank=9 (D152: the hero ninth on every board, so the rankings open with the rows around it)
  *   lang=fr|de (D169: the companion in French or German)
@@ -312,7 +313,7 @@ const iaDock = ia === 'none' ? { gameState: null, angler: null } : {
     baitOnHook: ia === 'rich' ? 'strip' : 'maggots',
     bait: [bait('worms', 'Worms', 12, 12, 25), bait('bread', 'Bread', 0, 12, 20), bait('maggots', 'Maggots', ia === 'empty' ? 0 : 34, 12, 30), bait('spinner', 'Spinner', 0, 72, 240), bait('ragworm', 'Ragworm', 24, 12, 60), bait('strip', 'Mackerel strip', ia === 'rich' ? 48 : 0, 12, 75)],
     access: ia === 'rich' ? ['waders', 'pier_permit'] : ['waders'], counters: {}, publicProfile: false, speciesLogged: ia === 'rich' ? 26 : 10, speciesTotal: 30 },
-  catches: ia === 'empty' ? [] : Array.from({ length: ia === 'full' ? 18 : 7 }, (_, i) => { const [speciesId, name, grams, value] = iaCatches[i % iaCatches.length]; return { id: 'c' + i, speciesId, name, grams: grams + i * 10, value, caughtTick: 900 - i, record: i === 0 } }),
+  catches: ia === 'empty' ? [] : Array.from({ length: ia === 'full' ? 18 : 7 }, (_, i) => { const [speciesId, name, grams, value] = iaCatches[i % iaCatches.length]; return { id: 'c' + i, speciesId, name, grams: grams + i * 10, value, caughtTick: 900 - i, record: i === 0, held: params.get('hold') === '1' && i === 1 } }),
   waters: [
     { id: 'millpond', name: 'Millpond', opensAfter: null, access: null, open: true, rank: { id: 'expert', logged: 7, total: 10, next: { id: 'veteran', species: 8 } }, weather: 'clear', band: 'dusk', bitePercent: 17, baits: ['worms', 'bread', 'spinner'], weatherUntil: now + 36e5 * 2 },
     { id: 'river_bend', name: 'River Bend', opensAfter: { waterId: 'millpond', waterName: 'Millpond', species: 6, logged: 7 }, access: 'waders', open: true, rank: { id: 'angler', logged: 3, total: 12, next: { id: 'expert', species: 6 } }, weather: 'overcast', band: 'dusk', bitePercent: 21, baits: ['worms', 'maggots', 'spinner'], weatherUntil: now + 36e5 * 2 },
@@ -356,7 +357,7 @@ if (v2 && iaDock.angler) {
     pegs: { pegs: 6, free: params.get('pegs') === 'full' ? 0 : 3, next: { pegs: 12, price: 800 } },
     deadbait: 6,
     trophies: { minPercent: 60, fee: 100 },
-    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && (params.get('trophy') === 'all' || i === (params.get('trophy') === 'bait' ? 2 : 0)) && params.get('trophy') !== 'none' ? 192 : null }])),
+    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && (params.get('trophy') === 'all' || i === (params.get('trophy') === 'bait' ? 2 : 0)) && params.get('trophy') !== 'none' ? 192 : null, wallGrams: params.get('wall') === '1' ? c.grams + (i % 2 === 0 ? 400 : -300) : null }])),
   };
   // Issue #6: trophy=poor leaves too few coins to mount the trophy-sized fish.
   if (params.get('trophy') === 'poor') iaDock.angler.gold = 120;

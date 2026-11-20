@@ -40,6 +40,7 @@ function CoolerPage() {
   const handOver = useIntent(api.idleAngler.full.handOverOrder, { onFeedback: notify })
   const asBait = useIntent(api.idleAngler.full.useAsBait, { onFeedback: notify })
   const mount = useIntent(api.idleAngler.full.mountCatch, { onFeedback: notify })
+  const hold = useIntent(api.idleAngler.full.holdCatch, { onFeedback: notify })
   const [mounting, setMounting] = useState<{ id: Id<'catches'>; name: string; grams: number; cost: number } | null>(null)
   const [chosen, setChosen] = useState<ReadonlySet<string>>(new Set())
   const [saleReview, setSaleReview] = useState<{ ids: string[]; includeTrophies: boolean } | null>(null)
@@ -54,7 +55,9 @@ function CoolerPage() {
   if (!dock?.angler) return null
   const full = dock.full ?? null
   const catches = dock.catches ?? []
-  const picked = catches.filter((c) => chosen.has(c.id))
+  // D245: a held fish cannot be ticked, sold or handed over until it is unheld.
+  const sellable = catches.filter((c) => !c.held)
+  const picked = sellable.filter((c) => chosen.has(c.id))
   const trophyCount = (rows: typeof catches) => rows.filter((fish) => full?.catchActions[fish.id]?.mountCost != null).length
   const reviewed = saleReview ? catchesForSale(catches, saleReview.ids, full?.catchActions, true) : []
   const saleRows = saleReview ? catchesForSale(catches, saleReview.ids, full?.catchActions, saleReview.includeTrophies) : []
@@ -117,25 +120,32 @@ function CoolerPage() {
             {catches.map((fish) => (
               <li key={fish.id}>
                 <label className="flex min-h-12 cursor-pointer items-center gap-3 border-b border-rule py-2 last:border-b-0">
-                  <input type="checkbox" className="pixel-check size-5 shrink-0" checked={chosen.has(fish.id)} onChange={() => toggle(fish.id)} />
+                  <input type="checkbox" className="pixel-check size-5 shrink-0" checked={!fish.held && chosen.has(fish.id)} disabled={fish.held} onChange={() => toggle(fish.id)} />
                   <FishIcon id={fish.speciesId} />
                   {/* Name over weight: inline, a phone's narrow row split the weight across lines. */}
-                  <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId} />{' '}<span className="text-sm text-muted"><span className="whitespace-nowrap">{formatWeight(fish.grams)}</span>{fish.record ? <>{' '}<span className="whitespace-nowrap text-gold-ink">· {t.personalBest}</span></> : null}{wanted.has(fish.id) ? <>{' '}<span className="whitespace-nowrap text-gold-ink">· {t.fishmongerTag}</span></> : null}{full?.catchActions[fish.id]?.mountCost != null ? <>{' '}<span className="whitespace-nowrap text-gold-ink">· {t.trophySize}</span></> : null}</span></span>
+                  <span className="flex min-w-0 flex-1 flex-col leading-tight"><FishName id={fish.speciesId} />{' '}<span className="text-sm text-muted"><span className="whitespace-nowrap">{formatWeight(fish.grams)}</span>{fish.record ? <>{' '}<span className="whitespace-nowrap text-gold-ink">· {t.personalBest}</span></> : null}{wanted.has(fish.id) ? <>{' '}<span className="whitespace-nowrap text-gold-ink">· {t.fishmongerTag}</span></> : null}{full?.catchActions[fish.id]?.mountCost != null ? <>{' '}<span className="whitespace-nowrap text-gold-ink">· {t.trophySize}</span></> : null}{fish.held ? <>{' '}<span className="whitespace-nowrap text-ink">· {t.heldTag}</span></> : null}</span></span>
                   <Coins n={fish.value} className="shrink-0 text-gold-ink" />
                 </label>
                 {(() => {
                   // A trophy-sized fish always says where it stands (issue #6): Mount when it can go up now, else the
                   // price and coins to go, or that the wall is full with a link to buy pegs.
+                  // D245: it also says how it weighs against the heaviest of its kind on the wall, and can be held
+                  // aside (keeping its slot) so no sale takes it while it waits for coins or a peg.
                   const bait = full?.catchActions[fish.id]?.bait === true
                   const cost = full?.catchActions[fish.id]?.mountCost ?? null
-                  if (!bait && cost === null) return null
+                  const wallGrams = full?.catchActions[fish.id]?.wallGrams ?? null
+                  if (!bait && cost === null && !fish.held) return null
                   const wallFull = full !== null && full.pegs.free === 0
+                  const holdName = words.species(fish.speciesId)
                   return (
                     <div className="flex flex-wrap items-center gap-2 border-b border-rule pb-2 pl-8">
+                      {cost !== null && wallGrams !== null ? <p className={`w-full text-sm ${wallGrams >= fish.grams ? 'text-muted' : 'text-gold-ink'}`}>{wallGrams >= fish.grams ? t.wallBigger(formatWeight(wallGrams)) : t.wallBeats(formatWeight(wallGrams))}</p> : null}
                       {bait ? <Button variant="secondary" disabled={asBait.pending} onClick={() => { if (cost !== null) { asBait.clearFeedback(); setBaiting(fish.id) } else void asBait.run({ catchId: fish.id }, t.toDeadbait(words.species(fish.speciesId))) }}>{t.useAsBait}</Button> : null}
                       {cost === null ? null : wallFull ? <span className="text-sm text-muted">{t.wallFull} <Link to="/app/idle-angler/trophies" className="underline underline-offset-4">{t.addPegs}</Link></span>
                         : dock.angler!.gold >= cost ? <Button variant="secondary" className="inline-flex items-center justify-center gap-2" disabled={mount.pending} onClick={() => { mount.clearFeedback(); setMounting({ id: fish.id, name: words.species(fish.speciesId), grams: fish.grams, cost }) }}>{t.mount} <Coins n={cost} /></Button>
                         : <div className="flex flex-wrap items-center gap-x-2 text-sm"><span className="text-muted">{t.mount}</span><Price price={cost} gold={dock.angler!.gold} /></div>}
+                      {fish.held ? <Button variant="quiet" className="text-sm" disabled={hold.pending} onClick={() => void hold.run({ catchId: fish.id, held: false }, t.unheld(holdName))}>{t.unhold}</Button>
+                        : cost !== null ? <Button variant="quiet" className="text-sm" disabled={hold.pending} onClick={() => { setChosen((current) => { const next = new Set(current); next.delete(fish.id); return next }); void hold.run({ catchId: fish.id, held: true }, t.held(holdName)) }}>{t.hold}</Button> : null}
                     </div>
                   )
                 })()}
@@ -143,8 +153,8 @@ function CoolerPage() {
             ))}
           </ul>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Button variant="secondary" disabled={sell.pending} onClick={() => openSale(catches)}>{review.sellCatch}</Button>
-            {trophyCount(catches) > 0 ? <p className="text-sm text-muted">{review.trophiesKept(trophyCount(catches))}</p> : null}
+            <Button variant="secondary" disabled={sell.pending || sellable.length === 0} onClick={() => openSale(sellable)}>{review.sellCatch}</Button>
+            {trophyCount(sellable) > 0 ? <p className="text-sm text-muted">{review.trophiesKept(trophyCount(sellable))}</p> : null}
             {picked.length === 0 ? <span className="text-sm text-muted">{t.orTick}</span> : null}
           </div>
           <Rows className="mt-3" rows={[[t.price, t.priceValue], [t.coolerFull, t.coolerFullValue]]} />

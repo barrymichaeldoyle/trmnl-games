@@ -160,6 +160,30 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall).toEqual([])
   })
 
+  it('holds a cooler fish aside so no sale, order or deadbait takes it, and weighs trophies against the wall (D245)', async () => {
+    const id = await seedAngler(t, { logbook: logbookOf(TEN), gold: 500, orders: [{ id: 'o1', kind: 'species', speciesId: 'roach', count: 1, bonus: 20 }] }, 'Pat')
+    const [big, bigger, roach] = await addFish(id, [['tench', 2000, 58], ['tench', 2400, 62], ['roach', 120, 10]])
+    await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'hold-mount1', catchId: big! })
+    await addFish(id, [['tench', 1900, 57]])
+    let dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
+    expect(dock.full.catchActions[bigger!]).toMatchObject({ wallGrams: 2000 })
+    expect(dock.full.catchActions[roach!]).toMatchObject({ mountCost: null, wallGrams: null })
+    expect(dock.full.orders[0].catchIds).toEqual([roach])
+    for (const fish of [bigger!, roach!]) expect(await as('Pat').mutation(api.idleAngler.full.holdCatch, { operationId: `hold-on-${fish}`, catchId: fish, held: true })).toMatchObject({ changed: true })
+    dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
+    expect(dock.catches.find((c: { id: string }) => c.id === bigger).held).toBe(true)
+    expect(dock.full.orders[0].catchIds).toEqual([])
+    expect(dock.full.catchActions[roach!].bait).toBe(false)
+    expect(await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'hold-sell01', catchIds: [bigger!] })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
+    expect(await as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'hold-order1', orderId: 'o1', catchIds: [roach!] })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
+    expect(await as('Pat').mutation(api.idleAngler.full.useAsBait, { operationId: 'hold-bait01', catchId: roach! })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
+    // Mounting still takes a held fish, and the wall lists the rarest, then the heaviest, first.
+    await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'hold-mount2', catchId: bigger! })
+    expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall.map((w: { grams: number }) => w.grams)).toEqual([2400, 2000])
+    await as('Pat').mutation(api.idleAngler.full.holdCatch, { operationId: 'hold-off-01', catchId: roach!, held: false })
+    expect(await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'hold-sell02', catchIds: [roach!] })).toMatchObject({ changed: true, count: 1 })
+  })
+
   it('points the mount goal at the wall until a cooler fish is big enough, and shows trophy weights (issue #6)', async () => {
     const id = await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT), goal: { rung: 13, castsAtStart: 0 } }, 'Pat')
     const before = (await as('Pat').query(api.idleAngler.anglers.dock, {})).full

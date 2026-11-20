@@ -42,6 +42,23 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-20',
+    changes: [
+      {
+        game: 'idle-angler',
+        title: 'Hold a trophy fish, and see if your wall has a bigger one',
+        body: 'A trophy-size fish in the cooler now says whether the biggest of its kind on your wall is heavier, so you can sell it without a second thought, or whether it beats the one up there. Tap Hold to set a fish aside: it keeps its cooler slot, and no sale or fishmonger order takes it until you unhold it, so it can wait for the coins or a free peg. The trophy wall now lists the rarest fish first, then the heaviest.',
+        fr: { title: 'Gardez un poisson trophée et comparez-le à votre mur', body: 'Un poisson de taille trophée dans la glacière indique désormais si le plus gros de son espèce sur votre mur est plus lourd, pour le vendre sans regret, ou s’il bat celui qui y est accroché. Touchez Garder pour le mettre de côté : il garde sa place dans la glacière, et aucune vente ni commande du poissonnier ne le prend tant que vous ne cessez pas de le garder ; il peut ainsi attendre les pièces ou un crochet libre. Le mur des trophées montre maintenant les poissons les plus rares d’abord, puis les plus lourds.' },
+        de: { title: 'Trophäenfische behalten und mit der Wand vergleichen', body: 'Ein Fisch in Trophäengröße in der Kühlbox zeigt jetzt, ob der größte seiner Art an deiner Wand schwerer ist, damit du ihn ohne Reue verkaufen kannst, oder ob er den dort hängenden schlägt. Tippe auf Behalten, um einen Fisch beiseitezulegen: Er behält seinen Platz in der Kühlbox, und kein Verkauf und keine Bestellung des Fischhändlers nimmt ihn, bis du ihn freigibst. So kann er auf die Münzen oder einen freien Haken warten. Die Trophäenwand zeigt jetzt die seltensten Fische zuerst, dann die schwersten.' },
+        es: { title: 'Guarda un pez trofeo y compáralo con tu pared', body: 'Un pez de tamaño trofeo en la nevera indica ahora si el mayor de su especie en tu pared pesa más, para venderlo sin remordimientos, o si supera al que está colgado. Toca Guardar para apartarlo: conserva su sitio en la nevera, y ninguna venta ni pedido del pescadero lo toma hasta que dejes de guardarlo, así puede esperar las monedas o un gancho libre. La pared de trofeos muestra ahora primero los peces más raros y luego los más pesados.' },
+        it: { title: 'Tieni un pesce da trofeo e confrontalo con la parete', body: 'Un pesce da trofeo nel frigo ora dice se il più grande della sua specie sulla tua parete pesa di più, così puoi venderlo senza rimpianti, o se batte quello appeso. Tocca Tieni per metterlo da parte: conserva il suo posto nel frigo, e nessuna vendita né ordine del pescivendolo lo prende finché non smetti di tenerlo, così può aspettare le monete o un gancio libero. La parete dei trofei ora mostra prima i pesci più rari, poi i più pesanti.' },
+        pt: { title: 'Guarde um peixe troféu e compare com a parede', body: 'Um peixe de tamanho troféu no cooler agora mostra se o maior da espécie na sua parede é mais pesado, para vender sem culpa, ou se ele supera o que está pendurado. Toque em Guardar para separá-lo: ele mantém a vaga no cooler, e nenhuma venda ou pedido do peixeiro o leva até você liberar, então ele pode esperar pelas moedas ou por um gancho livre. A parede de troféus agora mostra primeiro os peixes mais raros, depois os mais pesados.' },
+        pl: { title: 'Zatrzymaj rybę trofeową i porównaj ją ze ścianą', body: 'Ryba trofeowej wielkości w lodówce pokazuje teraz, czy największa z jej gatunku na twojej ścianie jest cięższa, więc możesz ją sprzedać bez żalu, czy też bije tę, która wisi. Dotknij Zatrzymaj, aby ją odłożyć: zachowuje miejsce w lodówce, a żadna sprzedaż ani zamówienie handlarza ryb jej nie weźmie, dopóki jej nie odblokujesz, więc może poczekać na monety lub wolny haczyk. Ściana trofeów pokazuje teraz najpierw najrzadsze ryby, potem najcięższe.' },
+        nl: { title: 'Bewaar een trofeevis en vergelijk hem met je wand', body: 'Een vis van trofeeformaat in de koelbox laat nu zien of de grootste van zijn soort aan je wand zwaarder is, zodat je hem zonder spijt verkoopt, of dat hij die aan de wand verslaat. Tik op Bewaren om hem apart te leggen: hij houdt zijn plek in de koelbox, en geen verkoop of bestelling van de visboer neemt hem tot je hem niet meer bewaart, zodat hij kan wachten op de munten of een vrije haak. De trofeeënwand toont nu eerst de zeldzaamste vissen, dan de zwaarste.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-17',
     changes: [
       {

@@ -31,7 +31,7 @@ export interface Dock {
     readonly speciesLogged: number
     readonly speciesTotal: number
   }
-  readonly catches?: ReadonlyArray<{ id: Id<'catches'>; speciesId: string; name: string; grams: number; value: number; caughtTick: number; record?: boolean }>
+  readonly catches?: ReadonlyArray<{ id: Id<'catches'>; speciesId: string; name: string; grams: number; value: number; caughtTick: number; record?: boolean; held?: boolean }>
   readonly waters?: ReadonlyArray<{ id: string; name: string; opensAfter: { waterId: string; waterName: string; species: number; logged: number; missing?: readonly string[] } | null; access: string | null; open: boolean; charter?: boolean; closed?: boolean; weather: string; band: string; bitePercent: number; baits: readonly string[]; weatherUntil: number; rank?: WaterRank | null; others?: number }>
   readonly shop?: {
     readonly rod: { name: string; price: number; limitGrams: number; biteBonusPercent: number } | null
@@ -74,7 +74,8 @@ interface FullDock {
   /** Issue #6: the mounting rule (a fish at `minPercent` of its species' top weight, for its value plus `fee`). */
   readonly trophies?: { minPercent: number; fee: number } | null
   readonly deadbait: number
-  readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null }>>
+  /** D245: `wallGrams`, for a trophy-sized fish, is the heaviest of its species on the wall (null when none is up). */
+  readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null; wallGrams?: number | null }>>
 }
 
 type Catch = NonNullable<Dock['catches']>[number]
