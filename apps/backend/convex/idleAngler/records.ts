@@ -118,6 +118,8 @@ export async function readBoard(ctx: QueryCtx, waterId: WaterId, period: string,
     entries,
     own: ownRow ? { rank: ownIndex >= 0 ? ownIndex + 1 : null, speciesId: ownRow.speciesId, rarity: speciesRarity(ownRow.speciesId), grams: ownRow.grams } : null,
     full: rows.length === BOARD_DEPTH,
+    /** Entries read, up to `BOARD_DEPTH` (`full` says there may be more). */
+    count: rows.length,
   }
 }
 

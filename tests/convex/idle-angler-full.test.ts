@@ -160,28 +160,52 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall).toEqual([])
   })
 
-  it('holds a cooler fish aside so no sale, order or deadbait takes it, and weighs trophies against the wall (D245)', async () => {
-    const id = await seedAngler(t, { logbook: logbookOf(TEN), gold: 500, orders: [{ id: 'o1', kind: 'species', speciesId: 'roach', count: 1, bonus: 20 }] }, 'Pat')
+  it('keeps a held fish from sales, orders and deadbait, and keeps one fish of each kind on the wall, the heaviest (D245, D246)', async () => {
+    const id = await seedAngler(t, { logbook: logbookOf(TEN), gold: 500, orders: [{ id: 'o1', kind: 'species', speciesId: 'roach', count: 1, bonus: 20 }, { id: 'o2', kind: 'species', speciesId: 'tench', count: 1, bonus: 20 }] }, 'Pat')
     const [big, bigger, roach] = await addFish(id, [['tench', 2000, 58], ['tench', 2400, 62], ['roach', 120, 10]])
     await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'hold-mount1', catchId: big! })
-    await addFish(id, [['tench', 1900, 57]])
+    const [lighter] = await addFish(id, [['tench', 1900, 57]])
     let dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
-    expect(dock.full.catchActions[bigger!]).toMatchObject({ wallGrams: 2000 })
-    expect(dock.full.catchActions[roach!]).toMatchObject({ mountCost: null, wallGrams: null })
-    expect(dock.full.orders[0].catchIds).toEqual([roach])
-    for (const fish of [bigger!, roach!]) expect(await as('Pat').mutation(api.idleAngler.full.holdCatch, { operationId: `hold-on-${fish}`, catchId: fish, held: true })).toMatchObject({ changed: true })
+    // D246: only the cooler's heaviest tench beats the wall; it is the wall fish, and the fishmonger never gets it.
+    expect(dock.full.catchActions[bigger!]).toMatchObject({ mountCost: 162, replaces: 2000, outweighed: null })
+    expect(dock.full.catchActions[lighter!]).toMatchObject({ mountCost: null, outweighed: { grams: 2400, by: 'cooler' } })
+    expect(dock.full.catchActions[roach!]).toMatchObject({ mountCost: null, replaces: null, outweighed: null })
+    expect(dock.full.orders.map((o: { catchIds: string[] }) => o.catchIds)).toEqual([[roach], [lighter]])
+    for (const fish of [lighter!, roach!]) expect(await as('Pat').mutation(api.idleAngler.full.holdCatch, { operationId: `hold-on-${fish}`, catchId: fish, held: true })).toMatchObject({ changed: true })
     dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
-    expect(dock.catches.find((c: { id: string }) => c.id === bigger).held).toBe(true)
-    expect(dock.full.orders[0].catchIds).toEqual([])
+    expect(dock.catches.find((c: { id: string }) => c.id === lighter).held).toBe(true)
+    expect(dock.full.orders.map((o: { catchIds: string[] }) => o.catchIds)).toEqual([[], []])
     expect(dock.full.catchActions[roach!].bait).toBe(false)
-    expect(await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'hold-sell01', catchIds: [bigger!] })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
+    expect(await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'hold-sell01', catchIds: [lighter!] })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
     expect(await as('Pat').mutation(api.idleAngler.full.handOverOrder, { operationId: 'hold-order1', orderId: 'o1', catchIds: [roach!] })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
     expect(await as('Pat').mutation(api.idleAngler.full.useAsBait, { operationId: 'hold-bait01', catchId: roach! })).toMatchObject({ ok: false, message: expect.stringMatching(/set aside/) })
-    // Mounting still takes a held fish, and the wall lists the rarest, then the heaviest, first.
-    await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'hold-mount2', catchId: bigger! })
-    expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall.map((w: { grams: number }) => w.grams)).toEqual([2400, 2000])
+    // The heavier tench takes the lighter one's peg; a lighter one cannot go up beside it.
+    expect(await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'hold-mount2', catchId: bigger! })).toMatchObject({ gold: 180 })
+    expect((await as('Pat').query(api.idleAngler.full.trophies, {})).wall).toMatchObject([{ grams: 2400, peg: 0 }])
+    expect((await as('Pat').query(api.idleAngler.anglers.dock, {})).full.catchActions[lighter!]).toMatchObject({ mountCost: null, outweighed: { grams: 2400, by: 'wall' } })
+    expect(await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'hold-mount3', catchId: lighter! })).toMatchObject({ ok: false, message: expect.stringMatching(/heavier one/) })
+    const lines = await t.run(async (ctx) => (await ctx.db.query('iaTickLogs').withIndex('by_anglerId_and_at_and_sequence', (q) => q.eq('anglerId', id)).collect()).map((l) => l.summary))
+    expect(lines.filter((l) => l.includes('in place of'))).toEqual(['The 2.4 kg Tench goes up on the wall in place of the 2.0 kg one.'])
+    expect((await angler(id)).counters.trophiesMounted).toBe(2)
     await as('Pat').mutation(api.idleAngler.full.holdCatch, { operationId: 'hold-off-01', catchId: roach!, held: false })
     expect(await as('Pat').mutation(api.idleAngler.anglers.sellCatches, { operationId: 'hold-sell02', catchIds: [roach!] })).toMatchObject({ changed: true, count: 1 })
+  })
+
+  it('swaps a heavier fish onto a full wall, sorted rarest then heaviest (D245, D246)', async () => {
+    const id = await seedAngler(t, { logbook: logbookOf(TEN), gold: 500 }, 'Pat')
+    await t.run(async (ctx) => {
+      const doc = (await ctx.db.get(id))!
+      for (const [peg, [speciesId, grams]] of ([['minnow', 20], ['roach', 300], ['rudd', 300], ['perch', 600], ['bream', 2000], ['tench', 2000]] as const).entries()) await ctx.db.insert('iaTrophies', { anglerId: id, userId: doc.userId, kind: 'fish', speciesId, grams, water: 'millpond', at: peg, peg })
+    })
+    const [tench, eel] = await addFish(id, [['tench', 2600, 63], ['eel', 2000, 60]])
+    const dock = await as('Pat').query(api.idleAngler.anglers.dock, {})
+    expect(dock.full.pegs).toMatchObject({ pegs: 6, free: 0 })
+    expect(dock.full.catchActions[tench!]).toMatchObject({ replaces: 2000 })
+    expect(await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'full-eel01', catchId: eel! })).toMatchObject({ ok: false, message: expect.stringMatching(/Every peg/) })
+    await as('Pat').mutation(api.idleAngler.full.mountCatch, { operationId: 'full-tench1', catchId: tench! })
+    const wall = (await as('Pat').query(api.idleAngler.full.trophies, {})).wall
+    expect(wall).toHaveLength(6)
+    expect(wall.find((w: { speciesId: string }) => w.speciesId === 'tench')).toMatchObject({ grams: 2600, peg: 5 })
   })
 
   it('points the mount goal at the wall until a cooler fish is big enough, and shows trophy weights (issue #6)', async () => {
@@ -308,6 +332,29 @@ describe('Idle Angler, the full game (D162, F2)', () => {
       ['millpond', 2],
       ['river_bend', 1],
     ])
+  })
+
+  it('shows last weekend\'s Open results on the Dock from Monday until Nice (D247)', async () => {
+    const ids = [await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Ana'), await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Bo'), await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Cy'), await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Di'), await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Ed')]
+    const saturday = Date.UTC(2026, 9, 24, 12, 0)
+    await t.run(async (ctx) => {
+      for (const [i, id] of ids.slice(0, 4).entries()) await recordCatch(ctx, (await ctx.db.get(id))!, { waterId: 'millpond', speciesId: 'crucian_carp', grams: 1200 - i * 100 }, saturday + i, true)
+    })
+    // During the weekend there is no result yet, and before the Monday close neither.
+    vi.setSystemTime(Date.UTC(2026, 9, 25, 12, 0))
+    expect(await as('Ana').query(api.idleAngler.full.openResult, {})).toBeNull()
+    vi.setSystemTime(Date.UTC(2026, 9, 26, 0, 5))
+    expect(await as('Ana').query(api.idleAngler.full.openResult, {})).toBeNull()
+    vi.setSystemTime(Date.UTC(2026, 9, 26, 0, 10))
+    await t.mutation(internal.idleAngler.full.closeOpens, {})
+    expect(await as('Ana').query(api.idleAngler.full.openResult, {})).toEqual({ period: 'o2026-10-24', results: [{ waterId: 'millpond', speciesId: 'crucian_carp', grams: 1200, rank: 1, entries: 4, more: false, winnerGrams: 1200, place: 1, prize: 500, passed: false }] })
+    expect((await as('Di').query(api.idleAngler.full.openResult, {}))!.results[0]).toMatchObject({ rank: 4, entries: 4, place: null, prize: 0, winnerGrams: 1200 })
+    expect(await as('Ed').query(api.idleAngler.full.openResult, {})).toBeNull()
+    expect(await as('Ana').mutation(api.idleAngler.full.seeOpenResult, { operationId: 'open-seen-1', period: 'o2026-10-24' })).toMatchObject({ changed: true })
+    expect(await as('Ana').query(api.idleAngler.full.openResult, {})).toBeNull()
+    // Bo has not said Nice, but the next Open starting clears the card.
+    vi.setSystemTime(Date.UTC(2026, 9, 31, 1, 0))
+    expect(await as('Bo').query(api.idleAngler.full.openResult, {})).toBeNull()
   })
 
   it('purges the wall and the shelf with the angler', async () => {

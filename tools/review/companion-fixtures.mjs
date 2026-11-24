@@ -18,7 +18,7 @@
  *   alerts=on (P33: two devices, both kinds on)   alerts=gone (turned off because the last device went stale)   alerts=none (no VAPID key yet)
  *   signedout=1 (game-aware signed-out entry; no session or backend)
  *   trophy=all|bait (D226: all catches are trophy-size, or the first bait-sized catch is a trophy)
- *   wall=1 (D245: each trophy-size catch has a mounted one of its kind, heavier for even rows, lighter for odd) hold=1 (D245: the second catch is held)
+ *   wall=1 (D246: odd trophy-size rows beat a lighter mounted one; even rows after the first are outweighed by the wall or the cooler) hold=1 (D245: the second catch is held)   result=gold|medals|entry (D247: last weekend's Open result card on the Dock)
  *   whatsnew=1 (D154: the What's new card, with every entry after 12 October)
  *   rank=9 (D152: the hero ninth on every board, so the rankings open with the rows around it)
  *   lang=fr|de (D169: the companion in French or German)
@@ -357,7 +357,12 @@ if (v2 && iaDock.angler) {
     pegs: { pegs: 6, free: params.get('pegs') === 'full' ? 0 : 3, next: { pegs: 12, price: 800 } },
     deadbait: 6,
     trophies: { minPercent: 60, fee: 100 },
-    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => [c.id, { bait: !fresh && i % 3 === 2, mountCost: !fresh && (params.get('trophy') === 'all' || i === (params.get('trophy') === 'bait' ? 2 : 0)) && params.get('trophy') !== 'none' ? 192 : null, wallGrams: params.get('wall') === '1' ? c.grams + (i % 2 === 0 ? 400 : -300) : null }])),
+    catchActions: Object.fromEntries(iaDock.catches.map((c, i) => {
+      const sized = !fresh && (params.get('trophy') === 'all' || i === (params.get('trophy') === 'bait' ? 2 : 0)) && params.get('trophy') !== 'none'
+      // D246: wall=1 makes odd trophy rows replace a lighter mounted one and even rows (after the first) outweighed by the wall or the cooler.
+      const outweighed = sized && params.get('wall') === '1' && i % 2 === 0 && i > 0 ? { grams: c.grams + 400, by: i % 4 === 0 ? 'wall' : 'cooler' } : null
+      return [c.id, { bait: !fresh && i % 3 === 2, mountCost: sized && !outweighed ? 192 : null, replaces: sized && params.get('wall') === '1' && i % 2 === 1 ? c.grams - 300 : null, outweighed }]
+    })),
   };
   // Issue #6: trophy=poor leaves too few coins to mount the trophy-sized fish.
   if (params.get('trophy') === 'poor') iaDock.angler.gold = 120;
@@ -420,6 +425,15 @@ const queries = {
   'idleAngler/payload:preview': () => iaPayload,
   'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: params.get('wall') === 'empty' ? [] : [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),
   'idleAngler/full:opens': () => (params.get('v2') ? { period: 'o2026-10-24', startsAt: params.get('open') === 'off' ? now + 864e5 * 3 : now - 36e5 * 5, endsAt: params.get('open') === 'off' ? now + 864e5 * 5 : now + 864e5, on: params.get('open') !== 'off', prizes: [500, 300, 150], waters: [['millpond', 'Millpond', 'perch', 'Perch'], ['river_bend', 'River Bend', 'chub', 'Chub'], ['heron_lake', 'Heron Lake', 'mirror_carp', 'Mirror Carp']].map(([id, name, tid, tname], w) => ({ id, name, target: { id: tid, name: tname }, own: w === 1 ? { rank: 4, speciesId: tid, grams: 1300 } : null, entries: w === 2 ? [] : [['Quillfeather_Longname', 2400], ['Mo', 1900], ['Bea', 1500], ['Barry', 1300]].map(([n, g], i) => ({ rank: i + 1, name: n, speciesId: tid, grams: g, own: n === 'Barry', profile: false })) })) } : null),
+  // D247: last weekend's Open results on the Dock: result=gold|medals (gold and a passed place)|entry (no medal).
+  'idleAngler/full:openResult': () => {
+    const which = params.get('result')
+    if (!which) return null
+    const gold = { waterId: 'millpond', speciesId: 'perch', grams: 1300, rank: 1, entries: 7, more: false, winnerGrams: 1300, place: 1, prize: 500, passed: false }
+    const passed = { waterId: 'river_bend', speciesId: 'chub', grams: 1900, rank: 2, entries: 4, more: false, winnerGrams: 2400, place: null, prize: 0, passed: true }
+    const entry = { waterId: 'heron_lake', speciesId: 'mirror_carp', grams: 6400, rank: 4, entries: 9, more: false, winnerGrams: 11200, place: null, prize: 0, passed: false }
+    return { period: 'o2026-11-21', results: which === 'gold' ? [gold] : which === 'medals' ? [gold, passed] : [entry] }
+  },
   'idleAngler/flies:mine': () => ({ totalCollected: 5, claimedThisWeek: params.get('fly') === 'done', nextAvailableAt: now + 864e5 * 3, connected: true, newest: 'red_tag', box: ['black_gnat', 'royal_coachman', 'mayfly', 'woolly_bugger', 'red_tag', 'blue_dun', 'march_brown', 'zulu', 'silver_doctor', 'greenwell', 'hares_ear', 'golden_olive'].map((id, i) => ({ id, name: id.replace(/_/g, ' '), count: i < 5 ? 1 : 0, rows: ['   #   ', '  ###  ', ' #:::# ', '  ###  ', ' # # # ', '   #   ', '  ##   '] })) }),
   'idleAngler/leaderboard:view': (args = {}) => ({ waterId: args.waterId ?? 'river_bend', period: args.period ?? 'week', weekEndsAt: now + 864e5 * 2, full: false, ...(args.period === 'open' ? { open: { targetId: (args.waterId ?? 'river_bend') === 'harbour_pier' ? null : 'chub', on: true, startsAt: now - 36e5 * 5, endsAt: now + 864e5 } } : {}), own: { rank: 3, speciesId: 'barbel', rarity: 'uncommon', grams: 1900 }, entries: [['Quillfeather_Longname', 'salmon', 'epic', 5240], ['Mo', 'pike', 'rare', 2410], ['Barry', 'barbel', 'uncommon', 1900], ['Hidden player', 'grayling', 'uncommon', 1210], ['Bea', 'chub', 'common', 2380]].map(([name, speciesId, rarity, grams], i) => ({ rank: i + 1, name, speciesId, rarity, grams, own: name === 'Barry', profile: name === 'Mo' })) }),
   // P48: new badges for the Dock's card, the More dot and the New tags: badges=new (three) or badges=one.

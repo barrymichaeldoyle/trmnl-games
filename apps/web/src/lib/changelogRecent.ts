@@ -42,6 +42,35 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-24',
+    changes: [
+      {
+        game: 'idle-angler',
+        title: 'See how you did in the weekend Open',
+        body: 'From Monday the Dock shows last weekend\'s Open results: your place, your fish and the winner\'s weight. A medal comes with its prize and confetti. Tap Nice to clear it.',
+        fr: { title: 'Votre résultat à l’Open du week-end', body: 'Dès lundi, le Ponton montre les résultats de l’Open du week-end : votre place, votre poisson et le poids du gagnant. Une médaille arrive avec son prix et des confettis. Touchez Super pour fermer la carte.' },
+        de: { title: 'So lief dein Wochenend-Open', body: 'Ab Montag zeigt der Steg die Ergebnisse des Opens vom Wochenende: deinen Platz, deinen Fisch und das Gewicht des Siegers. Eine Medaille kommt mit ihrem Preis und Konfetti. Tippe auf Schön, um die Karte zu schließen.' },
+        es: { title: 'Tu resultado en el Open del fin de semana', body: 'Desde el lunes, el Muelle muestra los resultados del Open del fin de semana: tu puesto, tu pez y el peso del ganador. Una medalla llega con su premio y confeti. Toca Genial para cerrar la tarjeta.' },
+        it: { title: 'Com’è andato il tuo Open del weekend', body: 'Da lunedì il Pontile mostra i risultati dell’Open del weekend: il tuo posto, il tuo pesce e il peso del vincitore. Una medaglia arriva con il suo premio e i coriandoli. Tocca Bello per chiudere la scheda.' },
+        pt: { title: 'Seu resultado no Open do fim de semana', body: 'A partir de segunda, o Píer mostra os resultados do Open do fim de semana: sua posição, seu peixe e o peso do vencedor. Uma medalha vem com o prêmio e confete. Toque em Legal para fechar o cartão.' },
+        pl: { title: 'Twój wynik w weekendowych zawodach Open', body: 'Od poniedziałku Pomost pokazuje wyniki zawodów Open z weekendu: twoje miejsce, twoją rybę i wagę zwycięzcy. Medal przychodzi z nagrodą i konfetti. Dotknij Super, aby zamknąć kartę.' },
+        nl: { title: 'Zo deed je het in de weekend-Open', body: 'Vanaf maandag toont de Stek de uitslag van de Open van het weekend: je plaats, je vis en het gewicht van de winnaar. Een medaille komt met zijn prijs en confetti. Tik op Mooi om de kaart te sluiten.' },
+      },
+      {
+        game: 'idle-angler',
+        title: 'One fish of each kind on your trophy wall',
+        body: 'Your wall now keeps the heaviest fish of each kind. A heavier one swaps in on the old one\'s peg, even when the wall is full, for the usual mounting price. In the cooler, a fish that would improve your wall is marked for your wall, and Sell all and the fishmonger leave it alone, so Hold is gone. A trophy-size fish that would not improve the wall says which heavier one beats it and sells like any other.',
+        fr: { title: 'Un poisson de chaque espèce sur votre mur', body: 'Votre mur garde maintenant le poisson le plus lourd de chaque espèce. Un plus lourd prend le crochet de l’ancien, même quand le mur est plein, au prix habituel du montage. Dans la glacière, un poisson qui améliorerait votre mur est marqué pour votre mur, et Tout vendre comme le poissonnier le laissent de côté : le bouton Garder disparaît. Un poisson de taille trophée qui n’améliorerait pas le mur indique lequel, plus lourd, le bat, et se vend comme les autres.' },
+        de: { title: 'Ein Fisch jeder Art an deiner Trophäenwand', body: 'Deine Wand hält jetzt den schwersten Fisch jeder Art. Ein schwererer kommt an den Haken des alten, auch wenn die Wand voll ist, zum üblichen Preis fürs Präparieren. In der Kühlbox ist ein Fisch, der deine Wand verbessern würde, mit für deine Wand markiert, und Alles verkaufen und der Fischhändler lassen ihn liegen; Behalten fällt deshalb weg. Ein Fisch in Trophäengröße, der die Wand nicht verbessern würde, zeigt, welcher schwerere ihn schlägt, und wird wie jeder andere verkauft.' },
+        es: { title: 'Un pez de cada especie en tu pared de trofeos', body: 'Tu pared guarda ahora el pez más pesado de cada especie. Uno más pesado ocupa el gancho del anterior, aunque la pared esté llena, por el precio habitual de montaje. En la nevera, un pez que mejoraría tu pared aparece marcado para tu pared, y Vender todo y el pescadero no lo tocan, así que Guardar desaparece. Un pez de tamaño trofeo que no mejoraría la pared dice qué pez más pesado lo supera y se vende como cualquier otro.' },
+        it: { title: 'Un pesce per specie sulla parete dei trofei', body: 'La tua parete ora tiene il pesce più pesante di ogni specie. Uno più pesante prende il gancio del vecchio, anche a parete piena, al solito prezzo di imbalsamazione. Nel frigo, un pesce che migliorerebbe la parete è segnato per la tua parete, e Vendi tutto e il pescivendolo lo lasciano stare, quindi Tieni non c’è più. Un pesce da trofeo che non migliorerebbe la parete dice quale pesce più pesante lo batte e si vende come gli altri.' },
+        pt: { title: 'Um peixe de cada espécie na parede de troféus', body: 'Sua parede agora guarda o peixe mais pesado de cada espécie. Um mais pesado ocupa o gancho do antigo, mesmo com a parede cheia, pelo preço normal de empalhar. No cooler, um peixe que melhoraria sua parede vem marcado para sua parede, e Vender tudo e o peixeiro o deixam de lado, então o Guardar saiu. Um peixe de tamanho troféu que não melhoraria a parede mostra qual peixe mais pesado o supera e é vendido como qualquer outro.' },
+        pl: { title: 'Jedna ryba każdego gatunku na ścianie trofeów', body: 'Ściana trzyma teraz najcięższą rybę każdego gatunku. Cięższa zajmuje haczyk poprzedniej, nawet gdy ściana jest pełna, za zwykłą cenę wypchania. W lodówce ryba, która poprawiłaby ścianę, ma znak na twoją ścianę, a Sprzedaj wszystko i handlarz ryb jej nie biorą, więc Zatrzymaj znika. Ryba trofeowej wielkości, która nie poprawiłaby ściany, pokazuje, która cięższa ją bije, i sprzedaje się jak każda inna.' },
+        nl: { title: 'Eén vis van elke soort aan je trofeeënwand', body: 'Je wand houdt nu de zwaarste vis van elke soort. Een zwaardere neemt de haak van de oude over, ook als de wand vol is, voor de gewone prijs van opzetten. In de koelbox staat bij een vis die je wand zou verbeteren voor je wand, en Alles verkopen en de visboer laten hem liggen, dus Bewaren is weg. Een vis van trofeeformaat die de wand niet zou verbeteren, laat zien welke zwaardere hem verslaat en verkoopt als elke andere.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-20',
     changes: [
       {

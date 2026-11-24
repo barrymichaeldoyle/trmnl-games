@@ -8,7 +8,7 @@ import type { AccessId, AnglerState, BaitClass, CatchRecord, IdleAnglerCatalog, 
  * Companion purchase and setup rules (idle-angler.md "Selling and the shop"), pure so the intents and
  * the harness share them. Each returns the new angler or a refusal code; nothing here reads storage.
  */
-export type ShopRefusal = 'NOT_ENOUGH_GOLD' | 'MAX_TIER' | 'ALREADY_OWNED' | 'BAIT_FULL' | 'LOCKED' | 'UNKNOWN' | 'SAME_WATER' | 'NOT_USED_HERE' | 'CLOSED' | 'NO_TICKET' | 'TICKET_HELD' | 'TOO_SMALL' | 'WALL_FULL' | 'NOT_BAIT_FISH'
+export type ShopRefusal = 'NOT_ENOUGH_GOLD' | 'MAX_TIER' | 'ALREADY_OWNED' | 'BAIT_FULL' | 'LOCKED' | 'UNKNOWN' | 'SAME_WATER' | 'NOT_USED_HERE' | 'CLOSED' | 'NO_TICKET' | 'TICKET_HELD' | 'TOO_SMALL' | 'WALL_FULL' | 'NOT_BIGGER' | 'NOT_BAIT_FISH'
 export type ShopResult = { readonly ok: true; readonly angler: AnglerState; readonly spent: number } | { readonly ok: false; readonly code: ShopRefusal }
 
 const refuse = (code: ShopRefusal): ShopResult => ({ ok: false, code })
@@ -157,13 +157,18 @@ export function mountCost(content: IdleAnglerCatalog, fish: Pick<CatchRecord, 's
   return fish.value + rule.fee
 }
 
-/** v2: mount a catch on a free peg (the caller removes the catch row and writes the trophy). */
-export function mountFish(content: IdleAnglerCatalog, angler: AnglerState, fish: Pick<CatchRecord, 'speciesId' | 'grams' | 'value'>, mounted: number): ShopResult {
+/**
+ * v2: mount a catch on a free peg (the caller removes the catch row and writes the trophy). D246: the wall holds one
+ * fish of each kind, so `wallGrams`, the heaviest of the species already up, makes this a replacement: the fish must
+ * be heavier, and it takes that fish's peg, so a full wall still takes it.
+ */
+export function mountFish(content: IdleAnglerCatalog, angler: AnglerState, fish: Pick<CatchRecord, 'speciesId' | 'grams' | 'value'>, mounted: number, wallGrams: number | null = null): ShopResult {
   if (!content.trophies) return refuse('UNKNOWN')
   if (!unlocked(content, angler, 'trophies')) return refuse('LOCKED')
   const cost = mountCost(content, fish)
   if (cost === null) return refuse('TOO_SMALL')
-  if (mounted >= pegsOf(content, angler)) return refuse('WALL_FULL')
+  if (wallGrams !== null && fish.grams <= wallGrams) return refuse('NOT_BIGGER')
+  if (wallGrams === null && mounted >= pegsOf(content, angler)) return refuse('WALL_FULL')
   if (angler.gold < cost) return refuse('NOT_ENOUGH_GOLD')
   return { ok: true, angler: { ...angler, gold: angler.gold - cost, counters: { ...angler.counters, trophiesMounted: (angler.counters.trophiesMounted ?? 0) + 1 } }, spent: cost }
 }

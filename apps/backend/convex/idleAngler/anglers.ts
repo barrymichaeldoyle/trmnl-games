@@ -59,6 +59,7 @@ export const REFUSAL: Record<string, string> = {
   TICKET_HELD: 'You already hold a charter ticket.',
   TOO_SMALL: 'That fish is too small to mount.',
   WALL_FULL: 'Every peg on the wall is taken.',
+  NOT_BIGGER: 'Your wall already has a heavier one of these.',
   NOT_BAIT_FISH: 'Only small fish go on the hook as deadbait.',
 }
 

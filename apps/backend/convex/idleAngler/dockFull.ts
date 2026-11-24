@@ -21,7 +21,7 @@ const FEATURE_NAMES = { shop_upgrades: 'Rod and cooler upgrades', orders: 'Fishm
 
 /**
  * The Dock's content v2 block (D162): the goal, the next locked feature, the slate with the fish that fit each order,
- * the season and its run, the charter ticket and the wall's pegs (and how many are free), and what each cooler fish can do (with the heaviest of its species on the wall, D245). Undefined under
+ * the season and its run, the charter ticket and the wall's pegs (and how many are free), and what each cooler fish can do (whether it would improve the wall, and the fish it would replace, D246). Undefined under
  * content v1, so the companion shows the MVP Dock unchanged until the switch.
  */
 export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, catches: readonly Doc<'catches'>[], mounted: readonly Doc<'iaTrophies'>[], now: number, utcOffsetSeconds: number | undefined) {
@@ -33,18 +33,35 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
   const season = seasonAt(content, now)
   const fishFor = (order: Order) =>
     catches
-      // D245: a held fish is never offered to the fishmonger.
-      .filter((c) => !c.held && catchMatches(content, order, asCatch(c)))
+      // D245: a held fish is never offered to the fishmonger; D246: nor is one that would improve the wall.
+      .filter((c) => !c.held && !forWall.has(c._id) && catchMatches(content, order, asCatch(c)))
       .sort((a, b) => a.value - b.value)
       .slice(0, order.count)
   const features = Object.fromEntries((Object.keys(FEATURE_NAMES) as Array<keyof typeof FEATURE_NAMES>).map((f) => [f, unlocked(content, state, f)]))
-  const mountCosts = new Map(catches.map((c) => [c._id, features.trophies === true ? mountCost(content, c) : null]))
-  // Issue #6: the mount goal points at the cooler only while a fish there is big enough; otherwise the wall says what to catch.
-  const mountGoal = goal?.predicate.kind === 'counter' && goal.predicate.counter === 'trophiesMounted'
-  const trophySized = [...mountCosts.values()].some((cost) => cost !== null)
   // D245: the heaviest mounted fish of each species, so the cooler says whether a trophy-sized fish beats the wall's.
   const wallBest = new Map<string, number>()
   for (const t of mounted) if (t.speciesId !== undefined && t.grams !== undefined) wallBest.set(t.speciesId, Math.max(t.grams, wallBest.get(t.speciesId) ?? 0))
+  // D246: the wall keeps one fish of each kind, the heaviest. A trophy-sized fish is a wall fish only when it is the
+  // heaviest of its kind in the cooler and beats the wall's; only those carry a mount cost, so only those are kept
+  // out of Sell all, the fishmonger's picks and deadbait. Any other trophy-sized fish says what outweighs it.
+  const sized = features.trophies === true ? catches.filter((c) => mountCost(content, c) !== null) : []
+  const coolerBest = new Map<string, Doc<'catches'>>()
+  for (const c of sized) {
+    const best = coolerBest.get(c.speciesId)
+    if (!best || c.grams > best.grams) coolerBest.set(c.speciesId, c)
+  }
+  const forWall = new Map<string, number>()
+  const outweighed = new Map<string, { grams: number; by: 'wall' | 'cooler' }>()
+  for (const c of sized) {
+    const wall = wallBest.get(c.speciesId) ?? null
+    const best = coolerBest.get(c.speciesId)!
+    if (wall !== null && wall >= best.grams) outweighed.set(c._id, { grams: wall, by: 'wall' })
+    else if (best._id !== c._id) outweighed.set(c._id, { grams: best.grams, by: 'cooler' })
+    else forWall.set(c._id, mountCost(content, c)!)
+  }
+  // Issue #6: the mount goal points at the cooler only while a fish there can go up; otherwise the wall says what to catch.
+  const mountGoal = goal?.predicate.kind === 'counter' && goal.predicate.counter === 'trophiesMounted'
+  const trophySized = forWall.size > 0
   return {
     goal: {
       // D167: a goal met by filling orders, which the companion links to the cooler only while an order can be filled.
@@ -78,8 +95,8 @@ export function fullDock(content: IdleAnglerCatalog, angler: Doc<'anglers'>, cat
     catchActions: Object.fromEntries(
       catches.map((c) => {
         const species = content.species.find((s) => s.id === c.speciesId)
-        const mountCost = mountCosts.get(c._id) ?? null
-        return [c._id, { bait: features.deadbait === true && species?.baitFish === true && !c.held, mountCost, wallGrams: mountCost === null ? null : (wallBest.get(c.speciesId) ?? null) }]
+        const mountCost = forWall.get(c._id) ?? null
+        return [c._id, { bait: features.deadbait === true && species?.baitFish === true && !c.held, mountCost, replaces: mountCost === null ? null : (wallBest.get(c.speciesId) ?? null), outweighed: outweighed.get(c._id) ?? null }]
       }),
     ),
   }

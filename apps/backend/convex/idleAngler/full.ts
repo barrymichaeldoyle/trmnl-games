@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { awardOpens, claimGoalReward, fillOrder, formatWeight, openPeriod, openTarget, orderDay, swapOrder, waterOf, type WaterId } from '@trmnl-games/idle-angler/sim'
+import { awardOpens, claimGoalReward, fillOrder, formatWeight, openPeriod, openTarget, openWindow, orderDay, swapOrder, unlocked, waterOf, type WaterId } from '@trmnl-games/idle-angler/sim'
 import { baitFromCatch, buyCharter, buyPegs, mountFish, pegsOf } from '@trmnl-games/idle-angler/sim/shop'
 import { deriveStreamSeed } from '@trmnl-games/engine/seed'
 import type { Doc, Id } from '../_generated/dataModel'
@@ -12,7 +12,7 @@ import { awardAfterAnglerIntent } from './achievements'
 import { asCatch, speciesName } from './dockFull'
 import { HELD_REFUSAL, REFUSAL, commandLog, intentResult, playableAngler, shopIntent, strip, worldContentOf } from './anglers'
 import { currentAngler } from './profile'
-import { OPEN_AWARD_DEPTH, byWallOrder, readBoard, topRows } from './records'
+import { BOARD_DEPTH, OPEN_AWARD_DEPTH, byWallOrder, readBoard, topRows } from './records'
 import { IDLE_ANGLER_RUNTIME } from './runtime'
 
 /**
@@ -143,7 +143,11 @@ export const holdCatch = mutation({
     ),
 })
 
-/** Mount a big fish on a free peg: it leaves the cooler and the market for the wall. */
+/**
+ * Mount a big fish on a free peg: it leaves the cooler and the market for the wall. D246: the wall keeps one fish of
+ * each kind, so a heavier fish of a kind already up replaces it on its peg (the lightest of that kind, for walls from
+ * before the rule), full wall or not; the fish taken down is gone, as with Take down.
+ */
 export const mountCatch = mutation({
   args: { operationId: v.string(), catchId: v.id('catches') },
   returns: intentResult,
@@ -154,15 +158,21 @@ export const mountCatch = mutation({
         const { world, content } = await worldContentOf(ctx)
         const row = await ownCatch(ctx, angler, catchId)
         const mounted = await mountedFish(ctx, angler._id)
-        const result = mountFish(content, toAnglerState(angler), row, mounted.length)
+        const sameKind = mounted.filter((m) => m.speciesId === row.speciesId).sort((a, b) => (a.grams ?? 0) - (b.grams ?? 0))
+        const wallGrams = sameKind.length === 0 ? null : Math.max(...sameKind.map((m) => m.grams ?? 0))
+        const result = mountFish(content, toAnglerState(angler), row, mounted.length, wallGrams)
         if (!result.ok) throw appError('INVALID_STATE', REFUSAL[result.code] ?? 'That is not possible right now.')
+        const replaced = sameKind[0] ?? null
         const taken = new Set(mounted.map((m) => m.peg))
         let peg = 0
         while (taken.has(peg)) peg += 1
         const water = content.species.find((s) => s.id === row.speciesId)?.water ?? angler.waterId
         await ctx.db.delete(row._id)
-        await ctx.db.insert('iaTrophies', { anglerId: angler._id, userId: angler.userId, kind: 'fish', speciesId: row.speciesId, grams: row.grams, water, at: Date.now(), peg })
-        const sequence = await commandLog(ctx, angler, 'idleAngler.mount', `The ${formatWeight(row.grams)} ${speciesName(content, row.speciesId)} goes up on the wall.`, -result.spent)
+        if (replaced) await ctx.db.delete(replaced._id)
+        await ctx.db.insert('iaTrophies', { anglerId: angler._id, userId: angler.userId, kind: 'fish', speciesId: row.speciesId, grams: row.grams, water, at: Date.now(), peg: replaced ? (replaced.peg ?? peg) : peg })
+        const name = speciesName(content, row.speciesId)
+        const line = replaced ? `The ${formatWeight(row.grams)} ${name} goes up on the wall in place of the ${formatWeight(replaced.grams ?? 0)} one.` : `The ${formatWeight(row.grams)} ${name} goes up on the wall.`
+        const sequence = await commandLog(ctx, angler, 'idleAngler.mount', line, -result.spent)
         await ctx.db.patch(angler._id, { ...fromAnglerState(result.angler), logSequence: sequence })
         await awardAfterAnglerIntent(ctx, angler, content, world?.currentTick ?? 0)
         return { changed: true, gold: result.angler.gold }
@@ -250,6 +260,77 @@ export const opens = query({
     }
     return { period, startsAt: saturday, endsAt: saturday + 2 * DAY_MS, on: now >= saturday && now < saturday + 2 * DAY_MS, waters, prizes: content.opens.prizes }
   },
+})
+
+/**
+ * D247: how the angler did in last weekend's Opens, for the Dock's result card. Monday to Friday, once a water's Open
+ * has closed (its `iaOpenAwards` receipt), each water where the angler had an entry: the fish, its place among the
+ * entries, the winning weight, and the medal and prize or that the place passed on (one medal a weekend, D230). Null
+ * during the weekend, when nothing was entered, and once the owner has acknowledged that weekend. Reads at most one
+ * entry, one receipt and `BOARD_DEPTH` board rows a water, and a handful of medals.
+ */
+export const openResult = query({
+  args: {},
+  returns: v.union(v.null(), v.object({
+    period: v.string(),
+    results: v.array(v.object({
+      waterId: v.string(),
+      speciesId: v.string(),
+      grams: v.number(),
+      rank: v.union(v.number(), v.null()),
+      entries: v.number(),
+      more: v.boolean(),
+      winnerGrams: v.union(v.number(), v.null()),
+      place: v.union(v.number(), v.null()),
+      prize: v.number(),
+      passed: v.boolean(),
+    })),
+  })),
+  handler: async (ctx) => {
+    const user = await currentUser(ctx)
+    const angler = await currentAngler(ctx, user)
+    if (angler === null || angler.activationState !== 'active') return null
+    const { content } = await worldContentOf(ctx)
+    if (!content.opens || !unlocked(content, toAnglerState(angler), 'opens')) return null
+    const now = Date.now()
+    if (openWindow(now).on) return null
+    const period = openPeriod(now - 7 * DAY_MS)
+    if (angler.openSeen === period) return null
+    const at = Date.parse(`${period.slice(1)}T12:00:00Z`)
+    const medals = (await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'medal')).order('desc').take(8)).filter((m) => m.periodKey === period)
+    const results = []
+    for (const water of content.waters) {
+      if (!openTarget(content, water.id, at)) continue
+      const entry = await ctx.db.query('iaCatchRecords').withIndex('by_anglerId_and_waterId_and_period', (q) => q.eq('anglerId', angler._id).eq('waterId', water.id).eq('period', period)).unique()
+      if (entry === null) continue
+      const closed = await ctx.db.query('iaOpenAwards').withIndex('by_period_and_waterId', (q) => q.eq('period', period).eq('waterId', water.id)).unique()
+      if (closed === null) continue
+      const board = await readBoard(ctx, water.id, period, angler._id, 1)
+      const rank = board.own?.rank ?? null
+      const place = medals.find((m) => m.water === water.id)?.place ?? null
+      results.push({ waterId: water.id, speciesId: entry.speciesId, grams: entry.grams, rank, entries: board.count, more: board.full, winnerGrams: board.entries[0]?.grams ?? null, place, prize: place ? (content.opens.prizes[place - 1] ?? 0) : 0, passed: place === null && rank !== null && rank <= 3 })
+    }
+    if (results.length === 0) return null
+    results.sort((a, b) => (a.place ?? 9) - (b.place ?? 9) || (a.rank ?? BOARD_DEPTH + 1) - (b.rank ?? BOARD_DEPTH + 1))
+    return { period, results }
+  },
+})
+
+/** D247: the owner has seen last weekend's result card; a repeat changes nothing. */
+export const seeOpenResult = mutation({
+  args: { operationId: v.string(), period: v.string() },
+  returns: intentResult,
+  handler: async (ctx, { operationId, period }) =>
+    strip(
+      await runIntent(ctx, operationId, 'idleAngler.seeOpenResult', { period }, async (user) => {
+        const angler = await currentAngler(ctx, user)
+        if (angler === null) throw appError('HERO_NOT_FOUND', 'No angler yet.')
+        if (!/^o\d{4}-\d{2}-\d{2}$/.test(period)) throw appError('INVALID_INPUT', 'That is not an Open.')
+        if (angler.openSeen === period) return { changed: false }
+        await ctx.db.patch(angler._id, { openSeen: period })
+        return { changed: true }
+      }),
+    ),
 })
 
 const PLACE = ['Gold', 'Silver', 'Bronze'] as const

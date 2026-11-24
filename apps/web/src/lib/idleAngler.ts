@@ -74,8 +74,12 @@ interface FullDock {
   /** Issue #6: the mounting rule (a fish at `minPercent` of its species' top weight, for its value plus `fee`). */
   readonly trophies?: { minPercent: number; fee: number } | null
   readonly deadbait: number
-  /** D245: `wallGrams`, for a trophy-sized fish, is the heaviest of its species on the wall (null when none is up). */
-  readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null; wallGrams?: number | null }>>
+  /**
+   * D246: `mountCost` is set only on a fish that would improve the wall (the cooler's heaviest of a kind the wall lacks
+   * or holds lighter), with `replaces`, the weight of the wall's fish it would take the place of. Any other
+   * trophy-sized fish has `outweighed`: the heavier one on the wall or in the cooler.
+   */
+  readonly catchActions: Readonly<Record<string, { bait: boolean; mountCost: number | null; replaces?: number | null; outweighed?: { grams: number; by: 'wall' | 'cooler' } | null }>>
 }
 
 type Catch = NonNullable<Dock['catches']>[number]

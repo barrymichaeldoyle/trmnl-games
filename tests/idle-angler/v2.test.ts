@@ -246,6 +246,9 @@ describe('the trophy wall and the Opens', () => {
     expect(mountFish(content, eight, { ...tench, grams: 1000 }, 0)).toEqual({ ok: false, code: 'TOO_SMALL' })
     expect(mountFish(content, eight, tench, 0)).toMatchObject({ ok: true, spent: 158, angler: { gold: 4842, counters: { trophiesMounted: 1 } } })
     expect(mountFish(content, eight, tench, 6)).toEqual({ ok: false, code: 'WALL_FULL' })
+    // D246: one fish of each kind: a heavier one replaces the wall's on its peg, full wall or not; a lighter one cannot go up.
+    expect(mountFish(content, eight, tench, 6, tench.grams - 1)).toMatchObject({ ok: true, spent: 158 })
+    expect(mountFish(content, eight, tench, 2, tench.grams)).toEqual({ ok: false, code: 'NOT_BIGGER' })
     expect(buyPegs(content, eight)).toMatchObject({ ok: true, spent: 800, angler: { pegs: 12 } })
   })
 

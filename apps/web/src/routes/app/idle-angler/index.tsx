@@ -12,6 +12,7 @@ import { Coins } from './-coins'
 import { GoalCard } from './-goalCard'
 import { OpenCard } from './-openCard'
 import { NewBadgesCard } from './-newBadges'
+import { OpenResultCard } from './-openResult'
 import { Rows } from './-rows'
 import { WaterCompany, WaterCount } from './-company'
 import { FlyCallout } from './-flyBox'
@@ -130,6 +131,8 @@ function DockPage() {
           <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 underline underline-offset-4">{t.sell(catches.length)} <Coins n={coolerValue} sign /></Link></p>
         ) : null}
         {fishmongerPays > 0 ? <p className="text-sm"><Link to="/app/idle-angler/cooler" className="inline-flex items-center gap-2 font-semibold text-gold-ink underline underline-offset-4">{t.fishmongerBuying} <Coins n={fishmongerPays} sign /></Link></p> : null}
+        {/* D247: last weekend's Open results, beside the badge celebration, until Nice or the next Open. */}
+        <OpenResultCard />
         <NewBadgesCard />
         {full ? <GoalCard full={full} fishmonger={fishmongerPays > 0} notify={notify} /> : null}
         {dock.open ? <OpenCard open={dock.open} bait={angler.bait} /> : null}

@@ -107,6 +107,7 @@ function TrophiesPage() {
             <summary className="min-h-11 cursor-pointer py-2 font-semibold">{t.howMounting}</summary>
             <Rows rows={[
               [t.whichFish, t.whichFishValue(rule.minPercent)],
+              [t.eachKind, t.eachKindValue],
               [t.where, <>{t.mountFrom} {cooler}</>],
               [common.cost, <span className="inline-flex flex-wrap items-center gap-x-1">{t.fishValuePlus} <Coins n={rule.fee} /></span>],
               [t.theFish, t.theFishValue],
