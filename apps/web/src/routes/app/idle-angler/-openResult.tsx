@@ -41,7 +41,7 @@ export function OpenResultCard() {
   if (!data) return null
   const results = data.results as Result[]
   return (
-    <section aria-labelledby="open-result-title" className={`relative flex flex-col gap-3 bg-panel p-3 ${medal ? 'border-4 border-gold' : 'border-l-4 border-sky'}`}>
+    <section aria-labelledby="open-result-title" className={`relative flex flex-col gap-3 bg-panel p-3 ${medal ? 'border-4 border-gold' : 'border-2 border-rule'}`}>
       {burst > 0 ? <Confetti key={burst} /> : null}
       <h2 id="open-result-title" className="inline-flex items-center gap-2 text-sm font-semibold text-gold-ink"><Glyph name="medal" size={12} />{t.title(results.length)}</h2>
       <ul className="flex flex-col gap-3">
