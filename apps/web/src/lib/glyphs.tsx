@@ -38,6 +38,8 @@ const UI_GLYPHS = {
   shirt: ['.##..##.', '########', '########', '.######.', '..####..', '..####..', '..####..', '..####..'],
   heart: ['........', '.##..##.', '########', '########', '########', '.######.', '..####..', '...##...'],
   keepsake: ['..####..', '.#....#.', '#..##..#', '#.####.#', '#.####.#', '#..##..#', '.#....#.', '..####..'],
+  /** D250: Idle Angler's rosette, one for each Open entered, with its two tails. */
+  rosette: ['..####..', '.#....#.', '#..##..#', '#.#..#.#', '#..##..#', '.#....#.', '..#..#..', '.#....#.'],
 } as const satisfies Record<string, readonly string[]>
 
 export type GlyphName = keyof typeof UI_GLYPHS | keyof typeof GLYPHS

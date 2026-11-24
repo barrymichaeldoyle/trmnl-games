@@ -357,6 +357,33 @@ describe('Idle Angler, the full game (D162, F2)', () => {
     expect(await as('Bo').query(api.idleAngler.full.openResult, {})).toBeNull()
   })
 
+  it('lists each Open entered on the shelf, with its place, medal and whether it has closed (D250)', async () => {
+    const ids = [await seedAngler(t, { logbook: logbookOf(MILLPOND_EIGHT) }, 'Ana'), await seedAngler(t, {}, 'Bo'), await seedAngler(t, {}, 'Cy')]
+    const saturday = Date.UTC(2026, 9, 24, 12, 0)
+    await t.run(async (ctx) => {
+      const docs = await Promise.all(ids.map(async (id) => (await ctx.db.get(id))!))
+      await recordCatch(ctx, docs[0]!, { waterId: 'millpond', speciesId: 'crucian_carp', grams: 1200 }, saturday, true)
+      await recordCatch(ctx, docs[1]!, { waterId: 'millpond', speciesId: 'crucian_carp', grams: 1200 }, saturday - 1, true)
+      await recordCatch(ctx, docs[0]!, { waterId: 'river_bend', speciesId: 'grayling', grams: 900 }, saturday + 2, true)
+      await recordCatch(ctx, docs[2]!, { waterId: 'river_bend', speciesId: 'grayling', grams: 700 }, saturday + 3, true)
+    })
+    // On Sunday both are under way; Bo's equal fish came first, so Ana is second at the Millpond.
+    vi.setSystemTime(Date.UTC(2026, 9, 25, 12, 0))
+    expect((await as('Ana').query(api.idleAngler.full.trophies, {}))!.shelf).toEqual([
+      { period: 'o2026-10-24', waterId: 'millpond', speciesId: 'crucian_carp', grams: 1200, rank: 2, closed: false, place: null, passed: false },
+      { period: 'o2026-10-24', waterId: 'river_bend', speciesId: 'grayling', grams: 900, rank: 1, closed: false, place: null, passed: false },
+    ])
+    vi.setSystemTime(Date.UTC(2026, 9, 26, 0, 10))
+    await t.mutation(internal.idleAngler.full.closeOpens, {})
+    // Bo takes the Millpond gold and Ana River Bend's; her Millpond silver passes on (one medal a weekend), Cy takes River Bend's silver.
+    const shelf = (await as('Ana').query(api.idleAngler.full.trophies, {}))!.shelf
+    expect(shelf.map((r: { waterId: string; rank: number; place: number | null; closed: boolean; passed: boolean }) => [r.waterId, r.rank, r.place, r.closed, r.passed])).toEqual([
+      ['millpond', 2, null, true, true],
+      ['river_bend', 1, 1, true, false],
+    ])
+    expect((await as('Cy').query(api.idleAngler.full.trophies, {}))!.shelf.map((r: { place: number | null }) => r.place)).toEqual([2])
+  })
+
   it('purges the wall and the shelf with the angler', async () => {
     const id = await seedAngler(t, {}, 'Pat')
     await t.run(async (ctx) => {

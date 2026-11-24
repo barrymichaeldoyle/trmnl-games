@@ -7,7 +7,7 @@ import { paintedSceneUri, sceneKeyFromUrl, sceneSteps } from '@trmnl-games/idle-
 import { clampStageWidth, MIN_STAGE_WIDTH, poseFor, STAGE_HEIGHT, STAGE_WIDTH, type SceneKey } from '@trmnl-games/idle-angler/art/scene'
 import { fishTones, flyTones, type Tones } from '@trmnl-games/idle-angler/art/tones'
 import { badgeColourLayers } from '@trmnl-games/idle-angler/art/badgeColour'
-import { frameForTier } from '@trmnl-games/idle-angler/art/badges'
+import { frameForTier, type BadgeFrame } from '@trmnl-games/idle-angler/art/badges'
 import { BadgeArt } from '../../../lib/badgeArt'
 
 /**
@@ -44,8 +44,8 @@ export function FishIcon({ id, size = 'small', scale = 3, className = '' }: { id
  * is the locked outline. The device's layers painted in the companion's colours by the shared `BadgeArt`, as Desk
  * Crawler's are.
  */
-export function BadgeIcon({ family, tier, scale = 2, className = '' }: { family: string; tier: number; scale?: number; className?: string }) {
-  const frame = frameForTier(family, tier)
+export function BadgeIcon({ family, tier, frame: fixed, scale = 2, className = '' }: { family: string; tier: number; frame?: BadgeFrame; scale?: number; className?: string }) {
+  const frame = fixed ?? frameForTier(family, tier)
   const layers = useMemo(() => badgeColourLayers(family, frame), [family, frame])
   return <BadgeArt layers={layers} scale={scale} className={className} />
 }

@@ -20,6 +20,8 @@ import { WhatsNewCard } from '../../../lib/whatsNewCard'
 import { LocalTime } from '../../../lib/localTime'
 import { formatDate, formatTime, useLocale, useT } from '../../../lib/i18n'
 import { iaDock } from '../../../i18n/iaDock'
+import { iaLog } from '../../../i18n/iaLog'
+import { Glyph } from '../../../lib/glyphs'
 import { seo } from '../../../lib/seo'
 
 /**
@@ -40,6 +42,7 @@ function DockPage() {
   const travel = useIntent(api.idleAngler.anglers.travelTo, { onFeedback: notify })
   const chooseBait = useIntent(api.idleAngler.anglers.chooseBait, { onFeedback: notify })
   const t = useT(iaDock)
+  const logWords = useT(iaLog)
   const words = useAngler()
   const locale = useLocale()
   const time = (at: number) => <LocalTime at={at} format={(date) => formatTime(locale, date)} />
@@ -136,8 +139,19 @@ function DockPage() {
         <NewBadgesCard />
         {full ? <GoalCard full={full} fishmonger={fishmongerPays > 0} notify={notify} /> : null}
         {dock.open ? <OpenCard open={dock.open} bait={angler.bait} /> : null}
-        {/* Issue #6: the wall's way in from the Dock once it opens, with what is on it. */}
-        {full?.features.trophies ? <p className="text-sm"><Link to="/app/idle-angler/trophies" className="underline underline-offset-4">{t.trophyWall}</Link> <span className="text-muted">· {t.pegs(full.pegs.pegs - full.pegs.free, full.pegs.pegs)}</span></p> : null}
+        {/* Issue #6: the wall's way in from the Dock once it opens, with what is on it. D250: the shelf's beside it from the Opens, rosettes and medals as glyph and number. */}
+        {full?.features.trophies || full?.features.opens ? (
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+            {full.features.trophies ? <span><Link to="/app/idle-angler/trophies" className="underline underline-offset-4">{t.trophyWall}</Link> <span className="text-muted">· {t.pegs(full.pegs.pegs - full.pegs.free, full.pegs.pegs)}</span></span> : null}
+            {full.features.opens ? (
+              <Link to="/app/idle-angler/trophies" hash="shelf" className="inline-flex items-center gap-2">
+                <span className="underline underline-offset-4">{logWords.shelf}</span>
+                <span className="inline-flex items-center gap-1 text-sky-ink"><Glyph name="rosette" size={12} /><span className="sr-only">{logWords.rosettes}</span>{angler.counters.opensEntered ?? 0}</span>
+                <span className="inline-flex items-center gap-1 text-gold-ink"><Glyph name="medal" size={12} /><span className="sr-only">{logWords.medals}</span>{angler.counters.medals ?? 0}</span>
+              </Link>
+            ) : null}
+          </p>
+        ) : null}
         {full?.runs.length ? <ul className="flex flex-col gap-1 text-sm">{full.runs.map((run) => <li key={run.id} className="font-semibold text-sky-ink">{words.text(run.line)}</li>)}</ul> : null}
       </section>
 

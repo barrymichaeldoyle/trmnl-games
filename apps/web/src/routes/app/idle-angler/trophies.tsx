@@ -10,7 +10,7 @@ import type { Dock } from '../../../lib/idleAngler'
 import { Button, Card, NoticeBar, useNotice } from '../../../lib/ui'
 import { LocalTime } from '../../../lib/localTime'
 import { ConfirmSheet } from '../desk-crawler/-confirm'
-import { FishIcon } from './-art'
+import { BadgeIcon, FishIcon } from './-art'
 import { FishName } from './-fish'
 import { Coins, Price } from './-coins'
 import { Rows } from './-rows'
@@ -22,7 +22,8 @@ import { useAngler } from '../../../lib/idleAngler'
 
 /**
  * The trophy wall (D162, idle-angler-full.md "The trophy wall"): mounted fish on their pegs, the shelf of Open medals
- * and the rosettes, one per Open entered. Fish are mounted from the cooler; pegs are bought here.
+ * and the rosettes, one per Open entered. Fish are mounted from the cooler; pegs are bought here. D250: the shelf lists
+ * each Open entered and shows from the Opens on, before the wall itself opens.
  */
 export const Route = createFileRoute('/app/idle-angler/trophies')({
   head: () => seo({ title: 'Trophy wall · Idle Angler', index: false }),
@@ -31,7 +32,11 @@ export const Route = createFileRoute('/app/idle-angler/trophies')({
 })
 
 type Trophy = { id: Id<'iaTrophies'>; speciesId: string | null; name: string | null; grams: number | null; water: string; at: number; peg: number | null; place: number | null; period: string | null }
-type Wall = { pegs: number; wall: Trophy[]; medals: Trophy[]; rosettes: number }
+/** Gold, silver and bronze medals wear the gold, silver and copper badge frames. */
+const MEDAL_FRAME: Record<number, 1 | 2 | 3> = { 1: 3, 2: 2, 3: 1 }
+
+type Rosette = { period: string; waterId: string; speciesId: string; grams: number; rank: number | null; closed: boolean; place: number | null; passed: boolean }
+type Wall = { pegs: number; wall: Trophy[]; medals: Trophy[]; rosettes: number; shelf: Rosette[] }
 
 
 function TrophiesPage() {
@@ -51,11 +56,50 @@ function TrophiesPage() {
   const day = (date: Date) => formatDate(locale, date, { day: 'numeric', month: 'short' })
   if (!wall || !dock?.angler) return null
   const full = dock.full
-  if (full && !full.features.trophies) {
+  if (full && !full.features.trophies && !full.features.opens) {
     return (
       <>
         <h1 className="font-display text-3xl font-bold">{t.trophyWall}</h1>
         <Card><p>{t.wallOpens(full.comingUp?.feature === 'trophies' ? full.comingUp.species : 8)}</p></Card>
+      </>
+    )
+  }
+  const day2 = (period: string) => day(new Date(`${period.slice(1)}T12:00:00Z`))
+  const shelf = (
+    <div id="shelf" className="scroll-mt-4">
+      <Card title={t.shelf}>
+        <Rows rows={[[t.rosettes, t.rosettesValue(wall.rosettes)], [t.medals, `${wall.medals.length}`]]} />
+        {wall.shelf.length > 0 ? (
+          <ul className="mt-3 flex flex-col">
+            {wall.shelf.map((r) => (
+              <li key={`${r.period}-${r.waterId}`} className="flex items-center gap-3 border-b border-rule py-2 last:border-b-0">
+                {/* A medal in its own metal (gold, silver, copper frames); any other entry is the Opens' rosette. */}
+                <BadgeIcon family={r.place !== null ? 'medals' : 'opens'} tier={1} frame={r.place !== null ? MEDAL_FRAME[r.place] : 1} scale={1} />
+                <span className="min-w-0 flex-1 leading-tight">
+                  <span className={`block font-semibold ${r.place === 1 ? 'text-gold-ink' : 'text-ink'}`}>
+                    {r.place !== null ? t.place[r.place] : !r.closed ? <>{t.underWay}{r.rank !== null ? ` · ${t.soFar(r.rank)}` : ''}</> : r.rank !== null ? `#${r.rank}` : t.rosettes}
+                    {r.place !== null && r.rank !== null && r.rank !== r.place ? <span className="font-normal text-muted"> · #{r.rank}</span> : null}
+                  </span>
+                  <span className="block text-sm"><FishName id={r.speciesId} /> · {t.openAt(words.water(r.waterId))}, <span className="whitespace-nowrap">{formatWeight(r.grams)}</span></span>
+                  {r.passed ? <span className="block text-sm text-muted">{t.passedOn}</span> : null}
+                </span>
+                {/* An Open's period is its Saturday ('o2026-10-17'), shown as a date like the wall's. */}
+                <span className="shrink-0 text-sm text-muted">{day2(r.period)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="mt-3 text-sm text-muted">{t.noRosettes}</p>}
+        {wall.shelf.length > 0 && wall.rosettes > wall.shelf.length ? <p className="mt-2 text-sm text-muted">{t.newest(wall.shelf.length, wall.rosettes)}</p> : null}
+        {wall.medals.length === 0 && wall.shelf.length > 0 ? <p className="mt-3 text-sm text-muted">{t.noMedals}</p> : null}
+      </Card>
+    </div>
+  )
+  if (full && !full.features.trophies) {
+    return (
+      <>
+        <h1 className="font-display text-3xl font-bold">{t.trophyWall}</h1>
+        {shelf}
+        <Card><p>{t.wallLater(full.comingUp?.feature === 'trophies' ? full.comingUp.species : 8)}</p></Card>
       </>
     )
   }
@@ -118,20 +162,7 @@ function TrophiesPage() {
           </details>
         </Card>
       ) : null}
-      <Card title={t.shelf}>
-        <Rows rows={[[t.rosettes, t.rosettesValue(wall.rosettes)], [t.medals, `${wall.medals.length}`]]} />
-        {wall.medals.length > 0 ? (
-          <ul className="mt-3 flex flex-col">
-            {wall.medals.map((m) => (
-              <li key={m.id} className="flex items-center gap-3 border-b border-rule py-2 last:border-b-0">
-                <span className={`w-16 shrink-0 font-semibold ${m.place === 1 ? 'text-gold-ink' : 'text-ink'}`}>{t.place[m.place ?? 0]}</span>
-                <span className="min-w-0 flex-1 text-sm">{m.speciesId ? <FishName id={m.speciesId} /> : null} · {t.openAt(words.water(m.water))}{m.grams ? `, ${formatWeight(m.grams)}` : ''}</span>
-                <span className="shrink-0 text-sm text-muted">{/* An Open's period is its Saturday ('o2026-10-17'), shown as a date like the wall's. */}{m.period ? day(new Date(`${m.period.slice(1)}T12:00:00Z`)) : ''}</span>
-              </li>
-            ))}
-          </ul>
-        ) : <p className="mt-3 text-sm text-muted">{t.noMedals}</p>}
-      </Card>
+      {shelf}
       <ConfirmSheet
         open={asking !== null}
         title={t.takeDownTitle(asking?.speciesId ? words.species(asking.speciesId) : null)}

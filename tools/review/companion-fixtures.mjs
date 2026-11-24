@@ -326,7 +326,7 @@ const iaDock = ia === 'none' ? { gameState: null, angler: null } : {
     cooler: { tier: 3, name: 'Chest Cooler', capacity: 18, used: ia === 'full' ? 18 : ia === 'empty' ? 0 : 7 },
     baitOnHook: ia === 'rich' ? 'strip' : 'maggots',
     bait: [bait('worms', 'Worms', 12, 12, 25), bait('bread', 'Bread', 0, 12, 20), bait('maggots', 'Maggots', ia === 'empty' ? 0 : 34, 12, 30), bait('spinner', 'Spinner', 0, 72, 240), bait('ragworm', 'Ragworm', 24, 12, 60), bait('strip', 'Mackerel strip', ia === 'rich' ? 48 : 0, 12, 75)],
-    access: ia === 'rich' ? ['waders', 'pier_permit'] : ['waders'], counters: {}, publicProfile: false, speciesLogged: ia === 'rich' ? 26 : 10, speciesTotal: 30 },
+    access: ia === 'rich' ? ['waders', 'pier_permit'] : ['waders'], counters: params.get('v2') && params.get('v2') !== 'new' ? { opensEntered: 4, medals: 2 } : {}, publicProfile: false, speciesLogged: ia === 'rich' ? 26 : 10, speciesTotal: 30 },
   catches: ia === 'empty' ? [] : Array.from({ length: ia === 'full' ? 18 : 7 }, (_, i) => { const [speciesId, name, grams, value] = iaCatches[i % iaCatches.length]; return { id: 'c' + i, speciesId, name, grams: grams + i * 10, value, caughtTick: 900 - i, record: i === 0, held: params.get('hold') === '1' && i === 1 } }),
   waters: [
     { id: 'millpond', name: 'Millpond', opensAfter: null, access: null, open: true, rank: { id: 'expert', logged: 7, total: 10, next: { id: 'veteran', species: 8 } }, weather: 'clear', band: 'dusk', bitePercent: 17, baits: ['worms', 'bread', 'spinner'], weatherUntil: now + 36e5 * 2 },
@@ -358,7 +358,8 @@ if (v2 && iaDock.angler) {
   iaDock.full = {
     goal: { ...(fresh ? { line: 'Land your first fish', coins: 10, page: null, rung: 0, of: 26 } : params.get('goal') === 'count' ? { line: 'Log eight species', coins: 30, page: null, progress: { value: 5, target: 8 }, rung: 12, of: 26 } : params.get('goal') === 'orders' ? { line: 'Fill an order for the fishmonger', coins: 20, page: 'cooler', orders: true, rung: 5, of: 26 } : { line: 'Mount a fish on the wall', coins: 30, page: params.get('trophy') === 'none' ? 'log' : 'cooler', hint: "Catch a fish at 60% of its species' top weight, then mount it from the Cooler.", rung: 13, of: 26 }), ...(params.get('goal') === 'ready' ? { unclaimed: [{ id: 'first_order', title: 'Fill an order for the fishmonger', coins: 20 }, { id: 'ten_species', title: 'Log ten species', coins: 30 }] } : {}) },
     comingUp: fresh ? { feature: 'shop_upgrades', name: 'Rod and cooler upgrades', species: 2, logged: 0 } : { feature: 'deadbait', name: 'Deadbait', species: 10, logged: 9 },
-    features: { shop_upgrades: !fresh, orders: !fresh, opens: !fresh, trophies: !fresh, deadbait: !fresh },
+    // wall=locked (D250): the Opens are open but the wall is not, so the page shows only the shelf.
+    features: { shop_upgrades: !fresh, orders: !fresh, opens: !fresh, trophies: !fresh && params.get('wall') !== 'locked', deadbait: !fresh },
     orders: fresh ? [] : [
       { id: 'o1', kind: 'species', line: 'Two Chub', hint: null, count: 2, catchIds: params.get('orders') === 'none' ? [] : [ids[1], ids[4]], reward: params.get('orders') === 'none' ? null : 161, bonus: 20 },
       { id: 'o2', kind: 'teaching', line: 'One Tench', hint: 'Millpond, on bread or worms, at dawn or dusk', count: 1, catchIds: [], reward: null, bonus: 60 },
@@ -437,7 +438,15 @@ const queries = {
   },
   'idleAngler/anglers:logbook': () => iaBook,
   'idleAngler/payload:preview': () => iaPayload,
-  'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: 4, wall: params.get('wall') === 'empty' ? [] : [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }] }),
+  'idleAngler/full:trophies': () => ({ pegs: 6, rosettes: params.get('shelf') === 'empty' ? 0 : 7, wall: params.get('wall') === 'empty' ? [] : [['tench', 'Tench', 2600, 'Millpond', 0], ['barbel', 'Barbel', 5200, 'River Bend', 1], ['mirror_carp', 'Mirror Carp', 12400, 'Heron Lake', 2]].map(([speciesId, name, grams, water, peg]) => ({ id: 't' + peg, speciesId, name, grams, water, at: now - 864e5 * (peg + 1), peg, place: null, period: null })), medals: [{ id: 'm1', speciesId: 'chub', name: 'Chub', grams: 2100, water: 'River Bend', at: now - 864e5 * 2, peg: null, place: 1, period: 'o2026-10-17' }, { id: 'm2', speciesId: 'perch', name: 'Perch', grams: 640, water: 'Millpond', at: now - 864e5 * 9, peg: null, place: 3, period: 'o2026-10-10' }],
+    // D250: each Open entered, newest first; shelf=empty for an angler with none yet.
+    shelf: params.get('shelf') === 'empty' ? [] : [
+      { period: 'o2026-10-24', waterId: 'millpond', speciesId: 'tench', grams: 2400, rank: 2, closed: false, place: null, passed: false },
+      { period: 'o2026-10-17', waterId: 'river_bend', speciesId: 'chub', grams: 2100, rank: 1, closed: true, place: 1, passed: false },
+      { period: 'o2026-10-17', waterId: 'millpond', speciesId: 'rudd', grams: 410, rank: 2, closed: true, place: null, passed: true },
+      { period: 'o2026-10-10', waterId: 'millpond', speciesId: 'perch', grams: 640, rank: 3, closed: true, place: 3, passed: false },
+      { period: 'o2026-10-10', waterId: 'river_bend', speciesId: 'barbel', grams: 3900, rank: 7, closed: true, place: null, passed: false },
+    ].slice(0, params.get('shelf') === 'empty' ? 0 : 5) }),
   'idleAngler/full:opens': () => (params.get('v2') ? { period: 'o2026-10-24', startsAt: params.get('open') === 'off' ? now + 864e5 * 3 : now - 36e5 * 5, endsAt: params.get('open') === 'off' ? now + 864e5 * 5 : now + 864e5, on: params.get('open') !== 'off', prizes: [500, 300, 150], waters: [['millpond', 'Millpond', 'perch', 'Perch'], ['river_bend', 'River Bend', 'chub', 'Chub'], ['heron_lake', 'Heron Lake', 'mirror_carp', 'Mirror Carp']].map(([id, name, tid, tname], w) => ({ id, name, target: { id: tid, name: tname }, own: w === 1 ? { rank: 4, speciesId: tid, grams: 1300 } : null, entries: w === 2 ? [] : [['Quillfeather_Longname', 2400], ['Mo', 1900], ['Bea', 1500], ['Barry', 1300]].map(([n, g], i) => ({ rank: i + 1, name: n, speciesId: tid, grams: g, own: n === 'Barry', profile: false })) })) } : null),
   // D247: last weekend's Open results on the Dock: result=gold|medals (gold and a passed place)|entry (no medal).
   'idleAngler/full:openResult': () => {

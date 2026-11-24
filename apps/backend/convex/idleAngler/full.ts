@@ -208,7 +208,15 @@ export const buyCharterTicket = mutation({
   handler: async (ctx, { operationId }) => strip(await shopIntent('idleAngler.buyCharter', (c, a) => buyCharter(c, a), (n) => `Booked a charter for ${n.charterCasts ?? 0} casts.`)(ctx, operationId, {})),
 })
 
-/** The trophy wall and shelf: every mounted fish (rarest, then heaviest, first: D245), the newest medals, and the rosettes (one per Open entered). */
+/** Rosettes the shelf lists (D250): the newest Opens entered, each with its place read off its board. */
+const ROSETTE_PAGE = 24
+
+/**
+ * The trophy wall and shelf: every mounted fish (rarest, then heaviest, first: D245), the newest medals, and the
+ * rosettes (one per Open entered). D250: the shelf lists each Open the angler entered, newest first: the fish, the
+ * water, its rank on that board, the medal it took, and whether the Open has closed. An entry is the angler's `o`
+ * period row in `iaCatchRecords`, so nothing new is stored; each listed rank is one bounded read of the heavier rows.
+ */
 export const trophies = query({
   args: {},
   returns: v.any(),
@@ -220,7 +228,22 @@ export const trophies = query({
     const wall = await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'fish')).take(MOUNTED_MAX)
     const medals = await ctx.db.query('iaTrophies').withIndex('by_anglerId_and_kind', (q) => q.eq('anglerId', angler._id).eq('kind', 'medal')).order('desc').take(SHELF_PAGE)
     const describe = (t: Doc<'iaTrophies'>) => ({ id: t._id, speciesId: t.speciesId ?? null, name: t.speciesId ? speciesName(content, t.speciesId) : null, grams: t.grams ?? null, water: waterOf(content, t.water).name, at: t.at, peg: t.peg ?? null, place: t.place ?? null, period: t.periodKey ?? null })
-    return { pegs: pegsOf(content, toAnglerState(angler)), wall: [...wall].sort(byWallOrder).map(describe), medals: medals.map(describe), rosettes: angler.counters.opensEntered ?? 0 }
+    const entries: Doc<'iaCatchRecords'>[] = []
+    for (const water of content.waters) {
+      entries.push(...(await ctx.db.query('iaCatchRecords').withIndex('by_anglerId_and_waterId_and_period', (q) => q.eq('anglerId', angler._id).eq('waterId', water.id).gte('period', 'o').lt('period', 'p')).order('desc').take(ROSETTE_PAGE)))
+    }
+    const order = (waterId: string) => content.waters.findIndex((w) => w.id === waterId)
+    entries.sort((a, b) => b.period.localeCompare(a.period) || order(a.waterId) - order(b.waterId))
+    const rosettes = []
+    for (const entry of entries.slice(0, ROSETTE_PAGE)) {
+      const heavier = await ctx.db.query('iaCatchRecords').withIndex('by_waterId_and_period_and_grams', (q) => q.eq('waterId', entry.waterId).eq('period', entry.period).gt('grams', entry.grams)).take(BOARD_DEPTH)
+      const tied = heavier.length < BOARD_DEPTH ? await ctx.db.query('iaCatchRecords').withIndex('by_waterId_and_period_and_grams', (q) => q.eq('waterId', entry.waterId).eq('period', entry.period).eq('grams', entry.grams).gt('earlierFirst', entry.earlierFirst)).take(BOARD_DEPTH - heavier.length) : []
+      const above = heavier.length + tied.length
+      const closed = (await ctx.db.query('iaOpenAwards').withIndex('by_period_and_waterId', (q) => q.eq('period', entry.period).eq('waterId', entry.waterId)).unique()) !== null
+      const place = medals.find((m) => m.periodKey === entry.period && m.water === entry.waterId)?.place ?? null
+      rosettes.push({ period: entry.period, waterId: entry.waterId, speciesId: entry.speciesId, grams: entry.grams, rank: above < BOARD_DEPTH ? above + 1 : null, closed, place, passed: closed && place === null && above < 3 })
+    }
+    return { pegs: pegsOf(content, toAnglerState(angler)), wall: [...wall].sort(byWallOrder).map(describe), medals: medals.map(describe), rosettes: angler.counters.opensEntered ?? 0, shelf: rosettes }
   },
 })
 
