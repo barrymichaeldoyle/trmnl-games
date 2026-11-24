@@ -43,6 +43,8 @@ All shown rank/Top 5/count belong to the same generation/publication. Live hero 
 
 Retain current and previous publication sets plus active build, including all associated generations/rank rows. Generation-aware bounded cleanup cannot delete protected pointers/inputs. Scrub/mask names immediately on deletion/suspension; immutable ordering/eligibility remains stable until builder completion. Keep minimal deleting-owner state until copied identities are safely purged; absent owner never makes a copied name public.
 
+D249: when a promoted set's `scoreAt` falls in a later week than the previous set's, the engine's `onPublished` hook copies the previous set's This week ranks (heroes with XP only) into `heroWeekResults` before that set can turn obsolete, for the Hero page's last-week card.
+
 ## Required verification
 
 - Exact today/this-week boundaries (00:00 UTC, Monday 00:00 UTC, D202) and one pinned cutoff despite page timing/recovery; at most one XP credit per hero/run.

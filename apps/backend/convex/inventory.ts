@@ -237,6 +237,47 @@ export const badges = query({
 })
 
 /** Bag, held find, potions and capacity for the owner's hero. */
+type GearKind = 'weapon' | 'armor'
+const gearStat = (item: Doc<'items'>) => (item.kind === 'weapon' ? item.attack : item.defense)
+const strongestFirst = (a: Doc<'items'>, b: Doc<'items'>) => gearStat(b) - gearStat(a) || a.requiredLevel - b.requiredLevel || (a._id < b._id ? -1 : 1)
+
+/** The bag's spares of one kind that beat what the hero wears, strongest first; held finds and worn pieces excluded. */
+function betterSpares(hero: Doc<'heroes'>, items: Doc<'items'>[], kind: GearKind): Doc<'items'>[] {
+  const wornId = kind === 'weapon' ? hero.weaponId : hero.armorId
+  const worn = items.find((item) => item._id === wornId)
+  const floor = worn ? gearStat(worn) : 0
+  return items
+    .filter((item) => item.kind === kind && item._id !== hero.weaponId && item._id !== hero.armorId && item._id !== hero.heldItemId && gearStat(item) > floor)
+    .sort(strongestFirst)
+}
+
+/**
+ * D248: the spares a sale should never take by accident. Per kind, the strongest spare that beats the worn piece and
+ * the strongest of those the hero can wear today (the same piece when it can): at most four ids, the next sword and
+ * the sword after that.
+ */
+export function keeperIds(hero: Doc<'heroes'>, items: Doc<'items'>[]): Set<Id<'items'>> {
+  const keep = new Set<Id<'items'>>()
+  for (const kind of ['weapon', 'armor'] as const) {
+    const better = betterSpares(hero, items, kind)
+    if (better[0]) keep.add(better[0]._id)
+    const wearable = better.find((item) => item.requiredLevel <= hero.level)
+    if (wearable) keep.add(wearable._id)
+  }
+  return keep
+}
+
+/** D248: per kind, the strongest spare the hero can wear now that beats the worn piece, for the Hero page's Equip. */
+function upgradesView(hero: Doc<'heroes'>, items: Doc<'items'>[]) {
+  return (['weapon', 'armor'] as const).flatMap((kind) => {
+    const best = betterSpares(hero, items, kind).find((item) => item.requiredLevel <= hero.level)
+    if (!best) return []
+    const wornId = kind === 'weapon' ? hero.weaponId : hero.armorId
+    const worn = items.find((item) => item._id === wornId)
+    return [{ id: best._id, kind, templateId: best.templateId, rarity: best.rarity, label: itemLabel(best), delta: gearStat(best) - (worn ? gearStat(worn) : 0) }]
+  })
+}
+
 export const mine = query({
   args: {},
   returns: v.any(),
@@ -254,8 +295,11 @@ export const mine = query({
     const workbench = workbenchOpen ? content.workbench : undefined
     // D145: whose name is on each found spare.
     const spares = await spareOwners(ctx, items)
+    const keep = keeperIds(hero, items)
     return {
       capacity,
+      // D248: the best spare of each kind the hero can wear now, for the Hero page's one-tap Equip.
+      upgrades: MANAGEABLE.has(hero.status) ? upgradesView(hero, items) : [],
       used,
       // D129: the material rows and the workbench's prices, absent under a catalog without one.
       materials: (workbench?.materials ?? []).map((m) => ({ id: m.id, name: m.name, glyph: m.glyph, count: held[m.id] ?? 0 })),
@@ -294,6 +338,8 @@ export const mine = query({
           affix: ((affix) => (affix ? { id: affix.id, name: affix.name, blurb: affix.blurb } : null))(affixById(catalogs[ACTIVE_CONTENT], item.affixId)),
           equipped: item._id === hero.weaponId || item._id === hero.armorId,
           held: item._id === hero.heldItemId,
+          // D248: a spare that beats the worn piece and that Select all and the one-tap sale leave alone.
+          keeper: keep.has(item._id),
           // D129: what salvaging yields, the workbench's next step, and whether an affix can be fitted.
           salvage: salvageYield(content, snapshotOf(item)),
           suffix: workbenchSuffix(content, snapshotOf(item)),
@@ -422,6 +468,39 @@ export const equip = mutation({
       await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
       await syncBagSleep(ctx, hero._id)
       return { changed: true }
+    }),
+})
+
+/**
+ * D248: put on several pieces in one step, from the Hero page's "Better gear in your bag" card. The ids are the ones
+ * `mine.upgrades` showed: each must still be a spare the hero can wear that beats the piece it replaces, at most one
+ * per kind, so a changed bag is refused before anything moves.
+ */
+export const equipBest = mutation({
+  args: { operationId: v.string(), itemIds: v.array(v.id('items')) },
+  returns: intentResult,
+  handler: async (ctx, args) =>
+    await runIntent(ctx, args.operationId, 'inventory.equipBest', { itemIds: [...args.itemIds] }, async (user) => {
+      if (args.itemIds.length < 1 || args.itemIds.length > 2) throw appError('INVALID_INPUT', 'Choose one piece of each kind.')
+      const hero = await requirePlayableHero(ctx, user)
+      if (!MANAGEABLE.has(hero.status)) throw appError('INVALID_STATE', "Gear can't be changed while your hero is recovering or paused.")
+      const items = await heroItems(ctx, hero._id)
+      const wanted = upgradesView(hero, items)
+      const patch: { weaponId?: Id<'items'>; armorId?: Id<'items'> } = {}
+      for (const id of args.itemIds) {
+        const offer = wanted.find((entry) => entry.id === id)
+        if (offer === undefined) throw appError('INVALID_STATE', 'Your bag changed. Look again before equipping.')
+        patch[offer.kind === 'weapon' ? 'weaponId' : 'armorId'] = id
+      }
+      if (Object.keys(patch).length !== args.itemIds.length) throw appError('INVALID_INPUT', 'Choose one piece of each kind.')
+      await ctx.db.patch(hero._id, { ...patch, counters: { ...withCounterDefaults(hero.counters), itemsEquipped: (hero.counters.itemsEquipped ?? 0) + args.itemIds.length } })
+      for (const id of args.itemIds) {
+        const item = items.find((entry) => entry._id === id)!
+        await commandLog(ctx, (await ctx.db.get(hero._id))!, 'equip', `Equipped the ${itemLabel(item)}.`)
+      }
+      await awardAfterIntent(ctx, hero, await contentOf(ctx), await currentTick(ctx))
+      await syncBagSleep(ctx, hero._id)
+      return { changed: true, count: args.itemIds.length }
     }),
 })
 
@@ -599,12 +678,14 @@ function resumePlanView(hero: Doc<'heroes'>, items: Doc<'items'>[], spare = 1) {
   }
 }
 
-/** The cheapest unequipped spares, the ones a full bag should give up first. */
+/** The cheapest unequipped spares, the ones a full bag should give up first; D248 keepers last. */
 function weakestSpares(hero: Doc<'heroes'>, items: Doc<'items'>[], count: number): Doc<'items'>[] {
   if (count <= 0) return []
+  // D248: the next sword goes last, only when nothing else is left to sell.
+  const keep = keeperIds(hero, items)
   return items
     .filter((item) => isGear(item.kind) && item._id !== hero.weaponId && item._id !== hero.armorId && item._id !== hero.heldItemId)
-    .sort((a, b) => a.saleValue - b.saleValue || a.attack + a.defense - (b.attack + b.defense) || (a._id < b._id ? -1 : 1))
+    .sort((a, b) => Number(keep.has(a._id)) - Number(keep.has(b._id)) || a.saleValue - b.saleValue || a.attack + a.defense - (b.attack + b.defense) || (a._id < b._id ? -1 : 1))
     .slice(0, count)
 }
 

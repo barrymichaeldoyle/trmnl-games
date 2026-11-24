@@ -17,6 +17,7 @@ import { codeSearch, heroKeepsake } from '../../../lib/scanCodes'
 import { TodoCard, type TodoView } from './-todo'
 import { ComingUp, GoalCard, type CareerView, type UnlockView } from './-career'
 import { NewBadgesCard } from './-newBadges'
+import { BetterGearCard, WeekResultCard } from './-heroCards'
 import { ConfirmSheet, Consequences } from './-confirm'
 import { Sheet, SheetTitle } from './-bagSlots'
 import { AlertNudge } from './-alerts'
@@ -201,7 +202,11 @@ function HeroSheet({ hero }: { hero: HeroView }) {
 
   return (
     <div className="flex min-w-0 flex-col gap-8">
+      {/* D249: last week's place leads on Mondays, beside a new badge: both are news. */}
+      <WeekResultCard />
       <NewBadgesCard />
+      {/* D248: a better piece in the bag is one tap from being worn. */}
+      {healthy && bag?.upgrades?.length ? <BetterGearCard upgrades={bag.upgrades} notify={notify} /> : null}
       {hero.career ? <GoalCard career={hero.career} level={hero.level} gold={hero.gold} holding={holding} notify={notify} /> : null}
       {hero.roster ? <RosterCard roster={hero.roster} name={hero.name} className={hero.className ?? 'Warrior'} /> : null}
       <section ref={commands} aria-labelledby="commands-title" className="flex flex-col gap-2">

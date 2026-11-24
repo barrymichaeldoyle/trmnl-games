@@ -177,6 +177,12 @@ Indexes: `by_publication_board_hero[publicationId,board,heroId]`, `by_generation
 
 The own scoped row identifies the captured cohort; do not derive it from newer live level. First appearance/group change has null delta. Retain current/previous publication sets plus active build. Bounded cleanup deletes whole obsolete sets and related inputs; no protected pointer may be removed.
 
+### `heroWeekResults` (D249)
+
+Fields: `heroId`, `week` (`keepsakeWeek`), `rank`, `cohortKey`, `totalPlayers`, `xp`. Index: `by_heroId_and_week`.
+
+A hero's final This week rank, copied from the week's last publication when the next week's first one is promoted, only for heroes with XP that week. Two weeks are kept per hero; account deletion removes them with the hero.
+
 ## TRMNL connection model
 
 ### `trmnlGrants`

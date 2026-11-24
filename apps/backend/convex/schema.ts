@@ -282,6 +282,16 @@ export default defineSchema({
   leaderboardGenerations: deskCrawlerEngine.generations,
   heroRanks: deskCrawlerEngine.ranks,
   achievementStats: deskCrawlerEngine.achievementStats,
+  /** D249: each hero's final This week rank, frozen from the week's last publication when Monday's first one lands. */
+  heroWeekResults: defineTable({
+    heroId: v.id('heroes'),
+    /** `keepsakeWeek` of the week the rank belongs to. */
+    week: v.number(),
+    rank: v.number(),
+    cohortKey: v.string(),
+    totalPlayers: v.number(),
+    xp: v.number(),
+  }).index('by_heroId_and_week', ['heroId', 'week']),
 
   iaWorldState: idleAnglerEngine.world,
   iaSimulationRuns: defineTable({
@@ -961,6 +971,8 @@ export default defineSchema({
 
   heroes: defineTable({
     userId: v.id('users'),
+    /** D249: the week whose result card the owner closed with Nice. */
+    weekSeen: v.optional(v.number()),
     name: v.string(),
     /** P37: one hero per class per account (`by_userId_and_class`). */
     class: v.union(v.literal('warrior'), v.literal('rogue')),

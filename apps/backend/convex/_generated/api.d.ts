@@ -138,6 +138,7 @@ import type * as sim_runs_tick from "../sim/runs/tick.js";
 import type * as trmnl from "../trmnl.js";
 import type * as trmnlPayload from "../trmnlPayload.js";
 import type * as users from "../users.js";
+import type * as weekResults from "../weekResults.js";
 import type * as world from "../world.js";
 
 import type {
@@ -277,6 +278,7 @@ declare const fullApi: ApiFromModules<{
   trmnl: typeof trmnl;
   trmnlPayload: typeof trmnlPayload;
   users: typeof users;
+  weekResults: typeof weekResults;
   world: typeof world;
 }>;
 

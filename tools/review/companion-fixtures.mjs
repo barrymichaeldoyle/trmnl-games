@@ -256,6 +256,20 @@ if (many > 0) {
   inventory.capacity = Math.max(inventory.capacity, many); inventory.used = many;
 }
 if (held) { inventory.gear.unshift({ id: 'held', kind: 'weapon', templateId: 'spork_halberd', name: 'Spork Halberd', label: 'Rare Spork Halberd', rarity: 'rare', requiredLevel: 4, attack: 11, defense: 0, saleValue: 19, affix: null, equipped: false, held: true }); inventory.heldItemId = 'held'; inventory.used = inventory.capacity; inventory.canResume = false }
+// D248: keepers (per kind, the strongest spare that beats the worn piece and the strongest wearable one) and the Hero page's upgrades.
+{
+  const statOf = (g) => (g.kind === 'weapon' ? g.attack : g.defense)
+  inventory.upgrades = []
+  for (const kind of ['weapon', 'armor']) {
+    const worn = inventory.gear.find((g) => g.equipped && g.kind === kind)
+    const better = inventory.gear.filter((g) => g.kind === kind && !g.equipped && !g.held && statOf(g) > (worn ? statOf(worn) : 0)).sort((a, b) => statOf(b) - statOf(a))
+    const wearable = better.find((g) => g.requiredLevel <= hero.level)
+    for (const g of inventory.gear) if (g === better[0] || g === wearable) g.keeper = true
+    if (wearable) inventory.upgrades.push({ id: wearable.id, kind, templateId: wearable.templateId, rarity: wearable.rarity, label: wearable.label, delta: statOf(wearable) - (worn ? statOf(worn) : 0) })
+  }
+  for (const g of inventory.gear) g.keeper ??= false
+  if (params.get('upgrades') === '0') inventory.upgrades = []
+}
 decorateGear();
 // P35: career=1 gives the hero its place on the ladder (goal card, Career page, unlocks) and the two log lines; career=new a
 // level-1 hero with everything still locked; career=done a finished ladder.
@@ -479,6 +493,13 @@ const queries = {
   },
   'roster:mine': () => data.roster,
   'inventory:mine': () => inventory,
+  // D249: last week's place on the Hero page: week=podium (2nd, moved up), week=mid (#14, moved down) or none.
+  'weekResults:mine': () => {
+    const which = params.get('week')
+    if (which !== 'podium' && which !== 'mid') return null
+    const startsAt = Date.UTC(2026, 10, 16)
+    return which === 'podium' ? { week: 2919, startsAt, rank: 2, of: 41, cohortKey: '4-7', xp: 18240, moved: 3 } : { week: 2919, startsAt, rank: 14, of: 41, cohortKey: '4-7', xp: 6120, moved: -2 }
+  },
   // The shell's tab marks: a held find or a nearly full bag counts on the Bag tab, an unclaimed reward dots Hero.
   'inventory:badges': () => ({ used: inventory.used, capacity: inventory.capacity, held: inventory.heldItemId !== null && inventory.heldItemId !== undefined, rewardWaiting: (hero.career?.unclaimed?.length ?? 0) > 0 }),
   'heroes:returnSummary': () => data.recap,

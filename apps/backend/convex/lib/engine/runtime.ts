@@ -26,6 +26,8 @@ export interface EngineRuntime<Content> {
     readonly buildBatch: FunctionReference<'mutation', 'internal', { publicationId: Id<'leaderboardPublications'>; expectedSequence: number }, null>
     readonly cleanupPublication: FunctionReference<'mutation', 'internal', { publicationId: Id<'leaderboardPublications'> }, null>
   }
+  /** Called once a publication is promoted, in the same transaction; its previous set is still published. */
+  onPublished?(ctx: MutationCtx, publication: Doc<'leaderboardPublications'>): Promise<void>
   /** Called once when this run's hero walk finishes, before publication or completion. */
   onCohortWalked?(ctx: MutationCtx, run: Doc<'simulationRuns'>): Promise<void>
 }

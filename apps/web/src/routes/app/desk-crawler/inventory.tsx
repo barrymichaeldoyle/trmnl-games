@@ -42,6 +42,8 @@ type Gear = {
   affix: { id: string; name: string; blurb: string } | null
   equipped: boolean
   held: boolean
+  /** D248: beats the worn piece; Select all and the one-tap sale leave it in the bag. */
+  keeper: boolean
   /** D129: what salvaging yields, the workbench suffix ("Mk II +1"), the next step and whether an affix can be fitted. */
   salvage: MaterialCount
   suffix: string
@@ -129,6 +131,9 @@ function Inventory() {
   const sellable = gear.filter((item) => !item.equipped && !item.held)
   const inBag = sellable
   const chosen = sellable.filter((item) => selected.has(item.id))
+  // D248: Select all takes everything but the spares that beat what the hero wears.
+  const bulk = sellable.filter((item) => !item.keeper)
+  const keepersIn = (items: Gear[]) => items.filter((item) => item.keeper)
   const goldOf = (items: Gear[]) => items.reduce((sum, item) => sum + item.saleValue, 0)
   const rareOf = (items: Gear[]) => items.filter((item) => item.rarity === 'rare' || item.rarity === 'epic').length
   const materials = bag.materials as Material[]
@@ -158,7 +163,7 @@ function Inventory() {
   const slotLabel = (item: Gear) => {
     const delta = deltaOf(item)
     const compare = item.requiredLevel > hero.level ? t.requiresLevel(item.requiredLevel) : delta > 0 ? t.better(delta) : delta < 0 ? t.worse(-delta) : t.same
-    return `${c.name(item.label)}, ${t.rarity[item.rarity] ?? item.rarity}, ${t.statOf(statOf(item), statLabel(item))}, ${compare}${item.held ? t.heldFind : ''}${item.spareOf ? t.spareOf(item.spareOf.ownerName) : ''}`
+    return `${c.name(item.label)}, ${t.rarity[item.rarity] ?? item.rarity}, ${t.statOf(statOf(item), statLabel(item))}, ${compare}${item.keeper ? t.keeperLabel : ''}${item.held ? t.heldFind : ''}${item.spareOf ? t.spareOf(item.spareOf.ownerName) : ''}`
   }
   const toggle = (id: string) => setSelected((current) => {
     const next = new Set(retainSellableSelection(current, gear))
@@ -294,7 +299,7 @@ function Inventory() {
         </div>
         <p className="mt-1 min-h-5 text-sm text-muted">
           {mode !== 'browse'
-            ? <>{t.tapToSelect}{sellable.length > chosen.length ? <> <button type="button" className="font-semibold text-ink underline underline-offset-4" onClick={() => setSelected(new Set(sellable.slice(0, SALE_LIMIT).map((item) => item.id)))}>{t.selectAll}</button></> : null}</>
+            ? <>{t.tapToSelect}{bulk.some((item) => !selected.has(item.id)) ? <> <button type="button" className="font-semibold text-ink underline underline-offset-4" onClick={() => setSelected(new Set([...chosen.map((item) => item.id), ...bulk.filter((item) => !selected.has(item.id)).map((item) => item.id)].slice(0, SALE_LIMIT)))}>{t.selectAll}</button></> : null}{keepersIn(sellable).length > 0 ? <> {t.selectAllKeeps}</> : null}</>
             : inBag.length === 0 ? t.noSpare : full ? t.bagFull : filling ? t.nearlyFull(workbench !== null) : t.tapToCompare(workbench !== null)}
         </p>
         <ul className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
@@ -357,6 +362,7 @@ function Inventory() {
           <SheetTitle>{review.kind === 'sell' ? <>{t.sellTitleBefore(t.items(review.items.length))}<span className="text-gold-ink">{t.goldAmount(goldOf(review.items))}</span>{t.titleEnd}</> : <>{t.salvageTitleBefore(t.items(review.items.length))}<span className="text-rare-ink">{mats(yieldOf(review.items))}</span>{t.titleEnd}</>}</SheetTitle>
           <p className="mt-2 text-sm">{t.cannotUndo}{rareOf(review.items) > 0 ? t.includes(t.rareItems(rareOf(review.items))) : ''}{review.kind === 'salvage' ? t.materialsToBench : ''}</p>
           <ul aria-label={review.kind === 'sell' ? t.itemsInSale : t.itemsToSalvage} className="mt-3 max-h-48 overflow-y-auto border-y-2 border-rule text-sm">{review.items.map((item) => <li key={item.id} className="flex items-center justify-between gap-3 border-b border-rule py-1.5 last:border-b-0"><span className={`flex min-w-0 items-center gap-2 font-semibold ${RARITY_TONE[item.rarity] ?? ''}`}><Gem rarity={item.rarity} scale={2} /><span className="truncate">{c.name(item.label)}</span></span>{review.kind === 'sell' ? <span className="shrink-0 tabular-nums text-gold-ink">{t.goldAmount(item.saleValue)}</span> : <span className="shrink-0 tabular-nums text-rare-ink">{mats(item.salvage)}</span>}</li>)}</ul>
+          {keepersIn(review.items).length > 0 ? <p className="mt-3 text-sm font-semibold text-hp-ink">{t.includesKeepers(keepersIn(review.items).map((item) => c.name(item.label)))}</p> : null}
           {!validReview ? <p role="alert" className="mt-3 text-sm font-semibold">{t.gearChanged}</p> : null}
           {!manageable && reason ? <p className="mt-3 text-sm">{reason}</p> : null}
           <div className="mt-3 empty:hidden"><ErrorNote message={reviewing.error} /></div>
@@ -415,6 +421,7 @@ function ItemSheet({ item, hero, current, manageable, reason, busy, claimBlocked
       {!item.equipped ? <><dt className="caps text-muted">{t.equipped}</dt><dd className="tabular-nums">{current ? <>{c.name(current.label)}, <StatOf item={current} /></> : <span className="text-muted">{t.nothingEquipped}</span>}</dd></> : null}
       {item.affix ? <><dt className="caps text-muted">{c.text(item.affix.name)}</dt><dd>{c.text(item.affix.blurb)}</dd></> : null}
       {item.spareOf ? <><dt className="caps text-muted">{t.nameOnIt}</dt><dd><WithName text={t.inMarker} name={item.spareOf.ownerName} profile={item.spareOf.profile} /></dd></> : null}
+      {item.keeper ? <><dt className="caps text-muted">{t.keep}</dt><dd className="font-semibold text-xp-ink">{t.keeperNote}</dd></> : null}
       <dt className="caps text-muted">{t.sellsFor}</dt>
       <dd className="tabular-nums text-gold-ink">{t.goldAmount(item.saleValue)}</dd>
       {onSalvage ? <><dt className="caps text-muted">{t.salvagesFor}</dt><dd className="tabular-nums text-rare-ink">{materialsText(item.salvage, materials, t)}</dd></> : null}

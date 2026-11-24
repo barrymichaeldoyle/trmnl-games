@@ -46,6 +46,10 @@ Inventory sleep is distinct from HP rest, voluntary pause and service quarantine
 
 Device text when held: “Bag full, holding a new find” with the attention line “Make room in your bag in the companion. Adventures resume on their own.” and a QR code to the bag. That panel stays only while a slot or a held find is still in the way (D179). A sorted bag says adventures resume soon and keeps the ordinary screen. Keep status distinct from service failure; use the idle sprite. Recent rank remains eligible, though XP accrual stops and old XP ages out; once window XP reaches zero a sleeper whose bag is still full is dormant and leaves recent boards until the bag is sorted (D32). Hardware Sleep Mode/offline/uninstall still never determine progress.
 
+## Spares to keep (D248)
+
+Per kind, the strongest spare that beats the worn piece and the strongest of those the hero can wear today are keepers. Select all leaves them out, the sale review names any picked by hand, and the full-bag one-tap sale sells them last. The Hero page offers the wearable one per kind and equips them in one tap (`inventory.equipBest`).
+
 ## Acceptance
 
 Test exact capacity boundaries, rare gear retention, potion cap fallback, copied-stat integrity, duplicate acquisition/claim/wake/sale, simultaneous tick/intent races, sleep without HP/XP/log spam, next-tick wake, no catch-up, and space checks after claiming. Measure cadence percentiles for all biomes and player policies. Update [gameplay](gameplay.md), [domain](domain-contracts.md), [model](data-model.md), [API](api.md), [quality](quality.md) and fixtures together when tuning changes.

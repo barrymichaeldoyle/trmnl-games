@@ -5,6 +5,7 @@ import { SEED_VERSION } from '@trmnl-games/engine/seed'
 import { makeSchedule } from '@trmnl-games/engine/schedule'
 import { internal } from '../../_generated/api'
 import { publishOfficeCensus } from '../../census'
+import { freezeWeekOnTurn } from '../../weekResults'
 import { publishFloorPresence } from '../presence'
 import type { EngineRuntime } from './runtime'
 import { DESK_CRAWLER_TABLES } from './tables'
@@ -24,6 +25,8 @@ export const DESK_CRAWLER_RUNTIME: EngineRuntime<ContentCatalog> = {
     buildBatch: internal.leaderboard.buildBatch,
     cleanupPublication: internal.leaderboard.cleanupPublication,
   },
+  // D249: the first publication of a new week freezes the last week's final This week ranks.
+  onPublished: freezeWeekOnTurn,
   onCohortWalked: async (ctx, run) => {
     await publishOfficeCensus(ctx, run)
     await publishFloorPresence(ctx, run)

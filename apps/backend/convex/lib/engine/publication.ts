@@ -174,6 +174,7 @@ async function publish(ctx: MutationCtx, runtime: EngineRuntime<unknown>, public
     lastCompletedTick: run.tick,
     lastCompletedAt: now,
   })
+  await runtime.onPublished?.(ctx, publication)
   // Keep current + previous; everything older becomes obsolete and is cleaned in bounded batches.
   const obsolete = await ctx.db
     .query(tables.publications)
