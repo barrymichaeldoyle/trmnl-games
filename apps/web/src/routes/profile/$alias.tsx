@@ -17,7 +17,7 @@ import { publicPagesMessages } from '../../i18n/publicPages'
 import { preloadContent } from '../../lib/content'
 import { useContent } from '../../lib/useContent'
 
-type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives' | 'little-plot' | 'pixel-wars'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number; badges?: Array<{ family: string; tier: number; id: string }> }
+type Game = { slug: 'desk-crawler' | 'idle-angler' | 'paper-lives' | 'little-plot' | 'pixel-wars'; name: string; life?: { age: number; status: string; job: string | null; traits: string[]; lives: number; longest: number; album: Array<{ ordinal: number; name: string; age: number; generation: number }> }; level?: number; title?: string; since: number; rank: { rank: number; totalPlayers: number } | null; achievements: number; species?: number; page: string | null; wall?: Array<{ speciesId: string; grams: number }>; medals?: number; rosettes?: number; badges?: Array<{ family: string; tier: number; id: string }> }
 type Profile = { alias: string; games: Game[]; platform: Array<{ id: string; name: string; blurb: string; share: number | null }> } | null
 
 const profileQuery = (alias: string) => convexQuery(api.platformProfile.view, { alias })
@@ -63,6 +63,7 @@ function ProfilePage() {
                   {game.rank ? t.rankAllTime(game.rank.rank, game.rank.totalPlayers) : ''}{t.achievementCount(game.achievements)}
                   {game.species !== undefined ? t.anglerSpecies(game.species) : ''}
                   {game.medals ? t.anglerMedals(game.medals) : ''}
+                  {game.rosettes ? t.anglerRosettes(game.rosettes) : ''}
                   {game.life ? ` · ${game.life.lives} ${game.life.lives === 1 ? 'life' : 'lives'} lived${game.life.longest ? `, the longest ${game.life.longest} years` : ''}` : ''}
                 </p>
                 {game.life?.traits.length ? <p className="text-sm text-muted">{game.life.traits.join(' · ')}</p> : null}
