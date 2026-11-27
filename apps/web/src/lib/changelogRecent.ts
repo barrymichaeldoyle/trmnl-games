@@ -42,6 +42,23 @@ export interface ChangelogEntry {
 export const changeIn = (change: Change, locale: Locale): { title: string; body: string } => (locale === 'en' ? change : change[locale])
 export const RECENT_CHANGES: ReadonlyArray<ChangelogEntry> = [
   {
+    date: '2026-11-27',
+    changes: [
+      {
+        game: 'desk-crawler',
+        title: 'Cake no longer wakes a knocked-out hero',
+        body: 'Answering a decision while your hero was knocked out could heal it without waking it up, and the game then paused that hero for a service check. A knocked-out hero now keeps its HP at zero until it gets back up, while the gold, potions and effects of your answer still count. The paused hero is back at work and has had the adventures it missed.',
+        fr: { title: 'Le gâteau ne réveille plus un héros K.-O.', body: 'Répondre à une décision pendant que votre héros était K.-O. pouvait le soigner sans le relever, et le jeu mettait alors ce héros en pause pour une vérification technique. Un héros K.-O. garde désormais ses PV à zéro jusqu’à ce qu’il se relève ; l’or, les potions et les effets de votre réponse comptent toujours. Le héros en pause a repris le travail et a rattrapé les aventures manquées.' },
+        de: { title: 'Kuchen weckt keinen k.o. gegangenen Helden mehr', body: 'Eine Entscheidung, während dein Held k.o. war, konnte ihn heilen, ohne dass er aufstand, und das Spiel pausierte diesen Helden dann für eine Wartungsprüfung. Ein Held, der k.o. ist, behält jetzt 0 LP, bis er wieder aufsteht; Gold, Tränke und Effekte deiner Antwort zählen weiterhin. Der pausierte Held ist wieder im Dienst und hat die verpassten Abenteuer nachgeholt.' },
+        es: { title: 'El pastel ya no despierta a un héroe noqueado', body: 'Responder a una decisión mientras tu héroe estaba noqueado podía curarlo sin levantarlo, y el juego pausaba entonces a ese héroe por una revisión técnica. Un héroe noqueado ahora mantiene sus PV en cero hasta que se levanta; el oro, las pociones y los efectos de tu respuesta siguen contando. El héroe pausado ha vuelto al trabajo y ha recuperado las aventuras perdidas.' },
+        it: { title: 'La torta non sveglia più un eroe KO', body: 'Rispondere a una decisione mentre il tuo eroe era KO poteva curarlo senza rimetterlo in piedi, e il gioco metteva quell’eroe in pausa per un controllo tecnico. Un eroe KO ora resta a zero PV finché non si rialza; l’oro, le pozioni e gli effetti della tua risposta contano comunque. L’eroe in pausa è tornato al lavoro e ha recuperato le avventure perse.' },
+        pt: { title: 'O bolo já não acorda um herói nocauteado', body: 'Responder a uma decisão enquanto o seu herói estava nocauteado podia curá-lo sem o levantar, e o jogo pausava então esse herói para uma verificação técnica. Um herói nocauteado agora fica com PV a zero até se levantar; o ouro, as poções e os efeitos da sua resposta continuam a contar. O herói pausado voltou ao trabalho e recuperou as aventuras que perdeu.' },
+        pl: { title: 'Ciasto nie budzi już znokautowanego bohatera', body: 'Odpowiedź na decyzję, gdy bohater był znokautowany, mogła go uleczyć, zanim wstał, a gra wstrzymywała wtedy tego bohatera na kontrolę techniczną. Znokautowany bohater ma teraz 0 PŻ, dopóki nie wstanie; złoto, mikstury i efekty twojej odpowiedzi nadal się liczą. Wstrzymany bohater wrócił do pracy i nadrobił stracone przygody.' },
+        nl: { title: 'Taart wekt geen knock-out held meer', body: 'Een beslissing beantwoorden terwijl je held knock-out was, kon hem genezen zonder dat hij opstond, waarna het spel die held pauzeerde voor een technische controle. Een knock-out held houdt nu 0 HP tot hij weer opstaat; het goud, de drankjes en de effecten van je antwoord tellen nog steeds. De gepauzeerde held is weer aan het werk en heeft de gemiste avonturen ingehaald.' },
+      },
+    ],
+  },
+  {
     date: '2026-11-24',
     changes: [
       {

@@ -229,16 +229,18 @@ export const setSuspended = mutation({
  * Release a quarantined hero after diagnosis; no retroactive catch-up (simulation.md). The one repair it makes is to
  * bring HP back under the hero's maximum for its level and class, the state behind the only quarantine so far
  * (2026-10-26, a Rogue healed to the Warrior ceiling by a decision); a hero released above its ceiling would be
- * quarantined again on the next tick. The audit outcome names the repair.
+ * quarantined again on the next tick. A knocked-out hero holding HP (2026-11-27, a decision healed a dead hero) goes
+ * back to 0 so its revival runs as usual. The audit outcome names the repair.
  */
 async function releaseQuarantinedHero(ctx: MutationCtx, actor: string, heroId: Id<'heroes'>, reasonCode: string): Promise<string> {
   const hero = await ctx.db.get(heroId)
   if (hero === null || hero.simulationState !== 'quarantined') throw appError('INVALID_STATE', 'Hero is not quarantined.')
   const world = await getOrCreateWorld(ctx)
   const max = heroMaxHp(worldContent(world), hero)
-  const repaired = hero.hp > max
-  await ctx.db.patch(heroId, { simulationState: 'healthy', quarantineReasonCode: undefined, ...(repaired ? { hp: max } : {}) })
-  const outcome = repaired ? `healthy, hp ${hero.hp} to ${max}` : 'healthy'
+  const hp = hero.status === 'dead' ? 0 : Math.min(hero.hp, max)
+  const repaired = hp !== hero.hp
+  await ctx.db.patch(heroId, { simulationState: 'healthy', quarantineReasonCode: undefined, ...(repaired ? { hp } : {}) })
+  const outcome = repaired ? `healthy, hp ${hero.hp} to ${hp}` : 'healthy'
   await audit(ctx, actor, 'release_hero', heroId, reasonCode, outcome)
   return outcome
 }

@@ -89,4 +89,12 @@ describe('narrative choice intent (D79)', () => {
     expect(await user.mutation(api.heroes.choose, { operationId: opId(), optionId: 'chip_in' })).toMatchObject({ changed: true, hp: 148 })
     expect(await heroDoc(t, heroId)).toMatchObject({ hp: 148, simulationState: 'healthy' })
   })
+  it('leaves a knocked-out hero at 0 HP when it answers a decision (the 2026-11-27 DEAD quarantine)', async () => {
+    const heroId = await seedHero(t, { level: 6, gold: 100, hp: 0, status: 'dead', reviveAtTick: 14, choice: { eventId: 'break_room_cake', offeredAtTick: 8, expiresAtTick: 104, biomeTier: 1 } }, 'Bo')
+    const user = as(t, 'Bo')
+    const view = (await user.query(api.heroes.mine, {})).choice
+    expect(view.options.find((o: { id: string }) => o.id === 'chip_in')?.change).toMatchObject({ gold: -15, hp: 0 })
+    expect(await user.mutation(api.heroes.choose, { operationId: opId(), optionId: 'chip_in' })).toMatchObject({ changed: true, hp: 0 })
+    expect(await heroDoc(t, heroId)).toMatchObject({ hp: 0, gold: 85, status: 'dead', simulationState: 'healthy' })
+  })
 })

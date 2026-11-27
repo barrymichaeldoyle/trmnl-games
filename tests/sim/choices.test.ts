@@ -33,6 +33,9 @@ describe('narrative choices (D79)', () => {
     expect(resolveEffect(contentV5, hero, 19, { gold: -15, hpPct: 15, potions: 3 }, 2)).toEqual({ gold: -5, hp: 23, potions: 1 })
     expect(resolveEffect(contentV5, hero, 0, { goldPerTier: 12, hpPct: -50 }, 3)).toEqual({ gold: 36, hp: -9, potions: 0 })
     expect(resolveEffect(contentV5, { ...hero, hp: maxHp(5) }, 0, { hpPct: 15 }, 1)).toEqual({ gold: 0, hp: 0, potions: 0 })
+    // A knocked-out hero keeps HP 0 either way, or the DEAD invariant quarantines it on the next tick.
+    expect(resolveEffect(contentV5, { ...hero, hp: 0 }, 0, { gold: -15, hpPct: 15 }, 1)).toEqual({ gold: -5, hp: 0, potions: 0 })
+    expect(resolveEffect(contentV5, { ...hero, hp: 0 }, 0, { hpPct: -50 }, 1)).toEqual({ gold: 0, hp: 0, potions: 0 })
   })
 
   it('offers a choice on an event draw, keeps one pending at a time, and never under v4', () => {

@@ -124,6 +124,10 @@ describe('owner-run moderation (D23)', () => {
     const other = await seedHero(t, { level: 3, hp: 50, simulationState: 'quarantined', quarantineReasonCode: 'XP' }, 'Cli')
     expect(await t.mutation(internal.admin.releaseHeroFromCli, { heroId: other, reasonCode: 'diagnosed' })).toEqual({ outcome: 'healthy' })
     expect(await t.run(async (ctx) => await ctx.db.get(other))).toMatchObject({ simulationState: 'healthy', hp: 50 })
+
+    const dead = await seedHero(t, { level: 6, hp: 69, status: 'dead', reviveAtTick: 3, simulationState: 'quarantined', quarantineReasonCode: 'DEAD' }, 'Ko')
+    expect(await t.mutation(internal.admin.releaseHeroFromCli, { heroId: dead, reasonCode: 'dead_heal_fixed' })).toEqual({ outcome: 'healthy, hp 69 to 0' })
+    expect(await t.run(async (ctx) => await ctx.db.get(dead))).toMatchObject({ simulationState: 'healthy', status: 'dead', hp: 0 })
   })
 
   it('compensates a hero with audited gold and a log line the player can read, within bounds', async () => {

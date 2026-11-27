@@ -24,12 +24,17 @@ export interface ChoiceResolution {
   readonly effectId?: string
 }
 
-/** The concrete change an effect makes to this hero: gold clamped at zero, HP within 1..max, potions within the pouch. */
+/**
+ * The concrete change an effect makes to this hero: gold clamped at zero, HP within 1..max, potions within the pouch.
+ * A knocked-out hero (HP 0) takes no HP change either way: a heal would leave a dead hero with HP and a loss would lift
+ * it to 1, and both broke the DEAD invariant and quarantined the hero (2026-11-27, Thanksgiving cake while knocked out).
+ * Revival sets its own HP.
+ */
 export function resolveEffect(content: ContentCatalog, hero: Pick<HeroState, 'level' | 'hp' | 'gold' | 'potionCap'> & { readonly class?: HeroState['class'] }, potionsHeld: number, effect: ChoiceEffect, biomeTier: number): ChoiceResolution {
   const max = heroMaxHp(content, hero)
   const goldChange = (effect.gold ?? 0) + (effect.goldPerTier ?? 0) * biomeTier
   const gold = Math.max(-hero.gold, goldChange)
-  const hpChange = effect.hpPct === undefined ? 0 : effect.hpPct > 0 ? Math.min(max - hero.hp, pctOf(max, effect.hpPct)) : -Math.min(hero.hp - 1, pctOf(max, -effect.hpPct))
+  const hpChange = effect.hpPct === undefined || hero.hp <= 0 ? 0 : effect.hpPct > 0 ? Math.min(max - hero.hp, pctOf(max, effect.hpPct)) : -Math.min(hero.hp - 1, pctOf(max, -effect.hpPct))
   const potions = Math.max(0, Math.min(effect.potions ?? 0, potionCap(content, hero) - potionsHeld))
   const effectId = effect.effectId !== undefined && content.effects?.some((rule) => rule.id === effect.effectId) ? effect.effectId : undefined
   return { gold, hp: hpChange, potions, ...(effectId === undefined ? {} : { effectId }) }
