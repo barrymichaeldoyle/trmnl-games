@@ -46,3 +46,45 @@ describe('reload a crashed page onto the deployed build', () => {
     expect(reload).not.toHaveBeenCalled()
   })
 })
+
+describe('load the next page fresh on a stale tab', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.resetModules()
+  })
+  const page = (href: string) => {
+    const url = new URL(href)
+    const location = { href: url.href, pathname: url.pathname, search: url.search, assign: vi.fn(), reload: vi.fn() }
+    const history = { state: { key: 'k' }, replaceState: vi.fn((_state: unknown, _title: string, next: string) => { const to = new URL(next); Object.assign(location, { href: to.href, pathname: to.pathname, search: to.search }) }) }
+    vi.stubGlobal('window', { location, history })
+    return { location, history }
+  }
+  const fresh = async () => (await import('../../apps/web/src/lib/deployWatch')).loadFresh
+
+  it('loads another path once, even when the navigation fires again', async () => {
+    const loadFresh = await fresh()
+    const { location } = page('https://trmnlgames.com/app/desk-crawler')
+    location.assign.mockImplementation(() => loadFresh('https://trmnlgames.com/help/desk-crawler'))
+    loadFresh('https://trmnlgames.com/help/desk-crawler')
+    expect(location.assign).toHaveBeenCalledTimes(1)
+    expect(location.reload).not.toHaveBeenCalled()
+  })
+
+  it('reloads instead of jumping when the address bar already shows the target (TRMNL-GAMES-A)', async () => {
+    const loadFresh = await fresh()
+    const { location, history } = page('https://trmnlgames.com/help/desk-crawler#office-calendar')
+    loadFresh('/help/desk-crawler#office-calendar')
+    expect(location.assign).not.toHaveBeenCalled()
+    expect(history.replaceState).not.toHaveBeenCalled()
+    expect(location.reload).toHaveBeenCalledTimes(1)
+  })
+
+  it('writes a new hash on the same page into the address bar, then reloads', async () => {
+    const loadFresh = await fresh()
+    const { location, history } = page('https://trmnlgames.com/help/desk-crawler')
+    loadFresh('/help/desk-crawler#office-calendar')
+    expect(history.replaceState).toHaveBeenCalledWith({ key: 'k' }, '', 'https://trmnlgames.com/help/desk-crawler#office-calendar')
+    expect(location.assign).not.toHaveBeenCalled()
+    expect(location.reload).toHaveBeenCalledTimes(1)
+  })
+})

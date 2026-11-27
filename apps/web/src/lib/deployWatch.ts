@@ -47,6 +47,27 @@ export async function reloadIfBehindDeploy(): Promise<boolean> {
   return true
 }
 
+let leaving = false
+
+/**
+ * Load `href` as a fresh page, once. `location.assign` to the URL the router has already pushed, or one that differs
+ * only by its hash, is a same-document jump: it only scrolls, the router hears it as another navigation, and the two
+ * called each other until the stack overflowed (Sentry TRMNL-GAMES-A, 2026-11-27: an old tab following a link to
+ * /help/desk-crawler#office-calendar). Such a target is written into the address bar without an event and reloaded.
+ */
+export function loadFresh(href: string) {
+  if (leaving) return
+  leaving = true
+  const here = window.location
+  const target = new URL(href, here.href)
+  if (target.pathname !== here.pathname || target.search !== here.search) {
+    here.assign(target.href)
+    return
+  }
+  if (target.href !== here.href) window.history.replaceState(window.history.state, '', target.href)
+  here.reload()
+}
+
 let holds = 0
 
 /**
@@ -97,7 +118,7 @@ export function useDeployWatch() {
       else void check().then(() => { if (stale && !typing()) reloadOnce(deployedId) })
     }
     const unsubscribe = router.subscribe('onBeforeNavigate', ({ toLocation, pathChanged }) => {
-      if (stale && pathChanged) window.location.assign(toLocation.href)
+      if (stale && pathChanged) loadFresh(toLocation.href)
     })
     const timer = window.setInterval(() => void check(), CHECK_EVERY_MS)
     document.addEventListener('visibilitychange', onVisible)
